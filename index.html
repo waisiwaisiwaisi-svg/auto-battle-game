@@ -127,6 +127,16 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 #stickBase{width:min(128px,100%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#2e2648 0 55%,#241d38 56%);box-shadow:0 0 0 2px var(--edge);position:relative}
 #stickKnob{position:absolute;left:50%;top:50%;width:42%;height:42%;margin:-21% 0 0 -21%;border-radius:50%;background:var(--panel2);box-shadow:0 0 0 2px var(--acc),0 3px 0 #0d0b14}
 #stickZone .hint{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:10px;color:var(--dim)}
+#ctrl{position:relative}
+#swapBar{position:absolute;right:0;top:0;bottom:0;width:56%;z-index:5;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+#swapBar[hidden]{display:none}
+#swapBar .sbHead{font-size:11px;color:var(--acc);text-align:center}
+#swapList{flex:1;display:flex;flex-direction:column;gap:6px;min-height:0}
+#swapList .cmd{flex:1;flex-direction:row;justify-content:flex-start;gap:8px;padding:2px 8px;text-align:left}
+#swapList canvas{width:40px;height:40px;flex:none}
+#swapList .hpb{height:4px;background:#0d0b14;margin-top:3px}
+#swapList .hpb i{display:block;height:100%;background:var(--good)}
+#swapCancel{min-height:34px;flex:none}
 #btns{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:6px;min-height:0}
 .cmd{
   position:relative;overflow:hidden;background:var(--panel);box-shadow:0 0 0 2px var(--edge),0 3px 0 #0d0b14;
@@ -207,13 +217,13 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
     </div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="320" height="240"></canvas>
-      <div class="ov" id="swapOv" hidden><b>こうたいする モンスターは？</b><div class="swaplist" id="swapList"></div><button class="btn sub" id="swapCancel" style="padding:6px 16px;font-size:13px">やめる</button></div>
       <div class="ov" id="pauseOv" hidden><h2>PAUSE</h2><button class="btn" id="btnResume">つづける</button><button class="btn sub" id="btnQuit" style="font-size:13px">しあいを やめる（まけ あつかい）</button></div>
       <div class="ov" id="resultOv" hidden><h2 id="resTitle"></h2><div class="lines" id="resLines"></div><button class="btn" id="resNext">つぎへ</button></div>
     </div>
     <div id="banner"></div>
     <div id="ctrl">
       <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div><div class="hint">いどう</div></div>
+      <div id="swapBar" hidden><div class="sbHead">こうたい（バトルは とまりません）</div><div id="swapList"></div><button class="cmd" id="swapCancel"><span class="a">やめる</span></button></div>
       <div id="btns">
         <button class="cmd mv" data-mv="0"><span class="a"></span><span class="b"></span><i class="cdv"></i></button>
         <button class="cmd mv" data-mv="1"><span class="a"></span><span class="b"></span><i class="cdv"></i></button>
@@ -221,7 +231,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
         <button class="cmd mv" data-mv="3"><span class="a"></span><span class="b"></span><i class="cdv"></i></button>
         <button class="cmd" id="cAtk"><span class="a">こうげき</span><span class="b">たいあたり</span><i class="cdv"></i></button>
         <button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button>
-        <button class="cmd" id="cSwap"><span class="a">こうたい</span><span class="b">ひかえと</span></button>
+        <button class="cmd" id="cSwap"><span class="a">こうたい</span><span class="b">ひかえと</span><i class="cdv"></i></button>
         <button class="cmd" id="cCap"><span class="a">カプセル</span><span class="b" id="capN"></span></button>
         <button class="cmd" id="cAuto"><span class="a">オート</span><span class="b" id="autoS">OFF</span></button>
         <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
@@ -1023,7 +1033,9 @@ function mkFighter(mon, side) {
 }
 const active = (side) => { const sd = B.sides[side]; return sd.fs[sd.act]; };
 const opp = (f) => active(1 - f.side);
-const targetable = (f) => f && ['free', 'wind', 'dash', 'act', 'stun', 'dodge'].includes(f.state);
+const targetable = (f) => f && ['free', 'wind', 'dash', 'act', 'stun', 'dodge', 'lag'].includes(f.state);
+// 交代したあと 出てきた モンスターは しばらく スキだらけ（うごけない・ダメージ増）
+const SWAP_LAG = 1.6, SWAP_CD = 4, LAG_DMG = 1.3;
 const hasType = (f, t) => f.sp.type === t || f.sp.type2 === t;
 const prefix = (f) => f.side === 0 ? '' : (B.kind === 'wild' ? 'やせいの ' : 'あいての ');
 function speedOf(f) {
@@ -1042,28 +1054,29 @@ function startBattle(cfg) {
   B = {
     kind: cfg.kind, st, cfg, t: 0, mode: 'intro', modeT: 0, paused: false, uidc: 0,
     sides: [
-      { fs: pf, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, trainer: { name: 'あなた', spr: TR_PLAYER, x: st.trainers[0].x, y: st.trainers[0].y, shout: 0 } },
-      { fs: ef, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, trainer: cfg.trainer ? { name: cfg.trainer.name, spr: cfg.trainer.spr, x: st.trainers[1].x, y: st.trainers[1].y, shout: 0 } : null },
+      { fs: pf, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: { name: 'あなた', spr: TR_PLAYER, x: st.trainers[0].x, y: st.trainers[0].y, shout: 0 } },
+      { fs: ef, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: cfg.trainer ? { name: cfg.trainer.name, spr: cfg.trainer.spr, x: st.trainers[1].x, y: st.trainers[1].y, shout: 0 } : null },
     ],
     projs: [], parts: [], texts: [], fx: [], decals: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
     cam: { x: st.W / 2, y: st.H / 2, z: VW / st.W }, catchO: null, result: null, exp: {}, skill: cfg.skill, sent: 0,
   };
-  $('resultOv').hidden = true; $('swapOv').hidden = true; $('pauseOv').hidden = true;
+  $('resultOv').hidden = true; $('swapBar').hidden = true; $('pauseOv').hidden = true;
   $('bTitle').textContent = cfg.title;
   for (const id of ['cCap', 'cRun']) $(id).hidden = cfg.kind !== 'wild';
-  $('cSwap').hidden = cfg.kind === 'wild';
+  $('cSwap').hidden = pf.length < 2;
   say(cfg.intro);
   show('scBattle');
   setupCmds();
 }
 
-function sendOut(side, idx, pass) {
+function sendOut(side, idx, pass, lag) {
   const sd = B.sides[side]; sd.act = idx;
   const f = sd.fs[idx], st = B.st;
   f.x = side ? st.fx1 - 120 : st.fx0 + 120; f.y = (st.fy0 + st.fy1) / 2 + rand(-20, 20);
   f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
   f.enterT = 0; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; f.lastMove = null; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
+  f.swapLag = lag ? SWAP_LAG : 0; if (lag) f.inv = 0;
   const tr = sd.trainer;
   if (tr) { B.fx.push({ type: 'beamIn', x0: tr.x, y0: tr.y - 30, x1: f.x, y1: f.y - 20, life: .45, max: .45 }); tr.shout = .7; }
   else burst(f.x, f.y - 4, '#3f9040', 16, 90, .5);
@@ -1336,6 +1349,8 @@ function benchIdx(side, random) {
 function doSwitch(f, idx, pass, forced) {
   f.state = 'return'; f.stT = .3; f.cur = null; f.queued = null;
   B.swapTo = idx; B.swapPass = pass || null;
+  B.sides[f.side].swapCd = SWAP_CD;
+  if (f.side === 0) $('swapBar').hidden = true;
   say(forced ? `${f.sp.n}は ひきずりだされた！` : `${prefix(f)}${f.sp.n}は もどっていった！`);
 }
 function aura(f, col) { B.fx.push({ type: 'ring', x: f.x, y: f.y, rad: 34, col, life: .45, max: .45 }); burst(f.x, f.y - BODY, col, 12, 60, .5); }
@@ -1382,7 +1397,9 @@ function hit(att, def, m, ang, opt) {
   const crit = Math.random() < (m.e && m.e.crit || m.crit ? 1 / 8 : 1 / 24);
   const stab = hasType(att, m.t) ? 1.25 : 1;
   let pow = m.pow; if (m.hits) pow = pow * (opt.hitNo + 1); // さんれんスピン：だんだん つよく
-  let dmg = Math.max(1, Math.round(pow * A / D * stab * eff * (crit ? 1.5 : 1) * rand(.88, 1.12)));
+  const lagHit = def.state === 'lag';
+  let dmg = Math.max(1, Math.round(pow * A / D * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.88, 1.12)));
+  if (lagHit) popText(def.x, def.y - 118, 'スキあり！', '#ff9a8a', true);
   const heavy = pow >= 19;
   // デコイ（みがわり）
   if (def.v.sub > 0 && !['hyper-voice', 'alluring-voice', 'psychic-noise'].includes(m.ref)) {
@@ -1395,7 +1412,7 @@ function hit(att, def, m, ang, opt) {
   dmg = Math.min(dmg, Math.ceil(def.hp));
   def.hp = Math.max(0, def.hp - dmg); def.flash = .12;
   def.cur = null; if (!def.v.rampage) def.queued = null;
-  def.state = 'stun'; def.stT = heavy ? .45 : .25;
+  if (!lagHit) { def.state = 'stun'; def.stT = heavy ? .45 : .25; }
   def.kx = Math.cos(ang) * (heavy ? 230 : 140) * K; def.ky = Math.sin(ang) * (heavy ? 230 : 140) * K;
   B.hitstop = Math.max(B.hitstop, heavy ? .08 : .04);
   B.shake = Math.max(B.shake, heavy ? 5 : 2);
@@ -1412,7 +1429,7 @@ function hit(att, def, m, ang, opt) {
   const e = m.e || {};
   if (def.hp > 0) {
     if (e.st && Math.random() * 100 < e.stCh) setStatus(def, e.st, att);
-    if (e.flinch && Math.random() * 100 < e.flinch) { def.state = 'stun'; def.stT = Math.max(def.stT, .7); popText(def.x, def.y - 80, 'ひるんだ！', '#ffffff'); }
+    if (e.flinch && !lagHit && Math.random() * 100 < e.flinch) { def.state = 'stun'; def.stT = Math.max(def.stT, .7); popText(def.x, def.y - 80, 'ひるんだ！', '#ffffff'); }
     if (e.foe && Math.random() * 100 < e.foeCh) changeStages(def, e.foe);
     if (m.healBlock) { def.v.healBlock = 6; }
     if (m.confuseIfBoosted && STAGE_KEYS.some(k => def.st[k] > 0)) { def.v.confuse = 3; say(`${def.sp.n}は こんらんした！`); }
@@ -1596,8 +1613,26 @@ function moveReach(f, o, m) {
   }
 }
 
+// あいてトレーナーの交代：タイプで ふりなら ひかえと いれかえる（出てきた直後は スキ）
+function aiSwitch(f, o, dt) {
+  const sd = B.sides[f.side];
+  if (B.kind !== 'cup' || sd.swapCd > 0 || f.state !== 'free' || f.v.rampage) return false;
+  f.swapT = (f.swapT == null ? 3 : f.swapT) - dt;
+  if (f.swapT > 0) return false;
+  f.swapT = rand(2.5, 4.5);
+  const threat = (x) => Math.max(1, ...o.moves.filter(id => MOVES[id].cat !== 'stat').map(id => effVs(MOVES[id].t, x.sp)));
+  const now = threat(f);
+  if (now < 2 || f.hp < f.maxHp * .3) return false;
+  let best = -1, bv = now;
+  sd.fs.forEach((x, i) => { if (i !== sd.act && !x.fainted && x.hp > 0) { const v = threat(x); if (v < bv) { bv = v; best = i; } } });
+  if (best < 0 || Math.random() > .3 + B.skill * .5) return false;
+  doSwitch(f, best);
+  return true;
+}
+
 function aiMove(f, o, dt, autoSpecial) {
   const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
+  if (f.side === 1 && aiSwitch(f, o, dt)) return;
   if (autoSpecial && !f.queued) {
     f.aiT -= dt;
     if (f.aiT <= 0) {
@@ -1693,10 +1728,20 @@ function updateFighter(f, dt) {
   if (f.pendingOut != null && ['act', 'free'].includes(f.state)) { const idx = f.pendingOut; f.pendingOut = null; doSwitch(f, idx); }
   switch (f.state) {
     case 'bench': case 'capt': return;
-    case 'enter': f.stT -= dt; f.scale = clamp(1 - f.stT / .5, 0, 1); if (f.stT <= 0) { f.state = 'free'; f.scale = 1; } break;
+    case 'enter':
+      f.stT -= dt; f.scale = clamp(1 - f.stT / .5, 0, 1);
+      if (f.stT <= 0) {
+        f.scale = 1;
+        if (f.swapLag > 0) { f.state = 'lag'; f.stT = f.swapLag; f.lagMax = f.swapLag; f.swapLag = 0; popText(f.x, f.y - 80, 'スキ！', '#ff9a8a', true); }
+        else f.state = 'free';
+      }
+      break;
+    case 'lag': // 交代直後：うごけない（かわす も だめ）
+      f.stT -= dt; if (f.stT <= 0) { f.state = 'free'; popText(f.x, f.y - 80, 'じゅんびOK', '#7bd88f'); }
+      break;
     case 'return':
       f.stT -= dt; f.scale = clamp(f.stT / .3, 0, 1);
-      if (f.stT <= 0) { f.state = 'bench'; f.scale = 1; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; if (f.status === 'tox') f.toxN = 1; B.pendingSend = { side: f.side, idx: B.swapTo, t: .2, pass: B.swapPass }; B.swapPass = null; }
+      if (f.stT <= 0) { f.state = 'bench'; f.scale = 1; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; if (f.status === 'tox') f.toxN = 1; B.pendingSend = { side: f.side, idx: B.swapTo, t: .2, pass: B.swapPass, lag: true }; B.swapPass = null; }
       return;
     case 'faint': f.stT -= dt; if (f.stT <= 0) afterFaint(f); return;
     case 'free': {
@@ -1826,6 +1871,7 @@ function bStep(dt) {
   B.cheer = Math.max(.15, B.cheer - dt * .4);
   B.shake = Math.max(0, B.shake - dt * 20);
   if (B.trickRoom > 0) { B.trickRoom -= dt; if (B.trickRoom <= 0) say('ねじれた じくうが もとに もどった！'); }
+  for (const sd of B.sides) sd.swapCd = Math.max(0, (sd.swapCd || 0) - dt);
   for (const sd of B.sides) if (sd.tail > 0) { sd.tail -= dt; if (sd.tail <= 0) say('おいかぜが やんだ'); }
 
   if (B.mode === 'intro') {
@@ -1833,7 +1879,7 @@ function bStep(dt) {
     if (B.sent === 1 && B.modeT > 1.7) { B.sent = 2; sendOut(0, 0); }
     if (B.modeT > 2.3) { B.mode = 'fight'; B.modeT = 0; say('バトル スタート！'); }
   }
-  if (B.pendingSend) { B.pendingSend.t -= dt; if (B.pendingSend.t <= 0) { const p = B.pendingSend; B.pendingSend = null; sendOut(p.side, p.idx, p.pass); } }
+  if (B.pendingSend) { B.pendingSend.t -= dt; if (B.pendingSend.t <= 0) { const p = B.pendingSend; B.pendingSend = null; sendOut(p.side, p.idx, p.pass, p.lag); } }
 
   if (B.mode === 'catch') updateCatch(dt);
   else if (B.mode === 'fight' || B.mode === 'intro') {
@@ -1982,19 +2028,27 @@ function cmdDodge() {
   startDodge(f, v.active ? Math.atan2(v.y, v.x) : null);
 }
 function cmdSwap() {
-  if (!canCommand() || B.kind === 'wild') return;
-  const f = active(0); if (!f || !['free', 'act'].includes(f.state)) return;
+  if (!canCommand()) return;
+  const bar = $('swapBar');
+  if (!bar.hidden) { bar.hidden = true; return; }
+  const sd = B.sides[0], f = active(0);
+  if (sd.swapCd > 0) { say(`まだ こうたい できない！（あと ${Math.ceil(sd.swapCd)}びょう）`); return; }
+  if (!f || !['free', 'act', 'stun'].includes(f.state)) return;
   const L = $('swapList'); L.innerHTML = '';
-  B.sides[0].fs.forEach((x, i) => {
-    if (i === B.sides[0].act || x.fainted || x.hp <= 0) return;
-    const b = document.createElement('button');
-    b.appendChild(spriteCanvas(x.mon.sid, 36));
-    b.insertAdjacentHTML('beforeend', `<span>${x.sp.n} Lv${x.lvl}<br><span class="dim">HP ${Math.ceil(x.hp)}/${x.maxHp}${x.status ? '・' + STATUS_NAMES[x.status] : ''}</span></span>`);
-    b.onclick = () => { $('swapOv').hidden = true; B.paused = false; doSwitch(f, i); say(`もどれ、${f.sp.n}！`); };
+  sd.fs.forEach((x, i) => {
+    if (i === sd.act || x.fainted || x.hp <= 0) return;
+    const b = document.createElement('button'); b.className = 'cmd';
+    b.appendChild(spriteCanvas(x.mon.sid, 40));
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><span class="a">${x.sp.n}</span> <span class="b">Lv${x.lvl}${x.status ? '・' + STATUS_NAMES[x.status] : ''}</span><div class="hpb"><i style="width:${x.hp / x.maxHp * 100}%"></i></div></span>`);
+    tap(b, () => {
+      const cur = active(0);
+      if (!canCommand() || !cur || !['free', 'act', 'stun'].includes(cur.state)) return;
+      doSwitch(cur, i); say(`もどれ、${cur.sp.n}！ いけっ、${x.sp.n}！`);
+    });
     L.appendChild(b);
   });
   if (!L.children.length) { say('こうたいできる モンスターが いない！'); return; }
-  B.paused = true; $('swapOv').hidden = false;
+  bar.hidden = false;
 }
 function cmdRun() { if (!canCommand() || B.kind !== 'wild') return; say('うまく にげきれた！'); endBattle('run'); }
 function cmdAuto() { S.auto = !S.auto; save(); updAutoBtn(); }
@@ -2037,6 +2091,7 @@ function updHUD() {
   $('cAtk').querySelector('.cdv').style.height = ((f.cd.tackle || 0) / MOVES.tackle.cd * 100) + '%';
   $('cAtk').classList.toggle('hot', f.queued === 'tackle');
   $('cDodge').querySelector('.cdv').style.height = (f.dodgeCd / .9 * 100) + '%';
+  $('cSwap').querySelector('.cdv').style.height = (B.sides[0].swapCd / SWAP_CD * 100) + '%';
   setText($('capN'), `のこり ${S.capsules}`);
 }
 
@@ -2149,6 +2204,14 @@ const ST_COL = { brn: '#ff8a3d', par: '#ffd84a', psn: '#b86ad8', tox: '#8a3ab0',
 // 状態異常・まもる・デコイ などの 見た目
 function drawConditions(f, top, oy, img) {
   const h = img.height * 2, cx = f.x, cy = f.y - h / 2 + oy;
+  if (f.state === 'lag') { // 交代直後の スキ：のこり時間バー
+    const w = 46, x = Math.round(cx - w / 2), k = clamp(f.stT / (f.lagMax || SWAP_LAG), 0, 1);
+    ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 1, top + 6, w + 2, 5);
+    ctx.fillStyle = Math.floor(B.t * 8) % 2 ? '#ff9a8a' : '#ff6b5b'; ctx.fillRect(x, top + 7, Math.round(w * k), 3);
+    ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#120e1c';
+    ctx.strokeText('スキ', cx, top - 10); ctx.fillStyle = '#ff9a8a'; ctx.fillText('スキ', cx, top - 10);
+    if (Math.random() < .15) B.parts.push({ x: cx + rand(-14, 14), y: cy - 10, vx: rand(-20, 20), vy: -40, life: .4, max: .4, col: '#9fd3ff', size: 2, g: 200 });
+  }
   if (f.status) {
     ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#120e1c';
     ctx.strokeText(STATUS_NAMES[f.status], cx, top - 8); ctx.fillStyle = ST_COL[f.status]; ctx.fillText(STATUS_NAMES[f.status], cx, top - 8);
@@ -2173,6 +2236,7 @@ function drawFighter(f) {
   if (f.state === 'enter' || f.state === 'return') { sx = sy = Math.max(.05, f.scale); }
   if (f.state === 'wind' && f.cur && f.cur.m.k !== 'melee') { sy = 1 - .1 * clamp(f.cur.t / f.cur.wind, 0, 1); }
   if (f.state === 'stun') { sx = 1.08; sy = .92; }
+  if (f.state === 'lag') { sy = 1 + Math.sin(B.t * 14) * .04; sx = 2 - sy; }
   if (f.state === 'dodge') alpha = .75;
   const bob = f.moving ? (Math.floor(f.walk * 9) % 2) * 2 : 0;
   if (FLYING.includes(f.mon.sid)) oy = -8 - Math.round(Math.sin(B.t * 4 + f.side) * 3);
@@ -2383,11 +2447,11 @@ $('btnReset').onclick = () => { if (!confirm('セーブデータを けします
 $('btnWild').onclick = startWild;
 $('btnCup').onclick = startCup;
 $('resNext').onclick = () => { $('resultOv').hidden = true; B = null; renderHub(); };
-$('swapCancel').onclick = () => { $('swapOv').hidden = true; if (B) B.paused = false; };
+tap($('swapCancel'), () => { $('swapBar').hidden = true; });
 $('btnPause').onclick = () => { if (!B || B.mode === 'end') return; B.paused = true; $('pauseOv').hidden = false; };
 $('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B) B.paused = false; };
 $('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; B.paused = false; endBattle(B.kind === 'wild' ? 'run' : 'lose'); B.endT = 0; };
-document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end' && $('swapOv').hidden) { B.paused = true; $('pauseOv').hidden = false; } });
+document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end') { B.paused = true; $('pauseOv').hidden = false; } });
 
 // あいての わざ：おぼえている中から ランダムに4つ（こうげきわざを 2つ以上）
 function pickMoves(m) {

@@ -167,6 +167,7 @@ namespace PixelMonsterArena
             if (f.State == "enter" || f.State == "return") sx = sy = Mathf.Max(.05f, f.Scale);
             if (f.State == "wind" && f.Cur != null && f.Cur.M.K != "melee") sy = 1 - .1f * Mathf.Clamp01(f.Cur.T / f.Cur.Wind);
             if (f.State == "stun") { sx = 1.08f; sy = .92f; }
+            if (f.State == "lag") { sy = 1 + Mathf.Sin(B.T * 14) * .04f; sx = 2 - sy; }
             if (f.State == "dodge") alpha = .75f;
             float bob = f.Moving ? (Mathf.FloorToInt(f.Walk * 9) % 2) * 2 : 0;
             if (f.Sp.Flying) oy = -8 - Mathf.Round(Mathf.Sin(B.T * 4 + f.Side) * 3);
@@ -193,6 +194,13 @@ namespace PixelMonsterArena
         void DrawConditions(Battle B, Fighter f, float top, float oy, PixelArt.MonSprites ms, int o)
         {
             float h = ms.H * 2, cx = f.X, cy = f.Y - h / 2 + oy;
+            if (f.State == "lag")
+            { // 交代直後の スキ：のこり時間バー
+                float w = 46, x = Mathf.Round(cx - w / 2), k = Mathf.Clamp01(f.StT / (f.LagMax > 0 ? f.LagMax : Battle.SwapLag));
+                P.Rect(x - 1, top + 6, w + 2, 5, C("#120e1c"), o + 3);
+                P.Rect(x, top + 7, Mathf.Round(w * k), 3, Mathf.FloorToInt(B.T * 8) % 2 == 1 ? C("#ff9a8a") : C("#ff6b5b"), o + 4);
+                WorldTexts.Add((new Vector2(cx, top - 10), "スキ", C("#ff9a8a"), 11));
+            }
             if (f.Status != "")
             {
                 WorldTexts.Add((new Vector2(cx, top - 10), Battle.StatusNames[f.Status], C(StCol[f.Status]), 10));

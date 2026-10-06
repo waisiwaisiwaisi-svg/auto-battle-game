@@ -111,7 +111,7 @@ namespace PixelMonsterArena
             if (_scr == Scr.Battle && B != null)
             {
                 HandleBattleInput();
-                if (!_swapOpen && !_pauseOpen)
+                if (!_pauseOpen) // こうたいの えらび中も バトルは とまらない
                 {
                     float rest = dt;
                     while (rest > 0) { float s = Mathf.Min(rest, 1 / 30f); B.Step(s); rest -= s; }
@@ -132,13 +132,13 @@ namespace PixelMonsterArena
         void HandleBattleInput()
         {
             var ptrs = InputAdapter.Pointers();
-            bool overlay = _swapOpen || _pauseOpen || _resultOpen;
+            bool overlay = _pauseOpen || _resultOpen;
             foreach (var p in ptrs)
             {
                 if (p.Began && !overlay)
                 {
                     if (_rJoy.Contains(p.Pos)) _joyId = p.Id;
-                    else foreach (var kv in _btnRects) if (kv.Value.Contains(p.Pos)) { PressButton(kv.Key); break; }
+                    else foreach (var kv in _btnRects.ToList()) if (kv.Value.Contains(p.Pos)) { PressButton(kv.Key); break; }
                 }
                 if (p.Id == _joyId)
                 {
@@ -178,7 +178,16 @@ namespace PixelMonsterArena
                 case "mv3": B.CmdMove(3); break;
                 case "atk": B.CmdAttack(); break;
                 case "dodge": B.CmdDodge(); break;
-                case "swap": if (B.CanSwap(out _)) _swapOpen = true; else if (B.Kind == "cup") B.Say("こうたいできる モンスターが いない！"); break;
+                case "swap":
+                    if (_swapOpen) _swapOpen = false;
+                    else if (B.Sides[0].SwapCd > 0) B.Say($"まだ こうたい できない！（あと {Mathf.CeilToInt(B.Sides[0].SwapCd)}びょう）");
+                    else if (B.CanSwap(out _)) _swapOpen = true;
+                    else B.Say("こうたいできる モンスターが いない！");
+                    break;
+                case "swapCancel": _swapOpen = false; break;
+                default:
+                    if (id.StartsWith("swapTo")) { B.DoPlayerSwap(int.Parse(id.Substring(6))); _swapOpen = false; }
+                    break;
                 case "cap": B.CmdCapsule(); break;
                 case "run": B.CmdRun(); break;
                 case "auto": S.auto = !S.auto; S.Save(); break;
@@ -485,7 +494,6 @@ namespace PixelMonsterArena
             y += U * 3.1f;
             // 操作
             ControlsGUI(new Rect(x, y, w, Screen.height - y - U * .6f));
-            if (_swapOpen) SwapGUI();
             if (_pauseOpen) PauseGUI();
             if (_resultOpen) ResultGUI();
         }
@@ -570,10 +578,11 @@ namespace PixelMonsterArena
             }
             list.Add(("atk", "こうげき", "たいあたり", Util.Hex("#d8d0c0"), f != null ? f.CdOf("tackle") / Data.Moves["tackle"].Cd : 0, f != null && f.Queued == "tackle", false));
             list.Add(("dodge", "かわす", "むてき", Util.Hex("#7fd8ff"), f != null ? f.DodgeCd / .9f : 0, false, false));
-            if (B.Kind == "cup") list.Add(("swap", "こうたい", "ひかえと", Util.Hex("#a49ac0"), 0, false, false));
-            else { list.Add(("cap", "カプセル", $"のこり {S.capsules}", Util.Hex("#3ad0c8"), 0, false, false)); list.Add(("run", "にげる", "", Util.Hex("#a49ac0"), 0, false, false)); }
+            if (B.Sides[0].Fs.Count > 1) list.Add(("swap", "こうたい", "ひかえと", Util.Hex("#a49ac0"), B.Sides[0].SwapCd / Battle.SwapCdMax, _swapOpen, false));
+            if (B.Kind == "wild") { list.Add(("cap", "カプセル", $"のこり {S.capsules}", Util.Hex("#3ad0c8"), 0, false, false)); list.Add(("run", "にげる", "", Util.Hex("#a49ac0"), 0, false, false)); }
             list.Add(("auto", "オート", S.auto ? "ON" : "OFF", S.auto ? Util.Hex("#4fd1a5") : Util.Hex("#a49ac0"), 0, S.auto, false));
             foreach (var key in _btnRects.Keys.Where(k => k != "pause").ToList()) _btnRects.Remove(key);
+            if (_swapOpen) { SwapBar(new Rect(bx, area.y, bw, area.height)); return; }
             int rows = Mathf.CeilToInt(list.Count / 2f);
             float gh = (area.height - (rows - 1) * U * .4f) / rows, gw = (bw - U * .4f) / 2;
             var sa = new GUIStyle(_lbl) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, wordWrap = false, fontSize = Mathf.RoundToInt(U * .85f) };
@@ -602,22 +611,27 @@ namespace PixelMonsterArena
         }
 
         void Overlay() { var o = GUI.color; GUI.color = new Color(.05f, .04f, .08f, .84f); GUI.DrawTexture(_rView, _tWhite); GUI.color = o; }
-        void SwapGUI()
+        // こうたいの えらび：ボタンの場所に ひかえを ならべる（バトルは とまらない）
+        void SwapBar(Rect area)
         {
-            Overlay();
-            float y = _rView.y + U;
-            GUI.Label(new Rect(_rView.x, y, _rView.width, U * 1.6f), "<b>こうたいする モンスターは？</b>", _center); y += U * 2;
-            B.CanSwap(out var bench);
+            if (!B.CanSwap(out var bench)) { _swapOpen = false; return; }
+            float rowH = Mathf.Min(U * 3.4f, (area.height - U * 3) / Mathf.Max(1, bench.Count));
+            var head = new GUIStyle(_small) { alignment = TextAnchor.MiddleCenter }; head.normal.textColor = Util.Hex("#ffd166");
+            GUI.Label(new Rect(area.x, area.y, area.width, U * 1.2f), "こうたい（バトルは とまりません）", head);
+            float y = area.y + U * 1.4f;
             foreach (var i in bench)
             {
-                var x = B.Sides[0].Fs[i];
-                var r = new Rect(_rView.center.x - U * 9, y, U * 18, U * 3);
-                if (GUI.Button(r, "", _btnSub)) { _swapOpen = false; B.DoPlayerSwap(i); }
-                DrawSprite(new Rect(r.x + U * .3f, r.y + U * .2f, U * 2.6f, U * 2.6f), PixelArt.Mon(x.Mon.sid).Normal);
-                GUI.Label(new Rect(r.x + U * 3.2f, r.y + U * .2f, r.width - U * 3.4f, U * 2.6f), $"{x.Sp.N} Lv{x.Lvl}\n<size={Mathf.RoundToInt(U * .7f)}>HP {Mathf.CeilToInt(x.Hp)}/{x.MaxHp}{(x.Status != "" ? "・" + Battle.StatusNames[x.Status] : "")}</size>", _lbl);
-                y += U * 3.4f;
+                var x = B.Sides[0].Fs[i]; var r = new Rect(area.x, y, area.width, rowH - U * .3f);
+                _btnRects["swapTo" + i] = r;
+                Panel(r);
+                DrawSprite(new Rect(r.x + U * .2f, r.y + U * .1f, r.height - U * .2f, r.height - U * .2f), PixelArt.Mon(x.Mon.sid).Normal);
+                GUI.Label(new Rect(r.x + r.height + U * .2f, r.y + U * .1f, r.width - r.height - U * .4f, r.height * .6f), $"<b>{x.Sp.N}</b> <size={Mathf.RoundToInt(U * .7f)}>Lv{x.Lvl}{(x.Status != "" ? "・" + Battle.StatusNames[x.Status] : "")}</size>", _lbl);
+                var hb = new Rect(r.x + r.height + U * .2f, r.yMax - U * .9f, r.width - r.height - U * .6f, U * .4f);
+                GUI.DrawTexture(hb, _tDark); GUI.DrawTexture(new Rect(hb.x, hb.y, hb.width * x.Hp / x.MaxHp, hb.height), _tGood);
+                y += rowH;
             }
-            if (GUI.Button(new Rect(_rView.center.x - U * 4, y + U * .3f, U * 8, U * 2), "やめる", _btnSub)) _swapOpen = false;
+            var cr = new Rect(area.x, area.yMax - U * 2.2f, area.width, U * 2.2f);
+            _btnRects["swapCancel"] = cr; Panel(cr); GUI.Label(cr, "やめる", _center);
         }
         void PauseGUI()
         {

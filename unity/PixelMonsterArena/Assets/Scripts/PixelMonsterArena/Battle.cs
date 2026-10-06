@@ -44,6 +44,7 @@ namespace PixelMonsterArena
         public float EnterT, LastProtect = -9; public string LastMove;
         public List<Shot> Shots = new List<Shot>();
         public int PendingOut = -1;
+        public float SwapLag, LagMax, SwapT = 3;
         public float CdOf(string id) => Cd.TryGetValue(id, out var v) ? v : 0;
         public bool HasType(string t) => Sp.Type == t || Sp.Type2 == t;
         public static Dictionary<string, int> NewStages() => new Dictionary<string, int> { { "atk", 0 }, { "def", 0 }, { "spa", 0 }, { "spd", 0 }, { "spe", 0 } };
@@ -57,7 +58,7 @@ namespace PixelMonsterArena
     public class Decal { public float X, Y, R; public string Kind; public int Seed; }
     public class TrainerInfo { public string Name; public Sprite Spr; public float X, Y, Shout; }
     public class Hazards { public int Rocks, Spikes, TSpikes; }
-    public class Side { public List<Fighter> Fs; public int Act; public TrainerInfo Trainer; public Hazards Hz = new Hazards(); public float Tail; }
+    public class Side { public List<Fighter> Fs; public int Act; public TrainerInfo Trainer; public Hazards Hz = new Hazards(); public float Tail, SwapCd; }
     public class CatchO { public string Phase; public float T, Sx, Sy, Tx, Ty, X, Y, P; public int Shakes; }
 
     public class BattleConfig
@@ -73,6 +74,8 @@ namespace PixelMonsterArena
     {
         const float K = Data.K, BODY = Data.Body;
         public const float Tick = 3; // 状態異常ダメージの間隔（秒）＝「1ターン」相当
+        // 交代したあと 出てきた モンスターは しばらく スキだらけ（うごけない・ダメージ増）
+        public const float SwapLag = 1.6f, SwapCdMax = 4, LagDmg = 1.3f;
         public static readonly string[] StageKeys = { "atk", "def", "spa", "spd", "spe" };
         public static readonly Dictionary<string, string> StageNames = new Dictionary<string, string> { { "atk", "こうげき" }, { "def", "ぼうぎょ" }, { "spa", "とくこう" }, { "spd", "とくぼう" }, { "spe", "すばやさ" } };
         public static readonly Dictionary<string, string> StatusNames = new Dictionary<string, string> { { "brn", "やけど" }, { "par", "まひ" }, { "psn", "どく" }, { "tox", "もうどく" }, { "slp", "ねむり" }, { "frz", "こおり" } };
@@ -102,7 +105,7 @@ namespace PixelMonsterArena
         int _uidc, _sent, _swapTo;
         (Dictionary<string, int> st, float sub)? _swapPass;
         readonly Dictionary<int, int> _exp = new Dictionary<int, int>();
-        class Pending { public int Side, Idx; public float T; public (Dictionary<string, int> st, float sub)? Pass; }
+        class Pending { public int Side, Idx; public float T; public (Dictionary<string, int> st, float sub)? Pass; public bool Lag; }
         Pending _pendingSend;
 
         public Battle(SaveData save, BattleConfig cfg)
@@ -132,7 +135,7 @@ namespace PixelMonsterArena
 
         public Fighter Active(int side) { var sd = Sides[side]; return sd.Fs.Count > sd.Act ? sd.Fs[sd.Act] : null; }
         Fighter Opp(Fighter f) => Active(1 - f.Side);
-        public static bool Targetable(Fighter f) => f != null && (f.State == "free" || f.State == "wind" || f.State == "dash" || f.State == "act" || f.State == "stun" || f.State == "dodge");
+        public static bool Targetable(Fighter f) => f != null && (f.State == "free" || f.State == "wind" || f.State == "dash" || f.State == "act" || f.State == "stun" || f.State == "dodge" || f.State == "lag");
         static float Dist(Fighter a, Fighter b) => Mathf.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
         static float Hyp(float a, float b) => Mathf.Sqrt(a * a + b * b);
         string Prefix(Fighter f) => f.Side == 0 ? "" : (Kind == "wild" ? "やせいの " : "あいての ");
@@ -168,7 +171,7 @@ namespace PixelMonsterArena
         static Color MoveCol(Move m) => m.T == "normal" ? Color.white : TC(m.T);
         static Color H(string hex) => Util.Hex(hex);
 
-        void SendOut(int side, int idx, (Dictionary<string, int> st, float sub)? pass = null)
+        void SendOut(int side, int idx, (Dictionary<string, int> st, float sub)? pass = null, bool lag = false)
         {
             var sd = Sides[side]; sd.Act = idx;
             var f = sd.Fs[idx];
@@ -176,6 +179,7 @@ namespace PixelMonsterArena
             f.State = "enter"; f.StT = .5f; f.Inv = .6f; f.Cur = null; f.Queued = null; f.Kx = f.Ky = 0; f.Face = side == 1 ? -1 : 1; f.AiT = Util.Rand(.6f, 1.2f); f.Scale = 0;
             f.EnterT = 0; f.V = new Volatile(); f.St = Fighter.NewStages(); f.LastMove = null; f.Shots.Clear();
             if (pass.HasValue) { f.St = new Dictionary<string, int>(pass.Value.st); if (pass.Value.sub > 0) f.V.Sub = pass.Value.sub; }
+            f.SwapLag = lag ? SwapLag : 0; if (lag) f.Inv = 0;
             var tr = sd.Trainer;
             if (tr != null) { Fxs.Add(new Fx { Type = "beamIn", X0 = tr.X, Y0 = tr.Y - 30, X1 = f.X, Y1 = f.Y - 20, Life = .45f, Max = .45f }); tr.Shout = .7f; }
             else Burst(f.X, f.Y - 4, H("#3f9040"), 16, 90, .5f);
@@ -456,6 +460,7 @@ namespace PixelMonsterArena
         {
             f.State = "return"; f.StT = .3f; f.Cur = null; f.Queued = null;
             _swapTo = idx; _swapPass = pass;
+            Sides[f.Side].SwapCd = SwapCdMax;
             Say(forced ? $"{f.Sp.N}は ひきずりだされた！" : $"{Prefix(f)}{f.Sp.N}は もどっていった！");
         }
         void Aura(Fighter f, Color col) { Fxs.Add(new Fx { Type = "ring", X = f.X, Y = f.Y, Rad = 34, Col = col, Life = .45f, Max = .45f }); Burst(f.X, f.Y - BODY, col, 12, 60, .5f); }
@@ -507,7 +512,9 @@ namespace PixelMonsterArena
             bool crit = Util.Value < (m.Crit ? 1 / 8f : 1 / 24f);
             float stab = att.HasType(m.T) ? 1.25f : 1;
             float pow = m.Pow; if (m.Hits > 0) pow *= hitNo + 1;
-            int dmg = Mathf.Max(1, Mathf.RoundToInt(pow * A / D * stab * eff * (crit ? 1.5f : 1) * Util.Rand(.88f, 1.12f)));
+            bool lagHit = def.State == "lag";
+            int dmg = Mathf.Max(1, Mathf.RoundToInt(pow * A / D * stab * eff * (crit ? 1.5f : 1) * (lagHit ? LagDmg : 1) * Util.Rand(.88f, 1.12f)));
+            if (lagHit) PopText(def.X, def.Y - 118, "スキあり！", H("#ff9a8a"), 1);
             bool heavy = pow >= 19;
             if (def.V.Sub > 0 && m.Id != "hyper-voice" && m.Id != "alluring-voice" && m.Id != "psychic-noise")
             {
@@ -520,7 +527,7 @@ namespace PixelMonsterArena
             dmg = Mathf.Min(dmg, Mathf.CeilToInt(def.Hp));
             def.Hp = Mathf.Max(0, def.Hp - dmg); def.Flash = .12f;
             def.Cur = null; if (def.V.Rampage == 0) def.Queued = null;
-            def.State = "stun"; def.StT = heavy ? .45f : .25f;
+            if (!lagHit) { def.State = "stun"; def.StT = heavy ? .45f : .25f; }
             def.Kx = Mathf.Cos(ang) * (heavy ? 230 : 140) * K; def.Ky = Mathf.Sin(ang) * (heavy ? 230 : 140) * K;
             Hitstop = Mathf.Max(Hitstop, heavy ? .08f : .04f);
             Shake = Mathf.Max(Shake, heavy ? 5 : 2);
@@ -537,7 +544,7 @@ namespace PixelMonsterArena
             if (def.Hp > 0)
             {
                 if (!string.IsNullOrEmpty(e.St) && Util.Value * 100 < e.StCh) SetStatus(def, e.St, att);
-                if (e.Flinch > 0 && Util.Value * 100 < e.Flinch) { def.State = "stun"; def.StT = Mathf.Max(def.StT, .7f); PopText(def.X, def.Y - 80, "ひるんだ！", Color.white); }
+                if (e.Flinch > 0 && !lagHit && Util.Value * 100 < e.Flinch) { def.State = "stun"; def.StT = Mathf.Max(def.StT, .7f); PopText(def.X, def.Y - 80, "ひるんだ！", Color.white); }
                 if (e.Foe != null && Util.Value * 100 < e.FoeCh) ChangeStages(def, e.Foe);
                 if (m.HealBlock) def.V.HealBlock = 6;
                 if (m.ConfuseIfBoosted && StageKeys.Any(k => def.St[k] > 0)) { def.V.Confuse = 3; Say($"{def.Sp.N}は こんらんした！"); }
@@ -748,9 +755,27 @@ namespace PixelMonsterArena
             }
         }
 
+        // あいてトレーナーの交代：タイプで ふりなら ひかえと いれかえる（出てきた直後は スキ）
+        bool AiSwitch(Fighter f, Fighter o, float dt)
+        {
+            var sd = Sides[f.Side];
+            if (Kind != "cup" || sd.SwapCd > 0 || f.State != "free" || f.V.Rampage > 0) return false;
+            f.SwapT -= dt; if (f.SwapT > 0) return false;
+            f.SwapT = Util.Rand(2.5f, 4.5f);
+            float Threat(Fighter x) => Mathf.Max(1, o.Moves.Where(id => Data.Moves[id].Damaging).Select(id => Data.EffVs(Data.Moves[id].T, x.Sp)).DefaultIfEmpty(1).Max());
+            float now = Threat(f);
+            if (now < 2 || f.Hp < f.MaxHp * .3f) return false;
+            int best = -1; float bv = now;
+            for (int i = 0; i < sd.Fs.Count; i++) { var x = sd.Fs[i]; if (i != sd.Act && !x.Fainted && x.Hp > 0) { float v = Threat(x); if (v < bv) { bv = v; best = i; } } }
+            if (best < 0 || Util.Value > .3f + Skill * .5f) return false;
+            DoSwitch(f, best, null, false);
+            return true;
+        }
+
         void AiMove(Fighter f, Fighter o, float dt, bool autoSpecial)
         {
             float d = Dist(f, o), ang = Mathf.Atan2(o.Y - f.Y, o.X - f.X);
+            if (f.Side == 1 && AiSwitch(f, o, dt)) return;
             if (autoSpecial && f.Queued == null)
             {
                 f.AiT -= dt;
@@ -862,14 +887,23 @@ namespace PixelMonsterArena
             {
                 case "bench": case "capt": return;
                 case "enter":
-                    f.StT -= dt; f.Scale = Util.Clamp(1 - f.StT / .5f, 0, 1); if (f.StT <= 0) { f.State = "free"; f.Scale = 1; }
+                    f.StT -= dt; f.Scale = Util.Clamp(1 - f.StT / .5f, 0, 1);
+                    if (f.StT <= 0)
+                    {
+                        f.Scale = 1;
+                        if (f.SwapLag > 0) { f.State = "lag"; f.StT = f.LagMax = f.SwapLag; f.SwapLag = 0; PopText(f.X, f.Y - 80, "スキ！", H("#ff9a8a"), 1); }
+                        else f.State = "free";
+                    }
+                    break;
+                case "lag": // 交代直後：うごけない（かわす も だめ）
+                    f.StT -= dt; if (f.StT <= 0) { f.State = "free"; PopText(f.X, f.Y - 80, "じゅんびOK", H("#7bd88f")); }
                     break;
                 case "return":
                     f.StT -= dt; f.Scale = Util.Clamp(f.StT / .3f, 0, 1);
                     if (f.StT <= 0)
                     {
                         f.State = "bench"; f.Scale = 1; f.V = new Volatile(); f.St = Fighter.NewStages(); if (f.Status == "tox") f.ToxN = 1;
-                        _pendingSend = new Pending { Side = f.Side, Idx = _swapTo, T = .2f, Pass = _swapPass }; _swapPass = null;
+                        _pendingSend = new Pending { Side = f.Side, Idx = _swapTo, T = .2f, Pass = _swapPass, Lag = true }; _swapPass = null;
                     }
                     return;
                 case "faint":
@@ -1021,12 +1055,16 @@ namespace PixelMonsterArena
         public bool CanSwap(out List<int> bench)
         {
             bench = new List<int>();
-            if (!CanCommand || Kind == "wild") return false;
-            var f = Active(0); if (f == null || !(f.State == "free" || f.State == "act")) return false;
+            if (!CanCommand || Sides[0].SwapCd > 0) return false;
+            var f = Active(0); if (f == null || !(f.State == "free" || f.State == "act" || f.State == "stun")) return false;
             for (int i = 0; i < Sides[0].Fs.Count; i++) { var x = Sides[0].Fs[i]; if (i != Sides[0].Act && !x.Fainted && x.Hp > 0) bench.Add(i); }
             return bench.Count > 0;
         }
-        public void DoPlayerSwap(int idx) { var f = Active(0); DoSwitch(f, idx, null, false); Say($"もどれ、{f.Sp.N}！"); }
+        public void DoPlayerSwap(int idx)
+        {
+            if (!CanSwap(out var bench) || !bench.Contains(idx)) return;
+            var f = Active(0); DoSwitch(f, idx, null, false); Say($"もどれ、{f.Sp.N}！ いけっ、{Sides[0].Fs[idx].Sp.N}！");
+        }
         public void CmdRun() { if (!CanCommand || Kind != "wild") return; Say("うまく にげきれた！"); EndBattle("run"); }
         /// <summary>動作確認用：次にこのわざを使わせる</summary>
         public void Force(string id) { var f = Active(0); if (f != null && Mode == "fight") { f.Cd[id] = 0; f.Queued = id; } }
@@ -1041,6 +1079,7 @@ namespace PixelMonsterArena
             Cheer = Mathf.Max(.15f, Cheer - dt * .4f);
             Shake = Mathf.Max(0, Shake - dt * 20);
             if (TrickRoom > 0) { TrickRoom -= dt; if (TrickRoom <= 0) Say("ねじれた じくうが もとに もどった！"); }
+            foreach (var sd in Sides) sd.SwapCd = Mathf.Max(0, sd.SwapCd - dt);
             foreach (var sd in Sides) if (sd.Tail > 0) { sd.Tail -= dt; if (sd.Tail <= 0) Say("おいかぜが やんだ"); }
 
             if (Mode == "intro")
@@ -1049,7 +1088,7 @@ namespace PixelMonsterArena
                 if (_sent == 1 && ModeT > 1.7f) { _sent = 2; SendOut(0, 0); }
                 if (ModeT > 2.3f) { Mode = "fight"; ModeT = 0; Say("バトル スタート！"); }
             }
-            if (_pendingSend != null) { _pendingSend.T -= dt; if (_pendingSend.T <= 0) { var p = _pendingSend; _pendingSend = null; SendOut(p.Side, p.Idx, p.Pass); } }
+            if (_pendingSend != null) { _pendingSend.T -= dt; if (_pendingSend.T <= 0) { var p = _pendingSend; _pendingSend = null; SendOut(p.Side, p.Idx, p.Pass, p.Lag); } }
 
             if (Mode == "catch") UpdateCatch(dt);
             else if (Mode == "fight" || Mode == "intro")
