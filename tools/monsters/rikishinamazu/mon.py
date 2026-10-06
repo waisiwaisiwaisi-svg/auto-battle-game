@@ -196,7 +196,11 @@ def frame(f):
              (mage(), A(b, h)), (head(E, mo), A(b, h)), (whisker(sw, mo == 'open'), A(b, h)), (arm(am), A(b))]
     g = compose(items)
     if fx: stamp(g, fx[1] + root[0] - 4, fx[2] - 1, fx[0])
-    return flip_ko(g, 61) if f == 'ko' else g
+    if f == 'ko':   # ばったり 前へ たおれる：腹ばいで 頭を 地面に つけ、目は ×
+        b = (-4, 6); hk = (4, 20)
+        g = compose([(tail(0), b), (leg(19, True), (-4, 1)), (body(), b), (sagari(), b), (leg(29), (-3, 1)), (arm('back'), (-2, 8)),
+                     (mage(), hk), (head('ko', 'shut'), hk), (whisker(2, False), hk)])
+    return g
 
 def layers(): return one_layer({f: frame(f) for f in FR})
 FRAMES = {f: {} for f in FR}

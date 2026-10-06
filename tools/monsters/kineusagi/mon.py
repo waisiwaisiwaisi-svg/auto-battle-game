@@ -73,11 +73,11 @@ def dark(rows): return recolor(rows, DARKER)
 
 # ---- 耳（見せ所）：根もとは 毛、先は 太い 杵（きね）の 木。なわの 帯 ----
 import math
-TIPS = {'back': (-15, -17), 'up': (-3, -22), 'fwd': (22, -6), 'down': (20, 10)}
-def ear(d='back', L=None):
+TIPS = {'back': (-11, -18), 'up': (-3, -22), 'fwd': (22, -6), 'down': (20, 10)}
+def ear(d='back', tip=None):
     """根もと（16,16）から 先へ。根もとは 毛、先ほど 太い 杵の 木"""
     N = 48; g = G(N, N); bx, by = 24, 24
-    tx, ty = TIPS[d]; ln = math.hypot(tx, ty); ux, uy = tx / ln, ty / ln; px, py = -uy, ux
+    tx, ty = tip or TIPS[d]; ln = math.hypot(tx, ty); ux, uy = tx / ln, ty / ln; px, py = -uy, ux
     ex, ey = bx + tx, by + ty
     pl(g, [(bx + px * 2.6, by + py * 2.6), (ex + px * 4, ey + py * 4), (ex - px * 4, ey - py * 4), (bx - px * 2.6, by - py * 2.6)], 'a')
     for y in range(N):
@@ -145,17 +145,18 @@ SPARK = ['.k.', 'kPk', '.k.']
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='earB', g='earB', x=-1, y=-2, rows=dark(ear()), alt={'atk0': dark(ear('up')), 'atk1': dark(ear('fwd')), 'atk2': dark(ear('down'))}),
+        dict(n='earB', g='earB', x=-1, y=-1, rows=dark(ear(tip=(-18, -10))), alt={'atk0': dark(ear(tip=(-8, -20))), 'atk1': dark(ear(tip=(21, -9))), 'atk2': dark(ear(tip=(22, 17)))}),
         dict(n='tail', g='body', x=11, y=44, rows=TAIL),
         dict(n='legF', g='legB', x=16, y=52, rows=dark(leg())),
         dict(n='armF', g='armB', x=32, y=40, rows=dark(FIST)),
         dict(n='body', g='body', x=14, y=37, rows=body()),
         dict(n='leg', g='legA', x=24, y=52, rows=leg()),
+        dict(n='earD', g='ear', x=5, y=0, rows=ear(tip=(25, 14)), only='atk2'),
         dict(n='head', g='head', x=19, y=19, rows=head(),
              alt={'blink': head(EYE_BLINK), 'hit': head(EYE_HIT), 'atk0': head(EYE_ATK), NB: head(EYE_ATK, mouth=1), 'ko': head(ko=True)}),
-        dict(n='ear', g='ear', x=4, y=-1, rows=ear(), alt={'atk0': ear('up'), 'atk1': ear('fwd'), 'atk2': ear('down')}),
+        dict(n='ear', g='ear', x=4, y=0, rows=ear(), alt={'atk0': ear('up'), 'atk1': ear('fwd')}, not_='atk2'),
         dict(n='arm', g='armA', x=28, y=41, rows=FIST, alt={NB: FIST_PUNCH}),
-        dict(n='pow', g='fx', x=50, y=40, rows=POW, only='atk2'),
+        dict(n='pow', g='fx', x=54, y=37, rows=POW, only='atk2'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'ear': (0, 1), 'earB': (0, 1)}, 'idle2': {'body': (0, 1), 'head': (0, 1), 'armA': (0, 1), 'armB': (0, 1)}, 'idle3': {'body': (0, 1), 'armA': (0, 1), 'armB': (0, 1)},

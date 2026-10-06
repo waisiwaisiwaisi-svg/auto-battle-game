@@ -74,7 +74,7 @@ def needles(g, scale=1.0, short=False):
         t = (x0 + 1 - CX) / RX
         if abs(t) >= 1: continue
         ys = CY - RY * math.sqrt(1 - t * t)
-        L = (13 - 6 * abs(t) ** 1.5) * scale * (0.6 if short else 1)
+        L = (11 - 5 * abs(t) ** 1.5) * scale * (0.6 if short else 1)
         if x0 > CX + 6: L *= .55                                   # 顔の 上は 短く
         lean = t * 8 * scale
         y0 = int(ys + 3); y1 = int(ys - L); x1 = int(round(x0 + lean))
@@ -132,15 +132,15 @@ def volley():
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='f1', g='legB', x=18, y=50, rows=foot(True)),
-        dict(n='f2', g='legA', x=23, y=51, rows=foot()),
-        dict(n='f3', g='legB', x=30, y=51, rows=foot(True)),
-        dict(n='f4', g='legA', x=35, y=50, rows=foot()),
-        dict(n='body', g='body', x=8, y=12, rows=body(),
+        dict(n='f1', g='legB', x=18, y=51, rows=foot(True)),
+        dict(n='f2', g='legA', x=23, y=52, rows=foot()),
+        dict(n='f3', g='legB', x=30, y=52, rows=foot(True)),
+        dict(n='f4', g='legA', x=35, y=51, rows=foot()),
+        dict(n='body', g='body', x=8, y=14, rows=body(),
              alt={'blink': body(eye='blink'), 'hit': body(.8, eye='hit'), 'atk0': body(1.12, eye='atk'),
                   'atk1': body(1.25, eye='atk', mouth=1), 'atk2': body(.9, eye='atk', mouth=1), 'ko': body(.9, eye='ko')}),
-        dict(n='spl', g='fx', x=56, y=40, rows=splash(True), only='atk1'),
-        dict(n='vol', g='fx', x=52, y=24, rows=volley(), only='atk2'),
+        dict(n='spl', g='fx', x=56, y=42, rows=splash(True), only='atk1'),
+        dict(n='vol', g='fx', x=52, y=27, rows=volley(), only='atk2'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'body': (0, -1)}, 'idle2': {'root': (0, -1), 'body': (0, -1)}, 'idle3': {'root': (0, -1)},

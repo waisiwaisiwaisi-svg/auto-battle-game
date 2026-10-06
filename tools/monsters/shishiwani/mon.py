@@ -97,11 +97,11 @@ LEG_N = ['........'] + LEG[1:]       # 手前の 足：上の 輪郭を けし�
 # ---- しっぽ：うろこの 段、先に ほのお ----
 def tail(sw=0):
     g = G(64, 64)
-    tube(g, [(16, 47), (9, 50), (4 + sw, 47), (3 + sw, 42)], [4, 3, 2.2, 1.6], SKIN)
-    for (x, y) in ((11, 46), (7, 46), (5 + sw, 44)): dots(g, 'U', [(x, y)]); dots(g, 'P', [(x, y - 1)])
+    tube(g, [(16, 47), (11, 50), (8 + sw, 47), (7 + sw, 42)], [4, 3, 2.2, 1.6], SKIN)
+    for (x, y) in ((12, 46), (10, 47), (8 + sw, 44)): dots(g, 'U', [(x, y)]); dots(g, 'P', [(x, y - 1)])
     g = ol(g)
     fl = ['..k..', '.kOk.', 'kOYOk', 'kYwYk', '.kYk.'] if not sw else ['.k...', '.kOk.', 'kOYOk', 'kYwYk', '.kYk.']
-    stamp(g, fl, 1 + sw, 36)
+    stamp(g, fl, 5 + sw, 36)
     return g
 # ---- 唐草の 布（たてがみ）：頭の 後ろから 背中へ。すそは ほのお ----
 def cloth(ph=0):

@@ -222,8 +222,8 @@ def layers():
         dict(n='eye', g='head', x=41, y=15, rows=EYE, alt=EYE_ALT, not_='ko'),
         dict(n='drip', g='head', x=53, y=26, rows=DRIP, only='idle0|idle1|idle2|idle3|blink|walk0|walk1|walk2|walk3'),
         L('spray', 'fx', spray(0), alt={'atk2': spray(1)}, only=NB),
-        dict(n='sp1', g='fx', x=14, y=7, rows=SPARK, only='idle1|idle3|walk1'),
-        dict(n='sp2', g='fx', x=40, y=4, rows=SPARK, only='idle0|idle2|walk3'),
+        dict(n='sp1', g='fx', x=12, y=9, rows=SPARK, only='idle1|idle3|walk1'),
+        dict(n='sp2', g='fx', x=41, y=8, rows=SPARK, only='idle0|idle2|walk3'),
         # ダウン：花が しおれて 地面に 落ちた 頭
         L('koneck', 'body', neck_ko(), only='ko'),
         L('kobloom', 'body', bloom_ko(), only='ko'),

@@ -117,7 +117,7 @@ def body():
     return make(d, RAMP, post=post)
 def leg(x0, far=False):
     def d(p):
-        tube(p, [(x0, 47), (x0 + 1, 55)], [3, 2.2], '2')
+        tube(p, [(x0, 48), (x0 + 1, 55)], [2.6, 2], '1')
     def post2(g):
         # かぎ爪（3本）
         put(g, ['kkkkkkk.', 'kEkEkEk.', 'kEkEkFk.', '.k.k.kk.'], x0 - 2, 56)
@@ -133,7 +133,7 @@ def head(open_=False):
     def post(s):
         # 目の まわりの 黒い ふち（ワシの 目の 筋 ⇔ はにわの 穴）
         line(s, 34, 28, 30, 30, 'P'); line(s, 34, 29, 31, 31, 'P')
-        crack(s, [(30, 20), (32, 23), (31, 26)])
+        crack(s, [(30, 20), (32, 23), (31, 26)]); crack(s, [(36, 30), (38, 31), (40, 33)])
         line(s, 33, 11, 34, 15, 'C'); line(s, 40, 11, 40, 15, 'C')
     return make(d, RAMP, lo=-.34, post=post)
 def beak(open_=False):
@@ -156,12 +156,12 @@ def beak(open_=False):
         dots(g, 'k', [(51, 23)])                     # 鼻の あな
     return make(d, RAMP, r=1, post=post, post2=post2)
 # 目：はにわの 穴の ふち（P）＋白い 光＋霊の 虹彩（明 G・暗 V）＋ひとみ（k）。まゆの 線で かこむ
-EYE = ['kk.........', 'kkkk.......', '.kkkkkk....', '..kPPPPPkk.', '.kPwGGkGGPk', '.kPGVVkVGPk', '..kPPkkPPk.', '...kkkkkk..']
+EYE = ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPwcGGkGGPk', 'kPGGVVkVVPk', 'kPPVVVkVPPk', '.kPPPPPPPk.', '..kkkkkkk..']
 EYE_ALT = {
-    'blink': ['kk.........', 'kkkk.......', '.kkkkkk....', '..kPPPPPkk.', '.kPPPPPPPPk', '.kkkkkkkkkk', '..kAAAAAAk.', '...kkkkkk..'],
-    'hit':   ['kk.........', 'kkkk.......', '.kkkkkk....', '..kPPPPPkk.', '.kPGPPPPGPk', '.kPPGGGGPPk', '..kPPPPPPk.', '...kkkkkk..'],
-    'atk0|atk1|atk2': ['kk.........', 'kkkk.......', '.kkkkkk....', '..kPPPPPkk.', '.kPwccwccPk', '.kPGGGkGGPk', '..kPVkkVPk.', '...kkkkkk..'],
-    'ko':    ['kk.........', 'kkkk.......', '.kkkkkk....', '..kPPPPPkk.', '.kPVPPPVPPk', '.kPPPVPPPPk', '..kPVPVPPk.', '...kkkkkk..'],
+    'blink': ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPPPPPPPPPk', 'kkkkkkkkkkk', 'kPPPPPPPPPk', '.kPPPPPPPk.', '..kkkkkkk..'],
+    'hit':   ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPGPPPPPGPk', 'kPPGGPGGPPk', 'kPPPPGPPPPk', '.kPPPPPPPk.', '..kkkkkkk..'],
+    'atk0|atk1|atk2': ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPwcccwccPk', 'kPGGGGkGGPk', 'kPPGGGkGPPk', '.kPPVVVPPk.', '..kkkkkkk..'],
+    'ko':    ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPPVPPPVPPk', 'kPPPPVPPPPk', 'kPPVPPPVPPk', '.kPPPPPPPk.', '..kkkkkkk..'],
 }
 # 霊の 光（はなれているのは 意図的：霊火の つぶ と 攻撃の 波）
 WISP = ['.c.', 'cGc', '.V.']
@@ -176,7 +176,7 @@ def layers():
         dict(n='leg', g='legA', x=0, y=0, rows=leg(28)),
         dict(n='head', g='head', x=0, y=0, rows=head()),
         dict(n='beak', g='head', x=0, y=0, rows=beak(), alt={'atk1|atk2': beak(True)}),
-        dict(n='eye', g='head', x=34, y=18, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=35, y=17, rows=EYE, alt=EYE_ALT),
         dict(n='wisp', g='fx', x=46, y=8, rows=WISP, only='idle1|idle3|walk1|walk3'),
         dict(n='wave', g='fx', x=56, y=25, rows=WAVE, only='atk1|atk2'),
     ]
