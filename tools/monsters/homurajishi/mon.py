@@ -36,90 +36,73 @@ def put(base, over, x=0, y=0):
 DARK = {'F': 'G', 'G': 'H', 'H': 'l', 'S': 'T', 'T': 'U', 'U': 'l', 'w': 'T'}
 def dark(rows): return pix.recolor(rows, DARK)
 
-# ---- 胴（胸が 深く、腰は しまる）----
+# ---- 胴（デフォルメ：小さく 丸く、胸が 少し 深い）----
 BODY_M = [
-    '..........##################......',
-    '.....###########################..',
-    '...##############################.',
-    '.#################################',
-    '##################################',
-    '##################################',
-    '##################################',
-    '##################################',
-    '##################################',
-    '##################################',
-    '.#################################',
-    '.#################################',
-    '..################################',
-    '..################################',
-    '...##############################.',
-    '....############.....###########..',
-    '.....#######...........#######....',
+    '.......############.....',
+    '....##################..',
+    '..#####################.',
+    '.#######################',
+    '########################',
+    '########################',
+    '########################',
+    '########################',
+    '########################',
+    '.#######################',
+    '..#####################.',
+    '...###################..',
+    '.....###############....',
 ]
-BODY = pix.outline(put(shade(BODY_M, {'#': 'FGH'}, low=13), [
+BODY = pix.outline(put(shade(BODY_M, {'#': 'FGH'}, low=10), [
     # 肋と ももの 筋（手打ち）
-    '', '', '',
-    '.....F',
-    '....FG.........HG',
-    '...FG.........HG',
-    '..FG.........H.GG',
-    '.FG.........H',
-    '.G.........H....HHH',
-    '..........H....HG',
-    '..............HG',
-    '.............H',
+    '', '',
+    '...F',
+    '..FG.......HG',
+    '.FG.......HG',
+    '.G.......H.GG',
+    '........H',
+    '.......H...HHH',
 ]))
 
-# ---- 後ろ足（太い もも、かかとが 後ろへ）----
+# ---- 後ろ足（短く 太い もも＋大きな 足）：付け根は 胴に 3ドット もぐる ----
 HLEG_M = [
-    '...######.....',
-    '.##########...',
-    '############..',
-    '#############.',
-    '#############.',
-    '.############.',
-    '..##########..',
-    '...########...',
-    '....######....',
-    '....#####.....',
-    '...#####......',
-    '...#####......',
-    '...#####......',
-    '..#######.....',
-    '.#########....',
-    '.##########...',
+    '..#######...',
+    '.#########..',
+    '###########.',
+    '###########.',
+    '.##########.',
+    '..########..',
+    '...######...',
+    '...#####....',
+    '...#####....',
+    '...#######..',
+    '..#########.',
+    '..##########',
 ]
 HLEG = pix.outline(put(shade(HLEG_M, {'#': 'FGH'}), [
-    '', '', '', '', '',
-    '..........H',
-    '.........H',
-    '', '', '', '', '', '', '',
+    '', '', '.........H', '........H', '.......H', '', '', '', '', '', '',
     '....k.k.k.w',
-    '...kk.k.k.kw',
 ]))
 
-# ---- 前足：鉄の こて（手首に 輪、こぶしに びょう）----
+# ---- 前足：鉄の こて（短く 太く、こぶしに びょう）----
 FLEG = [
-    '..kkkkkkk.....',
-    '.kFFGGGGHk....',
-    'kFFGGGGGHk....',
-    'kFGGGGGHHk....',
-    'kkkkkkkkkkk...',
-    'kSSSSTTTTUk...',
-    'kSUSTTTUTUkk..',
-    'kSTTTTTTTUUSk.',
-    'kSTTTTTTTUSSTk',
-    'kSTTTTTTTUUkk.',
-    'kSUSTTTUTUk...',
+    '.kkkkkkkkk....',
+    'kFFGGGGGGHk...',
+    'kFGGGGGGHHk...',
     'kkkkkkkkkkkk..',
-    'kSSSSTTTTTUUk.',
-    'kTTTTTTTUUUUk.',
-    '.kkkkkkkkkkkk.',
-    '.kFFGGGGGGHk..',
-    'kFGGGGGGGGGHk.',
-    'kGHGGHGGHGHHk.',
-    '.kkwkkwkkwkk..',
+    'kSSSSTTTTUUk..',
+    'kSUSTTUTTUUSk.',
+    'kSTTTTTTTUSSTk',
+    'kSUSTTUTTUUkk.',
+    'kkkkkkkkkkkk..',
+    '.kFGGGGGGHk...',
+    '.kFGGGGGHHk...',
+    '.kFGGGGGHHk...',
+    'kFFGGGGGGGHk..',
+    'kGHGGHGGHGHk..',
+    '.kwkkwkkwkk...',
 ]
+# 付け根は 胴に うめる：上の 輪郭を 消して 胴の 色と なじませる
+HLEG[0] = '.' * len(HLEG[0]); FLEG[0] = '.' * len(FLEG[0])
 FLEG_FAR = dark(FLEG)
 
 # ---- 頭（手打ち）：重い まゆ、長い 鼻すじ、きばの 見える 口 ----
@@ -176,15 +159,17 @@ TUFT2 = [
     '...kkYYYOk....',
     '.....kkkk.....',
 ]
-EYE = ['kYYkkk', 'kYYYkY', '.kkkkk']
-EYE_ALT = {'blink': ['kGGkkk', 'kkkkkG', '.HHHH.'], 'hit': ['kkGGkk', '..kk..', '.k..k.'], 'atk0|atk1|atk2': ['kYYYkk', 'kYYYYY', '.kkkkk'], 'ko': ['kGGGkG', 'GkGkGG', 'GGkGGG', 'GkGkGG']}
+# するどい 目：まゆの ひさしの 下、白い 光＋金と だいだいの 虹彩＋たての ひとみ、下まぶた
+EYE = ['kwYYkOk', 'kYOOkOk', '.kkkkkk']
+EYE_ALT = {'blink': ['kGGGGGk', 'kkkkkkk', '.HHHHH.'], 'hit': ['kkGGGkk', 'GGkkkGG', '.k...k.'],
+           'atk0|atk1|atk2': ['kwwYkYk', 'kYYOkOk', '.kkkkkk'], 'ko': ['kGkGkGG', 'GGkGGGG', 'GkGkGGG']}
 
 # ---- 燃える たてがみ：舌の 形の 炎を 奥から 重ねる（外側＝赤、内＝黄）----
-TONGUES = [(26, 12, 26, 0, 8), (21, 11, 13, 0, 9), (16, 14, 3, 5, 9), (13, 19, 0, 14, 9), (12, 25, 0, 25, 9),
-           (13, 31, 1, 36, 9), (16, 33, 6, 42, 8), (21, 34, 15, 45, 7), (26, 33, 25, 43, 6)]
+TONGUES = [(26, 12, 26, 1, 8), (21, 11, 13, 1, 9), (16, 14, 4, 5, 9), (13, 19, 1, 14, 9), (12, 24, 1, 24, 9),
+           (14, 28, 3, 32, 8), (17, 30, 9, 36, 7), (22, 31, 17, 38, 6), (27, 30, 27, 37, 6)]
 def mane(ph=0):
-    W, H = 34, 47; out = pix.grid(W, H)
-    core = pix.grid(W, H); pix.ellipse(core, 25, 21, 9, 12, '#')
+    W, H = 34, 40; out = pix.grid(W, H)
+    core = pix.grid(W, H); pix.ellipse(core, 25, 20, 9, 11, '#')
     def ring(m, y, x):
         r = 9
         for dy in range(-3, 4):
@@ -207,7 +192,7 @@ def mane(ph=0):
             for x in range(W):
                 if m[y][x] != '#': continue
                 r = ring(m, y, x)
-                out[y][x] = ('D' if (y > 34 or x > 26) else 'R') if r == 1 else 'O' if r == 2 else 'Y'
+                out[y][x] = ('D' if (y > 30 or x > 26) else 'R') if r == 1 else 'O' if r == 2 else 'Y'
     return pix.outline(pix.rows_of(out))
 MANE = mane(); MANE2 = mane(1)
 
@@ -284,23 +269,23 @@ BURST2 = [
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='tail', g='tail', x=1, y=20, rows=TAIL, alt={'idle1|idle3|walk1|walk3': TAIL2, 'ko': TAIL_KO}),
-        dict(n='hlegF', g='legB', x=16, y=43, rows=dark(HLEG), not_='ko'),
-        dict(n='flegF', g='legB', x=45, y=42, rows=FLEG_FAR, not_='ko'),
-        dict(n='body', g='body', x=8, y=26, rows=BODY),
-        dict(n='hleg', g='legA', x=8, y=43, rows=HLEG, not_='ko'),
-        dict(n='mane', g='mane', x=21, y=0, rows=MANE, alt={'idle1|idle3|walk1|walk3|atk2': MANE2}),
-        dict(n='fleg', g='legA', x=38, y=42, rows=FLEG, not_=NB + '|ko'),
-        dict(n='head', g='head', x=39, y=13, rows=HEAD, alt={'atk1|atk2': HEAD_ATK}),
-        dict(n='tuft', g='head', x=36, y=6, rows=TUFT, alt={'idle1|idle3|walk1|walk3|atk2': TUFT2}),
-        dict(n='eye', g='head', x=42, y=18, rows=EYE, alt=EYE_ALT),
-        dict(n='punch', g='punch', x=35, y=36, rows=PUNCH, only=NB + '|ko'),
-        dict(n='burst', g='punch', x=58, y=34, rows=BURST, alt={'atk2': BURST2}, only=NB),
+        dict(n='tail', g='tail', x=7, y=30, rows=TAIL, alt={'idle1|idle3|walk1|walk3': TAIL2, 'ko': TAIL_KO}),
+        dict(n='hlegF', g='legB', x=25, y=47, rows=dark(HLEG), not_='ko'),
+        dict(n='flegF', g='legB', x=46, y=46, rows=FLEG_FAR, not_='ko'),
+        dict(n='body', g='body', x=17, y=37, rows=BODY),
+        dict(n='hleg', g='legA', x=15, y=47, rows=HLEG, not_='ko'),
+        dict(n='mane', g='mane', x=21, y=4, rows=MANE, alt={'idle1|idle3|walk1|walk3|atk2': MANE2}),
+        dict(n='fleg', g='legA', x=39, y=46, rows=FLEG, not_=NB + '|ko'),
+        dict(n='head', g='head', x=39, y=17, rows=HEAD, alt={'atk1|atk2': HEAD_ATK}),
+        dict(n='tuft', g='head', x=36, y=10, rows=TUFT, alt={'idle1|idle3|walk1|walk3|atk2': TUFT2}),
+        dict(n='eye', g='head', x=42, y=22, rows=EYE, alt=EYE_ALT),
+        dict(n='punch', g='punch', x=36, y=40, rows=PUNCH, only=NB + '|ko'),
+        dict(n='burst', g='punch', x=59, y=38, rows=BURST, alt={'atk2': BURST2}, only=NB),
     ]
 
 FRAMES = {
     'idle0': {},
-    'idle1': {'body': (0, 1)},
+    'idle1': {'body': (0, 1), 'head': (0, -1)},
     'idle2': {'body': (0, 1), 'mane': (0, -1)},
     'idle3': {'body': (0, 0), 'mane': (0, -1)},
     'blink': {},
@@ -308,10 +293,10 @@ FRAMES = {
     'walk1': {'body': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (1, -1)},
     'walk3': {'body': (0, -1)},
-    'atk0': {'body': (-2, 2), 'mane': (-1, 0), 'legA': (-2, 0), 'tail': (1, 0)},
+    'atk0': {'body': (-2, 1), 'mane': (-1, 1), 'legA': (-1, 0), 'tail': (1, 0)},
     'atk1': {'root': (3, 0), 'body': (0, 1), 'punch': (1, 0)},
     'atk2': {'root': (5, 0), 'body': (0, 1), 'punch': (2, 0)},
-    'hit': {'root': (-3, 0), 'mane': (-1, 1), 'head': (-1, 1)},
-    'ko': {'body': (-2, 14), 'mane': (2, -3), 'head': (3, 4), 'tail': (2, 6), 'punch': (6, 14)},
+    'hit': {'root': (-3, 0), 'mane': (-1, 1), 'head': (-1, 0)},
+    'ko': {'body': (-2, 9), 'mane': (2, 6), 'head': (3, 3), 'tail': (2, 4), 'punch': (6, 12)},
 }
 PARENT = {'head': 'mane', 'mane': 'body', 'tail': 'body', 'body': 'root', 'punch': 'root', 'legA': 'root', 'legB': 'root'}

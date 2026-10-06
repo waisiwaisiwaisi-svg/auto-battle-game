@@ -6,7 +6,7 @@ PAL = {
     'R': '#d2cab8', 'Q': '#8e857c', 'P': '#4e4652',      # 岩 明・中・暗
     'C': '#ffa48e', 'D': '#e05a72', 'E': '#8c2a50',      # サンゴ
     'B': '#74c0f0', 'N': '#2f72b8', 'M': '#1c3c74',      # 体（深い 海の 青）
-    'W': '#d8f8ff', 'Y': '#ffe45c', 'w': '#ffffff',
+    'W': '#d8f8ff', 'Y': '#ffe45c', 'O': '#e0902a', 'w': '#ffffff',
 }
 LIGHT = set('RCBWYw')
 KEEP_BLACK = set('wY')
@@ -79,20 +79,25 @@ SHELL_D = [
 ]
 # 顔：甲羅の 前の 面。目の 柄（2本）の 先に 岩の まぶた＋黄色い つり目（たての ひとみ）
 STALK = [
-    '..kkkk.',
-    '.kRRRRk',
-    'kRQQQPk',
-    'kkkkkkk',
-    'kYYYkYk',
-    '.kkkkk.',
-    '..kBNk.',
-    '..kBNk.',
-    '..kNMk.',
-    '..kNMk.',
-    '..kNMk.',
+    '..kkkkkk.',
+    '.kRRRRRQk',
+    'kRQQQQQPk',
+    'kkkkkkkkk',
+    'kYYYYkYYk',
+    'kYYYYkYYk',
+    'kYYYYkYYk',
+    '.kkkkkkk.',
+    '...kBNk..',
+    '...kBNk..',
+    '...kNMk..',
+    '...kNMk..',
 ]
-EYEL = ['YYYkY']
-EYEL_ALT = {'blink': ['kkkkk'], 'atk0|atk1|atk2': ['wYYkY'], 'hit': ['kYkkk'], 'ko': ['YkYkY']}
+# 目（デフォルメで 大きく）：岩の まぶたの 下、白い 光＋黄と こはく色の 虹彩＋たての ひとみ
+EYEL = ['wYYYkkk', 'YYOOkOk', 'OOOOkOk']
+EYEL_ALT = {'blink': ['QQQQQQQ', 'QQQQQQQ', 'kkkkkkk'], 'atk0|atk1|atk2': ['wwYYkYk', 'YYYOkOk', 'OOOOkOk'],
+            'hit': ['kkQQQkk', 'QQkkkQQ', 'QQQQQQQ'], 'ko': ['QQkQkQQ', 'QQQkQQQ', 'QQkQkQQ']}
+EYEF = ['wYkkk', 'YOkOk', 'OOkOk']
+EYEF_ALT = {'blink': ['PPPPP', 'PPPPP', 'kkkkk'], 'atk0|atk1|atk2': ['wYkYk', 'YOkOk', 'OOkOk'], 'hit': ['kPPkk', 'PkkPP', 'PPPPP'], 'ko': ['kPkPP', 'PkPPP', 'kPkPP']}
 # 口：岩の 口板と 左右に ひらく 大あご（白い 牙）
 MOUTH = [
     'kkkkkk..',
@@ -185,25 +190,19 @@ ARM_FWD = [
     '.kkkkk.......',
 ]
 # 足：つけ根から ひざを 立て、先の とがった 足先で 立つ
+# 足：デフォルメで 短く 太く（ひざは 立てた まま、付け根は 腹の 下に もぐる）
 LEG = [
-    '......kkkk.......',
-    '.....kBBBNkkk....',
-    '....kBNNNNNNNkkk.',
-    '....kNNkkkkMMNNNk',
-    '...kBNk....kkMMMk',
-    '...kNMk......kkk.',
-    '...kNMk..........',
-    '...kNMk..........',
-    '..kBNk...........',
-    '..kNMk...........',
-    '..kNMk...........',
-    '.kBNk............',
-    '.kNMk............',
-    '.kNMk............',
-    'kBNk.............',
-    'kNMk.............',
-    'kMk..............',
-    'kk...............',
+    '......kkkkk......',
+    '.....kBBBBNkkk...',
+    '....kBNNNNNNNNkk.',
+    '...kBNNkkkkkMMNNk',
+    '...kBNMk....kkMMk',
+    '..kBNNMk.....kkk.',
+    '..kBNMMk.........',
+    '.kBNNMk..........',
+    '.kBNMMk..........',
+    'kBNNMk...........',
+    'kkkkk............',
 ]
 LEGF = pix.flip_h(LEG)
 BUB = {'idle0|blink|walk0|walk2': ['.kk.', 'kWWk', 'kWBk', '.kk.'], 'idle1|walk1|walk3': ['..kk.', '.kWk.', '..k..', 'W....'],
@@ -221,27 +220,27 @@ SHARDS = ['.kk.....', 'kRQk..kk', '.kk..kRk', '......k.', '..kk....', '.kRQk...'
 def layers():
     NA = 'atk1|atk2'
     return [
-        dict(n='stalkF', g='head', x=27, y=15, rows=dark(STALK)),
-        dict(n='legF2', g='legB', x=15, y=40, rows=dark(LEG)),
-        dict(n='coral1', g='body', x=6, y=20, rows=CORAL),
-        dict(n='coral2', g='body', x=16, y=18, rows=CORAL2),
-        dict(n='coral3', g='body', x=23, y=21, rows=dark(CORAL2)),
-        dict(n='stalk', g='head', x=31, y=14, rows=STALK),
-        dict(n='eyeF', g='head', x=28, y=19, rows=['YYkY'], alt={'blink': ['kkkk'], 'hit': ['kYkk'], 'ko': ['YkYk']}),
-        dict(n='eye', g='head', x=32, y=18, rows=EYEL, alt=EYEL_ALT),
-        dict(n='arm', g='body', x=37, y=22, rows=ARM[:10] + ['.kkkk.......'], not_=NA),
-        dict(n='armF', g='body', x=35, y=34, rows=ARM_FWD, only=NA),
-        dict(n='shell', g='body', x=5, y=24, rows=shell()),
-        dict(n='mouth', g='head', x=37, y=31, rows=MOUTH),
-        dict(n='belly', g='body', x=9, y=40, rows=BELLY),
-        dict(n='leg1', g='legA', x=0, y=42, rows=LEG),
-        dict(n='leg2', g='legB', x=11, y=42, rows=LEG),
-        dict(n='leg3', g='legA', x=21, y=42, rows=LEGF),
-        dict(n='claw', g='claw', x=38, y=0, rows=CLAW, not_=NA),
-        dict(n='clawS', g='claw', x=46, y=26, rows=CLAW_SLAM, only=NA),
-        dict(n='bub', g='head', x=46, y=30, rows=BUB['idle0|blink|walk0|walk2'], alt=BUB, not_='atk0|atk1|atk2|hit|ko'),
-        dict(n='splash', g='fx', x=46, y=48, rows=SPLASH, only=NA),
-        dict(n='shards', g='fx', x=56, y=38, rows=SHARDS, only='atk2'),
+        dict(n='stalkF', g='head', x=25, y=22, rows=dark(STALK)),
+        dict(n='legF2', g='legB', x=15, y=49, rows=dark(LEG)),
+        dict(n='coral1', g='body', x=6, y=28, rows=CORAL),
+        dict(n='coral2', g='body', x=16, y=26, rows=CORAL2),
+        dict(n='coral3', g='body', x=23, y=29, rows=dark(CORAL2)),
+        dict(n='stalk', g='head', x=30, y=21, rows=STALK),
+        dict(n='eyeF', g='head', x=26, y=26, rows=EYEF, alt=EYEF_ALT),
+        dict(n='eye', g='head', x=31, y=25, rows=EYEL, alt=EYEL_ALT),
+        dict(n='arm', g='body', x=37, y=30, rows=ARM[:10] + ['.kkkk.......'], not_=NA),
+        dict(n='armF', g='body', x=35, y=42, rows=ARM_FWD, only=NA),
+        dict(n='shell', g='body', x=5, y=32, rows=shell()),
+        dict(n='mouth', g='head', x=37, y=39, rows=MOUTH),
+        dict(n='belly', g='body', x=9, y=48, rows=BELLY),
+        dict(n='leg1', g='legA', x=1, y=50, rows=LEG),
+        dict(n='leg2', g='legB', x=11, y=50, rows=LEG),
+        dict(n='leg3', g='legA', x=20, y=50, rows=LEGF),
+        dict(n='claw', g='claw', x=38, y=8, rows=CLAW, not_=NA),
+        dict(n='clawS', g='claw', x=46, y=33, rows=CLAW_SLAM, only=NA),
+        dict(n='bub', g='head', x=46, y=38, rows=BUB['idle0|blink|walk0|walk2'], alt=BUB, not_='atk0|atk1|atk2|hit|ko'),
+        dict(n='splash', g='fx', x=46, y=55, rows=SPLASH, only=NA),
+        dict(n='shards', g='fx', x=56, y=45, rows=SHARDS, only='atk2'),
     ]
 
 FRAMES = {

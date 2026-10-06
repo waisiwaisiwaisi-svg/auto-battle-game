@@ -228,11 +228,16 @@ HEAD_OPEN = HEAD[:12] + [
 ]
 def _eye(h, a, b):
     h = list(h); h[7] = h[7][:6] + a + h[7][6 + len(a):]; h[8] = h[8][:6] + b + h[8][6 + len(b):]; return h
-HEAD_ATK0 = _eye(HEAD, 'YYYYY', 'OOOO')
-HEAD_OPEN = _eye(HEAD_OPEN, 'YYYYY', 'OOOO')
-HEAD_BLINK = _eye(HEAD, 'kkkkk', 'BBBk')
-HEAD_HIT = _eye(HEAD, 'kYkYk', 'BkBk')
+# 目：白い 光＋金の 虹彩（明 Y・暗 O）＋たての ひとみ（まゆと 下まぶたで かこむ）
+HEAD_ATK0 = _eye(HEAD, 'wwkYk', 'YOkOk')
+HEAD_OPEN = _eye(HEAD_OPEN, 'wwkYk', 'YOkOk')
+HEAD_BLINK = _eye(HEAD, 'kkkkk', 'BBBBk')
+HEAD_HIT = _eye(HEAD, 'kYkYk', 'BkBkk')
 HEAD_KO = _eye(HEAD, 'BkBkB', 'BBkBk')
+HEAD = _eye(HEAD, 'wYkYk', 'OOkOk')
+# デフォルメ：首を 14行 みじかく（まっすぐな ところを ぬく）、頭は そのまま
+NECK = [r for i, r in enumerate(NECK) if i not in (8, 9, 14, 15, 16, 17, 18, 19, 29, 30, 31, 32, 33, 34)]
+NSPLIT = 14
 # 水の ブレス（口から 右へ）
 BEAM = [
     '...........c...c.',
@@ -253,19 +258,19 @@ BEAM2 = [
 ]
 def layers():
     return [
-        dict(n='horn2', g='head', x=31, y=3, rows=HORN2),
+        dict(n='horn2', g='head', x=31, y=17, rows=HORN2),
         dict(n='tailfin', g='tail', x=11, y=16, rows=TAILFIN),
         dict(n='rear', g='tail', x=0, y=26, rows=REAR),
         dict(n='cr3', g='front', x=3, y=28, rows=CREST, alt={'idle1|idle3|walk1|walk3': CREST2}),
         dict(n='front', g='front', x=0, y=38, rows=FRONT),
-        dict(n='cr2', g='neck2', x=26, y=22, rows=CREST, alt={'idle2|walk0|walk2': CREST2}, not_='ko'),
-        dict(n='cr1', g='neck1', x=28, y=13, rows=CREST, alt={'idle1|idle3|walk1|walk3': CREST2}, not_='ko'),
-        dict(n='neck', g='neck1', x=36, y=9, rows=NECK[:22], not_='ko'),
-        dict(n='neckb', g='neck2', x=36, y=31, rows=NECK[22:], not_='ko'),
-        dict(n='head', g='head', x=36, y=2, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN, 'atk0': HEAD_ATK0, 'blink': HEAD_BLINK, 'hit': HEAD_HIT, 'ko': HEAD_KO}),
-        dict(n='horn', g='head', x=33, y=0, rows=HORN),
-        dict(n='beam', g='head', x=61, y=14, rows=BEAM, only='atk1'),
-        dict(n='beam2', g='head', x=61, y=15, rows=BEAM2, only='atk2'),
+        dict(n='cr2', g='neck2', x=26, y=28, rows=CREST, alt={'idle2|walk0|walk2': CREST2}, not_='ko'),
+        dict(n='cr1', g='neck1', x=28, y=27, rows=CREST, alt={'idle1|idle3|walk1|walk3': CREST2}, not_='ko'),
+        dict(n='neck', g='neck1', x=36, y=23, rows=NECK[:NSPLIT], not_='ko'),
+        dict(n='neckb', g='neck2', x=36, y=37, rows=NECK[NSPLIT:], not_='ko'),
+        dict(n='head', g='head', x=36, y=16, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN, 'atk0': HEAD_ATK0, 'blink': HEAD_BLINK, 'hit': HEAD_HIT, 'ko': HEAD_KO}),
+        dict(n='horn', g='head', x=33, y=14, rows=HORN),
+        dict(n='beam', g='head', x=61, y=28, rows=BEAM, only='atk1'),
+        dict(n='beam2', g='head', x=61, y=29, rows=BEAM2, only='atk2'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'neck1': (0, 1)}, 'idle2': {'neck1': (0, 1), 'tail': (0, 1)}, 'idle3': {'tail': (0, 1)},
@@ -273,6 +278,6 @@ FRAMES = {
     'walk0': {'neck1': (-1, 0), 'tail': (0, -1)}, 'walk1': {'neck1': (0, 0), 'neck2': (1, 0), 'front': (0, 0)},
     'walk2': {'neck1': (1, 0), 'tail': (0, 1)}, 'walk3': {'neck2': (-1, 0)},
     'atk0': {'neck1': (-2, 1), 'neck2': (-1, 0), 'head': (-1, 1)}, 'atk1': {'neck1': (2, 0), 'neck2': (1, 0), 'head': (1, 0)}, 'atk2': {'neck1': (2, 0), 'neck2': (1, 0)},
-    'hit': {'neck1': (-2, 2), 'neck2': (-1, 0), 'head': (-1, 1)}, 'ko': {'head': (1, 38), 'tail': (0, 2)},
+    'hit': {'neck1': (-2, 2), 'neck2': (-1, 0), 'head': (-1, 1)}, 'ko': {'head': (1, 24), 'tail': (0, 2)},
 }
 PARENT = {'head': 'neck1', 'neck1': 'neck2', 'neck2': 'root', 'tail': 'root', 'front': 'root'}

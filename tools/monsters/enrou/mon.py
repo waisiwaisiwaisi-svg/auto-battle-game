@@ -37,31 +37,26 @@ def dark(rows): return pix.recolor(rows, DARK)
 
 # ---- 胴：背中の 毛が 後ろへ 逆立つ。ひびの 奥で 熾火が 光る ----
 BODY_M = [
-    '..........#.....#.....#...........',
-    '.........##....##....##...#.......',
-    '......#.###..####..####..##.......',
-    '....##########################....',
-    '..##############################..',
-    '.################################.',
-    '##################################',
-    '##################################',
-    '##################################',
-    '.#################################',
-    '..################################',
-    '...############################...',
-    '....#########.......#############.',
-    '.....#######.........###########..',
-    '......#####...........#########...',
+    '......#.....#.....#.....',
+    '....###...###...###.....',
+    '..####################..',
+    '.######################.',
+    '########################',
+    '########################',
+    '########################',
+    '########################',
+    '.#######################',
+    '..#####################.',
+    '....##################..',
 ]
-BODY = pix.outline(put(shade(BODY_M, {'#': 'ABC'}, low=11), [
-    '', '', '', '',
-    '..............C.....C',
-    '.....C.......C.....kO',
-    '....C.......kO....kOY',
-    '...C.......kOY...kOk',
-    '..........kOk...kRk',
-    '..........Rk.....k',
-    '..........k',
+BODY = pix.outline(put(shade(BODY_M, {'#': 'ABC'}, low=9), [
+    '', '', '',
+    '..........C.....C',
+    '....C....C.....kO',
+    '...C....kO....kOY',
+    '..C....kOY...kOk',
+    '.......kOk...kRk',
+    '.......Rk.....k',
 ]))
 
 # ---- 足（細く 長い。爪は 白）----
@@ -70,86 +65,72 @@ HLEG_M = [
     '.#######..',
     '#########.',
     '#########.',
-    '.########.',
-    '..######..',
-    '...#####..',
-    '...####...',
-    '...###....',
-    '..###.....',
-    '..##......',
-    '..##......',
-    '..##......',
-    '..##......',
-    '..###.....',
-    '.#####....',
+    '.#######..',
+    '..#####...',
+    '..####....',
+    '..####....',
+    '..####....',
+    '..####....',
+    '..####....',
     '.######...',
+    '.#######..',
 ]
 def notop(r): return ['.' * len(r[0])] + r[1:]
 HLEG = notop(pix.outline(put(shade(HLEG_M, {'#': 'ABC'}), [
-    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '', '', '', '', '',
     '..k.k.k',
 ])))
 FLEG_M = [
-    '.####..',
-    '#####..',
-    '#####..',
-    '#####..',
-    '.####..',
-    '.###...',
-    '..##...',
-    '..##...',
-    '..##...',
-    '..##...',
-    '..##...',
-    '..##...',
-    '..##...',
-    '.###...',
-    '.####..',
+    '.#####.',
     '######.',
+    '######.',
+    '.#####.',
+    '.####..',
+    '.####..',
+    '.####..',
+    '.####..',
+    '.####..',
+    '.####..',
+    '.#####.',
     '#######',
 ]
 FLEG = notop(pix.outline(put(shade(FLEG_M, {'#': 'ABC'}), [
-    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '', '', '', '',
     '..k.k.k',
 ])))
 
 # ---- 頭（手打ち）：低い まゆ、熾火の 目、口の すき間が 燃える ----
 HEAD = [
-    '...kkkkk..............',
-    '.kkAAAAAkkk...........',
-    'kAAABBBBBBBkkk........',
-    'kABBBAABBBBBBBkkk.....',
-    'kABkkkkkkBBBBBBkkkk...',
-    'kBBBBBBBkkkAAAAAAAAkk.',
-    'kBABBBBBBBkBBBBBBBBBkk',
-    'kBCABBBBBBBBBBBBBBkkCk',
-    'kCBCABBBBBBBBBBkkkkkk.',
-    '.kCBCBBBBBBkOYYYYOOk..',
-    '.kCCBBBBBBBkkwkwkwk...',
-    'kCBCBBBBBBBBBBBCk.....',
-    '.kCkCCBBBBBCCCkk......',
-    '..k.kkCCCCCkkk........',
-    '......kkkkk...........',
+    '....kkkkkkk...............',
+    '..kkAAAAAAAkkk............',
+    '.kAAABBBBBBBBBkk..........',
+    'kAABBBBBBBBBBBBBkk........',
+    'kABBBBBBBBBBBBBBBBkk......',
+    'kABBBBBkkkkkkkkkBBBBkkk...',
+    'kABBBBkBBBBBBBkkBBBBBBBkk.',
+    'kABBBBkBBBBBBBkAAAAAAAAABk',
+    'kBABBBBkkkkkkkBBBBBBBBBBkk',
+    'kBCABBBBBBBBBBBBBBBBBkkCCk',
+    'kCBCABBBBBBBBBBBBBkkkkkkk.',
+    '.kCBCBBBBBBBBBBkOYYYYYOOk.',
+    '.kCCBBBBBBBBBBBkkwkwkwkk..',
+    'kCBCBBBBBBBBBBBBBBBCCk....',
+    '.kCkCCBBBBBBBBBCCCkk......',
+    '..k.kkCCCCCCCCCkk.........',
+    '......kkkkkkkkk...........',
 ]
-HEAD_OPEN = [
-    '...kkkkk..............',
-    '.kkAAAAAkkk...........',
-    'kAAABBBBBBBkkk........',
-    'kABBBAABBBBBBBkkk.....',
-    'kABkkkkkBBBBBBBBBkk...',
-    'kBBBBBBBkkkAAAAAAABkk.',
-    'kBABBBBBBBkBBBBBBBBBkk',
-    'kBCABBBBBBBBBBBBBkkkCk',
-    'kCBCABBBBBkkkwkwkwk.k.',
-    '.kCBCBBBkROOOOOOO.....',
-    '.kCCBBBkROYYYYYYY.....',
-    '..kCCBBBkROOOOOOO.....',
-    '...kCCBBBkkwkwkwk.....',
-    '....kkCCCCCCCCCk......',
-    '......kkkkkkkkk.......',
+HEAD_OPEN = HEAD[:10] + [
+    'kCBCABBBBBBBBBBBkkkwkwkwk.',
+    '.kCBCBBBBBBBBBkROOOOOOO...',
+    '.kCCBBBBBBBBBkROYYYYYYY...',
+    'kCBCBBBBBBBBBBkROOOOOOO...',
+    '.kCkCCBBBBBBBBBkkwkwkwk...',
+    '..k.kkCCCCCCCCCCCCCk......',
+    '......kkkkkkkkkkkkk.......',
 ]
-EYE = ['YYOk', '.kk.']
-EYE_ALT = {'blink': ['kkkk', '....'], 'hit': ['BkBk', 'k.k.'], 'atk0|atk1|atk2': ['YYYO', '.kkk'], 'ko': ['kBkB', 'BkBB']}
+# 目：まゆの ひさしの 下、白い 光＋熾火の 虹彩（黄・だいだい）＋たての ひとみ
+EYE = ['wYYkOkk', 'YOOkOOk']
+EYE_ALT = {'blink': ['BBBBBkk', 'kkkkkkk'], 'hit': ['kkBBBkk', 'BBkkkBk'], 'atk0|atk1|atk2': ['wwYkYkk', 'YYOkOOk'], 'ko': ['OkBkOkk', 'BOkOBBk']}
 EAR = [
     'k........',
     'kk.......',
@@ -213,8 +194,8 @@ TAIL = tail(0); TAIL2 = tail(1)
 # ---- 背中から 立ちのぼる 黒煙と 火の粉 ----
 # 背すじの 黒煙の たてがみ：煙の 舌が 後ろへ なびき、根もとで 熾火が 光る
 def smoke(ph):
-    W, H = 32, 18; out = pix.grid(W, H)
-    T = [(27, 17, 22, 3, 6), (21, 17, 12, 0, 8), (15, 17, 5, 2, 8), (9, 17, 0, 7, 7)]
+    W, H = 26, 15; out = pix.grid(W, H)
+    T = [(22, 14, 18, 2, 6), (16, 14, 10, 0, 7), (11, 14, 4, 2, 7), (6, 14, 0, 7, 6)]
     for i, (bx, by, tx, ty, w) in enumerate(T):
         s = ((i + ph) % 2) * 2 - 1 if ph else 0
         tx += s; dx, dy = tx - bx, ty - by; n = (dx * dx + dy * dy) ** .5; px, py = -dy / n, dx / n
@@ -268,23 +249,23 @@ BREATH2 = [
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='tail', g='tail', x=-1, y=19, rows=TAIL, alt={'idle1|idle2|walk1|walk3': TAIL2}),
-        dict(n='hlegF', g='legB', x=13, y=42, rows=dark(HLEG), not_='ko'),
-        dict(n='flegF', g='legB', x=40, y=42, rows=dark(FLEG), not_='ko'),
-        dict(n='body', g='body', x=8, y=27, rows=BODY),
-        dict(n='hleg', g='legA', x=8, y=42, rows=HLEG, not_='ko'),
-        dict(n='fleg', g='legA', x=35, y=42, rows=FLEG, not_='ko'),
-        dict(n='smoke', g='mane', x=11, y=12, rows=SMOKE, alt={'idle1|idle3|walk1|walk3|atk1': SMOKE2}),
-        # dict(n='ruff', g='body', x=33, y=27, rows=RUFF),
-        dict(n='ear', g='ear', x=38, y=18, rows=EAR, alt={'atk0|atk1|atk2|hit|ko': EAR_BACK}),
-        dict(n='head', g='head', x=37, y=26, rows=HEAD, alt={NB: HEAD_OPEN}),
-        dict(n='eye', g='head', x=42, y=31, rows=EYE, alt=EYE_ALT),
-        dict(n='breath', g='head', x=55, y=29, rows=BREATH, alt={'atk2': BREATH2}, only=NB),
+        dict(n='tail', g='tail', x=-2, y=25, rows=TAIL, alt={'idle1|idle2|walk1|walk3': TAIL2}),
+        dict(n='hlegF', g='legB', x=17, y=46, rows=dark(HLEG), not_='ko'),
+        dict(n='flegF', g='legB', x=34, y=46, rows=dark(FLEG), not_='ko'),
+        dict(n='body', g='body', x=9, y=34, rows=BODY),
+        dict(n='hleg', g='legA', x=10, y=46, rows=HLEG, not_='ko'),
+        dict(n='fleg', g='legA', x=29, y=46, rows=FLEG, not_='ko'),
+        dict(n='smoke', g='mane', x=8, y=23, rows=SMOKE, alt={'idle1|idle3|walk1|walk3|atk1': SMOKE2}),
+        dict(n='ruff', g='head', x=28, y=27, rows=RUFF),
+        dict(n='ear', g='ear', x=33, y=14, rows=EAR, alt={'atk0|atk1|atk2|hit|ko': EAR_BACK}),
+        dict(n='head', g='head', x=31, y=21, rows=HEAD, alt={NB: HEAD_OPEN}),
+        dict(n='eye', g='head', x=38, y=27, rows=EYE, alt=EYE_ALT),
+        dict(n='breath', g='head', x=53, y=29, rows=BREATH, alt={'atk2': BREATH2}, only=NB),
     ]
 
 FRAMES = {
     'idle0': {},
-    'idle1': {'body': (0, 1)},
+    'idle1': {'body': (0, 1), 'head': (0, -1)},
     'idle2': {'body': (0, 1), 'ear': (0, -1)},
     'idle3': {'body': (0, 0)},
     'blink': {},
@@ -292,10 +273,10 @@ FRAMES = {
     'walk1': {'body': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (2, -1)},
     'walk3': {'body': (0, -1)},
-    'atk0': {'body': (-2, 2), 'head': (-1, 2), 'legA': (-1, 0), 'tail': (1, -1)},
+    'atk0': {'body': (-2, 1), 'head': (-1, 1), 'legA': (-1, 0), 'tail': (1, -1)},
     'atk1': {'root': (2, 0), 'head': (1, -1)},
     'atk2': {'root': (3, 0), 'head': (1, -1)},
-    'hit': {'root': (-3, 0), 'head': (-2, -2), 'ear': (0, 0)},
-    'ko': {'body': (0, 13), 'head': (1, 2), 'tail': (0, 1)},
+    'hit': {'root': (-3, 0), 'head': (-2, -1), 'ear': (0, 0)},
+    'ko': {'body': (0, 12), 'head': (1, 2), 'tail': (0, 1)},
 }
 PARENT = {'mane': 'body', 'head': 'body', 'ear': 'head', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

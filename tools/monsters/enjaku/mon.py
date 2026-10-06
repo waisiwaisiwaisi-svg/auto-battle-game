@@ -17,10 +17,10 @@ HEAD = [
     '..kkVVWWWWkk..........',
     '....kkBAAAAAkk........',
     '....kBBAAAAAAAkk......',
-    '...kBBAAkkkkkAABk.....',
-    '...kBAkkYYYOkkAABk....',
-    '..kBBBAkkkkkRkkkkkk...',
-    '..kBBBBAAAkWWWWWWWWkk.',
+    '...kBBAkkkkkkkABk.....',
+    '...kBAkBBBBBBkAABk....',
+    '..kBBBkBBBBBBkkkkkkk..',
+    '..kBBBAkkkkkkWWWWWWWkk',
     '.kBBBBBAAkWWWWWWWWWWWk',
     '.kCBBBBBkWWVVVVWWWWVWk',
     '.kCCBBBBkWkkkkkkVVVkVk',
@@ -28,28 +28,20 @@ HEAD = [
     '...kkCCBBkkkkkkkk.....',
     '.....kkkkk............',
 ]
-BODY = [
-    '......................kkkk......',
-    '...................kkkBAAAk.....',
-    '.................kkBBAAAAABk....',
-    '...............kkBBBAAAAAABk....',
-    '.............kkBBBBBAAAAABBk....',
-    '...........kkBBBBBBBBAAAABBBk...',
-    '.........kkBBBBBRBBBBBBAABBBk...',
-    '........kBBBBBBBORBBBBBBBBBBCk..',
-    '.......kBBBBBBBBBORBBBBBBBBBCk..',
-    '......kBBBBBBBBBBBOBBBBBBBBCCk..',
-    '.....kBBBBBBBBBBBBBBBBBRBBBCCk..',
-    '....kBBBBBBBBBBBBBBBBBROBBCCCk..',
-    '...kBBBBBBBBBBBBBBBBBBBOBCCCk...',
-    '..kCBBBBBBBBBBBBBBBBBBBBCCCk....',
-    '.kCCBBBBBBBBBBBBBBBBBBCCCCk.....',
-    'kCCCBBBBBBBBBBBBBBBBCCCCkk......',
-    'kCCCCBBBBBBBBBBBBCCCCCkk........',
-    '.kkCCCCCCBBBBCCCCCCkk...........',
-    '...kkkCCCCCCCCCCkkk.............',
-    '......kkkkkkkkkk................',
-]
+# デフォルメ：胴は 小さく 丸い たまご形（左上に 光、右下に 影、熾火の ひびは 手で）
+def body_rows():
+    W, H = 25, 18; g = pix.grid(W, H); cx, cy, rx, ry = 12.5, 9.2, 12.3, 8.9
+    for y in range(H):
+        for x in range(W):
+            nx, ny = (x + .5 - cx) / rx, (y + .5 - cy) / ry
+            if nx * nx + ny * ny > 1: continue
+            l = -nx * .55 - ny * .85
+            g[y][x] = 'A' if l > .62 else 'C' if l < -.45 else 'B'
+    for (x, y, c) in ((9, 5, 'R'), (10, 6, 'O'), (10, 7, 'R'), (11, 8, 'O'), (17, 8, 'R'), (17, 9, 'O'), (18, 10, 'R'),
+                      (6, 11, 'R'), (7, 12, 'O'), (14, 13, 'r'), (15, 13, 'R'), (20, 5, 'O'), (21, 6, 'R')):
+        g[y][x] = c
+    return pix.outline(pix.rows_of(g))
+BODY = body_rows()
 TAIL0 = [
     '.....................kk.',
     '..................kkkRRk',
@@ -171,8 +163,9 @@ WING_DN = fan(26, 30, [(17, 1), (24, 0), (25, 5), (22, 10), (13, 11), (12, 7)],
                [(11, 7), (17, 9), (9, 29), (6, 28)], [(8, 6), (13, 9), (3, 28), (1, 26)]])
 for (x, y, c) in ((18, 3, 'O'), (19, 3, 'R'), (21, 6, 'R'), (15, 7, 'O')):   # 雨覆いの 残り火（手打ち）
     WING_DN[y] = WING_DN[y][:x] + c + WING_DN[y][x + 1:]
-EYE = ['YYYO']
-EYE_ALT = {'blink': ['kkkk'], 'atk0|atk1|atk2': ['wYYY'], 'hit': ['kYkk'], 'ko': ['OkOk']}
+# 目：骨の まゆの 下、白い 光＋金と だいだいの 虹彩＋たての ひとみ
+EYE = ['wYYkYO', 'YOOkOO']
+EYE_ALT = {'blink': ['BBBBBB', 'kkkkkk'], 'atk0|atk1|atk2': ['wwYkYY', 'YYOkOO'], 'hit': ['kkBBkk', 'BBkkBB'], 'ko': ['BkBkBB', 'BBkBBB']}
 def dark(rows): return pix.recolor(rows, {'A': 'B', 'B': 'C', 'Y': 'O', 'O': 'R', 'R': 'r'})
 
 GUST = [  # 攻撃：炎の つむじ風
@@ -205,8 +198,8 @@ def lying_body(W, H):
             g[y][x] = 'A' if l > .55 else 'C' if l < -.35 else 'B'
     return pix.rows_of(g)
 def ko_body():
-    g = pix.grid_of(pix.outline(lying_body(32, 13)))
-    for (x, y, c) in ((9, 4, 'r'), (10, 4, 'R'), (16, 6, 'r'), (21, 3, 'R'), (22, 3, 'r'), (13, 9, 'r'), (25, 7, 'r')): g[y][x] = c   # 消えかけの 残り火
+    g = pix.grid_of(pix.outline(lying_body(28, 12)))
+    for (x, y, c) in ((9, 4, 'r'), (10, 4, 'R'), (16, 6, 'r'), (21, 3, 'R'), (22, 3, 'r'), (13, 9, 'r'), (24, 7, 'r')): g[y][x] = c   # 消えかけの 残り火
     return pix.rows_of(g)
 def squash(rows, drop=3):
     return [r for y, r in enumerate(rows) if y % drop != 1]
@@ -237,7 +230,8 @@ WING_KO = [
 ]
 def head_ko():
     g = pix.grid_of(HEAD)
-    for (x, y, c) in ((7, 6, 'Y'), (9, 6, 'Y'), (8, 7, 'O'), (7, 8, 'Y'), (9, 8, 'Y'), (8, 6, 'k'), (7, 7, 'k'), (9, 7, 'k'), (10, 7, 'k'), (11, 7, 'k'), (8, 8, 'k')): g[y][x] = c
+    for y, r in ((7, 'BkBkBB'), (8, 'BBkBBB'), (9, 'BkBkkk')):
+        for i, c in enumerate(r): g[y][7 + i] = c
     return pix.rows_of(g)
 EYE_KO = ['kVk', 'VkV', 'kVk']
 def ko_layers():
@@ -245,7 +239,7 @@ def ko_layers():
         dict(n='ko_tail', g='root', x=-9, y=54, rows=cool(TAIL_KO)),
         dict(n='ko_body', g='root', x=10, y=46, rows=ko_body()),
         dict(n='ko_talon', g='root', x=30, y=52, rows=TALON_KO),
-        dict(n='ko_head', g='root', x=40, y=45, rows=head_ko()),
+        dict(n='ko_head', g='root', x=36, y=45, rows=head_ko()),
         dict(n='ko_wingF', g='root', x=3, y=49, rows=WING_KO),
     ]
 
@@ -255,19 +249,19 @@ def layers():
     return L + [dict(l, only='ko') for l in ko_layers()]
 def base_layers():
     return [
-        dict(n='wingB_up', g='wingB', x=18, y=0, rows=dark(WING_UP), only=UP),
-        dict(n='wingB_mid', g='wingB', x=9, y=8, rows=dark(WING_MID), only=MID),
-        dict(n='wingB_dn', g='wingB', x=20, y=24, rows=dark(WING_DN), only=DN),
-        dict(n='tail', g='tail', x=1, y=33, rows=TAIL0, alt={'idle1|idle3|walk1|walk3|atk1': TAIL1}),
-        dict(n='neck', g='head', x=38, y=17, rows=NECK),
-        dict(n='body', g='body', x=17, y=22, rows=BODY),
-        dict(n='talon', g='talon', x=31, y=40, rows=TALON),
-        dict(n='head', g='head', x=40, y=8, rows=HEAD),
-        dict(n='eye', g='head', x=48, y=15, rows=EYE, alt=EYE_ALT),
-        dict(n='wingF_up', g='wingF', x=9, y=2, rows=WING_UP, only=UP),
-        dict(n='wingF_mid', g='wingF', x=0, y=10, rows=WING_MID, only=MID),
-        dict(n='wingF_dn', g='wingF', x=9, y=29, rows=WING_DN, only=DN),
-        dict(n='gust', g='fx', x=57, y=17, rows=GUST, only='atk1'),
+        dict(n='wingB_up', g='wingB', x=19, y=3, rows=dark(WING_UP), only=UP),
+        dict(n='wingB_mid', g='wingB', x=10, y=11, rows=dark(WING_MID), only=MID),
+        dict(n='wingB_dn', g='wingB', x=21, y=26, rows=dark(WING_DN), only=DN),
+        dict(n='tail', g='tail', x=0, y=31, rows=TAIL0, alt={'idle1|idle3|walk1|walk3|atk1': TAIL1}),
+        dict(n='neck', g='head', x=37, y=19, rows=NECK),
+        dict(n='body', g='body', x=19, y=24, rows=BODY),
+        dict(n='talon', g='talon', x=30, y=40, rows=TALON),
+        dict(n='head', g='head', x=39, y=10, rows=HEAD),
+        dict(n='eye', g='head', x=46, y=17, rows=EYE, alt=EYE_ALT),
+        dict(n='wingF_up', g='wingF', x=10, y=5, rows=WING_UP, only=UP),
+        dict(n='wingF_mid', g='wingF', x=1, y=13, rows=WING_MID, only=MID),
+        dict(n='wingF_dn', g='wingF', x=10, y=31, rows=WING_DN, only=DN),
+        dict(n='gust', g='fx', x=56, y=19, rows=GUST, only='atk1'),
     ]
 
 FRAMES = {

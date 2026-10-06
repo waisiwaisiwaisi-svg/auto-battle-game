@@ -42,56 +42,61 @@ def put(rows, det, x0=0, y0=0):
 DARK = {'A': 'B', 'B': 'C', 'C': 'l', 'V': 'U', 'U': 'X'}
 def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 
+# デフォルメ：腹は 短く 丸く（背板 3枚）
 BODY_M = [
-    '....######.######.######...',
-    '..#######################..',
-    '.#########################.',
-    '###########################',
-    '###########################',
-    '###########################',
-    '###########################',
-    '###########################',
-    '.#########################.',
-    '..#######################..',
-    '....###################....',
+    '...######.#####.#####..',
+    '.#####################.',
+    '#######################',
+    '#######################',
+    '#######################',
+    '#######################',
+    '#######################',
+    '.#####################.',
+    '..###################..',
+    '....###############....',
 ]
 def body(hot=False):
     rows = shade(BODY_M, 'A', 'B', 'C', t=3, r=3, b=3)
     g = pix.grid_of(rows)
     # 背板の 継ぎ目：熾火が もれる（左＝影、右＝光の ふち）
-    for sx in (4, 10, 16, 22):
-        for y in range(0, 8):
+    for sx in (6, 12, 18):
+        for y in range(0, 7):
             if g[y][sx] == '.': continue
             g[y][sx] = 'Y' if (2 <= y <= 4 and (hot or y == 3)) else 'O'
             if g[y][sx - 1] != '.': g[y][sx - 1] = 'l' if y > 0 else 'C'
             if sx + 1 < len(g[0]) and g[y][sx + 1] in 'BC': g[y][sx + 1] = 'A' if y < 5 else 'B'
     # わき腹の すじ と 腹の 板
-    for x in range(1, 26):
-        if g[7][x] != '.': g[7][x] = 'l' if x % 7 else 'O'
-    for (x, y) in ((2, 3), (7, 2), (13, 2), (19, 2), (25, 4)):
+    for x in range(1, 22):
+        if g[6][x] != '.': g[6][x] = 'l' if x % 6 else 'O'
+    for (x, y) in ((2, 3), (9, 2), (15, 2), (21, 4)):
         if g[y][x] in 'BC': g[y][x] = 'A'
     return pix.outline(pix.rows_of(g))
 
+# 頭（デフォルメで 大きく）：平たい よろいの かぶと、重い まゆ、口もとに 白い きば
 HEAD = [
-    '..kkkk...........',
-    '.kAAABkkk........',
-    'kAABBBBBBkkkk....',
-    'kABBBBBkAAAAAkkk.',
-    'kABBBBkAABBBBBBBk',
-    'kABBBBkkkkkkkkkk.',
-    'kBBBBk.......Ck..',
-    'kBBBBBk.....CBk..',
-    'kCBBBBBBkkkCCCk..',
-    'kCCBBBBBBCCCwk...',
-    '.kCCCCCCCCCwk....',
-    '..kkkkkkkkkk.....',
+    '.....kkkkkkkk.........',
+    '...kkAAAAAAABkkk......',
+    '..kAAABBBBBBBBBBkk....',
+    '.kAABBBBBBBBBBBBBBk...',
+    '.kABBBBBBBBBBBBBBBBk..',
+    'kABBBBBBkkkkkkkkkBBBk.',
+    'kABBBBBkBBBBBBBkkBBBBk',
+    'kABBBBBkBBBBBBBkCBBBBk',
+    'kBBBBBBBkkkkkkkCCBBBBk',
+    'kBBBBBBBBBBBBBBCCCBBCk',
+    'kBBBBBBBBBBBBCCkkkkkk.',
+    'kCBBBBBBBBBBCkwkkwk...',
+    'kCCBBBBBBBBCkCCCCCk...',
+    '.kCCBBBBBBCCCCCCCk....',
+    '..kkCCCCCCCCCCkk......',
+    '....kkkkkkkkkk........',
 ]
-# 目：つり上がった まゆ の 下で 熾火色に 光る（たての ひとみ）
-EYE = ['kkkkkkkk', 'kYYYYkOk', 'CkkYYOkk']
-EYE_ALT = {'blink': ['kkkkkkkk', 'kBBBBBBk', 'Ckkkkkkk'],
-           'atk0|atk1|atk2': ['kkkkkkkk', 'YYYYYkYk', 'CkYYYYkk'],
-           'hit': ['kkkkkkkk', 'kOOkkkkk', 'CkkOOOOk'],
-           'ko': ['kOkkkOkk', 'kkkOkkkk', 'COkkkOkk']}
+# 目：熾火色の 虹彩（黄・だいだい）＋白い 光＋たての ひとみ。まゆの ひさしが 前へ 下がる つり目
+EYE = ['wYYkYOk', 'YOOkOOk']
+EYE_ALT = {'blink': ['BBBBBkk', 'kkkkkkk'],
+           'atk0|atk1|atk2': ['wwYkYkk', 'YYOkOOk'],
+           'hit': ['kkBBBkk', 'BBkkkBk'],
+           'ko': ['OkBkOkk', 'BOkOBBk']}
 
 # はさみ（腕＋大きな はさみ。すき間から 火花）
 CLAW = [
@@ -122,18 +127,18 @@ SPARK = {'idle0|walk0|walk2': ['....', '.Y..', '..O.', '....'],
          'idle2': ['Y...', '..Y.', 'O...', '..O.'],
          'idle3': ['.O..', '...Y', '.Y..', '....']}
 
+# 足：短く 太く（付け根は 腹の 下に もぐる）
 LEG = [
-    '.kkk....',
-    'kAABk...',
-    'kBBBCk..',
-    '.kBBCk..',
-    '..kBCk..',
-    '..kBCCk.',
-    '...kBCk.',
-    '...kBCk.',
-    '....kBCk',
-    '....kCCk',
-    '.....kk.',
+    '.kkkk...',
+    'kAABBk..',
+    'kBBBBCk.',
+    '.kBBBCk.',
+    '..kBBCk.',
+    '..kBBCCk',
+    '...kBBCk',
+    '...kBCCk',
+    '...kCCk.',
+    '....kk..',
 ]
 LEGR = pix.flip_h(LEG)
 
@@ -192,6 +197,9 @@ T_STRIKE = [(9, 32), (12, 26), (17, 21), (23, 18), (29, 16)]
 T_HIT = [(8, 33), (4, 28), (2, 22), (3, 16), (7, 12)]
 SPINE = ['.k..', 'kYk.', 'kOAk', 'kBBk']
 SPINE_H = ['.kk.', 'kYYk', 'kOAk', 'kBBk']
+# かぶとの 後ろへ 反った 角（付け根は かぶとの 中に 2ドット もぐる）
+HSPINE = ['kk...', 'kYkk.', '.kOAk', '.kBBk', '.kBBk']
+HSPINE_H = ['kk...', 'kYkk.', '.kYAk', '.kOBk', '.kBBk']
 SPLASH = [
     '....V....',
     '.V..Y..U.',
@@ -205,29 +213,31 @@ SPLASH = [
 def layers():
     T = 'tail'
     return [
-        dict(n='legF1', g='legB', x=38, y=48, rows=dark(LEG)),
-        dict(n='legF2', g='legA', x=30, y=48, rows=dark(LEG)),
-        dict(n='legF3', g='legB', x=19, y=48, rows=dark(LEGR)),
-        dict(n='legF4', g='legA', x=11, y=48, rows=dark(LEGR)),
-        dict(n='clawF', g='clawB', x=44, y=35, rows=dark(CLAW)),
-        dict(n='tail', g=T, x=0, y=2, rows=tail(T_IDLE, STING),
+        dict(n='legF1', g='legB', x=40, y=50, rows=dark(LEG)),
+        dict(n='legF2', g='legA', x=32, y=50, rows=dark(LEG)),
+        dict(n='legF3', g='legB', x=19, y=50, rows=dark(LEGR)),
+        dict(n='legF4', g='legA', x=11, y=50, rows=dark(LEGR)),
+        dict(n='clawF', g='clawB', x=45, y=34, rows=dark(CLAW)),
+        dict(n='tail', g=T, x=0, y=4, rows=tail(T_IDLE, STING),
              alt={'idle1|idle3|walk1|walk3': tail(T_UP, STING, hot=True), 'atk0': tail(T_COCK, STING, hot=True),
                   'atk1': tail(T_STRIKE, STING_FWD, hot=True), 'atk2': tail(T_STRIKE, STING_FWD, hot=True),
                   'hit': tail(T_HIT, STING), 'ko': tail(T_HIT, STING)}),
-        dict(n='body', g='body', x=7, y=39, rows=body(), alt={'idle1|idle3|atk0|atk1|atk2': body(True)}),
+        dict(n='body', g='body', x=7, y=40, rows=body(), alt={'idle1|idle3|atk0|atk1|atk2': body(True)}),
         *[dict(n='sp%d' % i, g='body', x=x, y=y, rows=SPINE, alt={'idle1|idle3|atk0|atk1|atk2': SPINE_H})
-          for i, (x, y) in enumerate(((13, 37), (19, 37), (25, 37)))],
-        dict(n='leg1', g='legA', x=41, y=49, rows=LEG),
-        dict(n='leg2', g='legB', x=33, y=49, rows=LEG),
-        dict(n='leg3', g='legA', x=17, y=49, rows=LEGR),
-        dict(n='leg4', g='legB', x=9, y=49, rows=LEGR),
-        dict(n='head', g='head', x=32, y=37, rows=HEAD),
-        dict(n='eye', g='head', x=38, y=42, rows=EYE, alt=EYE_ALT),
-        dict(n='arm', g='claw', x=43, y=45, rows=ARM),
-        dict(n='claw', g='claw', x=47, y=39, rows=CLAW),
-        dict(n='spark', g='claw', x=56, y=44, rows=SPARK['idle0|walk0|walk2'],
+          for i, (x, y) in enumerate(((10, 38), (16, 38), (22, 38)))],
+        dict(n='leg1', g='legA', x=37, y=51, rows=LEG),
+        dict(n='leg2', g='legB', x=29, y=51, rows=LEG),
+        dict(n='leg3', g='legA', x=16, y=51, rows=LEGR),
+        dict(n='leg4', g='legB', x=8, y=51, rows=LEGR),
+        *[dict(n='hs%d' % i, g='head', x=x, y=y, rows=HSPINE, alt={'idle1|idle3|atk0|atk1|atk2': HSPINE_H})
+          for i, (x, y) in enumerate(((30, 32), (35, 31)))],
+        dict(n='head', g='head', x=27, y=34, rows=HEAD),
+        dict(n='eye', g='head', x=35, y=40, rows=EYE, alt=EYE_ALT),
+        dict(n='arm', g='claw', x=44, y=46, rows=ARM),
+        dict(n='claw', g='claw', x=47, y=40, rows=CLAW),
+        dict(n='spark', g='claw', x=56, y=45, rows=SPARK['idle0|walk0|walk2'],
              alt={k: v for k, v in SPARK.items()}, not_='hit|ko'),
-        dict(n='splash', g='tail', x=44, y=20, rows=SPLASH, only='atk2'),
+        dict(n='splash', g='tail', x=44, y=22, rows=SPLASH, only='atk2'),
     ]
 
 FRAMES = {

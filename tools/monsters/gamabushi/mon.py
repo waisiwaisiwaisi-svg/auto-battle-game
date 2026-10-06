@@ -7,14 +7,14 @@ PAL = {
     'E': '#f2e2b0', 'F': '#c4a070',                      # はら
     'R': '#e85a44', 'S': '#a82e36', 'T': '#5a1a2e',      # 朱ぬりの よろい
     'w': '#ffffff', 'W': '#8ee4ff', 'V': '#3a8ee0',      # 水の 刀
-    'Y': '#ffd23a', 'n': '#f07a98',
+    'Y': '#ffd23a', 'O': '#c8781e', 'n': '#f07a98',
 }
 LIGHT = set('AERwWY')
 KEEP_BLACK = set('wY')
 DK = {'A': 'B', 'B': 'C', 'C': 'C', 'E': 'F', 'R': 'S', 'S': 'T'}
 def dk(rows): return [''.join(DK.get(c, c) for c in r) for r in rows]
 
-BODY = [
+BODY0 = [
     ".....AAAAAAAAAAAA.......",
     "...AABBBBBBBBBBBBBA.....",
     "..ABBBBBBBBBBBBBBBBBA...",
@@ -34,7 +34,7 @@ BODY = [
     ".BBBBCCCCCFFFFFFFFFCCC..",
     "..CCCCCCCCCCCCCCCCCC....",
 ]
-SKIRT = [
+SKIRT0 = [
     "RRRRRRRRRRRRRRRRRRRRRRRRRS",
     "RSSSSSkRSSSSSkRSSSSSkSSSST",
     "TTTTTTkTTTTTTkTTTTTTkTTTTT",
@@ -43,6 +43,9 @@ SKIRT = [
     "RSSSSSkRSSSSSkSSSSSTkSSSTT",
     "STTTTTkSTTTTTkSTTTTTkTTTT.",
 ]
+# デフォルメ：胴を 3行・草ずりを 2行・うでを 2行 みじかく（頭は そのまま）
+BODY = [r for i, r in enumerate(BODY0) if i not in (8, 9, 11)]
+SKIRT = [r for i, r in enumerate(SKIRT0) if i not in (3, 4)]
 LEG = [
     "..AAABBBBC...",
     ".ABBBBBBBBC..",
@@ -88,10 +91,11 @@ HELM = [
     "STTTT............",
 ]
 CREST = ['w....w', 'Wk..kW', 'VWkkWV', '.VWWV.', '..YY..']
-EYE = ['.kkk.....', 'kYYYkkk..', 'kYwYYYYkk', 'kYYkkkYYk', '.kYYYYYk.', '..kkkkk..']
+# 目：金の 虹彩（明 Y・暗 O）＋白い 光＋横長の ひとみ。黒い まぶたが 前へ つり下がる
+EYE = ['.kkk.....', 'kYYYkkk..', 'kYwYYYYkk', 'kYOkkkOYk', '.kOOOOOk.', '..kkkkk..']
 EYE_ALT = {'blink': ['.kkk.....', 'kBBBkkk..', 'kBBBBBBkk', 'kkkkkkkkk', '.CBBBBBC.', '..CCCCC..'],
-           'hit': ['..kk.....', '.kYYkk...', 'kYkYYYkk.', 'kkYYYkkk.', '.kkkkkk..', '.........'],
-           'atk0|atk1|atk2': ['.kkk.....', 'kwwYkkk..', 'kYwwYYYkk', 'kYYkkkwYk', '.kYYYYYk.', '..kkkkk..'],
+           'hit': ['..kk.....', '.kYYkk...', 'kYkwYOkk.', 'kkOOOkkk.', '.kkkkkk..', '.........'],
+           'atk0|atk1|atk2': ['.kkk.....', 'kwwYkkk..', 'kYwwYYYkk', 'kYYkkkwYk', '.kOYYYOk.', '..kkkkk..'],
            'ko': ['.........', '.k...k...', '..k.k....', '...k.....', '..k.k....', '.k...k...']}
 # 刀は 舌で にぎる。刀の 絵は 40x34 の 板に 手描きの 部品を 置く（原点 x=44, y=6）
 def place(parts, W=50, H=34):
@@ -177,7 +181,7 @@ SW = {
     'atk1': place([(SWORD_THRUST, 2, 13), (DROP1, 30, 18), (DROP2, 25, 20)]),
     'atk2': place([(ARC, 13, 5), (SWORD_DOWN, 8, 14), (SPLASH, 16, 24)]),
 }
-ARM = [
+ARM0 = [
     ".RRRRRRRR......",
     "RRSSSSSSSR.....",
     "RkkkkkkkkS.....",
@@ -197,6 +201,7 @@ ARM = [
     "........CCCCC..",
 ]
 
+ARM = [r for i, r in enumerate(ARM0) if i not in (7, 9)]
 ARM_PUNCH = [
     ".RRRRRRRR...........",
     "RRSSSSSSSR..........",
@@ -214,16 +219,16 @@ ARM_PUNCH = [
 def base():
     return [
         dict(n='legB', g='legB', x=9, y=48, rows=outline(dk(LEG))),
-        dict(n='armB', g='armB', x=8, y=29, rows=outline(dk(ARM))),
-        dict(n='body', g='body', x=12, y=27, rows=outline(BODY)),
+        dict(n='armB', g='armB', x=8, y=31, rows=outline(dk(ARM))),
+        dict(n='body', g='body', x=12, y=30, rows=outline(BODY)),
         dict(n='skirt', g='body', x=11, y=43, rows=outline(SKIRT)),
         dict(n='legA', g='legA', x=27, y=48, rows=outline(LEG)),
-        dict(n='head', g='head', x=22, y=11, rows=outline(HEAD)),
-        dict(n='helm', g='head', x=20, y=7, rows=outline(HELM)),
-        dict(n='crest', g='head', x=28, y=5, rows=outline(CREST)),
-        dict(n='eye', g='head', x=39, y=12, rows=EYE, alt=EYE_ALT),
-        dict(n='sword', g='head', x=44, y=6, rows=SW['idle0|idle3|blink|walk0|walk1|walk2|walk3|hit'], alt=SW),
-        dict(n='armF', g='armF', x=30, y=29, rows=outline(ARM), alt={'atk1': outline(ARM_PUNCH)}),
+        dict(n='head', g='head', x=22, y=14, rows=outline(HEAD)),
+        dict(n='helm', g='head', x=20, y=10, rows=outline(HELM)),
+        dict(n='crest', g='head', x=28, y=8, rows=outline(CREST)),
+        dict(n='eye', g='head', x=39, y=15, rows=EYE, alt=EYE_ALT),
+        dict(n='sword', g='head', x=44, y=9, rows=SW['idle0|idle3|blink|walk0|walk1|walk2|walk3|hit'], alt=SW),
+        dict(n='armF', g='armF', x=30, y=31, rows=outline(ARM), alt={'atk1': outline(ARM_PUNCH)}),
     ]
 # ダウン：たっている 絵を 90度 たおして（あおむけ・頭が 後ろ）、目は ×
 def knocked():
