@@ -1,0 +1,150 @@
+<title>アリーナ・モンスター図鑑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+1p:wght@400;700&display=swap">
+<style>
+/* 携帯ゲーム機の 図鑑：画面（スプライトの 窓）＋ 説明の 紙。窓は 暗い 液晶、紙は 青みの 灰 */
+:root {
+  --bg: #e9ecf2; --paper: #f7f8fb; --ink: #1d2230; --muted: #5b6478; --line: #cfd5e1;
+  --screen: #1b2233; --screen-ink: #cfe3d6; --accent: #e8622a;
+  --display: 'DotGothic16', 'M PLUS 1p', ui-monospace, monospace;
+  --body: 'M PLUS 1p', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11141c; --paper: #181c27; --ink: #e4e8f1; --muted: #98a2b8; --line: #2b3243;
+  --screen: #0b0f18; --screen-ink: #b9d6c4; --accent: #ff8a4a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11141c; --paper: #181c27; --ink: #e4e8f1; --muted: #98a2b8; --line: #2b3243;
+  --screen: #0b0f18; --screen-ink: #b9d6c4; --accent: #ff8a4a; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); line-height: 1.6 }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 18px }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(26px, 4vw, 38px); margin: 0; letter-spacing: .04em; text-wrap: balance }
+.sub { color: var(--muted); margin: 4px 0 0; font-size: 14px }
+.count { font-family: var(--display); font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px }
+.chip { font: 13px var(--body); border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 4px 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px }
+.chip i { width: 9px; height: 9px; border-radius: 2px; display: inline-block }
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper) }
+.chip:focus-visible, .mv:focus-visible, .more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; min-width: 0 }
+.screen { background: var(--screen); position: relative; display: grid; place-items: end center; height: 236px; padding-bottom: 10px }
+.screen::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: 18px; height: 10px; border-radius: 50%; background: rgba(0, 0, 0, .35); z-index: 0 }
+.screen canvas { image-rendering: pixelated; position: relative; z-index: 1; max-width: 100% }
+.no { position: absolute; top: 8px; left: 10px; font-family: var(--display); color: var(--screen-ink); font-size: 13px; letter-spacing: .08em; font-variant-numeric: tabular-nums }
+.moves { position: absolute; top: 6px; right: 6px; display: flex; gap: 3px }
+.mv { font: 11px var(--display); color: var(--screen-ink); background: transparent; border: 1px solid rgba(207, 227, 214, .25); border-radius: 4px; padding: 1px 6px; cursor: pointer }
+.mv[aria-pressed="true"] { background: var(--screen-ink); color: var(--screen) }
+.info { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0 }
+.name { font-family: var(--display); font-size: 20px; margin: 0; line-height: 1.2 }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.type { font-size: 12px; font-weight: 700; color: #1d2230; border-radius: 4px; padding: 1px 8px }
+.base { font-size: 12px; color: var(--muted) }
+.lead { font-size: 13px; color: var(--ink); margin: 0 }
+details { border-top: 1px dashed var(--line); margin-top: 4px; padding-top: 6px }
+summary { cursor: pointer; font-size: 12px; color: var(--muted); list-style: none }
+summary::-webkit-details-marker { display: none }
+summary::before { content: '▸ '; } details[open] summary::before { content: '▾ ' }
+.doc { font-size: 12.5px; color: var(--ink) }
+.doc h4 { font-size: 12px; margin: 10px 0 2px; color: var(--muted); letter-spacing: .06em }
+.doc table { border-collapse: collapse; width: 100%; margin: 4px 0 }
+.doc th { text-align: left; font-weight: 700; white-space: nowrap; padding: 2px 8px 2px 0; vertical-align: top; color: var(--muted) }
+.doc td { padding: 2px 0 }
+.doc ul { margin: 2px 0; padding-left: 1.1em }
+.doc p { margin: 4px 0 }
+.empty { color: var(--muted); padding: 30px 0 }
+@media (prefers-reduced-motion: reduce) { .mv { transition: none } }
+</style>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>アリーナ・モンスター図鑑</h1>
+      <p class="sub">属性タイプ ＋ モンスター。1ドットずつ 手で 打った GBA風（64×64・16色以内）。画面の ボタンで 動きを 切りかえ</p>
+    </div>
+    <div class="count" id="count"></div>
+  </header>
+  <div class="filters" id="filters" role="group" aria-label="タイプで しぼりこむ"></div>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+const MONS = /*DATA*/null;
+const TYPES = /*TYPES*/null;
+const AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
+const MOTIONS = { '待機': [['idle0', 240], ['idle1', 240], ['idle2', 240], ['idle3', 240], ['idle0', 240], ['blink', 110], ['idle1', 240], ['idle2', 240], ['idle3', 240]],
+  '歩く': [['walk0', 130], ['walk1', 130], ['walk2', 130], ['walk3', 130]],
+  '攻撃': [['idle0', 400], ['atk0', 380], ['atk1', 150], ['atk2', 260]],
+  '被弾': [['idle0', 500], ['hit', 420]], 'ダウン': [['idle0', 500], ['hit', 260], ['ko', 1400]] };
+function decode(m, key) {
+  const s = m.f[key]; if (!s) return null;
+  const px = new Uint8ClampedArray(m.w * m.h * 4), pal = m.pal.map(h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
+  let p = 0, i = 0;
+  while (i < s.length) {
+    const c = AL.indexOf(s[i]); let n;
+    if (s[i + 1] === '~') { n = parseInt(s.substr(i + 2, 3), 16); i += 5 } else { n = parseInt(s.substr(i + 1, 2), 16); i += 3 }
+    if (c > 0) { const col = pal[c - 1]; for (let k = 0; k < n; k++) { const q = (p + k) * 4; px[q] = col[0]; px[q + 1] = col[1]; px[q + 2] = col[2]; px[q + 3] = 255 } }
+    p += n;
+  }
+  return new ImageData(px, m.w, m.h);
+}
+const grid = document.getElementById('grid'), filters = document.getElementById('filters'), count = document.getElementById('count');
+const cards = [];
+let active = null;
+
+for (const m of MONS) {
+  const card = document.createElement('article'); card.className = 'card'; card.dataset.types = m.types.join(' ');
+  const scale = Math.max(2, Math.min(3, Math.floor(200 / Math.max(m.w, m.h))));
+  const frames = {}; for (const k in m.f) frames[k] = decode(m, k);
+  const cv = document.createElement('canvas'); cv.width = m.w; cv.height = m.h; cv.style.width = m.w * scale + 'px'; cv.style.height = m.h * scale + 'px';
+  cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', m.name + ' の ドット絵');
+  const g = cv.getContext('2d');
+  const screen = document.createElement('div'); screen.className = 'screen';
+  screen.innerHTML = `<span class="no">No.${String(m.no).padStart(3, '0')}</span>`;
+  const mv = document.createElement('div'); mv.className = 'moves';
+  for (const k of Object.keys(MOTIONS)) {
+    const b = document.createElement('button'); b.className = 'mv'; b.type = 'button'; b.textContent = k; b.setAttribute('aria-pressed', k === '待機');
+    b.onclick = () => { st.motion = k; st.i = 0; st.t = 0; mv.querySelectorAll('.mv').forEach(x => x.setAttribute('aria-pressed', x === b)) };
+    mv.appendChild(b);
+  }
+  screen.append(mv, cv);
+  const types = m.types.map(t => `<span class="type" style="background:${(TYPES[t] || ['', '#ccc'])[1]}">${(TYPES[t] || [t])[0]}</span>`).join('');
+  const info = document.createElement('div'); info.className = 'info';
+  info.innerHTML = `<h3 class="name">${m.name}</h3><div class="row">${types}<span class="base">もと：${m.base}</span></div>` +
+    `<details><summary>設定を 読む</summary><div class="doc">${m.doc}</div></details>`;
+  card.append(screen, info); grid.appendChild(card);
+  const st = { motion: '待機', i: 0, t: 0, frames, g };
+  if (frames.idle0) g.putImageData(frames.idle0, 0, 0);
+  cards.push({ card, st, m });
+}
+// 1つの タイマーで 全部 動かす（画面に 見えている カードだけ 描く）
+let last = performance.now();
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function tick(now) {
+  const dt = now - last; last = now;
+  for (const c of cards) {
+    if (c.card.hidden) continue;
+    const seq = MOTIONS[c.st.motion]; c.st.t += dt;
+    while (c.st.t > seq[c.st.i][1]) { c.st.t -= seq[c.st.i][1]; c.st.i = (c.st.i + 1) % seq.length }
+    const f = c.st.frames[seq[c.st.i][0]] || c.st.frames.idle0;
+    if (f && f !== c.st.drawn) { c.st.g.clearRect(0, 0, c.m.w, c.m.h); c.st.g.putImageData(f, 0, 0); c.st.drawn = f }
+  }
+  if (!reduce) requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+// タイプの しぼりこみ
+const used = [...new Set(MONS.flatMap(m => m.types))];
+const all = document.createElement('button'); all.className = 'chip'; all.type = 'button'; all.textContent = 'すべて'; all.setAttribute('aria-pressed', 'true');
+filters.appendChild(all);
+const chips = [all];
+for (const t of Object.keys(TYPES).filter(t => used.includes(t))) {
+  const b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.setAttribute('aria-pressed', 'false');
+  b.innerHTML = `<i style="background:${TYPES[t][1]}"></i>${TYPES[t][0]}`; b.dataset.t = t; filters.appendChild(b); chips.push(b);
+}
+function apply() {
+  let n = 0;
+  for (const c of cards) { c.card.hidden = !!active && !c.m.types.includes(active); if (!c.card.hidden) n++ }
+  chips.forEach(b => b.setAttribute('aria-pressed', (b.dataset.t || null) === active));
+  count.textContent = `${n} / ${MONS.length} たい`;
+}
+filters.addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; active = b.dataset.t || null; apply() });
+apply();
+</script>
