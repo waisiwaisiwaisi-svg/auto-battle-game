@@ -19,7 +19,7 @@ namespace PixelMonsterArena
             go.AddComponent<Game>();
         }
 
-        enum Scr { Title, Starter, Hub, Team, Battle }
+        enum Scr { Title, Starter, Hub, Team, Battle, Chart }
         Scr _scr = Scr.Title;
         SaveData S;
         Battle B;
@@ -279,6 +279,7 @@ namespace PixelMonsterArena
                 case Scr.Hub: HubGUI(); break;
                 case Scr.Team: TeamGUI(); break;
                 case Scr.Battle: BattleGUI(); break;
+                case Scr.Chart: ChartGUI(); break;
             }
             if (_confirmMsg != null) ConfirmGUI();
             if (_toastT > 0 && _toast != null)
@@ -360,7 +361,9 @@ namespace PixelMonsterArena
             float hw = (w - U) / 2;
             if (GUI.Button(new Rect(x, y, hw, U * 4), "たいかいへ\n<size=" + Mathf.RoundToInt(U * .7f) + ">スタジアムで しあい</size>", _btn)) StartCup();
             if (GUI.Button(new Rect(x + hw + U, y, hw, U * 4), "くさむらへ\n<size=" + Mathf.RoundToInt(U * .7f) + ">モンスターを つかまえる</size>", _btn)) StartWild();
-            y += U * 5;
+            y += U * 4.6f;
+            if (GUI.Button(new Rect(x, y, w, U * 2), "タイプあいしょう表", _btnSub)) _scr = Scr.Chart;
+            y += U * 2.6f;
             GUI.Label(new Rect(x, y, w * .7f, U * 1.5f), "パーティ（上から3たいが しゅつじょう）", _small);
             if (GUI.Button(new Rect(x + w - U * 6, y, U * 6, U * 1.6f), "へんせい ›", _btnSub)) { _scr = Scr.Team; _scroll = Vector2.zero; }
             y += U * 2;
@@ -377,6 +380,38 @@ namespace PixelMonsterArena
             GUI.Label(new Rect(x, y, w, U * 6), "<b>そうさ</b>：左のスティックで いどう／右のボタンで こうげき・わざ・かわす。赤い はんいは あいての わざの よちょう。◎の わざ（命中100未満）は むいた方向・はんいに うつので よけられる。\nPC：WASD=移動 J=こうげき K/L/U/I=わざ Space=かわす", _small);
             if (GUI.Button(new Rect(x + w / 2 - U * 6, Screen.height - U * 2.5f, U * 12, U * 1.6f), "セーブデータを けす", _btnSub))
                 Confirm("セーブデータを けしますか？\nもとに もどせません。", () => { SaveData.Delete(); S = null; _scr = Scr.Title; });
+        }
+
+        // ---------- タイプあいしょう表 ----------
+        static readonly Dictionary<string, string> TypeShort = new Dictionary<string, string> {
+            { "normal", "ノ" }, { "fire", "炎" }, { "water", "水" }, { "grass", "草" }, { "elec", "電" }, { "ice", "氷" }, { "fighting", "闘" }, { "poison", "毒" }, { "ground", "地" },
+            { "wind", "風" }, { "psychic", "超" }, { "bug", "虫" }, { "rock", "岩" }, { "ghost", "霊" }, { "dragon", "竜" }, { "dark", "悪" }, { "steel", "鋼" }, { "fairy", "妖" } };
+        void ChartGUI()
+        {
+            float x = _col.x + U * .5f, w = _col.width - U, y = U;
+            GUI.Label(new Rect(x, y, w, U * 2), "<b>タイプあいしょう表</b>", _lbl);
+            if (GUI.Button(new Rect(x + w - U * 6, y, U * 6, U * 2), "もどる", _btnSub)) _scr = Scr.Hub;
+            y += U * 2.4f;
+            GUI.Label(new Rect(x, y, w, U * 3.2f), "たて＝わざの タイプ／よこ＝うける タイプ。◎=2ばい △=0.5ばい ×=こうかなし。2タイプには かけ算。同じタイプの わざは 1.25ばい。", _small);
+            y += U * 3.4f;
+            var ts = Data.Types.Keys.ToList(); float c = w / (ts.Count + 1);
+            var hs = new GUIStyle(_small) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, fontSize = Mathf.RoundToInt(c * .55f) }; hs.normal.textColor = Util.Hex("#1a1626");
+            var cs = new GUIStyle(hs);
+            void Head(Rect r, string t) { var o = GUI.color; GUI.color = Data.Types[t].C; GUI.DrawTexture(r, _tWhite); GUI.color = o; GUI.Label(r, TypeShort[t], hs); }
+            for (int j = 0; j < ts.Count; j++) Head(new Rect(x + c * (j + 1), y, c - 1, c - 1), ts[j]);
+            for (int i = 0; i < ts.Count; i++)
+            {
+                float ry = y + c * (i + 1);
+                Head(new Rect(x, ry, c - 1, c - 1), ts[i]);
+                for (int j = 0; j < ts.Count; j++)
+                {
+                    float v = Data.Eff(ts[i], ts[j]); var r = new Rect(x + c * (j + 1), ry, c - 1, c - 1);
+                    GUI.DrawTexture(r, v == 2 ? Tex2("#5a2a2a") : v == .5f ? Tex2("#1e2a44") : v == 0 ? Tex2("#111111") : _tPanel);
+                    if (v != 1) { cs.normal.textColor = v == 2 ? Util.Hex("#ff8a6a") : v == 0 ? Util.Hex("#888888") : Util.Hex("#7fb2ff"); GUI.Label(r, v == 2 ? "◎" : v == 0 ? "×" : "△", cs); }
+                }
+            }
+            y += c * (ts.Count + 1) + U * .5f;
+            GUI.Label(new Rect(x, y, w, U * 5), string.Join("　", ts.Select(t => $"{TypeShort[t]}={Data.Types[t].N}")), _small);
         }
 
         // ---------- へんせい ----------
@@ -477,8 +512,8 @@ namespace PixelMonsterArena
             y += U * 1.9f;
             // プレート
             float pw = (w - U * .6f) / 2;
-            Plate(new Rect(x, y, pw, U * 4.6f), 0); Plate(new Rect(x + pw + U * .6f, y, pw, U * 4.6f), 1);
-            y += U * 5.2f;
+            Plate(new Rect(x, y, pw, U * 5.8f), 0); Plate(new Rect(x + pw + U * .6f, y, pw, U * 5.8f), 1);
+            y += U * 6.4f;
             // ゲーム画面（4:3）
             float vh = Mathf.Min(w * .75f, Screen.height * .45f), vw = vh / .75f;
             _rView = new Rect(_col.x + (_col.width - vw) / 2, y, vw, vh);
@@ -506,6 +541,11 @@ namespace PixelMonsterArena
             var right = side == 1;
             var al = new GUIStyle(_lbl) { alignment = right ? TextAnchor.UpperRight : TextAnchor.UpperLeft, wordWrap = false, clipping = TextClipping.Clip };
             GUI.Label(new Rect(r.x + U * .4f, r.y + U * .1f, r.width - U * .8f, U * 1.5f), right ? $"<size={Mathf.RoundToInt(U * .72f)}>Lv{f.Lvl}</size>  <b>{f.Sp.N}</b>" : $"<b>{f.Sp.N}</b>  <size={Mathf.RoundToInt(U * .72f)}>Lv{f.Lvl}</size>", al);
+            // タイプ
+            float cw = U * 3.4f, cyy = r.y + U * 1.6f;
+            var types = string.IsNullOrEmpty(f.Sp.Type2) ? new[] { f.Sp.Type } : new[] { f.Sp.Type, f.Sp.Type2 };
+            for (int i = 0; i < types.Length; i++) Chip(new Rect(right ? r.xMax - U * .4f - cw * (types.Length - i) - i * 2 : r.x + U * .4f + i * (cw + 2), cyy, cw, U * 1.1f), types[i]);
+            r = new Rect(r.x, r.y + U * 1.2f, r.width, r.height - U * 1.2f);
             var hb = new Rect(r.x + U * .4f, r.y + U * 1.7f, r.width - U * .8f, U * .6f);
             GUI.DrawTexture(hb, _tDark);
             float k = f.Hp / f.MaxHp;
@@ -574,7 +614,17 @@ namespace PixelMonsterArena
             {
                 if (f == null || i >= f.Moves.Count) continue;
                 var mv = Data.Moves[f.Moves[i]];
-                list.Add(("mv" + i, mv.N, $"{Data.Types[mv.T].N}{(mv.Aim == "dir" && mv.Damaging ? "◎" : "")}", Data.Types[mv.T].C, f.CdOf(mv.Id) / mv.Cd, f.Queued == mv.Id, B.MoveBlocked(f, mv.Id) != null));
+                // あいてへの あいしょうを ボタンに 表示
+                string sub = $"{Data.Types[mv.T].N}{(mv.Aim == "dir" && mv.Damaging ? "◎" : "")}";
+                var foe = B.Active(1);
+                if (foe != null && mv.Damaging)
+                {
+                    float v = Data.EffVs(mv.T, foe.Sp) * (mv.SuperVsWater && foe.HasType("water") ? 4 : 1);
+                    if (v >= 2) sub = $"<color=#ff8a6a>{Data.Types[mv.T].N}・ばつぐん！</color>";
+                    else if (v == 0) sub = $"<color=#7fb2ff>{Data.Types[mv.T].N}・きかない</color>";
+                    else if (v < 1) sub = $"<color=#7fb2ff>{Data.Types[mv.T].N}・いまいち</color>";
+                }
+                list.Add(("mv" + i, mv.N, sub, Data.Types[mv.T].C, f.CdOf(mv.Id) / mv.Cd, f.Queued == mv.Id, B.MoveBlocked(f, mv.Id) != null));
             }
             list.Add(("atk", "こうげき", "たいあたり", Util.Hex("#d8d0c0"), f != null ? f.CdOf("tackle") / Data.Moves["tackle"].Cd : 0, f != null && f.Queued == "tackle", false));
             list.Add(("dodge", "かわす", "むてき", Util.Hex("#7fd8ff"), f != null ? f.DodgeCd / .9f : 0, false, false));
@@ -586,7 +636,7 @@ namespace PixelMonsterArena
             int rows = Mathf.CeilToInt(list.Count / 2f);
             float gh = (area.height - (rows - 1) * U * .4f) / rows, gw = (bw - U * .4f) / 2;
             var sa = new GUIStyle(_lbl) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, wordWrap = false, fontSize = Mathf.RoundToInt(U * .85f) };
-            var sb = new GUIStyle(_small) { alignment = TextAnchor.MiddleCenter, wordWrap = false };
+            var sb = new GUIStyle(_small) { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true };
             for (int i = 0; i < list.Count; i++)
             {
                 var it = list[i];

@@ -89,6 +89,19 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 .macts{display:flex;flex-direction:column;gap:4px}
 .macts button{font-size:11px;background:var(--panel2);box-shadow:0 0 0 1px var(--edge);padding:5px 6px;min-width:56px}
 .list{display:flex;flex-direction:column;gap:8px}
+#chartWrap table{border-collapse:collapse;font-size:10px;margin:0 auto}
+#chartWrap td,#chartWrap th{width:19px;height:19px;text-align:center;padding:0;border:1px solid #2a2340}
+#chartWrap th{color:#1a1626;font-weight:700}
+#chartWrap td.x2{background:#5a2a2a;color:#ff8a6a;font-weight:700}
+#chartWrap td.x05{background:#1e2a44;color:#7fb2ff}
+#chartWrap td.x0{background:#111;color:#888}
+#chartWrap tr:hover td{outline:1px solid #fff3}
+.plate .types{display:flex;gap:3px;margin-top:2px}
+#plE .types{justify-content:flex-end}
+.plate .types .chip{font-size:9px;padding:0 4px}
+.cmd.mv[data-eff="2"]{box-shadow:0 0 0 2px #ff8a6a,0 3px 0 #0d0b14}
+.cmd.mv[data-eff="0.5"] .b,.cmd.mv[data-eff="0"] .b{color:#7fb2ff}
+.cmd.mv[data-eff="2"] .b{color:#ff8a6a}
 .mwrap{display:flex;flex-direction:column;gap:0}
 .medit{background:#1b1530;box-shadow:0 0 0 2px var(--edge);padding:8px;display:flex;flex-direction:column;gap:5px;max-height:55vh;overflow:auto}
 .mrow{text-align:left;background:var(--panel);box-shadow:0 0 0 1px var(--edge);border-left:5px solid var(--c);padding:5px 7px;font-size:12px;line-height:1.45}
@@ -190,6 +203,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
       <button class="btn" id="btnCup">たいかいへ<span>スタジアムで しあい</span></button>
       <button class="btn" id="btnWild" style="background:#7bd88f;box-shadow:0 4px 0 #3f8a50,0 0 0 3px #0d0b14">くさむらへ<span>モンスターを つかまえる</span></button>
     </div>
+    <button class="btn sub" id="btnChart" style="padding:8px;font-size:13px">タイプあいしょう表</button>
     <div class="sec-title"><span>パーティ（上から3匹が しゅつじょう）</span><button class="dim" id="btnTeam" style="text-decoration:underline">へんせい ›</button></div>
     <div class="partyrow" id="hubParty"></div>
     <div class="card dim" style="line-height:1.7">
@@ -201,6 +215,12 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
   </section>
 
   <!-- チーム -->
+  <section class="screen" id="scChart" hidden>
+    <div class="sec-title"><span style="font-size:16px;color:var(--ink)">タイプあいしょう表</span><button class="btn sub" id="btnChartBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <p class="dim">たて＝わざの タイプ／よこ＝うける モンスターの タイプ。<b style="color:#ff8a6a">◎</b>=2ばい（ばつぐん） <b style="color:#7fb2ff">△</b>=0.5ばい <b style="color:#888">×</b>=こうかなし。2タイプの モンスターには 2つを かけ算。わざと 同じタイプの モンスターが つかうと 1.25ばい。</p>
+    <div id="chartWrap" style="overflow:auto"></div>
+  </section>
+
   <section class="screen" id="scTeam">
     <div class="sec-title"><span style="font-size:16px;color:var(--ink)">パーティ</span><button class="btn sub" id="btnTeamBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <div class="list" id="teamParty"></div>
@@ -212,8 +232,8 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
   <section class="screen" id="scBattle" hidden>
     <div id="bTop"><span id="bTitle"></span><button id="btnPause">ポーズ</button></div>
     <div class="plates">
-      <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="lv"></span></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div></div>
-      <div class="plate" id="plE"><div class="top"><span class="lv"></span><b class="nm"></b></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div></div>
+      <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="lv"></span></div><div class="types"></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div></div>
+      <div class="plate" id="plE"><div class="top"><span class="lv"></span><b class="nm"></b></div><div class="types"></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div></div>
     </div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="320" height="240"></canvas>
@@ -776,6 +796,20 @@ function renderHub() {
     P.appendChild(d);
   });
   show('scHub');
+}
+const TYPE_SHORT = { normal: 'ノ', fire: '炎', water: '水', grass: '草', elec: '電', ice: '氷', fighting: '闘', poison: '毒', ground: '地', wind: '風', psychic: '超', bug: '虫', rock: '岩', ghost: '霊', dragon: '竜', dark: '悪', steel: '鋼', fairy: '妖' };
+function renderChart() {
+  const ts = Object.keys(TYPES);
+  const th = (t) => `<th style="background:${TYPES[t].c}" title="${TYPES[t].n}">${TYPE_SHORT[t]}</th>`;
+  let h = `<table><tr><th style="background:none;color:var(--dim)">技＼受</th>${ts.map(th).join('')}</tr>`;
+  for (const a of ts) {
+    h += `<tr>${th(a)}`;
+    for (const d of ts) { const v = effOf(a, d); h += v === 2 ? '<td class="x2">◎</td>' : v === .5 ? '<td class="x05">△</td>' : v === 0 ? '<td class="x0">×</td>' : '<td></td>'; }
+    h += '</tr>';
+  }
+  h += '</table><p class="dim" style="margin-top:8px">' + ts.map(t => `${TYPE_SHORT[t]}=${TYPES[t].n}`).join('　') + '</p>';
+  $('chartWrap').innerHTML = h;
+  show('scChart');
 }
 function renderTeam(openUid) {
   const P = $('teamParty'), B = $('teamBox'); P.innerHTML = ''; B.innerHTML = '';
@@ -2003,6 +2037,7 @@ function setupCmds() {
     if (!id) return;
     const m = MOVES[id];
     b.querySelector('.a').textContent = m.n;
+    b.querySelector('.a').style.fontSize = m.n.length > 8 ? '10.5px' : m.n.length > 6 ? '11.5px' : '';
     b.querySelector('.b').textContent = moveSub(m);
     b.style.setProperty('--c', TYPES[m.t].c);
   });
@@ -2069,6 +2104,8 @@ function updPlate(id, side) {
   const root = $(id), f = active(side); if (!f) return;
   setText(root.querySelector('.nm'), f.sp.n);
   setText(root.querySelector('.lv'), `Lv${f.lvl}`);
+  const tsig = f.sp.type + (f.sp.type2 || '');
+  const tEl = root.querySelector('.types'); if (tEl._t !== tsig) { tEl._t = tsig; tEl.innerHTML = typeChip(f.sp.type) + (f.sp.type2 ? typeChip(f.sp.type2) : ''); }
   const k = f.hp / f.maxHp, bar = root.querySelector('.hp i');
   bar.style.transform = `scaleX(${k})`;
   bar.style.background = k > .5 ? 'var(--good)' : k > .2 ? 'var(--mid)' : 'var(--bad)';
@@ -2087,6 +2124,11 @@ function updHUD() {
     b.querySelector('.cdv').style.height = ((f.cd[id] || 0) / m.cd * 100) + '%';
     b.classList.toggle('hot', f.queued === id);
     b.classList.toggle('blocked', !!moveBlocked(f, id));
+    // あいてへの あいしょうを ボタンに 表示
+    const o = active(1); let eff = '';
+    if (o && m.cat !== 'stat') { const v = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1); eff = v >= 2 ? '2' : v === 0 ? '0' : v < 1 ? '0.5' : ''; }
+    if (b.dataset.eff !== eff) b.dataset.eff = eff;
+    setText(b.querySelector('.b'), eff ? `${TYPES[m.t].n}・${eff === '2' ? 'ばつぐん！' : eff === '0' ? 'きかない' : 'いまいち'}` : moveSub(m));
   });
   $('cAtk').querySelector('.cdv').style.height = ((f.cd.tackle || 0) / MOVES.tackle.cd * 100) + '%';
   $('cAtk').classList.toggle('hot', f.queued === 'tackle');
@@ -2442,6 +2484,8 @@ document.addEventListener('gesturestart', (ev) => ev.preventDefault());
 $('btnNew').onclick = () => { if (loadSave() && !confirm('セーブデータを けして はじめから あそびますか？')) return; renderStarter(); };
 $('btnContinue').onclick = () => { S = loadSave(); if (S) { updAutoBtn(); renderHub(); } };
 $('btnTeam').onclick = () => renderTeam();
+$('btnChart').onclick = renderChart;
+$('btnChartBack').onclick = () => renderHub();
 $('btnTeamBack').onclick = renderHub;
 $('btnReset').onclick = () => { if (!confirm('セーブデータを けしますか？ もとに もどせません。')) return; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; renderTitle(); };
 $('btnWild').onclick = startWild;
