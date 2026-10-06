@@ -9,7 +9,7 @@ PAL = {
     'V': '#e8ff5c', 'U': '#8ed028', 'T': '#3e7a24',      # 毒（明・中・暗）
     'P': '#a874e6', 'Q': '#5c2c8e',                      # 背の とげ
     'w': '#ffffff',
-    'Y': '#ffe04a', 'O': '#c8780e', 'R': '#ff5a2a',      # 首ごとの 目（黄・こがね・赤）
+    'Y': '#ffe04a', 'O': '#c8780e', 'R': '#ff3c22',      # 首ごとの 目（黄・こがね・赤）
 }
 LIGHT = set('HBVPw')
 KEEP_BLACK = set('wVUYOR')
@@ -102,11 +102,11 @@ HEAD_OPEN = HEAD[:9] + [
     '..kkkkkkkkkkkkkk....',
 ]
 # A 爬虫類の つり目：白目なし。上は 明るい 虹彩、下は 暗い 虹彩、まん中を 2段の 細い たての スリット。上まぶたは 太い まゆ、
-# 下は 細い 線。首ごとに 虹彩の 色を 変える（上の 首＝緑 V/U、まん中＝黄 Y/O、下の 首＝赤 R/J）
+# 下は 細い 線。首ごとに 虹彩の 色を 変える（上の 首＝緑 V/U、まん中＝黄 Y/O、下の 首＝赤 R/O）
 EYE = ['VVkV', 'kUkVUUk']
 EYE_ALT = {'blink': ['IIII', 'kkkkkkk'], 'hit': ['kkVk', 'kVkkVkk'], 'atk0|atk1|atk2': ['wVkV', 'kVkwVVk'], 'ko': ['kIkI', 'IkIkIkI']}
 def eye_of(col, dark=False):
-    m = {'g': {}, 'y': {'V': 'Y', 'U': 'O'}, 'r': {'V': 'R', 'U': 'J'}}[col]
+    m = {'g': {}, 'y': {'V': 'Y', 'U': 'O'}, 'r': {'V': 'R', 'U': 'O', 'w': 'Y'}}[col]
     if dark: m = dict(m, I='J')
     f = lambda rows: [''.join(m.get(c, c) for c in r) for r in rows]
     return f(EYE), {k: f(v) for k, v in EYE_ALT.items()}

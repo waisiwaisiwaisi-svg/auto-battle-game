@@ -14,7 +14,7 @@ PAL = {
 }
 LIGHT = set('AEPwYc')
 KEEP_BLACK = set('wYyPp')
-EYE_BOX = (41, 33, 12, 7)   # 両目（idle0 の 64x64 座標）
+EYE_BOX = (40, 33, 13, 8)   # 両目（idle0 の 64x64 座標）
 
 def _run(g, x, y, dx, dy, ch):
     n = 0
@@ -128,9 +128,9 @@ BARB_HOT = [r.replace('w', 'P').replace('n', 'p') for r in BARB]
 GL = ['Pp', 'pq']
 GL_HOT = ['PP', 'Pp']
 # 目（M：重い まぶた・半目）：厚い まぶた（A／B）が 金の 虹彩の 上半分を おおい、黒い まぶたの 線が 瞳を 横に 切る。下に 残る 金（Y／y）と 黒瞳で 冷たく 見下す。手前は 大きく、奥は 小さく
-EYE = ['kAAAAAk', 'kkkkkkk', 'kYYkkYk', '.kyyyk.']
-EYE_ALT = {'blink': ['kAAAAAk', 'kBBBBBk', 'kkkkkkk', '.BBBBB.'], 'atk0|atk1|atk2': ['kkkkkkk', 'kYYkkYk', 'kYYkkyk', '.kyyyk.'],
-           'hit': ['kAAAAAk', 'kkBBkkB', 'BBkkBBB', '.BBBBB.'], 'ko': ['kAAAAAk', 'BkBBkBB', 'BBkkBBB', 'BkBBkBB']}
+EYE = ['.AAAAAA.', 'kkkkkkkk', 'kYYkkYYk', 'kyYkkyyk', '.kyyyyk.']
+EYE_ALT = {'blink': ['.AAAAAA.', 'kAAAAAAk', 'kBBBBBBk', 'kkkkkkkk', '.BBBBBB.'], 'atk0|atk1|atk2': ['.kkkkkk.', 'kYYYYYYk', 'kYYkkYYk', 'kyYkkyyk', '.kyyyyk.'],
+           'hit': ['.AAAAAA.', 'kkBBBkkB', 'BBkkkBBB', 'BBBBBBBB', '.BBBBBB.'], 'ko': ['.AAAAAA.', 'BkBBBkBB', 'BBkBkBBB', 'BBBkBBBB', 'BBkBkBB.']}
 EYE2 = ['kkkk', 'kYkk', '.kyk']
 EYE2_ALT = {'blink': ['kkkk', 'AAAA', '.AA.'], 'atk0|atk1|atk2': ['kYkk', 'kYkk', '.kyk'], 'hit': ['kkAA', 'AAkk', '.AA.'], 'ko': ['kAkA', 'AkAk', '.AA.']}
 # 毒しぶき
@@ -165,7 +165,7 @@ def layers():
         dict(n='g4', g='w1', x=21, y=48, rows=GL, alt={'atk0|atk1': GL_HOT}),
         dict(n='g5', g='w1', x=28, y=52, rows=GL, alt={'atk0|atk1': GL_HOT}),
         dict(n='g6', g='w2', x=36, y=47, rows=GL, alt={'atk0|atk1': GL_HOT}),
-        dict(n='eye', g='w2', x=41, y=36, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='w2', x=40, y=36, rows=EYE, alt=EYE_ALT),
         dict(n='eye2', g='w2', x=49, y=34, rows=EYE2, alt=EYE2_ALT),
         dict(n='spray', g='root', x=TBX + round(SX) + 6, y=TBY + round(SY) + 2, rows=SPRAY, only='atk1'),
         dict(n='dust', g='root', x=6, y=58, rows=DUST[0], alt={'walk1|walk3': DUST[1]}, only='walk0|walk1|walk2|walk3'),

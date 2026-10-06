@@ -113,6 +113,14 @@ def eye(g, x, y, mode='idle', A='Y', B='O', big=False):
             if c == '.': continue
             put(g, x + i, y + j, {'A': A, 'B': B}.get(c, c))
     return g
+# 目（M：重い まぶた）：小さく 暗い 青の 目。毛の 色の 厚い 上まぶたが 前へ 垂れて 虹彩の 上半分を かくし、下に 小さく 白い 光＋青・こい 紺の 虹彩＋黒い 瞳が のぞく
+LID_EYE = {
+    'idle':  ['.kkkkk..', 'kAABBBk.', 'kkkkkkkk', '.kwKkNk.', '..kkkk..'],
+    'atk':   ['.kkkkk..', 'kAABBBk.', 'kkkkkkkk', '.kwJkKk.', '.kKNkNk.', '..kkkk..'],
+    'blink': ['.kkkkk..', 'kAABBBk.', 'kABBBBBk', '.kkkkkk.', '........'],
+    'hit':   ['.kkkkk..', 'kAABBBk.', 'kkkkkkkk', '..k..k..', '.k....k.'],
+    'ko':    ['.kkkkk..', 'kAABBBk.', 'kkABBkkk', '..kkk...', '..kkk...', '.k...k..'],
+}
 EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit': 'hit', 'ko': 'ko'}
 # ===END KIT===
 
@@ -123,9 +131,10 @@ PAL = {
     'R': '#b4b0c0', 'Q': '#716c82', 'P': '#403c50',      # 氷河の 岩
     'I': '#eafcff', 'J': '#8edcf4', 'K': '#3a86bc',      # つらら・氷
     'w': '#ffffff', 'p': '#c04a5a', 'Y': '#ffe27a',      # 光／口の 中／目の 光
+    'N': '#1a2c5c',                                      # 目（こい 紺）
 }
 LIGHT = set('ARIwY')
-KEEP_BLACK = set('wI')
+KEEP_BLACK = set('wIN')
 FUR = {'1': 'ABD'}
 FUR_BACK = {'1': 'BDD'}
 
@@ -175,7 +184,9 @@ def head(mode='idle'):
     else: dots(g, 'B', [(52, 45), (53, 48), (52, 51)])
     for x in range(36, 46): put(g, x, 22 + (x - 36) // 3, 'B')      # 額の 毛の すじ
     for x in range(39, 47): put(g, x, 26 + (x - 39) // 4, 'D')       # 太い まゆ
-    eye(g, 41, 28, {'idle': 'idle'}.get(mode, mode), 'J', 'K', big=True)
+    for j, r in enumerate(LID_EYE[mode]):
+        for i, c in enumerate(r):
+            if c != '.': put(g, 41 + i, 28 + j, c)
     if mode == 'atk':
         stamp(g, ['kkkkk', 'kpppk', '.kkk.'], 44, 41)
     return g
@@ -229,4 +240,5 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1)},
     'ko': {'body': (0, 5), 'head': (1, 2)},
 }
+EYE_BOX = (41, 28, 8, 5)
 PARENT = {'head': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

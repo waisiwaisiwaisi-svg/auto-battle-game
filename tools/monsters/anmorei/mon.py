@@ -1,16 +1,17 @@
 # アンモレイ（いわ・ゴースト × アンモナイト）手打ち GBA風・デフォルメ（大きな 化石の 渦殻、殻口から 霊の 頭と 触手）
 import math
 META = dict(id='anmorei', name='アンモレイ', types=['rock', 'ghost'], base='アンモナイト', size='M')
+EYE_BOX = (37, 24, 10, 8)
 PAL = {
     'k': '#101018', 'l': '#2e2638',
     'S': '#e4d8bc', 'T': '#a8977a', 'U': '#5e5040',      # 化石の 石
     'P': '#f0dcff', 'Q': '#b07ce8', 'R': '#6236ac',      # 霊火・霊の 体
     'E': '#1c0e28',                                      # 殻の 中の 闇
-    'Y': '#d4ff6a', 'Z': '#58a636',                      # 目
+    'Y': '#ff86f4', 'Z': '#8a14c8',                      # 目（光る 紫：明るい 光・暗い にじみ）
     'w': '#ffffff',
 }
 LIGHT = set('SPYw')
-KEEP_BLACK = set('wPQR')
+KEEP_BLACK = set('wPQRYZ')
 import pix
 # ---- 下書き用の 小道具（あたりの マスク → 左上 光の 3段階 → 手打ちの 仕上げ → 輪郭）----
 def M(W, H, *sh):
@@ -99,7 +100,15 @@ HOOD = P(M(18, 17, ('e', '1', 9, 8.5, 9, 8.5), ('p', '1', [(0, 3), (12, 2), (18,
     (['RRRRRR', '......RR'], 1, 12),
     (['..RRRRRRR', 'RRQQQQQQ'], 6, 1),     # まゆの 骨
 ], lw=2, dw=3)
-EYE, EYE_ALT = eye('Y', 'Z')
+# 目（E 光る目）：ひとみの ない 紫の 霊光。白い 芯＋白紫（P）＋明るい 紫（Y）、まわりに 1ドットの こい 紫の にじみ（Z）。
+# 上が 平らで 下が 丸い にらむ 形。後ろへ 霊火の 尾が ゆらぐ
+EYE = ['Z.........', 'YZ........', 'ZYZZZZZZZ.', '.ZYYYYYYYZ', '..ZYPwwPYZ', '..ZYPwPPZ.', '...ZYYYZ..', '....ZZZ...']
+EYE_ALT = {
+    'blink': ['Z.........', 'YZ........', 'ZYZ.......', '.Z.ZZZZZZ.', '..ZYYYYYYZ', '...ZZZZZZ.', '..........', '..........'],
+    'hit': ['..........', 'Z.........', 'YZ.ZZ..ZZ.', '.ZZYYZZYZ.', '..ZPwZYPZ.', '..ZYZ.ZYZ.', '...Z...Z..', '..........'],
+    'atk0|atk1|atk2': ['YZ........', 'PYZ.......', 'ZPYZZZZZZZ', '.ZYPPPPYYZ', '.ZYPwwwPYZ', '..ZPwwwPYZ', '..ZYPPPYZ.', '...ZZZZZ..'],
+    'ko': ['..........', '..........', '...Z...Z..', '....Z.Z...', '.....Z....', '....Z.Z...', '...Z...Z..', '..........'],
+}
 MOUTH = ['kkkkkk', 'kwkwkw', 'kEEEEk', '.kwkwk', '..kkk.']
 
 def flame(W, H, polys):
@@ -136,7 +145,7 @@ def layers():
         dict(n='tent', g='tent', x=31, y=36, rows=TENT, alt={'idle1|idle3|walk1|walk3|hit': TENT2, NB: TENT_ATK}),
         dict(n='hood', g='head', x=30, y=22, rows=HOOD),
         dict(n='shell', g='shell', x=4, y=13, rows=SHELL, alt={'idle1|idle3|walk1|walk3|atk1': SHELL2}),
-        dict(n='eye', g='head', x=39, y=25, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=37, y=24, rows=EYE, alt=EYE_ALT),
         dict(n='mouth', g='head', x=43, y=33, rows=MOUTH),
     ]
 FRAMES = {
