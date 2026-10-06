@@ -3,7 +3,7 @@ import pix
 META = dict(id='onibigitsune', name='オニビギツネ', types=['ghost', 'fire'], base='キツネ', size='M')
 PAL = {
     'k': '#101018', 'l': '#30295c',
-    'A': '#f6f4ff', 'B': '#b8b6de', 'C': '#6c6a9e',
+    'A': '#fbfaff', 'B': '#cecce9', 'C': '#7c7ab0',
     'R': '#e82c4c',
     'V': '#e8fcff', 'X': '#78d4ff', 'Z': '#4a5cf0', 'D': '#28288c',
     'Y': '#ffd84a',
@@ -153,23 +153,25 @@ EAR = [
 
 # ---- 三本の しっぽ：根もとは 毛、先は 鬼火 ----
 def tails(ph=0):
-    W, H = 30, 38; g = pix.grid(W, H)
+    W, H = 30, 38; out = pix.grid(W + 2, H + 2)
     T = [((26, 33), (25, 16), (15, 3)), ((25, 33), (13, 28), (4, 14)), ((25, 34), (10, 38), (1, 28))]
-    for (p0, p1, p2) in T:
+    FUR = [((21, 21), (21, 22), (20, 15), (20, 16)), ((12, 27), (13, 27), (9, 23), (10, 23)), ((9, 33), (10, 33), (13, 35), (14, 35))]
+    for (p0, p1, p2), fur in zip(T, FUR):   # 奥（上）から 手前（下）へ 1本ずつ 輪郭つきで 重ねる
+        g = pix.grid(W, H)
         for i in range(80):
             t = i / 79
             x = (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0]
             y = (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]
-            w = 2.2 + 2.6 * (1 - abs(t - .6) / .6) if t < .92 else 2.6
+            w = 2.4 + 2.8 * (1 - abs(t - .6) / .6) if t < .92 else 2.8
             for yy in range(H):
                 for xx in range(W):
                     if (xx + .5 - x) ** 2 + (yy + .5 - y) ** 2 <= w * w and g[yy][xx] == '.':
                         g[yy][xx] = '%' if t > .84 else '#'
-    s = pix.grid_of(shade(pix.rows_of(g), {'#': 'ABC', '%': 'XXZ'}))
-    # 毛の すじ（手で 置く）
-    for (x, y) in ((22, 20), (21, 23), (19, 12), (12, 27), (15, 29), (9, 22), (8, 33), (12, 35), (20, 16), (6, 30)):
-        if s[y][x] == 'B': s[y][x] = 'C'
-    return pix.outline(pix.rows_of(s))
+        s = pix.grid_of(shade(pix.rows_of(g), {'#': 'ABC', '%': 'XXZ'}))
+        for (x, y) in fur:
+            if s[y][x] == 'B': s[y][x] = 'C'
+        pix.stamp(out, pix.outline(pix.rows_of(s)), 0, 0)
+    return pix.rows_of(out)
 TAILS = tails()
 # しっぽの 先で もえる 鬼火
 ONI = [
@@ -233,7 +235,7 @@ NB = 'atk1|atk2'
 def layers():
     return [
         dict(n='earF', g='head', x=39, y=13, rows=dark(EAR)),
-        dict(n='tails', g='tail', x=1, y=7, rows=TAILS),
+        dict(n='tails', g='tail', x=0, y=6, rows=TAILS),
         dict(n='oni1', g='tail', x=11, y=1, rows=ONI, alt={'idle1|idle3|walk1|walk3|atk0': ONI2}),
         dict(n='oni2', g='tail', x=0, y=12, rows=ONI2, alt={'idle1|idle3|walk1|walk3|atk0': ONI}),
         dict(n='oni3', g='tail', x=-3, y=26, rows=ONI, alt={'idle1|idle3|walk1|walk3|atk0': ONI2}),
@@ -266,6 +268,6 @@ FRAMES = {
     'atk1': {'root': (3, 0), 'head': (1, 1)},
     'atk2': {'root': (4, 0), 'fx': (4, 0)},
     'hit': {'root': (-3, 0), 'head': (-2, -1), 'tail': (1, 0)},
-    'ko': {'body': (0, 11), 'head': (2, 4), 'tail': (2, 10)},
+    'ko': {'body': (0, 11), 'head': (2, 4), 'tail': (3, 3)},
 }
 PARENT = {'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}
