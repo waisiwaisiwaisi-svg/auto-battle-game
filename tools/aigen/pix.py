@@ -27,15 +27,32 @@ def flood_bg(im, tol=34):
         if x < W - 1: st.append((y, x + 1))
     return ~seen
 
-def to_pixel(src, height, flip=False, colors=16, outline=(26, 16, 34), linew=3.0, method='lanczos', bg='rembg'):
+def to_pixel(src, height, flip=False, colors=16, outline=(26, 16, 34), linew=3.0, method='lanczos', bg='rembg', holes=False, clip_y=None):
     im = Image.open(src).convert('RGB')
     if flip: im = im.transpose(Image.FLIP_LEFT_RIGHT)
     if bg == 'rembg':
-        rgba = cutout(im)
+        # 色は 元画像、形（アルファ）だけ rembg から
+        rgba = im.convert('RGBA'); arr = np.asarray(rgba).copy(); arr[..., 3] = np.asarray(cutout(im))[..., 3]; rgba = Image.fromarray(arr)
     else:
         fg = flood_bg(im)
         if bg == 'union': fg |= np.asarray(cutout(im))[..., 3] > 128
         rgba = im.convert('RGBA'); arr = np.asarray(rgba).copy(); arr[..., 3] = np.where(fg, 255, 0); rgba = Image.fromarray(arr)
+    if clip_y:
+        # 足もとの 地面（草・石）を 切る：下絵の この 高さ（0〜1）より 下は 背景あつかい
+        arr = np.asarray(rgba).copy(); arr[int(arr.shape[0] * clip_y):, :, 3] = 0; rgba = Image.fromarray(arr)
+    if holes:
+        # ふちと つながっていない とうめい部分（白い むね など）を うめる
+        arr = np.asarray(rgba).copy(); A = arr[..., 3] > 128; H, W = A.shape
+        seen = np.zeros((H, W), bool); st = [(y, x) for y in (0, H - 1) for x in range(W)] + [(y, x) for x in (0, W - 1) for y in range(H)]
+        while st:
+            y, x = st.pop()
+            if seen[y, x] or A[y, x]: continue
+            seen[y, x] = True
+            if y > 0: st.append((y - 1, x))
+            if y < H - 1: st.append((y + 1, x))
+            if x > 0: st.append((y, x - 1))
+            if x < W - 1: st.append((y, x + 1))
+        arr[..., 3] = np.where(~seen, 255, 0); rgba = Image.fromarray(arr)
     a = np.asarray(rgba)[..., 3]
     ys, xs = np.nonzero(a > 128)
     box = (xs.min(), ys.min(), xs.max() + 1, ys.max() + 1)
@@ -52,7 +69,7 @@ def to_pixel(src, height, flip=False, colors=16, outline=(26, 16, 34), linew=3.0
         al = np.asarray(rgba.split()[3].resize((tw, th), Image.BOX)) > 128
         # 少し コントラストを 上げてから 減色
         sm = np.asarray(small).astype(float); sm = np.clip((sm - 128) * 1.12 + 128, 0, 255).astype(np.uint8)
-        q = Image.fromarray(sm).quantize(colors=colors, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+        q = Image.fromarray(sm).quantize(colors=colors, method=getattr(Image.Quantize, os.environ.get('QM', 'FASTOCTREE')), dither=Image.Dither.NONE)
         px = np.asarray(q.convert('RGB')).copy()
     else:
         # 先に 大きいまま 減色 → ブロックごとの 最頻色で 縮小（にごらない）
@@ -116,8 +133,9 @@ if __name__ == '__main__':
     src, dst, h = sys.argv[1], sys.argv[2], int(sys.argv[3])
     flip = 'flip' in sys.argv[4:]
     method = 'mode' if 'mode' in sys.argv[4:] else 'lanczos'
+    holes = 'holes' in sys.argv[4:]
     bgm = 'flood' if 'flood' in sys.argv[4:] else 'union' if 'union' in sys.argv[4:] else 'rembg'
     os.makedirs(os.path.dirname(dst) or '.', exist_ok=True)
-    im = to_pixel(src, h, flip, method=method, colors=int(os.environ.get('COLORS', 16)), bg=bgm); im.save(dst)
+    im = to_pixel(src, h, flip, method=method, colors=int(os.environ.get('COLORS', 16)), bg=bgm, holes=holes); im.save(dst)
     im.resize((im.width * 8, im.height * 8), Image.NEAREST).save(dst.replace('.png', '_x8.png'))
     print(dst, im.size)

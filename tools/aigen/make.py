@@ -15,8 +15,20 @@ EYE = {
 }
 def hexrgb(h): return [int(h[i:i + 2], 16) for i in (1, 3, 5)]
 def make(id, c):
-    im = to_pixel(os.path.join(HERE, c['src']), c['h'], c.get('flip', False), colors=c.get('colors', 16), bg=c.get('bg', 'rembg'))
+    im = to_pixel(os.path.join(HERE, c['src']), c['h'], c.get('flip', False), colors=c.get('colors', 16), bg=c.get('bg', 'rembg'), holes=c.get('holes', False), clip_y=c.get('clip_y'))
     a = np.array(im)
+    if c.get('erase'):
+        # 指定の 四角を けして 輪郭を 引きなおす（足もとの 草など）
+        OL = np.array([26, 16, 34])
+        for (x0, y0, x1, y1) in c['erase']: a[y0:y1, x0:x1, 3] = 0
+        body = (a[..., 3] > 0) & ~np.all(a[..., :3] == OL, -1)
+        H, W = body.shape; out = np.zeros_like(a); out[body] = a[body]
+        for y in range(H):
+            for x in range(W):
+                if body[y, x]: continue
+                if any(0 <= yy < H and 0 <= xx < W and body[yy, xx] for yy, xx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1))):
+                    out[y, x, :3] = OL; out[y, x, 3] = 255
+        a = out
     blinks = []
     for (cx, cy, style, *col) in c.get('eyes', []):
         rows = EYE[style]; h = len(rows); w = len(rows[0])

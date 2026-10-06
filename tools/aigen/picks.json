@@ -1,0 +1,135 @@
+{
+ "hinokon": {
+  "src": "src/hinokon_103.png",
+  "h": 66,
+  "colors": 18,
+  "eyes": [
+   [
+    50,
+    17,
+    "big"
+   ]
+  ]
+ },
+ "happamogu": {
+  "src": "src/happamogu_107.png",
+  "h": 58,
+  "eyes": [
+   [
+    25,
+    28,
+    "mid",
+    "#5a3a22",
+    "#2a1a10"
+   ],
+   [
+    38,
+    28,
+    "mid",
+    "#5a3a22",
+    "#2a1a10"
+   ]
+  ]
+ },
+ "birikurage": {
+  "src": "src/birikurage_107.png",
+  "h": 56,
+  "eyes": [
+   [
+    30,
+    28,
+    "mid",
+    "#7ae8ff",
+    "#2a7ac0"
+   ],
+   [
+    45,
+    28,
+    "mid",
+    "#7ae8ff",
+    "#2a7ac0"
+   ]
+  ]
+ },
+ "soyodori": {
+  "src": "src/soyodori_302.png",
+  "h": 60,
+  "colors": 20,
+  "holes": true,
+  "eyes": [
+   [
+    41,
+    26,
+    "mid",
+    "#6a4a2a",
+    "#2a1a10"
+   ]
+  ]
+ },
+ "dokukino": {
+  "src": "src/dokukino_302.png",
+  "h": 60,
+  "colors": 18,
+  "eyes": [
+   [
+    25,
+    33,
+    "mid",
+    "#5a3a2a",
+    "#2a1a10"
+   ],
+   [
+    37,
+    33,
+    "mid",
+    "#5a3a2a",
+    "#2a1a10"
+   ]
+  ]
+ },
+ "yorukoumo": {
+  "src": "src/yorukoumo_404.png",
+  "h": 62,
+  "colors": 20,
+  "holes": true
+ },
+ "gouen": {
+  "src": "src/gouen_407.png",
+  "h": 74,
+  "colors": 20,
+  "holes": true
+ },
+ "tsuraran": {
+  "src": "src/tsuraran_401.png",
+  "h": 64,
+  "colors": 20,
+  "holes": true
+ },
+ "mizupuku": {
+  "src": "src/mizupuku_403.png",
+  "h": 50,
+  "colors": 20,
+  "holes": true
+ },
+ "gorotan": {
+  "src": "src/gorotan_406.png",
+  "h": 70,
+  "colors": 20,
+  "holes": true,
+  "clip_y": 0.86,
+  "erase": [
+   [
+    0,
+    56,
+    22,
+    74
+   ],
+   [
+    58,
+    63,
+    84,
+    74
+   ]
+  ]
+ }
+}

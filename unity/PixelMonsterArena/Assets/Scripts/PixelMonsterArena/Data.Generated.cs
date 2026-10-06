@@ -640,7 +640,7 @@ namespace PixelMonsterArena
             { "hinokon", new Species {
                 Id = "hinokon", N = "サラマン", Type = "fire", Type2 = "", Hp = 40, Atk = 54, Def = 44, Spd = 66,
                 Style = "mid", Catch = 0.45f, Rare = false,
-                Desc = "せなかに ほのおの たてがみを ともす 火トカゲ。きんいろの もようが あつくなると ひのたまを はく。",
+                Desc = "せなかに ほのお色の とげを ならべた 火トカゲ。きんいろの もようが あつくなると ひのたまを はく。",
                 Pal = new Dictionary<char, string> { { 'o', "#ff8a3d" }, { 'O', "#ffc27a" }, { 'w', "#fff3e0" }, { 'k', "#1a1626" }, { 'n', "#3a1a1a" }, { 'r', "#ff4a3d" }, { 'y', "#ffe066" } },
                 Learn = new[] { new LearnEntry(1, "ember"), new LearnEntry(1, "flame"), new LearnEntry(1, "quick-attack"), new LearnEntry(3, "will-o-wisp"), new LearnEntry(6, "flame-charge"), new LearnEntry(9, "u-turn"), new LearnEntry(12, "flamethrower"), new LearnEntry(15, "swords-dance"), new LearnEntry(18, "nasty-plot"), new LearnEntry(21, "fire-blast"), new LearnEntry(24, "overheat"), new LearnEntry(27, "flare-blitz"), new LearnEntry(30, "baton-pass"), new LearnEntry(33, "dragon-pulse"), new LearnEntry(36, "draco-meteor") },
                 Rows = new[] {
@@ -749,7 +749,7 @@ namespace PixelMonsterArena
             { "dokukino", new Species {
                 Id = "dokukino", N = "マジタケ", Type = "grass", Type2 = "poison", Hp = 46, Atk = 54, Def = 46, Spd = 48,
                 Style = "ranged", Catch = 0.45f, Rare = false,
-                Desc = "とんがりぼうしを かぶった キノコの まどうし。どくの ほうしで まほうを となえる。",
+                Desc = "むらさきの かさを かぶった キノコの まどうし。どくの ほうしで まほうを となえる。",
                 Pal = new Dictionary<char, string> { { 'p', "#b05ad8" }, { 'P', "#f0a8ff" }, { 'w', "#f4ecd8" }, { 'k', "#1a1626" }, { 'm', "#7a3a3a" } },
                 Learn = new[] { new LearnEntry(1, "leaf"), new LearnEntry(1, "spore"), new LearnEntry(1, "toxic"), new LearnEntry(4, "leech-seed"), new LearnEntry(7, "toxic-spikes"), new LearnEntry(10, "sludge-bomb"), new LearnEntry(13, "giga-drain"), new LearnEntry(16, "synthesis"), new LearnEntry(19, "dazzling-gleam"), new LearnEntry(22, "energy-ball"), new LearnEntry(25, "sludge-wave"), new LearnEntry(28, "poison-jab"), new LearnEntry(31, "gunk-shot"), new LearnEntry(34, "flash-cannon"), new LearnEntry(37, "psyshock") },
                 Rows = new[] {
