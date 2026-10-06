@@ -140,10 +140,10 @@ MANE = [
 
 def layers():
     return [
-        dict(n='wingB_up', g='wingB', x=27, y=1, rows=dark(WING_UP), only=UP),
-        dict(n='wingB_mid', g='wingB', x=17, y=11, rows=dark(WING_MID), only=MID),
-        dict(n='wingB_dn', g='wingB', x=15, y=31, rows=dark(WING_DN), only=DN),
-        dict(n='tail', g='tail', x=5, y=40, rows=TAIL),
+        dict(n='wingB_up', g='wingB', x=18, y=1, rows=dark(WING_UP), only=UP),
+        dict(n='wingB_mid', g='wingB', x=10, y=13, rows=dark(WING_MID), only=MID),
+        dict(n='wingB_dn', g='wingB', x=9, y=31, rows=dark(WING_DN), only=DN),
+        dict(n='tail', g='tail', x=5, y=42, rows=TAIL),
         dict(n='talonB', g='talon', x=29, y=42, rows=pix.recolor(TALON, {'P': 'Q', 'Q': 'Z'})),
         dict(n='body', g='body', x=18, y=30, rows=BODY),
         dict(n='talon', g='talon', x=34, y=41, rows=TALON),
