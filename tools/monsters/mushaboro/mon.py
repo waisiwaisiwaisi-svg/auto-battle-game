@@ -72,7 +72,6 @@ TORSO = [
     '..kYYYYYYYyyyyyyyyyk..',
     '..kkkkkkkkkkkkkkkkkk..',
 ]
-CRACK_ALT = None
 # 草摺（すそ広がり、すそは ぼろぼろ）
 SKIRT = [
     '...kkkkkkkkkkkkkkkkkkkkkk...',
@@ -293,17 +292,6 @@ SLASH = [
     '..........kCDk........',
     '.........kDkk.........',
     '.........kk...........',
-]
-TRAIL = [
-    '..........kk',
-    '.........kCk',
-    '........kCDk',
-    '.......kCDk.',
-    '......kCDk..',
-    '.....kCDk...',
-    'kkkkkCDk....',
-    'kCCCDDk.....',
-    '.kkkkk......',
 ]
 
 # ダウン：中身が 抜けて よろいが くずれ落ちる
