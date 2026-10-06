@@ -11,6 +11,7 @@ namespace PixelMonsterArena
         public string sid;
         public int lvl;
         public int exp;
+        public List<string> moves = new List<string>();
     }
 
     /// <summary>セーブデータ。PlayerPrefs に JSON で保存する。</summary>

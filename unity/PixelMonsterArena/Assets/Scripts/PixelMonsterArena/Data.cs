@@ -10,19 +10,41 @@ namespace PixelMonsterArena
         public TypeInfo(string n, string hex) { N = n; C = Util.Hex(hex); }
     }
 
-    /// <summary>わざ。K: melee=近接 / proj=弾 / beam=直線 / aoe=自分の周囲 / strike=相手の足元 / dash=突進</summary>
+    /// <summary>わざの追加効果</summary>
+    public class MoveEffect
+    {
+        public string St;              // brn / par / psn / tox / frz
+        public int StCh, Flinch, Drain, Recoil, Heal, FoeCh;
+        public Dictionary<string, int> Self, Foe; // 能力ランク変化
+        public bool Seed;
+    }
+
+    /// <summary>
+    /// わざ。K: melee=近接 / swipe=前方おうぎ / proj=弾 / beam=直線 / cone=おうぎ / aoe=自分の周囲 / strike=相手の足元 /
+    /// multi=複数の範囲 / dash=突進 / それ以外は補助。Aim: lock=相手をねらう（命中100）, dir=方向・範囲指定（命中100未満）
+    /// </summary>
     public class Move
     {
-        public string Id, N, T, K;
-        public float Pow, Cd, Wind, Spd, Spread, R, Len, Rad, Wid, Homing, Life;
-        public int Cnt = 1;
+        public string Id, N, T, K, Cat, Aim, Pattern, Look, Sp, Hz, Fld, Ctr;
+        public int Acc, Prio, Power, Cnt = 1, Hits, BurstMin, BurstMax;
+        public float Pow, Cd, Wind, Spd, Spread, R, Len, Rad, Wid, Half, Homing, Life, Mult;
+        public bool SwitchOut, Sucker, UseDef, UseFoeAtk, HitDef, Crit, Ohko, Rampage, RapidSpin, HealBlock, SuperVsWater, ConfuseIfBoosted, Fakeout;
+        public MoveEffect E;
+        public bool Damaging => Cat != "stat";
+        public bool IsZone => K == "aoe" || K == "strike" || K == "multi" || K == "cone" || K == "swipe" || K == "beam" || K == "dash";
+    }
+
+    public struct LearnEntry
+    {
+        public readonly int Lv; public readonly string Id;
+        public LearnEntry(int lv, string id) { Lv = lv; Id = id; }
     }
 
     public class Species
     {
-        public string Id, N, Type, Style, Desc;
+        public string Id, N, Type, Type2, Style, Desc;
         public int Hp, Atk, Def, Spd;
-        public string[] Moves;
+        public LearnEntry[] Learn;
         public float Catch;
         public bool Rare;
         public Dictionary<char, string> Pal;
@@ -39,11 +61,6 @@ namespace PixelMonsterArena
 
     public static partial class Data
     {
-        /// <summary>見た目を大きくしたぶん、距離・速さも K 倍にそろえる（index.html と同じ）</summary>
-        public const float K = 1.6f;
-        /// <summary>足元から体の中心までの高さ</summary>
-        public const float Body = 22f;
-
         public static readonly string[] Starters = { "hinokon", "mizupuku", "happamogu" };
         public static readonly string[] Fields = { "grass", "dirt", "concrete", "water" };
         public static readonly Dictionary<string, string> FieldNames = new Dictionary<string, string>
@@ -52,19 +69,43 @@ namespace PixelMonsterArena
         };
         static readonly string[] CupNames = { "ルーキーカップ", "スーパーカップ", "マスターカップ", "レジェンドカップ" };
 
-        static bool _scaled;
-        public static void Init()
-        {
-            if (_scaled) return;
-            _scaled = true;
-            foreach (var m in Moves.Values) { m.Len *= K; m.Rad *= K; m.Wid *= K; m.Spd *= K; m.R *= K; }
-        }
-
         public static float Eff(string moveType, string defType)
         {
             if (Chart.TryGetValue(moveType, out var row) && row.TryGetValue(defType, out var v)) return v;
             return 1f;
         }
+        /// <summary>2タイプなら掛け算</summary>
+        public static float EffVs(string moveType, Species sp) => Eff(moveType, sp.Type) * (string.IsNullOrEmpty(sp.Type2) ? 1 : Eff(moveType, sp.Type2));
+
+        public static List<string> Learned(MonData m)
+        {
+            var list = new List<string>();
+            foreach (var e in Species[m.sid].Learn) if (e.Lv <= m.lvl) list.Add(e.Id);
+            return list;
+        }
+
+        /// <summary>そうび中のわざ（最大4つ）。未設定なら おぼえた順の さいごの4つ</summary>
+        public static List<string> Equipped(MonData m)
+        {
+            var L = Learned(m);
+            if (m.moves == null || m.moves.Count == 0) m.moves = L.GetRange(Mathf.Max(0, L.Count - 4), Mathf.Min(4, L.Count));
+            m.moves = m.moves.FindAll(L.Contains);
+            if (m.moves.Count > 4) m.moves = m.moves.GetRange(0, 4);
+            if (m.moves.Count == 0) m.moves = L.GetRange(Mathf.Max(0, L.Count - 4), Mathf.Min(4, L.Count));
+            return m.moves;
+        }
+
+        /// <summary>あいての わざ：おぼえている中から ランダムに4つ（こうげきわざを 2つ以上）</summary>
+        public static List<string> PickMoves(MonData m)
+        {
+            var L = Learned(m);
+            var atk = L.FindAll(id => Moves[id].Damaging); var sup = L.FindAll(id => !Moves[id].Damaging);
+            Shuffle(atk); Shuffle(sup);
+            var res = atk.GetRange(0, Mathf.Min(atk.Count, Mathf.Max(2, 4 - Mathf.Min(2, sup.Count))));
+            res.AddRange(sup);
+            return res.GetRange(0, Mathf.Min(4, res.Count));
+        }
+        static void Shuffle<T>(List<T> a) { for (int i = a.Count - 1; i > 0; i--) { int j = Util.RandI(0, i); (a[i], a[j]) = (a[j], a[i]); } }
 
         public static string CupName(int tier) => tier < CupNames.Length ? CupNames[tier] : $"レジェンドカップ {tier - 2}";
         public static int RoundLv(Round r, int tier) => r.Lv + tier * 8;

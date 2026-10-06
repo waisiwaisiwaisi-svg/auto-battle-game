@@ -60,6 +60,11 @@ python3 -m http.server 8000
 
 ビルドは不要です。`.nojekyll` を置いているので そのまま配信されます。
 
+## Unity 版
+
+`unity/PixelMonsterArena` に Unity 6 用のプロジェクトがあります。ひらきかた・ビルド方法は [unity/README.md](unity/README.md) を見てください。
+ブラウザ版と同じデータ（`index.html` から自動生成）で動きます。
+
 ## 前作
 
 `duel.html` は 前のバージョン（スタンスだけを切り替える オート対戦「Pixel Stance Duel」）です。
