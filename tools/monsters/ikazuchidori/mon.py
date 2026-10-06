@@ -127,6 +127,43 @@ TALON = [
     '.k..k..k.',
 ]
 
+SPARK = [  # ため：冠の 避雷針に 放電
+    '..k.....k..',
+    '.kYk...kEk.',
+    'kYwYk.kEwEk',
+    '.kYk...kEk.',
+    '..k..k..k..',
+    '....kYk....',
+    '...kYwYk...',
+    '....kYk....',
+    '.....k.....',
+]
+BOLT = [  # 決め：くちばしから 稲妻
+    '..................kk......',
+    '.................kYwk.....',
+    'kkk.............kYwk......',
+    'kwYkk.....kk...kYwk.......',
+    '.kkwYkk..kYwk.kYwwkkkkk...',
+    '...kkwYkkYwwkkYwwYYYYwwk..',
+    '.....kkwwwwYYwwwkkkkkYwwk.',
+    '.......kkYwwkkkk....kkYwwk',
+    '.........kYwk.........kYwk',
+    '..........kYk..........kYk',
+    '...........k............k.',
+]
+BURST = [
+    '...k...k...',
+    '..kEk.kYk..',
+    'k.kwEkwYk.k',
+    'kEkkwwwkkYk',
+    '.kEwwwwwYk.',
+    'kkwwwwwwwkk',
+    '.kYwwwwwEk.',
+    'kYkkwwwkkEk',
+    'k.kYkwkEk.k',
+    '..kYk.kEk..',
+    '...k...k...',
+]
 UP, MID, DN = 'idle0|blink|walk0|atk0', 'idle1|idle3|walk1|walk3|atk2|hit|ko', 'idle2|walk2|atk1'
 MANE = [
     '....kkk..kkk....',
@@ -150,16 +187,28 @@ def layers():
         dict(n='mane', g='head', x=35, y=24, rows=MANE),
         dict(n='head', g='head', x=40, y=10, rows=HEAD),
         dict(n='eye', g='head', x=44, y=18, rows=EYE, alt=EYE_ALT),
+        dict(n='spark', g='head', x=37, y=0, rows=SPARK, only='atk0'),
+        dict(n='bolt', g='fx', x=51, y=13, rows=BOLT, only='atk1'),
+        dict(n='burst', g='fx', x=60, y=12, rows=BURST, only='atk2'),
         dict(n='wingF_up', g='wingF', x=6, y=9, rows=WING_UP, only=UP),
         dict(n='wingF_mid', g='wingF', x=-3, y=18, rows=WING_MID, only=MID),
         dict(n='wingF_dn', g='wingF', x=-3, y=33, rows=WING_DN, only=DN),
     ]
 
 FRAMES = {
-    'idle0': {}, 'idle1': {'root': (0, 1)}, 'idle2': {'root': (0, 2)}, 'idle3': {'root': (0, 1)},
+    'idle0': {},
+    'idle1': {'root': (0, 1)},
+    'idle2': {'root': (0, 2), 'talon': (0, -1)},
+    'idle3': {'root': (0, 1)},
     'blink': {},
-    'walk0': {'root': (0, -1)}, 'walk1': {}, 'walk2': {'root': (0, 1)}, 'walk3': {},
-    'atk0': {'root': (-3, -2)}, 'atk1': {'root': (3, 1)}, 'atk2': {'root': (5, 1)},
-    'hit': {'root': (-4, 0)}, 'ko': {'root': (0, 9)},
+    'walk0': {'root': (0, -1)},
+    'walk1': {},
+    'walk2': {'root': (0, 1), 'talon': (-1, -1), 'tail': (0, -1)},
+    'walk3': {},
+    'atk0': {'root': (-3, -2), 'head': (-1, 0), 'talon': (1, 0)},
+    'atk1': {'root': (2, 1), 'head': (2, 1), 'talon': (2, -1)},
+    'atk2': {'root': (4, 1), 'head': (1, 1)},
+    'hit': {'root': (-4, 0), 'head': (-1, -1), 'talon': (1, 0), 'tail': (1, 0)},
+    'ko': {'root': (-2, 6), 'head': (3, 4), 'talon': (0, -2), 'tail': (0, -3)},
 }
 PARENT = {'head': 'body', 'tail': 'body', 'talon': 'body', 'wingF': 'body', 'wingB': 'body', 'body': 'root', 'fx': 'root'}
