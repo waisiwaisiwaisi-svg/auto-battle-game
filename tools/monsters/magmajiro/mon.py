@@ -3,7 +3,7 @@ PAL = {
     'k': '#101018', 'l': '#4a2230',
     'R': '#a898b4', 'Q': '#62527a', 'P': '#382c48',
     'Y': '#ffe066', 'O': '#ff7a22',
-    'F': '#fad6a4', 'G': '#d8965e', 'H': '#9a5a38',
+    'F': '#e8b47c', 'G': '#b8743e', 'H': '#6e3a24',
     'w': '#ffffff', 'n': '#f08aa0',
 }
 LIGHT = set('RFYw')
@@ -50,27 +50,32 @@ def shell(hot=False):
     return [''.join(r) for r in g]
 
 HEAD = [
-    '......kkkkk',
-    '....kkRRRQQkk',
-    '...kRRQQQQQPk',
-    '...kRQQQQQQPPk',
-    '..kPQQQQQQPPPk',
-    '..klllllllllllk',
-    '.kFGGGGGGGGGGGGk',
-    '.kFGGGGGG...GGGGk',
-    '.kFGGGGGG...GGGGGk',
-    '.kFGGGGGG...GGGGGGGk',
-    '.kFGGGGGGGGGGGGGGGGGk',
-    '.kGGGGGGGGGGGGGGGGGGnk',
-    '..kGGGGGGGGGGlllGGGHk',
-    '..kHGGGGGGGGGGGGHHHk',
-    '...kHHGGGGGGHHHkk',
-    '...kkHHHHHHHkk',
-    '.....kkkkkkk',
+    '......kkkkkkk...........',
+    '....kkRRRRRQQkk.........',
+    '...kRRRRQQQQQQPkk.......',
+    '..kRRQQQQQQQQQQPPkk.....',
+    '.kRQQQQQQQQQQQQQPPPkk...',
+    '.kQQQQQQQQQQQQQQQQPPPkk.',
+    'kPQQQQQQQPPPPPPPPPPPPPPk',
+    'kPPQQQPPkkkkkkkkkkkkkkk.',
+    '.kPPPPkHHHk.....kHHHHk..',
+    '.kHkkkHGGGHkkkkkHGGGGGk.',
+    '.kHGOOGGGGGGGGGGGGGGGGkk',
+    '.kHGGOOGGGGGGGGGGGGGGGHk',
+    '.kHGGGGGGGGGGGkkkkkkkkk.',
+    '.kHGGGGGkkkkkkwGwGGwGk..',
+    '..kHGGGGGGGGGGGGGGGHk...',
+    '..kHHHGGGGGGGGGHHHk.....',
+    '...kkHHHHHHHHHHHkk......',
+    '.....kkkkkkkkkkk........',
 ]
-EYE = ['wkk', 'kkk', 'kkk']
-EYE_ALT = {'blink': ['GGG', 'kkk', 'GGG'], 'hit|atk0': ['kkG', 'GGk', 'kkG'], 'ko': ['kGk', 'GkG', 'kGk']}
-EAR = ['...kkk', '..kFGGk', '.kFnnGk', '.kFnnGHk', '.kFnnGHk', '.kGnnGHk', '..kGGHk', '...kkk']
+# するどい 目：つり上がった まゆ＋溶岩色の 虹彩＋たての ひとみ
+EYE = ['YYYkO']
+EYE_ALT = {'blink': ['kkkkk'], 'hit': ['kOkOk'], 'atk0|atk1|atk2': ['YYYYk'], 'ko': ['HkHkH']}
+NHORN = ['...kk', '..kRk', '.kRQk', 'kRQPk', 'kRPPk']
+SPIKE = ['k.....', 'kYk...', '.kOkk.', '.kRQPk', '.kRQPk', 'kRQQPk', 'kRQPPk']
+# 耳の かわりに 後ろへ 反った 岩の つの（先が 溶岩）
+EAR = ['kk......', 'kOkk....', '.kRQkk..', '.kRQQPk.', '..kRQQPk', '..kRQPPk', '...kRPk.', '....kk..']
 LEG = ['.kkkkk', 'kFGGGHk', 'kFGGGHk', 'kGGGGHk', 'kGGGHHk', 'kGGGHHHk', 'kHHHHHHk', '.kwkwkk']
 BELLY = [
     '.kHHHHHHHHHHHHHHHHHHHHHHHHHHk',
@@ -148,9 +153,14 @@ def layers():
         dict(n='legH', g='legB', x=14, y=42, rows=LEG, not_=NOT_BALL),
         dict(n='legF', g='legA', x=40, y=42, rows=LEG, not_=NOT_BALL),
         dict(n='shell', g='body', x=8, y=16, rows=outline_shell(SHELL), alt={'idle1|idle3|walk1|walk3': outline_shell(SHELL_HOT)}, not_=NOT_BALL),
-        dict(n='ear', g='ear', x=42, y=21, rows=EAR, not_=NOT_BALL),
-        dict(n='head', g='head', x=39, y=26, rows=HEAD, not_=NOT_BALL),
-        dict(n='eye', g='head', x=48, y=33, rows=EYE, alt=EYE_ALT, not_=NOT_BALL),
+        dict(n='sp1', g='body', x=10, y=15, rows=SPIKE, not_=NOT_BALL),
+        dict(n='sp2', g='body', x=16, y=11, rows=SPIKE, not_=NOT_BALL),
+        dict(n='sp3', g='body', x=23, y=9, rows=SPIKE, not_=NOT_BALL),
+        dict(n='sp4', g='body', x=30, y=11, rows=SPIKE, not_=NOT_BALL),
+                dict(n='head', g='head', x=40, y=28, rows=HEAD, not_=NOT_BALL),
+        dict(n='ear', g='ear', x=36, y=23, rows=EAR, not_=NOT_BALL),
+        dict(n='nhorn', g='head', x=59, y=30, rows=NHORN, not_=NOT_BALL),
+        dict(n='eye', g='head', x=51, y=36, rows=EYE, alt=EYE_ALT, not_=NOT_BALL),
         dict(n='ball', g='root', x=14, y=20, rows=ball(), alt={'atk2': ball(True, .28)}, only=NOT_BALL),
     ]
 
