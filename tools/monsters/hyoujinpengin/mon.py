@@ -187,7 +187,7 @@ def blade(mode='idle', back=False):
     if back:                # 奥の ひれ：後ろ下へ のびる 刃
         poly(p, [(27, 40), (22, 40), (14, 51), (8, 57), (10, 59), (17, 55), (26, 47)], '1')
     elif mode == 'idle':    # 下へ 長く のびる 刃（前へ 反る）
-        poly(p, [(32, 39), (38, 38), (48, 49), (55, 56), (55, 58), (52, 59), (43, 54), (33, 47)], '1')
+        poly(p, [(33, 39), (38, 38), (49, 48), (57, 55), (58, 58), (53, 58), (44, 52), (33, 45)], '1')
     elif mode == 'up':      # ため：後ろへ ふりかぶる
         poly(p, [(30, 41), (35, 40), (30, 30), (24, 22), (22, 24), (26, 33), (29, 44)], '1')
     else:                   # 攻撃：前へ まっすぐ 突き出す
@@ -197,6 +197,8 @@ def blade(mode='idle', back=False):
     for y in range(64):                 # 刃の ふち（下と 前）は 白く 光る 線
         for x in range(64):
             if s[y][x] != '.' and at(s, x, y + 1) == '.' and (x > 38 or back): g[y][x] = 'w' if not back else 'S'
+    if not back and mode == 'idle':       # 刃の 先の ぎざぎざ（トウピック）
+        dots(g, 'k', [(58, 56), (57, 57)]); dots(g, 'T', [(56, 56)])
     j = (24, 42) if back else (35, 42)                         # 付け根の 鋲（胴に 食いこむ 関節）
     dots(g, 'U', [(j[0], j[1]), (j[0] + 1, j[1] + 1), (j[0], j[1] + 1)]); dots(g, 'S', [(j[0] - 1, j[1] - 1)])
     return g
@@ -213,7 +215,7 @@ SLASH = [
 
 def ko_pose():
     c = G(); stamp(c, CREST, 24, 15)
-    return fallen(stack(blade('idle', True), leg(34, True), body(), leg(25, False), head('ko'), c, blade()), cw=True)
+    return fallen(stack(blade('idle', True), leg(35, True), body(), leg(28, False), head('ko'), c, blade()), cw=True)
 KO = None
 def layers():
     global KO
@@ -221,9 +223,9 @@ def layers():
     H = {m: rows_of(head(m)) for m in ('idle', 'blink', 'atk', 'hit', 'ko')}
     return [
         L('bladeB', 'finB', blade('idle', True), not_='ko'),
-        L('legB', 'legB', leg(34, True), not_='ko'),
+        L('legB', 'legB', leg(35, True), not_='ko'),
         L('body', 'body', body(), not_='ko'),
-        L('legA', 'legA', leg(25, False), not_='ko'),
+        L('legA', 'legA', leg(28, False), not_='ko'),
         L('head', 'head', head(), alt={'blink': H['blink'], 'atk0|atk1|atk2': H['atk'], 'hit': H['hit']}, not_='ko'),
         dict(n='crest', g='head', x=24, y=15, rows=CREST, not_='ko'),
         L('blade', 'fin', blade(), alt={'atk1|atk2': rows_of(blade('atk'))}, not_='ko'),
