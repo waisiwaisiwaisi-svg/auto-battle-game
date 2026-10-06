@@ -94,15 +94,15 @@ def leg(path, ramp=CARA):
     g = ol(g)
     return g
 LEGS = {
-    'n1': [(44, 45), (53, 38), (55, 59)], 'n2': [(42, 48), (48, 48), (49, 59)],
-    'n3': [(36, 48), (30, 48), (29, 59)], 'n4': [(34, 45), (24, 40), (19, 59)],
+    'n1': [(44, 45), (52, 38), (53, 59)], 'n2': [(42, 48), (48, 48), (49, 59)],
+    'n3': [(36, 48), (30, 48), (29, 59)], 'n4': [(34, 45), (25, 40), (21, 59)],
 }
 
 # ---- ホオズキの 腹（見せ所）：つけ根が 広く、先が 後ろ上へ とがる ちょうちん形。すじの 間の やぶれ目から 霊火 ----
-TIP = (8, 19); STEM = (33, 36)
+TIP = (10, 19); STEM = (33, 36)
 def lantern(glow=0):
     g = G(64, 64)
-    m = G(64, 64); pix.ellipse(m, 21, 31, 12, 11, '#'); poly(m, [(12, 25), (TIP[0], TIP[1]), (10, 19), (18, 21)], '#')
+    m = G(64, 64); pix.ellipse(m, 21, 31, 12, 11, '#'); poly(m, [(13, 25), (TIP[0], TIP[1]), (12, 19), (18, 21)], '#')
     for y in range(64):
         for x in range(64):
             if m[y][x] == '#':
@@ -149,7 +149,7 @@ EYE = ['kkkk.....', '.kkkkkk..', '..kwSSkSk', '..kTTTkTk', '...kkkkk.']
 EYE_ALT = {'blink': ['kkkk.....', '.kkkkkk..', '.........', '..kkkkkkk', '.........'],
            'hit': ['.........', '..kk...k.', '...kk.kk.', '..kk...kk', '.........'],
            'atk0|atk1|atk2': ['kkkk.....', '.kkkkkk..', '..kwwSkSk', '..kSSTkTk', '...kkkkk.'],
-           'ko': ['.........', '..k..k...', '...kk....', '...kk....', '..k..k...']}
+           'ko': ['.........', '..D..D...', '...DD....', '...DD....', '..D..D...']}
 SUB = ['kSk.kSk', '.k...k.']
 WISP = [['..k..', '.kSk.', '.kSSk', 'kSwSk', 'kSwSk', '.kkk.'], ['.k...', '.kSk.', 'kSSk.', 'kSwSk', 'kSwSk', '.kkk.']]
 BITE = [['....kk', '..kkSk', '.kSSk.', 'kSwk..', 'kSk...', '.k....'], ['..k...', '.kSk..', 'kSwSkk', '.kSSSk', '..kkk.']]
@@ -159,13 +159,13 @@ NB = 'atk1|atk2'
 def layers():
     LG = {k: leg(v) for k, v in LEGS.items() if k[0] == 'n'}
     return [
-        L('lantern', 'abd', lantern(), alt={'atk0|atk1|idle1|idle3': lantern(1)}, x=-1, y=3),
-        L('ped', 'abd', pedicel(), x=-1, y=3),
+        L('lantern', 'abd', lantern(), alt={'atk0|atk1|idle1|idle3': lantern(1)}, x=1, y=3),
+        L('ped', 'abd', pedicel(), x=0, y=3),
         L('n4', 'legA', LG['n4']), L('n3', 'legB', LG['n3']), L('n2', 'legA', LG['n2']), L('n1', 'legB', LG['n1']),
         L('head', 'head', head(), alt={NB: head(1)}, x=-1, y=4),
         dict(n='eye', g='head', x=40, y=34, rows=EYE, alt=EYE_ALT),
         dict(n='sub', g='head', x=40, y=32, rows=SUB, not_='blink|ko|hit'),
-        dict(n='wisp', g='fx', x=13, y=13, rows=WISP[0], alt={'idle1|idle3|walk1|walk3': WISP[1]}, not_='ko'),
+        dict(n='wisp', g='fx', x=14, y=15, rows=WISP[0], alt={'idle1|idle3|walk1|walk3': WISP[1]}, not_='ko'),
         dict(n='bite', g='fx2', x=52, y=41, rows=BITE[0], alt={'atk2': BITE[1]}, only=NB),
     ]
 FRAMES = {

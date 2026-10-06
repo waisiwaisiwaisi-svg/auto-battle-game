@@ -93,13 +93,13 @@ def body():
 # ---- 翼（たたんで 少し 立てる）：先は 灰青の 風切り ----
 def wing(up=0):
     g = G(64, 64)
-    poly(g, [(17, 39 - up), (27, 38), (33, 42), (30, 48), (21, 51), (12, 50), (10, 46 - up)], 'B')
+    poly(g, [(17, 39 - up), (27, 38), (33, 42), (30, 48), (21, 51), (12, 50), (12, 46 - up)], 'B')
     edge(g, {'B': WNG}, 2, 1, 2, 1)
     # 風切り羽（3枚、後ろへ とがる）
     for i, (y0) in enumerate((43, 46, 49)):
         y0 -= up if i == 0 else 0
-        poly(g, [(16, y0 - 2), (7 - i, y0 - 1 + i), (16, y0 + 2)], 'C')
-        hline(g, 'T', 9, 15, y0 + 1)
+        poly(g, [(16, y0 - 2), (11 - i, y0 - 1 + i), (16, y0 + 2)], 'C')
+        hline(g, 'T', 12, 15, y0 + 1)
     for (x0, y0, x1, y1) in ((17, 44, 28, 42), (17, 47, 27, 46)):
         pix.line(g, x0, y0, x1, y1, 'C')
     return ol(g)
@@ -161,7 +161,7 @@ NB = 'atk1|atk2'
 def layers():
     return [
         dict(n='legB', g='legB', x=30, y=54, rows=dark(LEG)),
-        dict(n='tail', g='body', x=6, y=45, rows=TAIL),
+        dict(n='tail', g='body', x=9, y=45, rows=TAIL),
         L('body', 'body', body()),
         dict(n='legA', g='legA', x=21, y=54, rows=LEG_N),
         L('wing', 'wing', wing(), alt={'idle1|idle3|walk1|walk3|atk0': wing(2)}),

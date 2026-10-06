@@ -86,7 +86,7 @@ DARK = {'A': 'B', 'B': 'C', 'C': 'C'}
 def head(open_=False):
     def d(p):
         ellipse(p, 27, 23, 12, 10, '1')
-        ellipse(p, 35, 29, 10.5, 7, '1')
+        ellipse(p, 36, 28, 12, 7.5, '1')
     def post(s):
         # 溶けた ろうの ふち（てっぺんの 溶け口）と、たれる すじ
         for (x, n) in ((18, 5), (22, 8), (29, 6), (33, 3)):
@@ -96,14 +96,13 @@ def head(open_=False):
             if s[15 + n][x] != '.': s[15 + n][x] = 'B'
         # 口：牙の ならぶ さけた 口
         if open_:
-            put(s, ['kkkkkkkkk', 'kwPwPPwPw', 'kPPPPPPPP', 'kPwPPwPwk', '.kkkkkkk.'], 37, 30)
+            put(s, ['kkkkkkkkkk', 'kwPwPPwPwP', 'kPPPPPPPPP', 'kPwPPwPwkk', '.kkkkkkk..'], 38, 30)
         else:
-            put(s, ['kkkkkkkkk', '.wkwBwkwk', '..B.B.B..'], 37, 31)
-            dots(s, 'B', [(37, 32)])
+            put(s, ['kkkkkkkkkk', '.wkwBwkwBw', '..B.B.B.B.'], 38, 32)
     def post2(g):
         dots(g, 'k', [(25, 12), (25, 11), (26, 10)])          # しん
         if open_:
-            for y in range(30, 35): g[y][46] = 'k'
+            for y in range(30, 35): g[y][48] = 'k'
     return make(d, RAMP, lo=-.34, post=post, post2=post2)
 def dish():
     """首の 燭台の 皿（真ちゅうの 輪）"""
@@ -191,7 +190,7 @@ def layers():
         dict(n='n3', g='legB', x=0, y=0, rows=L['n3'], alt={'atk1|atk2': LA['n3']}),
         dict(n='head', g='head', x=0, y=0, rows=H, alt={'atk1|atk2': HO}),
         dict(n='dish', g='dish', x=0, y=0, rows=dish()),
-        dict(n='eye', g='head', x=36, y=21, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=36, y=20, rows=EYE, alt=EYE_ALT),
         dict(n='ball', g='root', x=52, y=18, rows=BALL, only='atk1'),
         dict(n='ball2', g='root', x=57, y=19, rows=BALL2, only='atk2'),
     ]

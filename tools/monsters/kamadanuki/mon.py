@@ -153,8 +153,8 @@ def head():
     return g
 # 目：白い 光＋金と だいだいの 虹彩＋たての ひとみ（くまどりの 中）。上に 太い まゆ
 EYE = ['kkkk....', '.kkkkkkk', '.kwYYkYk', '.kYOOkOk', '..kkkkk.']
-EYE_ALT = {'blink': ['kkkk....', '.kkkkkkk', '.DDDDDDD', '.kkkkkkk', '........'], 'hit': ['........', '.kk...kk', '..kk.kk.', '.kk...kk', '........'],
-           'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkYk', '.kYYOkOk', '..kkkkk.'], 'ko': ['........', '.k..k...', '..kk....', '..kk....', '.k..k...']}
+EYE_ALT = {'blink': ['kkkk....', '.kkkkkkk', '.DDDDDDD', '.kkkkkkk', '........'], 'hit': ['........', '.FF...FF', '..FF.FF.', '.FF...FF', '........'],
+           'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkYk', '.kYYOkOk', '..kkkkk.'], 'ko': ['........', '.F..F...', '..FF....', '..FF....', '.F..F...']}
 # 湯気の 一撃
 def steam(ph):
     g = G(80, 64)

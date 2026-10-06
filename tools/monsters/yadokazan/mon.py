@@ -201,11 +201,11 @@ SPARK2 = ['.O...O.', '..Y.Y..', 'O..Y..O', '..Y.Y..', '.O...O.']
 def layers():
     V = volcano(); VE = volcano(True); CL = claw('closed'); CO = claw('open'); H = head(); HO = head(True)
     return [
-        dict(n='smoke', g='smoke', x=-3, y=0, rows=smoke(0), alt={'idle1|walk1|blink': smoke(1), 'idle2|walk2': smoke(2), 'idle3|walk3|hit': smoke(3)}, not_='atk1|atk2|ko'),
-        dict(n='erupt', g='shell', x=-3, y=0, rows=eruption(), only='atk1|atk2'),
+        dict(n='smoke', g='smoke', x=-1, y=3, rows=smoke(0), alt={'idle1|walk1|blink': smoke(1), 'idle2|walk2': smoke(2), 'idle3|walk3|hit': smoke(3)}, not_='atk1|atk2|ko'),
+        dict(n='erupt', g='shell', x=-1, y=3, rows=eruption(), only='atk1|atk2'),
         dict(n='legF1', g='legB', x=-3, y=0, rows=leg([(35, 50), (32, 56), (31, 60)], True)),
         dict(n='legF2', g='legA', x=-3, y=0, rows=leg([(41, 51), (41, 56), (42, 60)], True)),
-        dict(n='shell', g='shell', x=-3, y=0, rows=V, alt={'idle1|idle3|walk1|walk3|atk1|atk2': VE}),
+        dict(n='shell', g='shell', x=-1, y=0, rows=V, alt={'idle1|idle3|walk1|walk3|atk1|atk2': VE}),
         dict(n='sclaw', g='body', x=-3, y=0, rows=small_claw()),
         dict(n='stalkF', g='head', x=-3, y=0, rows=stalk(True)),
         dict(n='eyeF', g='head', x=30, y=24, rows=EYEF, alt=EYEF_ALT),
