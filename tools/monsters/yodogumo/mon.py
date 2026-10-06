@@ -43,19 +43,15 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 
 # ---- 足：関節の 位置を 手で 決め、線で あたり → 2段の 陰影＋ひざの つや ----
 def leg(pts, far=False):
+    """デフォルメの 足：2ドットの 太さ。もも（1本目）は 上の 線が 明るく、すねは 右（下）の 線が 影"""
     g = pix.grid(72, 64)
-    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):   # デフォルメ：足は 2ドットの 太さ
-        pix.line(g, x0, y0, x1, y1, 'B')
-        if abs(x1 - x0) > abs(y1 - y0): pix.line(g, x0, y0 + 1, x1, y1 + 1, 'B')
-        else: pix.line(g, x0 + 1, y0, x1 + 1, y1, 'B')
+    for k, ((x0, y0), (x1, y1)) in enumerate(zip(pts, pts[1:])):
+        flat = abs(x1 - x0) > abs(y1 - y0)
+        a, b = ('A', 'B') if k == 0 else ('B', 'C')
+        if flat: pix.line(g, x0, y0 + 1, x1, y1 + 1, b); pix.line(g, x0, y0, x1, y1, a)
+        else: pix.line(g, x0 + 1, y0, x1 + 1, y1, b); pix.line(g, x0, y0, x1, y1, a)
     for (x, y) in pts[1:-1]:                       # ひざ：ふくらみと つや
-        g[y][x] = 'A'; g[y - 1][x] = 'A'; g[y][x + 1] = 'C'; g[y - 1][x + 1] = 'B'
-    for (x0, y0), (x1, y1) in zip(pts[1:], pts[2:]):   # すねの 下半分は 影
-        n = max(abs(x1 - x0), abs(y1 - y0))
-        for t in range(n // 2, n + 1):
-            x, y = x0 + round((x1 - x0) * t / n), y0 + round((y1 - y0) * t / n)
-            for (xx, yy) in ((x, y), (x + 1, y), (x, y + 1)):
-                if g[yy][xx] == 'B' and (xx > x or yy > y): g[yy][xx] = 'C'
+        g[y][x] = 'A'; g[y - 1][x] = 'A'; g[y][x + 1] = 'B'; g[y - 1][x + 1] = 'B'; g[y + 1][x + 1] = 'C'
     rows = pix.outline(pix.rows_of(g))[1:]
     rows = [r[1:] for r in rows]
     gg = pix.grid_of(rows)
@@ -65,16 +61,14 @@ def leg(pts, far=False):
     rows = pix.rows_of(gg)
     return dark(rows) if far else rows
 
-# デフォルメ：ひざを 低く、足を 短く（付け根は 頭胸部の 下に かくれる）
 # デフォルメ：足は 短く 太く。ひざは 体の りんかくの 外に 出して 見せる（付け根は 頭胸部の 下に かくれる）
-L1 = [(44, 45), (55, 34), (59, 43), (61, 58)]
+L1 = [(44, 45), (57, 34), (61, 44), (62, 58)]
 L1_UP = [(44, 44), (53, 30), (59, 26), (63, 29)]
-L2 = [(42, 46), (49, 32), (52, 44), (53, 58)]
-L3 = [(37, 46), (29, 32), (24, 45), (21, 58)]
-L4 = [(35, 47), (18, 35), (11, 46), (7, 58)]
-F1 = [(44, 44), (52, 33), (56, 45), (57, 57)]
-F3 = [(37, 44), (32, 34), (28, 46), (25, 57)]
-F4 = [(35, 45), (13, 38), (6, 48), (3, 54)]
+L2 = [(42, 46), (48, 31), (51, 44), (51, 58)]
+L3 = [(37, 46), (28, 31), (24, 45), (23, 58)]
+L4 = [(35, 47), (16, 34), (10, 46), (7, 58)]
+F3 = [(37, 44), (34, 33), (31, 46), (31, 57)]
+F4 = [(35, 45), (22, 33), (16, 46), (14, 57)]
 
 # ---- 腹：毒の ふくろが すけて 光る ----
 def abdomen(hot=False):
@@ -166,7 +160,6 @@ def layers():
         dict(n='f4', g='legB', x=0, y=0, rows=leg(F4, True)),
         dict(n='f3', g='legA', x=0, y=0, rows=leg(F3, True)),
 
-        dict(n='f1', g='legA', x=0, y=0, rows=leg(F1, True)),
         dict(n='abd', g='body', x=11, y=26, rows=abdomen(), alt={'idle1|idle3|walk1|walk3|' + A: abdomen(True)}),
         dict(n='l4', g='legA', x=0, y=0, rows=leg(L4)),
         dict(n='l3', g='legB', x=0, y=0, rows=leg(L3)),

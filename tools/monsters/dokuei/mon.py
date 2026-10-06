@@ -1,47 +1,79 @@
-# ドクエイ（どく・みず × エイ）手打ち GBA風
+# ドクエイ（どく・みず × エイ）手打ち GBA風・デフォルメ（2〜3頭身：前に 大きな 頭と つり目、つばさは 小さく、毒針の 尾は 大きい まま）
 META = dict(id='dokuei', name='ドクエイ', types=['poison', 'water'], base='エイ', size='M')
 PAL = {
     'k': '#101018', 'l': '#1c1a2a',
     'A': '#6e9e8c', 'B': '#3e6a62', 'D': '#22403e',
     'E': '#c8d8c0',
     'P': '#ff7ae0', 'p': '#c03aa8', 'q': '#6a1a6a',
-    'Y': '#ffe040',
+    'Y': '#ffe040', 'y': '#c08a10',
     'w': '#f4ecd8', 'n': '#b0a080',
     'c': '#a8f0ff',
 }
 LIGHT = set('AEPwYc')
-KEEP_BLACK = set('wYPp')
+KEEP_BLACK = set('wYyPp')
 
-# 体（つばさ）：右前へ とがった やじりの 形。奥の つばさは 上、手前の つばさは 下（裏の 白い ふちが 見える）
-DISC = [
-    '................kkkk.............................',
-    '.............kkkAAAAkkk..........................',
-    '............kAAAAAAAAAAkkk.......................',
-    '...........kAAAABBBBAAAAAAkk.....................',
-    '..........kAABBBBBBBBBBAAAAAkkk..................',
-    '.........kAABBBBBBBBBBBBBBAAAAAkkk...............',
-    '........kAABBBBBBBBBBBBBBBBBAAAAAAkkk............',
-    '.......kAABBBBBBBBBBBBBBBBBBBBBAAAAAAkk..........',
-    '......kAABBBBBBBBBBBBBBBBBBBBBBBBBAAAAAkk........',
-    '.....kAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBAAAAkk......',
-    '....kAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBAAAAk.....',
-    '...kAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBAAAkk...',
-    '..kAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBAAAkk.',
-    '.kAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAk',
-    'kEEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDEEEEEk',
-    '.kEEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBDDEEEEEkkk.',
-    '..kEEDBBBBBBBBBBBBBBBBBBBBBBBBBBBBBDDDEEEEEkk....',
-    '...kEEDBBBBBBBBBBBBBBBBBBBBBBBBBDDDEEEEEkkk......',
-    '....kEEDBBBBBBBBBBBBBBBBBBBBBDDDEEEEEEkk.........',
-    '.....kEEDBBBBBBBBBBBBBBBBBDDDEEEEEEkkk...........',
-    '......kEEDBBBBBBBBBBBBBDDDEEEEEEkkk..............',
-    '.......kEEDBBBBBBBBBDDDEEEEEEkkk.................',
-    '........kEEDDBBBBDDDEEEEEEkkk....................',
-    '.........kEEEDDDDEEEEEEkkk.......................',
-    '..........kEEEEEEEEEkkk..........................',
-    '...........kkEEEEkkk.............................',
-    '.............kkkk................................',
-]
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
+from pix import grid, poly, outline, rows_of
+def _run(g, x, y, dx, dy, ch):
+    n = 0
+    while 0 <= y < len(g) and 0 <= x < len(g[0]) and g[y][x] == ch: n += 1; x += dx; y += dy
+    return n
+# 体（つばさ）：デフォルメで 小さく。奥の つばさは 上、手前の つばさは 下（裏の 白い ふちが 見える）
+def disc():
+    g = grid(64, 64)
+    poly(g, [(10, 46.5), (18, 39), (27, 35), (36, 34), (42, 37), (44, 44), (10, 47)], '1')          # 奥の つばさ
+    poly(g, [(10, 46), (44, 44), (45, 47), (38, 52), (29, 56), (22, 57), (16, 54)], '2')            # 手前の つばさ
+    out = [r[:] for r in g]
+    for y in range(64):
+        for x in range(64):
+            c = g[y][x]
+            if c == '1':
+                up = _run(g, x, y, 0, -1, '1'); dn = _run(g, x, y, 0, 1, '1')
+                out[y][x] = 'A' if up <= 1 else 'D' if dn <= 1 else 'B'
+            elif c == '2':
+                up = _run(g, x, y, 0, -1, '2'); dn = _run(g, x, y, 0, 1, '2')
+                out[y][x] = 'A' if up <= 1 else 'E' if dn <= 2 else 'D' if dn == 3 else 'B'
+    # 奥の つばさの 光の すじ（ひれの 骨）
+    for x, y in ((22, 39), (23, 40), (24, 41), (30, 37), (31, 38), (32, 39)):
+        if out[y][x] == 'B': out[y][x] = 'A'
+    ys = [y for y in range(64) if any(c != '.' for c in out[y])]; xs = [x for x in range(64) if any(out[y][x] != '.' for y in range(64))]
+    return xs[0] - 1, ys[0] - 1, outline(rows_of([r[xs[0]:xs[-1] + 1] for r in out[ys[0]:ys[-1] + 1]]))
+DX, DY, DISC = disc()
+SEG = [(0, 12), (12, 24), (24, 40)]   # つばさの 波うち用（列で 3つに 分ける）
+def cut(rows, x0, x1): return [r[x0:x1] for r in rows]
+
+# 頭（デフォルメで 大きく）：まるい 頭に 前へ つき出た 頭びれ（角の ような ひれ）、背の 上の つり目、下に 牙の 口
+def head():
+    g = grid(64, 64)
+    poly(g, [(37, 42), (39, 36), (44, 32), (51, 31), (56, 33), (60, 37), (61.5, 42), (60, 47), (55, 50.5), (47, 51.5), (41, 49.5)], '1')
+    poly(g, [(56, 33), (60, 30), (63.5, 30), (61, 34), (59, 36)], '1')                                # 奥の 頭びれ
+    poly(g, [(58, 44), (63.5, 46), (63, 49), (58, 48)], '1')                                         # 手前の 頭びれ
+    out = [r[:] for r in g]
+    for y in range(64):
+        for x in range(64):
+            if g[y][x] != '1': continue
+            up = _run(g, x, y, 0, -1, '1'); lf = _run(g, x, y, -1, 0, '1'); dn = _run(g, x, y, 0, 1, '1'); rt = _run(g, x, y, 1, 0, '1')
+            out[y][x] = 'D' if (dn <= 2 or rt <= 1) else 'A' if (up <= 2 or lf <= 1) else 'B'
+    def P(pts, ch):
+        for x, y in pts: out[y][x] = ch
+    # 背骨の 稜線（光る すじ）
+    P([(40, 41), (41, 40), (42, 39)], 'A')
+    # まゆの ひさし（黒い 線、目の 上で つり上がる）
+    P([(42, 35), (43, 35), (44, 36), (45, 36), (46, 36), (47, 36), (48, 37), (49, 37)], 'k')
+    P([(52, 34), (53, 34), (54, 34), (55, 35), (56, 35)], 'k')
+    # 毒の いぼ（頭の 上）
+    P([(47, 33), (50, 33)], 'p'); P([(46, 33), (49, 33)], 'P')
+    # 口：下がわに 横に さけた 口と 牙、白い あご
+    P([(46, 47), (47, 47), (48, 47), (49, 47), (50, 47), (51, 47), (52, 47), (53, 46), (54, 46), (55, 46), (56, 46), (57, 45), (58, 45)], 'k')
+    P([(48, 48), (51, 48), (54, 47), (57, 46)], 'w')
+    for x in range(44, 57):
+        for y in range(48, 52):
+            if out[y][x] in 'BD' and y >= 49: out[y][x] = 'E'
+    ys = [y for y in range(64) if any(c != '.' for c in out[y])]; xs = [x for x in range(64) if any(out[y][x] != '.' for y in range(64))]
+    return xs[0] - 1, ys[0] - 1, outline(rows_of([r[xs[0]:xs[-1] + 1] for r in out[ys[0]:ys[-1] + 1]]))
+HX, HY, HEAD = head()
+
 # 尾：うしろへ 出て、さそりの ように 上へ 反り返る
 TAIL = [
     '..............kkkk.',
@@ -144,11 +176,12 @@ BARB_D = [
 # 毒の ふくろ（つばさに 光る）
 GL = ['Pp', 'pq']
 GL_HOT = ['PP', 'Pp']
-# 目：背の 上に 突き出た 金の つり目
-EYE = ['kk...', 'kkkkk', '.kYYk', '..kkk']
-EYE_ALT = {'blink': ['kk...', 'kkkkk', '.kkkk', '.....'], 'atk0|atk1|atk2': ['kk...', 'kkkkk', 'kYYYk', '.kkkk'], 'hit': ['kk...', 'kkkkk', '.kYkk', '..k..'], 'ko': ['.....', 'k.k..', '.k...', 'k.k..']}
-EYE2_ALT = {'blink': ['kkkk.', '....'], 'atk0|atk1|atk2': ['kYYk', 'kYk.'], 'hit': ['kkYk', '.k..'], 'ko': ['k.k.', '.k..']}
-EYE2 = ['kYYk', '.kk.']
+# 目：まゆの ひさしの 下の 金の つり目（白い 光＋金 2段＋たての ひとみ）。手前は 大きく、奥は 小さく
+EYE = ['kwYYkYk', 'kYyykyk', '.kkyykk']
+EYE_ALT = {'blink': ['BBBBBBB', 'kkkkkkk', '.BBBBBB'], 'atk0|atk1|atk2': ['kwwYkYk', 'kYYYkYk', '.kkYYkk'],
+           'hit': ['BkkBBBB', 'BBBkkkk', 'BkkBBBB'], 'ko': ['BkBBkBB', 'BBkkBBB', 'BkBBkBB']}
+EYE2 = ['wYkY', 'yykk']
+EYE2_ALT = {'blink': ['AAAA', 'kkkk'], 'atk0|atk1|atk2': ['wwkY', 'YYkk'], 'hit': ['kkAA', 'AAkk'], 'ko': ['kAkA', 'AkAA']}
 # 毒しぶき
 SPRAY = [
     '.P...p..',
@@ -162,33 +195,33 @@ DRIP = ['P', 'p']
 DUST = [['c....c', '.c..c.'], ['.c..c.', 'c....c']]
 def layers():
     L = [
-        dict(n='tail', g='tail', x=2, y=19, rows=TAIL, not_='atk1|atk2'),
-        dict(n='barb', g='tail', x=17, y=17, rows=BARB, alt={'atk0': BARB_HOT}, not_='atk1|atk2'),
-        dict(n='drip', g='tail', x=22, y=24, rows=DRIP, only='idle2|idle3|walk1|walk3'),
+        dict(n='tail', g='tail', x=2, y=17, rows=TAIL, not_='atk1|atk2'),
+        dict(n='barb', g='tail', x=17, y=15, rows=BARB, alt={'atk0': BARB_HOT}, not_='atk1|atk2'),
+        dict(n='drip', g='tail', x=22, y=22, rows=DRIP, only='idle2|idle3|walk1|walk3'),
     ]
     for i, (a, b) in enumerate(SEG):
-        L.append(dict(n=f'd{i}', g=f'w{i}', x=9 + a, y=33, rows=cut(DISC, a, b)))
+        L.append(dict(n=f'd{i}', g=f'w{i}', x=DX + a, y=DY, rows=cut(DISC, a, b)))
     L += [
-        dict(n='g1', g='w1', x=28, y=39, rows=GL, alt={'atk0|atk1': GL_HOT}),
-        dict(n='g2', g='w2', x=35, y=41, rows=GL, alt={'atk0|atk1': GL_HOT}),
-        dict(n='g3', g='w0', x=20, y=43, rows=GL, alt={'atk0|atk1': GL_HOT}),
-        dict(n='g4', g='w0', x=21, y=50, rows=GL, alt={'atk0|atk1': GL_HOT}),
-        dict(n='g5', g='w1', x=29, y=51, rows=GL, alt={'atk0|atk1': GL_HOT}),
-        dict(n='g6', g='w1', x=26, y=54, rows=GL, alt={'atk0|atk1': GL_HOT}),
-        dict(n='g7', g='w2', x=36, y=49, rows=GL, alt={'atk0|atk1': GL_HOT}),
-        dict(n='eye', g='w2', x=45, y=41, rows=EYE, alt=EYE_ALT),
-        dict(n='eye2', g='w2', x=45, y=48, rows=EYE2, alt=EYE2_ALT),
-        dict(n='strike', g='root', x=5, y=19, rows=TAIL_STRIKE, only='atk1|atk2'),
-        dict(n='barbd', g='root', x=50, y=25, rows=BARB_D, only='atk1|atk2'),
-        dict(n='spray', g='root', x=52, y=33, rows=SPRAY, only='atk1'),
-        dict(n='dust', g='root', x=2, y=57, rows=DUST[0], alt={'walk1|walk3': DUST[1]}, only='walk0|walk1|walk2|walk3'),
+        dict(n='g1', g='w1', x=26, y=38, rows=GL, alt={'atk0|atk1': GL_HOT}),
+        dict(n='g2', g='w2', x=34, y=38, rows=GL, alt={'atk0|atk1': GL_HOT}),
+        dict(n='g3', g='w0', x=18, y=42, rows=GL, alt={'atk0|atk1': GL_HOT}),
+        dict(n='g4', g='w0', x=20, y=50, rows=GL, alt={'atk0|atk1': GL_HOT}),
+        dict(n='g5', g='w1', x=27, y=49, rows=GL, alt={'atk0|atk1': GL_HOT}),
+        dict(n='g7', g='w2', x=35, y=47, rows=GL, alt={'atk0|atk1': GL_HOT}),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD),
+        dict(n='eye', g='head', x=42, y=37, rows=EYE, alt=EYE_ALT),
+        dict(n='eye2', g='head', x=52, y=35, rows=EYE2, alt=EYE2_ALT),
+        dict(n='strike', g='root', x=5, y=17, rows=TAIL_STRIKE, only='atk1|atk2'),
+        dict(n='barbd', g='root', x=50, y=23, rows=BARB_D, only='atk1|atk2'),
+        dict(n='spray', g='root', x=52, y=31, rows=SPRAY, only='atk1'),
+        dict(n='dust', g='root', x=4, y=58, rows=DUST[0], alt={'walk1|walk3': DUST[1]}, only='walk0|walk1|walk2|walk3'),
     ]
     return L
 FRAMES = {
-    'idle0': {}, 'idle1': {'w0': (0, -1), 'tail': (0, -1)}, 'idle2': {'w1': (0, -1), 'tail': (0, -1)}, 'idle3': {'w2': (0, -1)},
+    'idle0': {}, 'idle1': {'w0': (0, -1), 'tail': (0, -1)}, 'idle2': {'w1': (0, -1), 'tail': (0, -1), 'head': (0, 1)}, 'idle3': {'w2': (0, -1)},
     'blink': {},
     'walk0': {'w0': (0, -1)}, 'walk1': {'w1': (0, -1), 'tail': (1, 0)}, 'walk2': {'w2': (0, -1)}, 'walk3': {'w1': (0, 1), 'tail': (-1, 0)},
-    'atk0': {'tail': (-1, -2), 'root': (-2, 0)}, 'atk1': {'root': (2, 0)}, 'atk2': {'root': (3, 0), 'w2': (0, 1)},
-    'hit': {'root': (-3, 0), 'w2': (0, -2), 'w1': (0, -1), 'tail': (-1, 1)}, 'ko': {'_flip': True},
+    'atk0': {'tail': (-1, -2), 'root': (-2, 0), 'head': (-1, 1)}, 'atk1': {'root': (2, 0)}, 'atk2': {'root': (3, 0), 'w2': (0, 1)},
+    'hit': {'root': (-3, 0), 'w2': (0, -1), 'head': (-1, -2), 'tail': (-1, 1)}, 'ko': {'_flip': True},
 }
-PARENT = {'w0': 'root', 'w1': 'root', 'w2': 'root', 'tail': 'root'}
+PARENT = {'w0': 'root', 'w1': 'root', 'w2': 'root', 'tail': 'root', 'head': 'root'}

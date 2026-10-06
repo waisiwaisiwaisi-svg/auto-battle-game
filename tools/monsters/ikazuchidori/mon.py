@@ -122,6 +122,7 @@ def head(eye='open', beak=False):
     for (x, y) in ((5, 1), (6, 1), (3, 3), (2, 4), (9, 2), (10, 2)): g[y][x] = 'P'
     for (x, y) in ((3, 10), (4, 11), (5, 12), (10, 12), (11, 13)): g[y][x] = 'Z'
     return pix.outline([''.join(r) for r in g])
+CREST = ['kk.......', 'kPkk.....', '.kPQQkk..', '..kQQQQZk', '...kkQQZk', 'kk...kkk.', 'kPkkk....', '.kPQQkk..', '..kkQQZk.', '....kkk..']
 HORN = ['kk....', 'kYYk..', '.kYEk.', '..kEPk', '..kPPk', '..kPPk']
 HORN_KO = pix.recolor(HORN, {'Y': 'g', 'E': 'Q'})
 TAIL = [
@@ -269,6 +270,7 @@ def base_layers():
         dict(n='talonB', g='talon', x=29, y=42, rows=pix.recolor(TALON, {'P': 'Q', 'Q': 'Z'})),
         dict(n='body', g='body', x=18, y=30, rows=BODY),
         dict(n='talon', g='talon', x=34, y=41, rows=TALON),
+        dict(n='crest', g='head', x=29, y=13, rows=CREST),
         dict(n='horn1', g='head', x=39, y=6, rows=HORN),
         dict(n='horn2', g='head', x=45, y=5, rows=HORN),
         dict(n='mane', g='head', x=33, y=26, rows=MANE),
