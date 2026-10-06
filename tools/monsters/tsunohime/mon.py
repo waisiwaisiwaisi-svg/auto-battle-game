@@ -33,94 +33,127 @@ def shade(spans, W, lit=1, dk=2):
             g[y][x] = c
     return g
 
-# ---- 胴と 首（あたりの はばを 行ごとに）----
-SPAN = [(36, 37), (33, 38), (32, 39), (31, 40), (31, 41), (30, 41), (30, 41), (30, 40), (29, 40), (29, 40), (28, 40), (28, 40),
-        (10, 40), (8, 40), (6, 39), (4, 39), (3, 39), (3, 39), (2, 39), (2, 38), (2, 37), (2, 36), (3, 36), (3, 35), (4, 33),
-        (6, 29), (8, 27), (10, 25)]
+# ---- 胴と 首：深い 胸・アーチを えがく 首（あたりは 多角形、筋肉は 手で）----
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
+from pix import grid, poly, outline, rows_of
+BX, BY = 8, 6
+def run(g, x, y, dx, dy):
+    n = 0
+    while 0 <= y < len(g) and 0 <= x < len(g[0]) and g[y][x] != '.': n += 1; x += dx; y += dy
+    return n
 def body():
-    g = shade(SPAN, 42, lit=2, dk=3)
-    # 筋肉（肩・もも・首の すじ）を 手で
-    for (x, y) in ((30, 14), (29, 15), (28, 16), (28, 17), (29, 18), (9, 15), (8, 16), (8, 17), (9, 18), (10, 19), (34, 6), (33, 8), (33, 10),
-                   (16, 20), (17, 20), (18, 21), (22, 21), (23, 21), (36, 15), (36, 16)):
-        if g[y][x] == 'G': g[y][x] = 'H'
-    for (x, y) in ((31, 13), (30, 13), (31, 12), (10, 14), (11, 14), (6, 16), (5, 17), (35, 4), (34, 5), (20, 14), (21, 14), (22, 14)):
-        if g[y][x] == 'G': g[y][x] = 'F'
-    for x in range(13, 28):
-        if g[14][x] == 'G' and 14 <= x <= 26: g[14][x] = 'F'
-        if g[15][x] == 'G' and 17 <= x <= 23: g[15][x] = 'F'
-        if g[21][x] == 'G' and 15 <= x <= 27: g[21][x] = 'H'
-        if g[22][x] == 'G': g[22][x] = 'H'
-    for (x, y) in ((8, 14), (7, 15), (6, 16), (6, 17), (32, 12), (33, 13), (34, 13), (35, 4), (36, 3), (34, 7), (33, 9)):
-        if g[y][x] == 'G': g[y][x] = 'F'
-    return [''.join(r) for r in _ol(g)]
+    W, H = 44, 42; g = grid(W, H)
+    pts = [(9, 31), (12, 27), (18, 26), (25, 28), (32, 26), (36, 21), (39, 15), (42, 10), (46, 7), (50, 9), (50, 17), (48, 23),
+           (47, 29), (46, 35), (43, 43), (37, 46), (27, 44), (19, 44), (13, 43), (9, 38)]
+    poly(g, [(x - BX, y - BY) for x, y in pts], '#')
+    out = grid(W, H)
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] == '.': continue
+            up, lf, dn, rt = run(g, x, y, 0, -1), run(g, x, y, -1, 0), run(g, x, y, 0, 1), run(g, x, y, 1, 0)
+            c = 'G'
+            if dn <= 3 or rt <= 1: c = 'H'
+            elif dn == 4 and (x + y) % 2: c = 'H'
+            if up <= 2 or (lf <= 2 and dn > 3): c = 'F'
+            out[y][x] = c
+    def P(pts, ch, hi=None):
+        for (x, y) in pts:
+            x -= BX; y -= BY
+            if 0 <= y < H and 0 <= x < W and out[y][x] != '.':
+                out[y][x] = ch
+                if hi and out[y][x + 1] == 'G': out[y][x + 1] = hi
+    # 肩の 筋肉（弧）と ひじ
+    P([(36, 28), (35, 29), (34, 30), (34, 31), (34, 32), (34, 33), (35, 34), (36, 35), (37, 36), (38, 37), (39, 38)], 'H', 'F')
+    # 首の すじ（アーチに そって）
+    P([(42, 14), (41, 16), (40, 18), (39, 20), (39, 22)], 'H', 'F')
+    P([(45, 12), (44, 15), (43, 18)], 'F')
+    # 胸の もりあがり
+    P([(44, 30), (44, 31), (45, 32)], 'F')
+    # 腰の 筋肉（もも）
+    P([(17, 28), (16, 29), (15, 30), (15, 31), (15, 32), (15, 33), (16, 34), (17, 35), (18, 36), (19, 37)], 'H', 'F')
+    P([(11, 29), (12, 28), (13, 28)], 'F')
+    # あばら（うすく）
+    P([(25, 36), (26, 37), (28, 36), (29, 37), (31, 36), (32, 37)], 'H')
+    return outline(rows_of(out))
 
-# 頭：金の 面よろい（鼻すじ）、耳は 後ろへ
+# 頭：下向きに ひいた 戦馬の 頭。金の 面よろい、耳は 後ろへ ねる
 HEAD = [
-    '...kk.............',
-    '..kFGk............',
-    '..kFGHk...........',
-    '..kGGHkkkk........',
-    '.kGGGkSSSTkk......',
-    '.kGGkSSTTTTUk.....',
-    'kGGkkkkkSTTTUk....',
-    'kGGGGGGkkSTTUUk...',
-    'kGGGGGGGGkSTTUUk..',
-    'kFGGGGGGGGkSTTUUk.',
-    '.kGGGGGGGGGkSTTUk.',
-    '.kHGGGGGGGGGkTTUUk',
-    '..kHGGGGGGGGGkUUUk',
-    '...kHGGGGGGGGGkkHk',
-    '....kHHGGGGGkkkkk.',
-    '.....kHHHHkwkwkk..',
-    '......kkHHHHHkk...',
-    '........kkkkk.....',
+    '..kk............',
+    '.kFGk...........',
+    '.kFGHk..........',
+    'kFGGHkkkk.......',
+    'kFGGGkSSSkk.....',
+    'kGGGkkkSTTTUk...',
+    'kGGk......TTUk..',
+    'kGGGkkkkkkSTTUk.',
+    'kGGGGGGGGkkSTTUk',
+    'kHGGGGGGGGGkSTUk',
+    '.kHGGGGGGGGGkTUk',
+    '..kHGGGGGGGGGkUk',
+    '...kHGGGGGGGGGkk',
+    '....kHGGGGGGGkkk',
+    '.....kHHGGGkkwk.',
+    '......kHHHHHkkk.',
+    '.......kkkkkk...',
 ]
-EYE = ['wEEEk', 'kEEk.']
-EYE_ALT = {'blink': ['kkkkk', 'GGGG.'], 'atk0|atk1|atk2': ['wwwEk', 'kwEk.'], 'hit': ['kEkkk', 'GkEk.'], 'ko': ['kGkGk', 'GkGk.']}
-# 結晶の やり（ツノ）：ななめに 手で 打つ。らせんの きざみ つき
+EYE = ['wEEkE']
+EYE_ALT = {'blink': ['kkkkk'], 'atk0|atk1|atk2': ['wwEkw'], 'hit': ['kEkkk'], 'ko': ['kGkGk']}
+# 結晶の やり（ツノ）：前へ つき出す。らせんの きざみ つき
 HORN = [
-    '............kk',
-    '...........kCk',
-    '..........kCPk',
-    '.........kCPQk',
-    '........kCPQk.',
-    '.......kCPQk..',
-    '......kCCQk...',
-    '.....kCPQk....',
-    '....kCPQQk....',
-    '...kCPPQk.....',
-    '..kCCPQk......',
-    '.kCPPQk.......',
-    'kCPPQQk.......',
-    'kkkkkk........',
+    '.............kk',
+    '...........kkCk',
+    '.........kkCCPk',
+    '.......kkCPQPk.',
+    '.....kkCPQPkk..',
+    '...kkCPQPkk....',
+    '.kkCPQQkk......',
+    'kCPQkk.........',
+    'kkk............',
 ]
 HORN_HOT = [r.replace('P', 'C').replace('Q', 'P') for r in HORN]
-# たてがみの かわりの 結晶の とげ
-SHARD = [
-    'k......',
-    'kCk....',
-    'kCPk...',
-    'kCPPk..',
-    'kCCPQk.',
-    '.kCPQQk',
-    '.kCPQQk',
-    '..kPQk.',
-    '...kk..',
-]
-SHARD_S = ['k...', 'kCk.', 'kPQk', '.kk.']
+# 流れる 結晶の たてがみ：首の いただき（クレスト）に そって 結晶の 房を 下から 順に 重ねる。房は 後ろ上へ なびく
+CREST = [(33, 25), (35, 22), (37, 19), (38, 16), (40, 13), (42, 10), (44, 8)]
+MX, MY = 22, 0
+def mane(shine=0):
+    W, H = 28, 30; canvas = grid(W, H)
+    for i, (ax, ay) in enumerate(CREST):
+        ax -= MX; ay -= MY
+        L = 7 + (i % 2) * 2 + (2 if 2 <= i <= 4 else 0)
+        tip = (ax - L, ay - L // 2 + 1 - (i % 2))
+        g = grid(W, H)
+        poly(g, [(ax + 1, ay - 1.5), (ax + 2, ay + 2), (ax - 1, ay + 2.5), tip], '#')
+        out = [r[:] for r in g]
+        for y in range(H):
+            for x in range(W):
+                if g[y][x] == '.': continue
+                up, dn = run(g, x, y, 0, -1), run(g, x, y, 0, 1)
+                out[y][x] = 'C' if up <= 1 else 'Q' if dn <= 1 else 'P'
+        if 0 <= tip[1] < H and 0 <= tip[0] < W: out[tip[1]][tip[0]] = 'C'
+        if shine and i % 3 == shine % 3:
+            for y in range(H):
+                for x in range(W):
+                    if out[y][x] == 'P': out[y][x] = 'C'; break
+        o = outline(rows_of(out))
+        for y, r in enumerate(o[1:H + 1]):
+            for x, c in enumerate(r[1:W + 1]):
+                if c != '.': canvas[y][x] = c
+    return outline(rows_of(canvas))
+MANE = mane(); MANE2 = mane(1)
 TAIL = [
-    '......kkk.',
-    '....kkCCPk',
-    '...kCCPPQk',
-    '..kCPPQQk.',
-    '.kCPPQk...',
-    'kCPPQk.kk.',
-    'kCPQk.kCPk',
-    'kPQk.kCPQk',
-    'kPQk.kPQk.',
-    '.kQk.kPQk.',
-    '.kk..kQk..',
-    '.....kk...',
+    '.......kkk..',
+    '.....kkCCPk.',
+    '....kCCPPQk.',
+    '...kCPPQQk..',
+    '..kCPPQk....',
+    '.kCPPQk.kk..',
+    'kCPPQk.kCPk.',
+    'kCPQk.kCPQk.',
+    'kPQk.kCPQk..',
+    'kPQk.kPQk...',
+    '.kQk.kPQk...',
+    '.kQk.kQk....',
+    '..kk.kk.....',
 ]
 PLATE = [
     '..kkkkk.....',
@@ -135,72 +168,65 @@ PLATE = [
     '..kUUk......',
     '...kk.......',
 ]
+# 前足（ふんばる）：ひじ → ひざ（こぶ）→ 金の わ → 結晶の ひづめ
 FLEG = [
-    '.kkkkkk.',
-    'kFFGGGHk',
-    'kFGGGGHk',
-    'kFGGGGHk',
-    'kFGGGHHk',
-    'kGGGGHHk',
-    '.kGGGHHk',
-    '.kGGGHk.',
-    '.kFGGHk.',
-    '..kGGHk.',
-    '..kFGHk.',
-    '..kGGHk.',
-    '..kGHk..',
-    '..kGHk..',
-    '..kGHk..',
-    '..kGHk..',
-    '..kGHk..',
-    '.kSSTUk.',
-    '.kGGHHk.',
-    '.kGGHHk.',
-    '.kCPPQk.',
-    'kCPPPQQk',
-    'kkkkkkkk',
-]
-# 前足を 上げた 形（ため）
-FLEG_UP = [
-    '.kkkkk...',
-    'kFGGGHk..',
-    'kFGGGHHk.',
-    'kFGGGHHk.',
-    '.kGGGHHk.',
+    '.kkkkkk..',
+    'kFGGGGHk.',
+    'kFGGGGHk.',
+    '.kFGGGHk.',
+    '.kFGGGHk.',
+    '..kFGGHk.',
+    '..kFGHk..',
+    '..kFGHHk.',
     '..kGGGHk.',
-    '...kGGHk.',
-    '...kGGHk.',
+    '..kFGHk..',
+    '..kFGHk..',
+    '..kFGHk..',
+    '..kSTUk..',
     '..kGGHk..',
-    '.kGGHk...',
-    'kSSTUk...',
-    'kCPQk....',
-    'kPQk.....',
-    'kkk......',
+    '..kGGHHk.',
+    '.kCPPQk..',
+    'kCPPPQQk.',
+    'kkkkkkkk.',
 ]
+# 上げた 前足（ひざを 曲げて 前へ）
+FLEG_UP = [
+    '.kkkkk.....',
+    'kFGGGHkk...',
+    'kFGGGGHHk..',
+    '.kFGGGGHHk.',
+    '..kkFGGGHHk',
+    '....kkGGGHk',
+    '......kGGHk',
+    '.....kGGHk.',
+    '....kGGHk..',
+    '...kSTUk...',
+    '..kCPQk....',
+    '.kCPQk.....',
+    '.kkkk......',
+]
+# 後ろ足：もも → すね（後ろへ）→ 飛節（かかと）→ まっすぐな 管
 HLEG = [
-    '..kkkkkk...',
-    '.kFFGGGGkk.',
+    '..kkkkkkk..',
+    '.kFFGGGGHk.',
     'kFFGGGGGGHk',
     'kFGGGGGGGHk',
-    'kFGGGGGGGHk',
-    'kGGGGGGGHHk',
-    'kGGGGGGGHHk',
-    '.kGGGGGHHk.',
-    '.kGGGGHHk..',
+    'kFGGGGGGHHk',
+    '.kFGGGGGHk.',
+    '..kGGGGHk..',
     '.kGGGGHk...',
-    'kGGGGHk....',
+    '.kGGGHk....',
     'kFGGHk.....',
+    'kGGGHk.....',
+    '.kFGHk.....',
+    '.kFGHk.....',
+    '.kFGHk.....',
+    '.kSTUk.....',
     '.kGGHk.....',
-    '.kGGHk.....',
-    '..kGHk.....',
-    '..kGHk.....',
-    '..kGHk.....',
-    '..kGHk.....',
-    '.kSSTUk....',
     '.kGGHHk....',
-    '.kCPPQk....',
-    'kCPPPQQk...',
-    'kkkkkkkk...',
+    'kCPPQk.....',
+    'kCPPQQk....',
+    'kkkkkkk....',
 ]
 MOTE = ['.k.', 'kCk', 'kPk', '.k.']
 BURST = [
@@ -239,24 +265,21 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 BODY = body()
 def layers():
     return [
-        dict(n='tail', g='tail', x=0, y=27, rows=TAIL),
-        dict(n='legHF', g='legB', x=16, y=37, rows=dark(HLEG)),
-        dict(n='legFF', g='legA', x=33, y=38, rows=dark(FLEG)),
-        dict(n='sh1', g='neck', x=33, y=8, rows=SHARD),
-        dict(n='sh2', g='neck', x=31, y=13, rows=SHARD),
-        dict(n='sh3', g='neck', x=30, y=18, rows=SHARD),
-        dict(n='sh4', g='body', x=28, y=23, rows=SHARD),
-        dict(n='body', g='body', x=7, y=15, rows=BODY),
-        dict(n='plate', g='body', x=41, y=27, rows=PLATE),
-        dict(n='legH', g='legA', x=9, y=38, rows=HLEG),
-        dict(n='legF', g='legB', x=38, y=38, rows=FLEG, alt={'atk0': FLEG_UP}),
-        dict(n='head', g='head', x=41, y=10, rows=HEAD),
-        dict(n='eye', g='head', x=45, y=17, rows=EYE, alt=EYE_ALT),
-        dict(n='horn', g='head', x=46, y=1, rows=HORN, alt={'atk0|atk1|atk2': HORN_HOT}),
-        dict(n='m1', g='m1', x=24, y=6, rows=MOTE),
+        dict(n='tail', g='tail', x=0, y=26, rows=TAIL),
+        dict(n='legHF', g='legB', x=17, y=40, rows=dark(HLEG)),
+        dict(n='legFF', g='legA', x=40, y=40, rows=dark(FLEG_UP), alt={'walk0|walk1': dark(FLEG)}),
+                dict(n='body', g='body', x=BX - 1, y=BY - 1, rows=BODY),
+        dict(n='mane', g='neck', x=MX - 1, y=MY - 1, rows=MANE, alt={'idle1|idle3': MANE2}),
+        dict(n='plate', g='body', x=40, y=29, rows=PLATE),
+        dict(n='legH', g='legA', x=9, y=41, rows=HLEG),
+        dict(n='legF', g='legB', x=35, y=43, rows=FLEG, alt={'atk0': FLEG_UP}),
+        dict(n='head', g='head', x=43, y=4, rows=HEAD),
+        dict(n='eye', g='head', x=47, y=10, rows=EYE, alt=EYE_ALT),
+        dict(n='horn', g='head', x=49, y=-1, rows=HORN, alt={'atk0|atk1|atk2': HORN_HOT}),
+        dict(n='m1', g='m1', x=22, y=4, rows=MOTE),
         dict(n='m2', g='m2', x=2, y=14, rows=MOTE),
         dict(n='m3', g='m3', x=58, y=30, rows=MOTE, not_='atk1|atk2'),
-        dict(n='burst', g='head', x=53, y=-5, rows=BURST, alt={'atk2': BURST2}, only='atk1|atk2'),
+        dict(n='burst', g='head', x=57, y=-8, rows=BURST, alt={'atk2': BURST2}, only='atk1|atk2'),
     ]
 
 FRAMES = {
