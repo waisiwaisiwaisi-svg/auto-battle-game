@@ -44,7 +44,8 @@ def bolt(rows, pts):
         for x, c in enumerate(r):
             if c in 'YE' and rows[y][x] in '.k': g[y][x] = rows[y][x]
     return pix.rows_of(g)
-WING_UP = bolt([r.replace('E', 'Q') for r in WING_UP], [(4, 6), (9, 10), (8, 12), (15, 14), (14, 16), (21, 18)])
+WING_UP = [WING_UP[0]] + [r for r in WING_UP[1:6] for _ in (0, 1)] + WING_UP[6:]
+WING_UP = bolt([r.replace('E', 'Q') for r in WING_UP], [(4, 11), (9, 15), (8, 17), (15, 19), (14, 21), (21, 23)])
 def swept(rows):
     keep = [r for y, r in enumerate(rows) if y % 3 != 1]
     H = len(keep); out = []
@@ -95,21 +96,23 @@ HEAD = [
 EYE = ['EEw']
 EYE_ALT = {'blink': ['kkk'], 'atk0|atk1|atk2': ['www'], 'hit': ['kEk'], 'ko': ['EkE']}
 TAIL = [
-    '............kkk.',
-    '..........kkPQk.',
-    '.kk......kPPQk..',
-    'kYEkk...kPQQk...',
-    '.kPPQkkkPQQk....',
-    '..kkPQQPQQQk....',
-    '....kkPQQQQQk...',
-    '..kk..kPQQQZk...',
-    '.kYEkkkPQQZZk...',
-    '..kPPQQQQZZk....',
-    '...kkkPQZZk.....',
-    '.....kPQZk......',
-    '....kEZZk.......',
-    '...kYkkk........',
-    '...kk...........',
+    '..............kk..',
+    '............kkPQk.',
+    '..........kkPPQk..',
+    '........kkPPQQk...',
+    '..kk..kkPPQQQk....',
+    '.kYPkkPPQQQQk.....',
+    '..kkPPPQQQZk......',
+    '....kkQQQZZk......',
+    '...kPPQQZZkk......',
+    '..kPPkkZZk.kk.....',
+    '.kPPk..kZk.kQk....',
+    'kYPk..kQZk..kQk...',
+    '.kk..kQZk...kZk...',
+    '....kQZk....kZQk..',
+    '...kYQk......kZQk.',
+    '...kYk.......kYk..',
+    '....k.........k...',
 ]
 TALON = [
     '.kkkkk...',
@@ -137,19 +140,19 @@ MANE = [
 
 def layers():
     return [
-        dict(n='wingB_up', g='wingB', x=17, y=0, rows=dark(WING_UP), only=UP),
-        dict(n='wingB_mid', g='wingB', x=9, y=9, rows=dark(WING_MID), only=MID),
-        dict(n='wingB_dn', g='wingB', x=9, y=25, rows=dark(WING_DN), only=DN),
-        dict(n='tail', g='tail', x=6, y=33, rows=TAIL),
-        dict(n='talonB', g='talon', x=29, y=36, rows=pix.recolor(TALON, {'P': 'Q', 'Q': 'Z'})),
-        dict(n='body', g='body', x=18, y=24, rows=BODY),
-        dict(n='talon', g='talon', x=34, y=35, rows=TALON),
-        dict(n='mane', g='head', x=35, y=18, rows=MANE),
-        dict(n='head', g='head', x=40, y=4, rows=HEAD),
-        dict(n='eye', g='head', x=44, y=12, rows=EYE, alt=EYE_ALT),
-        dict(n='wingF_up', g='wingF', x=6, y=3, rows=WING_UP, only=UP),
-        dict(n='wingF_mid', g='wingF', x=-3, y=12, rows=WING_MID, only=MID),
-        dict(n='wingF_dn', g='wingF', x=-3, y=27, rows=WING_DN, only=DN),
+        dict(n='wingB_up', g='wingB', x=27, y=1, rows=dark(WING_UP), only=UP),
+        dict(n='wingB_mid', g='wingB', x=17, y=11, rows=dark(WING_MID), only=MID),
+        dict(n='wingB_dn', g='wingB', x=15, y=31, rows=dark(WING_DN), only=DN),
+        dict(n='tail', g='tail', x=5, y=40, rows=TAIL),
+        dict(n='talonB', g='talon', x=29, y=42, rows=pix.recolor(TALON, {'P': 'Q', 'Q': 'Z'})),
+        dict(n='body', g='body', x=18, y=30, rows=BODY),
+        dict(n='talon', g='talon', x=34, y=41, rows=TALON),
+        dict(n='mane', g='head', x=35, y=24, rows=MANE),
+        dict(n='head', g='head', x=40, y=10, rows=HEAD),
+        dict(n='eye', g='head', x=44, y=18, rows=EYE, alt=EYE_ALT),
+        dict(n='wingF_up', g='wingF', x=6, y=9, rows=WING_UP, only=UP),
+        dict(n='wingF_mid', g='wingF', x=-3, y=18, rows=WING_MID, only=MID),
+        dict(n='wingF_dn', g='wingF', x=-3, y=33, rows=WING_DN, only=DN),
     ]
 
 FRAMES = {
