@@ -115,7 +115,7 @@ def eye(g, x, y, mode='idle', A='Y', B='O', big=False):
     return g
 # 目（L：隈取り）：凧絵の 赤い 隈。目の 上を 赤い 線が 走り、後ろの 目じりから 上へ はね上がる。目は クリーム色の 白目に 黄緑の 虹彩（明・暗）＋黒い 瞳＋白い 光、下にも 赤い 隈が 後ろへ 流れる
 def kuma(mid, under=True):
-    top = ['r...........', '.RR.........', '..RRRRRRRr..', '...R' + mid[0][4:]]
+    top = ['............', '.rR.........', '..RRRRRRRr..', '...R' + mid[0][4:]]
     rows = top + mid[1:]
     if under: rows = rows + ['....rRRRR...', '...r........']
     return rows
@@ -261,5 +261,5 @@ FRAMES = {
     'hit': {'root': (-3, -1), 'head': (-1, -1)},
     'ko': {'_flip': True},
 }
-EYE_BOX = (36, 17, 12, 10)
+EYE_BOX = (36, 18, 12, 8)
 PARENT = {'head': 'body', 'wing': 'body', 'wingB': 'body', 'tail': 'body', 'leg': 'body', 'arm': 'body', 'body': 'root', 'fx': 'root'}

@@ -131,12 +131,12 @@ def dome(w, h):
 DOME = dome(13, 12); DOME_F = dark(dome(11, 10), DK)
 # 目（I うつろな 穴の目）：抜け殻の 目は からっぽの 穴。外は 濃い こはくの 影（H）、中は 殻の 中の 闇（E）の 2段。
 # 奥に 霊火の 青い 小さな 光（P＋Q）が 1点 ともる。穴の ふちから ひびが 走る。穴の 上ふちは 前へ 下がる
-EYE = ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEkkkEEH', 'HEkPQkEEH', '.HEkkEEH.', '..HHHHH.H', '.......H.']
+EYE = ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEkkkEEH', 'HEkPQkEEH', '.HEkkEEH.', '..HHHHHHk', '.......k.']
 EYE_ALT = {
-    'blink': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEEEEEEH', 'HEEEEEEEH', '.HEEEEEH.', '..HHHHH.H', '.......H.'],          # 光が 消える
-    'hit': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEkEkEEH', 'HEQEEEQEH', '.HEEkEEH.', '..HHHHH.H', '.......H.'],            # 光が 割れて 散る
-    'atk0|atk1|atk2': ['HH.......', '.HHHHH...', '.HEEQQHH.', 'HEQPPQEEH', 'HEQPPQEEH', '.HEQQEEH.', '..HHHHH.H', '.......H.'],   # 奥の 霊火が 大きく 燃える
-    'ko': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEkEEkEEH', 'HEEkkEEEH', '.HkEEkEH.', '..HHHHH.H', '.......H.'],
+    'blink': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEEEEEEH', 'HEEEEEEEH', '.HEEEEEH.', '..HHHHHHk', '.......k.'],          # 光が 消える
+    'hit': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEkEkEEH', 'HEQEEEQEH', '.HEEkEEH.', '..HHHHHHk', '.......k.'],            # 光が 割れて 散る
+    'atk0|atk1|atk2': ['HH.......', '.HHHHH...', '.HEEQQHH.', 'HEQPPQEEH', 'HEQPPQEEH', '.HEQQEEH.', '..HHHHHHk', '.......k.'],   # 奥の 霊火が 大きく 燃える
+    'ko': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEkEEkEEH', 'HEEkkEEEH', '.HkEEkEH.', '..HHHHHHk', '.......k.'],
 }
 EYE_F = ['.HHHH.', 'HEEEEH', 'HEkQEH', '.HEEH.']; EYE_F_ALT = {'blink|ko': ['.HHHH.', 'HEEEEH', 'HEEEEH', '.HEEH.'], 'atk0|atk1|atk2': ['.HHHH.', 'HEQQEH', 'HEQPEH', '.HEEH.']}
 MOUTH = ['kk..', 'kGk.', '.kGk', '..kk']                        # 口の 針（ストロー）

@@ -88,7 +88,7 @@ HEAD = P(M(19, 16, ('p', '1', [(0, 6), (7, 0), (14, 1), (19, 7), (15, 12), (5, 1
 # 目（D 複眼）：琥珀の 丸い ドーム。ななめの あみ目の すじ（暗い 色の 線）と たての 白い 反射の 帯。ひとみは ない。
 # 上に 前へ 下がる 太い まゆの 線
 def ceye(mode=''):
-    rows = ['kk.......', '.kkkkk...', '.kwYYOkkk', 'kYwYOYOQk', 'kOwOYOQOk', 'kQOQOQOQk', '.kQOQOQk.', '..kkkkk..']
+    rows = ['kk.......', '.kkkkk...', '.kwYYYkkk', 'kYwYOYYOk', 'kYOwYYOOk', 'kOOOwOQOk', '.kQOOQOk.', '..kkkkk..']
     if mode == 'atk': rows = ['k........', 'kkkkk....', '.kwwYYkkk', 'kYwwYYYOk', 'kYwYwYOYk', 'kOYOYOYOk', '.kOQOQOk.', '..kkkkk..']
     if mode == 'hit': rows = ['.........', '..kkkk...', 'kk.kwYk..', 'kYwYkOOk.', 'kOkOYkQOk', 'kQOkOQkQk', '.kQOQkQk.', '..kkkkk..']
     if mode == 'blink': rows = ['kk.......', '.kkkkk...', '.kDDDDkkk', 'kkkkkkkkk', 'kOQOQOQOk', 'kQOQOQOQk', '.kQOQOQk.', '..kkkkk..']
