@@ -330,7 +330,7 @@ namespace PixelMonsterArena
         {
             float x = _col.x + U, w = _col.width - U * 2, y = U * 1.5f;
             GUI.Label(new Rect(x, y, w * .6f, U * 4), "PIXEL MONSTER\nARENA", new GUIStyle(_title) { fontSize = Mathf.RoundToInt(U * 1.2f), alignment = TextAnchor.UpperLeft });
-            GUI.Label(new Rect(x + w * .55f, y, w * .45f, U * 4.5f), $"トロフィー <b>{S.trophies}</b>\nカプセル <b>{S.capsules}</b>\nつかまえた <b>{S.caught}</b>", new GUIStyle(_small) { alignment = TextAnchor.UpperRight, richText = true });
+            GUI.Label(new Rect(x + w * .55f, y, w * .45f, U * 4.5f), $"トロフィー <b>{S.trophies}</b>\nクリスタル <b>{S.capsules}</b>\nつかまえた <b>{S.caught}</b>", new GUIStyle(_small) { alignment = TextAnchor.UpperRight, richText = true });
             y += U * 5;
             var r = Data.Rounds[S.round];
             var cr = new Rect(x, y, w, U * 6.5f); Panel(cr);
@@ -601,7 +601,7 @@ namespace PixelMonsterArena
             list.Add(("atk", "こうげき", "たいあたり", Util.Hex("#d8d0c0"), f != null ? f.CdOf("tackle") / Data.Moves["tackle"].Cd : 0, f != null && f.Queued == "tackle", false));
             list.Add(("dodge", "かわす", "むてき", Util.Hex("#7fd8ff"), f != null ? f.DodgeCd / .9f : 0, false, false));
             if (B.Sides[0].Fs.Count > 1) list.Add(("swap", "こうたい", "ひかえと", Util.Hex("#a49ac0"), B.Sides[0].SwapCd / Battle.SwapCdMax, _swapOpen, false));
-            if (B.Kind == "wild") { list.Add(("cap", "カプセル", $"のこり {S.capsules}", Util.Hex("#3ad0c8"), 0, false, false)); list.Add(("run", "にげる", "", Util.Hex("#a49ac0"), 0, false, false)); }
+            if (B.Kind == "wild") { list.Add(("cap", "クリスタル", $"のこり {S.capsules}", Util.Hex("#3ad0c8"), 0, false, false)); list.Add(("run", "にげる", "", Util.Hex("#a49ac0"), 0, false, false)); }
             list.Add(("auto", "オート", S.auto ? "ON" : "OFF", S.auto ? Util.Hex("#4fd1a5") : Util.Hex("#a49ac0"), 0, S.auto, false));
             foreach (var key in _btnRects.Keys.Where(k => k != "pause").ToList()) _btnRects.Remove(key);
             if (_swapOpen) { SwapBar(new Rect(bx, area.y, bw, area.height)); return; }

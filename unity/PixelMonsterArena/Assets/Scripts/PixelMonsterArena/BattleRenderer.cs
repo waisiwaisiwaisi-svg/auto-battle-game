@@ -230,11 +230,11 @@ namespace PixelMonsterArena
             var c = B.Catch; float ox = 0;
             if (c.Phase == "shake" && c.T < .35f) ox = Mathf.Round(Mathf.Sin(c.T / .6f * Mathf.PI * 2) * 2);
             float x = Mathf.Round(c.X) + ox, y = Mathf.Round(c.Y);
-            P.Rect(x - 9, y - 8, 18, 17, C("#120e1c"), O_CAP);
-            P.Rect(x - 8, y - 7, 16, 15, C("#3ad0c8"), O_CAP + 1);
-            P.Rect(x - 8, y + 4, 16, 4, C("#1e8a84"), O_CAP + 2);
-            P.Rect(x - 8, y, 16, 2, C("#ffd166"), O_CAP + 2);
-            P.Rect(x - 6, y - 5, 4, 2, C("#e8ffff"), O_CAP + 2);
+            // ふういんクリスタル：ひかる ひし形の 結晶
+            P.Ellipse(x, y, 14, 14, new Color(150 / 255f, 240 / 255f, 1, .35f + Mathf.Sin(B.T * 10) * .15f), O_CAP);
+            P.Sprite(PixelArt.Pixel, x, y, 13, 18, C("#1a1424"), O_CAP + 1, Mathf.PI / 4);
+            P.Sprite(PixelArt.Pixel, x, y, 11, 15.5f, C("#3ad0e8"), O_CAP + 2, Mathf.PI / 4);
+            P.Rect(x - 3, y - 6, 2, 3, Color.white, O_CAP + 3);
             if (c.Phase == "shake") for (int i = 0; i < c.Shakes; i++) P.Star(x - 12 + i * 12, y - 18, 4, C("#ffd84a"), O_CAP + 3);
         }
 

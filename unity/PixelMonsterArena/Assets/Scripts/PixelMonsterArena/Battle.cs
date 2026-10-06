@@ -979,15 +979,15 @@ namespace PixelMonsterArena
         public void CmdCapsule()
         {
             if (Kind != "wild" || Mode != "fight" || Catch != null || Paused) return;
-            if (S.capsules <= 0) { Say("カプセルが もう ない！"); return; }
+            if (S.capsules <= 0) { Say("クリスタルが もう ない！"); return; }
             var e = Active(1); if (!Targetable(e)) return;
             S.capsules--; S.Save();
             var tr = Sides[0].Trainer; tr.Shout = .6f;
             Mode = "catch";
             Catch = new CatchO { Phase = "throw", Sx = tr.X, Sy = tr.Y - 30, Tx = e.X, Ty = e.Y - 12, P = CatchProb(e), X = tr.X, Y = tr.Y };
-            Say("いけっ！ キャプチャーカプセル！");
+            Say("いけっ！ ふういんクリスタル！");
         }
-        static readonly string[] FailLines = { "ああっ！ カプセルから でてしまった！", "おしい！ もうすこしだったのに！", "だめだ！ にげだした！" };
+        static readonly string[] FailLines = { "ああっ！ クリスタルから でてしまった！", "おしい！ もうすこしだったのに！", "だめだ！ にげだした！" };
         void UpdateCatch(float dt)
         {
             var c = Catch; var e = Active(1); c.T += dt;
@@ -1181,7 +1181,7 @@ namespace PixelMonsterArena
                 }
                 else if (res == "lose") { S.round = 0; lines.Insert(0, "まけてしまった… たいかいは 1かいせんから やりなおし"); }
             }
-            if (S.capsules > caps0) lines.Add($"カプセルを {S.capsules - caps0}こ てにいれた");
+            if (S.capsules > caps0) lines.Add($"クリスタルを {S.capsules - caps0}こ てにいれた");
             S.Save();
         }
     }

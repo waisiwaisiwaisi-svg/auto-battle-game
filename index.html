@@ -192,7 +192,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
   <section class="screen" id="scHub">
     <div class="hubhead">
       <h1 class="logo" style="font-size:18px;text-align:left">PIXEL MONSTER<br>ARENA</h1>
-      <div class="stat">トロフィー <b id="hTrophy">0</b><br>カプセル <b id="hCaps">0</b><br>つかまえた <b id="hCaught">0</b></div>
+      <div class="stat">トロフィー <b id="hTrophy">0</b><br>クリスタル <b id="hCaps">0</b><br>つかまえた <b id="hCaught">0</b></div>
     </div>
     <div class="card cupinfo" id="cupInfo"></div>
     <div class="bigbtns">
@@ -247,7 +247,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
         <button class="cmd" id="cAtk"><span class="a">こうげき</span><span class="b">たいあたり</span><i class="cdv"></i></button>
         <button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button>
         <button class="cmd" id="cSwap"><span class="a">こうたい</span><span class="b">ひかえと</span><i class="cdv"></i></button>
-        <button class="cmd" id="cCap"><span class="a">カプセル</span><span class="b" id="capN"></span></button>
+        <button class="cmd" id="cCap"><span class="a">クリスタル</span><span class="b" id="capN"></span></button>
         <button class="cmd" id="cAuto"><span class="a">オート</span><span class="b" id="autoS">OFF</span></button>
         <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
       </div>
@@ -427,8 +427,8 @@ const MOVES = {
 /* スプライト：1文字=1ドット（.は透明）。輪郭線は自動で付く。右向き。 */
 const SPECIES = {
   hinokon: {
-    n: 'ヒノコン', type: 'fire', base: { hp: 40, atk: 54, def: 44, spd: 66 }, moves: ['ember', 'flame'], style: 'mid', catch: .45, rare: 0,
-    desc: 'しっぽの ほのおで きもちを あらわす こぎつね。とおくから ひのたまを うつ。',
+    n: 'サラマン', type: 'fire', base: { hp: 40, atk: 54, def: 44, spd: 66 }, moves: ['ember', 'flame'], style: 'mid', catch: .45, rare: 0,
+    desc: 'つばさと つのを もつ こどもの 火竜。しっぽの ほのおで まりょくを ためて ひのたまを はく。',
     pal: { o: '#ff8a3d', O: '#ffc27a', w: '#fff3e0', k: '#1a1626', n: '#3a1a1a', r: '#ff4a3d', y: '#ffe066' },
     rows: [
       '........o..o..',
@@ -444,8 +444,8 @@ const SPECIES = {
       '...OO.O..O.OO.',
     ] },
   mizupuku: {
-    n: 'ミズプク', type: 'water', base: { hp: 48, atk: 46, def: 52, spd: 50 }, moves: ['bubble', 'tide'], style: 'ranged', catch: .45, rare: 0,
-    desc: 'まんまるの みずふうせんの ような さかな。ためた みずを いっきに はなつ。',
+    n: 'ルリスライム', type: 'water', base: { hp: 48, atk: 46, def: 52, spd: 50 }, moves: ['bubble', 'tide'], style: 'ranged', catch: .45, rare: 0,
+    desc: 'むねに るり色の ほうせきを やどす スライム。かんむりは むかし 王さまから もらったものらしい。',
     pal: { b: '#4aa8ff', B: '#9fd3ff', w: '#ffffff', k: '#1a1626', m: '#1d3d7a', f: '#2f74d0', l: '#d8f0ff' },
     rows: [
       '....bbbb....',
@@ -461,8 +461,8 @@ const SPECIES = {
       '....f..f....',
     ] },
   happamogu: {
-    n: 'ハッパモグ', type: 'grass', base: { hp: 50, atk: 52, def: 50, spd: 44 }, moves: ['vine', 'spore'], style: 'melee', catch: .45, rare: 0,
-    desc: 'あたまの はっぱで ひなたぼっこする もぐら。ちかづいて ツタで たたく。',
+    n: 'マンドラ', type: 'grass', base: { hp: 50, atk: 52, def: 50, spd: 44 }, moves: ['vine', 'spore'], style: 'melee', catch: .45, rare: 0,
+    desc: 'ひっこぬかれると さけぶ 森の まもの。はっぱの かんむりで ひかりを あつめ、ツタで たたく。',
     pal: { g: '#62d26f', G: '#b6f5a0', s: '#3e8a3a', m: '#8a6a4a', l: '#d8b890', k: '#1a1626', n: '#ff8aa0' },
     rows: [
       '.....gg.....',
@@ -478,8 +478,8 @@ const SPECIES = {
       '..mm....mm..',
     ] },
   birikurage: {
-    n: 'ビリクラゲ', type: 'elec', type2: 'water', base: { hp: 42, atk: 58, def: 40, spd: 70 }, moves: ['spark', 'thunder'], style: 'mid', catch: .4, rare: 0,
-    desc: 'ふわふわ ういている でんきクラゲ。さわると しびれる。',
+    n: 'ボルトウィスプ', type: 'elec', type2: 'water', base: { hp: 42, atk: 58, def: 40, spd: 70 }, moves: ['spark', 'thunder'], style: 'mid', catch: .4, rare: 0,
+    desc: 'あらしの よるに うまれる かみなりの せいれい。ふれると しびれる ひかりの からだ。',
     pal: { y: '#ffd84a', Y: '#fff5b0', k: '#1a1626', z: '#ffae3a' },
     rows: [
       '...yyyyyy...',
@@ -494,8 +494,8 @@ const SPECIES = {
       '...z....z...',
     ] },
   gorotan: {
-    n: 'ゴロタン', type: 'rock', type2: 'ground', base: { hp: 60, atk: 56, def: 66, spd: 30 }, moves: ['rockfall', 'quake'], style: 'melee', catch: .4, rare: 0,
-    desc: 'こうらが いわで できた カメ。うごきは おそいが とても かたい。',
+    n: 'ルーンゴーレム', type: 'rock', type2: 'ground', base: { hp: 60, atk: 56, def: 66, spd: 30 }, moves: ['rockfall', 'quake'], style: 'melee', catch: .4, rare: 0,
+    desc: 'いにしえの ルーンが きざまれた 石の きょじん。うごきは おそいが とても かたい。',
     pal: { r: '#9a8070', R: '#c8b098', s: '#8fc070', k: '#1a1626', l: '#d8c8a0' },
     rows: [
       '....rrrrr......',
@@ -508,8 +508,8 @@ const SPECIES = {
       '..ss.....ss....',
     ] },
   soyodori: {
-    n: 'ソヨドリ', type: 'wind', base: { hp: 40, atk: 50, def: 40, spd: 80 }, moves: ['gust', 'tornado'], style: 'ranged', catch: .45, rare: 0,
-    desc: 'かぜに のって くらす ことり。はねで かぜの やいばを とばす。',
+    n: 'グリフィ', type: 'wind', base: { hp: 40, atk: 50, def: 40, spd: 80 }, moves: ['gust', 'tornado'], style: 'ranged', catch: .45, rare: 0,
+    desc: 'わしの あたまと ししの からだを もつ グリフォンの ひな。かぜを きって とびまわる。',
     pal: { c: '#7fd8d0', C: '#c8fff8', w: '#ffffff', k: '#1a1626', y: '#ffc84a' },
     rows: [
       '......ccc....',
@@ -524,8 +524,8 @@ const SPECIES = {
       '.....y..y....',
     ] },
   dokukino: {
-    n: 'ドクキノ', type: 'grass', type2: 'poison', base: { hp: 46, atk: 54, def: 46, spd: 48 }, moves: ['leaf', 'spore'], style: 'ranged', catch: .45, rare: 0,
-    desc: 'かさの もようが あやしく ひかる キノコ。ほうしの ばくだんを まく。',
+    n: 'マジタケ', type: 'grass', type2: 'poison', base: { hp: 46, atk: 54, def: 46, spd: 48 }, moves: ['leaf', 'spore'], style: 'ranged', catch: .45, rare: 0,
+    desc: 'とんがりぼうしを かぶった キノコの まどうし。どくの ほうしで まほうを となえる。',
     pal: { p: '#b05ad8', P: '#f0a8ff', w: '#f4ecd8', k: '#1a1626', m: '#7a3a3a' },
     rows: [
       '...pppppp...',
@@ -540,8 +540,8 @@ const SPECIES = {
       '....w..w....',
     ] },
   yorukoumo: {
-    n: 'ヨルコウモ', type: 'wind', type2: 'dark', base: { hp: 44, atk: 58, def: 42, spd: 76 }, moves: ['gust', 'spark'], style: 'melee', catch: .4, rare: 0,
-    desc: 'よるの スタジアムに あらわれる コウモリ。すばやく とびかかる。',
+    n: 'ガーゴイ', type: 'wind', type2: 'dark', base: { hp: 44, atk: 58, def: 42, spd: 76 }, moves: ['gust', 'spark'], style: 'melee', catch: .4, rare: 0,
+    desc: 'とうの うえで よるを みはる ちいさな ガーゴイル。いしの つばさで すばやく おそいかかる。',
     pal: { d: '#5a4a8a', D: '#8a78c0', r: '#ff4a5a', w: '#ffffff' },
     rows: [
       'd..........d',
@@ -554,8 +554,8 @@ const SPECIES = {
       '....dddd....',
     ] },
   gouen: {
-    n: 'ゴウエン', type: 'fire', type2: 'fighting', base: { hp: 58, atk: 72, def: 56, spd: 58 }, moves: ['blaze', 'quake'], style: 'melee', catch: .18, rare: 1,
-    desc: 'もえる たてがみの あばれウシ。めったに みられない つよい モンスター。',
+    n: 'ミノタウ', type: 'fire', type2: 'fighting', base: { hp: 58, atk: 72, def: 56, spd: 58 }, moves: ['blaze', 'quake'], style: 'melee', catch: .18, rare: 1,
+    desc: 'もえる おのを ふりまわす めいきゅうの まもの。めったに すがたを みせない。',
     pal: { h: '#f4ecd8', b: '#8a3a2a', B: '#c0583a', k: '#1a1626', n: '#e8a080', f: '#ff8a3d', r: '#ff4a3d', y: '#ffe066' },
     rows: [
       '.h.......h...',
@@ -571,8 +571,8 @@ const SPECIES = {
       '.kk.kk.kk.kk.',
     ] },
   tsuraran: {
-    n: 'ツララン', type: 'ice', type2: 'fairy', base: { hp: 50, atk: 62, def: 60, spd: 64 }, moves: ['icicle', 'tide'], style: 'ranged', catch: .18, rare: 1,
-    desc: 'こおりの けっしょうから うまれた せいれい。つららを いっせいに とばす。',
+    n: 'ユキピクシー', type: 'ice', type2: 'fairy', base: { hp: 50, atk: 62, def: 60, spd: 64 }, moves: ['icicle', 'tide'], style: 'ranged', catch: .18, rare: 1,
+    desc: 'こおりの はねを もつ ゆきの ようせい。いたずら ずきで つららを いっせいに とばす。',
     pal: { i: '#9fe0ff', I: '#ffffff', k: '#1a1626', m: '#3a6aa0' },
     rows: [
       '.....i.....',
@@ -810,130 +810,163 @@ const SpriteGen = (() => {
 
   // ---------- モンスター（40x40、右むき、足もと y≒38） ----------
   const MON = {
+    // サラマン：つばさと 角の ある 子どもの 火竜
     hinokon: () => [
-      P([[12, 25], [3, 22], [1, 13], [5, 6], [6, 13], [9, 9], [10, 16], [14, 20]], '#ff5a2a', { lift: .2 }),
-      P([[11, 23], [5, 20], [4, 14], [7, 16], [9, 13], [12, 20]], '#ffc23a', { flat: true, noLine: true }),
-      E(14, 33, 3, 4.5, '#d8642a'), E(18, 34, 3, 4, '#d8642a'),
-      E(19, 27, 9, 7, '#f2833a'),
-      E(24, 34, 2.6, 4.6, '#f2833a'), E(28, 34, 2.6, 4.4, '#f2833a'),
-      E(24, 38, 2.6, 1.3, '#fff0d8', { flat: true }), E(28, 38, 2.6, 1.3, '#fff0d8', { flat: true }),
-      E(25, 27, 4, 5, '#ffe2b8', { noLine: true, lift: .2 }),
-      P([[20, 13], [20.5, 1], [26, 9]], '#f2833a'), P([[21.5, 10], [21.7, 4], [24.5, 9]], '#7a2f1a', { flat: true, noLine: true }),
-      E(27, 15, 9.5, 8.5, '#f2833a'),
-      P([[29, 9], [35, 0], [35, 11]], '#f2833a'), P([[31, 9], [34.3, 3], [34, 9.5]], '#7a2f1a', { flat: true, noLine: true }),
-      E(32, 19.5, 5.5, 3.6, '#ffe2b8', { noLine: true, lift: .15 }),
-      E(37, 17.6, 1.6, 1.3, '#3a1a1a', { flat: true }),
-      ...eye(29.5, 14.5, 1.05),
-      E(33, 22.5, 1.6, .9, '#ff9a9a', { flat: true, noLine: true }),
-      P([[24, 7.5], [26, 3], [27, 7.5], [29, 4], [29, 9]], '#ffc23a', { flat: true }),
+      P([[16, 18], [6, 4], [9, 13], [2, 10], [8, 19], [3, 21], [13, 24]], '#8a2a2a'),
+      P([[11, 28], [3, 30], [0, 25], [2, 31], [9, 34], [15, 31]], '#e8552a'),
+      P([[3, 27], [-1, 20], [3, 22], [4, 17], [7, 24]], '#ffc23a', { flat: true }),
+      E(13, 34, 3, 4, '#b8401e'), E(20, 34, 3, 4, '#b8401e'),
+      E(18, 27, 9, 7.5, '#e8552a'),
+      E(21, 30, 5, 4.5, '#ffd9a0', { noLine: true, lift: .15 }),
+      P([[12, 21], [13, 17], [15, 20], [17, 16], [18, 20], [20, 17], [21, 21]], '#ffb13a', { flat: true }),
+      E(16, 35, 3, 4, '#e8552a'), E(23, 35, 3, 4, '#e8552a'),
+      E(16, 38.5, 2.6, 1.1, '#3a1a1a', { flat: true }), E(23, 38.5, 2.6, 1.1, '#3a1a1a', { flat: true }),
+      P([[24, 12], [21, 3], [27, 10]], '#f4ecd8'), P([[29, 10], [30, 2], [32, 11]], '#f4ecd8'),
+      E(27, 17, 8, 7, '#e8552a'),
+      E(33, 20.5, 4.5, 3.2, '#e8552a'),
+      E(32, 22, 3.5, 1.6, '#ffd9a0', { noLine: true, flat: true }),
+      E(36.5, 19, .8, .7, '#3a1a1a', { flat: true }),
+      ...eye(28.5, 15.5, 1.0, '#ffcc22'),
+      P([[16, 21], [26, 15], [23, 26], [14, 27]], '#c03a2a', { lift: .3 }),
     ],
+    // ルリスライム：宝石の 核を もつ スライム
     mizupuku: () => [
-      P([[8, 22], [0, 14], [2, 24], [0, 33], [9, 27]], '#2f74d0'),
-      P([[16, 11], [21, 2], [27, 10]], '#2f74d0'),
-      E(20, 23, 13.5, 12.5, '#4aa8ff'),
-      E(23, 28, 8.5, 6.5, '#d8f0ff', { noLine: true, lift: .2 }),
-      ...eye(26, 18, 1.35),
-      E(32, 25, 1.8, 1.6, '#1d3d7a', { flat: true }),
-      E(14, 15, 2.2, 2.2, '#bfe6ff', { noLine: true }), E(11, 19, 1.1, 1.1, '#bfe6ff', { noLine: true, flat: true }),
-      E(33, 9, 2.5, 2.5, '#bfe6ff', { lift: .3 }), E(37, 4, 1.4, 1.4, '#bfe6ff', { lift: .3 }),
+      P([[20, 6], [25, 13], [6, 24], [14, 12]], '#3a8ad8'),
+      E(20, 27, 15, 11, '#3a8ad8'),
+      E(20, 26, 12, 8.5, '#6ab8f8', { noLine: true, lift: .2 }),
+      P([[20, 20], [25, 26], [20, 33], [15, 26]], '#2050c0', { flat: true }),
+      P([[20, 21], [23, 26], [20, 26], [17, 26]], '#7ab0ff', { flat: true, noLine: true }),
+      E(18.5, 23, .8, .8, '#ffffff', { flat: true, noLine: true }),
+      E(10, 20, 2, 4, '#d8f2ff', { flat: true, noLine: true }),
+      ...eye(13, 26, .9, '#102050'), ...eye(28, 26, .9, '#102050'),
+      P([[18, 31], [22, 31], [20, 33]], '#102050', { flat: true }),
+      P([[13, 8], [15, 3], [17, 7], [20, 1], [23, 7], [25, 3], [27, 8], [24, 10], [16, 10]], '#ffd84a', { lift: .3 }),
+      E(20, 6, 1.4, 1.4, '#ff4a8a', { flat: true, noLine: true }),
     ],
+    // マンドラ：葉の 冠を かぶった マンドラゴラ
     happamogu: () => [
-      E(19, 9, 2.2, 6, '#3e8a3a', { flat: true }),
-      P([[19, 6], [9, 2], [6, 7], [12, 9]], '#62d26f'), P([[20, 6], [29, 0], [33, 4], [25, 8]], '#62d26f'),
-      E(12, 34, 3.5, 4, '#6a4a32'), E(28, 35, 3.5, 3.5, '#6a4a32'),
-      E(19, 26, 13, 11, '#8a6a4a'),
-      E(22, 29, 8, 7, '#e0c49a', { noLine: true, lift: .15 }),
-      E(31, 26, 5, 3.6, '#e0c49a'),
-      E(35.5, 24.5, 2.2, 1.8, '#ff8aa0', { flat: true }),
-      P([[23, 35], [24, 39], [26, 35]], '#f4ecd8', { flat: true }), P([[27, 35], [28, 39], [30, 35]], '#f4ecd8', { flat: true }),
-      ...eye(26, 20, .9),
-      E(30.5, 28.5, 1.4, .8, '#ff9a9a', { flat: true, noLine: true }),
+      P([[19, 10], [6, 2], [3, 7], [12, 12]], '#3e9a3a'), P([[21, 10], [34, 1], [37, 6], [27, 12]], '#3e9a3a'),
+      P([[20, 11], [15, 0], [20, 3], [24, 0], [22, 11]], '#62d26f'),
+      P([[14, 33], [9, 39], [12, 39], [17, 35]], '#a87a4a'), P([[24, 33], [27, 39], [30, 39], [26, 33]], '#a87a4a'),
+      P([[11, 23], [3, 26], [2, 30], [6, 28], [11, 28]], '#a87a4a'),
+      E(20, 24, 10, 12, '#d8a870'),
+      E(22, 27, 6, 7, '#ecc898', { noLine: true, lift: .2 }),
+      P([[28, 22], [36, 18], [38, 22], [34, 24], [29, 27]], '#a87a4a'),
+      P([[13, 17], [15, 20], [11, 21]], '#8a5a3a', { flat: true, noLine: true }), P([[20, 33], [22, 35], [18, 35]], '#8a5a3a', { flat: true, noLine: true }),
+      ...eye(17, 21, .85, '#2a3a10'), ...eye(25, 21, .85, '#2a3a10'),
+      E(21, 28, 2.2, 2.6, '#5a2a1a', { flat: true }),
+      E(14, 25, 1.5, .8, '#ff9a8a', { flat: true, noLine: true }), E(28, 25, 1.5, .8, '#ff9a8a', { flat: true, noLine: true }),
     ],
+    // ボルトウィスプ：雷の 精霊
     birikurage: () => [
-      P([[12, 22], [9, 28], [12, 31], [9, 36], [12, 39], [14, 36], [12, 31], [15, 28], [14, 22]], '#ffae3a', { flat: true }),
-      P([[19, 22], [17, 28], [21, 32], [18, 37], [21, 40], [23, 37], [21, 32], [23, 28], [22, 22]], '#ffae3a', { flat: true }),
-      P([[26, 22], [29, 28], [26, 31], [29, 36], [26, 39], [24, 36], [27, 31], [24, 28], [24, 22]], '#ffae3a', { flat: true }),
-      E(19, 17, 13, 11, '#ffd84a'),
-      P([[6, 18], [32, 18], [30, 24], [8, 24]], '#ffe680', { lift: -.2 }),
-      E(13, 9, 3, 2, '#fff7c0', { flat: true, noLine: true }),
-      ...eye(15, 15, 1.05), ...eye(24, 15, 1.05),
-      E(19.5, 20, 2, 1.2, '#b8641a', { flat: true }),
-      P([[33, 8], [36, 4], [35, 9], [38, 8], [34, 14]], '#fff26a', { flat: true }),
+      P([[13, 29], [6, 34], [1, 33], [5, 37], [11, 36], [17, 31]], '#ffd84a', { lift: .2 }),
+      P([[20, 2], [24, 11], [29, 6], [30, 15], [34, 12], [33, 24], [20, 30], [7, 24], [6, 12], [10, 15], [11, 6], [16, 11]], '#ffd84a', { lift: .1 }),
+      E(20, 22, 12, 10, '#ffe680'),
+      E(20, 23, 8, 7, '#fff7c8', { noLine: true, flat: true }),
+      ...eye(16, 21, 1.0, '#6a4a00'), ...eye(24.5, 21, 1.0, '#6a4a00'),
+      E(20.5, 26.5, 1.8, 1.2, '#b8641a', { flat: true }),
+      P([[34, 22], [38, 18], [37, 23], [40, 23], [35, 28]], '#ffffff', { flat: true }),
+      P([[4, 18], [1, 14], [3, 19], [0, 20], [5, 23]], '#ffffff', { flat: true }),
     ],
+    // ルーンゴーレム：光る ルーンが きざまれた 石の 巨人
     gorotan: () => [
-      E(10, 33, 3.5, 4, '#7aa860'), E(26, 34, 3.5, 4, '#7aa860'),
-      E(34, 24, 5.5, 5, '#8fc070'),
-      E(19, 23, 14, 10, '#9a8070'),
-      E(14, 20, 4, 3, '#b8a088', { noLine: false }), E(23, 18, 4, 3, '#b8a088'), E(20, 26, 4.5, 3, '#b8a088'), E(10, 26, 3, 2.4, '#b8a088'), E(28, 25, 3, 2.4, '#b8a088'),
-      E(19, 31, 15, 3.4, '#d8c8a0'),
-      E(15, 35, 3.5, 4, '#8fc070'), E(30, 35, 3.5, 4, '#8fc070'),
-      ...eye(35.5, 22.5, .85),
-      E(38, 26, 1.5, .7, '#3a2a1a', { flat: true }),
+      E(13, 34, 4, 5, '#6a6878'), E(26, 34, 4, 5, '#6a6878'),
+      P([[9, 14], [31, 14], [33, 32], [7, 32]], '#8a8898'),
+      P([[12, 3], [28, 3], [29, 15], [11, 15]], '#9a98a8'),
+      P([[3, 15], [9, 14], [10, 28], [5, 31], [1, 27]], '#7a7888'), P([[31, 14], [37, 15], [39, 27], [35, 31], [30, 28]], '#7a7888'),
+      E(4, 31, 3.5, 3, '#6a6878'), E(36, 31, 3.5, 3, '#6a6878'),
+      P([[4, 19], [6, 19], [6, 25], [4, 25]], '#7affff', { flat: true, noLine: true }), P([[34, 19], [36, 19], [36, 25], [34, 25]], '#7affff', { flat: true, noLine: true }),
+      P([[13, 7], [27, 7], [27, 11], [13, 11]], '#3a3848', { flat: true, noLine: true }),
+      E(17, 9, 1.8, 1.3, '#7affff', { flat: true, noLine: true }), E(24, 9, 1.8, 1.3, '#7affff', { flat: true, noLine: true }),
+      E(20, 23, 5, 5, '#2a6a70', { flat: true }), E(20, 23, 3, 3, '#7affff', { flat: true, noLine: true }),
+      E(10, 15, 3, 1.5, '#5aa850', { flat: true, noLine: true }), E(28, 7, 2.5, 1.2, '#5aa850', { flat: true, noLine: true }),
     ],
+    // グリフィ：グリフォンの ひな
     soyodori: () => [
-      P([[12, 26], [1, 22], [4, 27], [0, 31], [11, 31]], '#4fa8a0'),
-      P([[18, 35], [17, 39], [19, 39]], '#ffb13a', { flat: true }), P([[23, 35], [22, 39], [25, 39]], '#ffb13a', { flat: true }),
-      E(19, 26, 9.5, 9, '#7fd8d0'),
-      E(21, 29, 5.5, 5.5, '#f4fbff', { noLine: true, lift: .2 }),
-      P([[11, 22], [21, 21], [19, 30], [10, 30], [8, 26]], '#4fa8a0', { lift: .2 }),
-      E(25, 15, 8, 7.5, '#7fd8d0'),
-      P([[21, 9], [18, 1], [24, 7], [24, 0], [27, 8]], '#4fa8a0'),
-      P([[32, 15], [39, 17], [32, 19]], '#ffc84a'),
-      ...eye(28, 14, 1.0),
-      E(30, 19, 1.4, .8, '#ffb0c0', { flat: true, noLine: true }),
+      P([[9, 26], [1, 22], [3, 29], [0, 33], [8, 31]], '#c8a060'), E(2, 33, 2.2, 2, '#8a6a3a'),
+      E(13, 34, 2.8, 4, '#b08850'), E(24, 34, 2.8, 4, '#b08850'),
+      E(18, 27, 10, 7.5, '#d8b070'),
+      P([[10, 19], [2, 9], [8, 10], [6, 4], [14, 9], [14, 4], [20, 14], [18, 24], [11, 24]], '#8a6a3a', { lift: .2 }),
+      E(26, 18, 7.5, 7.5, '#f4ecd8'),
+      E(22, 21, 4, 5, '#e8d8b8', { noLine: true }),
+      P([[31, 16], [38, 19], [35, 22], [31, 21]], '#ffc23a'), P([[35, 21], [38, 19], [36, 23]], '#c88a20', { flat: true, noLine: true }),
+      P([[22, 11], [21, 5], [25, 10], [26, 4], [28, 11]], '#f4ecd8'),
+      ...eye(28.5, 17, .95, '#4a2a10'),
+      E(17, 35, 2.8, 4, '#d8b070'), E(27, 35, 2.8, 4, '#d8b070'),
+      E(17, 38.6, 2.6, 1, '#4a3a2a', { flat: true }), E(27, 38.6, 2.6, 1, '#4a3a2a', { flat: true }),
     ],
+    // マジタケ：とんがり帽子の キノコ 魔導士
     dokukino: () => [
-      E(14, 37, 3.5, 2, '#d8c8b0'), E(26, 37, 3.5, 2, '#d8c8b0'),
-      E(20, 28, 8.5, 9, '#f4ecd8'),
-      E(20, 15, 17, 10, '#b05ad8'),
-      E(20, 22, 15, 3, '#7a3a98', { noLine: true, flat: true }),
-      E(11, 12, 3, 2.4, '#fff4ff', { noLine: true }), E(21, 8, 3.5, 2.4, '#fff4ff', { noLine: true }), E(29, 14, 2.6, 2.2, '#fff4ff', { noLine: true }), E(16, 18, 2, 1.5, '#fff4ff', { noLine: true }),
-      ...eye(16.5, 28, .9), ...eye(24, 28, .9),
-      P([[18, 33], [22, 33], [20, 35]], '#7a3a3a', { flat: true }),
+      E(15, 37, 3.5, 2, '#d8c8b0'), E(24, 37, 3.5, 2, '#d8c8b0'),
+      E(19, 29, 8, 8.5, '#f4ecd8'),
+      E(27, 27, 2.5, 2.5, '#f4ecd8'),
+      E(19, 19, 15, 5, '#8a3ab0'),
+      P([[8, 18], [30, 18], [24, 9], [21, 1], [12, 3], [17, 6], [16, 11]], '#b05ad8'),
+      E(13, 16, 2.4, 1.6, '#ffe8ff', { noLine: true }), E(21, 13, 2, 1.6, '#ffe8ff', { noLine: true }), E(25, 17, 1.6, 1.2, '#ffe8ff', { noLine: true }),
+      P([[9, 18], [29, 18], [29, 20], [9, 20]], '#ffd84a', { flat: true, noLine: true }),
+      ...eye(16, 27, .85, '#3a1a5a'), ...eye(23, 27, .85, '#3a1a5a'),
+      P([[18, 32], [21, 32], [19.5, 33.5]], '#7a3a3a', { flat: true }),
+      P([[29, 14], [31, 14], [31, 38], [29, 38]], '#7a4a2a'),
+      E(30, 12, 3.2, 3.2, '#7bff8a', { lift: .3 }), E(29, 11, 1, 1, '#ffffff', { flat: true, noLine: true }),
     ],
+    // ガーゴイ：ちいさな ガーゴイル
     yorukoumo: () => [
-      P([[14, 20], [1, 10], [0, 22], [4, 20], [5, 27], [9, 23], [13, 28]], '#3a2a6a'),
-      P([[26, 20], [39, 10], [40, 22], [36, 20], [35, 27], [31, 23], [27, 28]], '#3a2a6a'),
-      P([[14, 13], [12, 2], [19, 10]], '#5a4a8a'), P([[26, 13], [28, 2], [21, 10]], '#5a4a8a'),
-      E(20, 23, 9, 10, '#6a5a9a'),
-      E(20, 27, 5, 5, '#8a7ab8', { noLine: true }),
-      ...eye(16.5, 20, .95, '#ff3a4a'), ...eye(24, 20, .95, '#ff3a4a'),
-      P([[18, 26], [19, 29], [20, 26]], '#ffffff', { flat: true }), P([[21, 26], [22, 29], [23, 26]], '#ffffff', { flat: true }),
-      E(16, 36, 2, 2, '#3a2a6a'), E(24, 36, 2, 2, '#3a2a6a'),
+      P([[14, 18], [1, 6], [3, 14], [0, 20], [5, 20], [4, 26], [12, 26]], '#4a3a6a'),
+      P([[26, 18], [39, 6], [37, 14], [40, 20], [35, 20], [36, 26], [28, 26]], '#4a3a6a'),
+      P([[29, 30], [37, 33], [35, 30], [39, 29], [36, 35], [28, 34]], '#5a5a78'),
+      E(14, 35, 3.5, 3.5, '#5a5a78'), E(26, 35, 3.5, 3.5, '#5a5a78'),
+      E(20, 28, 8, 8, '#7a7a98'),
+      E(20, 30, 4.5, 5, '#9a9ab8', { noLine: true }),
+      P([[14, 13], [10, 3], [17, 10]], '#d8c8a0'), P([[26, 13], [30, 3], [23, 10]], '#d8c8a0'),
+      E(20, 17, 8, 7, '#7a7a98'),
+      ...eye(16.5, 16, .9, '#ff2a3a'), ...eye(24, 16, .9, '#ff2a3a'),
+      P([[17, 21], [18, 23.5], [19, 21]], '#ffffff', { flat: true }), P([[21, 21], [22, 23.5], [23, 21]], '#ffffff', { flat: true }),
+      E(14, 38.5, 3, 1, '#2a2a3a', { flat: true }), E(26, 38.5, 3, 1, '#2a2a3a', { flat: true }),
     ],
+    // ミノタウ：もえる おのを もつ ミノタウロス
     gouen: () => [
-      P([[7, 22], [0, 18], [3, 14], [1, 8], [7, 14], [9, 20]], '#ff6a2a'),
-      E(10, 33, 3.2, 5, '#5a2418'), E(22, 33, 3.2, 5, '#5a2418'),
-      E(17, 25, 12, 8.5, '#8a3a2a'),
-      E(14, 35, 3.2, 5, '#8a3a2a'), E(26, 35, 3.2, 5, '#8a3a2a'),
-      E(14, 39, 3, 1.4, '#2a1a1a', { flat: true }), E(26, 39, 3, 1.4, '#2a1a1a', { flat: true }),
-      P([[20, 10], [16, 3], [22, 7], [23, 0], [26, 7], [30, 2], [30, 10], [24, 20], [18, 20]], '#ff8a3a', { lift: .2 }),
-      E(30, 18, 7.5, 7.5, '#a8483a'),
-      P([[27, 12], [24, 3], [22, 6], [25, 13]], '#f4ecd8'), P([[33, 12], [37, 3], [39, 6], [35, 13]], '#f4ecd8'),
-      E(35, 22, 4.5, 3.5, '#e8a080', { noLine: true }),
-      E(37, 21, .8, .8, '#3a1a1a', { flat: true }), E(35, 23, .8, .8, '#3a1a1a', { flat: true }),
-      ...eye(31, 16, .9, '#ffcc3a'),
+      P([[31, 4], [33, 4], [33, 30], [31, 30]], '#7a4a2a'),
+      P([[33, 3], [40, 7], [40, 15], [33, 13]], '#c8c8d8'), P([[36, 2], [40, 0], [40, 7]], '#ff8a3a', { flat: true }),
+      P([[33, 13], [40, 15], [38, 18], [33, 16]], '#ffb13a', { flat: true, noLine: true }),
+      E(14, 34, 3.5, 5, '#6a3020'), E(24, 34, 3.5, 5, '#6a3020'),
+      P([[10, 18], [28, 18], [26, 31], [12, 31]], '#a84a30'),
+      P([[12, 27], [26, 27], [26, 31], [12, 31]], '#5a3a2a', { flat: true }), E(19, 29, 2, 2, '#ffd84a', { flat: true }),
+      E(28, 22, 3.5, 4.5, '#a84a30'), E(31, 26, 2.6, 2.4, '#a84a30'),
+      E(10, 23, 3.5, 5, '#a84a30'),
+      E(14, 38.6, 3.3, 1.2, '#2a1a1a', { flat: true }), E(24, 38.6, 3.3, 1.2, '#2a1a1a', { flat: true }),
+      P([[12, 16], [10, 9], [14, 12], [14, 6], [18, 11], [20, 5], [22, 11], [26, 8], [27, 17]], '#ff8a3a', { flat: true }),
+      E(20, 13, 7, 6.5, '#a84a30'),
+      P([[13, 9], [5, 6], [3, 1], [8, 4], [14, 7]], '#f4ecd8'), P([[27, 9], [35, 6], [37, 1], [32, 4], [26, 7]], '#f4ecd8'),
+      E(20, 17, 4.5, 3.2, '#e8a080', { noLine: true }),
+      E(18.5, 17, .8, .8, '#3a1a1a', { flat: true }), E(21.5, 17, .8, .8, '#3a1a1a', { flat: true }),
+      ...eye(16.5, 12, .75, '#ffcc22'), ...eye(23.5, 12, .75, '#ffcc22'),
     ],
+    // ユキピクシー：氷の 羽の 妖精
     tsuraran: () => [
-      P([[6, 18], [3, 23], [6, 28], [9, 23]], '#bfe8ff'), P([[34, 10], [31, 15], [34, 20], [37, 15]], '#bfe8ff'),
-      P([[20, 1], [32, 18], [20, 37], [8, 18]], '#9fe0ff'),
-      P([[20, 1], [20, 37], [8, 18]], '#d8f4ff', { noLine: true, lift: .3 }),
-      P([[12, 22], [5, 30], [7, 31], [14, 25]], '#9fe0ff'), P([[28, 22], [34, 31], [32, 32], [26, 25]], '#9fe0ff'),
-      ...eye(16.5, 17, .95, '#2a4a8a'), ...eye(23.5, 17, .95, '#2a4a8a'),
-      E(20, 23, 1.8, 1, '#3a6aa0', { flat: true }),
-      E(14, 21, 1.4, .8, '#ffb0d0', { flat: true, noLine: true }), E(26, 21, 1.4, .8, '#ffb0d0', { flat: true, noLine: true }),
+      P([[17, 18], [5, 6], [3, 14], [9, 20]], '#bff0ff', { lift: .3 }), P([[17, 21], [4, 24], [6, 29], [13, 25]], '#bff0ff', { lift: .3 }),
+      P([[23, 18], [35, 6], [37, 14], [31, 20]], '#bff0ff', { lift: .3 }), P([[23, 21], [36, 24], [34, 29], [27, 25]], '#bff0ff', { lift: .3 }),
+      E(17, 36, 1.6, 2.5, '#f8d4c8'), E(23, 36, 1.6, 2.5, '#f8d4c8'),
+      P([[13, 34], [27, 34], [24, 22], [16, 22]], '#6ac8f0'),
+      E(20, 23, 4, 3, '#f8d4c8'),
+      E(20, 15, 7, 6.5, '#f8e0d4', { lift: .2 }),
+      P([[13, 13], [12, 5], [15, 9], [17, 2], [20, 8], [23, 2], [25, 9], [28, 5], [27, 13], [20, 10]], '#e8f8ff'),
+      ...eye(17.5, 15.5, .8, '#2a6aa0'), ...eye(23, 15.5, .8, '#2a6aa0'),
+      E(20, 19.5, 1, .6, '#c06a7a', { flat: true }),
+      P([[28, 27], [31, 18], [32, 18], [29, 27]], '#e8f8ff', { flat: true }),
+      P([[31, 14], [34, 18], [31, 22], [28, 18]], '#9fe8ff'),
     ],
   };
-  // トレーナー（32x40、右むき）
+  // トレーナー（32x40、右むき）：フードつき マントの 冒険者。hat=フード・マント、coat=服
   const TRAINER = (hat, coat) => [
-    E(12, 37, 3, 2, '#2a1e1e'), E(19, 37, 3, 2, '#2a1e1e'),
-    P([[10, 28], [21, 28], [21, 36], [10, 36]], '#3a3350'),
-    P([[8, 19], [23, 19], [24, 30], [7, 30]], coat),
-    E(6, 25, 2.2, 4, coat), E(25, 25, 2.2, 4, coat),
-    E(6, 29, 2, 2, '#f8d4b0', { lift: .25 }), E(25, 29, 2, 2, '#f8d4b0', { lift: .25 }),
-    E(16, 12, 8, 7.5, '#f8d4b0', { lift: .25 }),
-    P([[7, 10], [9, 3], [17, 1], [24, 4], [25, 10], [16, 8]], hat),
-    P([[17, 8], [30, 9], [24, 11]], hat),
+    P([[7, 16], [25, 16], [27, 37], [5, 37]], hat),
+    E(12, 37, 3, 2, '#3a2a1e'), E(19, 37, 3, 2, '#3a2a1e'),
+    P([[11, 28], [20, 28], [20, 36], [11, 36]], '#4a3a30'),
+    P([[9, 19], [22, 19], [23, 30], [8, 30]], coat),
+    P([[8, 26], [23, 26], [23, 28], [8, 28]], '#6a4a2a', { flat: true }), E(16, 27, 1.2, 1.2, '#ffd84a', { flat: true }),
+    E(24, 25, 2.2, 3.5, coat), E(24, 29, 2, 2, '#ffe0c8', { lift: .5 }),
+    P([[25, 29], [27, 29], [30, 14], [29, 13]], '#c8c8d8'), P([[24, 28], [28, 28], [28, 30], [24, 30]], '#8a6a3a', { flat: true }),
+    E(16, 12, 7.5, 7, '#ffe0c8', { lift: .5 }),
+    P([[8, 14], [8, 6], [14, 1], [21, 2], [25, 7], [25, 11], [21, 7], [11, 9], [10, 16]], hat),
     ...eye(19, 13, .8), ...eye(13.5, 13, .8),
     E(17, 17, 1.2, .6, '#c06a5a', { flat: true }),
   ];
@@ -964,11 +997,12 @@ const trainerSpr = (hat, coat) => rgbaCanvas(SpriteGen.render(SpriteGen.TRAINER(
 const TR_PLAYER = trainerSpr('#e84a5f', '#3a6ee8');
 
 function spriteCanvas(sid, size) {
-  const img = SPR[sid].n, c = document.createElement('canvas');
-  c.width = size; c.height = size; c.className = 'pix';
+  // 内部は 2〜3倍の 解像度で 整数倍に 描いて、CSS で size に する（ドットが にじまない）
+  const img = SPR[sid].n, c = document.createElement('canvas'), R = size * Math.min(3, Math.max(2, Math.ceil(window.devicePixelRatio || 1)));
+  c.width = R; c.height = R; c.className = 'pix'; c.style.width = c.style.height = size + 'px';
   const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
-  const s = Math.max(1, Math.floor(size / Math.max(img.width, img.height) * 2) / 2);
-  g.drawImage(img, Math.floor((size - img.width * s) / 2), Math.floor((size - img.height * s) / 2), img.width * s, img.height * s);
+  const s = Math.max(1, Math.floor(R / Math.max(img.width, img.height)));
+  g.drawImage(img, Math.floor((R - img.width * s) / 2), Math.floor((R - img.height * s) / 2), img.width * s, img.height * s);
   return c;
 }
 
@@ -2089,13 +2123,13 @@ function updateFighter(f, dt) {
 function catchProb(e) { return clamp(e.sp.catch * (1.6 - 1.3 * e.hp / e.maxHp) * (e.state === 'stun' ? 1.15 : 1) * (e.status === 'slp' || e.status === 'frz' ? 2 : e.status ? 1.5 : 1), .04, .95); }
 function cmdCapsule() {
   if (!B || B.kind !== 'wild' || B.mode !== 'fight' || B.catchO || B.paused) return;
-  if (S.capsules <= 0) { say('カプセルが もう ない！'); return; }
+  if (S.capsules <= 0) { say('クリスタルが もう ない！'); return; }
   const e = active(1); if (!targetable(e)) return;
   S.capsules--; save();
   const tr = B.sides[0].trainer; tr.shout = .6;
   B.mode = 'catch';
   B.catchO = { phase: 'throw', t: 0, sx: tr.x, sy: tr.y - 30, tx: e.x, ty: e.y - 12, shakes: 0, p: catchProb(e), x: tr.x, y: tr.y };
-  say('いけっ！ キャプチャーカプセル！');
+  say('いけっ！ ふういんクリスタル！');
 }
 function updateCatch(dt) {
   const c = B.catchO, e = active(1); c.t += dt;
@@ -2122,7 +2156,7 @@ function updateCatch(dt) {
         c.phase = 'fail';
         e.state = 'stun'; e.stT = .4; e.inv = .4;
         burst(c.x, c.y, '#ffffff', 20, 120, .5);
-        say(choice(['ああっ！ カプセルから でてしまった！', 'おしい！ もうすこしだったのに！', 'だめだ！ にげだした！']));
+        say(choice(['ああっ！ クリスタルから でてしまった！', 'おしい！ もうすこしだったのに！', 'だめだ！ にげだした！']));
         B.catchO = null; B.mode = 'fight';
       }
     }
@@ -2245,7 +2279,7 @@ function endBattle(res) {
       lines.unshift('まけてしまった… たいかいは 1かいせんから やりなおし');
     }
   }
-  if (S.capsules > caps0) lines.push(`カプセルを ${S.capsules - caps0}こ てにいれた`);
+  if (S.capsules > caps0) lines.push(`クリスタルを ${S.capsules - caps0}こ てにいれた`);
   B.resLines = lines;
   save();
 }
@@ -2594,16 +2628,19 @@ function render() {
 
   for (const p of B.projs) drawProj(p);
 
-  // キャプチャーカプセル
+  // ふういんクリスタル
   if (B.catchO) {
     const c = B.catchO; let ox = 0;
     if (c.phase === 'shake') ox = Math.round(Math.sin(c.t / .6 * Math.PI * 2) * 2 * (c.t < .35 ? 1 : 0));
     const x = Math.round(c.x) + ox, y = Math.round(c.y);
-    ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 9, y - 8, 18, 17);
-    ctx.fillStyle = '#3ad0c8'; ctx.fillRect(x - 8, y - 7, 16, 15);
-    ctx.fillStyle = '#1e8a84'; ctx.fillRect(x - 8, y + 4, 16, 4);
-    ctx.fillStyle = '#ffd166'; ctx.fillRect(x - 8, y, 16, 2);
-    ctx.fillStyle = '#e8ffff'; ctx.fillRect(x - 6, y - 5, 4, 2);
+    // ふういんクリスタル：ひかる ひし形の 結晶
+    const glow = .35 + Math.sin(B.t * 10) * .15;
+    ctx.fillStyle = `rgba(150,240,255,${glow})`; ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fill();
+    const dia = (r, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, y - r * 1.4); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r * 1.4); ctx.lineTo(x - r, y); ctx.closePath(); ctx.fill(); };
+    dia(9, '#1a1424'); dia(8, '#3ad0e8'); 
+    ctx.fillStyle = '#b8f8ff'; ctx.beginPath(); ctx.moveTo(x, y - 11); ctx.lineTo(x - 8, y); ctx.lineTo(x, y); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#1e8aa8'; ctx.beginPath(); ctx.moveTo(x, y + 11); ctx.lineTo(x + 8, y); ctx.lineTo(x, y); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(x - 3, y - 6, 2, 3);
     if (c.phase === 'shake') for (let i = 0; i < c.shakes; i++) drawStar(x - 12 + i * 12, y - 18, 4, '#ffd84a');
   }
 

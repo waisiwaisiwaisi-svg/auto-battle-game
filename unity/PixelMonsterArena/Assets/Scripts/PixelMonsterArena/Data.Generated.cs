@@ -638,9 +638,9 @@ namespace PixelMonsterArena
         public static readonly Dictionary<string, Species> Species = new Dictionary<string, Species>
         {
             { "hinokon", new Species {
-                Id = "hinokon", N = "ヒノコン", Type = "fire", Type2 = "", Hp = 40, Atk = 54, Def = 44, Spd = 66,
+                Id = "hinokon", N = "サラマン", Type = "fire", Type2 = "", Hp = 40, Atk = 54, Def = 44, Spd = 66,
                 Style = "mid", Catch = 0.45f, Rare = false,
-                Desc = "しっぽの ほのおで きもちを あらわす こぎつね。とおくから ひのたまを うつ。",
+                Desc = "つばさと つのを もつ こどもの 火竜。しっぽの ほのおで まりょくを ためて ひのたまを はく。",
                 Pal = new Dictionary<char, string> { { 'o', "#ff8a3d" }, { 'O', "#ffc27a" }, { 'w', "#fff3e0" }, { 'k', "#1a1626" }, { 'n', "#3a1a1a" }, { 'r', "#ff4a3d" }, { 'y', "#ffe066" } },
                 Learn = new[] { new LearnEntry(1, "ember"), new LearnEntry(1, "flame"), new LearnEntry(1, "quick-attack"), new LearnEntry(3, "will-o-wisp"), new LearnEntry(6, "flame-charge"), new LearnEntry(9, "u-turn"), new LearnEntry(12, "flamethrower"), new LearnEntry(15, "swords-dance"), new LearnEntry(18, "nasty-plot"), new LearnEntry(21, "fire-blast"), new LearnEntry(24, "overheat"), new LearnEntry(27, "flare-blitz"), new LearnEntry(30, "baton-pass"), new LearnEntry(33, "dragon-pulse"), new LearnEntry(36, "draco-meteor") },
                 Rows = new[] {
@@ -657,9 +657,9 @@ namespace PixelMonsterArena
                     "...OO.O..O.OO.",
                 } } },
             { "mizupuku", new Species {
-                Id = "mizupuku", N = "ミズプク", Type = "water", Type2 = "", Hp = 48, Atk = 46, Def = 52, Spd = 50,
+                Id = "mizupuku", N = "ルリスライム", Type = "water", Type2 = "", Hp = 48, Atk = 46, Def = 52, Spd = 50,
                 Style = "ranged", Catch = 0.45f, Rare = false,
-                Desc = "まんまるの みずふうせんの ような さかな。ためた みずを いっきに はなつ。",
+                Desc = "むねに るり色の ほうせきを やどす スライム。かんむりは むかし 王さまから もらったものらしい。",
                 Pal = new Dictionary<char, string> { { 'b', "#4aa8ff" }, { 'B', "#9fd3ff" }, { 'w', "#ffffff" }, { 'k', "#1a1626" }, { 'm', "#1d3d7a" }, { 'f', "#2f74d0" }, { 'l', "#d8f0ff" } },
                 Learn = new[] { new LearnEntry(1, "bubble"), new LearnEntry(1, "tide"), new LearnEntry(1, "aqua-jet"), new LearnEntry(3, "yawn"), new LearnEntry(6, "flip-turn"), new LearnEntry(9, "icy-wind"), new LearnEntry(12, "surf"), new LearnEntry(15, "liquidation"), new LearnEntry(18, "recover"), new LearnEntry(21, "ice-beam"), new LearnEntry(24, "mirror-coat"), new LearnEntry(27, "hydro-pump"), new LearnEntry(30, "freeze-dry"), new LearnEntry(33, "dragon-pulse"), new LearnEntry(36, "psychic-noise") },
                 Rows = new[] {
@@ -676,9 +676,9 @@ namespace PixelMonsterArena
                     "....f..f....",
                 } } },
             { "happamogu", new Species {
-                Id = "happamogu", N = "ハッパモグ", Type = "grass", Type2 = "", Hp = 50, Atk = 52, Def = 50, Spd = 44,
+                Id = "happamogu", N = "マンドラ", Type = "grass", Type2 = "", Hp = 50, Atk = 52, Def = 50, Spd = 44,
                 Style = "melee", Catch = 0.45f, Rare = false,
-                Desc = "あたまの はっぱで ひなたぼっこする もぐら。ちかづいて ツタで たたく。",
+                Desc = "ひっこぬかれると さけぶ 森の まもの。はっぱの かんむりで ひかりを あつめ、ツタで たたく。",
                 Pal = new Dictionary<char, string> { { 'g', "#62d26f" }, { 'G', "#b6f5a0" }, { 's', "#3e8a3a" }, { 'm', "#8a6a4a" }, { 'l', "#d8b890" }, { 'k', "#1a1626" }, { 'n', "#ff8aa0" } },
                 Learn = new[] { new LearnEntry(1, "vine"), new LearnEntry(1, "spore"), new LearnEntry(1, "leech-seed"), new LearnEntry(4, "rapid-spin"), new LearnEntry(7, "giga-drain"), new LearnEntry(10, "spikes"), new LearnEntry(13, "synthesis"), new LearnEntry(16, "energy-ball"), new LearnEntry(19, "earth-power"), new LearnEntry(22, "swords-dance"), new LearnEntry(25, "earthquake"), new LearnEntry(28, "body-press"), new LearnEntry(31, "leaf-storm"), new LearnEntry(34, "play-rough") },
                 Rows = new[] {
@@ -695,9 +695,9 @@ namespace PixelMonsterArena
                     "..mm....mm..",
                 } } },
             { "birikurage", new Species {
-                Id = "birikurage", N = "ビリクラゲ", Type = "elec", Type2 = "water", Hp = 42, Atk = 58, Def = 40, Spd = 70,
+                Id = "birikurage", N = "ボルトウィスプ", Type = "elec", Type2 = "water", Hp = 42, Atk = 58, Def = 40, Spd = 70,
                 Style = "mid", Catch = 0.4f, Rare = false,
-                Desc = "ふわふわ ういている でんきクラゲ。さわると しびれる。",
+                Desc = "あらしの よるに うまれる かみなりの せいれい。ふれると しびれる ひかりの からだ。",
                 Pal = new Dictionary<char, string> { { 'y', "#ffd84a" }, { 'Y', "#fff5b0" }, { 'k', "#1a1626" }, { 'z', "#ffae3a" } },
                 Learn = new[] { new LearnEntry(1, "spark"), new LearnEntry(1, "thunder"), new LearnEntry(1, "thunder-wave"), new LearnEntry(5, "volt-switch"), new LearnEntry(8, "protect"), new LearnEntry(11, "thunderbolt"), new LearnEntry(14, "toxic-spikes"), new LearnEntry(17, "thunder-punch"), new LearnEntry(20, "sludge-wave"), new LearnEntry(23, "substitute"), new LearnEntry(26, "hydro-pump"), new LearnEntry(29, "recover"), new LearnEntry(32, "dazzling-gleam"), new LearnEntry(35, "trick") },
                 Rows = new[] {
@@ -713,9 +713,9 @@ namespace PixelMonsterArena
                     "...z....z...",
                 } } },
             { "gorotan", new Species {
-                Id = "gorotan", N = "ゴロタン", Type = "rock", Type2 = "ground", Hp = 60, Atk = 56, Def = 66, Spd = 30,
+                Id = "gorotan", N = "ルーンゴーレム", Type = "rock", Type2 = "ground", Hp = 60, Atk = 56, Def = 66, Spd = 30,
                 Style = "melee", Catch = 0.4f, Rare = false,
-                Desc = "こうらが いわで できた カメ。うごきは おそいが とても かたい。",
+                Desc = "いにしえの ルーンが きざまれた 石の きょじん。うごきは おそいが とても かたい。",
                 Pal = new Dictionary<char, string> { { 'r', "#9a8070" }, { 'R', "#c8b098" }, { 's', "#8fc070" }, { 'k', "#1a1626" }, { 'l', "#d8c8a0" } },
                 Learn = new[] { new LearnEntry(1, "rockfall"), new LearnEntry(1, "quake"), new LearnEntry(1, "stealth-rock"), new LearnEntry(4, "rock-tomb"), new LearnEntry(7, "iron-defense"), new LearnEntry(10, "rock-blast"), new LearnEntry(13, "body-press"), new LearnEntry(16, "slack-off"), new LearnEntry(19, "rock-slide"), new LearnEntry(22, "iron-head"), new LearnEntry(25, "stone-edge"), new LearnEntry(28, "curse"), new LearnEntry(31, "metal-burst"), new LearnEntry(34, "fissure") },
                 Rows = new[] {
@@ -729,9 +729,9 @@ namespace PixelMonsterArena
                     "..ss.....ss....",
                 } } },
             { "soyodori", new Species {
-                Id = "soyodori", N = "ソヨドリ", Type = "wind", Type2 = "", Hp = 40, Atk = 50, Def = 40, Spd = 80,
+                Id = "soyodori", N = "グリフィ", Type = "wind", Type2 = "", Hp = 40, Atk = 50, Def = 40, Spd = 80,
                 Style = "ranged", Catch = 0.45f, Rare = false,
-                Desc = "かぜに のって くらす ことり。はねで かぜの やいばを とばす。",
+                Desc = "わしの あたまと ししの からだを もつ グリフォンの ひな。かぜを きって とびまわる。",
                 Pal = new Dictionary<char, string> { { 'c', "#7fd8d0" }, { 'C', "#c8fff8" }, { 'w', "#ffffff" }, { 'k', "#1a1626" }, { 'y', "#ffc84a" } },
                 Learn = new[] { new LearnEntry(1, "gust"), new LearnEntry(1, "tornado"), new LearnEntry(1, "quick-attack"), new LearnEntry(4, "taunt"), new LearnEntry(7, "air-slash"), new LearnEntry(10, "roost"), new LearnEntry(13, "tailwind"), new LearnEntry(16, "u-turn"), new LearnEntry(19, "hyper-voice"), new LearnEntry(22, "icy-wind"), new LearnEntry(25, "brave-bird"), new LearnEntry(28, "encore"), new LearnEntry(31, "draining-kiss"), new LearnEntry(34, "alluring-voice") },
                 Rows = new[] {
@@ -747,9 +747,9 @@ namespace PixelMonsterArena
                     ".....y..y....",
                 } } },
             { "dokukino", new Species {
-                Id = "dokukino", N = "ドクキノ", Type = "grass", Type2 = "poison", Hp = 46, Atk = 54, Def = 46, Spd = 48,
+                Id = "dokukino", N = "マジタケ", Type = "grass", Type2 = "poison", Hp = 46, Atk = 54, Def = 46, Spd = 48,
                 Style = "ranged", Catch = 0.45f, Rare = false,
-                Desc = "かさの もようが あやしく ひかる キノコ。ほうしの ばくだんを まく。",
+                Desc = "とんがりぼうしを かぶった キノコの まどうし。どくの ほうしで まほうを となえる。",
                 Pal = new Dictionary<char, string> { { 'p', "#b05ad8" }, { 'P', "#f0a8ff" }, { 'w', "#f4ecd8" }, { 'k', "#1a1626" }, { 'm', "#7a3a3a" } },
                 Learn = new[] { new LearnEntry(1, "leaf"), new LearnEntry(1, "spore"), new LearnEntry(1, "toxic"), new LearnEntry(4, "leech-seed"), new LearnEntry(7, "toxic-spikes"), new LearnEntry(10, "sludge-bomb"), new LearnEntry(13, "giga-drain"), new LearnEntry(16, "synthesis"), new LearnEntry(19, "dazzling-gleam"), new LearnEntry(22, "energy-ball"), new LearnEntry(25, "sludge-wave"), new LearnEntry(28, "poison-jab"), new LearnEntry(31, "gunk-shot"), new LearnEntry(34, "flash-cannon"), new LearnEntry(37, "psyshock") },
                 Rows = new[] {
@@ -765,9 +765,9 @@ namespace PixelMonsterArena
                     "....w..w....",
                 } } },
             { "yorukoumo", new Species {
-                Id = "yorukoumo", N = "ヨルコウモ", Type = "wind", Type2 = "dark", Hp = 44, Atk = 58, Def = 42, Spd = 76,
+                Id = "yorukoumo", N = "ガーゴイ", Type = "wind", Type2 = "dark", Hp = 44, Atk = 58, Def = 42, Spd = 76,
                 Style = "melee", Catch = 0.4f, Rare = false,
-                Desc = "よるの スタジアムに あらわれる コウモリ。すばやく とびかかる。",
+                Desc = "とうの うえで よるを みはる ちいさな ガーゴイル。いしの つばさで すばやく おそいかかる。",
                 Pal = new Dictionary<char, string> { { 'd', "#5a4a8a" }, { 'D', "#8a78c0" }, { 'r', "#ff4a5a" }, { 'w', "#ffffff" } },
                 Learn = new[] { new LearnEntry(1, "gust"), new LearnEntry(1, "spark"), new LearnEntry(1, "shadow-sneak"), new LearnEntry(4, "crunch"), new LearnEntry(7, "taunt"), new LearnEntry(10, "sucker-punch"), new LearnEntry(13, "u-turn"), new LearnEntry(16, "shadow-ball"), new LearnEntry(19, "knock-off"), new LearnEntry(22, "dark-pulse"), new LearnEntry(25, "foul-play"), new LearnEntry(28, "destiny-bond"), new LearnEntry(31, "poltergeist"), new LearnEntry(34, "curse"), new LearnEntry(37, "flash-cannon"), new LearnEntry(40, "alluring-voice") },
                 Rows = new[] {
@@ -781,9 +781,9 @@ namespace PixelMonsterArena
                     "....dddd....",
                 } } },
             { "gouen", new Species {
-                Id = "gouen", N = "ゴウエン", Type = "fire", Type2 = "fighting", Hp = 58, Atk = 72, Def = 56, Spd = 58,
+                Id = "gouen", N = "ミノタウ", Type = "fire", Type2 = "fighting", Hp = 58, Atk = 72, Def = 56, Spd = 58,
                 Style = "melee", Catch = 0.18f, Rare = true,
-                Desc = "もえる たてがみの あばれウシ。めったに みられない つよい モンスター。",
+                Desc = "もえる おのを ふりまわす めいきゅうの まもの。めったに すがたを みせない。",
                 Pal = new Dictionary<char, string> { { 'h', "#f4ecd8" }, { 'b', "#8a3a2a" }, { 'B', "#c0583a" }, { 'k', "#1a1626" }, { 'n', "#e8a080" }, { 'f', "#ff8a3d" }, { 'r', "#ff4a3d" }, { 'y', "#ffe066" } },
                 Learn = new[] { new LearnEntry(1, "blaze"), new LearnEntry(1, "quake"), new LearnEntry(1, "fake-out"), new LearnEntry(5, "drain-punch"), new LearnEntry(8, "body-slam"), new LearnEntry(11, "bulk-up"), new LearnEntry(14, "thunder-punch"), new LearnEntry(17, "roar"), new LearnEntry(20, "close-combat"), new LearnEntry(23, "dragon-dance"), new LearnEntry(26, "flare-blitz"), new LearnEntry(29, "aura-sphere"), new LearnEntry(32, "focus-blast"), new LearnEntry(35, "outrage"), new LearnEntry(38, "iron-head"), new LearnEntry(40, "dragon-pulse") },
                 Rows = new[] {
@@ -800,9 +800,9 @@ namespace PixelMonsterArena
                     ".kk.kk.kk.kk.",
                 } } },
             { "tsuraran", new Species {
-                Id = "tsuraran", N = "ツララン", Type = "ice", Type2 = "fairy", Hp = 50, Atk = 62, Def = 60, Spd = 64,
+                Id = "tsuraran", N = "ユキピクシー", Type = "ice", Type2 = "fairy", Hp = 50, Atk = 62, Def = 60, Spd = 64,
                 Style = "ranged", Catch = 0.18f, Rare = true,
-                Desc = "こおりの けっしょうから うまれた せいれい。つららを いっせいに とばす。",
+                Desc = "こおりの はねを もつ ゆきの ようせい。いたずら ずきで つららを いっせいに とばす。",
                 Pal = new Dictionary<char, string> { { 'i', "#9fe0ff" }, { 'I', "#ffffff" }, { 'k', "#1a1626" }, { 'm', "#3a6aa0" } },
                 Learn = new[] { new LearnEntry(1, "icicle"), new LearnEntry(1, "tide"), new LearnEntry(1, "ice-shard"), new LearnEntry(4, "encore"), new LearnEntry(7, "ice-punch"), new LearnEntry(10, "ice-fang"), new LearnEntry(13, "calm-mind"), new LearnEntry(16, "psychic"), new LearnEntry(19, "moonblast"), new LearnEntry(22, "triple-axel"), new LearnEntry(25, "blizzard"), new LearnEntry(28, "trick-room"), new LearnEntry(31, "psyshock"), new LearnEntry(34, "draining-kiss"), new LearnEntry(37, "psychic-noise"), new LearnEntry(40, "trick") },
                 Rows = new[] {
