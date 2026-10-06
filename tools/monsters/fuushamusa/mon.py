@@ -1,74 +1,5 @@
-# フウシャムサ（かぜ・ノーマル × ムササビ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭、小さな 胴、短い 手足の 先に 風車の 羽根の 膜）
-import os, sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
-from pix import grid, rows_of, poly, line, stamp, ellipse
-
-# ---------- 下書きの 道具（あたり → 左上光の 陰影 → 輪郭）。仕上げの 目・牙・模様は 手で 打つ ----------
-N = 64
-def G(): return grid(N, N)
-def at(g, x, y): return g[y][x] if 0 <= y < N and 0 <= x < N else '.'
-def dots(g, ch, pts):
-    for x, y in pts:
-        if 0 <= y < N and 0 <= x < N: g[y][x] = ch
-def put(g, rows, x0, y0): stamp(g, rows, x0, y0); return g
-def tube(p, path, rad, ch):
-    """太さの かわる 管（手足・首・尾の あたり）"""
-    for i in range(len(path) - 1):
-        (x0, y0), (x1, y1) = path[i], path[i + 1]; r0, r1 = rad[i], rad[i + 1]
-        n = int(max(abs(x1 - x0), abs(y1 - y0)) * 3) + 1
-        for j in range(n + 1):
-            t = j / n; cx, cy, r = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, r0 + (r1 - r0) * t
-            for y in range(int(cy - r - 1), int(cy + r + 2)):
-                for x in range(int(cx - r - 1), int(cx + r + 2)):
-                    if 0 <= x < N and 0 <= y < N and (x + .5 - cx) ** 2 + (y + .5 - cy) ** 2 <= r * r: p[y][x] = ch
-def ink(p, ch='k'):
-    """まわりに 1ドットの 輪郭"""
-    g = G()
-    for y in range(N):
-        for x in range(N):
-            if p[y][x] != '.': g[y][x] = p[y][x]
-            elif any(at(p, x + dx, y + dy) != '.' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): g[y][x] = ch
-    return g
-def shade(p, ramps, r=2, hi=.3, lo=-.28):
-    """左上から 光：ふくらみの 向きで 明・中・暗、上と 左の ふちは 明（三日月）、下と 右の ふちは 暗"""
-    m = [[1 if p[y][x] != '.' else 0 for x in range(N)] for y in range(N)]
-    def B(x, y):
-        s = n = 0
-        for yy in range(y - r, y + r + 1):
-            for xx in range(x - r, x + r + 1): n += 1; s += m[yy][xx] if 0 <= yy < N and 0 <= xx < N else 0
-        return s / n
-    out = [row[:] for row in p]
-    for y in range(N):
-        for x in range(N):
-            c = p[y][x]
-            if c not in ramps: continue
-            h, md, d = ramps[c]
-            v = (B(x + 1, y) - B(x - 1, y)) * 1.6 + (B(x, y + 1) - B(x, y - 1)) * 2.5
-            out[y][x] = h if v > hi else d if v < lo else md
-            if at(p, x, y - 1) == '.' or at(p, x - 1, y) == '.': out[y][x] = h
-            if at(p, x, y + 1) == '.' or at(p, x + 1, y) == '.': out[y][x] = d
-    return out
-def recol(g, mp): return [[mp.get(c, c) for c in r] for r in g]
-def make(draw, ramps, r=2, hi=.3, lo=-.28, post=None, post2=None, dk=None):
-    """draw(p) で あたり → 陰影 → post(s) 手打ち → 輪郭 → post2(g) 手打ち"""
-    p = G(); draw(p); s = shade(p, ramps, r, hi, lo)
-    if post: post(s)
-    if dk: s = recol(s, dk)
-    g = ink(s)
-    if post2: post2(g)
-    return rows_of(g)
-def shift(rows, dx, dy):
-    g = G()
-    for y, r in enumerate(rows):
-        for x, c in enumerate(r):
-            if c != '.' and 0 <= x + dx < N and 0 <= y + dy < N: g[y + dy][x + dx] = c
-    return rows_of(g)
-def over(*rowsets):
-    g = G()
-    for rs in rowsets: stamp(g, rs, 0, 0)
-    return rows_of(g)
+# フウシャムサ（かぜ・ノーマル × ムササビ）手打ち GBA風・デフォルメ（2〜3頭身：右向き 3/4 で 滑空。大きな 頭に 房の 耳と 前歯、前足と 後ろ足の あいだの 飛膜が 風車の 帆）
 META = dict(id='fuushamusa', name='フウシャムサ', types=['wind', 'normal'], base='ムササビ', size='M')
-import math
 PAL = {
     'k': '#101018', 'l': '#3e2a26',
     'A': '#f2d8a6', 'B': '#c48c58', 'C': '#7c4e32',      # 毛（明・中・暗）
@@ -79,104 +10,134 @@ PAL = {
 }
 LIGHT = set('ADcw')
 KEEP_BLACK = set('wcm')
-RAMP = {'1': 'ABC', '2': 'DDE'}
-DARK = {'A': 'B', 'B': 'C', 'D': 'E'}
-HUB = (29, 36)
+import pix
+# ---- 下書き用の 小道具（あたりの マスク → 左上 光の 3段階 → 手打ちの 仕上げ → 輪郭）----
+def M(W, H, *sh):
+    """('e',ch,cx,cy,rx,ry) だ円 / ('p',ch,[(x,y),...]) 多角形 / ('r',ch,x0,y0,x1,y1) 四角 / ('t',ch,r,[(x,y),...]) 太い 線。ch='.' で けずる"""
+    g = pix.grid(W, H)
+    for s in sh:
+        if s[0] == 'e': pix.ellipse(g, *s[2:], s[1])
+        elif s[0] == 'p': pix.poly(g, s[2], s[1])
+        elif s[0] == 'r':
+            for y in range(s[3], s[5] + 1):
+                for x in range(s[2], s[4] + 1): g[y][x] = s[1]
+        elif s[0] == 't':
+            r, pts = s[2], s[3]
+            for (ax, ay), (bx, by) in zip(pts, pts[1:]):
+                n = int(max(abs(bx - ax), abs(by - ay)) * 2) + 1
+                for i in range(n + 1):
+                    t = i / n; pix.ellipse(g, ax + (bx - ax) * t, ay + (by - ay) * t, r, r, s[1]) if False else _disc(g, ax + (bx - ax) * t, ay + (by - ay) * t, r, s[1])
+    return g
+def _disc(g, cx, cy, r, ch):
+    for y in range(int(cy - r - 1), int(cy + r + 2)):
+        for x in range(int(cx - r - 1), int(cx + r + 2)):
+            if 0 <= y < len(g) and 0 <= x < len(g[0]) and (x + .5 - cx) ** 2 + (y + .5 - cy) ** 2 <= r * r: g[y][x] = ch
+def shade(g, ramps, lw=2, dw=2):
+    H, W = len(g), len(g[0]); src = [r[:] for r in g]
+    def run(y, x, dy, dx, c):
+        n = 1
+        while 0 <= y + dy * n < H and 0 <= x + dx * n < W and src[y + dy * n][x + dx * n] == c: n += 1
+        return n
+    for y in range(H):
+        for x in range(W):
+            c = src[y][x]
+            if c not in ramps: continue
+            hi, mid, lo = ramps[c]
+            if run(y, x, 1, 0, c) <= dw or run(y, x, 0, 1, c) <= dw: g[y][x] = lo
+            elif run(y, x, -1, 0, c) <= lw or run(y, x, 0, -1, c) <= 1: g[y][x] = hi
+            else: g[y][x] = mid
+    return g
+def P(g, ramps, over=(), lw=2, dw=2, ol=True):
+    """マスクに 陰影 → 手打ちの 上がき（rows, x, y）→ 輪郭（輪郭の ぶん 左上へ 1 ずれる）"""
+    shade(g, ramps, lw, dw)
+    for rows, x, y in over: pix.stamp(g, rows, x, y)
+    r = pix.rows_of(g)
+    return pix.outline(r) if ol else r
+def dark(rows, m): return pix.recolor(rows, m)
+def eye(A, B, glow='w'):
+    """右向きの つり目（8x5）：まゆ／上まぶたの 線、白い 光＋虹彩 2色（A 明・B 暗）＋たての ひとみ k、下まぶた"""
+    base = ['kkkkk...', 'kww' + A + A + 'kkk', 'kw' + A + B + B + 'k' + A + 'k', '.k' + B * 3 + 'k' + B + 'k', '..kkkkkk']
+    alt = {
+        'blink': ['kkkkk...', '.kkkkkkk', '........', '........', '........'],
+        'hit': ['kkkk....', '...kkkk.', '.kkk....', '...kkkk.', '........'],
+        'atk0|atk1|atk2': ['kkkkk...', 'kw' + glow * 2 + A + 'kkk', 'kw' + glow + A + A + 'k' + glow + 'k', '.k' + A * 3 + 'k' + A + 'k', '..kkkkkk'],
+        'ko': ['.k...k..', '..k.k...', '...k....', '..k.k...', '.k...k..'],
+    }
+    return base, alt
+FUR = {'1': 'ABC'}
+DK = {'A': 'B', 'B': 'C', 'C': 'l', 'D': 'E', 'E': 'C', 'w': 'E'}
 
-def vec(a): return math.cos(math.radians(a)), math.sin(math.radians(a))
-def blade(a, L=24, w=12):
-    """風車の 羽根 ＝ 手足の あいだに 張った 四角い 膜。前の ふちは 手足の 骨、うしろに 帆の 格子"""
-    ux, uy = vec(a); vx, vy = -uy, ux; hx, hy = HUB
-    P = lambda t, s: (round(hx + ux * t + vx * s), round(hy + uy * t + vy * s))
-    def d(p): poly(p, [P(4, 0), P(L, 0), P(L, w), P(8, w * .7)], '2')
-    def post(s):
-        for t in (11, 16, 21):          # 帆の 格子（よこ）
-            line(s, *P(t, 1), *P(t, w - 1), 'E')
-        line(s, *P(10, w // 2), *P(L - 1, w // 2), 'E')
-    return make(d, RAMP, r=1, post=post)
-def limb(a, L=24):
-    ux, uy = vec(a); hx, hy = HUB
-    P = lambda t: (hx + ux * t, hy + uy * t)
-    def d(p):
-        tube(p, [P(2), P(L * .5), P(L)], [2.8, 2, 1.6], '1')
-    def post2(g):
-        # 先の かぎ爪（白）
-        x, y = map(round, P(L + 1.5)); x2, y2 = map(round, P(L + 2.5))
-        for (xx, yy) in ((x, y), (x2, y2)):
-            if 0 <= xx < 64 and 0 <= yy < 64: g[yy][xx] = 'w'
-        for (xx, yy) in ((x2 + 1, y2), (x2, y2 + 1), (x2 - 1, y2), (x2, y2 - 1)):
-            if 0 <= xx < 64 and 0 <= yy < 64 and g[yy][xx] == '.': g[yy][xx] = 'k'
-    return make(d, RAMP, r=1, post2=post2)
-ANG = (225, 315, 45, 135)        # 風車の 向き（ふだん：×）
-ANG2 = (270, 0, 90, 180)         # まわった 向き（攻撃：＋）
+# ---- 飛膜 ＝ 風車の 帆（見せ所）：前足の 先・後ろ足の 先・胴を 角に した 帆。格子の すじ、まん中の 骨で 2枚に わかれる ----
+def sail(pts, rib):
+    g = M(64, 64, ('p', '1', pts))
+    for y in range(64):
+        for x in range(64):
+            if g[y][x] == '1': g[y][x] = 'E' if (x % 4 == 0 or y % 4 == 0) else 'D'
+    pix.line(g, *rib, 'C')                                        # 帆の 骨（膜を 2枚に 分ける）
+    return pix.outline(pix.rows_of(g))
+def limb(path, r=2.0):
+    g = M(64, 64, ('t', '1', r, path))
+    shade(g, FUR, 1, 1)
+    x, y = path[-1]; g[int(y)][int(x)] = 'w'                        # かぎ爪
+    return pix.outline(pix.rows_of(g))
+def wingset(f=0):
+    """f: はばたき（帆の 先が 上下に 1〜2ドット）"""
+    near = sail([(36, 37), (52, 46 + f), (31, 50 + f), (7, 51 - f), (16, 40)], (25, 40, 29, 50 + f))
+    far = dark(sail([(33, 29), (43, 7 - f), (24, 7 - f), (3, 12 + f), (16, 30)], (25, 29, 25, 8 - f)), DK)
+    legs_n = [limb([(36, 37), (45, 41), (52, 46 + f)]), limb([(18, 39), (12, 45), (7, 51 - f)])]
+    legs_f = [dark(limb([(34, 29), (39, 18), (43, 7 - f)]), DK), dark(limb([(17, 30), (10, 21), (3, 12 + f)]), DK)]
+    return near, far, legs_n, legs_f
+def merge(*gs):
+    g = pix.grid_of(gs[0])
+    for h in gs[1:]:
+        for y, r in enumerate(h):
+            for x, c in enumerate(r):
+                if c != '.': g[y][x] = c
+    return pix.rows_of(g)
+def wings(f):
+    n, fa, ln, lf = wingset(f)
+    return merge(fa, *lf), merge(n, *ln)
+FAR0, NEAR0 = wings(0); FAR1, NEAR1 = wings(2)
 
-def body():
-    def d(p):
-        ellipse(p, 29, 37, 7, 7.5, '1')
-        tube(p, [(29, 42), (29, 47), (30, 51)], [3, 4, 3.2], '1')       # 平たい しっぽ（短く）
-    def post(s):
-        for y in range(36, 44):
-            for x in range(27, 32):
-                if s[y][x] == 'B' and (x + y) % 3: s[y][x] = 'A'      # おなかの 白い 毛
-        dots(s, 'C', [(31, 50), (32, 52), (27, 51)])
-    return make(d, RAMP, post=post)
-def head(open_=False):
-    def d(p):
-        ellipse(p, 29, 22, 10.5, 9, '1')
-        poly(p, [(34, 18), (42, 21), (43, 24), (38, 29), (32, 29)], '1')      # 鼻づら（右むき）
-        poly(p, [(20, 16), (20, 8), (26, 14)], '1')                          # 耳（とがった 房）
-        poly(p, [(27, 14), (31, 7), (34, 15)], '1')
-    def post(s):
-        line(s, 21, 9, 22, 14, 'C'); line(s, 31, 8, 31, 14, 'C')
-        for (x, y) in ((33, 27), (34, 28), (35, 28), (36, 28), (37, 27), (32, 26), (22, 26), (21, 25), (23, 27)): s[y][x] = 'A'
-        dots(s, 'k', [(42, 21), (42, 22)])
-        if open_:
-            put(s, ['kkkkkk', 'kRRRRk', 'kRRRRR', 'kkkkkk'], 37, 24)
-            dots(s, 'w', [(41, 25), (41, 26), (40, 25)])
-        else:
-            line(s, 35, 26, 42, 24, 'k')
-            dots(s, 'w', [(40, 25), (41, 25), (40, 26), (38, 26), (38, 27)]); dots(s, 'C', [(41, 26), (39, 27), (37, 27)])
-    return make(d, RAMP, lo=-.34, post=post)
-# 目：まゆの 毛＋白い 光＋風色の 虹彩（明 m・暗 T）＋たての ひとみ
-EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwmmkmmk', '.kwmmTkTmk', '.kmTTTkTTk', '..kTTkkTk.', '...kkkkk..']
-EYE_ALT = {
-    'blink': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAAAAAAAk', '.kkkkkkkkk', '.kBBBBBBBk', '..kBBBBBk.', '...kkkkk..'],
-    'hit':   ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kkkAAAAkk', '.kAAkkkkAk', '.kBBBBBkkk', '..kkkBBBk.', '...kkkkk..'],
-    'atk0|atk1|atk2': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwwckcwk', '.kwcccmccm', '.kmmmmkmmk', '..kTTkkTk.', '...kkkkk..'],
-    'ko':    ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kBkBBBkBk', '.kBBkBkBBk', '.kBkBBBkBk', '..kBBBBBk.', '...kkkkk..'],
-}
-# 風（はなれているのは 意図的：風の すじ）
-WIND1 = ['..cccc.....', '.c....mm...', 'c.......m..', '.........m.', '.mmm.....m.', 'm...m...m..', '.....mmm...']
-WIND2 = ['...cc....', '.cc..m...', 'c.....m..', '......m..', '..mmmm...']
-GUST = ['....cccccc..', '..cc......c.', 'cc..mmmmm..c', '..mm.....m.c', 'mm..ccc..m..', '...c...cm...', '....mmm.....']
+# ---- 胴（小さく 平たい、前が 少し 上がる）としっぽ（平たく 後ろへ）----
+BODY = P(M(26, 14, ('e', '1', 13, 7, 13, 6.5)), FUR, [(['..AAAA', 'AA'], 5, 1), (['AAAAAAA'], 9, 10)], lw=2, dw=2)
+TAIL = P(M(18, 9, ('p', '1', [(18, 2), (18, 7), (8, 8), (0, 6), (4, 3), (10, 1)])), FUR, [(['C.C.C'], 5, 4)], lw=1, dw=2)
+TAIL2 = P(M(18, 9, ('p', '1', [(18, 2), (18, 7), (8, 6), (0, 3), (4, 1), (10, 0)])), FUR, [(['C.C.C'], 5, 2)], lw=1, dw=2)
 
+# ---- 頭（大きい）：房の ある とがった 耳、ほおの 毛、鼻先、白い 前歯（牙）----
+HEAD = P(M(23, 21, ('e', '1', 11, 10.5, 11, 9.5), ('e', '1', 17.5, 13, 5, 5.5)), FUR, [
+    (['..AAAA', '.AA', 'A'], 3, 2),
+    (['AAAA', 'AAAAA', '.AAAA'], 16, 13),                          # 口もと
+    (['C.', 'CC', '.C', 'C'], 2, 13), (['CCC.', '...C'], 8, 8),                              # ほおの 毛
+], lw=2, dw=3)
+EAR = ['k..k.......', 'kk.kk......', '.kkAkk.....', '.kAAAkk....', '..kBAAAkk..', '..kBBAAAk..', '...kCBBBAk.', '...kCCBBk..', '....kkkk...']   # 先に 房毛
+EAR_F = dark(EAR, DK)
+EYE, EYE_ALT = eye('m', 'T')
+NOSE = ['kk', 'kk']
+TEETH = ['kkkk', 'kwwk', 'kwwk', '.kk.']
+MOUTH_OPEN = ['kkkkk', 'kRRRk', 'kwwRk', 'kwwk.', '.kk..']
+GUST = ['....kkkk......', '..kkccmmkk....', '.kcmmkkkmmk...', 'kcmk....kmk.kk', 'kmk..kkk.kk.kck', '.k..kccmk...kmk', '...kcmkk...kmk.', '....kk....kk...']
+WIND = ['.kk...kk..', 'kcmkkkcmk.', '.kk...kkmk', '.......kk.']
+NB = 'atk1|atk2'
 def layers():
-    BL = {a: blade(a) for a in ANG + ANG2}; LM = {a: limb(a) for a in ANG + ANG2}
-    lay = []
-    for i, (a, a2) in enumerate(zip(ANG, ANG2)):
-        g = 'legA' if i % 2 else 'legB'
-        lay.append(dict(n='bl%d' % i, g=g, x=0, y=0, rows=BL[a], alt={'atk1|walk1|walk3': BL[a2]}))
-    for i, (a, a2) in enumerate(zip(ANG, ANG2)):
-        g = 'legA' if i % 2 else 'legB'
-        lay.append(dict(n='lm%d' % i, g=g, x=0, y=0, rows=LM[a], alt={'atk1|walk1|walk3': LM[a2]}))
-    H = head(); HO = head(True)
-    lay += [
-        dict(n='body', g='body', x=0, y=0, rows=body()),
-        dict(n='head', g='head', x=0, y=0, rows=H, alt={'atk1|atk2': HO}),
-        dict(n='eye', g='head', x=27, y=14, rows=EYE, alt=EYE_ALT),
-        dict(n='wind', g='fx', x=1, y=26, rows=WIND1, only='idle1|idle3|walk1|walk3'),
-        dict(n='wind2', g='fx', x=50, y=28, rows=WIND2, only='idle2|walk2'),
-        dict(n='gust', g='fx', x=48, y=20, rows=GUST, only='atk1|atk2'),
+    return [
+        dict(n='far', g='wing', x=0, y=0, rows=FAR0, alt={'idle1|idle3|walk1|walk3|atk0|hit': FAR1}),
+        dict(n='earF', g='head', x=33, y=7, rows=EAR_F),
+        dict(n='tail', g='tail', x=0, y=31, rows=TAIL, alt={'idle1|idle3|walk1|walk3': TAIL2}),
+        dict(n='body', g='body', x=11, y=26, rows=BODY),
+        dict(n='head', g='head', x=32, y=14, rows=HEAD),
+        dict(n='ear', g='head', x=37, y=7, rows=EAR),
+        dict(n='eye', g='head', x=43, y=19, rows=EYE, alt=EYE_ALT),
+        dict(n='nose', g='head', x=55, y=26, rows=NOSE),
+        dict(n='teeth', g='head', x=52, y=30, rows=TEETH, alt={NB: MOUTH_OPEN}),
+        dict(n='near', g='wing', x=0, y=0, rows=NEAR0, alt={'idle1|idle3|walk1|walk3|atk0|hit': NEAR1}),
+        dict(n='wind', g='fx', x=0, y=20, rows=WIND, only='idle1|idle3|walk0|walk2'),
+        dict(n='gust', g='fx', x=55, y=29, rows=GUST, only=NB),
     ]
-    return lay
 FRAMES = {
-    'idle0': {}, 'idle1': {'body': (0, 1)}, 'idle2': {'body': (0, 1), 'legA': (0, 1)}, 'idle3': {'legB': (0, 1)}, 'blink': {},
-    'walk0': {'root': (0, -1), 'legA': (1, 0)}, 'walk1': {'root': (0, -2), 'legB': (0, 1)},
-    'walk2': {'root': (0, -1), 'legA': (-1, 0)}, 'walk3': {'legB': (0, -1)},
-    'atk0': {'root': (-3, 1), 'head': (-1, 1), 'legA': (1, 1), 'legB': (1, -1)},
-    'atk1': {'root': (3, 0)},
-    'atk2': {'root': (5, 0), 'legA': (-1, 0)},
-    'hit': {'root': (-3, 0), 'head': (-2, -1)},
-    'ko': {'_flip': True},
+    'idle0': {}, 'idle1': {'root': (0, -1)}, 'idle2': {'root': (0, -1), 'head': (0, 1)}, 'idle3': {'root': (0, 0)}, 'blink': {},
+    'walk0': {'root': (1, -1)}, 'walk1': {'root': (2, -2)}, 'walk2': {'root': (1, -1)}, 'walk3': {'root': (0, 0)},
+    'atk0': {'root': (-2, -1), 'head': (-1, 1)}, 'atk1': {'root': (3, 1)}, 'atk2': {'root': (4, 1), 'fx': (2, 0)},
+    'hit': {'root': (-3, -1), 'head': (-1, -1)}, 'ko': {'_flip': True},
 }
-PARENT = {'head': 'body', 'legA': 'body', 'legB': 'body', 'body': 'root', 'fx': 'root'}
+PARENT = {'head': 'body', 'tail': 'body', 'wing': 'body', 'body': 'root', 'fx': 'root'}

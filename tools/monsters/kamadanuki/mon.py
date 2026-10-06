@@ -94,39 +94,54 @@ def tail(sw=0):
         for x in range(4, 20):
             if g[y][x] != '.' and y < 32 - (x - 6 - sw) // 3: g[y][x] = 'D'
     return ol(g)
-# ---- 足・腕（短く 太く、白い 爪）----
-LEG = ['kkkkkk.', 'kHDDDlk', 'kHDDDlk', 'kDDDDlk', 'kHDDDDlk', 'kDDDDllk', 'kwkwkwkk']
-LEG_N = ['.......'] + LEG[1:]
-ARM = ['..kkkk..', '.kHDDDk.', 'kHDDDDlk', 'kDDDDDlk', '.kDDDllk', '.kDDDlkw', '.kwkwkk.']
-ARM_UP = ['..kkk...', '.kHDDk..', 'kHDDDlk.', 'kDDDDlkw', '.kDDDlkw', '..kwkwk.']
-DARKF = {'H': 'D', 'D': 'l', 'w': 'S'}
+# ---- 足・腕（短く 太く、白い 爪）：付け根は 毛の 胴に 3ドット もぐる ----
+LEG = ['.kkkkk..', 'kGHDDDk.', 'kHDDDDlk', 'kHDDDDlk', 'kDDDDDlk', 'kHDDDDDlk', 'kDDDDDllk', 'kwkwkwkkk']
+LEG_N = ['........'] + LEG[1:]
+def arm(up=False):
+    g = G(16, 16)
+    ball(g, 5, 4, 4.2, 4, FUR)                                   # 肩（毛の かたまり）
+    tube(g, [(5, 5), (8, 9) if not up else (10, 5), (9, 12) if not up else (13, 5)], [3, 2.6, 2.6], 'HDD')
+    g = ol(g)
+    if up: dots(g, 'w', [(15, 4), (15, 6)])
+    else: dots(g, 'w', [(8, 15), (10, 15)])
+    return R(g)
+ARM = arm(); ARM_UP = arm(True)
+DARKF = {'F': 'G', 'G': 'H', 'H': 'D', 'D': 'l', 'w': 'S'}
 def far(rows): return [''.join(DARKF.get(c, c) for c in r) for r in rows]
 
-# ---- 鉄の 茶釜（見せ所の 胴）：あられ もようの いぼ、金の ふち、前に ふた ----
-def kettle(lid=0):
+# ---- 胴（見せ所）：まるい 毛の 胴の おなかが 鉄の 茶釜。釜の まわりを 毛が つつみ（上は 胸の 毛が かぶさる）、前に ふた ----
+def body(lid=0):
     g = G(64, 64)
-    ball(g, 32, 43, 12.5, 10.5, IRON, hi=.45, lo=-.3)
-    for y in range(34, 54):                                     # あられ（いぼ）を 市松に
-        for x in range(20, 45):
-            if (x + (y // 3) * 2) % 4 == 0 and y % 3 == 0 and g[y][x] in 'ST':
-                g[y][x] = 'S' if g[y][x] == 'T' else 'w'
-                if g[y + 1][x] in 'ST': g[y + 1][x] = 'U'
-    for x in range(20, 45):                                     # 金の ふち（口）
-        if g[34][x] != '.': g[34][x] = 'O'
-        if g[33][x] != '.': g[33][x] = 'Y'
-    for x in range(21, 44):                                     # すその 帯
-        if g[50][x] != '.': g[50][x] = 'U'
+    ball(g, 31, 44, 14, 11.5, FUR, hi=.5, lo=-.3)              # 毛の 胴
+    k = G(64, 64)
+    ball(k, 33.5, 45.5, 10.5, 9, IRON, hi=.25, lo=-.5)              # おなかの 釜（3/4 で 前寄り）
+    for y in range(37, 55):                                      # あられ（いぼ）
+        for x in range(25, 44):
+            if k[y][x] in 'ST' and (x + (y // 3) * 2) % 4 == 0 and y % 3 == 1:
+                k[y][x] = 'S' if k[y][x] == 'T' else 'w'
+                if k[y + 1][x] in 'ST': k[y + 1][x] = 'U'
+    for y in range(64):
+        for x in range(64):
+            if k[y][x] != '.' and g[y][x] != '.': g[y][x] = k[y][x]
+    inner(g, 'U', 'STUw', 'FGH')                                 # 釜と 毛の さかいに 鉄の 影
+    for x in range(25, 44):                                      # 金の ふち（釜の 口）
+        if g[38][x] in 'STUw': g[38][x] = 'O'
+        if g[39][x] in 'STUw': g[39][x] = 'Y' if x < 38 else 'O'
+    # 胸の 毛が 釜の 口に かぶさる（ぎざぎざの 毛先）
+    poly(g, [(24, 33), (44, 33), (44, 37), (41, 40), (39, 37), (36, 40), (33, 37), (30, 40), (28, 37), (25, 39)], 'F')
+    for (x, y) in ((41, 39), (36, 39), (30, 39), (39, 36), (33, 36), (28, 36)): g[y][x] = 'G'
+    # 横と 下の 毛の ふち（釜を だく ように まわりこむ）
+    for (x, y) in ((24, 44), (24, 45), (25, 48), (25, 49), (27, 52), (28, 53), (40, 53), (42, 51), (43, 49)):
+        if g[y][x] in 'STUwOY': g[y][x] = 'G'
     g = ol(g)
-    # 鐶（かん）：横の 鉄の 輪
-    stamp(g, ['.kkk.', 'kOYOk', 'kY.Ok', 'kOOOk', '.kkk.'], 17, 37)
-    # ふた
+    stamp(g, ['.kkk.', 'kOYOk', 'kY.Ok', 'kOOOk', '.kkk.'], 22, 41)   # 鐶（かん）
     if lid == 0:
-        stamp(g, ['..kkkkkk..', '.kSSSSSTk.', 'kSSkYYkSTk', 'kSTkOOkTUk', '.kTTTTTUk.', '..kkkkkk..'], 31, 40)
+        stamp(g, ['..kkkkkk..', '.kSSSSSTk.', 'kSSkYYkSTk', 'kSTkOOkTUk', '.kTTTTTUk.', '..kkkkkk..'], 32, 43)
     elif lid == 1:   # 熱く 光る
-        stamp(g, ['..kkkkkk..', '.kYYYYYOk.', 'kYYkwwkYOk', 'kYOkYYkOOk', '.kOOOOOOk.', '..kkkkkk..'], 31, 40)
+        stamp(g, ['..kkkkkk..', '.kYYYYYOk.', 'kYYkwwkYOk', 'kYOkYYkOOk', '.kOOOOOOk.', '..kkkkkk..'], 32, 43)
     else:            # ひらいた ふた（上へ）＋ 中は 赤く 光る 湯気口
-        stamp(g, ['..kkkkkk..', '.kOOOOOOk.', 'kOYYwwYYOk', 'kOYwwwwYOk', '.kOYYYYOk.', '..kkkkkk..'], 31, 41)
-        stamp(g, ['...kkkk..', '.kkSSSSk.', 'kSSkYkSTk', '.kkTTTTk.', '...kkkk..'], 32, 35)
+        stamp(g, ['..kkkkkk..', '.kOOOOOOk.', 'kOYYwwYYOk', 'kOYwwwwYOk', '.kOYYYYOk.', '..kkkkkk..'], 32, 44)
+        stamp(g, ['...kkkk..', '.kkSSSSk.', 'kSSkYkSTk', '.kkTTTTk.', '...kkkk..'], 33, 38)
     return g
 
 # ---- 頭（大きく）：まるい 耳、くまどりの 中に つり目、とがった 口に 牙 ----
@@ -168,13 +183,13 @@ NB = 'atk1|atk2'
 def layers():
     return [
         L('tail', 'tail', tail(), alt={'idle1|idle3|walk1|walk3': tail(1)}),
-        dict(n='armB', g='armB', x=18, y=38, rows=far(ARM)),
-        dict(n='legB', g='legB', x=34, y=53, rows=far(LEG)),
-        L('kettle', 'body', kettle(), alt={'atk0': kettle(1), NB: kettle(2)}),
-        dict(n='legA', g='legA', x=25, y=53, rows=LEG_N),
+        dict(n='armB', g='armB', x=18, y=33, rows=far(ARM)),
+        dict(n='legB', g='legB', x=34, y=52, rows=far(LEG)),
+        L('belly', 'body', body(), alt={'atk0': body(1), NB: body(2)}),
+        dict(n='legA', g='legA', x=24, y=52, rows=LEG_N),
         L('head', 'head', head()),
         dict(n='eye', g='head', x=37, y=19, rows=EYE, alt=EYE_ALT),
-        dict(n='arm', g='arm', x=42, y=38, rows=ARM, alt={NB: ARM_UP}),
+        dict(n='arm', g='arm', x=40, y=35, rows=ARM, alt={NB: ARM_UP}),
         L('steam', 'fx', steam(0), alt={'atk2': steam(1)}, only=NB),
     ]
 FRAMES = {

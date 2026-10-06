@@ -106,26 +106,37 @@ def flame2(W, H, paths):
 # ---- 割れた 背から 立ちのぼる 霊火（見せ所）：後ろ上へ なびき、先が くるりと まく 3本の 舌 ----
 def ghostfire(sw=0, tall=0):
     t = -tall
-    return flame2(30, 32, [
-        ([(15, 30), (13, 22), (9, 14 + t), (10 + sw, 7 + t), (14 + sw, 3 + t), (16 + sw, 5 + t)], 5.5, 0.8),
-        ([(11, 30), (7, 25), (3 + sw, 21 + t), (2 + sw, 16 + t), (4 + sw, 14 + t)], 3.6, 0.7),
-        ([(20, 30), (22, 22), (21 + sw, 15 + t), (24 + sw, 11 + t), (26 + sw, 12 + t)], 3.8, 0.7),
+    return flame2(34, 34, [
+        ([(17, 33), (16, 24), (11, 15 + t), (11 + sw, 7 + t), (15 + sw, 2 + t), (18 + sw, 4 + t)], 6.5, 0.8),
+        ([(12, 33), (7, 27), (3 + sw, 22 + t), (2 + sw, 17 + t), (5 + sw, 14 + t)], 4.2, 0.7),
+        ([(22, 33), (25, 25), (24 + sw, 17 + t), (27 + sw, 12 + t), (30 + sw, 13 + t)], 4.4, 0.7),
     ])
 WINGS = ghostfire(); WINGS2 = ghostfire(-2); WINGS_BIG = ghostfire(-1, 3)
 
 # ---- 頭＋胸（ひとつながりの 大きな こぶ）：前に セミの しま顔、上の 前はしに 目の ふくらみ、背は たてに 割れる ----
-BODY = P(M(31, 25, ('e', '1', 15, 12.5, 14.5, 11.5), ('e', '1', 24, 15, 7, 8), ('r', '1', 2, 13, 28, 20)), AMBER, [
+BODY = P(M(25, 25, ('e', '1', 12.5, 12.5, 12.5, 11.5), ('r', '1', 2, 13, 23, 20)), AMBER, [
     (['...AAAA', '.AA', 'A', 'A'], 3, 2),
     (['A', 'A', 'A'], 1, 9),
-    (['..l', '.l.', '.l.', 'l..', 'l..', 'l..', 'l..', 'l..', '.l.', '.l.', '..l'], 18, 4),   # 胸と 頭の さかい（殻の つぎ目）
-    (['..FFFFF.', '.FAAFFFF', 'HHHHHHHH', 'FFFFFFFG', 'HHHHHHHH', 'FFFFFFG.', 'HHHHHHH.', '.GGGGG..'], 22, 9),   # しま顔（セミの 顔）
-    (['AA......', '.AEEEEE.', '.EEEEEEEA', '..EEEEEEA', '...EEEE.', '....E.E', '.....E'], 4, 0),   # 割れた 背（中は からっぽの 闇）
+    (['A..........A', 'AAEEEEEEEEAA', '.AEEEEEEEEA.', '..AEEEEEEA..', '...AEEEEA...', '....AEEA', '.....EE', '.....E'], 5, 0),   # 割れた 背（めくれた ふち、中は からっぽの 闇）
+    (['.......HH', '.....HH..', '...HH....', '.HH......', 'H........'], 13, 9),   # 殻の 板の すじ
+    (['A', '.', 'A'], 7, 12), (['A'], 12, 16),
+], lw=2, dw=3)
+# 頭：横に 広い 頭（3/4 で 少し 正面を 向く）。まん中に セミの しま顔、両はしに 目
+HEAD = P(M(28, 19, ('e', '1', 14, 9.5, 14, 9.5), ('r', '1', 2, 5, 26, 14)), AMBER, [
+    (['..AAAAAA', '.A', 'A'], 3, 1),
+    (['..FFFFFFFF..', '.FAAFFFFFFG.', 'HHHHHHHHHHHH', 'FFFFFFFFFFFG', 'HHHHHHHHHHHH', '.FFFFFFFFFG.', '.HHHHHHHHHH.', '..FFFFFFFG..', '...HHHHHH...', '....GGGG....'], 9, 6),   # しま顔（セミの 顔の ふくらみ）
 ], lw=2, dw=3)
 def dome(w, h):
     return P(M(w, h, ('e', '1', w / 2, h / 2, w / 2, h / 2)), AMBER, [(['AA', 'A'], 1, 1)], lw=1, dw=1)
-DOME = dome(11, 10); DOME_F = dark(dome(10, 9), DK)
-EYE, EYE_ALT = eye('R', 'S')
-EYE_F = ['kkkk.', 'kwRRk', 'kSSkk']; EYE_F_ALT = {'blink|hit|ko': ['.....', 'kkkkk', '.....']}
+DOME = dome(13, 12); DOME_F = dark(dome(11, 10), DK)
+EYE = ['kkkkkk...', 'kwwRRRkk.', 'kwRRSSkRk', 'kRSSSSkRk', '.kSSSSkSk', '..kkkkkk.']
+EYE_ALT = {
+    'blink': ['kkkkkk...', '.kkkkkkkk', '.........', '.........', '.........', '.........'],
+    'hit': ['kkkk.....', '...kkkk..', '......kk.', '...kkkk..', 'kkkk.....', '.........'],
+    'atk0|atk1|atk2': ['kkkkkk...', 'kwwwwRkk.', 'kwwRRRkwk', 'kRRRRRkRk', '.kRRRRkRk', '..kkkkkk.'],
+    'ko': ['.k....k..', '..k..k...', '...kk....', '..k..k...', '.k....k..', '.........'],
+}
+EYE_F = ['kkkkk.', 'kwRRRk', 'kRSSkk', '.kkkk.']; EYE_F_ALT = {'blink|hit|ko': ['......', 'kkkkkk', '......', '......']}
 MOUTH = ['kk..', 'kGk.', '.kGk', '..kk']                        # 口の 針（ストロー）
 
 # ---- 腹（節の 輪が 4つ、後ろが すぼまって とがる）----
@@ -172,24 +183,25 @@ SLASH = ['..........kk', '........kkPk', '......kkPQk.', '....kkPQUk..', '..kkPQ
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='fire', g='fire', x=6, y=1, rows=WINGS, alt={'idle1|idle3|walk1|walk3|atk2': WINGS2, 'atk0|atk1': WINGS_BIG}, not_='ko'),
-        dict(n='legF', g='legB', x=23, y=48, rows=LEG_F),
-        dict(n='domeF', g='body', x=33, y=17, rows=DOME_F),
-        dict(n='eyeF', g='body', x=35, y=20, rows=EYE_F, alt=EYE_F_ALT),
-        dict(n='clawF', g='clawF', x=41, y=37, rows=CLAW_F, alt={'atk0': dark(CLAW_UP, DK)}),
+        dict(n='fire', g='fire', x=3, y=-2, rows=WINGS, alt={'idle1|idle3|walk1|walk3|atk2': WINGS2, 'atk0|atk1': WINGS_BIG}, not_='ko'),
+        dict(n='legF', g='legB', x=22, y=48, rows=LEG_F),
+        dict(n='clawF', g='clawF', x=40, y=36, rows=CLAW_F, alt={'atk0': dark(CLAW_UP, DK)}),
         dict(n='abd', g='abd', x=1, y=38, rows=ABD),
-        dict(n='body', g='body', x=17, y=21, rows=BODY),
-        dict(n='leg', g='legA', x=29, y=48, rows=LEG),
-        dict(n='dome', g='body', x=43, y=19, rows=DOME),
-        dict(n='eye', g='body', x=44, y=21, rows=EYE, alt=EYE_ALT),
-        dict(n='mouth', g='body', x=47, y=40, rows=MOUTH),
-        dict(n='clawN', g='clawN', x=34, y=41, rows=CLAW_N, alt={'atk0': CLAW_UP}),
-        dict(n='slash', g='clawN', x=50, y=30, rows=SLASH, only=NB),
+        dict(n='body', g='body', x=15, y=23, rows=BODY),
+        dict(n='leg', g='legA', x=28, y=48, rows=LEG),
+        dict(n='domeF', g='head', x=25, y=13, rows=DOME_F),
+        dict(n='eyeF', g='head', x=27, y=16, rows=EYE_F, alt=EYE_F_ALT),
+        dict(n='head', g='head', x=29, y=15, rows=HEAD),
+        dict(n='dome', g='head', x=49, y=11, rows=DOME),
+        dict(n='eye', g='head', x=51, y=14, rows=EYE, alt=EYE_ALT),
+        dict(n='mouth', g='head', x=45, y=34, rows=MOUTH),
+        dict(n='clawN', g='clawN', x=33, y=40, rows=CLAW_N, alt={'atk0': CLAW_UP}),
+        dict(n='slash', g='clawN', x=49, y=29, rows=SLASH, only=NB),
     ]
 FRAMES = {
-    'idle0': {}, 'idle1': {'body': (0, 1)}, 'idle2': {'fire': (0, -1), 'clawN': (0, -1)}, 'idle3': {'body': (0, 1)}, 'blink': {},
+    'idle0': {}, 'idle1': {'body': (0, 1), 'head': (0, 1)}, 'idle2': {'fire': (0, -1), 'clawN': (0, -1)}, 'idle3': {'head': (0, 1)}, 'blink': {},
     'walk0': {'legA': (1, -1), 'legB': (-1, 0), 'body': (0, -1)}, 'walk1': {'root': (1, -1)}, 'walk2': {'legA': (-1, 0), 'legB': (1, -1), 'body': (0, -1)}, 'walk3': {'root': (1, 0)},
     'atk0': {'fire': (0, -2), 'root': (-2, 0), 'clawN': (0, -3), 'clawF': (0, -2)}, 'atk1': {'fire': (0, -2), 'root': (4, 0), 'clawN': (3, -1)}, 'atk2': {'root': (5, 0), 'clawN': (2, 1), 'clawF': (4, 0)},
-    'hit': {'root': (-3, 0), 'clawN': (-1, 0)}, 'ko': {'_flip': True},
+    'hit': {'root': (-3, 0), 'head': (-1, -1), 'clawN': (-1, 0)}, 'ko': {'_flip': True},
 }
-PARENT = {'abd': 'body', 'fire': 'body', 'clawN': 'body', 'clawF': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}
+PARENT = {'head': 'body', 'abd': 'body', 'fire': 'body', 'clawN': 'body', 'clawF': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

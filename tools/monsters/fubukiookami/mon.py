@@ -10,6 +10,13 @@ def mask(W, H, shapes):
     for s in shapes:
         if s[0] == 'e': ellipse(g, s[1], s[2], s[3], s[4], s[5])
         elif s[0] == 'p': poly(g, s[1], s[2])
+        elif s[0] == 't':   # 太い 線（関節で 曲がる 足など）
+            for (ax, ay), (bx, by) in zip(s[1], s[1][1:]):
+                for i in range(17):
+                    t = i / 16; cx, cy = ax + (bx - ax) * t, ay + (by - ay) * t
+                    for yy in range(H):
+                        for xx in range(W):
+                            if (xx + .5 - cx) ** 2 + (yy + .5 - cy) ** 2 <= s[2] ** 2: g[yy][xx] = s[3]
         elif s[0] == 'r':
             for y in range(max(0, s[2]), min(H, s[4])):
                 for x in range(max(0, s[1]), min(W, s[3])): g[y][x] = s[5]
@@ -127,50 +134,55 @@ EYE_ALT = {'blink': ['kkk.....', 'UkkkkkU.', 'VVVVVVVV', 'kkkkkkk.', '.UUUUU..']
            'atk0|atk1|atk2': ['kkkk....', 'UkwkkkkU', 'kwccCkCk', 'kCCBkBk.', '.kkkkk..'],
            'ko': ['........', 'UkVVVkU.', 'VVkVkVV.', 'VVVkVVV.', 'VVkVkVV.']}
 
-# ---- 胴（小さく 丸い。毛並みは 横に 流れる 筋）----
-BODY = outline(over(shade(zone(mask(30, 18, [('e', 15, 9, 14.5, 8.5, '#')]), lambda x, y: y > 8 + (x < 8)), {'#': DFUR, 'o': LFUR}, 2, 2, 3), [
-    '', '', '',
-    '.....UUUU......UUU',
-    '...........UUUU',
-    '..UUU......',
-    '........UUUUU....UU',
-    '.....UUU.......UUU',
-    '..UU......UUUU',
-    '..........',
-]))
+# ---- 胴＋しっぽ（ひとつながり）：胸は 深く 前が 高い、腹は 引きしまり、腰から 先は 細く なって 吹雪の しっぽに ほどける ----
+def body(ph=0):
+    d = 1 if ph else 0
+    m = mask(44, 26, [('p', [(44, 9), (44, 17), (41, 23), (34, 23), (27, 20), (20, 19), (15, 17), (10, 17), (5, 17 + d), (0, 19 + d), (5, 13), (0, 12 - d), (6, 10), (1, 5 - d), (8, 7), (4, 0 + d), (11, 4), (15, 7), (20, 6), (30, 4), (38, 3)], '#')])
+    m = shade(zone(m, lambda x, y: y > 15 - (x > 33) * 4 + (x < 22) * 9), {'#': DFUR, 'o': LFUR}, 2, 2, 2)
+    m = over(m, [
+        '', '', '', '', '',
+        '......P',
+        '.....W.......',
+        '..PPP....WW.......UUUU......UUU',
+        '.......WW...............UUUU',
+        '...WWW.........UUU......',
+        '.........PP..........UUUUU',
+        '..PPPP..WW.......UUU.......',
+        '.......PPP',
+        '...WW.......',
+        '.....PPP',
+    ])
+    return outline(m)
+BODY = body(); BODY2 = body(1)
 # ---- 首の ふさ毛（頭と 胴を つなぐ。毛先は 後ろ下へ 流れる）----
 RUFF = outline(shade(mask(16, 14, [('p', [(4, 0), (15, 0), (16, 10), (12, 13), (10, 9), (7, 12), (6, 8), (2, 10), (3, 5), (0, 6)], '#')]), {'#': 'WVU'}, 2, 2, 2))
 # ---- 吹雪に 溶ける 後ろ半身：横に 流れる 雪の 筋（根もとは 胴に 食いこむ）----
-STORM_M = [
-    '..............###########.',
-    '......##################..',
-    '.............############.',
-    '#########################.',
-    '.....####################.',
-    '...........##############.',
-    '..#######################.',
-    '.........###############..',
-    '................#######...',
-]
 def storm(ph=0):
-    """ふさふさの しっぽ が 後ろへ 流れ、先が 吹雪の 筋に ほどける"""
-    m = [(r[7:] + '..') if ph and j % 2 == 0 else r[5:] for j, r in enumerate(STORM_M)]
-    m = shade(zone(m, lambda x, y: y >= 4), {'#': DFUR, 'o': LFUR}, 1, 1, 0)
-    m = over(m, ['', '', '', 'PP', '', '', '.PP'])
+    """ふさふさの しっぽが 腰から 後ろ上へ のび、先は 横に 流れる 吹雪の 筋に ほどける"""
+    d = 1 if ph else 0
+    m = mask(22, 16, [
+        ('p', [(22, 9), (17, 4), (11, 2), (6, 3 + d), (2, 1), (5, 6), (0, 7 + d), (7, 9), (2, 11 - d), (9, 12), (16, 14), (22, 15)], '#'),
+    ])
+    m = shade(zone(m, lambda x, y: y >= 10), {'#': DFUR, 'o': LFUR}, 1, 1, 0)
+    m = over(m, ['', '', '', '......PPP', '...PP', '', '.....PPPP', '', '...PPP'])
     return outline(m)
 STORM = storm(); STORM2 = storm(1)
 FLAKES = ['k......k....', '......kck...', '.......k.k..', '.........kck', '..k.......k.', '.kck........', '..k.....k...', '........kck.', '.........k..']
 FLAKES2 = ['....k.......', '...kck....k.', '....k....kck', '..........k.', '.k..........', 'kck....k....', '.k....kck...', '.......k....', '............']
 
-# ---- 足（短く 太い、白い 爪）----
-LEG_M = ['######', '######', '######', '.#####', '.#####', '.#####', '######', '#######']
-def leg(far=False):
-    m = over(shade(LEG_M, {'#': 'WVU'}, 1, 1, 2), ['', '', '', '', '', '', '', 'w.w.w'])
-    r = opentop(outline(m), 2)
+# ---- 足（短く 太いが ちゃんと 曲がる）：前足＝ひじ → 手首 → 前を 向く 足先、後ろ足＝太もも → 後ろへ 曲がる かかと → 足先 ----
+def fleg(far=False):
+    m = mask(12, 15, [('t', [(3.5, 1), (5, 6), (5.5, 10)], 2.4, '#'), ('e', 7.5, 12, 4, 2.6, '#')])
+    m = over(shade(m, {'#': 'WVU'}, 1, 1, 2), ['', '', '', '', '', '', '', '', '', '', '', '', '', '....w.w.w'])
+    m = over(m, ['', '', '', '', '', '', '', '', '', '...U'])          # 手首の くびれ
+    r = opentop(outline(m), 3)
     return recolor(r, {'W': 'V', 'V': 'U', 'U': 'N'}) if far else r
-LEG = leg(); LEGF = leg(True)
-# 後ろ足：吹雪に 半分 溶けた 足（上が 霊気の むらさき）
-HLEG = opentop(outline(over(shade(LEG_M, {'#': 'VUN'}, 1, 1, 2), ['.P.P.', 'P.P.P', '.P.P', '', '', '', '', 'w.w.w'])), 2)
+def hleg(far=False):
+    m = mask(13, 16, [('e', 7, 4.5, 5.5, 4.5, '#'), ('t', [(6, 7), (3, 10.5)], 2.3, '#'), ('t', [(3, 10.5), (4.5, 13)], 1.8, '#'), ('e', 6.5, 13.5, 3.8, 2.2, '#')])
+    m = over(shade(m, {'#': 'VUN'}, 1, 1, 2), ['', '', '..PP', '.P', '', '', '', '', '', '', '', '', '', '', '', '....w.w.w'])
+    r = opentop(outline(m), 4)
+    return recolor(r, {'V': 'U', 'U': 'N', 'W': 'V'}) if far else r
+LEG = fleg(); LEGF = fleg(True); HLEG = hleg(); HLEGF = hleg(True)
 
 # ---- 攻撃：氷の かみつき（はじける 氷片）----
 BITE = ['...k....k...', '..kck..kck..', '.kcCBkkcCBk.', 'kcCBBBBBCBBk', '.kBBkkkkBBk.', '..kk....kk..']
@@ -179,25 +191,24 @@ BITE2 = ['k...k..k...k', 'ck.kck.kck.k', '.kcCBkkcCBk.', '..kBBkkBBk..', '.kck..
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='flakes', g='storm', x=5, y=27, rows=FLAKES, alt={'idle1|idle3|walk1|walk3|atk2': FLAKES2}, not_='ko'),
-        dict(n='hlegF', g='legB', x=20, y=51, rows=recolor(HLEG, {'V': 'U', 'U': 'N'})),
-        dict(n='flegF', g='legA', x=38, y=51, rows=LEGF),
-        dict(n='storm', g='storm', x=5, y=34, rows=STORM, alt={'idle1|idle3|walk1|walk3|atk2': STORM2}),
-        dict(n='body', g='body', x=14, y=34, rows=BODY),
-        dict(n='ruff', g='body', x=32, y=28, rows=RUFF),
-        dict(n='hleg', g='legA', x=16, y=52, rows=HLEG),
-        dict(n='fleg', g='legB', x=34, y=52, rows=LEG),
-        dict(n='head', g='head', x=31, y=15, rows=HEAD, alt={NB: HEAD_ATK}),
-        dict(n='eye', g='head', x=43, y=23, rows=EYE, alt=EYE_ALT),
-        dict(n='fang', g='head', x=47, y=30, rows=FANG, alt={NB: FANG_ATK}),
-        dict(n='bite', g='head', x=58, y=32, rows=BITE, alt={'atk2': BITE2}, only=NB),
+        dict(n='flakes', g='storm', x=1, y=17, rows=FLAKES, alt={'idle1|idle3|walk1|walk3|atk2': FLAKES2}, not_='ko'),
+        dict(n='hlegF', g='legB', x=19, y=44, rows=HLEGF),
+        dict(n='flegF', g='legA', x=37, y=46, rows=LEGF),
+        dict(n='body', g='body', x=0, y=25, rows=BODY, alt={'idle1|idle3|walk1|walk3|atk2': BODY2}),
+        dict(n='ruff', g='body', x=31, y=27, rows=RUFF),
+        dict(n='hleg', g='legA', x=15, y=44, rows=HLEG),
+        dict(n='fleg', g='legB', x=33, y=46, rows=LEG),
+        dict(n='head', g='head', x=31, y=13, rows=HEAD, alt={NB: HEAD_ATK}),
+        dict(n='eye', g='head', x=43, y=21, rows=EYE, alt=EYE_ALT),
+        dict(n='fang', g='head', x=47, y=28, rows=FANG, alt={NB: FANG_ATK}),
+        dict(n='bite', g='head', x=58, y=30, rows=BITE, alt={'atk2': BITE2}, only=NB),
     ]
 FRAMES = {
-    'idle0': {}, 'idle1': {'head': (0, -1)}, 'idle2': {'body': (0, 1), 'head': (0, 1)}, 'idle3': {'storm': (-1, 0)}, 'blink': {},
+    'idle0': {}, 'idle1': {'head': (0, -1)}, 'idle2': {'body': (0, 1), 'head': (0, 1)}, 'idle3': {'head': (0, 1)}, 'blink': {},
     'walk0': {'legA': (1, -1), 'legB': (-1, 0), 'head': (0, -1)}, 'walk1': {'body': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (1, -1), 'head': (0, -1)}, 'walk3': {'body': (0, -1)},
-    'atk0': {'body': (-2, 1), 'head': (-1, 1), 'legA': (-1, 0), 'storm': (-1, 0)},
-    'atk1': {'root': (4, 0), 'head': (1, 1)}, 'atk2': {'root': (5, 0), 'head': (1, 1), 'storm': (-2, 0)},
+    'atk0': {'body': (-2, 1), 'head': (-1, 1), 'legA': (-1, 0)},
+    'atk1': {'root': (4, 0), 'head': (1, 1)}, 'atk2': {'root': (5, 0), 'head': (1, 1)},
     'hit': {'root': (-3, 0), 'head': (-2, -1)}, 'ko': {'_flip': True},
 }
 PARENT = {'head': 'body', 'storm': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}
