@@ -45,54 +45,60 @@ def spots(g, pts):
                 if c != '.' and g[y + j][x + i] in 'ABC': g[y + j][x + i] = c
     return pix.rows_of(g)
 
-# ---- 胴：短く 丸く、肩（右）が 盛り上がる。影の 斑点 ----
+# ---- 胴：低く しなやかに（もも＝左が 少し 高く、背中で へこみ、肩＝右が 盛り上がる。腹は 細く しぼる）----
 BODY_M = [
-    '............#####...',
-    '.......###########..',
-    '....###############.',
-    '..#################.',
-    '.###################',
-    '####################',
-    '####################',
-    '####################',
-    '####################',
-    '.###################',
-    '..#################.',
-    '...###############..',
-    '.....###########....',
+    '...#######..........######....',
+    '.###########......##########..',
+    '##############################',
+    '##############################',
+    '##############################',
+    '##############################',
+    '.#############################',
+    '.############################.',
+    '..##########################..',
+    '...########........#######....',
+    '....######..........#####.....',
 ]
-BODY = pix.outline(spots(shade(BODY_M, {'#': 'ABC'}, low=10),
-                         [(4, 4, 0), (9, 2, 1), (14, 3, 2), (7, 7, 3), (12, 7, 0), (2, 7, 1), (16, 6, 1)]))
+BODY = pix.outline(spots(shade(BODY_M, {'#': 'ABC'}, low=8),
+                         [(4, 2, 0), (10, 4, 1), (15, 3, 2), (6, 6, 3), (12, 7, 0), (20, 5, 1), (24, 3, 3)]))
 
-# ---- 足：短く 太い。上の 4行は 胴の 中に 食いこむ ----
-FLEG_M = [
-    '.######.',
-    '########',
-    '########',
-    '.######.',
-    '.#####..',
-    '..####..',
-    '..####..',
-    '..####..',
-    '..####..',
-    '.######.',
-    '#######.',
+# ---- うしろ足：ふせた 「く」の 字（もも→ すねが うしろへ → かかと → 足先は 前へ）。上の 3行は 胴に 食いこむ（手で 打つ）----
+HLEG = [
+    '.kBBBBBBBBk...',
+    'kABBBBBBBBCk..',
+    'kABBDDBBBBCk..',
+    'kABBBDBBBBCCk.',
+    '.kABBBBBBBCCk.',
+    '..kABBBBBBCk..',
+    '..kABBBBBCk...',
+    '..kABBBBCk....',
+    '.kABBBCkk.....',
+    '.kABBCk.......',
+    'kABBCk........',
+    'kABBCk........',
+    'kABBBCk.......',
+    'kABBBBBBBCkk..',
+    'kABBlBBlBCCkw.',
+    'kCCCCCCCCCCwk.',
+    '.kkwkkwkkwk...',
 ]
-FLEG = notop(pix.outline(put(shade(FLEG_M, {'#': 'ABC'}), ['', '', '', '', '', '', '', '', '', '', '.k.k.kw'])))
-HLEG_M = [
-    '..#######.',
-    '.#########',
-    '##########',
-    '##########',
-    '.########.',
-    '..######..',
-    '...####...',
-    '...####...',
-    '...####...',
-    '..######..',
-    '.#######..',
+# ---- 前足：太い 肩 → ひじ → ななめ 前へ 出た うで → 大きな 足先と 爪（手で 打つ）----
+FLEG = [
+    'kBBBBBBBCk....',
+    'kABBBBBBCk....',
+    '.kABBBBBCk....',
+    '..kABBBBCk....',
+    '...kABBBCk....',
+    '...kABBCk.....',
+    '...kABBCk.....',
+    '...kABBBCk....',
+    '...kABBBCk....',
+    '..kAABBBBCkk..',
+    '..kABBBBBBBCkk',
+    '..kABlBBlBBCkw',
+    '..kCCCCCCCCCwk',
+    '...kwkkwkkwk..',
 ]
-HLEG = notop(pix.outline(put(spots(shade(HLEG_M, {'#': 'ABC'}), [(4, 1, 2)]), ['', '', '', '', '', '', '', '', '', '', '.k.k.kw'])))
 # とびかかる 前足（攻撃）：前へ のばし、爪を 全部 出す
 REACH = [
     '..............kk...',
@@ -177,22 +183,28 @@ def tail():
     return pix.outline(pix.rows_of(s))
 TAIL = tail()
 
-# ---- 口から あふれる 黒い もや ----
-MIST = [
-    '...kk.....',
-    '..kCCk.kk.',
-    '.kCBCCkCCk',
-    'kCBCDCCBCk',
-    '.kCCkkCCk.',
-    '..kk..kk..',
+# ---- 背中から 立ちのぼる 影の ほのお（あく）：肩の 斑点から 上へ ゆらぐ。根もとは 背に 食いこむ ----
+WISP = [
+    '....k....',
+    '...kPk...',
+    '...kPk.k.',
+    '..kPDkkPk',
+    '..kDDkPDk',
+    '.kPDDDDDk',
+    '.kDDDDDDk',
+    'kDDDDDDk.',
+    'kDDDDDk..',
 ]
-MIST2 = [
-    '....kk....',
-    '.kk.kCk...',
-    'kCCkkCCkk.',
-    'kCBCCDCBCk',
-    '.kkCCkCCk.',
-    '...kk.kk..',
+WISP2 = [
+    '.....k...',
+    '..k.kPk..',
+    '.kPkkDk..',
+    '.kDkPDk.k',
+    '..kDDDkPk',
+    '.kPDDDDDk',
+    '.kDDDDDDk',
+    'kDDDDDDk.',
+    'kDDDDDk..',
 ]
 # ---- 影の 爪あと（攻撃）----
 CLAW = [
@@ -212,30 +224,30 @@ CLAW = [
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='tail', g='tail', x=-1, y=30, rows=TAIL),
-        dict(n='hlegF', g='legB', x=18, y=46, rows=dark(HLEG), not_='ko'),
-        dict(n='flegF', g='legB', x=34, y=47, rows=dark(FLEG), not_='ko|atk1'),
-        dict(n='body', g='body', x=14, y=34, rows=BODY),
-        dict(n='hleg', g='legA', x=13, y=46, rows=HLEG, not_='ko'),
-        dict(n='fleg', g='legA', x=29, y=47, rows=FLEG, not_='ko|atk1'),
-        dict(n='reach', g='legA', x=34, y=42, rows=REACH, only='atk1'),
-        dict(n='head', g='head', x=32, y=24, rows=HEAD, alt={NB: HEAD_OPEN}),
-        dict(n='eye', g='head', x=40, y=28, rows=EYE, alt=EYE_ALT),
-        dict(n='mist', g='head', x=48, y=38, rows=MIST, alt={'idle1|idle3|walk1|walk3': MIST2}, not_=NB + '|ko'),
-        dict(n='claw', g='fx', x=50, y=20, rows=CLAW, only='atk2'),
+        dict(n='tail', g='tail', x=1, y=29, rows=TAIL),
+        dict(n='hlegF', g='legB', x=17, y=43, rows=dark(HLEG), not_='ko'),
+        dict(n='flegF', g='legB', x=35, y=45, rows=dark(FLEG), not_='ko|atk1'),
+        dict(n='wisp', g='body', x=29, y=29, rows=WISP, alt={'idle1|idle3|walk1|walk3|atk0': WISP2}, not_='ko|hit'),
+        dict(n='body', g='body', x=12, y=36, rows=BODY),
+        dict(n='hleg', g='legA', x=13, y=44, rows=HLEG, not_='ko'),
+        dict(n='fleg', g='legA', x=39, y=46, rows=FLEG, not_='ko|atk1'),
+        dict(n='reach', g='legA', x=38, y=43, rows=REACH, only='atk1'),
+        dict(n='head', g='head', x=37, y=27, rows=HEAD, alt={NB: HEAD_OPEN}),
+        dict(n='eye', g='head', x=45, y=31, rows=EYE, alt=EYE_ALT),
+        dict(n='claw', g='fx', x=54, y=25, rows=CLAW, only='atk2'),
     ]
 
 FRAMES = {
     'idle0': {},
-    'idle1': {'body': (0, 1)},
-    'idle2': {'body': (0, 1), 'head': (0, 0)},
-    'idle3': {'body': (0, 0)},
+    'idle1': {'body': (0, 1), 'head': (0, 0)},
+    'idle2': {'body': (0, 1), 'head': (0, 1)},
+    'idle3': {'body': (0, 0), 'head': (0, 0)},
     'blink': {},
     'walk0': {'legA': (1, -1), 'legB': (-1, 0)},
     'walk1': {'body': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (1, -1)},
     'walk3': {'body': (0, -1)},
-    'atk0': {'root': (-2, 0), 'body': (0, 2), 'head': (0, 1), 'tail': (0, -1)},
+    'atk0': {'root': (-2, 0), 'body': (0, 2), 'head': (0, 0), 'tail': (0, -1)},
     'atk1': {'root': (6, -4), 'legB': (2, 2), 'head': (1, -1)},
     'atk2': {'root': (8, 0), 'fx': (0, 0)},
     'hit': {'root': (-3, 0), 'head': (-1, -2)},
