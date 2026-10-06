@@ -1,14 +1,16 @@
 # イシコマ（いわ・エスパー × 狛犬）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭と 阿の 大口、たてがみは 石灯籠の 笠の 段、胴は 小さく 丸く）
 META = dict(id='ishikoma', name='イシコマ', types=['rock', 'psychic'], base='狛犬', size='M')
+EYE_BOX = (37, 18, 10, 9)
 PAL = {
     'k': '#101018', 'l': '#2c2c28',
     'S': '#e0e0cc', 'T': '#9c9c86', 'U': '#58594c',      # 石
     'J': '#ffb2f0', 'K': '#cc44b4',                      # 宝珠（念力）
     'R': '#d0344c', 'E': '#4a1020',                      # 口の 中
-    'Y': '#ffd84a', 'O': '#c07a1a',                      # 目
+    'Y': '#ffd84a', 'O': '#c07a1a',                      # 目（金 明・暗）
     'w': '#ffffff',
 }
 LIGHT = set('SJYw')
+KEEP_BLACK = set('wYO')
 import pix
 # ---- 下書き用の 小道具（あたりの マスク → 左上 光の 3段階 → 手打ちの 仕上げ → 輪郭）----
 def M(W, H, *sh):
@@ -97,7 +99,15 @@ def head(wide=False):
     g[5][24] = 'k'; g[6][25] = 'k'                                               # 鼻の 穴
     return pix.outline(pix.rows_of(g))
 HEAD, HEAD_WIDE = head(), head(True)
-EYE, EYE_ALT = eye('Y', 'O', glow='J')
+# 目（C 三白眼）：大きく 見開いた 白目に、小さな 金の 虹彩（明 Y・暗 O）と 点の ひとみが 上の 前に 寄る。
+# 下まぶたの 線は 太く 濃い（黒＋石の 影）。上まぶたは 細い。にらみつける 目
+EYE = ['kkkk......', 'kwwwkkkkk.', 'kwwwwYYwkk', 'kwwwwYkOwk', 'kwwwwwOOwk', 'kwwwwwwwwk', '.kwwwwwwk.', 'UUkkkkkkUU', '..UUUUUU..']
+EYE_ALT = {
+    'blink': ['kkkk......', '.kkkkkkk..', '.....kkkkk', '..........', '..........', 'kkkkkkkkk.', '.kkkkkkkk.', 'UUUUUUUUUU', '..UUUUUU..'],
+    'hit': ['..........', 'kkkk......', '...kkkkk..', '.......kkk', '...kkkkk..', 'kkkk......', '..........', 'UUUUUUU...', '..........'],
+    'atk0|atk1|atk2': ['kkkk......', 'kwwwkkkkk.', 'kwwwwJJwkk', 'kwwwwJkYwk', 'kwwwwwYYwk', 'kwwwwwwwwk', '.kwwwwwwk.', 'UUkkkkkkUU', '..UUUUUU..'],
+    'ko': ['..........', '..........', '.k....k...', '..k..k....', '...kk.....', '..k..k....', '.k....k...', 'UUUUUUUU..', '..........'],
+}
 JEWEL = ['...k...', '..kJk..', '.kwJJk.', 'kwJJJKk', 'kJJJKKk', '.kJKKk.', '..kkk..']
 JEWEL_GLOW = ['...k...', '..kwk..', '.kwwJk.', 'kwwwJJk', 'kJwJJKk', '.kJJKk.', '..kkk..']
 
@@ -156,7 +166,7 @@ def layers():
         dict(n='legF', g='legB', x=27, y=51, rows=LEG_N),
         dict(n='mane', g='mane', x=14, y=8, rows=MANE),
         dict(n='head', g='head', x=27, y=15, rows=HEAD, alt={NB: HEAD_WIDE}),
-        dict(n='eye', g='head', x=38, y=21, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=37, y=18, rows=EYE, alt=EYE_ALT),
         dict(n='jewel', g='head', x=30, y=16, rows=JEWEL, alt={'atk0|atk1|atk2|idle2': JEWEL_GLOW}),
         dict(n='wave', g='fx', x=56, y=21, rows=WAVE, alt={'atk2': WAVE2}, only=NB),
     ]

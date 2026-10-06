@@ -1,6 +1,7 @@
 # キバセイウチ（こおり・みず × セイウチ）手打ち GBA風
 from pix import grid, rows_of, ellipse, outline, recolor
 META = dict(id='kibaseiuchi', name='キバセイウチ', types=['ice', 'water'], base='セイウチ', size='L')
+EYE_BOX = (42, 23, 9, 5)   # 重い まぶたの 目（idle0）
 PAL = {
     'k': '#101018', 'l': '#3c1e2a',
     'A': '#d49a74', 'B': '#9a6048', 'C': '#5e3432',      # 皮（明・中・暗）

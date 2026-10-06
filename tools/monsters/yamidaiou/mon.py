@@ -142,8 +142,14 @@ def mantle(fl=0):
         if at(g, x, y) in 'AB': put(g, x, y, 'E'); put(g, x + 1, y, 'E')
     return g
 
-BIGEYE = ['kkk.......', '.kkkkkkkk.', '.kwwYYkkkk', '.kwYYYkYOk', '.kYYOOkOOk', '..kOOOkOk.', '...kkkkk..']
-BIGEYE_ATK = ['kkk.......', '.kkkkkkkkk', '.kwwwYYkYk', '.kwYYYYkYk', '.kYYYOkOOk', '..kOOOkOk.', '...kkkkk..']
+# 目（G：よこ瞳）：大きな 金の 虹彩（黄・だいだい）の まん中に 横長の 四角い 黒瞳。白い 光、上まぶたの 線は 後ろが 上がる
+BIGEYE = ['kk........', '.kkkkkkkk.', '.kwYYYYYOk', '.kYkkkkYOk', '.kYkkkkOOk', '..kOOOOOk.', '...kkkkk..']
+BIGEYE_ATK = ['kk........', '.kkkkkkkk.', '.kwwYYYYYk', '.kYkkkkkOk', '.kYYYYYOOk', '..kOOOOOk.', '...kkkkk..']
+OCTO_EYE = {
+    'blink': ['kk........', '.kkkkkkkk.', '.kAAAAAAAk', '.kBBBBBBBk', '..kkkkkkk.', '..........', '..........'],
+    'hit':   ['kk........', '.kkk...kk.', '...kk.kk..', '....kkk...', '...kk.kk..', '.kkk...kk.', '..........'],
+    'ko':    ['..........', '..A....A..', '...A..A...', '....AA....', '...A..A...', '..A....A..', '..........'],
+}
 # ---------- 頭：大きな 丸い 頭に 闇の 中で 光る 目 ----------
 def head(mode='idle'):
     def f(p): disc(p, 37, 38, 11.5, 9)
@@ -151,7 +157,7 @@ def head(mode='idle'):
     if mode in ('idle', 'atk'):                        # 大きな 目（白い 光＋金と だいだいの 虹彩＋たての ひとみ）
         stamp(g, BIGEYE if mode == 'idle' else BIGEYE_ATK, 32, 31)
     else:
-        eye(g, 33, 32, mode, 'Y', 'O', big=True)
+        stamp(g, OCTO_EYE[mode], 32, 31)
     for x, y in ((30, 41), (31, 42), (40, 43), (44, 40)): put(g, x, y, 'E')
     return g
 
@@ -228,4 +234,5 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'body': (-1, -1), 'head': (-1, 0)},
     'ko': {'body': (-2, 9), 'head': (0, 6), 'armB': (0, 0)},
 }
+EYE_BOX = (32, 31, 10, 7)
 PARENT = {'body': 'root', 'head': 'root', 'arm': 'root', 'armB': 'root', 'fx': 'root', 'fx2': 'root'}

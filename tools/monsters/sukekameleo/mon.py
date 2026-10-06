@@ -212,13 +212,19 @@ TURRET = [
     '..kDDDDDk..',
     '...kkkkk...',
 ]
+# 目（T：出目）：顔から 前上へ 飛び出た 筒の 目玉（皮の 輪の ひだ）。中は ピンクと 紫の うずまきの 虹彩、まん中に 小さく 鋭い 黒瞳、左上に 白い 光。待機中は うずが 回る
+SPIRAL = ['MMMMM', 'NNNNM', 'MMkNM', 'MNNNM', 'MMMMM']
+def spin(rows, n):
+    for _ in range(n): rows = [''.join(rows[4 - j][i] for j in range(5)) for i in range(5)]
+    return rows
+def lit(rows): return ['w' + rows[0][1:]] + rows[1:]
 IRIS = {
-    0: ['wNNNN', 'MMMMN', 'NNkMN', 'NMMMN', 'NNNNN'],
-    1: ['wNNNN', 'NMMMN', 'NMkNN', 'NMMMM', 'NNNNN'],
+    0: lit(SPIRAL),
+    1: lit(spin(SPIRAL, 1)),
     'blink': ['AAAAA', 'BBBBB', 'kkkkk', 'BBBBB', 'DDDDD'],
-    'hit': ['kNNNk', 'NkNkN', 'NNkNN', 'NkNkN', 'kNNNk'],
+    'hit': ['MNNMN', 'NMMNM', 'NNkMN', 'MNMMN', 'NMNNM'],
     'ko': ['k...k', '.k.k.', '..k..', '.k.k.', 'k...k'],
-    'atk': ['wwNNN', 'wMMMN', 'NNkMN', 'NMMMN', 'NNNNN'],
+    'atk': lit([r.replace('M', 'Y') for r in spin(SPIRAL, 2)]),
 }
 def turret(mode=0):
     t = [list(r) for r in TURRET]
@@ -231,9 +237,6 @@ def turret(mode=0):
         for j in range(5):
             for i in range(5):
                 if t[3 + j][3 + i] == 'G': t[3 + j][3 + i] = 'B'
-    # 上の まぶた（するどい ひさし：前へ 下がる）
-    for i, c in enumerate('kkkkkkkk'):
-        if 2 + i < 11: t[2 + (i // 4)][1 + i] = 'k'
     return rows_of(t)
 
 # ---------- 舌の 一撃（攻撃）：口から のびる 舌（つながっている）＋先に 念の 玉 ----------
@@ -258,7 +261,7 @@ def layers():
         L('hf', 'legA', leg(22, False)),
         L('ff', 'legB', leg(39, False), alt={'atk1|atk2': rows_of(leg(39, False, 2, 1))}),
         L('head', 'head', head(), alt={'blink': H['blink'], 'atk1|atk2': H['atk'], 'hit': H['hit'], 'ko': H['ko']}),
-        dict(n='eye', g='head', x=39, y=28, rows=T[0], alt={'idle1|idle3|walk1|walk3': T[1], 'blink': T['blink'], 'atk0|atk1|atk2': T['atk'], 'hit': T['hit'], 'ko': T['ko']}),
+        dict(n='eye', g='head', x=40, y=26, rows=T[0], alt={'idle1|idle3|walk1|walk3': T[1], 'blink': T['blink'], 'atk0|atk1|atk2': T['atk'], 'hit': T['hit'], 'ko': T['ko']}),
         L('tongue', 'head', tongue(7), alt={'atk2': rows_of(tongue(4))}, only='atk1|atk2'),
         dict(n='ring', g='root', x=55, y=27, rows=RING, only='atk0|atk1'),
     ]
@@ -272,4 +275,5 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'tail': (1, 1)},
     'ko': {'body': (0, 5), 'head': (2, 6), 'tail': (-1, 0)},
 }
+EYE_BOX = (40, 26, 11, 10)
 PARENT = {'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

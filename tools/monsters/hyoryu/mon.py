@@ -90,7 +90,7 @@ HEAD_OPEN = HEAD[:11] + [
     '..kkkkkkkkk.............',
 ]
 # 目（F：黒い 強膜）：白目の かわりに 真っ黒。その 中に 氷の 青の 細い たて瞳（芯は 白っぽい 青）が 光る。下ぶちは 暗い 紫
-EYE = ['xxxKIxx', 'mxxKJxk']
+EYE = ['xxxxIxx', 'mxxxJxk']
 EYE_ALT = {'blink': ['kkkkkkk', 'kEEEEEk'], 'hit': ['kkxxxkk', 'kxJxxxk'],
            'atk0|atk1|atk2': ['xxKIwKx', 'mxKJIKk'],
            'ko': ['kxKxKxk', 'kxxKxxk', 'kxKxKxk']}

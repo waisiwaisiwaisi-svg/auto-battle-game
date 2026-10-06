@@ -1,12 +1,13 @@
 # イカヅチドリ（でんき・ひこう(風) × 雷鳥）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭、胴は 小さく、翼は 大きい まま）
 import pix
+EYE_BOX = (44, 15, 9, 7)
 META = dict(id='ikazuchidori', name='イカヅチドリ', types=['elec', 'wind'], base='雷鳥（神話）', size='L')
 PAL = {
     'k': '#101018', 'l': '#1a2a3e',
     'P': '#7ca6b8', 'Q': '#3e5f78', 'Z': '#1f2f48',
     'G': '#eaeef6', 'g': '#9ca6be',
     'Y': '#ffec3a', 'E': '#7af4ff', 'w': '#ffffff',
-    'O': '#f4c64a', 'o': '#a6702a', 'c': '#2a8cb8',   # c：目の 暗い 虹彩
+    'O': '#f4c64a', 'o': '#a6702a', 'c': '#2a8cb8',   # c：目の 輪の 内がわ（暗い 水色）
 }
 KEEP_BLACK = set('wEcY')
 LIGHT = set('PGYEwO')
@@ -104,12 +105,13 @@ HEAD_OPEN_BEAK = {   # 口を あけた くちばし（上と 下が ひらく�
     14: ".ZZQQQQQQQQQQZ.kooOOk.k..",
     15: "..ZZZQQQQQQZZZ..kkkkk....",
 }
+# 目（B 猛禽）：白目なし。大きく 丸い 水色の 輪（外 E・内 c）の 中に 大きな 丸い 黒瞳と 白い 光 1点。太い まゆの ひさしが 上の 前半分を 切る
 EYES = {
-    'open':  ['kk........', '.kkkkkkkk.', '..kwEEEkEk', '.kEccccckc', '..kkkkkkk.'],
-    'glow':  ['kk........', '.kkkkkkkk.', '..kwwwEEEk', '.kEEwEEkEk', '..kccckck.'],
-    'blink': ['kk........', '.kkkkkkkk.', '..kQQQQQQk', '.kkkkkkkkk', '..ZZZZZZ..'],
-    'hit':   ['kk........', '.kkkkkkkk.', '..kEkkkEkk', '.kkkckkkck', '..kkkkkkk.'],
-    'ko':    ['..........', '..kEccEk..', '..kckkck..', '..kkcckk..', '..kckkck..'],
+    'open':  ['kk.......', '.kkkkkkkk', '.kEEckkkk', 'kEcwkkcEk', 'kEckkkcEk', '.kEcccEk.', '..kkkkk..'],
+    'glow':  ['kk.......', '.kkkkkkkk', '.kwEEkkkk', 'kEEwkkEEk', 'kEEkkkEEk', '.kEEEEEk.', '..kkkkk..'],
+    'blink': ['kk.......', '.kkkkkkkk', '.kQQQkkkk', 'kQQQQQQQk', 'kkkkkkkkk', '.ZZZZZZZ.', '.........'],
+    'hit':   ['kk.......', '.kkkkkkkk', '.kQQQkkkk', 'kkkkkkkkk', 'kcEkkkEck', '.kkcccck.', '..kkkkk..'],
+    'ko':    ['.........', '.........', '..kkkkk..', '.kEkEkEk.', '.kEEkEEk.', '.kEkEkEk.', '..kkkkk..'],
 }
 def head(eye='open', beak=False):
     rows = list(HEAD_C)

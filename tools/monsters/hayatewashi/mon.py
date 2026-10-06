@@ -4,6 +4,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 from pix import grid, rows_of, grid_of, poly, ellipse, stamp
 
 META = dict(id='hayatewashi', name='ハヤテワシ', types=['wind', 'fighting'], base='ワシ', size='M')
+EYE_BOX = (44, 14, 8, 6)   # 猛禽の 目（idle0）
 PAL = {
     'k': '#101018', 'l': '#2c2a48',
     'R': '#a8bcd8', 'Q': '#5f7298', 'P': '#36405e',      # はね（はがね色の 青）
@@ -146,12 +147,14 @@ def head():
     dots(g, 'H', [(48, 16), (46, 18), (42, 14), (45, 19)])
     return rows_of(g)
 
-EYE = ['kkkk.....', '.kkkkkkk.', '..kwYkYk.', '..kOOkOk.', '...kkkk..']   # 太い まゆ＋ハイライト＋虹彩 2色＋ひとみ   # 太い まゆの ひさし＋つり目
+# 目：猛禽の 目（B）。白目なし。金の 丸い 虹彩（Y 明・O 暗）に 大きな 丸い 黒ひとみ（2×2）と 光 1点（w）。
+#   太い 黒の まゆの ひさしが くちばしへ むかって ななめに 下がり、虹彩の 前上を 切る（コオリミミズクの 平らな ひさしとは ちがう）
+EYE = ['kkkk....', '.kkkkkkk', '.kYYYkkk', '.kYwkOk.', '.kOkkOk.', '..kOOk..']
 EYE_ALT = {
-    'blink': ['kkkk.....', '.kkkkkkk.', '..kkkkkk.', '..GGGGGG.', '.........'],
-    'atk0|atk1|atk2': ['kkkk.....', '.kkkkkkk.', '..kwckYk.', '..kYYkOk.', '...kkkk..'],
-    'hit': ['.........', '.kkGGkk..', '..GkkGG..', '.kkGGkk..', '.........'],
-    'ko': ['.........', '..kGGGk..', '..GkGkG..', '..GGkGG..', '..GkGkG..'],
+    'blink': ['kkkk....', '.kkkkkkk', '.kkkkkkk', '.kGGGGk.', '.kkkkkk.', '..GGGG..'],
+    'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkkk', '.kwYkYk.', '.kYYYOk.', '..kOOk..'],
+    'hit': ['kkkk....', '.kkkkkk.', '.kkkkkk.', '.kYOYOk.', '.kOOkOk.', '..kkkk..'],
+    'ko': ['kkkk....', '.kkkkkk.', '..k..k..', '...kk...', '...kk...', '..k..k..'],
 }
 
 # ---------- 足（テーピングを 巻いた 拳闘の 足、白い かぎ爪）----------
@@ -228,7 +231,7 @@ def layers():
         dict(n='body', g='body', x=0, y=0, rows=body()),
         dict(n='legs', g='legs', x=42, y=43, rows=legs(LEGS), alt={'atk1|atk2': legs(LEGS_ATK)}),
         dict(n='head', g='head', x=-1, y=6, rows=head()),
-        dict(n='eye', g='head', x=45, y=15, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=44, y=14, rows=EYE, alt=EYE_ALT),
         dict(n='wingF', g='wingF', x=1, y=4, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|atk0|hit': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
         dict(n='gust', g='root', x=27, y=52, rows=OL(GUST), only='walk2'),
         dict(n='slash', g='root', x=51, y=33, rows=OL(SLASH), only='atk1'),

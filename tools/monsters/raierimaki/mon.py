@@ -173,7 +173,7 @@ def base():
         dict(n='body', g='body', x=17, y=33, rows=outline(BODY)),
         dict(n='legA', g='legA', x=24, y=48, rows=outline(LEG)),
         dict(n='horn', g='head', x=30, y=15, rows=outline(HORN)),
-        dict(n='head', g='head', x=33, y=17, rows=head(), alt={'blink': head('blink'), 'hit': head('hit'), 'atk0': head('glow'), 'atk1|atk2': head('glow', True)}),
+        dict(n='head', g='head', x=33, y=17, rows=head(), alt={'blink': head('blink'), 'hit': head('hit'), 'atk0': head('glow'), 'atk1|atk2': head('glow', True), 'ko': head('ko')}),
         dict(n='armF', g='armF', x=40, y=39, rows=outline(ARM), alt={'atk1': outline(ARM_STRIKE)}),
     ]
 def fx():

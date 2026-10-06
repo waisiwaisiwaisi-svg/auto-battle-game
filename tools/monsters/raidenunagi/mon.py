@@ -1,5 +1,6 @@
 # ライデンウナギ（でんき・みず × ウナギ）手打ち GBA風・デフォルメ（2〜3頭身：頭を 大きく、体の うねりは そのまま）
 from pix import outline
+EYE_BOX = (45, 22, 9, 5)
 META = dict(id='raidenunagi', name='ライデンウナギ', types=['elec', 'water'], base='ウナギ', size='M')
 PAL = {
     'k': '#101018', 'l': '#181c36',
@@ -152,12 +153,13 @@ HEAD_BOT = [
     "...DFFFFFFFFFFFFFFFk......",
     "....FFFFFFFFFFFFF.........",
 ]
-EYES = {
-    'open':  ['kk.......', '.kkkkkkk.', '..kwYYkYk', '.kYYyykyk', '.kyyyOkOk', '..kkkkkk.'],
-    'hot':   ['kk.......', '.kkkkkkk.', '..kwwYYYk', '.kYwYYkYk', '.kYYYykyk', '..kyykyk.'],
-    'blink': ['kk.......', '.kkkkkkk.', '..kBBBBBk', '.kBBBBBBk', '.kkkkkkkk', '..DDDDDD.'],
-    'hit':   ['kk.......', '.kkkkkkk.', '..kYkkYkk', '.kkykkykk', '.kykkykkk', '..kkkkkk.'],
-    'ko':    ['.........', '..kYyyYk.', '..kykkyk.', '..kkyykk.', '..kykkyk.', '..kyyyyk.'],
+# 目（E 光る目）：瞳なし。白い 芯→黄白→稲妻の 黄の 光が 前下へ とがる 逆三角形。ふちは 黒線の かわりに だいだいの にじみ、前の 角に 水色の 火花
+EYES = {   # 前下へ ななめに 走る 稲妻の 切れ目の 形
+    'open':  ['kk.......', '.kkkkk...', '.OYwwyOkk', '..OyYwYOk', '...OOyyOc', '.....OO..'],
+    'hot':   ['kk.......', '.kkkkk...', '.YwwwwYkk', '.OYwwwwYc', '..OOYwYOc', '....OOO..'],
+    'blink': ['kk.......', '.kkkkk...', '.kkkkkkkk', '..OOyyOOk', '.....OO..', '.........'],
+    'hit':   ['kk.......', '.kkkkk...', '.OYkwyOkk', '..OkYOkOk', '...OkyO..', '.........'],
+    'ko':    ['kk.......', '.kkkkk...', '..O...Okk', '...O.O...', '....O....', '...O.O...'],
 }
 def head(eye='open', gape=0):
     rows = list(HEAD_TOP) + ["DBBBBBBBkkkkkkkkkkkkkkkk..", "DBBBBBBkwkwkkwkkwkkwkkwk.."]

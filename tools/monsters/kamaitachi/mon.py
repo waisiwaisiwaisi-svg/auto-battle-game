@@ -126,12 +126,12 @@ HEAD_OPEN = [
 ]
 # L 隈取りの 目：黒い 仮面（M）が 目を つつみ、後ろへ はね上がる。白目の つり目に 赤い 虹彩（E・e）、ほおに 赤い すじ
 # （頭の 古い くまどり 帯は この 層で 上書きする。頭 2列目〜14列目・4段目〜9段目）
-EYE = ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMSSEEeMMMB', 'BBMMMSEMeMMMM', 'BBBMMMMMMMMMB', 'BBBBBBBMEeBBB']
+EYE = ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMSSEEeMMMB', 'BBMMMSEMeMMMM', 'BBBMMMMMMMMMB', '.......MEe']
 EYE_ALT = {
-    'blink': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMMMMMMMMMB', 'BBMMMeeeeMMMM', 'BBBMMMMMMMMMB', 'BBBBBBBMEeBBB'],
-    'atk0|atk1|atk2': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMSSSEEMMMB', 'BBMMMSEMEMMMM', 'BBBMMMMMMMMMB', 'BBBBBBBMEeBBB'],
-    'hit': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMMeMMMMMMB', 'BBMMMMeeeMMMM', 'BBBMMeMMMMMMB', 'BBBBBBBMEeBBB'],
-    'ko': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMEMMEMMMMB', 'BBMMMMEMMMMMM', 'BBBMMEMMEMMMB', 'BBBBBBBMEeBBB'],
+    'blink': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMMMMMMMMMB', 'BBMMMeeeeMMMM', 'BBBMMMMMMMMMB', '.......MEe'],
+    'atk0|atk1|atk2': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMSSSEEMMMB', 'BBMMMSEMEMMMM', 'BBBMMMMMMMMMB', '.......MEe'],
+    'hit': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMMeMMMMMMB', 'BBMMMMeeeMMMM', 'BBBMMeMMMMMMB', '.......MEe'],
+    'ko': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMEMMEMMMMB', 'BBMMMMEMMMMMM', 'BBBMMEMMEMMMB', '.......MEe'],
 }
 
 # ---- 鎌の 腕：毛の 前腕から 三日月の 刃（上が 刃、下が みね）----
