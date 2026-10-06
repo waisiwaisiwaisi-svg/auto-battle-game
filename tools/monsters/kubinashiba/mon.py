@@ -77,103 +77,128 @@ RB = {'1': 'ABD', '2': 'STl', '3': 'UUX'}
 
 def body():
     p = G()
-    oval(p, 28, 36, 13, 7.5, '1')          # 胴
-    oval(p, 18, 34, 8.5, 8.5, '1')         # しり
-    oval(p, 38, 35, 7.5, 8.5, '1')         # 胸
-    tube(p, [(38, 33), (43, 25), (46, 19)], [7, 5.6, 4.6], '1')   # 太い 首
+    oval(p, 27, 36, 13, 7.5, '1')          # 胴
+    oval(p, 16, 34, 8, 8, '1')             # しり
+    oval(p, 37, 35, 7.5, 8.5, '1')         # 胸
+    tube(p, [(37, 33), (41, 26), (44, 20)], [7, 5.4, 4.4], '1')   # 太い 首
     s = shade(p, RB, r=2)
     # 首の 切り口：上の ふちが 焦げて 暗い
     for x in range(64):
         ys = [y for y in range(64) if s[y][x] != '.' and y < 24]
         for y in ys[:2]: s[y][x] = 'D'
     # 肩と もも の すじ（筋肉の 影）
-    dots(s, 'D', [(34, 33), (33, 34), (33, 35), (32, 36), (24, 32), (23, 33), (22, 34), (22, 35), (22, 36)])
-    dots(s, 'A', [(35, 32), (36, 31), (25, 31), (26, 30)])
+    dots(s, 'D', [(33, 33), (32, 34), (32, 35), (31, 36), (22, 32), (21, 33), (20, 34), (20, 35), (20, 36), (12, 39), (13, 40), (26, 42), (30, 42)])
+    dots(s, 'A', [(34, 32), (35, 31), (23, 31), (24, 30)])
     return ink(s)
 
 def leg(path, rad):
     p = G(); tube(p, path, rad, '1'); s = shade(p, RB, r=1, hi=.2, lo=-.2)
     x, y = path[-1]; x = round(x)
-    for i in range(-2, 3):
-        s[61][x + i] = 'X'; s[60][x + i] = 'U' if i < 1 else 'X'
+    for i in range(-2, 2):
+        s[61][x + i] = 'X'; s[60][x + i] = 'U' if i < 0 else 'X'
     return ink(s)
-FRONT_N = lambda: leg([(39, 38), (40, 46), (40, 52), (41, 59)], [3.6, 2.6, 1.8, 1.6])
-FRONT_F = lambda: leg([(34, 38), (35, 46), (34, 52), (35, 59)], [3, 2.4, 1.7, 1.5])
-HIND_N = lambda: leg([(16, 37), (15, 44), (12, 50), (14, 55), (15, 59)], [4.6, 3.4, 2, 1.7, 1.6])
-HIND_F = lambda: leg([(22, 39), (21, 45), (19, 50), (21, 55), (22, 59)], [3.6, 2.8, 1.8, 1.6, 1.5])
+FRONT_N = lambda: leg([(38, 39), (39, 46), (39, 52), (40, 59)], [3.2, 2.2, 1.6, 1.5])
+FRONT_F = lambda: leg([(33, 39), (34, 46), (33, 52), (34, 59)], [2.8, 2, 1.5, 1.4])
+HIND_N = lambda: leg([(14, 37), (14, 44), (11, 50), (13, 55), (14, 59)], [4, 3, 1.7, 1.5, 1.5])
+HIND_F = lambda: leg([(20, 39), (20, 45), (18, 50), (20, 55), (21, 59)], [3.2, 2.4, 1.5, 1.4, 1.4])
+
+def KO_LEGS():
+    p = G()
+    tube(p, [(36, 54), (42, 57), (48, 59)], [3, 2, 1.5], '1')
+    tube(p, [(14, 53), (20, 57), (26, 59)], [3.4, 2.2, 1.5], '1')
+    s = shade(p, RB, r=1, hi=.2, lo=-.2)
+    dots(s, 'U', [(48, 58), (49, 58), (26, 58), (27, 58)]); dots(s, 'X', [(49, 59), (50, 59), (27, 59), (28, 59)])
+    return ink(s)
 
 def smoke(paths):
     p = G()
     for path, rad in paths: tube(p, path, rad, '2')
     s = shade(p, RB, r=1, hi=.2, lo=-.25)
     return ink(s)
+# 黒煙の たてがみ：首すじから 後ろ上へ 立ちのぼる 筋
 MANE = [
-    ([(41, 26), (37, 22), (33, 21), (30, 18)], [2.6, 2.4, 1.6, .6]),
-    ([(43, 21), (40, 16), (36, 14), (33, 10)], [2.6, 2.2, 1.6, .6]),
-    ([(44, 16), (42, 11), (39, 8)], [2.2, 1.6, .6]),
+    ([(38, 28), (33, 25), (29, 25), (25, 22)], [2.4, 2.2, 1.6, .6]),
+    ([(40, 24), (35, 19), (30, 18), (27, 14)], [2.6, 2.2, 1.6, .6]),
+    ([(42, 20), (38, 14), (34, 11), (32, 7)], [2.4, 2, 1.4, .6]),
 ]
 MANE2 = [
-    ([(41, 26), (36, 23), (32, 21), (29, 19)], [2.6, 2.4, 1.6, .6]),
-    ([(43, 21), (39, 17), (35, 15), (32, 12)], [2.6, 2.2, 1.6, .6]),
-    ([(44, 16), (41, 12), (38, 10)], [2.2, 1.6, .6]),
+    ([(38, 28), (33, 26), (28, 25), (24, 23)], [2.4, 2.2, 1.6, .6]),
+    ([(40, 24), (35, 20), (30, 19), (26, 16)], [2.6, 2.2, 1.6, .6]),
+    ([(42, 20), (38, 15), (34, 13), (31, 9)], [2.4, 2, 1.4, .6]),
 ]
-TAIL = [([(11, 32), (6, 30), (3, 33), (2, 40), (4, 45)], [2.8, 2.6, 2.2, 1.6, .6]),
-        ([(11, 34), (8, 38), (7, 44)], [2, 1.6, .6])]
-TAIL2 = [([(11, 32), (6, 31), (4, 35), (4, 41), (2, 46)], [2.8, 2.6, 2.2, 1.6, .6]),
-         ([(11, 34), (9, 39), (9, 45)], [2, 1.6, .6])]
+TAIL = [([(9, 32), (5, 33), (3, 38), (3, 44), (5, 49)], [2.8, 2.6, 2.2, 1.6, .6]),
+        ([(9, 34), (7, 40), (8, 46)], [2, 1.5, .6])]
+TAIL2 = [([(9, 32), (5, 34), (4, 39), (3, 45), (2, 50)], [2.8, 2.6, 2.2, 1.6, .6]),
+         ([(9, 34), (8, 40), (10, 45)], [2, 1.5, .6])]
 
 # ---------- 霊火の 頭（見せ所）：馬の 頭の 形を した 炎。耳と たてがみが 炎の 舌 ----------
-def flame(var=0, big=0):
+def flame(var=0, big=0, ko=False):
     p = G()
-    sh = [(41, 21), (42, 12), (45, 6), (51, 5), (56, 8), (61, 13), (63, 17), (62, 20), (56, 21), (50, 21), (47, 23)]
-    if big: sh = [(x + (1 if x > 50 else 0), y - (1 if y < 12 else 0)) for x, y in sh]
+    sh = [(40, 22), (41, 14), (44, 7), (50, 5), (55, 8), (62, 14), (63, 19), (60, 22), (54, 21), (50, 24), (45, 25)]
+    if big: sh = [(x, y - (1 if y < 12 else 0)) for x, y in sh]
     poly(p, sh, 'V')
-    # 炎の 舌（耳・後ろへ なびく）
-    tongues = [[(44, 9), (46, 0 + var), (49, 6)], [(48, 6), (52, 1 - var), (53, 6)], [(42, 13), (36, 5 + var), (45, 8)], [(41, 18), (35, 13 - var), (42, 15)]]
+    # 炎の 舌（耳・後ろへ なびく 炎の たてがみ）
+    tongues = [[(45, 8), (46, 0 + var), (50, 6)], [(49, 6), (54, 1 + var), (54, 8)],
+               [(42, 12), (33, 4 + var), (46, 8)], [(41, 16), (32, 12 - var), (42, 13)], [(40, 21), (34, 19 + var), (41, 18)]]
     for t in tongues: poly(p, t, 'V')
-    # 内側ほど 明るい
-    def inner(ch_from, ch_to, n, ox=0, oy=0):
+    def inner(src, dst, n, ox=0, oy=0):
         q = [r[:] for r in p]
         for y in range(64):
             for x in range(64):
-                if p[y][x] == ch_from and all(at(p, x + dx + ox, y + dy + oy) != '.' for dx in range(-n, n + 1) for dy in range(-n, n + 1) if abs(dx) + abs(dy) <= n): q[y][x] = ch_to
+                if p[y][x] == src and all(at(p, x + dx + ox, y + dy + oy) != '.' for dx in range(-n, n + 1) for dy in range(-n, n + 1) if abs(dx) + abs(dy) <= n): q[y][x] = dst
         return q
-    p = inner('V', 'C', 2, 1, 1)
-    p = inner('C', 'W', 4, 1, 2)
-    g = ink(p)
-    return g
-EYE = ['kkk.....', '.kkkkk..', '..krrrkk', '...kkkk.']   # つり上がった 切れ目、赤く 光る ひとみ
-EYE_ALT = {'blink': ['........', '.kkkk...', '..kkkkkk', '........'],
-           'hit': ['.k.....k', '..kk.kk.', '....k...', '..kk.kk.'],
-           'atk0|atk1|atk2': ['kkk.....', '.kkkkkk.', '..krrrrk', '...kkkk.'],
-           'ko': ['.k...k..', '..k.k...', '...k....', '..k.k...']}
-MOUTH = ['......kk', '..kkkk.k', 'kkWkWkk.', '.kkkkk..']  # 裂けた 口と 炎の 牙
-MOUTH_OPEN = ['.......kk', '..kkkkk.k', 'kkWkWkWkk', 'krrrrrrk.', 'kkWkWkk..', '.kkkkk...']
+    p = inner('V', 'C', 1, 1, 0)
+    if not ko:
+        p = inner('C', 'W', 3, -1, 2)
+        for y in range(64):          # 白い 芯は 下半分だけ（炎の 根もと）
+            for x in range(64):
+                if p[y][x] == 'W' and (y < 15 or x > 58): p[y][x] = 'C'
+    else:
+        for y in range(64):
+            for x in range(64):
+                if p[y][x] == 'C' and (x + y) % 2: p[y][x] = 'V'
+    # 炎の すじ（右下 → 左上へ なめる 線）
+    for (x0, y0, x1, y1) in ((47, 21, 42, 15), (52, 20, 47, 13), (58, 19, 55, 15), (44, 12, 40, 8)):
+        line(p, x0, y0, x1, y1, 'V')
+    # ほお骨の かげ
+    dots(p, 'V', [(48, 16), (49, 17), (50, 17), (51, 17)])
+    return ink(p)
+# まゆの ひさし＋つり上がった 切れ目、赤く 光る ひとみ
+EYE = ['kk.......', 'kkkk.....', '.kkkkkk..', '..krrrrk.', '...kkkkk.']
+EYE_ALT = {'blink': ['kk.......', 'kkkk.....', '.kkkkkk..', '..kkkkkk.', '.........'],
+           'hit': ['k........', '.kk......', '...kkkkk.', '.kk......', 'k........'],
+           'atk0|atk1|atk2': ['kk.......', 'kkkk.....', '.kkkkkkk.', '..krrrrrk', '...kkkkk.'],
+           'ko': ['kk...kk..', '..k.k....', '...k.....', '..k.k....', 'kk...kk..']}
+MOUTH = ['.......kk', '...kkkk.k', 'kkkWkWkk.', '.kkkkkk..']  # 裂けた 口と 炎の 牙
+MOUTH_OPEN = ['.......kk', '..kkkkkk.', 'kkWkWkWkk', 'krrrrrrk.', 'kkWkWkWk.', '.kkkkkk..']
 BLAST = [
-    '.....VV.......',
-    '..VVCCVV..V...',
-    'VVCCWWCCVVCV..',
-    'VCWWWWWWCCVVV.',
-    'VCWWWWWWWCCVVV',
-    'VVCCWWWCCVV.V.',
-    '..VVCCCVV..V..',
-    '....VV........',
+    '.....VV........',
+    '..VVCCVV..V....',
+    'VVCCWWCCVVCV.V.',
+    'VCWWWWWWCCVVV..',
+    'VCWWWWWWWCCVVVV',
+    'VVCCWWWCCVV.V..',
+    '..VVCCCVV..V...',
+    '....VV.........',
 ]
+BLAST2 = ['..V..V..', 'VCCVV.V.', 'CWWCCV..', 'VCCV.V..', '..V.....']
 
 def layers():
     BODY = rows_of(body())
     return [
+        dict(n='kolegs', g='root', x=0, y=0, rows=rows_of(KO_LEGS()), only='ko'),
         dict(n='tail', g='tail', x=0, y=0, rows=rows_of(smoke(TAIL)), alt={'idle1|idle2|walk1|walk3|atk1': rows_of(smoke(TAIL2))}),
-        dict(n='legHF', g='legB', x=0, y=0, rows=rows_of(HIND_F())),
-        dict(n='legFF', g='legA', x=0, y=0, rows=rows_of(FRONT_F())),
+        dict(n='legHF', not_='ko', g='legB', x=0, y=0, rows=rows_of(HIND_F())),
+        dict(n='legFF', not_='ko', g='legA', x=0, y=0, rows=rows_of(FRONT_F())),
         dict(n='body', g='body', x=0, y=0, rows=BODY),
-        dict(n='legHN', g='legA', x=0, y=0, rows=rows_of(HIND_N())),
-        dict(n='legFN', g='legB', x=0, y=0, rows=rows_of(FRONT_N())),
+        dict(n='legHN', not_='ko', g='legA', x=0, y=0, rows=rows_of(HIND_N())),
+        dict(n='legFN', not_='ko', g='legB', x=0, y=0, rows=rows_of(FRONT_N())),
         dict(n='mane', g='neck', x=0, y=0, rows=rows_of(smoke(MANE)), alt={'idle1|idle2|walk1|walk3|atk1': rows_of(smoke(MANE2))}),
-        dict(n='flame', g='head', x=0, y=0, rows=rows_of(flame()), alt={'idle1|idle2|walk1|walk3': rows_of(flame(1)), 'atk0|atk1|atk2': rows_of(flame(1, 1))}),
-        dict(n='eye', g='head', x=48, y=9, rows=EYE, alt=EYE_ALT),
-        dict(n='mouth', g='head', x=53, y=16, rows=MOUTH, alt={'atk1|atk2': MOUTH_OPEN}),
-        dict(n='blast', g='head', x=63, y=11, rows=BLAST, only='atk1'),
+        dict(n='flame', g='head', x=0, y=0, rows=rows_of(flame()), alt={'idle1|idle2|walk1|walk3': rows_of(flame(1)), 'atk0|atk1|atk2': rows_of(flame(1, 1)), 'ko': rows_of(flame(0, 0, True))}),
+        dict(n='eye', g='head', x=48, y=10, rows=EYE, alt=EYE_ALT),
+        dict(n='mouth', g='head', x=55, y=18, rows=MOUTH, alt={'atk1|atk2': MOUTH_OPEN}),
+        dict(n='blast', g='head', x=63, y=13, rows=BLAST, only='atk1'),
+        dict(n='blast2', g='head', x=64, y=15, rows=BLAST2, only='atk2'),
     ]
 
 FRAMES = {
@@ -184,6 +209,6 @@ FRAMES = {
     'atk1': {'root': (3, 0), 'head': (2, 1)},
     'atk2': {'root': (4, 0), 'head': (1, 1)},
     'hit': {'root': (-3, 0), 'head': (-3, 1), 'legA': (1, 0)},
-    'ko': {'_flip': True},
+    'ko': {'body': (-2, 15), 'head': (5, 22), 'tail': (0, -2)},
 }
 PARENT = {'head': 'neck', 'neck': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

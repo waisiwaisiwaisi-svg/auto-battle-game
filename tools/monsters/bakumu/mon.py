@@ -60,134 +60,110 @@ RAMP = {'1': 'ABD', '2': 'EFH', '3': 'UVW'}
 
 # ---------- 胴：黒い 前後に 白い 鞍（マレーバクの 2色）----------
 def body():
-    p = G(); ellipse(p, 25, 43, 16, 10.5, '1')
+    p = G(); ellipse(p, 21, 44, 13, 10, '1')
     for y in range(64):
         for x in range(64):
             # 鞍：肩の うしろから 腰まで、腹の 線より 上
-            if p[y][x] == '1' and 13 <= x + (y - 40) * .25 <= 31 and y <= 48: p[y][x] = '2'
-    s = shade(p, RAMP, r=3)
-    # 鞍の ふちの 毛（ぎざぎざ）を 手で
-    dots(s, 'H', [(14, 48), (16, 47), (19, 48), (22, 47), (25, 48), (28, 47)])
-    dots(s, 'D', [(31, 34), (32, 37), (32, 41), (33, 44)])
+            if p[y][x] == '1' and 10 <= x + (y - 40) * .3 <= 25 and y <= 48: p[y][x] = '2'
+    s = shade(p, RAMP, r=3, hi=.22, tilt=.8)
+    dots(s, 'H', [(12, 48), (15, 48), (18, 48), (21, 48), (24, 47)])
+    dots(s, 'F', [(13, 47), (16, 47), (19, 47), (22, 46)])
     return ink(s)
 def leg(x0, far=False):
     p = G()
-    poly(p, [(x0, 49), (x0 + 6, 49), (x0 + 6, 58), (x0, 58)], '1')
-    s = shade(p, RAMP, r=1, tilt=.2)
-    for x in range(x0, x0 + 7): s[58][x] = 'D'
-    s[57][x0 + 1] = 'w'; s[57][x0 + 3] = 'w'; s[58][x0 + 1] = 'k'; s[58][x0 + 3] = 'k'
+    poly(p, [(x0, 49), (x0 + 6, 49), (x0 + 6, 54), (x0 + 5.5, 58), (x0 + .5, 58), (x0, 55)], '1')
+    s = shade(p, RAMP, r=1, tilt=.6)
+    for x in range(x0, x0 + 6): s[57][x] = 'D' if s[57][x] != '.' else '.'
+    s[57][x0 + 1] = 'w'; s[57][x0 + 3] = 'w'
     if far:
         for y in range(64):
             for x in range(64):
                 if s[y][x] in 'AB': s[y][x] = 'D' if s[y][x] == 'B' else 'B'
     g = ink(s)
-    for x in range(x0, x0 + 7): g[59][x] = 'k'
+    for x in range(x0, x0 + 6): g[58][x] = 'k'
     return g
 
-# ---------- 頭：くさび形、耳は うしろへ とがる ----------
+# ---------- 頭：くさび形、小さな 耳（ふちが 白い）----------
 def head():
     p = G()
-    ellipse(p, 43, 35, 8.5, 8, '1')
-    poly(p, [(44, 27.5), (53, 31), (55, 35), (53, 40), (44, 43)], '1')   # 鼻すじ
-    poly(p, [(36, 31), (37, 23), (41, 22), (43, 29)], '1')               # 耳（とがる）
-    s = shade(p, RAMP, r=2)
-    # 耳の 内がわ
-    dots(s, 'Q', [(38, 25), (39, 25), (38, 26), (39, 26), (39, 27), (40, 27)])
-    # ほおの しわ・口の 線
-    dots(s, 'D', [(46, 40), (47, 40), (48, 40), (49, 39), (50, 39), (51, 39)])
+    poly(p, [(25, 34), (29, 28), (35, 26), (41, 28), (46, 31), (47, 35), (44, 39), (38, 42), (31, 43.5), (26, 41)], '1')
+    poly(p, [(28, 29), (28.5, 23), (32, 23.5), (33, 27.5)], '1')
+    s = shade(p, RAMP, r=2, tilt=.6)
+    dots(s, 'E', [(29, 23), (30, 23), (31, 23), (29, 24)])
+    dots(s, 'Q', [(30, 25), (30, 26), (31, 26)])
+    dots(s, 'A', [(34, 27), (35, 27), (36, 27), (37, 27), (38, 28)])
+    dots(s, 'D', [(31, 37), (32, 38), (33, 39), (39, 40), (40, 40)])
     g = ink(s)
-    dots(g, 'k', [(47, 41), (48, 41), (49, 40), (50, 40), (51, 40), (52, 40)])
-    dots(g, 'w', [(50, 41), (52, 41)])    # きば
+    # 口：ななめに さけて きば
+    dots(g, 'k', [(37, 39), (38, 39), (39, 38), (40, 38), (41, 38), (42, 37), (43, 37)])
+    dots(g, 'w', [(39, 39), (41, 39)])
     return g
 
-# ---------- 鼻＝煙管：皮の 鼻 → 真鍮の 輪 → 細い 羅宇（らお）→ 雁首 ----------
-NOSE_PATH = [(52, 36), (56, 38), (59, 41), (60, 45)]
+# ---------- 鼻＝煙管：真鍮の 吸い口 → 皮の 羅宇（らお）→ 真鍮の 雁首 ----------
 def nose(lift=0):
     p = G()
-    tube(p, [(51, 35), (55, 37.5)], [3.2, 2.6], '1')
-    tube(p, [(55, 37.5), (58.5, 40.5 - lift), (60.5, 45 - lift)], [2.2, 1.8, 1.8], '1')
-    s = shade(p, RAMP, r=1, tilt=.3)
-    # 鼻の しわ（輪）
-    for (x, y) in ((53, 35), (53, 36), (53, 37), (56, 37), (56, 38), (56, 39)):
-        if s[y][x] in 'ABD': s[y][x] = 'D'
+    tube(p, [(45, 34), (51, 35.5), (56.5, 37.5 - lift)], [2.6, 2.0, 1.7], '1')
+    s = shade(p, RAMP, r=1, tilt=.6)
+    for x in (49, 52, 55):                      # 鼻の しわ＝竹の ふし
+        for y in range(30, 42):
+            if s[y][x] in 'ABD': s[y][x] = 'D' if s[y - 1][x] not in '.' else 'A'
     g = ink(s)
-    # 真鍮の 吸い口の 輪（手で）
-    stamp(g, ['kUk', 'UVW', 'VWk'], 57, 39 - lift)
-    stamp(g, BOWL, 57, 44 - lift)
+    stamp(g, ['kUk', 'UVk', 'UVk', 'VWk', 'kk.'], 45, 31)     # 吸い口の 金の 輪
+    stamp(g, GAN if not lift else [r.replace('Q', 'P') for r in GAN], 55, 35 - lift)
+    if lift: dots(g, 'P', [(57, 39 - lift), (59, 38 - lift)])                               # 雁首
     return g
-# 雁首：上むきに ひらいた 金の 火皿。中で 夢の 火が くすぶる
-BOWL = [
-    '.kkkkkk',
-    'kPQQQPk',
-    'kUUUVWk',
-    '.kUVWk.',
-    '..kWk..',
-    '...k...',
-]
-BOWL_HOT = [
-    '.kkkkkk',
-    'kPPPPPk',
-    'kUUUVWk',
-    '.kUVWk.',
-    '..kWk..',
-    '...k...',
+# 雁首：細い 金の 首が 下へ のび、先で 上むきに 火皿が ひらく
+GAN = [
+    'kkk.....',
+    'kUVk....',
+    'kVUVk...',
+    '.kVVWk..',
+    '..kVWk..',
+    '.kkkkkkk',
+    'kUPPPQUk',
+    'kUUUVVWk',
+    '.kUVVWk.',
+    '..kWWk..',
+    '...kk...',
 ]
 
-# ---------- 夢の 煙（くるくる 立ちのぼる）----------
-SMOKE = [
-    [
-        '...PPQ......',
-        '..PQ..Q.....',
-        '..Q...Q.....',
-        '...QQQ......',
-        '.....PQ.....',
-        '......Q.....',
-        '.....PQ.....',
-        '.....Q......',
-    ],
-    [
-        '....PPQ.....',
-        '...PQ..Q....',
-        '...Q...Q....',
-        '....QQQ.....',
-        '.....PQ.....',
-        '.....Q......',
-        '.....PQ.....',
-        '......Q.....',
-    ],
-    [
-        '..PPQ.......',
-        '.PQ..Q......',
-        '.Q..PQ......',
-        '..QQ........',
-        '....PQ......',
-        '.....Q......',
-        '......Q.....',
-        '.....PQ.....',
-    ],
-]
-# 攻撃：夢の 煙の かたまり（中に 目玉）
-BLAST = [
-    '.......PPPP.......',
-    '....PPPQQQQPP.....',
-    '..PPQQQQQQQQQPP...',
-    '.PQQQQkkkkkQQQQP..',
-    'PQQQQkRRRRwkQQQQP.',
-    'PQQQkRRkkRRRkQQQQP',
-    'PQQQQkRRRRRkQQQQP.',
-    '.PQQQQkkkkkQQQQP..',
-    '..PPQQQQQQQQQPP...',
-    '....PPPQQQPP......',
-    '.......PP.........',
-]
-BLAST2 = [
-    '...P..PP....P.',
-    '.PQ..PQQP..PQ.',
-    'PQ..PQ..QP..Q.',
-    '.Q..Q....Q.PQ.',
-    '..PQ...PQ...Q.',
-    '....P....QP...',
-]
+# ---------- 夢の 煙（くねって 立ちのぼる 帯、黒い 線は なし）----------
+def smoke(ph=0):
+    p = G(); o = (0, 1, -1)[ph]
+    path = [(59, 41), (60 + o * .5, 37), (58, 33), (56 - o, 29), (56.5, 25), (59 + o, 22)]
+    tube(p, path, [1, 1.4, 1.7, 1.8, 1.9, 2.0], 'P')
+    ellipse(p, 56.5 + o, 19.5, 2.8, 2.2, 'P')
+    g = G()
+    for y in range(64):
+        for x in range(64):
+            if p[y][x] != '.':
+                # 光の 当たらない 右下だけ 濃い ふち、ところどころ 切れる
+                edge = at(p, x + 1, y) == '.' or at(p, x, y + 1) == '.'
+                g[y][x] = 'Q' if edge else 'P'
+                if (y + ph) % 5 == 0 and x % 2 == 0: g[y][x] = '.'
+    dots(g, 'Q', [(56 + o, 19), (57 + o, 19), (57 + o, 20)])
+    return g
+# 攻撃：夢の 煙の 大きな かたまり（中に にらむ 目玉）
+def blast(big=True):
+    p = grid(30, 24)
+    for (cx, cy, r) in ((8, 13, 6), (15, 9, 7), (22, 12, 6.5), (15, 16, 6), (4, 15, 3)) if big else ((6, 12, 3), (14, 8, 3.5), (21, 13, 3), (12, 16, 2.5)):
+        for y in range(24):
+            for x in range(30):
+                if (x + .5 - cx) ** 2 + ((y + .5 - cy) * 1.15) ** 2 <= r * r: p[y][x] = 'Q'
+    for y in range(24):
+        for x in range(30):
+            if p[y][x] == 'Q' and (y == 0 or x == 0 or p[y - 1][x] == '.' or p[y][x - 1] == '.' or (y > 1 and p[y - 2][x] == '.')): p[y][x] = 'P'
+    g = [r[:] for r in p]
+    for y in range(24):
+        for x in range(30):
+            if p[y][x] == '.' and any(0 <= y + dy < 24 and 0 <= x + dx < 30 and p[y + dy][x + dx] != '.' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): g[y][x] = 'k'
+    if big:
+        stamp(g, ['..kkkkk..', '.kRRRRwk.', 'kRRkkkRRk', '.kRRRRRk.', '..kkkkk..'], 10, 10)
+    else:
+        for y in range(24):
+            for x in range(30):
+                if g[y][x] == 'Q' and (x + y) % 2: g[y][x] = '.'
+    return rows_of(g)
 EYE = ['kk.....', '.kkkk..', '..RRkRk', '...kkk.']
 EYE_ALT = {
     'blink': ['kk.....', '.kkkk..', '..kkkkk', '.......'],
@@ -197,19 +173,19 @@ EYE_ALT = {
 }
 
 def layers():
-    N0 = rows_of(nose()); N1 = rows_of(nose(1))
+    N0 = rows_of(nose()); N1 = rows_of(nose(1)); SM = [rows_of(smoke(i)) for i in range(3)]
     return [
-        dict(n='legFH', g='legB', x=0, y=0, rows=rows_of(leg(11, True))),
-        dict(n='legFF', g='legA', x=0, y=0, rows=rows_of(leg(33, True))),
+        dict(n='legFH', g='legB', x=0, y=0, rows=rows_of(leg(13, True))),
+        dict(n='legFF', g='legA', x=0, y=0, rows=rows_of(leg(28, True))),
         dict(n='body', g='body', x=0, y=0, rows=rows_of(body())),
-        dict(n='legH', g='legA', x=0, y=0, rows=rows_of(leg(14))),
-        dict(n='legF', g='legB', x=0, y=0, rows=rows_of(leg(29))),
-        dict(n='smoke', g='nose', x=52, y=31, rows=SMOKE[0], alt={'idle1|walk1|walk2': SMOKE[1], 'idle2|idle3|walk3|blink': SMOKE[2]}, not_='atk1|atk2|hit|ko'),
+        dict(n='legH', g='legA', x=0, y=0, rows=rows_of(leg(9))),
+        dict(n='legF', g='legB', x=0, y=0, rows=rows_of(leg(24))),
+        dict(n='smoke', g='nose', x=0, y=0, rows=SM[0], alt={'idle1|walk1|walk2': SM[1], 'idle2|idle3|walk3|blink': SM[2]}, not_='atk1|atk2|hit|ko'),
         dict(n='nose', g='nose', x=0, y=0, rows=N0, alt={'atk0|atk1|atk2': N1}),
         dict(n='head', g='head', x=0, y=0, rows=rows_of(head())),
-        dict(n='eye', g='head', x=42, y=29, rows=EYE, alt=EYE_ALT),
-        dict(n='blast', g='nose', x=58, y=30, rows=BLAST, only='atk1'),
-        dict(n='blast2', g='nose', x=60, y=28, rows=BLAST2, only='atk2'),
+        dict(n='eye', g='head', x=33, y=28, rows=EYE, alt=EYE_ALT),
+        dict(n='blast', g='nose', x=56, y=18, rows=blast(), only='atk1'),
+        dict(n='blast2', g='nose', x=62, y=18, rows=blast(False), only='atk2'),
     ]
 
 FRAMES = {

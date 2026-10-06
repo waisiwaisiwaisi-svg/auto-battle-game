@@ -65,42 +65,59 @@ def shade(g, ramps=RAMP, dk=1.0):
 def recolor(g, m): return [[m.get(c, c) for c in r] for r in g]
 DARK = {'R': 'Q', 'Q': 'P', 'P': 'l', 'm': 'n', 'n': 'o', 'o': 'l', 'S': 'T', 'T': 'U', 'F': 'G'}
 
-# ---------- 翼（細く 長い 風切りの 翼。うしろの ふちは 風に 切られた ぎざぎざ）----------
-WP = {
-    'up':   dict(w=(30, 8),  tip=(14, 0),  tr=[(13, 7), (18, 15), (25, 21), (32, 26)]),
-    'hi':   dict(w=(26, 13), tip=(5, 6),   tr=[(6, 14), (13, 21), (22, 26), (32, 29)]),
-    'mid':  dict(w=(24, 20), tip=(1, 15),  tr=[(4, 24), (12, 30), (22, 33), (32, 32)]),
-    'down': dict(w=(31, 41), tip=(21, 55), tr=[(11, 52), (11, 45), (18, 38), (30, 33)]),
+# ---------- 翼：腕の 骨（肩→ひじ→手首）＋ 3本の 指の 骨 ＋ 膜（指の あいだは 内へ えぐれた 波形）----------
+WOY = 8   # 翼の 下書きは 上に 8ドット 余白を とる（ふりあげ用）
+WP = {   # S=肩 E=ひじ W=手首 F=指先（前→後ろ） A=膜の 胴への つけね
+    'up':   dict(E=(35, 14), W=(33, 2), F=[(22, -8), (16, 4), (20, 18)], A=(28, 32)),
+    'hi':   dict(E=(33, 16), W=(28, 5), F=[(8, -1), (6, 13), (15, 25)], A=(27, 33)),
+    'mid':  dict(E=(31, 18), W=(24, 10), F=[(1, 6), (4, 21), (14, 30)], A=(27, 33)),
+    'down': dict(E=(30, 35), W=(24, 43), F=[(3, 45), (9, 55), (21, 58)], A=(33, 36)),
 }
+S0 = (37, 28)
 def segd(px, py, a, b):
     (x0, y0), (x1, y1) = a, b; vx, vy = x1 - x0, y1 - y0; L = vx * vx + vy * vy or 1
     t = max(0, min(1, ((px - x0) * vx + (py - y0) * vy) / L)); return ((px - x0 - vx * t) ** 2 + (py - y0 - vy * t) ** 2) ** .5
 def wing(pose, far=False):
-    g = G(); sx, sy = 37, 28
-    P = WP[pose]; wx, wy = P['w']; tx, ty = P['tip']
-    # うしろの ふち：指の あいだを 手首側へ えぐって 波形に
-    edge = [P['tr'][0]]
-    for (ax, ay), (bx, by) in zip(P['tr'], P['tr'][1:]):
-        mx, my = (ax + bx) / 2, (ay + by) / 2; edge += [(round(mx + (wx - mx) * .18), round(my + (wy - my) * .18)), (bx, by)]
-    p = G(); poly(p, [(sx, sy - 1), (wx, wy), (tx, ty)] + edge + [(sx - 2, sy + 3)], 'n')
-    # 膜：骨の そばは 明るく、うしろの ふちへ 向かって 暗く（境は 市松）
-    for y in range(64):
+    H = 64 + WOY
+    def sh(p): return (p[0], p[1] + WOY)
+    P = WP[pose]; S, E, W, A = sh(S0), sh(P['E']), sh(P['W']), sh(P['A']); F = [sh(f) for f in P['F']]
+    # 膜の りんかく：指先と 指先の あいだは 手首へ 向かって えぐる（スカラップ）
+    def notch(a, b, k=.42):
+        mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2; return (round(mx + (W[0] - mx) * k), round(my + (W[1] - my) * k))
+    edge = [F[0], notch(F[0], F[1]), F[1], notch(F[1], F[2]), F[2], notch(F[2], A, .3), A]
+    g = grid(64, H); p = grid(64, H); poly(p, [S, E, W] + edge, 'n')
+    # 膜の 色：骨の すぐ 下（光の 側）は 明、まん中は 中、うしろの ふちと 骨の 影は 暗（市松は 使わない）
+    bones = [(S, E), (E, W)] + [(W, f) for f in F]
+    for y in range(H):
         for x in range(64):
             if p[y][x] != 'n': continue
-            d = min(segd(x, y, (sx, sy), (wx, wy)), segd(x, y, (wx, wy), (tx, ty)))
-            ck = (x + y) % 2 == 0
-            p[y][x] = 'm' if d < 3.5 or (d < 5 and ck) else 'n' if d < 8.5 or (d < 10 and ck) else 'o'
+            d = min(segd(x, y, a, b) for a, b in bones)
+            de = min(segd(x, y, a, b) for a, b in zip(edge, edge[1:]))
+            p[y][x] = 'o' if de < 1.6 else 'm' if d < 2.2 else 'n'
+    if far:   # 奥の 翼は 影絵：外の 輪郭だけ、骨は 色の すじ（内側に 黒線を 入れない）
+        for y in range(H):
+            for x in range(64):
+                if p[y][x] != '.': p[y][x] = 'o' if p[y][x] != 'm' else 'Q'
+        for f in F:
+            q = grid(64, H); stroke(q, W[0], W[1], f[0], f[1], .6, .4, 'P')
+            for y in range(H):
+                for x in range(64):
+                    if q[y][x] != '.' and p[y][x] != '.': p[y][x] = 'P'
+        q = grid(64, H); stroke(q, S[0], S[1], E[0], E[1], 2.0, 1.5, 'Q'); stroke(q, E[0], E[1], W[0], W[1], 1.5, 1.2, 'Q')
+        for y in range(H):
+            for x in range(64):
+                if q[y][x] != '.': p[y][x] = 'Q' if (y > 0 and q[y - 1][x] != '.') else 'R'
+        ink(g, p)
+        return rows_of(recolor(g, {'R': 'Q', 'Q': 'P', 'k': 'k'}))
     ink(g, p)
-    for y in range(64):
-        for x in range(64):
-            if g[y][x] in 'mn' and ((y + 1 < 64 and g[y + 1][x] == 'k') or (x + 1 < 64 and g[y][x + 1] == 'k')): g[y][x] = 'o'
-    # 指の 骨（すじ）
-    for (fx, fy) in P['tr'][:3]:
-        p = G(); stroke(p, wx, wy, fx, fy, .7, .5, '5'); ink(g, p)
-    p = G(); stroke(p, sx, sy, wx, wy, 2.4, 1.7, '1'); ink(g, p)
-    p = G(); stroke(p, wx, wy, tx, ty, 1.5, .6, '1'); ink(g, p)
-    g = shade(g, {'1': 'RQP', '5': 'QPP'})
-    put(g, wx - 1, wy - 3, ['.k.', 'kSk', 'kTk'] if pose != 'down' else ['kTk', 'kSk', '.k.'])
+    # 指の 骨（細い）→ 腕の 骨（太い）の 順に 重ねる
+    for f in F:
+        q = grid(64, H); stroke(q, W[0], W[1], f[0], f[1], 1.0, .5, '5'); ink(g, q)
+    q = grid(64, H); stroke(q, S[0], S[1], E[0], E[1], 2.4, 1.8, '1'); stroke(q, E[0], E[1], W[0], W[1], 1.8, 1.4, '1'); ink(g, q)
+    g = shade(g, {'1': 'RQP', '5': 'RPP'})
+    # 手首の 刃の かぎ爪（手で）
+    cl = ['.k.', 'kSk', 'kTk', '.k.'] if pose != 'down' else ['.k.', 'kTk', 'kSk', '.k.']
+    put(g, W[0] - 1, W[1] - 4 if pose != 'down' else W[1] + 1, cl)
     if far: g = recolor(g, DARK)
     return rows_of(g)
 
@@ -234,7 +251,7 @@ def layers():
     W = {p: wing(p) for p in WP}; WF = {p: wing(p, True) for p in WP}
     T = {p: tail(p) for p in ('rest', 'up', 'fwd', 'low')}
     return [
-        dict(n='wingB', g='wingB', x=4, y=-3, rows=WF['hi'], alt={'idle1|idle3|walk1|walk3|atk2': WF['mid'], 'walk0|hit': WF['up'], 'walk2|atk1': WF['down'], 'atk0': WF['mid']}),
+        dict(n='wingB', g='wingB', x=-4, y=-1 - WOY, rows=WF['up'], alt={'walk1|walk3|atk2': WF['hi'], 'walk2|atk1': WF['mid']}),
         dict(n='legFar', g='body', x=35, y=36, rows=LEG_FAR),
         dict(n='tail', g='tail', x=0, y=0, rows=T['rest'], alt={'atk0': T['up'], 'atk1': T['fwd'], 'atk2': T['low']}),
         dict(n='body', g='body', x=0, y=0, rows=body()),
@@ -242,7 +259,7 @@ def layers():
         dict(n='head', g='head', x=0, y=0, rows=head()),
         dict(n='mouth', g='head', x=53, y=21, rows=MOUTH_OPEN, only='atk1|atk2|hit'),
         dict(n='eye', g='head', x=52, y=16, rows=EYE, alt=EYE_ALT),
-        dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|hit': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk0|atk2': W['mid']}),
+        dict(n='wingF', g='wingF', x=0, y=-WOY, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|hit|atk0': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
         dict(n='gust', g='root', x=26, y=56, rows=OL(GUST), only='walk2'),
         dict(n='slash', g='root', x=51, y=10, rows=OL(SLASH), only='atk1'),
     ]

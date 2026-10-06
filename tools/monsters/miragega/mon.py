@@ -83,6 +83,16 @@ def span_poly(sp):
     return pts
 FW_PTS = span_poly(FW_SPAN)
 FW_VEIN = [4, 22, 34, 46]          # 翅脈を のばす 先（点の 番号）
+# ふりあげた 前翅（これも 手で 打つ）
+FW_SPAN_UP = {
+    0: (15, 17), 1: (13, 18), 2: (15, 19), 3: (16, 20), 4: (15, 21), 5: (13, 22), 6: (12, 24), 7: (11, 25),
+    8: (13, 26), 9: (11, 27), 10: (10, 28), 11: (12, 29), 12: (10, 30), 13: (9, 31), 14: (11, 32), 15: (9, 33),
+    16: (9, 34), 17: (11, 35), 18: (10, 36), 19: (11, 37), 20: (13, 38), 21: (12, 39), 22: (13, 40), 23: (15, 41),
+    24: (17, 41), 25: (20, 41), 26: (24, 40), 27: (29, 39),
+}
+FW_PTS_UP = span_poly(FW_SPAN_UP)
+FW_VEIN_UP = [2, 20, 32, 44]
+FW_BITE_UP = [(11.4, 8.3), (10.4, 11.3), (9.4, 14.3), (10.4, 17.3), (12.4, 20.3)]
 FW_BITE = [(3.4, 10.3), (4.4, 14.3), (6.4, 18.3), (8.4, 22.3), (11.4, 26.3)]   # 波の 谷
 HW_BASE = (38, 31)
 HW_PTS = [(38, 30), (31, 31), (23, 34), (17, 38), (14, 43), (15, 48), (19, 51), (24, 52), (29, 51), (33, 47), (36, 42), (39, 36)]
@@ -92,12 +102,14 @@ def turn(pts, base, deg):
     """あたりの 点を つけねで まわす（下書き用。ぬりは あとで）"""
     a = math.radians(deg); bx, by = base
     return [(round(bx + (x - bx) * math.cos(a) - (y - by) * math.sin(a)), round(by + (x - bx) * math.sin(a) + (y - by) * math.cos(a))) for x, y in pts]
-ANG = {'mid': 0, 'hi': 14, 'up': 34, 'down': -62}
+ANG = {'mid': 0, 'hi': 14, 'up': 34, 'down': -50}
 def turnf(pts, base, deg):
     a = math.radians(deg); bx, by = base
     return [(bx + (x - bx) * math.cos(a) - (y - by) * math.sin(a), by + (x - bx) * math.sin(a) + (y - by) * math.cos(a)) for x, y in pts]
 FW = {k: turn(FW_PTS, FW_BASE, a) for k, a in ANG.items()}
 FW_BITES = {k: turnf(FW_BITE, FW_BASE, a) for k, a in ANG.items()}
+FW['up'] = FW_PTS_UP; FW_BITES['up'] = FW_BITE_UP
+FW_VEINS = {k: FW_VEIN for k in ANG}; FW_VEINS['up'] = FW_VEIN_UP
 HW = {'rest': HW_PTS, 'down': turn(HW_PTS, HW_BASE, -30)}
 HW_BITES = {'rest': HW_BITE, 'down': turnf(HW_BITE, HW_BASE, -30)}
 SPOT = [   # 翅の 目玉：アーモンド形に たての ひとみ（にらむ 目）
@@ -153,7 +165,7 @@ def wingpart(pts, spot, glow=False, small=False, base=None, veins=(), bites=(), 
     if not nospot: put(g, round(cx) - len(S[0]) // 2, round(cy) - len(S) // 2, S)
     return g
 def wing(pose, far=False, glow=False):
-    g = wingpart(FW[pose], .35, glow, base=FW_BASE, veins=FW_VEIN, bites=FW_BITES[pose], nospot=far)
+    g = wingpart(FW[pose], .35, glow, base=FW_BASE, veins=FW_VEINS[pose], bites=FW_BITES[pose], nospot=far)
     if far: g = recolor(g, DARK)
     return rows_of(g)
 def hindwing(pose, far=False):
@@ -272,15 +284,16 @@ def layers():
     H = {p: hindwing(p) for p in HW}; HF = {p: hindwing(p, True) for p in HW}
     return [
         dict(n='hindB', g='wingB', x=3, y=-3, rows=HF['rest'], alt={'walk2': HF['down']}),
-        dict(n='wingB', g='wingB', x=3, y=-3, rows=WF['up'], alt={'idle1|idle3|walk1|walk3|atk1|atk2': WF['hi'], 'walk0|atk0|hit': WF['up'], 'walk2': WF['down']}),
+        dict(n='wingB', g='wingB', x=3, y=-3, rows=WF['up'], alt={'walk1|walk3|atk1|atk2': WF['mid'], 'walk0|atk0|hit': WF['up'], 'walk2': WF['down']}),
         dict(n='legB', g='legs', x=33, y=40, rows=OL(LEGS_BACK) if False else LEGS_BACK),
         dict(n='hindF', g='wingF', x=0, y=0, rows=H['rest'], alt={'walk2': H['down']}),
+        dict(n='wingFd', g='wingF', x=0, y=0, rows=W['down'], only='walk2'),
         dict(n='body', g='body', x=0, y=0, rows=body()),
         dict(n='legs', g='legs', x=39, y=34, rows=LEGS),
         dict(n='head', g='head', x=0, y=0, rows=head()),
         dict(n='probo', g='head', x=51, y=29, rows=PROBO, only='atk1|atk2'),
         dict(n='eye', g='head', x=46, y=22, rows=EYE, alt=EYE_ALT),
-        dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|atk0|hit': W['up'], 'walk2': W['down'], 'walk1|walk3|atk2': W['mid'], 'atk1': WG}),
+        dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'walk0|atk0|hit': W['up'], 'walk1|walk3|atk2': W['mid'], 'atk1': WG}, not_='walk2'),
         dict(n='dust', g='root', x=8, y=46, rows=OL(DUST_A), alt={'idle1|idle3|walk1|walk3': OL(DUST_B)}, not_='atk0|atk1|atk2|hit|ko'),
         dict(n='ring1', g='root', x=55, y=20, rows=OL(RING1), only='atk1'),
         dict(n='ring2', g='root', x=58, y=17, rows=OL(RING2), only='atk2'),
@@ -290,9 +303,9 @@ def OL(rows): return outline(rows)
 
 FRAMES = {
     'idle0': {},
-    'idle1': {'body': (0, -1)},
+    'idle1': {'body': (0, -1), 'wingF': (0, -1), 'wingB': (0, -1)},
     'idle2': {'head': (0, 1)},
-    'idle3': {'body': (0, 1), 'legs': (0, -1)},
+    'idle3': {'body': (0, 1), 'legs': (0, -1), 'wingF': (0, -1)},
     'blink': {},
     'walk0': {'body': (0, 1)},
     'walk1': {},

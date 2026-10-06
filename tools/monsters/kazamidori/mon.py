@@ -40,7 +40,7 @@ def light_map(p, r=2):
                 n += 1; s += m[yy][xx] if 0 <= yy < 64 and 0 <= xx < 64 else 0
         return s / n
     return {(x, y): (B(x + 1, y) - B(x - 1, y)) * 1.6 + (B(x, y + 1) - B(x, y - 1)) * 2.5 for y in range(64) for x in range(64) if m[y][x]}
-RAMP = {'1': 'STU', '2': 'Ccd', '3': 'YYy', '4': 'TUU'}
+RAMP = {'1': 'STU', '2': 'Ccd', '3': 'YYy', '4': 'TUU', '5': 'wST'}
 def shade(p, r=2, hi=.35, lo=-.3):
     L = light_map(p, r); out = [row[:] for row in p]
     for (x, y), v in L.items():
@@ -74,13 +74,12 @@ def shift(g, dx, dy):
             if g[y][x] != '.' and 0 <= x + dx < 64 and 0 <= y + dy < 64: o[y + dy][x + dx] = g[y][x]
     return o
 
-# ---------- 尾：鋼の 鎌の 羽（3枚）----------
+# ---------- 尾：鋼の 鎌の 羽（2枚に へらして 蹴爪を 見せる）----------
 def tail():
     g = G()
     for path, rad in (
-        ([(19, 37), (12, 37), (6, 35), (2, 37)], [2.6, 2.2, 1.6, .9]),
-        ([(19, 35), (12, 29), (6, 24), (2, 25)], [2.8, 2.4, 1.8, 1]),
-        ([(20, 33), (15, 24), (11, 15), (7, 10), (3, 11)], [3, 2.8, 2.3, 1.7, 1]),
+        ([(19, 35), (12, 27), (6, 25), (2, 29), (1, 33)], [2.8, 2.5, 2, 1.2, .6]),
+        ([(20, 33), (16, 21), (11, 12), (6, 8), (2, 11), (1, 17)], [3.2, 3, 2.6, 2, 1.3, .6]),
     ):
         h = part(lambda p: tube(p, path, rad), r=1)
         # 羽の 軸（中央の 暗い 線）
@@ -103,16 +102,19 @@ def body():
     return g
 
 # ---------- 首と 頭 ----------
-def head(eye='n'):
-    def neck(p):
-        tube(p, [(32, 31), (36, 23), (40, 17)], [6, 5.2, 4.5])
-        ellipse(p, 43, 13.5, 5.6, 5.2, '1')
-    g = part(neck, r=2)
-    # 首の 羽（後ろへ 垂れる とがった 羽先）
-    for (x, y) in ((31, 24), (30, 28), (30, 32), (33, 20)):
-        stamp(g, ['kk..', 'kTk.', '.kTk', '..kk'], x - 3, y)
-    for (x0, y0, x1, y1) in ((35, 22, 33, 27), (38, 20, 35, 30), (40, 22, 38, 31)):
-        line(g, x0, y0, x1, y1, 'l')
+def head(eye='n', d=None, neck_path=None):
+    """d：頭だけを ずらす（ダウン用）。neck_path：首の 道すじ"""
+    def skull(p): ellipse(p, 43, 13.5, 5.6, 5.2, '1')
+    def neck(p): tube(p, neck_path or [(32, 31), (36, 23), (40, 17)], [6, 5.2, 4.5])
+    if d is None:
+        g = part(lambda p: (neck(p), skull(p)), r=2)
+        # 首の 羽（後ろへ 垂れる とがった 羽先）
+        for (x, y) in ((31, 24), (30, 28), (30, 32), (33, 20)):
+            stamp(g, ['kk..', 'kTk.', '.kTk', '..kk'], x - 3, y)
+        for (x0, y0, x1, y1) in ((35, 22, 33, 27), (38, 20, 35, 30), (40, 22, 38, 31)):
+            line(g, x0, y0, x1, y1, 'l')
+    else:
+        g = part(skull, r=2)
     # くちばし（かぎ形）
     b = part(lambda p: poly(p, [(46, 10.5), (51, 11), (55, 13), (55, 16), (53, 15), (47, 16)], '3'), r=1, hi=.2)
     line(b, 48, 14, 53, 14, 'k'); dots(b, 'y', [(54, 15), (54, 14)])
@@ -128,8 +130,8 @@ def head(eye='n'):
         'ko': ['........', '..k.k...', '...k....', '..k.k...', '........'],
     }[eye]
     stamp(g, E, 39, 9)
-    if eye == 'ko':
-        for (x, y) in ((40, 10), (41, 10), (41, 11), (42, 11), (40, 12)): pass
+    if d is not None:
+        n = part(neck, r=2); g = over(n, shift(g, *d))
     return g
 def head_open():
     """攻撃：くちばしを 大きく 開いて さけぶ"""
@@ -183,11 +185,11 @@ def leg(hip, knee, ankle, toes, spur, back=False):
         for t in toes: tube(p, [ankle, t], [1.2, .8], '3')
     over(g, part(s, r=1, hi=.1))
     # 蹴爪：後ろへ 反る 大きな 刃
-    over(g, part(lambda p: poly(p, spur, '1'), r=1, hi=.1))
+    over(g, part(lambda p: poly(p, spur, '5'), r=1, hi=.2, lo=-.2))
     for t in toes: dots(g, 'w', [t])
     return dark(g) if back else g
-LEG_A = dict(hip=(33, 45), knee=(35, 50), ankle=(34, 58), toes=[(40, 60), (38, 61), (30, 60)], spur=[(34, 52), (29, 52.5), (24, 50), (21, 46), (25, 51.5), (29, 55.5), (34, 56)])
-LEG_B = dict(hip=(24, 45), knee=(25, 50), ankle=(23, 58), toes=[(29, 60), (27, 61), (19, 60)], spur=[(23, 52), (18, 52.5), (13, 50), (10, 46), (14, 51.5), (18, 55.5), (23, 56)])
+LEG_A = dict(hip=(33, 45), knee=(35, 50), ankle=(34, 58), toes=[(40, 60), (38, 61), (30, 60)], spur=[(34, 51), (29, 51), (24, 48), (19, 43), (22, 49), (27, 54), (34, 57)])
+LEG_B = dict(hip=(24, 45), knee=(25, 50), ankle=(23, 58), toes=[(29, 60), (27, 61), (19, 60)], spur=[(23, 51), (18, 51), (13, 48), (9, 43), (11, 49), (16, 54), (23, 57)])
 # 飛びげり：両足を 前へ つき出し、蹴爪が 先頭
 KICK_A = dict(hip=(33, 45), knee=(39, 48), ankle=(45, 54), toes=[(50, 55), (49, 57), (43, 58)], spur=[(44, 52), (48, 49), (53, 48), (56, 49), (52, 51), (48, 54), (45, 55)])
 KICK_B = dict(hip=(26, 45), knee=(31, 50), ankle=(36, 56), toes=[(41, 57), (40, 59), (34, 60)], spur=[(35, 54), (39, 51), (44, 50), (47, 51), (43, 53), (39, 56), (36, 57)])
@@ -213,6 +215,10 @@ SLASH = [
 ]
 GUST = ['W..V....W.', '.WW.VV.W..', '..V..WWV.V', 'W..V...W..']
 
+# ダウン：前のめりに たおれ、足は 後ろへ 投げ出す
+KO_D = (6, 40)
+KO_A = dict(hip=(22, 54), knee=(16, 56), ankle=(9, 57), toes=[(4, 54), (3, 56), (6, 60)], spur=[(11, 56), (12, 51), (11, 47), (14, 51), (14, 56)])
+
 def layers():
     T = rows_of(tail()); B = rows_of(body()); H = rows_of(head())
     W = rows_of(wing()); WU = rows_of(wing(True)); CB = rows_of(comb())
@@ -220,16 +226,19 @@ def layers():
     KA = rows_of(leg(**KICK_A)); KB = rows_of(leg(**KICK_B, back=True))
     ATK = 'atk1|atk2'
     return [
-        dict(n='legB', g='legB', x=0, y=0, rows=LB, alt={ATK: KB}),
+        dict(n='legB', g='legB', x=0, y=0, rows=LB, alt={ATK: KB}, not_='ko'),
         dict(n='tail', g='tail', x=0, y=0, rows=T),
         dict(n='wind', g='tail', x=0, y=2, rows=WIND0, alt={'idle1|idle3|walk1|walk3': WIND1}, not_='ko|hit'),
         dict(n='body', g='body', x=0, y=0, rows=B),
-        dict(n='legA', g='legA', x=0, y=0, rows=LA, alt={ATK: KA}),
-        dict(n='comb', g='comb', x=0, y=0, rows=CB),
+        dict(n='legA', g='legA', x=0, y=0, rows=LA, alt={ATK: KA}, not_='ko'),
+        dict(n='comb', g='comb', x=0, y=0, rows=CB, not_='ko'),
         dict(n='head', g='head', x=0, y=0, rows=H, alt={
             'blink': rows_of(head('blink')), 'atk0': rows_of(head('atk')), ATK: rows_of(head_open()),
-            'hit': rows_of(head('hit')), 'ko': rows_of(head('ko'))}),
+            'hit': rows_of(head('hit'))}, not_='ko'),
         dict(n='wing', g='wing', x=0, y=0, rows=W, alt={'atk0|atk1': WU}),
+        dict(n='kocomb', g='root', x=0, y=0, rows=rows_of(shift(comb(), *KO_D)), only='ko'),
+        dict(n='kohead', g='root', x=0, y=0, rows=rows_of(head('ko', KO_D, [(36, 44), (41, 48), (45, 52)])), only='ko'),
+        dict(n='kolegA', g='root', x=0, y=0, rows=rows_of(leg(**KO_A)), only='ko'),
         dict(n='slash', g='fx', x=46, y=36, rows=SLASH, only='atk1'),
         dict(n='gust', g='fx', x=52, y=40, rows=GUST, only='atk2'),
     ]
@@ -248,6 +257,6 @@ FRAMES = {
     'atk1': {'root': (4, -5), 'head': (0, 1)},
     'atk2': {'root': (6, -2), 'head': (1, 1)},
     'hit': {'root': (-3, 0), 'body': (-1, 1), 'head': (-3, 1), 'comb': (-1, 0), 'tail': (1, 1)},
-    'ko': {'_flip': True},
+    'ko': {'body': (0, 12), 'wing': (1, 1), 'tail': (0, 1)},
 }
 PARENT = {'head': 'body', 'comb': 'head', 'wing': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

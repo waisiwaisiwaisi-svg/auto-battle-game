@@ -1,20 +1,42 @@
 # デンシャコ（でんき・かくとう × シャコ）手打ち GBA風
 import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
-from pix import grid, rows_of, poly, line, stamp
+from pix import grid, rows_of, poly, line, stamp, ellipse
 
-# ---------- 下書きの 道具（あたりを とり、陰影は 光の 向きで 決めて から 手で 直す）----------
-W = H = 64
-def G(): return grid(W, H)
-def at(g, x, y): return g[y][x] if 0 <= y < H and 0 <= x < W else '.'
+# ---------- 下書きの 道具（あたり → 左上光の 陰影 → 輪郭。仕上げは 手で 打つ）----------
+def G(): return grid(64, 64)
+def at(g, x, y): return g[y][x] if 0 <= y < 64 and 0 <= x < 64 else '.'
 def dots(g, ch, pts):
     for x, y in pts:
-        if 0 <= y < H and 0 <= x < W: g[y][x] = ch
-def ell(p, cx, cy, rx, ry, ch, only=None):
-    for y in range(H):
-        for x in range(W):
-            if ((x + .5 - cx) / rx) ** 2 + ((y + .5 - cy) / ry) ** 2 <= 1 and (only is None or p[y][x] in only): p[y][x] = ch
-def tube(p, path, rad, ch):
+        if 0 <= y < 64 and 0 <= x < 64: g[y][x] = ch
+def over(g, ch, pts, on):
+    """on の 色の 上だけに 打つ"""
+    for x, y in pts:
+        if at(g, x, y) in on: g[y][x] = ch
+def ink(g, p):
+    for y in range(64):
+        for x in range(64):
+            if p[y][x] == '.' and any(at(p, x + dx, y + dy) != '.' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): g[y][x] = 'k'
+    for y in range(64):
+        for x in range(64):
+            if p[y][x] != '.': g[y][x] = p[y][x]
+def light_map(p, r=2):
+    m = [[1 if p[y][x] != '.' else 0 for x in range(64)] for y in range(64)]
+    def B(x, y):
+        s = n = 0
+        for yy in range(y - r, y + r + 1):
+            for xx in range(x - r, x + r + 1):
+                n += 1; s += m[yy][xx] if 0 <= yy < 64 and 0 <= xx < 64 else 0
+        return s / n
+    return {(x, y): (B(x + 1, y) - B(x - 1, y)) * 1.6 + (B(x, y + 1) - B(x, y - 1)) * 2.5 for y in range(64) for x in range(64) if m[y][x]}
+def shade(p, ramps, r=2, hi=.35, lo=-.3):
+    L = light_map(p, r); out = [row[:] for row in p]
+    for (x, y), v in L.items():
+        c = p[y][x]
+        if c in ramps:
+            h, m, d = ramps[c]; out[y][x] = h if v > hi else d if v < lo else m
+    return out
+def tube(p, path, rad, ch='1'):
     for i in range(len(path) - 1):
         (x0, y0), (x1, y1) = path[i], path[i + 1]; r0, r1 = rad[i], rad[i + 1]
         n = int(max(abs(x1 - x0), abs(y1 - y0)) * 3) + 1
@@ -22,46 +44,15 @@ def tube(p, path, rad, ch):
             t = j / n; cx, cy, r = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, r0 + (r1 - r0) * t
             for y in range(int(cy - r - 1), int(cy + r + 2)):
                 for x in range(int(cx - r - 1), int(cx + r + 2)):
-                    if 0 <= x < W and 0 <= y < H and (x + .5 - cx) ** 2 + (y + .5 - cy) ** 2 <= r * r: p[y][x] = ch
-def light_map(p, r=2):
-    m = [[1 if p[y][x] != '.' else 0 for x in range(W)] for y in range(H)]
-    def B(x, y):
-        s = n = 0
-        for yy in range(y - r, y + r + 1):
-            for xx in range(x - r, x + r + 1):
-                n += 1; s += m[yy][xx] if 0 <= yy < H and 0 <= xx < W else 0
-        return s / n
-    return {(x, y): (B(x + 1, y) - B(x - 1, y)) * 1.6 + (B(x, y + 1) - B(x, y - 1)) * 2.5 for y in range(H) for x in range(W) if m[y][x]}
-def shade(p, ramps, r=2, hi=.35, lo=-.3):
-    """左上から 光：ramps = {下書きの 文字: '明中暗'}"""
-    L = light_map(p, r); out = [row[:] for row in p]
-    for (x, y), v in L.items():
-        c = p[y][x]
-        if c in ramps:
-            h, m, d = ramps[c]; out[y][x] = h if v > hi else d if v < lo else m
-    return out
-def ink(p, ch='k'):
-    """1ドットの 黒い 輪郭で かこむ"""
-    g = G()
-    for y in range(H):
-        for x in range(W):
-            if p[y][x] == '.' and any(at(p, x + dx, y + dy) != '.' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): g[y][x] = ch
-            elif p[y][x] != '.': g[y][x] = p[y][x]
-    return g
-def put(g, rows, x0, y0): stamp(g, rows, x0, y0); return g
-def swap(g, mp, box=None):
-    x0, y0, x1, y1 = box or (0, 0, W, H)
-    for y in range(max(0, y0), min(H, y1)):
-        for x in range(max(0, x0), min(W, x1)):
-            if g[y][x] in mp: g[y][x] = mp[g[y][x]]
-    return g
-def shift(rows, dx, dy):
-    g = G()
-    for y, r in enumerate(rows):
-        for x, c in enumerate(r):
-            if c != '.' and 0 <= x + dx < W and 0 <= y + dy < H: g[y + dy][x + dx] = c
-    return rows_of(g)
-
+                    if (x + .5 - cx) ** 2 + (y + .5 - cy) ** 2 <= r * r and 0 <= x < 64 and 0 <= y < 64: p[y][x] = ch
+def ell(cx, cy, rx, ry, a0, a1, n=24):
+    return [(cx + rx * math.cos(math.radians(a0 + (a1 - a0) * i / n)), cy + ry * math.sin(math.radians(a0 + (a1 - a0) * i / n))) for i in range(n + 1)]
+def part(draw, ramps, r=2, hi=.35, lo=-.3, post=None):
+    p = G(); draw(p); s = shade(p, ramps, r, hi, lo)
+    if post: post(s)
+    g = G(); ink(g, s); return g
+def R(g): return rows_of(g)
+def L(n, g, rows, **kw): return dict(n=n, g=g, x=0, y=0, rows=rows, **kw)
 
 META = dict(id='denshako', name='デンシャコ', types=['elec', 'fighting'], base='シャコ', size='M')
 PAL = {
@@ -86,20 +77,21 @@ def seg(s, cx, cy, px, py, n, a='D', b='A', on='ABD'):
 # ---- 腹（地面に ねる 節の 胴）と 尾扇 ----
 def abd_g():
     def d(p):
-        tube(p, [(14, 53), (21, 54), (28, 52), (33, 49)], [4.2, 5.2, 5.8, 6.2])
+        tube(p, [(17, 53), (23, 54), (29, 52), (33, 49)], [4.4, 5.4, 6, 6.4])
     def post(s):
-        for cx in (17, 22, 27): seg(s, cx, 53, 0, 1, 7)
+        for cx in (20, 25, 30): seg(s, cx, 53, 0, 1, 7)
+        over(s, 'y', [(22, 48), (23, 47), (27, 47), (28, 46), (32, 44)], 'AB')
         for y in range(58, 60):
             for x in range(64):
                 if s[y][x] in 'AB': s[y][x] = 'D'
     return part(d, SH, r=2, post=post)
 def tail_g():
     def d(p):
-        tube(p, [(14, 51), (3, 44)], [3.2, 1], '2')
-        tube(p, [(13, 53), (1, 52)], [3.4, 1], '2')
-        tube(p, [(14, 55), (4, 60)], [3, 1], '2')
+        tube(p, [(17, 51), (8, 45)], [3.2, 1], '2')
+        tube(p, [(16, 53), (6, 52)], [3.4, 1], '2')
+        tube(p, [(17, 55), (9, 60)], [3, 1], '2')
     def post(s):
-        for (x0, y0, x1, y1) in ((12, 51, 5, 46), (11, 53, 3, 52)):
+        for (x0, y0, x1, y1) in ((15, 51, 10, 47), (14, 53, 8, 52)):
             g2 = G(); line(g2, x0, y0, x1, y1, 'o')
             for y in range(64):
                 for x in range(64):
@@ -113,7 +105,7 @@ def thorax_g():
         for t in (0.35, 0.7):
             cx, cy = 32 + 9 * t, 50 - 17 * t
             seg(s, cx, cy, .87, .48, 7)
-    return part(d, SH, r=2, post=post)
+    return part(d, SH, r=2, hi=.5, post=post)
 def head_g():
     def d(p):
         poly(p, [(35, 31), (39, 24), (46, 20), (53, 21), (58, 24), (62, 26), (57, 28), (52, 31), (44, 34), (37, 35)], '1')
@@ -129,102 +121,160 @@ def head_g():
     dots(g, 'k', [(50, 30), (51, 31), (52, 30), (53, 31), (54, 30), (49, 31), (55, 30)])
     dots(g, 'W', [(50, 31), (53, 32), (54, 31)]); dots(g, 'k', [(50, 32), (53, 33), (54, 32), (49, 32), (51, 32), (52, 33), (55, 31)])
     return g
-# ---- 目（柄の 先の 複眼。まんなかの 帯＝横の ひとみ、ひさしで つり目）----
+# ---- 目（太く 短い 柄の 先の 複眼。上まぶたが 前へ 下がる つり目、たての ひとみ）----
 def stalks_g():
     def d(p):
-        tube(p, [(45, 22), (43, 14)], [1.6, 1.4])
-        tube(p, [(49, 22), (50, 14)], [1.8, 1.6])
+        tube(p, [(43, 24), (40, 18)], [2, 1.6])
+        tube(p, [(49, 23), (51, 17)], [2.2, 1.8])
     return part(d, SH, r=1)
-EYE_B = ['.kkkk.', 'kAkkkk', 'kkyyYk', 'kkkkkk', '.kkkk.']
-EYE_F = ['.kkkkk.', 'kAAkkkk', 'kBkkYYk', 'kkyYYYk', 'kkkkkkk', '.kkkkk.']
+EYE_B = [
+    '.kkkkk.',
+    'kAABBDk',
+    'kBkkkkk',
+    'kYYkkkk',
+    'kYkYYyk',
+    'kykYyyk',
+    '.kkkkk.',
+]
+EYE_F = [
+    '..kkkkkk.',
+    '.kAAABBDk',
+    'kABBBkkkk',
+    'kYYYkkkkk',
+    'kWYYkYYyk',
+    'kYYYkYyyk',
+    'kyyykyygk',
+    '.kkkkkkk.',
+]
+def _e(rows, *sub):
+    rows = list(rows)
+    for i, r in sub: rows[i] = r
+    return rows
 EYE_F_ALT = {
-    'blink': ['.kkkkk.', 'kAAkkkk', 'kBBBkkk', 'kkkkkkk', 'kBBBBBk', '.kkkkk.'],
-    'atk0|atk1|atk2': ['.kkkkk.', 'kAAkkkk', 'kBkWWWk', 'kkWWWWk', 'kkkkkkk', '.kkkkk.'],
-    'hit': ['.kkkkk.', 'kAAkkkk', 'kBkkkBk', 'kkBBkkk', 'kkkkkkk', '.kkkkk.'],
-    'ko': ['.kkkkk.', 'kAkBkAk', 'kBBkBBk', 'kAkBkAk', 'kkkkkkk', '.kkkkk.'],
+    'blink': _e(EYE_F, (3, 'kBBBkkkkk'), (4, 'kBBBBBBkk'), (5, 'kkkkkkkkk'), (6, 'kBBBBBBDk')),
+    'atk0|atk1|atk2': _e(EYE_F, (3, 'kWWWkkkkk'), (4, 'kWWWkWWYk'), (5, 'kWWWkWYYk'), (6, 'kYYYkYYyk')),
+    'hit': _e(EYE_F, (3, 'kBBkkkkBk'), (4, 'kBBBkkkBk'), (5, 'kBkkkBBBk'), (6, 'kkBBBBBDk')),
+    'ko': _e(EYE_F, (3, 'kBkBBBkBk'), (4, 'kBBkBkBBk'), (5, 'kBBBkBBBk'), (6, 'kBBkBkBDk')),
 }
 EYE_B_ALT = {
-    'blink': ['.kkkk.', 'kAkkkk', 'kBBBBk', 'kkkkkk', '.kkkk.'],
-    'atk0|atk1|atk2': ['.kkkk.', 'kAkkkk', 'kkWWWk', 'kkkkkk', '.kkkk.'],
-    'hit': ['.kkkk.', 'kAkkkk', 'kkBkBk', 'kkkkkk', '.kkkk.'],
-    'ko': ['.kkkk.', 'kkBkBk', 'kBkBkk', 'kkBkBk', '.kkkk.'],
+    'blink': _e(EYE_B, (3, 'kBBkkkk'), (4, 'kkkkkkk'), (5, 'kBBBBDk')),
+    'atk0|atk1|atk2': _e(EYE_B, (3, 'kWWkkkk'), (4, 'kWkWWYk'), (5, 'kYkWYyk')),
+    'hit': _e(EYE_B, (3, 'kBkkkBk'), (4, 'kBBkBBk'), (5, 'kkBBBDk')),
+    'ko': _e(EYE_B, (3, 'kBkBkBk'), (4, 'kBBkBBk'), (5, 'kBkBkBk')),
 }
 # 触角の うろこ（だいだいの 小旗）と むち
 def ant_g():
     def d(p):
-        poly(p, [(54, 22), (58, 16), (61, 14), (60, 18), (56, 23)], '2')
+        poly(p, [(54, 23), (57, 17), (60, 14), (60, 19), (57, 24)], '2')
     g = part(d, OR, r=1)
-    line(g, 52, 20, 58, 9, 'k'); dots(g, 'k', [(59, 8), (60, 8)])
+    line(g, 52, 21, 56, 10, 'k'); dots(g, 'k', [(57, 9), (58, 9)])
     return g
 # ---- 見せ所：電気の こぶし（捕脚の こぶ ⇔ ボクシングの こぶし）----
-def arm_g(cx=52, cy=41, r=8.2, mx=(41, 34), punch=False):
+def arm_g(cx=52, cy=40, r=9.6, mx=(40, 34)):
+    ix, iy = round(cx), round(cy)
+    wx = ix - 9
     def d(p):
-        tube(p, [mx, (cx - r + 2, cy + 1)], [2.6, 2.8], '1')
+        tube(p, [mx, (wx - 1, iy + 1)], [2.6, 3], '1')
     a = part(d, SH, r=1)
     def dc(p):
-        ellipse(p, cx, cy, r, r * .95, '3')
+        ellipse(p, cx, cy, r, r * .93, '3')
+        # 指の あいだの くぼみ（右の ふちを 1ドット けずる）
+        for yy in (-3, 2):
+            for x in range(64):
+                if p[iy + yy][63 - x] == '3': p[iy + yy][63 - x] = '.'; break
     c = part(dc, CL, r=3, hi=.3, lo=-.25)
-    def club_post(c):
-        # こぶしの 指の 段（右がわに 3本の しわ）
-        for i, yy in enumerate((-3, 0, 3)):
-            for j in range(3):
-                x, y = round(cx + r * .45 + j), round(cy + yy - j * .3)
-                if at(c, x, y) in 'Yyg': c[y][x] = 'g'
-        # 電気の すじ（手で：ジグザグ）
-        over(c, 'W', [(round(cx - 4), round(cy - 4)), (round(cx - 3), round(cy - 5)), (round(cx - 2), round(cy - 4)), (round(cx - 1), round(cy - 5)), (round(cx - 5), round(cy - 2)), (round(cx - 5), round(cy - 1))], 'Yy')
-        # 手首の テープ（かくとう）
-        wx = round(cx - r + 1)
-        for y in range(round(cy - 4), round(cy + 5)):
-            for x in (wx, wx + 1):
-                if at(c, x, y) in 'Yyg': c[y][x] = 't' if (y + x) % 3 else 'W'
-    club_post(c)
-    g = G(); stamp(g, R(a), 0, 0); stamp(g, R(c), 0, 0)
+    # 指の みぞ（右から 左へ）と 指の 上の 光
+    for yy in (-3, 2):
+        xs = [x for x in range(64) if c[iy + yy][x] in 'Yyg']
+        for x in xs[-6:]: c[iy + yy][x] = 'g'
+        for x in xs[-5:-1]:
+            if at(c, x, iy + yy + 1) in 'yg': c[iy + yy + 1][x] = 'Y' if x < ix + 4 else 'y'
+    # 親指（下を 横切る）
+    for (x, y) in ((ix - 3, iy + 6), (ix - 2, iy + 5), (ix - 1, iy + 5), (ix, iy + 5), (ix + 1, iy + 5), (ix + 2, iy + 6)):
+        if at(c, x, y) in 'Yyg': c[y][x] = 'g'
+        if at(c, x, y - 1) in 'yg': c[y - 1][x] = 'Y'
+    # 電気の すじ（ジグザグ）
+    over(c, 'W', [(ix - 5, iy - 5), (ix - 4, iy - 6), (ix - 3, iy - 5), (ix - 2, iy - 6), (ix - 6, iy - 3), (ix - 6, iy - 2), (ix - 5, iy - 1)], 'Yy')
+    # 手首の テープ（かくとう）
+    def dt(p):
+        for y in range(iy - 5, iy + 6):
+            for x in range(wx - 1, wx + 3): p[y][x] = '4'
+    t = part(dt, {'4': 'Wtt'}, r=1)
+    for y in range(iy - 5, iy + 6, 3):
+        for x in range(wx - 1, wx + 3):
+            if t[y][x] in 'Wt': t[y][x] = 'l'
+    g = G(); stamp(g, R(a), 0, 0); stamp(g, R(c), 0, 0); stamp(g, R(t), 0, 0)
     return g
-SPARK1 = ['..W....', '.WC..C.', 'C..W.W.', '...C...']
-SPARK2 = ['.C...W.', 'W.W.C..', '..C..WC', '.W.....']
-BOLT = [
-    '.......W.....C.',
-    '..C...WC...W...',
-    'W..WWWCW..WCW..',
-    '.WWCCWWWWWCCWWC',
-    'C..WWCWWCWWW..W',
-    '..W..WCW..CW.C.',
-    '.C...W.C....W..',
-    '.....C......C..',
-]
+def bolt(paths, w=0):
+    """稲妻：W の しん＋C の ふち＋黒の 輪郭"""
+    p = G()
+    for pts in paths:
+        for i in range(len(pts) - 1): line(p, *pts[i], *pts[i + 1], 'W')
+    if w:
+        q = [r[:] for r in p]
+        for y in range(64):
+            for x in range(64):
+                if p[y][x] == '.' and any(at(p, x + dx, y + dy) == 'W' for dx, dy in ((1, 0), (0, 1))): q[y][x] = 'C'
+        p = q
+    g = G(); ink(g, p); return R(g)
+SPARK1 = bolt([[(0, 4), (2, 2), (3, 4), (5, 0)], [(2, 7), (5, 6), (6, 9)]])
+SPARK2 = bolt([[(0, 1), (3, 2), (4, 0), (6, 2)], [(1, 6), (3, 5), (4, 8), (6, 7)]])
+BOLT = bolt([[(0, 6), (4, 3), (6, 7), (10, 2), (12, 6), (16, 0)], [(0, 8), (5, 10), (8, 8), (11, 13), (15, 11)], [(1, 4), (3, 0)]], 1)
+BOLT2 = bolt([[(0, 4), (3, 2), (5, 5), (8, 1)], [(1, 7), (4, 9), (7, 8)]], 1)
+CHG = bolt([[(0, 0), (2, 3), (1, 5), (3, 8)], [(9, 0), (8, 3), (10, 5)], [(4, 12), (6, 14), (9, 13)]], 1)
 # 脚（だいだい、細く 3本 → 2本に まとめる）
 def leg_g(x0, y0, x1, y1):
     def d(p): tube(p, [(x0, y0), ((x0 + x1) / 2 + 1, (y0 + y1) / 2), (x1, y1)], [1.6, 1.4, 1.1], '2')
     return part(d, OR, r=1)
 
+# ---- ダウン：横だおれ（脚が 上を 向く）----
+def ko_g():
+    def d(p):
+        tube(p, [(16, 56), (24, 57), (33, 56), (42, 54)], [4.2, 5, 5.6, 5.8])
+        poly(p, [(40, 49), (47, 48), (54, 50), (58, 54), (53, 57), (44, 58), (40, 58)], '1')
+    def post(s):
+        for cx in (21, 27, 33, 38): seg(s, cx, 56, 0, 1, 7)
+    b = part(d, SH, r=2, hi=.5, post=post)
+    def dt(p):
+        tube(p, [(16, 54), (7, 50)], [3, 1], '2'); tube(p, [(15, 57), (6, 58)], [3, 1], '2')
+        for (x0, x1) in ((27, 25), (32, 31), (36, 37)): tube(p, [(x0, 51), (x1 - 1, 46), (x1 + 1, 44)], [1.5, 1.2, 1], '2')
+    t = part(dt, OR, r=1)
+    def ds(p): tube(p, [(50, 50), (55, 45)], [1.8, 1.6]); tube(p, [(45, 49), (46, 45)], [1.6, 1.4])
+    st = part(ds, SH, r=1)
+    c = arm_g(cx=61, cy=55, r=5.6, mx=(52, 57))
+    g = G()
+    for q in (t, b, st, c): stamp(g, R(q), 0, 0)
+    stamp(g, ['.kkkkkk.', 'kBBBBBDk', 'kykyykyk', 'kyykkyyk', 'kykyykyk', '.kkkkkk.'], 52, 40)
+    return R(g)
 def layers():
-    ARM = R(arm_g()); ARM_BACK = R(arm_g(cx=46, cy=30, mx=(40, 33))); ARM_PUNCH = R(arm_g(cx=56, cy=36, mx=(42, 33)))
-    ARM2 = R(arm_g(cx=55, cy=38, mx=(42, 33)))
+    ARM = R(arm_g()); ARM_BACK = R(arm_g(cx=47, cy=45, mx=(37, 36))); ARM_PUNCH = R(arm_g(cx=57, cy=36, mx=(41, 32)))
+    ARM2 = R(arm_g(cx=55, cy=39, mx=(41, 33)))
     return [
-        L('legB2', 'legB', R(leg_g(29, 53, 30, 60))),
-        L('tail', 'tail', R(tail_g())),
-        L('abd', 'abd', R(abd_g())),
-        L('legA', 'legA', R(leg_g(36, 51, 39, 60))),
-        L('thorax', 'body', R(thorax_g())),
-        L('legB', 'legB', R(leg_g(33, 54, 34, 60))),
-        L('stalks', 'head', R(stalks_g())),
-        dict(n='eyeB', g='head', x=40, y=9, rows=EYE_B, alt=EYE_B_ALT),
-        L('ant', 'head', R(ant_g())),
-        L('headc', 'head', R(head_g())),
-        dict(n='eyeF', g='head', x=47, y=9, rows=EYE_F, alt=EYE_F_ALT),
-        L('arm', 'arm', ARM, alt={'atk0': ARM_BACK, 'atk1': ARM_PUNCH, 'atk2': ARM2}),
-        dict(n='spk', g='arm', x=56, y=31, rows=SPARK1, alt={'idle1|idle3|walk1|walk3': SPARK2}, not_='atk0|atk1|atk2|hit|ko'),
-        dict(n='spk0', g='arm', x=44, y=19, rows=SPARK2, only='atk0'),
-        dict(n='bolt', g='arm', x=63, y=31, rows=BOLT, only='atk1'),
-        dict(n='bolt2', g='arm', x=62, y=33, rows=SPARK1, only='atk2'),
+        L('legB2', 'legB', R(leg_g(29, 53, 30, 60)), not_='ko'),
+        L('tail', 'tail', R(tail_g()), not_='ko'),
+        L('abd', 'abd', R(abd_g()), not_='ko'),
+        L('legA', 'legA', R(leg_g(36, 51, 39, 60)), not_='ko'),
+        L('thorax', 'body', R(thorax_g()), not_='ko'),
+        L('legB', 'legB', R(leg_g(33, 54, 34, 60)), not_='ko'),
+        L('stalks', 'head', R(stalks_g()), not_='ko'),
+        dict(n='eyeB', g='head', x=35, y=12, rows=EYE_B, alt=EYE_B_ALT, not_='ko'),
+        L('ant', 'head', R(ant_g()), not_='ko'),
+        L('headc', 'head', R(head_g()), not_='ko'),
+        dict(n='eyeF', g='head', x=47, y=10, rows=EYE_F, alt=EYE_F_ALT, not_='ko'),
+        L('ko', 'root', ko_g(), only='ko'),
+        L('arm', 'arm', ARM, alt={'atk0': ARM_BACK, 'atk1': ARM_PUNCH, 'atk2': ARM2}, not_='ko'),
+        dict(n='spk', g='arm', x=55, y=26, rows=SPARK1, alt={'idle1|idle3|walk1|walk3': SPARK2}, not_='atk0|atk1|atk2|hit|ko'),
+        dict(n='spk0', g='arm', x=38, y=34, rows=CHG, only='atk0'),
+        dict(n='bolt', g='arm', x=64, y=31, rows=BOLT, only='atk1'),
+        dict(n='bolt2', g='arm', x=63, y=34, rows=BOLT2, only='atk2'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'body': (0, 1)}, 'idle2': {'body': (0, 1), 'arm': (0, -1)}, 'idle3': {'arm': (0, -1)},
     'blink': {},
     'walk0': {'legA': (1, -1), 'legB': (-1, 0)}, 'walk1': {'body': (0, -1), 'tail': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (1, -1)}, 'walk3': {'body': (0, -1), 'tail': (0, -1)},
-    'atk0': {'body': (-1, 1), 'tail': (0, -1)}, 'atk1': {'root': (3, 0)}, 'atk2': {'root': (2, 0)},
+    'atk0': {'body': (-1, 1), 'tail': (0, -1)}, 'atk1': {'root': (4, 0)}, 'atk2': {'root': (3, 0)},
     'hit': {'root': (-3, 0), 'body': (-1, 1), 'arm': (-1, 1)},
-    'ko': {'_flip': True},
+    'ko': {},
 }
 PARENT = {'head': 'body', 'arm': 'body', 'body': 'root', 'abd': 'root', 'tail': 'root', 'legA': 'root', 'legB': 'root'}

@@ -64,13 +64,17 @@ DARK = {'A': 'B', 'B': 'C', 'E': 'F', 'F': 'H', 'Y': 'O', 'O': 'R'}
 # ---------- 火山の 貝（円すい）：火口・溶岩の すじ・岩の 段 ----------
 def volcano(erupt=False):
     p = G()
-    poly(p, [(5, 52), (10, 38), (15, 24), (18, 16), (31, 16), (34, 24), (39, 36), (42, 46), (40, 53), (10, 55)], '1')
+    poly(p, [(7, 52), (11, 38), (16, 24), (19, 16), (30, 16), (33, 24), (37, 36), (40, 46), (38, 53), (11, 55)], '1')
     s = shade(p, RAMP, r=3, hi=.25, lo=-.22)
-    # 岩の 段（横の 割れ目）：手で 打つ
-    for y, xs in ((24, range(17, 24)), (31, range(14, 21)), (38, range(10, 17)), (45, range(8, 14)), (27, range(28, 33)), (35, range(31, 37)), (43, range(34, 40))):
-        for x in xs:
-            if s[y][x] in 'ABC': s[y][x] = 'C'
-            if s[y - 1][x] in 'BC' and x < 26: s[y - 1][x] = 'A'
+    # 巻き貝の 段（らせんの みぞ）：左上から 右下へ 下がる すじ。みぞの 上は 光、下は 影
+    xs = [x for x in range(64)]
+    for y0 in (21, 29, 37, 45):
+        for x in range(64):
+            y = y0 + (x - 10) * 7 // 30
+            if 0 <= y < 63 and s[y][x] in 'ABC' and at(s, x, y - 1) != '.':
+                s[y][x] = 'k'
+                if s[y + 1][x] in 'ABC': s[y + 1][x] = 'C' if x > 22 else 'B'
+                if s[y - 1][x] in 'BC': s[y - 1][x] = 'A'
     # 火口（上の ふちの くぼみ）
     for x in range(19, 31): s[16][x] = 'k'
     for x in range(20, 30): s[17][x] = 'R' if not erupt else 'O'
@@ -90,55 +94,54 @@ def volcano(erupt=False):
         for (x, y) in f:
             if s[y][x + 1] in 'ABC': s[y][x + 1] = 'R'
     # 貝の 口（右下の 開いた ところ）：暗い 穴
-    poly(s, [(33, 44), (39, 40), (43, 47), (40, 53), (34, 54)], 'k')
-    poly(s, [(35, 45), (39, 42), (41, 47), (39, 52), (35, 52)], 'H')
+    poly(s, [(31, 44), (36, 40), (40, 46), (38, 53), (32, 54)], 'k')
+    poly(s, [(33, 45), (36, 42), (38, 47), (37, 52), (33, 52)], 'H')
     return rows_of(ink(s))
 
-# ---------- 噴煙（idle で 形が かわる）----------
-def smoke(ph):
-    p = G()
-    puffs = [[(24, 13, 4, 3), (21, 9, 4, 3.2), (17, 6, 3.5, 2.8), (12, 4, 2.5, 2)],
-             [(25, 13, 4, 3), (22, 9, 4.2, 3), (18, 6, 3.4, 3), (13, 3, 3, 2.2)],
-             [(24, 13, 4.4, 3), (21, 10, 3.6, 3), (17, 6, 4, 2.8), (12, 3, 2.6, 2.2)],
-             [(25, 13, 4, 3.2), (21, 9, 3.8, 3.2), (16, 6, 3.6, 2.6), (11, 4, 2.4, 2)]][ph]
-    for (cx, cy, rx, ry) in puffs: ellipse(p, cx, cy, rx, ry, '3')
-    s = shade(p, {'3': 'STT'}, r=2, hi=.15, lo=-.1)
-    return rows_of(ink(s))
+# ---------- 噴煙（もくもくの 玉を 奥から 1つずつ 重ねる）----------
+def puffs(lst, g=None):
+    g = g or G()
+    for (cx, cy, rx, ry) in lst:
+        p = G(); ellipse(p, cx, cy, rx, ry, '3')
+        s = shade(p, {'3': 'SST'}, r=1, hi=.1, lo=-.05)
+        stamp(g, rows_of(ink(s)), 0, 0)
+    return g
+SM = [[(14, 5, 3, 2.6), (19, 8, 3.6, 3), (26, 10, 3.4, 2.8), (23, 13, 4, 3)],
+      [(13, 4, 3.2, 2.6), (19, 7, 3.8, 3), (26, 9, 3.2, 2.8), (24, 13, 4, 3)],
+      [(12, 4, 3, 2.4), (18, 7, 4, 3.2), (25, 10, 3.6, 2.8), (23, 13, 4.2, 3)],
+      [(13, 5, 2.8, 2.4), (18, 8, 3.8, 3), (26, 9, 3.4, 3), (24, 13, 3.8, 3)]]
+def smoke(ph): return rows_of(puffs(SM[ph]))
 def eruption():
-    p = G()
-    for (cx, cy, rx, ry) in ((25, 11, 5, 4), (20, 6, 4.4, 3.4), (14, 3, 3.4, 2.4)): ellipse(p, cx, cy, rx, ry, '3')
-    s = shade(p, {'3': 'STT'}, r=2, hi=.15, lo=-.1)
-    g = ink(s)
-    # 噴き上がる 溶岩の しぶき
-    put(g, ['..Y...', '.YOY.O', 'YOROYO', '.OYO..', '..O...'], 22, 9)
-    dots(g, 'O', [(18, 12), (31, 8), (33, 11), (16, 9)]); dots(g, 'Y', [(30, 6), (19, 4)])
+    g = puffs([(12, 3, 3, 2.4), (18, 5, 4, 3), (28, 6, 3.6, 3), (24, 10, 4.6, 3.4)])
+    put(g, ['...Y....', '.Y.OY.O.', 'O.YOOY..', '.YORROY.', '..OYYO..', '...OO...'], 20, 9)
+    dots(g, 'O', [(17, 11), (31, 9), (33, 12), (15, 9)]); dots(g, 'Y', [(32, 5), (16, 2)])
     return rows_of(g)
 
 # ---------- カニの からだ・目・脚 ----------
 def body():
     p = G()
-    ellipse(p, 42.5, 44, 7, 6, '2')
+    ellipse(p, 41, 42, 6.5, 5.5, '2')
     s = shade(p, RAMP, r=2)
-    # 頭の 甲（かたい ふち）とげ
-    dots(s, 'k', [(38, 42), (39, 41), (40, 41), (41, 41), (42, 41), (43, 41)])
-    dots(s, 'E', [(39, 40), (41, 40), (43, 40)])
+    # 頭の 甲の ふち（ぎざぎざ）
+    for x in range(36, 46): s[39][x] = 'k' if x % 2 else s[39][x]
+    dots(s, 'E', [(37, 38), (39, 38), (41, 38), (43, 38)])
     # 口もと：小さい 牙
-    put(s, ['kkk', 'wkw'], 46, 47)
+    put(s, ['kkk.', 'wkwk'], 44, 44)
     return rows_of(ink(s))
 def stalks():
     p = G()
-    tube(p, [(41, 40), (40, 34), (41, 30)], [1, 1, 1], '2')
-    tube(p, [(45, 40), (46, 35), (48, 31)], [1.1, 1.1, 1.1], '2')
+    tube(p, [(41, 39), (40, 34), (40, 31)], [1.2, 1.2, 1.3], '2')
+    tube(p, [(44, 39), (45, 34), (46, 30)], [1.5, 1.3, 1.5], '2')
     s = shade(p, RAMP, r=1)
-    s = [[DARK.get(c, c) if x < 43 and y < 41 else c for x, c in enumerate(r)] for y, r in enumerate(s)]
+    s = [[DARK.get(c, c) if x < 42 and y < 40 else c for x, c in enumerate(r)] for y, r in enumerate(s)]
     return rows_of(ink(s))
 # するどい 目：上が 平らな つり目＋たての ひとみ（まゆの とげ つき）
-EYE_N = ['kkk....', 'kHkkkk.', '.kYYYkk', '.kYYkYk', '..kkkk.']
+EYE_N = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kOYYYYkYYOk', '.kOYYYYkYYYk', '.kOOYYYkYYOk', '..kkOOOOOOk.', '....kkkkkk..']
 EYE_F = ['kkkk..', '.kOOkk', '.kOkOk', '..kkk.']
-EYE_ATK = ['kkk....', 'kHkkkk.', '.kwYYkk', '.kYYYYk', '..kkkk.']
-EYE_BL = ['kkk....', 'kHkkkk.', '.kFFFkk', '.kkkkkk', '..kkkk.']
-EYE_HIT = ['kkk....', 'kHkkkk.', '.kYkYkk', '.kkYkkk', '..kkkk.']
-EYE_KO = ['kkk....', 'kHkkkk.', '.kkFkkk', '.kFkFkk', '..kkkk.']
+EYE_ATK = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kYwYYYYYYYk', '.kYYYYYYYYYk', '.kOYYYYYYYOk', '..kkOOOOOOk.', '....kkkkkk..']
+EYE_BL = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kHHHHHHHHHk', '.kkkkkkkkkkk', '.kFFFFFFFFFk', '..kkFFFFFFk.', '....kkkkkk..']
+EYE_HIT = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kFkkFFFFFkk', '.kFFFkkFkkFk', '.kFFFFFkFFFk', '..kkFFFFFFk.', '....kkkkkk..']
+EYE_KO = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kFkFFFkFkFk', '.kFFkFFFkFFk', '.kFkFkFkFkFk', '..kkFFFFFFk.', '....kkkkkk..']
 EYE_FKO = ['kkkk..', '.kkHkk', '.kHkHk', '..kkk.']
 
 def leg(path, far=False):
@@ -150,33 +153,41 @@ def leg(path, far=False):
     x, y = path[1]; g[y][x] = 'k'
     return rows_of(g)
 
-# 巨大な はさみ（見せ所）：ごつい 岩の こぶ＋赤熱した 刃先
+# 巨大な はさみ（見せ所）：箱形の 掌＋長い 2本の 指。岩の こぶ と 赤熱した 刃先
 def claw(mode):
     p = G()
-    ellipse(p, 49, 45, 7.5, 6.5, '2')             # 掌（てのひら）
-    tube(p, [(42, 47), (45, 46)], [3, 3.4], '2')    # うで
+    tube(p, [(40, 49), (44, 47)], [2.6, 3.2], '2')    # うで
+    poly(p, [(43, 41), (46, 37), (51, 36), (53, 38), (53, 51), (49, 54), (44, 53), (42, 49)], '2')   # 掌
     if mode == 'open':
-        poly(p, [(51, 39), (56, 34), (61, 33), (63, 35), (59, 37), (55, 41)], '2')    # 上の 指（大きく 開く）
-        poly(p, [(53, 48), (59, 49), (63, 50), (60, 53), (54, 53)], '2')              # 下の 指
+        UP = [(50, 37), (54, 33), (58, 31), (62, 31), (62, 33), (58, 35), (55, 39), (53, 42)]
+        LO = [(52, 45), (57, 46), (61, 47), (62, 50), (58, 52), (52, 52)]
     else:
-        poly(p, [(51, 39), (57, 38), (62, 41), (63, 44), (58, 43), (54, 44)], '2')    # 上の 指（とじる）
-        poly(p, [(53, 48), (59, 47), (63, 45), (61, 49), (56, 51), (52, 51)], '2')   # 下の 指
-    s = shade(p, RAMP, r=2, hi=.22, lo=-.25)
-    # 岩の こぶ（掌の 上に 火山岩の よろい）
-    for (x, y) in ((45, 41), (48, 40), (51, 41), (44, 44), (47, 43)):
-        dots(s, 'B', [(x, y), (x + 1, y)]); dots(s, 'A', [(x, y - 1)]) if at(s, x, y - 1) != '.' else None
-        dots(s, 'C', [(x + 1, y + 1)])
-    # 赤熱した 刃先と 内がわの 歯
+        UP = [(50, 37), (55, 36), (59, 37), (62, 39), (62, 42), (59, 41), (55, 42), (52, 43)]
+        LO = [(52, 45), (56, 45), (60, 45), (62, 44), (61, 48), (57, 51), (52, 52)]
+    poly(p, UP, '2'); poly(p, LO, '2')
+    s = shade(p, RAMP, r=2, hi=.2, lo=-.25)
+    # 指の つけ根の 線
+    if mode == 'open': line(s, 51, 38, 53, 42, 'k')
+    else: line(s, 51, 38, 52, 42, 'k')
+    line(s, 52, 45, 52, 51, 'k')
+    # 岩の よろい：火山岩の こぶ と 溶岩の さけめ
+    for (x, y) in ((44, 40), (47, 38), (45, 44)):
+        dots(s, 'B', [(x, y), (x + 1, y), (x, y + 1), (x + 1, y + 1)]); dots(s, 'A', [(x, y)]); dots(s, 'C', [(x + 1, y + 1), (x + 2, y + 1)])
+    line(s, 45, 50, 50, 46, 'O'); dots(s, 'Y', [(47, 48), (48, 47)]); dots(s, 'R', [(46, 51), (49, 49), (51, 47)])
     g = ink(s)
     if mode == 'open':
-        dots(g, 'Y', [(61, 34), (62, 34), (60, 35)]); dots(g, 'O', [(59, 36), (58, 37), (61, 35), (59, 34)])
-        dots(g, 'w', [(56, 40), (58, 38), (60, 37)])
-        dots(g, 'Y', [(62, 51), (61, 52)]); dots(g, 'O', [(60, 51), (59, 50), (62, 50), (60, 52)])
-        dots(g, 'w', [(56, 48), (58, 48), (60, 48)])
+        dots(g, 'Y', [(61, 32), (60, 32), (61, 31)]); dots(g, 'O', [(59, 32), (59, 33), (60, 33)])
+        dots(g, 'w', [(55, 38), (57, 36), (59, 35)])
+        dots(g, 'Y', [(61, 49), (60, 49)]); dots(g, 'O', [(59, 49), (61, 48), (59, 50)])
+        dots(g, 'w', [(55, 45), (57, 46), (59, 47)])
+        dots(g, 'k', [(54, 44), (55, 43)])
     else:
-        dots(g, 'Y', [(62, 43), (61, 42)]); dots(g, 'O', [(60, 42), (59, 41), (62, 42), (60, 43)])
-        dots(g, 'w', [(56, 44), (58, 44), (60, 44)])
-        dots(g, 'Y', [(62, 46), (61, 47)]); dots(g, 'O', [(60, 47), (59, 48), (62, 47)])
+        dots(g, 'Y', [(61, 40), (61, 41)]); dots(g, 'O', [(60, 40), (61, 39), (60, 41)])
+        dots(g, 'w', [(54, 43), (56, 43), (58, 42)])
+        dots(g, 'Y', [(61, 45), (60, 46)]); dots(g, 'O', [(60, 45), (59, 46), (60, 47)])
+        dots(g, 'w', [(55, 44), (57, 44)])
+        for x in range(53, 61): 
+            if g[44][x] in 'EFH': g[44][x] = 'k'
     return rows_of(g)
 def small_claw():
     p = G(); ellipse(p, 46, 50, 3, 2.4, '2'); poly(p, [(47, 48), (51, 49), (50, 51), (47, 52)], '2')
@@ -191,16 +202,15 @@ def layers():
     return [
         dict(n='smoke', g='smoke', x=0, y=0, rows=smoke(0), alt={'idle1|walk1|blink': smoke(1), 'idle2|walk2': smoke(2), 'idle3|walk3|hit': smoke(3), 'atk1|atk2': eruption()}, not_='atk1|atk2|ko'),
         dict(n='erupt', g='shell', x=0, y=0, rows=eruption(), only='atk1|atk2'),
-        dict(n='legF1', g='legB', x=0, y=0, rows=leg([(40, 48), (36, 53), (34, 59)], True), not_='ko'),
-        dict(n='legF2', g='legA', x=0, y=0, rows=leg([(44, 49), (42, 54), (43, 60)], True)),
+        dict(n='legF1', g='legB', x=0, y=0, rows=leg([(39, 46), (36, 53), (35, 59)], True), not_='ko'),
+        dict(n='legF2', g='legA', x=0, y=0, rows=leg([(43, 47), (42, 54), (43, 60)], True)),
         dict(n='shell', g='shell', x=0, y=0, rows=V, alt={'idle1|idle3|walk1|walk3|atk1|atk2': VE}),
-        dict(n='sclaw', g='body', x=0, y=0, rows=small_claw()),
         dict(n='stalks', g='head', x=0, y=0, rows=stalks()),
-        dict(n='eyeF', g='head', x=38, y=28, rows=EYE_F, alt={'blink': ['kkkk..', '.kkkkk', '.kHHHk', '..kkk.'], 'ko': EYE_FKO, 'atk0|atk1|atk2': ['kkkk..', '.kYYkk', '.kYYYk', '..kkk.']}),
+        dict(n='eyeF', g='head', x=37, y=28, rows=EYE_F, alt={'blink': ['kkkk..', '.kkkkk', '.kHHHk', '..kkk.'], 'ko': EYE_FKO, 'atk0|atk1|atk2': ['kkkk..', '.kYYkk', '.kYYYk', '..kkk.']}),
         dict(n='body', g='body', x=0, y=0, rows=body()),
-        dict(n='legA1', g='legA', x=0, y=0, rows=leg([(39, 49), (33, 54), (30, 59)])),
-        dict(n='legB1', g='legB', x=0, y=0, rows=leg([(44, 50), (46, 55), (49, 60)])),
-        dict(n='eyeN', g='head', x=45, y=28, rows=EYE_N, alt={'blink': EYE_BL, 'atk0|atk1|atk2': EYE_ATK, 'hit': EYE_HIT, 'ko': EYE_KO}),
+        dict(n='legA1', g='legA', x=0, y=0, rows=leg([(37, 47), (32, 53), (30, 59)])),
+        dict(n='legB1', g='legB', x=0, y=0, rows=leg([(42, 49), (46, 55), (49, 60)])),
+        dict(n='eyeN', g='head', x=40, y=23, rows=EYE_N, alt={'blink': EYE_BL, 'atk0|atk1|atk2': EYE_ATK, 'hit': EYE_HIT, 'ko': EYE_KO}),
         dict(n='claw', g='claw', x=0, y=0, rows=CL, alt={'atk1': CO}),
         dict(n='spark', g='claw', x=55, y=36, rows=SPARK1, only='atk2'),
         dict(n='spark0', g='claw', x=58, y=38, rows=SPARK2, only='atk0'),
