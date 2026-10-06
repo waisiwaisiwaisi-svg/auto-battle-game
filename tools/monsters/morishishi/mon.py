@@ -138,6 +138,8 @@ def head(eye='open', mouth=False):
         g[14][10] = 'k'; g[15][19] = 'w'; g[15][22] = 'w'; g[15][25] = 'w'
     return pix.outline(pix.rows_of(g))
 HEAD = head()
+# 首すじに かかる 苔の 毛布の はし（頭と 胴の つなぎ目）
+NAPE = ['..kkkk....', '.kMMMNkk..', 'kMMNNNNNk.', 'kMNNNNOOk.', 'kNNNOONOk.', 'kNNOOkOk..', '.kOkkOk...', '.kk..k....']
 EAR = pix.outline(['..AA', '.ABB', 'ABBC', 'ABCC', 'BBCC', 'BCC.'])
 # 根の きば（口の はしから 上へ、先は 後ろへ 曲がる）
 TUSK = [
@@ -226,9 +228,10 @@ def layers():
         dict(n='body', g='body', x=2, y=29, rows=BODY),
         dict(n='hleg', g='legA', x=4, y=50, rows=HLEG),
         dict(n='fleg', g='legA', x=28, y=50, rows=LEG),
-        dict(n='ear', g='head', x=31, y=25, rows=EAR),
-        dict(n='head', g='head', x=29, y=28, rows=HEAD, alt={'blink': head('blink'), 'hit': head('hit'), 'atk0': head('glow'), NB: head('glow', True), 'ko': head('ko')}),
-        dict(n='tusk', g='head', x=48, y=29, rows=TUSK),
+        dict(n='ear', g='head', x=32, y=25, rows=EAR),
+        dict(n='head', g='head', x=30, y=28, rows=HEAD, alt={'blink': head('blink'), 'hit': head('hit'), 'atk0': head('glow'), NB: head('glow', True), 'ko': head('ko')}),
+        dict(n='nape', g='head', x=27, y=27, rows=NAPE),
+        dict(n='tusk', g='head', x=49, y=29, rows=TUSK),
         dict(n='dust', g='fx', x=0, y=50, rows=DUST, only=NB),
         dict(n='clods', g='head', x=56, y=16, rows=CLODS, only='atk2'),
     ]

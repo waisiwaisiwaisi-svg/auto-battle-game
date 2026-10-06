@@ -179,28 +179,28 @@ LEG = [
     '.kkkk..',
 ]
 LEGF = pix.flip_h(LEG)
-LEGM = ['.kkk..', 'kABBk.', 'kBBCk.', '.kBCk.', '..kBCk', '..kBCk', '.kCCkk', '.kkk..']
+LEGM = ['.kkk..', 'kABBk.', 'kBBCk.', 'kBBCk.', '.kBCk.', '.kBCk.', '..kBCk', '..kBCk', '..kBCk', '..kBCk', '.kCCkk', '.kkk..']
 
 def layers():
     A = 'atk1|atk2'
     return [
-        dict(n='legF1', g='legB', x=9, y=50, rows=dark(LEG)),
-        dict(n='legF2', g='legA', x=23, y=51, rows=dark(LEGM)),
+        dict(n='legF1', g='legB', x=9, y=49, rows=dark(LEG)),
+        dict(n='legF2', g='legA', x=24, y=47, rows=dark(LEGM)),
         dict(n='legF3', g='legB', x=41, y=49, rows=dark(LEGF)),
-        dict(n='ely', g='body', x=3, y=32, rows=elytra(1),
+        dict(n='ely', g='body', x=3, y=30, rows=elytra(1),
              alt={'idle1|walk1|walk3': elytra(2), 'idle2|idle3|blink|atk0|atk1|atk2': elytra(3), 'hit|ko': elytra(0)}),
-        dict(n='leg1', g='legA', x=5, y=50, rows=LEG),
-        dict(n='leg2', g='legB', x=19, y=52, rows=LEGM),
-        dict(n='pro', g='body', x=22, y=34, rows=PRO),
-        dict(n='phorn', g='body', x=27, y=30, rows=PHORN),
-        dict(n='horn', g='horn', x=42, y=17, rows=HORN),
-        dict(n='head', g='head', x=31, y=34, rows=head(), alt={'blink': head('blink'), 'hit': head('hit'), 'atk0|atk1|atk2': head('glow'), 'ko': head('ko')}),
+        dict(n='leg1', g='legA', x=5, y=49, rows=LEG),
+        dict(n='leg2', g='legB', x=19, y=48, rows=LEGM),
+        dict(n='pro', g='body', x=22, y=32, rows=PRO),
+        dict(n='phorn', g='body', x=27, y=28, rows=PHORN),
+        dict(n='horn', g='horn', x=42, y=15, rows=HORN),
+        dict(n='head', g='head', x=31, y=32, rows=head(), alt={'blink': head('blink'), 'hit': head('hit'), 'atk0|atk1|atk2': head('glow'), 'ko': head('ko')}),
         dict(n='leg3', g='legA', x=36, y=49, rows=LEGF),
-        dict(n='spark', g='horn', x=44, y=14, rows=SPARK['idle0|walk0|walk2'], alt=SPARK, not_='hit|ko|atk0|' + A),
-        dict(n='aura', g='body', x=8, y=24, rows=AURA, only='atk0'),
-        dict(n='aura2', g='horn', x=42, y=14, rows=pix.flip_h(AURA), only='atk0'),
-        dict(n='bolt', g='horn', x=55, y=16, rows=BOLT, only=A),
-        dict(n='flash', g='horn', x=67, y=22, rows=FLASH, only='atk2'),
+        dict(n='spark', g='horn', x=44, y=12, rows=SPARK['idle0|walk0|walk2'], alt=SPARK, not_='hit|ko|atk0|' + A),
+        dict(n='aura', g='body', x=8, y=22, rows=AURA, only='atk0'),
+        dict(n='aura2', g='horn', x=42, y=12, rows=pix.flip_h(AURA), only='atk0'),
+        dict(n='bolt', g='horn', x=55, y=14, rows=BOLT, only=A),
+        dict(n='flash', g='horn', x=67, y=20, rows=FLASH, only='atk2'),
     ]
 
 FRAMES = {
