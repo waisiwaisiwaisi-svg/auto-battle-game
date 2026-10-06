@@ -18,41 +18,45 @@ def _outline(rows):
     return [''.join(r) for r in out]
 
 # ---- 胴：猫背の 体。背中は はがねの 板よろい（4枚・下の ふちが とがる）、下は 土色の 毛 ----
-SPAN = [(17, 24), (13, 27), (10, 28), (8, 29), (6, 30), (5, 31), (4, 31), (3, 31), (2, 31), (1, 31),
-        (1, 31), (1, 31), (1, 31), (1, 31), (1, 31), (2, 31), (3, 31), (4, 30)]
-SEAMS = [(), (15, 19, 23), (14, 19, 23), (13, 18, 23), (12, 18, 23), (11, 18, 24), (11, 17, 24), (10, 17, 24), (9, 16, 24), (8, 16, 24)]
+# デフォルメ：短く 高い ドーム（板よろい 3枚）。頭は 元の 大きさの まま
+SPAN = [(10, 16), (7, 19), (5, 21), (4, 22), (3, 23), (2, 24), (1, 24), (1, 25), (0, 25), (0, 25), (0, 25), (0, 25),
+        (0, 25), (0, 25), (0, 25), (0, 25), (0, 25), (0, 25), (1, 25), (1, 24), (2, 23), (4, 21)]
+S1 = [None, 11, 11, 10, 10, 10, 9, 9, 9, 8, 8, 8]
+S2 = [None, 17, 17, 17, 17, 18, 18, 18, 18, 18, 19, 19]
+SEAMS = [() if a is None else (a, b) for a, b in zip(S1, S2)]
+P = 11   # 板の 下の ふち（とがる）
 def body():
-    g = [['.'] * 32 for _ in range(len(SPAN))]
+    g = [['.'] * 26 for _ in range(len(SPAN))]
     for y, (a, b) in enumerate(SPAN):
         for x in range(a, b + 1):
-            if y <= 9:
+            if y <= P:
                 cuts = [a - 1] + [s for s in SEAMS[y] if a < s < b] + [b + 1]
                 if x in cuts: g[y][x] = 'k'; continue
                 lo = max(c for c in cuts if c < x); hi = min(c for c in cuts if c > x)
                 dl, dr = x - lo - 1, hi - x - 1
                 c = 'T'
-                if dl == 0 or (dl <= 2 and 2 <= y <= 4) or y <= 1: c = 'S'
-                if dr <= 1 or (y >= 6 and dr <= 3) or y >= 8: c = 'U'
+                if dl == 0 or (dl <= 2 and 2 <= y <= 5) or y <= 1: c = 'S'
+                if dr <= 1 or (y >= 7 and dr <= 3) or y >= P - 1: c = 'U'
                 if y <= 1 and dr <= 1: c = 'T'
-                if y == 9:   # 板の 下の ふちは とがる
+                if y == P:   # 板の 下の ふちは とがる
                     m = (lo + hi) / 2; c = 'U' if abs(x - m) <= (hi - lo) / 2 - 2 else 'k'
                 g[y][x] = c
-            elif y == 10:
-                lo = max([a - 1] + [s for s in SEAMS[9] if s < x]); hi = min([b + 1] + [s for s in SEAMS[9] if s > x])
+            elif y == P + 1:
+                lo = max([a - 1] + [s for s in SEAMS[P] if s < x]); hi = min([b + 1] + [s for s in SEAMS[P] if s > x])
                 m = (lo + hi) / 2; g[y][x] = 'k' if abs(x - m) <= (hi - lo) / 2 - 3 else 'H'
             else:
                 c = 'G'
-                if y == 11 or y >= 16 or x >= b - 2 or (y >= 14 and x >= b - 7): c = 'H'
-                elif x <= a + 1 and y <= 14: c = 'F'
+                if y == P + 2 or y >= 19 or x >= b - 2 or (y >= 17 and x >= b - 7): c = 'H'
+                elif x <= a + 1 and y <= 16: c = 'F'
                 g[y][x] = c
     rows = _outline([''.join(r) for r in g])
     g = [list(r) for r in rows]
     # 手で 打つ：びょう（リベット）・きず・毛の すじ
-    for (x, y) in ((6, 8), (13, 5), (12, 8), (19, 4), (18, 8), (24, 7)):
+    for (x, y) in ((5, 10), (6, 5), (13, 6), (12, 10), (20, 6), (20, 10)):
         g[y][x] = 'S'; g[y + 1][x] = 'U'
-    for (x, y) in ((22, 3), (23, 4)):  # 板の きず
+    for (x, y) in ((16, 4), (17, 5)):  # 板の きず
         g[y][x] = 'U'
-    for (x, y) in ((5, 14), (10, 13), (15, 14), (20, 13), (25, 14), (8, 16), (13, 16), (18, 16), (6, 12)):
+    for (x, y) in ((5, 17), (10, 16), (15, 17), (20, 16), (8, 19), (13, 19), (18, 19), (6, 15)):
         if g[y][x] in 'GF': g[y][x] = 'H'
         if g[y - 1][x - 1] in 'G': g[y - 1][x - 1] = 'F'
     return [''.join(r) for r in g]
@@ -91,8 +95,8 @@ HEAD = [
     '.kHHHHHHkkkkkk....',
     '..kkkkkkk.........',
 ]
-EYE = ['TkkkkT', 'kYYkOk', 'YYYkOk', 'kOOkk.']
-EYE_ALT = {'blink': ['TkkkkT', 'kTTTTk', 'kkkkkk', 'kTTTk.'], 'atk0|atk1|atk2': ['TkkkkT', 'kYYkYk', 'YYYkYk', 'kYOkk.'], 'hit': ['TkkkkT', 'kOkkOk', 'kTOOkk', 'kOkkO.'], 'ko': ['TkkkkT', 'kOkOkk', 'kTOkTk', 'kOkOk.']}
+EYE = ['TkkkkT', 'kwYkOk', 'YYYkOk', 'kOOkk.']
+EYE_ALT = {'blink': ['TkkkkT', 'kTTTTk', 'kkkkkk', 'kTTTk.'], 'atk0|atk1|atk2': ['TkkkkT', 'kwwkYk', 'YYYkYk', 'kOOkk.'], 'hit': ['TkkkkT', 'kOkkOk', 'kTOOkk', 'kOkkO.'], 'ko': ['TkkkkT', 'kOkOkk', 'kTOkTk', 'kOkOk.']}
 SPK = ['.k....', 'kSk...', 'kSUk..', 'kSTUk.', 'kSTUUk', 'kSTTUk']
 ARM = [
     '..kkkkk...........',
@@ -116,12 +120,12 @@ ARM = [
     '..........k.......',
 ]
 LEG = [
-    '.kkkkk..',
+    'kFGGGHk.',
+    'kFGGGHk.',
     'kFGGGHk.',
     'kGGGGHk.',
     'kGGGHHk.',
-    'kGGHHHk.',
-    'kGHHHHkk',
+    'kGGHHHkk',
     'kHHHHHHk',
     'kkkkkkkk',
     'kSkSkSk.',
@@ -155,23 +159,24 @@ SPEED = ['TTTTTT....', '..........', '...TTTTTTT', '..........', 'TTTTT.....', '
 DUST = ['...DD......DD..', '.DDDDD..DDDDD..', 'DD.DDDDDDD.DDD.']
 
 BODY = body()
+HX, HY = 26, 29
 def layers():
     return [
-        dict(n='armF', g='legA', x=33, y=43, rows=dark(ARM)),
-        dict(n='legHF', g='legB', x=14, y=51, rows=dark(LEG)),
-        dict(n='tail', g='body', x=5, y=46, rows=TAIL),
-        dict(n='sp1', g='body', x=11, y=33, rows=SPK),
-        dict(n='sp2', g='body', x=17, y=29, rows=SPK),
-        dict(n='sp3', g='body', x=23, y=28, rows=SPK),
-        dict(n='body', g='body', x=6, y=32, rows=BODY),
-        dict(n='legH', g='legA', x=8, y=51, rows=LEG),
-        dict(n='head', g='head', x=31, y=33, rows=HEAD),
-        dict(n='eye', g='head', x=36, y=37, rows=EYE, alt=EYE_ALT),
-        dict(n='drill', g='head', x=47, y=36, rows=drill(0), alt={'idle1|walk1|walk3': drill(1), 'idle2': drill(2), 'idle3': drill(3), 'atk0': drill(2, True), 'atk1': drill(1, True), 'atk2': drill(3, True)}),
-        dict(n='arm', g='legB', x=28, y=42, rows=ARM),
-        dict(n='fx', g='head', x=59, y=37, rows=SPARK, alt={'atk2': SPARK2}, only='atk1|atk2'),
+        dict(n='armF', g='legA', x=HX + 2, y=HY + 10, rows=dark(ARM)),
+        dict(n='legHF', g='legB', x=13, y=50, rows=dark(LEG)),
+        dict(n='tail', g='body', x=2, y=44, rows=TAIL),
+        dict(n='sp1', g='body', x=7, y=30, rows=SPK),
+        dict(n='sp2', g='body', x=12, y=27, rows=SPK),
+        dict(n='sp3', g='body', x=18, y=25, rows=SPK),
+        dict(n='body', g='body', x=4, y=29, rows=BODY),
+        dict(n='legH', g='legA', x=6, y=51, rows=LEG),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD),
+        dict(n='eye', g='head', x=HX + 5, y=HY + 4, rows=EYE, alt=EYE_ALT),
+        dict(n='drill', g='head', x=HX + 16, y=HY + 3, rows=drill(0), alt={'idle1|walk1|walk3': drill(1), 'idle2': drill(2), 'idle3': drill(3), 'atk0': drill(2, True), 'atk1': drill(1, True), 'atk2': drill(3, True)}),
+        dict(n='arm', g='legB', x=HX - 3, y=HY + 11, rows=ARM),
+        dict(n='fx', g='head', x=HX + 28, y=HY + 4, rows=SPARK, alt={'atk2': SPARK2}, only='atk1|atk2'),
         dict(n='speed', g='root', x=-4, y=38, rows=SPEED, only='atk1'),
-        dict(n='dust', g='root', x=2, y=58, rows=DUST, only='atk0'),
+        dict(n='dust', g='root', x=0, y=58, rows=DUST, only='atk0'),
     ]
 
 FRAMES = {

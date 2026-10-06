@@ -70,26 +70,21 @@ JAW = [
 ]
 # 尾びれ：ぼろぼろに やぶれた 亡霊の ひれ
 TAIL = [
-    'kk............',
-    'kAkk..........',
-    '.kABkk........',
-    '.kAABBkk......',
-    '..kABBBDkk....',
-    '..kkABBBDDk...',
-    '.kAkkABBBDDk..',
-    'kAAABABBBBDDk.',
-    '.kkABBBBBBBDk.',
-    '...kABBBBBBDk.',
-    '...kABBBBBBDk.',
-    '..kABBBBBBDDk.',
-    '.kABBkBBBBDDk.',
-    'kABkkBBBBDDk..',
-    'kkk.kBBBDDk...',
-    '...kBBDDkk....',
-    '..kBDDkk......',
-    '.kDDkk........',
-    'kDkk..........',
-    'kk............',
+    'kk..........',
+    'kAkk........',
+    '.kABkk......',
+    '..kABBDkk...',
+    '.kAkABBBDk..',
+    'kAAABABBBDk.',
+    '.kkABBBBBDk.',
+    '...kABBBBDk.',
+    '..kABBBBBDk.',
+    '.kABBkBBBDk.',
+    'kABkkBBBDk..',
+    'kkk.kBBDDk..',
+    '...kBDDkk...',
+    '..kDDk......',
+    '.kkk........',
 ]
 # 背びれ・胸びれ（やぶれた 膜）
 DFIN = [
@@ -110,18 +105,20 @@ PFIN = [
     '...kk...',
 ]
 # 目：くぼんだ 黒い 目の 穴に 霊火の ひとみ
+# 目：くぼんだ 黒い 穴に 霊火の ひとみ（白い 光＋白緑と 青緑の 2色＋たての ひとみ）。上は 太い まゆで つり目
 EYE = [
-    'kk.....',
-    'kkkkk..',
-    '.kccCkk',
-    '.kcCkCk',
-    '..kkkk.',
+    'kkk.......',
+    '.kkkkkkk..',
+    '.kwccCkCk.',
+    '.kcCCCkNk.',
+    '..kNNNkkk.',
+    '...kkkk...',
 ]
 EYE_ALT = {
-    'blink': ['kk.....', 'kkkkk..', '.kkkkkk', '.......', '.......'],
-    'atk0|atk1|atk2': ['kk.....', 'kkkkk..', 'kcccCkk', 'kcCCkCk', '.kkkkk.'],
-    'hit': ['kk.....', 'kkkkk..', '.kCkCkk', '..kCkk.', '.......'],
-    'ko': ['.......', 'kk.kk..', '..k....', 'kk.kk..', '.......'],
+    'blink': ['kkk.......', '.kkkkkkk..', '.kkkkkkkk.', '..NNNNNk..', '...kkkk...', '..........'],
+    'atk0|atk1|atk2': ['kkk.......', '.kkkkkkk..', 'kwwccCkck.', 'kcccCCkCk.', '.kCNNNkkk.', '..kkkkk...'],
+    'hit': ['kkk.......', '.kkkkkkk..', '.kCkkkkCk.', '..kCkkCk..', '...kCCk...', '....kk....'],
+    'ko': ['..........', '.kk..kk...', '...kk.....', '.kk..kk...', '..........', '..........'],
 }
 # 口の 中（暗い 紫）
 def _maw():
@@ -154,6 +151,8 @@ LURE = [
     'kBk...........',
     'kBk...........',
     'kBk...........',
+    '.kBk..........',
+    '.kBk..........',
     '.kBk..........',
     '..kk..........',
 ]
@@ -204,17 +203,17 @@ SOUL = ['..k..', '.kck.', 'kcwCk', 'kCcNk', '.kNk.', '..kk.', '...k.']
 SOUL2 = ['.k...', 'kck..', 'kcwCk', 'kCcNk', '.kNk.', '.kk..', '.k...']
 def layers():
     return [
-        dict(n='tail', g='tail', x=2, y=26, rows=TAIL),
-        dict(n='dfin', g='body', x=17, y=19, rows=DFIN),
+        dict(n='tail', g='tail', x=4, y=28, rows=TAIL),
+        dict(n='dfin', g='body', x=17, y=22, rows=DFIN),
+        dict(n='lure', g='lure', x=34, y=12, rows=LURE),
         dict(n='maw', g='body', x=29, y=34, rows=MAW),
         dict(n='body', g='body', x=9, y=24, rows=BODY),
         dict(n='dots', g='body', x=15, y=36, rows=DOTS),
-        dict(n='eye', g='body', x=37, y=27, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='body', x=34, y=28, rows=EYE, alt=EYE_ALT),
         dict(n='ut', g='body', x=32, y=41, rows=UTEETH),
         dict(n='jaw', g='jaw', x=27, y=34, rows=JAW),
         dict(n='lt', g='jaw', x=35, y=30, rows=LTEETH),
         dict(n='pfin', g='fin', x=21, y=41, rows=PFIN),
-        dict(n='lure', g='lure', x=34, y=12, rows=LURE),
         dict(n='flame', g='lure', x=44, y=18, rows=FLAME, alt={'idle1|idle3|walk1|walk3': FLAME2, 'atk0|atk1': FLAME_BIG}),
         dict(n='bub', g='root', x=10, y=17, rows=BUB[0], alt={'idle2|idle3|walk2|walk3': BUB[1]}, not_='atk0|atk1|atk2|hit|ko'),
         dict(n='soul', g='tail', x=6, y=47, rows=SOUL, alt={'idle1|idle3|walk1|walk3': SOUL2}, not_='ko|atk1'),

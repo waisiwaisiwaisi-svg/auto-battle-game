@@ -53,6 +53,36 @@ def torso():
     for x in range(14, 24, 3): out[17 + (x - 14) // 4][x] = 'l' if g[17 + (x - 14) // 4][x] != '.' else '.'
     return outline(rows_of(out))
 
+
+# ---- デフォルメ用の 胴（小さく 丸く：胸は 厚く、腰は 低く）----
+def torso2():
+    W, H = 27, 17; g = grid(W, H)
+    poly(g, [(0, 8), (3, 3), (8, 1), (14, 2), (19, 0), (24, 1), (26, 5), (27, 11), (25, 17), (18, 17), (16, 14), (11, 14), (9, 17), (3, 17), (0, 13)], '#')
+    out = grid(W, H)
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] == '.': continue
+            up, lf, dn, rt = run(g, x, y, 0, -1), run(g, x, y, -1, 0), run(g, x, y, 0, 1), run(g, x, y, 1, 0)
+            c = 'G'
+            if dn <= 3 or rt <= 2: c = 'H'
+            elif dn == 4 and (x + y) % 2: c = 'H'
+            if up <= 2 or (lf <= 2 and dn > 3): c = 'F'
+            out[y][x] = c
+    # 背骨に そって 竜の うろこ
+    for i, x in enumerate(range(4, 18, 3)):
+        y = next(j for j in range(H) if g[j][x] != '.')
+        out[y][x] = 'M'; out[y][x + 1] = 'N'; out[y + 1][x] = 'N'; out[y + 1][x + 1] = 'O'
+    # 肩の もりあがり と 胸
+    for (x, y) in ((18, 3), (17, 4), (17, 5), (17, 6), (18, 7), (19, 8), (20, 9)):
+        out[y][x] = 'l'; out[y][x + 1] = 'F' if out[y][x + 1] == 'G' else out[y][x + 1]
+    for (x, y) in ((24, 7), (23, 8), (23, 9), (24, 10)): out[y][x] = 'l'
+    # ももの 丸み
+    for (x, y) in ((8, 6), (7, 7), (6, 8), (6, 9), (7, 10), (8, 11)): out[y][x] = 'l'
+    for (x, y) in ((8, 7), (7, 8)): out[y][x] = 'F'
+    # あばら
+    for (x, y) in ((13, 7), (14, 8), (15, 7)): out[y][x] = 'l'
+    return outline(rows_of(out))
+
 # ---- 竜の 翼（骨の あたりは 線、膜の 陰影は 骨からの 距離で）----
 def wing(spread=False):
     W, H = 30, 30; g = grid(W, H)
@@ -188,8 +218,8 @@ RUFF = [
     '....kk....',
 ]
 # 目：ひさしの 下で 光る つり目（たての ひとみ）
-EYE = ['VVVkV', 'kUVkk']
-EYE_ALT = {'blink': ['GGGGG', 'kkkkk'], 'hit': ['kVkkV', 'kkVkk'], 'atk0|atk1|atk2': ['wVVkV', 'kVVkV'], 'ko': ['kGkGk', 'GkGkG']}
+EYE = ['wVVkU', 'UUTkT']
+EYE_ALT = {'blink': ['HHHHH', 'kkkkk'], 'hit': ['kVkVk', 'VkTkV'], 'atk0|atk1|atk2': ['wwVkV', 'VUUkU'], 'ko': ['kGGGk', 'GkkkG', 'kGGGk']}
 HORN = ['kk......', 'kMkk....', '.kMNkk..', '.kMNNNkk', '..kMNNOk', '...kkkk.']
 # 毒蛇の しっぽ（S字に 立ち上がり、前を にらむ）
 SNAKE = [
@@ -197,8 +227,8 @@ SNAKE = [
     '.kMMMMNNkk....',
     'kMNNNNNNNNkk..',
     'kMNNkkkNNNNNkk',
-    'kNNNkVVkNNNNOk',
-    'kNNNNkkNNNNNOk',
+    'kNNNkwVkNNNNOk',
+    'kNNNNUkNNNNNOk',
     'kONNNNNNkkkkkk',
     '.kONNNkwkkwk..',
     '..kONNNkk.k...',
@@ -220,44 +250,33 @@ SNAKE_OPEN = [
     'kMNNNNNNNNkkk.',
     'kMNNkkkNNNNNNk',
     'kNNNkwVkNkkkkk',
-    'kNNNNkkNkwdddw',
+    'kNNNNUkNkwdddw',
     'kONNNNNkrrrrk.',
     '.kONNNkwkwkk..',
     '..kONNNkk.....',
 ] + SNAKE[9:]
+# 足：短く 太く（付け根は 胴に 3ドット 食いこむ。上の 輪郭は 打たない）
 LEG_F = [
-    '.kkkkkkkk..',
-    'kFFGGGGGHk.',
-    'kFGGGGGGHHk',
-    'kFGGGGGGHHk',
-    '.kFGGGGGHHk',
-    '.kFGGGGHHk.',
-    '..kFGGGHHk.',
-    '..kFGGGHk..',
-    '..kFGGGHk..',
-    '..kFGGGHHk.',
-    '.kFGGGGGHk.',
-    '.kFGGGGGHHk',
-    'kFGGGGGGHHHk',
-    'kGGGlGGlGHHk',
-    'kHHHlHHlHHHk',
-    '.kwkkwkkwkk.',
+    'kFGGGGHk.',
+    'kFGGGGHHk',
+    'kFGGGGHHk',
+    '.kFGGGHk.',
+    '.kFGGGHk.',
+    'kFGGGGHHk',
+    'kGGlGGlHHk',
+    'kHHlHHlHHk',
+    '.kwkkwkkwk',
 ]
 LEG_H = [
-    'kkkkkkkkkk.',
-    'kFGGGGGGHHk',
-    'kFGGGGGGHHk',
-    '.kFGGGGGHk.',
-    '..kFGGGHk..',
-    '...kFGGHk..',
-    '...kFGGHk..',
-    '...kFGGHk..',
-    '..kFGGGHk..',
-    '..kFGGGHHk.',
-    '.kFGGGGGHk.',
-    '.kGGGlGGlHk',
-    '.kHHHlHHlHk',
-    '..kwkkwkkw.',
+    'kFGGGGHHk',
+    'kFGGGGHHk',
+    'kFGGGGHHk',
+    '.kFGGGHk.',
+    '.kFGGGHk.',
+    '.kFGGGHHk',
+    'kGGlGGlHk',
+    'kHHlHHlHk',
+    '.kwkwkkwk',
 ]
 DARK = {'F': 'G', 'G': 'H', 'H': 'l', 'M': 'N', 'N': 'O', 'O': 'l', 'V': 'U', 'U': 'T'}
 def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
@@ -282,26 +301,26 @@ BREATH2 = [
     '..kkkkk....kkkkkk......',
 ]
 DRIP = ['kVk', 'kUk', '.k.']
-TORSO = torso(); MANE = mane()
-
+TORSO = torso2(); MANE = mane()
+HX, HY = 34, 21          # 顔の 位置（頭は 元の 大きさの まま）
 def layers():
     return [
-        dict(n='wingF', g='wingF', x=16, y=-2, rows=dark(wing(True)), only='atk0|atk1|atk2'),
-        dict(n='snake', g='tail', x=0, y=16, rows=SNAKE, alt={'atk0|atk1|atk2': SNAKE_OPEN}),
-        dict(n='legFF', g='legB', x=43, y=45, rows=dark(LEG_F)),
-        dict(n='legHF', g='legA', x=13, y=46, rows=dark(LEG_H)),
-        dict(n='torso', g='body', x=4, y=26, rows=TORSO),
-        dict(n='legH', g='legB', x=6, y=46, rows=LEG_H),
-        dict(n='legF', g='legA', x=35, y=44, rows=LEG_F),
-        dict(n='wing', g='wing', x=8, y=2, rows=wing(), alt={'atk0|atk1|atk2': wing(True)}),
-        dict(n='mane', g='head', x=31, y=4, rows=MANE),
-        dict(n='head', g='head', x=39, y=11, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='ruff', g='head', x=37, y=8, rows=RUFF),
-        dict(n='horn', g='head', x=44, y=7, rows=HORN),
-        dict(n='eye', g='head', x=51, y=19, rows=EYE, alt=EYE_ALT),
-        dict(n='drip', g='drip', x=58, y=31, rows=DRIP, only='idle1|idle2|walk1|walk3'),
-        dict(n='breath1', g='fx', x=62, y=24, rows=BREATH1, only='atk1'),
-        dict(n='breath2', g='fx', x=58, y=21, rows=BREATH2, only='atk2'),
+        dict(n='wingF', g='wingF', x=13, y=6, rows=dark(wing(True)), only='atk0|atk1|atk2'),
+        dict(n='snake', g='tail', x=2, y=24, rows=SNAKE, alt={'atk0|atk1|atk2': SNAKE_OPEN}),
+        dict(n='legFF', g='legB', x=31, y=51, rows=dark(LEG_F)),
+        dict(n='legHF', g='legA', x=15, y=51, rows=dark(LEG_H)),
+        dict(n='torso', g='body', x=9, y=36, rows=TORSO),
+        dict(n='legH', g='legB', x=9, y=52, rows=LEG_H),
+        dict(n='legF', g='legA', x=26, y=52, rows=LEG_F),
+        dict(n='wing', g='wing', x=5, y=12, rows=wing(), alt={'atk0|atk1|atk2': wing(True)}),
+        dict(n='mane', g='head', x=HX - 8, y=HY - 7, rows=MANE),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
+        dict(n='ruff', g='head', x=HX - 2, y=HY - 3, rows=RUFF),
+        dict(n='horn', g='head', x=HX + 5, y=HY - 4, rows=HORN),
+        dict(n='eye', g='head', x=HX + 12, y=HY + 8, rows=EYE, alt=EYE_ALT),
+        dict(n='drip', g='drip', x=HX + 19, y=HY + 20, rows=DRIP, only='idle1|idle2|walk1|walk3'),
+        dict(n='breath1', g='fx', x=HX + 23, y=HY + 13, rows=BREATH1, only='atk1'),
+        dict(n='breath2', g='fx', x=HX + 19, y=HY + 10, rows=BREATH2, only='atk2'),
     ]
 
 FRAMES = {
@@ -314,10 +333,10 @@ FRAMES = {
     'walk1': {'body': (0, -1), 'wing': (0, -1), 'drip': (0, 0)},
     'walk2': {'legA': (-1, 0), 'legB': (1, -1), 'body': (0, 1)},
     'walk3': {'body': (0, -1), 'wing': (0, -1), 'drip': (0, 0)},
-    'atk0': {'body': (-1, 2), 'head': (-2, 1), 'wing': (0, -2), 'tail': (-1, -1), 'legA': (-1, 0)},
+    'atk0': {'body': (-1, 1), 'head': (-1, 1), 'wing': (0, -2), 'tail': (-1, -1), 'legA': (-1, 0)},
     'atk1': {'root': (3, 0), 'head': (1, 0), 'wing': (0, -2), 'tail': (1, 0)},
     'atk2': {'root': (4, 0), 'head': (1, -1), 'wing': (0, 0)},
-    'hit': {'root': (-3, 0), 'head': (-3, -2), 'wing': (-1, 2), 'tail': (1, 1)},
+    'hit': {'root': (-3, 0), 'head': (-2, -1), 'wing': (-1, 1), 'tail': (1, 1)},
     'ko': {'_flip': True},
 }
 PARENT = {'head': 'body', 'wing': 'body', 'wingF': 'wing', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'drip': 'head', 'fx': 'head'}

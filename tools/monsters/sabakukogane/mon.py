@@ -43,27 +43,25 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 
 # ---- 前ばね：ひらたい ドーム。すじ（みぞ）と トルコ石の ふちどりは 手で ----
 def elytra():
-    g = pix.grid(38, 19); pix.ellipse(g, 19, 14, 19.2, 14, '#')
-    for x in range(38):
-        if g[18][x] == '#': g[18][x] = '#'
+    W = 26; g = pix.grid(W, 16); pix.ellipse(g, 13, 12, 13.2, 12, '#')
     rows = shade(pix.rows_of(g), 'A', 'B', 'C', t=3, lf=2, r=3, b=3)
     g = pix.grid_of(rows)
     # たての みぞ（ドームに そって 曲がる）
-    for gx in (9, 16, 23, 30):
-        for y in range(2, 15):
-            x = gx + (y - 9) * (gx - 19) // 40
+    for gx in (6, 11, 16, 21):
+        for y in range(2, 12):
+            x = gx + (y - 7) * (gx - 13) // 30
             if g[y][x] in 'ABC':
                 g[y][x] = 'l' if y > 3 else 'C'
                 if g[y][x + 1] in 'BC' and y < 12: g[y][x + 1] = 'A' if y < 7 else 'B'
     # つや
-    for (x, y) in ((11, 2), (12, 2), (13, 1), (6, 4), (5, 5)):
-        if g[y][x] in 'ABC': g[y][x] = 'w' if (x, y) == (13, 1) else 'A'
+    for (x, y) in ((8, 2), (9, 1), (10, 1), (4, 4), (3, 5)):
+        if g[y][x] in 'ABC': g[y][x] = 'w' if (x, y) == (9, 1) else 'A'
     # トルコ石の ふち（すそ）
-    for x in range(38):
-        if g[15][x] != '.': g[15][x] = 'k'
-        if g[16][x] != '.': g[16][x] = 'T' if x % 4 else 'k'
-        if g[17][x] != '.': g[17][x] = 'U' if x % 4 else 'k'
-        if g[18][x] != '.': g[18][x] = 'l'
+    for x in range(W):
+        if g[12][x] != '.': g[12][x] = 'k'
+        if g[13][x] != '.': g[13][x] = 'T' if x % 4 else 'k'
+        if g[14][x] != '.': g[14][x] = 'U' if x % 4 else 'k'
+        if g[15][x] != '.': g[15][x] = 'l'
     return pix.outline(pix.rows_of(g))
 
 PRO = [
@@ -80,22 +78,28 @@ PRO = [
     '..kkkkkkkkk.....',
 ]
 # 頭：くまでの ような ぎざぎざの 盾（頭楯）
+# 頭：くまでの ような ぎざぎざの 盾（頭楯）。デフォルメで 大きく（目は 頭の 上に 重ねる）
 HEAD = [
-    '...kkkkk..........',
-    '..kBBBBBkkk.......',
-    '.kBBBBBBBBBkkk....',
-    'kBBkkkkkkkkBBBkkk.',
-    'kBk.......kBBAAAAk',
-    'kBBkk....kBBAABBBk',
-    'kCBBBkkkkBBBBBCCk.',
-    'kCCBBBBBBBBCkCkCk.',
-    '.kCCCBBBCkkwkwkwk.',
-    '..kkkCkkCk.k.k.k..',
-    '.....k..k.........',
+    '.....kkkkkkk.......',
+    '...kkAAAAAAAkk.....',
+    '..kAABBBBBBBBBk....',
+    '.kABBBBBBBBBBBBk...',
+    'kABBBBBBBBBBBBBAk..',
+    'kABBBBBBBBBBBBBBAk.',
+    'kBBBBBBBBBBBBBBBCAk',
+    'kBBBBBBBBBBBBBBCkk.',
+    'kCBBBBBBBBBBBBBBAAk',
+    'kCBBBBBBBBBBBBBCCkk',
+    'kCBBBBBBBBBBBBCBAAk',
+    'kCCBBBBBBBBBBCCCkk.',
+    '.kCCBBBBBBBBCCCCAk.',
+    '..kCCCkwkwkwkCCCk..',
+    '...kkkk.k.k.kkkk...',
 ]
-EYE = ['TTTTTTk', 'kkTTTkk']
-EYE_ALT = {'blink': ['kkkkkkk', 'BBkkkkk'], 'atk0|atk1|atk2': ['YYYYYYk', 'kkYYYYk'],
-           'hit': ['kTkkkTk', 'kkTTTkk'], 'ko': ['TkTkTkk', 'kTkkTkT']}
+# 目：まゆの 線＋ハイライト＋トルコ石 2色＋たての ひとみ（前へ むかって 下がる つり目）
+EYE = ['kkkkkkk..', 'kwTTTkTkk', 'kTTUUkUk.', '.kkkkkk..']
+EYE_ALT = {'blink': ['.........', 'kkkkkkkkk', '.CCCCCC..', '.........'], 'atk0|atk1|atk2': ['kkkkkkk..', 'kwYYYkYkk', 'kYYOOkOk.', '.kkkkkk..'],
+           'hit': ['kkkkk...', 'BkBBBkB.', 'BBkBkBB.', '.kBBBk..'], 'ko': ['........', 'BkBkB...', 'BBkBB...', 'BkBkB...']}
 # ---- 太陽の 円盤を 三日月の 角が かかえる（あたりは 円、光の 向きで 3段、光線と 角先は 手で）----
 def disc(hot=False, turn=0):
     W, H = 25, 24; cx, cy = 12, 10; g = pix.grid(W, H)
@@ -143,17 +147,14 @@ STALK = [
 ]
 # 足：太く 短い。前足は くまでの ような 歯
 LEG = [
-    '..kkk...',
+    '.kABBk..',
     '.kABBk..',
     '.kBBCCk.',
     '..kBBCk.',
-    '..kkBCk.',
     '.kkBCkk.',
     '.kBCk...',
-    'kkBCkk..',
-    'kBCk....',
-    'kCCk....',
-    'kkk.....',
+    'kBCCk...',
+    'kkkk....',
 ]
 LEGR = pix.flip_h(LEG)
 RAKE = [
@@ -182,24 +183,25 @@ def ball(phase=0):
 DUST = ['.B..A...', 'A.k.B..B', '.kBk.kAk', 'BkCBkkBk', '.kkkkkk.']
 SWIRL = {'atk0': ['.A..B.', 'B....A', '..kk..', '.kBAk.', '..kk..'], }
 
+HX, HY = 29, 36
 def layers():
     A = 'atk1|atk2'
     return [
-        dict(n='legF1', g='legB', x=13, y=48, rows=dark(LEG)),
-        dict(n='legF2', g='legA', x=28, y=48, rows=dark(LEGR)),
-        dict(n='rakeF', g='legB', x=42, y=47, rows=dark(RAKE)),
-        dict(n='stalk', g='head', x=47, y=33, rows=STALK),
-        dict(n='disc', g='disc', x=37, y=12, rows=disc(), alt={'idle1|idle3|walk1|walk3': disc(False, 1), 'atk0': disc(True, 0), A: disc(True, 1)}),
-        dict(n='ely', g='body', x=3, y=30, rows=elytra()),
-        dict(n='pro', g='body', x=31, y=33, rows=PRO),
-        dict(n='head', g='head', x=41, y=39, rows=HEAD),
-        dict(n='eye', g='head', x=43, y=43, rows=EYE, alt=EYE_ALT),
-        dict(n='leg1', g='legA', x=6, y=49, rows=LEG),
-        dict(n='leg2', g='legB', x=22, y=49, rows=LEGR),
-        dict(n='rake', g='legA', x=37, y=48, rows=RAKE),
-        dict(n='swirl', g='head', x=56, y=40, rows=SWIRL['atk0'], only='atk0'),
-        dict(n='ball', g='root', x=55, y=42, rows=ball(), alt={'atk2': ball(3)}, only=A),
-        dict(n='dust', g='root', x=55, y=53, rows=DUST, only='atk2'),
+        dict(n='legF1', g='legB', x=13, y=51, rows=dark(LEG)),
+        dict(n='legF2', g='legA', x=23, y=51, rows=dark(LEGR)),
+        dict(n='rakeF', g='legB', x=HX + 3, y=HY + 14, rows=dark(RAKE)),
+        dict(n='stalk', g='head', x=HX + 6, y=HY - 6, rows=STALK),
+        dict(n='disc', g='disc', x=HX - 4, y=HY - 27, rows=disc(), alt={'idle1|idle3|walk1|walk3': disc(False, 1), 'atk0': disc(True, 0), A: disc(True, 1)}),
+        dict(n='ely', g='body', x=5, y=35, rows=elytra()),
+        dict(n='pro', g='body', x=HX - 5, y=HY - 3, rows=PRO),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD),
+        dict(n='eye', g='head', x=HX + 4, y=HY + 5, rows=EYE, alt=EYE_ALT),
+        dict(n='leg1', g='legA', x=7, y=52, rows=LEG),
+        dict(n='leg2', g='legB', x=17, y=52, rows=LEGR),
+        dict(n='rake', g='legA', x=HX - 2, y=HY + 15, rows=RAKE),
+        dict(n='swirl', g='head', x=HX + 19, y=HY + 4, rows=SWIRL['atk0'], only='atk0'),
+        dict(n='ball', g='root', x=HX + 19, y=HY + 3, rows=ball(), alt={'atk2': ball(3)}, only=A),
+        dict(n='dust', g='root', x=HX + 19, y=HY + 14, rows=DUST, only='atk2'),
     ]
 
 FRAMES = {

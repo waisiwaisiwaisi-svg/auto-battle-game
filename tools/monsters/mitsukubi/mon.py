@@ -1,4 +1,4 @@
-# ミツクビ（ドラゴン・どく × ヒドラ）手打ち GBA風
+# ミツクビ（ドラゴン・どく × ヒドラ）手打ち GBA風・デフォルメ（頭を 大きく、首を 短く、胴を 小さく 丸く、足を 短く）
 from pix import grid, rows_of, ellipse, poly, line, outline, recolor
 META = dict(id='mitsukubi', name='ミツクビ', types=['dragon', 'poison'], base='ヒドラ', size='L')
 PAL = {
@@ -49,9 +49,9 @@ def neck_layer(name, g, pts, dark=False, poses=POSE, extra=None):
 
 # ---- 胴 ----
 def body():
-    W, H = 40, 22; g = grid(W, H)
-    ellipse(g, 21, 11, 18.5, 10, '#')
-    poly(g, [(5, 6), (0, 16), (3, 17), (8, 15)], '#')
+    W, H = 34, 19; g = grid(W, H)
+    ellipse(g, 18, 9.5, 15.5, 8.8, '#')
+    poly(g, [(5, 5), (0, 13), (3, 14), (8, 12)], '#')
     out = grid(W, H)
     for y in range(H):
         for x in range(W):
@@ -61,88 +61,87 @@ def body():
             if dn <= 4: c = 'J'
             if dn == 5 and (x + y) % 2: c = 'J'
             if up <= 2 or lf <= 2: c = 'H'
-            if dn <= 3 and 10 < x < 36: c = 'B' if dn >= 2 else 'C'
+            if dn <= 3 and 9 < x < 30: c = 'B' if dn >= 2 else 'C'
             out[y][x] = c
     # うろこの 列（ずらした 弧）
-    for y in range(4, 14, 3):
-        for x in range(6 + (y % 2) * 2, 36, 4):
+    for y in range(4, 12, 3):
+        for x in range(6 + (y % 2) * 2, 30, 4):
             if out[y][x] == 'I': out[y][x] = 'J'; out[y][x + 1] = 'J'
             if out[y - 1][x] == 'I': out[y - 1][x] = 'H'
     # 腹の 段
-    for x in range(12, 36, 3):
+    for x in range(11, 30, 3):
         for y in range(H):
             if out[y][x] == 'B': out[y][x] = 'C'
     return outline(rows_of(out))
 
+# 頭（デフォルメで 大きく 17x11 → 20x14）：後ろに 2本の とげ、太い まゆの つり目、上あごの 牙
 HEAD = [
-    '...kk............',
-    '..kHHkkkkk.......',
-    '.kHHHIIIIIkkk....',
-    'kHHIIIIkkkIIIkk..',
-    'kHIIIIIIIIkkIIIkk',
-    'kIIIIIIIIIIIIIIHk',
-    'kIIIIIIIIIIIIkkkk',
-    'kJIIIIIIkkkkkkk..',
-    'kJJIIIIkwJJwJwk..',
-    '.kJJJJJJJJJJJk...',
-    '..kkkkkkkkkkk....',
+    '..kk................',
+    '.kHHk...kk..........',
+    '.kHIkk.kHk..........',
+    '..kHIIkkIkkkkk......',
+    '..kHIIIIIIIIIIkkk...',
+    '.kHHIIIIIIIIIIIIIkk.',
+    'kHHkkkkkIIIIIIIIIIk.',
+    'kHIk....kkkIIIIIIIHk',
+    'kIIIk......kIIIIIIIk',
+    'kIIIIkkkkkkkIIIIIIIk',
+    'kJIIIIIIIIIIkkkkkkkk',
+    'kJJIIIIIIIIkkwkkwkk.',
+    '.kJJJJJJJJJkBBBBBk..',
+    '..kkkkkkkkkkkkkkk...',
 ]
-HEAD_OPEN = [
-    '...kk............',
-    '..kHHkkkkk.......',
-    '.kHHHIIIIIkkk....',
-    'kHHIIIIkkkIIIkk..',
-    'kHIIIIIIIIkkIIIkk',
-    'kIIIIIIIIIIIIIIHk',
-    'kIIIIIIIIIkwkwkkk',
-    'kJIIIIIIkUUUUUk..',
-    'kJJIIIIkUUUUk....',
-    'kJJJIIIIkwUUwk...',
-    '.kJJJJJJJkkkkk...',
-    '..kkkkkkkk.......',
+HEAD_OPEN = HEAD[:9] + [
+    'kIIIIkkkkkkkIIIIkkkk',
+    'kJIIIIIIIIIIkwkwkk..',
+    'kJJIIIIIIIIkUUUUUk..',
+    'kJJJIIIIIIkUUTTUUk..',
+    '.kJJJJJJJJkwBBwBk...',
+    '..kkkkkkkkkkkkkk....',
 ]
-EYE = ['kVVk', '.kV']
-EYE_ALT = {'blink': ['kkkk', '.II'], 'hit': ['kIkI', '.kI'], 'atk0|atk1|atk2': ['kwVk', '.kV'], 'ko': ['kIkI', '.IkI']}
+# 目：白い 光＋黄緑と 緑の 2色＋たての ひとみ
+# 目：前へ さがる まゆで つり目。白い 光＋黄緑と 緑の 2色＋たての ひとみ
+EYE = ['wVkV', 'kUkUUTT']
+EYE_ALT = {'blink': ['IIII', 'kkkkkkk'], 'hit': ['kkVk', 'kVkkVkk'], 'atk0|atk1|atk2': ['wVkV', 'kVkVVUU'], 'ko': ['kIkI', 'IkIkIkI']}
 DKH = {'H': 'I', 'I': 'J', 'J': 'l'}
 def dk(rows): return [''.join(DKH.get(c, c) for c in r) for r in rows]
 SPINE = ['.kk', 'kPk', 'kPQk', 'kQQk']
 LEG = [
-    '.kkkkkkk.', 'kHIIIIIJk', 'kHIIIIJJk', '.kHIIIJJk', '.kIIIIJJk', '.kIIIJJk.',
-    'kHIIIIJJk', 'kIIIIIJJJk', 'kJJJJJJJJk', 'kwkwkwkkk.',
+    '.kkkkkkk.', 'kHIIIIIJk', 'kHIIIIJJk', 'kHIIIIJJk', 'kIIIIIJJJk', 'kJJJJJJJJk', 'kwkwkwkkk.',
 ]
 DRIP = ['kVk', 'kUk', '.k.']
 GLOB = ['.kkk.', 'kVVUk', 'kVUUk', '.kkk.']
 SPLAT = ['..kk..kk..', '.kVUkkVUk.', 'kVUUUUUTk.', '.kUUTTTk..', 'kVk.kk.kUk', '.k......k.']
 
-P1 = [(26, 41), (29, 33), (30, 26), (33, 19), (37, 14), (41, 11)]
-P2 = [(31, 41), (35, 35), (38, 30), (42, 26), (48, 23)]
-P3 = [(30, 45), (35, 45), (39, 42), (44, 40)]
+P1 = [(27, 43), (29, 36), (32, 29), (36, 24), (41, 21)]
+P2 = [(30, 44), (34, 39), (39, 35), (45, 33)]
+P3 = [(30, 48), (36, 48), (42, 46)]
 BODY = body()
 
 def layers():
     return [
-        dict(n='legFF', g='legB', x=34, y=50, rows=dk(LEG)),
-        dict(n='legHF', g='legA', x=12, y=50, rows=dk(LEG)),
-        *[dict(n='sp%d' % i, g='body', x=x, y=y, rows=SPINE) for i, (x, y) in enumerate(((8, 32), (13, 30), (18, 29), (23, 29)))],
+        dict(n='legFF', g='legB', x=29, y=53, rows=dk(LEG)),
+        dict(n='legHF', g='legA', x=11, y=53, rows=dk(LEG)),
+        *[dict(n='sp%d' % i, g='body', x=x, y=y, rows=SPINE) for i, (x, y) in enumerate(((9, 36), (14, 34), (19, 34), (24, 35)))],
         neck_layer('neck1', 'n1', P1, True, {'atk0': (-4, 0), 'atk1|atk2': (3, 1), 'hit': (-3, -1)}),
-        dict(n='head1', g='h1', x=40, y=4, rows=dk(HEAD), alt={'atk1|atk2': dk(HEAD_OPEN)}),
-        dict(n='eye1', g='h1', x=47, y=7, rows=EYE, alt=EYE_ALT),
-        dict(n='body', g='body', x=1, y=32, rows=BODY),
-        dict(n='legH', g='legB', x=6, y=51, rows=LEG),
+        dict(n='head1', g='h1', x=38, y=13, rows=dk(HEAD), alt={'atk1|atk2': dk(HEAD_OPEN)}),
+        dict(n='eye1', g='h1', x=42, y=20, rows=EYE, alt=EYE_ALT),
+        dict(n='body', g='body', x=4, y=37, rows=BODY),
+        dict(n='legH', g='legB', x=6, y=54, rows=LEG),
         neck_layer('neck3', 'n3', P3, False, {'atk0': (-3, 0), 'atk1|atk2': (3, 0), 'hit': (-2, -1)}),
-        dict(n='head3', g='h3', x=42, y=34, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='eye3', g='h3', x=49, y=37, rows=EYE, alt=EYE_ALT),
+        dict(n='head3', g='h3', x=40, y=39, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
+        dict(n='eye3', g='h3', x=44, y=46, rows=EYE, alt=EYE_ALT),
         neck_layer('neck2', 'n2', P2, False, {'atk0': (-4, 0), 'atk1|atk2': (3, 0), 'hit': (-3, -2)}),
-        dict(n='head2', g='h2', x=46, y=16, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='eye2', g='h2', x=53, y=19, rows=EYE, alt=EYE_ALT),
-        dict(n='legF', g='legA', x=28, y=51, rows=LEG),
-        dict(n='drip2', g='h2', x=56, y=24, rows=DRIP, only='idle1|idle2|walk1'),
-        dict(n='drip3', g='h3', x=52, y=43, rows=DRIP, only='idle2|idle3|walk3'),
-        dict(n='glob1', g='fx', x=58, y=8, rows=GLOB, only='atk1'),
-        dict(n='glob2', g='fx', x=63, y=21, rows=GLOB, only='atk1'),
-        dict(n='glob3', g='fx', x=60, y=38, rows=GLOB, only='atk1'),
-        dict(n='splat', g='fx', x=62, y=18, rows=SPLAT, only='atk2'),
-        dict(n='splat2', g='fx', x=60, y=36, rows=SPLAT, only='atk2'),
+        dict(n='head2', g='h2', x=43, y=26, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
+        dict(n='eye2', g='h2', x=47, y=33, rows=EYE, alt=EYE_ALT),
+        dict(n='legF', g='legA', x=24, y=54, rows=LEG),
+        dict(n='drip2', g='h2', x=57, y=38, rows=DRIP, only='idle1|idle2|walk1'),
+        dict(n='drip3', g='h3', x=54, y=51, rows=DRIP, only='idle2|idle3|walk3'),
+        dict(n='glob1', g='fx', x=61, y=22, rows=GLOB, only='atk1'),
+        dict(n='glob2', g='fx', x=66, y=35, rows=GLOB, only='atk1'),
+        dict(n='glob3', g='fx', x=63, y=48, rows=GLOB, only='atk1'),
+        dict(n='splat', g='fx', x=64, y=32, rows=SPLAT, only='atk2'),
+        dict(n='splat2', g='fx', x=62, y=45, rows=SPLAT, only='atk2'),
     ]
 
 FRAMES = {

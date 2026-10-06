@@ -10,10 +10,10 @@ PAL = {
     'F': '#f4eec4', 'G': '#c2b27a',                      # 腹
     'm': '#dcf8f6', 'n': '#8ccad8', 'o': '#4a7e9c',      # 翼の 膜（風の 空色）
     'S': '#f6f9fc', 'T': '#a2aec4', 'U': '#5a6482',      # 刃（尾・角・爪）
-    'Y': '#ffe23a', 'r': '#e23c3c',                      # 目・口
+    'Y': '#ffe23a', 'O': '#d0821c', 'r': '#e23c3c',      # 目（虹彩 2色）・口
 }
 LIGHT = set('RFmSY')
-KEEP_BLACK = set('S')
+KEEP_BLACK = set('SYO')
 RAMP = {'1': 'RQP', '2': 'FGG', '3': 'mnQ', '4': 'STU', '5': 'QPP'}
 
 # ---------- 下書き用の 小道具 ----------
@@ -130,20 +130,20 @@ def wing(pose, far=False):
 # ---------- 胴・首・足 ----------
 def body():
     g = G()
-    p = G(); ellipse(p, 31, 32, 11, 6.5, '1')
-    poly(p, [(22, 35), (41, 33), (38, 38), (26, 39)], '2')
+    p = G(); ellipse(p, 31, 34, 9, 7, '1')
+    poly(p, [(23, 37), (39, 34), (37, 40), (27, 41)], '2')
     ink(g, p)
-    # 首（下側は 腹の 色）
-    p = G(); stroke(p, 38, 30, 45, 25, 4.4, 3.6, '1'); stroke(p, 45, 25, 49, 21, 3.6, 3.2, '1')
-    stroke(p, 41, 33, 48, 26, 1.6, 1.4, '2'); ink(g, p)
+    # 首（デフォルメで 短く。下側は 腹の 色）
+    p = G(); stroke(p, 35, 32, 41, 27, 4.6, 4.0, '1')
+    stroke(p, 38, 36, 43, 29, 1.6, 1.4, '2'); ink(g, p)
     g = shade(g, dk=.85)
     # 背中の ひれ（風を 切る 小さな 刃）を 手で
-    for (x, y) in ((24, 27), (29, 26), (34, 26), (40, 22), (45, 18)):
+    for (x, y) in ((25, 29), (30, 28), (35, 28)):
         put(g, x, y - 2, ['k..', 'Sk.', 'TTk'])
     # 腹の 段（うろこの すじ）
-    dots(g, 'G', [(26, 37), (29, 37), (32, 37), (35, 36), (38, 35), (44, 29)])
-    dots(g, 'R', [(28, 29), (31, 28), (34, 28)])
-    dots(g, 'P', [(29, 31), (32, 30), (35, 30), (38, 31)])
+    dots(g, 'G', [(28, 39), (31, 39), (34, 38), (37, 37)])
+    dots(g, 'R', [(27, 31), (30, 30), (33, 30)])
+    dots(g, 'P', [(28, 33), (31, 32), (34, 32)])
     return rows_of(g)
 
 LEG = [   # ちぢめた 後ろ足（白い 刃の かぎ爪）
@@ -181,21 +181,23 @@ HEAD = [   # 手打ち：細長い くさび形の 頭、あごは 腹の 色
     '..kPGGGGGGGGkk....',
     '...kkkkkkkkk......',
 ]
+HX, HY = 40, 19
 def head():
     g = G()
-    for (bx, by, tx, ty) in [(50, 15, 39, 9), (50, 18, 41, 15)]:
+    for (bx, by, tx, ty) in [(HX + 3, HY + 2, HX - 9, HY - 5), (HX + 3, HY + 5, HX - 7, HY + 2)]:
         p = G(); stroke(p, bx, by, tx, ty, 2.0, .6, '4'); ink(g, p)
     g = shade(g, {'4': 'STU'})
-    put(g, 47, 13, HEAD)
-    put(g, 45, 21, ['kkk.', 'kSTk', '.kTk', '..k.'])   # ほおの 刃
+    put(g, HX, HY, HEAD)
+    put(g, HX - 2, HY + 8, ['kkk.', 'kSTk', '.kTk', '..k.'])   # ほおの 刃
     return rows_of(g)
 
-EYE = ['kkk....', '.Rkkkk.', '..YYkk.', '..kkk..']   # まゆの 刃で おおわれた つり目
+# まゆの 刃で おおわれた つり目：ハイライト（S）＋虹彩 2色（Y・O）＋たての ひとみ
+EYE = ['kkk.....', '.Rkkkkk.', '.kSYkOk.', '..kOkk..']
 EYE_ALT = {
-    'blink': ['kkk....', '.Rkkkk.', '..kkkk.', '.......'],
-    'atk0|atk1|atk2': ['kkk....', '.Rkkkk.', '..SSYk.', '..kkk..'],
-    'hit': ['.......', '.kk.kk.', '...k...', '.kk.kk.'],
-    'ko': ['.......', '..k.k..', '...k...', '..k.k..'],
+    'blink': ['kkk.....', '.Rkkkkk.', '.kkkkkk.', '..QQQ...'],
+    'atk0|atk1|atk2': ['kkk.....', '.Rkkkkk.', '.kSSkYk.', '..kYkk..'],
+    'hit': ['........', '.kkQkk..', '.QQkQQ..', '.kkQkk..'],
+    'ko': ['........', '.kQQQk..', '.QkQkQ..', '.QQkQQ..'],
 }
 MOUTH_OPEN = [   # 攻撃：口を 開く
     'kkkkkkkkkkk.',
@@ -210,10 +212,10 @@ MOUTH_OPEN = [   # 攻撃：口を 開く
 def tail(pose):
     g = G()
     path = {
-        'rest': [(25, 33), (17, 34), (11, 37), (7, 42), (6, 47)],
-        'up':   [(25, 32), (19, 27), (16, 19), (19, 11), (26, 6)],
-        'fwd':  [(25, 31), (21, 21), (28, 10), (40, 5), (52, 6)],
-        'low':  [(25, 33), (23, 40), (32, 46), (45, 46), (55, 42)],
+        'rest': [(24, 35), (18, 37), (13, 40), (10, 45), (10, 49)],
+        'up':   [(24, 34), (18, 28), (16, 20), (19, 13), (26, 9)],
+        'fwd':  [(24, 33), (20, 23), (27, 12), (39, 7), (51, 8)],
+        'low':  [(24, 36), (23, 42), (31, 47), (43, 47), (52, 43)],
     }[pose]
     p = G()
     n = len(path) - 1
@@ -257,17 +259,17 @@ def layers():
     W = {p: wing(p) for p in WP}; WF = {p: wing(p, True) for p in WP}
     T = {p: tail(p) for p in ('rest', 'up', 'fwd', 'low')}
     return [
-        dict(n='wingB', g='wingB', x=-4, y=-1 - WOY, rows=WF['up'], alt={'walk1|walk3|atk2': WF['hi'], 'walk2|atk1': WF['mid']}),
-        dict(n='legFar', g='body', x=35, y=36, rows=LEG_FAR),
+        dict(n='wingB', g='wingB', x=-8, y=1 - WOY, rows=WF['up'], alt={'walk1|walk3|atk2': WF['hi'], 'walk2|atk1': WF['mid']}),
+        dict(n='legFar', g='body', x=33, y=38, rows=LEG_FAR),
         dict(n='tail', g='tail', x=0, y=0, rows=T['rest'], alt={'atk0': T['up'], 'atk1': T['fwd'], 'atk2': T['low']}),
         dict(n='body', g='body', x=0, y=0, rows=body()),
-        dict(n='leg', g='body', x=27, y=36, rows=LEG),
+        dict(n='leg', g='body', x=26, y=38, rows=LEG),
         dict(n='head', g='head', x=0, y=0, rows=head()),
-        dict(n='mouth', g='head', x=53, y=21, rows=MOUTH_OPEN, only='atk1|atk2|hit'),
-        dict(n='eye', g='head', x=52, y=16, rows=EYE, alt=EYE_ALT),
-        dict(n='wingF', g='wingF', x=0, y=-WOY, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|hit|atk0': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
+        dict(n='mouth', g='head', x=HX + 6, y=HY + 8, rows=MOUTH_OPEN, only='atk1|atk2|hit'),
+        dict(n='eye', g='head', x=HX + 5, y=HY + 3, rows=EYE, alt=EYE_ALT),
+        dict(n='wingF', g='wingF', x=-4, y=2 - WOY, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|hit|atk0': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
         dict(n='gust', g='root', x=26, y=56, rows=OL(GUST), only='walk2'),
-        dict(n='slash', g='root', x=51, y=10, rows=OL(SLASH), only='atk1'),
+        dict(n='slash', g='root', x=50, y=12, rows=OL(SLASH), only='atk1'),
     ]
 
 FRAMES = {

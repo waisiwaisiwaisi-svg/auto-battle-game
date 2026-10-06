@@ -10,6 +10,7 @@ PAL = {
 }
 LIGHT = set('SYWCRw')
 
+# デフォルメ（2〜3頭身）：かぶとは そのまま、胴・草摺・すね当てを 短く
 # ---- かぶと（右向き 3/4）：鉢・ひさし・しころ（3段）・吹き返し・面頬 ----
 HEAD = [
     '.........kkkkkkkk...........',
@@ -34,11 +35,12 @@ HEAD = [
     '.kkkkkkkkkk..kkkkkkkkkkk....',
 ]
 # かぶとの 中の 霊火の 目（つり目）
-EYE = ['WCkkkkkkkkWWW', 'kWCkkkkkCWWkk']
+# かぶとの 中の 霊火の 目（つり目）：白い 光＋水色と 青緑の 2色＋たての ひとみ（闇）
+EYE = ['wCkkkkwCCkCCk', 'DDkkkkCDDkDkk', 'kkkkkkkDDkkkk']
 EYE_ALT = {
-    'blink': ['kkkkkkkkkkkkk', 'kDDkkkkkkDDDk'],
-    'atk0|atk1|atk2': ['WWkkkkkkkkWWW', 'kWWCkkkCWWWkk'],
-    'hit|ko': ['CkCkkkkkkCkCk', 'kCkkkkkkkkCkk'],
+    'blink': ['kkkkkkkkkkkkk', 'DDkkkkDDDDDkk', 'kkkkkkkkkkkkk'],
+    'atk0|atk1|atk2': ['wWkkkkwWWkWWk', 'CCkkkkWCCkCkk', 'kkkkkkkCCkkkk'],
+    'hit': ['CkkkkkCkkkCkk', 'kCkkkkkCkCkkk', 'kkkkkkkkCkkkk'],
 }
 # 鍬形（くわがた）の 金の 角
 CREST = [
@@ -58,16 +60,12 @@ TORSO = [
     '.....kkkkkkkkkkkk.....',
     '...kkSSSSSSSTTTTTkk...',
     '..kSSSSTTTTTTTTTTUUk..',
-    '..kSTTTTTTTTTTTTUUUk..',
-    '..kRrRrRrRrRrRrrrrrk..',
     '..kSSSSSkkkTTTTTTUUk..',
     '..kSTTTkCWCkTTTTUUUk..',
     '..kRrRkCWWDkRrrrrrrk..',
     '..kSSSkCWDkTTTTTTUUk..',
     '..kSTTTkDkTTTTTTUUUk..',
     '..kRrRrRkRrRrRrrrrrk..',
-    '..kSSSSSTTTTTTTTTUUk..',
-    '..kSTTTTTTTTTTTTUUUk..',
     '..kkkkkkkkkkkkkkkkkk..',
     '..kYYYYYYYyyyyyyyyyk..',
     '..kkkkkkkkkkkkkkkkkk..',
@@ -77,8 +75,6 @@ SKIRT = [
     '...kkkkkkkkkkkkkkkkkkkkkk...',
     '..kSSTTkSSSTTkSSSTTkSTTUUk..',
     '..kRrRrkRrRrrkRrRrrkRrrrrk..',
-    '.kSSTTTkSSTTTkSSTTTkSTTUUUk.',
-    '.kRrRrrkRrRrrkRrRrrkRrrrrlk.',
     'kSSTTTkSSTTTUkSTTTUkTTTUUUUk',
     'kTTUUUkTTUUUkkTUUUkkkUUUUkk.',
     '.kkk.kk.kkkk...kkk....kkk...',
@@ -90,8 +86,6 @@ SODE = [
     'kRrRrRrrrrk.',
     'kSSSSTTTTUUk',
     'kRrRrRrrrrlk',
-    'kSSSTTTTTUUk',
-    'kRrRrRrrrrlk',
     '.kSSTTTTTUUUk',
     '.kRrRrrrrrlk.',
     '.kTTTTUUUUUUk',
@@ -102,8 +96,6 @@ SODE_B = [
     'kTTTTTUk',
     'krrrrrlk',
     'kTTTUUUk',
-    'krrrrrlk',
-    'kTTUUUUk',
     'krrrrrlk',
     'kUUUUUUk',
     '.kkkkkk.',
@@ -197,38 +189,30 @@ SWORD_DN = [
     '.................kkTk',
     '...................kk',
 ]
-# すね当て（後ろ足は 後ろへ ひらく、前足は 前へ ふみこむ）
+# すね当て（短く 太く。後ろ足は 後ろへ、前足は 前へ。上は 霊火で 草摺と つながる）
 LEG_B = [
-    '.....kCCk.',
-    '....kCWCDk',
-    '....kCDDk.',
+    '....kCCk..',
+    '...kCWCDk.',
     '...kkkkkk.',
-    '...kSTTUk.',
+    '..kSSTUk..',
     '..kSTTUUk.',
-    '..kSTTUUk.',
-    '.kSTTUUk..',
-    '.kSTTUUk..',
-    '.kTTUUUk..',
+    '.kSTTUUUk.',
     'kkkkkkkkk.',
-    'kSTTUUUUkk',
+    'kSSTTUUUkk',
     'kTUUUUUUUk',
     '.kkkkkkkk.',
 ]
 LEG_A = [
-    'kCCk.........',
-    'kCWCDk.......',
-    '.kCDDk.......',
-    '.kkkkkk......',
-    '..kSSTUk.....',
-    '..kSTTUUk....',
-    '...kSTTUk....',
-    '...kSTTUUk...',
-    '...kSTTUUk...',
-    '....kTTUUk...',
-    '...kkkkkkkk..',
-    '...kSSTTTUUkk',
-    '...kTTUUUUUUk',
-    '....kkkkkkkk.',
+    '.kCCk.......',
+    '.kCWCDk.....',
+    '.kkkkkkk....',
+    '..kSSTUk....',
+    '..kSTTUUk...',
+    '...kSTTUUk..',
+    '..kkkkkkkkk.',
+    '..kSSTTTUUkk',
+    '..kTTUUUUUUk',
+    '...kkkkkkkk.',
 ]
 # 霊火の 吹き流し（かぶとの 後ろから）
 PLUME0 = [
@@ -325,22 +309,22 @@ def layers():
     return [
         dict(n='ko', g='root', x=12, y=39, rows=KO, only='ko'),
         dict(n='wisp', g='root', x=40, y=32, rows=KO_WISP, only='ko'),
-        dict(n='plume', g='plume', x=17, y=5, rows=PLUME0, alt={'idle1|idle3|walk1|walk3|atk1|atk2': PLUME1}, not_='ko'),
-                dict(n='sodeB', g='body', x=17, y=26, rows=SODE_B, not_='ko'),
-        dict(n='legB', g='legB', x=14, y=47, rows=LEG_B, not_='ko'),
-        dict(n='legA', g='legA', x=37, y=47, rows=LEG_A, not_='ko'),
-        dict(n='skirt', g='body', x=17, y=40, rows=SKIRT, not_='ko'),
-        dict(n='torso', g='body', x=21, y=25, rows=TORSO, not_='ko'),
-        dict(n='head', g='head', x=29, y=11, rows=HEAD, not_='ko'),
-        dict(n='eye', g='head', x=41, y=22, rows=EYE, alt=EYE_ALT, not_='ko'),
-        dict(n='crest', g='head', x=39, y=5, rows=CREST, not_='ko'),
-        dict(n='sword', g='arm', x=40, y=14, rows=SWORD, not_='ko|atk0|atk1|atk2'),
-        dict(n='swordV', g='arm', x=46, y=15, rows=SWORD_UP, only='atk0'),
-        dict(n='swordF', g='arm', x=44, y=33, rows=SWORD_FWD, only='atk1'),
-        dict(n='swordD', g='arm', x=46, y=34, rows=SWORD_DN, only='atk2'),
-        dict(n='sode', g='body', x=35, y=25, rows=SODE, not_='ko'),
-        dict(n='arm', g='arm', x=38, y=33, rows=ARM, not_='ko'),
-        dict(n='slash', g='fx', x=52, y=11, rows=SLASH, only='atk1'),
+        dict(n='plume', g='plume', x=17, y=14, rows=PLUME0, alt={'idle1|idle3|walk1|walk3|atk1|atk2': PLUME1}, not_='ko'),
+                dict(n='sodeB', g='body', x=17, y=36, rows=SODE_B, not_='ko'),
+        dict(n='legB', g='legB', x=15, y=51, rows=LEG_B, not_='ko'),
+        dict(n='legA', g='legA', x=35, y=51, rows=LEG_A, not_='ko'),
+        dict(n='skirt', g='body', x=17, y=46, rows=SKIRT, not_='ko'),
+        dict(n='torso', g='body', x=21, y=35, rows=TORSO, not_='ko'),
+        dict(n='sword', g='arm', x=40, y=23, rows=SWORD, not_='ko|atk0|atk1|atk2'),
+        dict(n='head', g='head', x=29, y=20, rows=HEAD, not_='ko'),
+        dict(n='eye', g='head', x=40, y=31, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='crest', g='head', x=39, y=14, rows=CREST, not_='ko'),
+        dict(n='swordV', g='arm', x=46, y=24, rows=SWORD_UP, only='atk0'),
+        dict(n='swordF', g='arm', x=44, y=42, rows=SWORD_FWD, only='atk1'),
+        dict(n='swordD', g='arm', x=46, y=43, rows=SWORD_DN, only='atk2'),
+        dict(n='sode', g='body', x=35, y=35, rows=SODE, not_='ko'),
+        dict(n='arm', g='arm', x=38, y=42, rows=ARM, not_='ko'),
+        dict(n='slash', g='fx', x=52, y=20, rows=SLASH, only='atk1'),
     ]
 
 FRAMES = {

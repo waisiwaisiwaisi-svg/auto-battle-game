@@ -6,10 +6,10 @@ PAL = {
     'P': '#eaa292', 'Q': '#b86262', 'R': '#783442',
     'r': '#3e0e1c', 'w': '#fff6dc', 'n': '#c8b490',
     'S': '#ecd08a', 's': '#b48c4a',
-    'Y': '#ffb020',
+    'Y': '#ffd040', 'O': '#d86410',
 }
 LIGHT = set('UPwS')
-KEEP_BLACK = set('wnrY')
+KEEP_BLACK = set('wnrYO')
 
 # 体：砂岩の よろいの 節。腹がわは 赤い 肉
 BODY = [
@@ -183,8 +183,10 @@ SAND = [
 # こぼれ落ちる 砂
 FALL = [['S.....', '......', '.s..S.', '......', 's.....', '...s..'], ['......', 'S...s.', '......', '.S....', '......', 's..S..']]
 # 口の ふちの 目（三つの 光る 細目）
-EYE = ['kkkkk', 'kYYYk', '.kkk.']
-EYE_ALT = {'blink': ['kkkkk', 'kkkkk', '.....'], 'atk0|atk1|atk2': ['kkkkk', 'kYYYY', 'kYYk.'], 'hit': ['.kkk.', 'kYkYk', '.kkk.'], 'ko': ['.....', 'kVkVk', '.....']}
+# 目：まぶたの 線＋ハイライト＋虹彩 2色（黄・だいだい）＋たての ひとみ
+EYE = ['kkkkk.', 'kwYkOk', 'kYOkOk', '.kkkk.']
+EYE_ALT = {'blink': ['kkkkk.', 'kVVVVk', 'kkkkkk', '......'], 'atk0|atk1|atk2': ['kkkkk.', 'kwwkYk', 'kYYkOk', '.kkkk.'],
+           'hit': ['.kkk..', 'kOkOk.', 'kkOkk.', '.kkk..'], 'ko': ['......', 'kVVVk.', 'VkVkV.', 'kVVVk.']}
 # 口の まわりの 岩の とげ
 SPK_U = ['kk...', 'kUkk.', '.kUVk', '..kk.']
 SPK_L = ['kkk..', 'kUVkk', '.kkVk']

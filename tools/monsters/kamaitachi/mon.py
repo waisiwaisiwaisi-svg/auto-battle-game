@@ -7,7 +7,7 @@ PAL = {
     'W': '#fff0c8',
     'S': '#f6faff', 'T': '#a6b2ca', 'U': '#566080',
     'V': '#c4fff2', 'X': '#3ebcb4',
-    'E': '#ff2848',
+    'E': '#ff2848', 'e': '#9a1030',
 }
 LIGHT = set('AWSV')
 
@@ -38,25 +38,23 @@ def dark(rows): return pix.recolor(rows, DARK)
 def notop(r): return ['.' * len(r[0])] + r[1:]
 
 # ---- 胴：細長く しなやか。腹は クリーム色 ----
+# デフォルメ：胴は 短く 丸く（頭は 大きく）
 BODY_M = [
-    '..........###########.............',
-    '.......#################..........',
-    '.....#######################......',
-    '...############################...',
-    '..##############################..',
-    '.################################.',
-    '.#################################',
-    '##################################',
-    '##################################',
-    '.%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##',
-    '..%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#..',
-    '....%%%%%%%%%%...........%%%%%....',
+    '......#########.......',
+    '...###############....',
+    '.####################.',
+    '######################',
+    '######################',
+    '######################',
+    '.%%%%%%%%%%%%%%%%%%%##',
+    '..%%%%%%%%%%%%%%%%%%#.',
+    '....%%%%%.....%%%%%...',
 ]
 BODY = pix.outline(put(shade(BODY_M, {'#': 'ABC', '%': 'WWB'}), [
-    '', '', '',
-    '........C......C......C',
-    '.......C......C......C',
-    '......C......C......C',
+    '', '',
+    '.......C......C',
+    '......C......C',
+    '.....C......C',
 ]))
 NECK_M = [
     '.....#####.',
@@ -72,7 +70,7 @@ NECK_M = [
     '###%%%%%%%%',
     '##%%%%%%%%%',
 ]
-NECK = notop(pix.outline(shade(NECK_M, {'#': 'ABC', '%': 'WWB'})))
+NECK = notop(pix.outline(shade(NECK_M[4:], {'#': 'ABC', '%': 'WWB'})))
 
 HLEG_M = [
     '..#####..',
@@ -84,35 +82,50 @@ HLEG_M = [
     '..#####..',
     '..####...',
     '..###....',
-    '..###....',
-    '..###....',
     '.#####...',
 ]
-HLEG = notop(pix.outline(put(shade(HLEG_M, {'#': 'ABC'}), ['', '', '', '', '', '', '', '', '', '', '', '.k.k.'])))
+HLEG = notop(pix.outline(put(shade(HLEG_M, {'#': 'ABC'}), ['', '', '', '', '', '', '', '', '', '.k.k.'])))
 
 # ---- 頭（手打ち）：黒い くまどりの 中に 赤い 目、細い 牙 ----
+# ---- 頭（手打ち・デフォルメで 大きく）：黒い くまどりの 中に 赤い 目、細い 牙 ----
 HEAD = [
-    '..kk............',
-    '.kAAkkkkkk......',
-    '.kAABBBBBBkkk...',
-    'kAABBBBBBBBBBkk.',
-    'kABkkkkkkBBBBBBk',
-    'kABCCCCCkkBBBBBk',
-    'kBBBCCCBBBBBBkkk',
-    'kBBBBBWWWWWWkSk.',
-    '.kBBWWWWWWWWkk..',
-    '..kkWWWWWWWk....',
-    '....kkkkkkk.....',
+    '...kkkkkkk...........',
+    '..kAAAAAAAkkk........',
+    '.kAABBBBBBBBBkk......',
+    'kAABBBBBBBBBBBBkk....',
+    'kABBBBBBBBBBBBBBBkk..',
+    'kABkkkkkkkkBBBBBBBBk.',
+    'kABCCCCCCCCkkBBBBBBBk',
+    'kBBCCCCCCCCCCkBBBBBkk',
+    'kBBBCCCCCCCkkBBBkkkk.',
+    'kBBBBBBBBBBBBBBkkSk..',
+    'kBBBBBBWWWWWWWkkSk...',
+    '.kBBBWWWWWWWWWWkk....',
+    '..kBWWWWWWWWWWk......',
+    '...kkWWWWWWWkk.......',
+    '.....kkkkkkk.........',
 ]
-HEAD_OPEN = HEAD[:6] + [
-    'kBBBCCCBBBBBBkkk',
-    'kBBBBBWWWWkSkSk.',
-    '.kBBWWWWWkllll..',
-    '..kkWWWWWWkSkSk.',
-    '....kkkkkkkkk...',
+HEAD_OPEN = [
+    '...kkkkkkk...........',
+    '..kAAAAAAAkkk........',
+    '.kAABBBBBBBBBkk......',
+    'kAABBBBBBBBBBBBkk....',
+    'kABBBBBBBBBBBBBBBkk..',
+    'kABkkkkkkkkBBBBBBBBk.',
+    'kABCCCCCCCCkkBBBBBBBk',
+    'kBBCCCCCCCCCCkBBBBBkk',
+    'kBBBCCCCCCCkkBBkkkkk.',
+    'kBBBBBBBBBBBBkSkSkSk.',
+    'kBBBBBBWWWWWkllllll..',
+    '.kBBBWWWWWWWkSkSkSk..',
+    '..kBWWWWWWWWWkkkkk...',
+    '...kkWWWWWWWkk.......',
+    '.....kkkkkkk.........',
 ]
-EYE = ['kEEk']
-EYE_ALT = {'blink': ['kkkk'], 'hit': ['kCkC'], 'atk0|atk1|atk2': ['EEEE'], 'ko': ['CkCk']}
+# 目：くまどりの 中、ハイライト（S）＋虹彩 2色（E・e）＋たての ひとみ
+EYE = ['.kkkkkk', 'kSEkEek', '.kekeek']
+EYE_ALT = {'blink': ['.......', 'kkkkkkk', '.CCCCC.'], 'hit': ['BkBkB..', 'BBkBB..', 'BkBkB..'],
+           'atk0|atk1|atk2': ['.kkkkkk', 'kSSkEEk', '.kEkEek'], 'ko': ['AkAkA..', 'AAkAA..', 'AkAkA..']}
 
 # ---- 鎌の 腕：毛の 前腕から 三日月の 刃（上が 刃、下が みね）----
 ARM = [
@@ -224,23 +237,23 @@ def slash(r1=11, r2=8, cut=0):
 SLASH = slash(); SLASH2 = slash(11, 10, 6)
 
 NB = 'atk1|atk2'
+HX, HY = 33, 29
 def layers():
     return [
-        dict(n='tail', g='tail', x=2, y=17, rows=TAIL),
-        dict(n='swirl', g='tail', x=14, y=13, rows=SWIRL, alt={'idle1|idle3|walk1|walk3|atk1': SWIRL2}),
-        dict(n='hlegF', g='legB', x=18, y=47, rows=dark(HLEG), not_='ko'),
-        dict(n='farm', g='legB', x=43, y=47, rows=dark(FAR_ARM), not_='ko'),
-        dict(n='fin1', g='body', x=17, y=31, rows=FIN),
-        dict(n='fin2', g='body', x=24, y=30, rows=FIN),
-        dict(n='fin3', g='body', x=31, y=31, rows=FIN),
-        dict(n='body', g='body', x=9, y=35, rows=BODY),
-        dict(n='hleg', g='legA', x=10, y=47, rows=HLEG, not_='ko'),
-        dict(n='neck', g='head', x=36, y=26, rows=NECK),
-        dict(n='ear', g='head', x=41, y=14, rows=EAR),
-        dict(n='head', g='head', x=42, y=17, rows=HEAD, alt={NB: HEAD_OPEN}),
-        dict(n='eye', g='head', x=46, y=22, rows=EYE, alt=EYE_ALT),
-        dict(n='arm', g='arm', x=40, y=31, rows=ARM, alt={NB: ARM_SWING}, not_='ko'),
-        dict(n='slash', g='arm', x=58, y=22, rows=SLASH, alt={'atk2': SLASH2}, only=NB),
+        dict(n='tail', g='tail', x=5, y=25, rows=TAIL),
+        dict(n='swirl', g='tail', x=17, y=22, rows=SWIRL, alt={'idle1|idle3|walk1|walk3|atk1': SWIRL2}),
+        dict(n='hlegF', g='legB', x=18, y=50, rows=dark(HLEG), not_='ko'),
+        dict(n='farm', g='legB', x=36, y=48, rows=dark(FAR_ARM), not_='ko'),
+        dict(n='fin1', g='body', x=16, y=39, rows=FIN),
+        dict(n='fin2', g='body', x=23, y=38, rows=FIN),
+        dict(n='body', g='body', x=12, y=43, rows=BODY),
+        dict(n='hleg', g='legA', x=12, y=50, rows=HLEG, not_='ko'),
+        dict(n='neck', g='head', x=HX - 4, y=HY + 9, rows=NECK),
+        dict(n='ear', g='head', x=HX + 2, y=HY - 4, rows=EAR),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={NB: HEAD_OPEN}),
+        dict(n='eye', g='head', x=HX + 3, y=HY + 6, rows=EYE, alt=EYE_ALT),
+        dict(n='arm', g='arm', x=31, y=40, rows=ARM, alt={NB: ARM_SWING}, not_='ko'),
+        dict(n='slash', g='arm', x=49, y=31, rows=SLASH, alt={'atk2': SLASH2}, only=NB),
     ]
 
 FRAMES = {
@@ -257,6 +270,6 @@ FRAMES = {
     'atk1': {'root': (4, 0), 'arm': (3, 6), 'head': (1, 0)},
     'atk2': {'root': (6, 0), 'arm': (3, 8)},
     'hit': {'root': (-3, 0), 'head': (-2, -1), 'arm': (-3, -1)},
-    'ko': {'body': (0, 12), 'head': (2, 4), 'tail': (0, 0)},
+    'ko': {'body': (0, 5), 'head': (0, 11), 'tail': (0, 0)},
 }
 PARENT = {'head': 'body', 'arm': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}
