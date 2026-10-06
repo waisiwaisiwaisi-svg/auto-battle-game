@@ -1445,7 +1445,7 @@ function beginMove(f, id) {
   const o = opp(f); if (!o) return;
   const m = MOVES[id];
   let ang = Math.atan2(o.y - f.y, o.x - f.x), tx = o.x, ty = o.y;
-  // ◎（命中100未満）の わざ：プレイヤーは スティックを たおした方向に ねらえる
+  // ◎（命中100未満）の わざ：（スティック廃止のため 通常は あいての いた 方向・いちに 固定）
   if (f.side === 0 && !S.auto && m.aim === 'dir') {
     const v = playerVec();
     if (v.active) { ang = Math.atan2(v.y, v.x); const d = dist(f, o); tx = clamp(f.x + v.x / Math.hypot(v.x, v.y) * d, B.st.fx0, B.st.fx1); ty = clamp(f.y + v.y / Math.hypot(v.x, v.y) * d, B.st.fy0, B.st.fy1); }
@@ -2681,7 +2681,7 @@ function render() {
 }
 
 /* =====================================================================
-   入力（スティック・ボタン・キーボード）
+   入力（ボタン・キーボード）
    ===================================================================== */
 const tap = (el, fn) => el.addEventListener('pointerdown', (ev) => { ev.preventDefault(); fn(); });
 document.querySelectorAll('.cmd.mv').forEach(b => tap(b, () => cmdMove(+b.dataset.mv)));
