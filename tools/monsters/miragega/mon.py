@@ -68,21 +68,38 @@ DARK = {'R': 'Q', 'Q': 'P', 'P': 'l', 'F': 'G', 'G': 'H', 'Y': 'O', 'O': 'n', 'm
 import math
 # 前翅の りんかく（手で 打った 点）：前の ふちは 弧、先は かぎ形、外の ふちは 波（スカラップ）、後ろの ふちは ゆるい 弧
 FW_BASE = (41, 25)
-FW_PTS = [(41, 24), (36, 17), (29, 11), (21, 7), (13, 4), (7, 2), (2, 1),    # 前の ふち → 先
-          (4, 4), (6, 6),                                                     # かぎの 内がわ
-          (4, 9), (3, 12), (6, 13), (4, 16), (7, 17), (6, 20), (9, 21), (9, 24), (12, 24),   # 波の ふち
-          (15, 27), (21, 30), (28, 32), (34, 32), (39, 29)]                    # 後ろの ふち
-FW_VEIN = [5, 12, 16, 20]          # 翅脈を のばす 先（点の 番号）
+# 前翅：行ごとに 左はし・右はしを 手で 打つ（左＝外の ふち：かぎ形の 先と 波の 谷、右＝前の ふち／後ろの ふち）
+FW_SPAN = {
+    0: (3, 7), 1: (1, 11), 2: (0, 15), 3: (2, 19), 4: (4, 22), 5: (5, 24), 6: (5, 26), 7: (4, 28),
+    8: (3, 29), 9: (3, 30), 10: (5, 31), 11: (4, 32), 12: (3, 33), 13: (4, 34), 14: (6, 35), 15: (5, 35),
+    16: (5, 36), 17: (6, 37), 18: (8, 37), 19: (7, 38), 20: (7, 38), 21: (8, 39), 22: (10, 40), 23: (9, 40),
+    24: (10, 41), 25: (11, 41), 26: (13, 41), 27: (13, 40), 28: (15, 39), 29: (18, 38), 30: (22, 37), 31: (27, 35),
+}
+def span_poly(sp):
+    ys = sorted(sp); L = [(sp[y][0], y) for y in ys] + [(sp[ys[-1]][0], ys[-1] + 1)]
+    pts = []
+    for y in ys: pts += [(sp[y][0], y), (sp[y][0], y + 1)]
+    for y in reversed(ys): pts += [(sp[y][1] + 1, y + 1), (sp[y][1] + 1, y)]
+    return pts
+FW_PTS = span_poly(FW_SPAN)
+FW_VEIN = [4, 22, 34, 46]          # 翅脈を のばす 先（点の 番号）
+FW_BITE = [(3.4, 10.3), (4.4, 14.3), (6.4, 18.3), (8.4, 22.3), (11.4, 26.3)]   # 波の 谷
 HW_BASE = (38, 31)
-HW_PTS = [(38, 30), (31, 31), (23, 34), (17, 38), (14, 43), (16, 45), (15, 48), (19, 48), (20, 51), (24, 50),
-          (27, 52), (29, 48), (33, 47), (36, 42), (39, 36)]
-HW_VEIN = [4, 8, 11]
+HW_PTS = [(38, 30), (31, 31), (23, 34), (17, 38), (14, 43), (15, 48), (19, 51), (24, 52), (29, 51), (33, 47), (36, 42), (39, 36)]
+HW_VEIN = [4, 6, 8]
+HW_BITE = [(13.6, 45.6), (16.2, 50.4), (21.4, 52.6), (27.0, 52.4), (31.6, 49.6)]
 def turn(pts, base, deg):
     """あたりの 点を つけねで まわす（下書き用。ぬりは あとで）"""
     a = math.radians(deg); bx, by = base
     return [(round(bx + (x - bx) * math.cos(a) - (y - by) * math.sin(a)), round(by + (x - bx) * math.sin(a) + (y - by) * math.cos(a))) for x, y in pts]
-FW = {'mid': FW_PTS, 'hi': turn(FW_PTS, FW_BASE, 14), 'up': turn(FW_PTS, FW_BASE, 34), 'down': turn(FW_PTS, FW_BASE, -112)}
+ANG = {'mid': 0, 'hi': 14, 'up': 34, 'down': -62}
+def turnf(pts, base, deg):
+    a = math.radians(deg); bx, by = base
+    return [(bx + (x - bx) * math.cos(a) - (y - by) * math.sin(a), by + (x - bx) * math.sin(a) + (y - by) * math.cos(a)) for x, y in pts]
+FW = {k: turn(FW_PTS, FW_BASE, a) for k, a in ANG.items()}
+FW_BITES = {k: turnf(FW_BITE, FW_BASE, a) for k, a in ANG.items()}
 HW = {'rest': HW_PTS, 'down': turn(HW_PTS, HW_BASE, -30)}
+HW_BITES = {'rest': HW_BITE, 'down': turnf(HW_BITE, HW_BASE, -30)}
 SPOT = [   # 翅の 目玉：アーモンド形に たての ひとみ（にらむ 目）
     '....kkkkk....',
     '..kkYYYYYkk..',
@@ -102,15 +119,18 @@ SPOT_GLOW = [
     '....kkkkk....',
 ]
 SPOT_S = ['.kkkk.', 'kYOkYk', '.kkkk.']
-def wingpart(pts, spot, glow=False, small=False, base=None, veins=()):
-    g = G(); p = G(); poly(p, pts, '1'); ink(g, p)
-    g = shade(g, dk=.8)
+def wingpart(pts, spot, glow=False, small=False, base=None, veins=(), bites=(), lobes=(), nospot=False):
     bx, by = base or pts[0]
+    g = G(); p = G(); poly(p, pts, '1')
+    for (cx_, cy_) in bites:   # 波の 谷を まるく かじる → 山が まるく 残る（スカラップ）
+        ellipse(p, cx_ + .5, cy_ + .5, 1.7, 1.7, '.')
+    ink(g, p)
+    g = shade(g, dk=.8)
     cells = [(x, y) for y in range(64) for x in range(64) if g[y][x] in 'RQP']
     far = max(((x - bx) ** 2 + (y - by) ** 2) ** .5 for x, y in cells)
     for x, y in cells:
         d = ((x - bx) ** 2 + (y - by) ** 2) ** .5 / far
-        z = .035 * ((x // 2 + y // 2) % 2)
+        z = .035 * math.sin(math.atan2(y - by, x - bx) * 9)   # 波形の 帯
         # 中ほどに 暗い 波形の 帯、外の ふちは 明るい 鱗粉の 帯（境に 細い 線）
         if .40 + z < d < .52 + z: g[y][x] = 'n' if .43 + z < d < .49 + z else 'P'
         elif .82 + z < d < .87 + z: g[y][x] = 'P'
@@ -121,19 +141,23 @@ def wingpart(pts, spot, glow=False, small=False, base=None, veins=()):
         for i in range(3, n - 2):
             x, y = round(bx + (ex - bx) * i / n), round(by + (ey - by) * i / n)
             if g[y][x] in 'RQ': g[y][x] = 'P'
-    for x, y in cells:
-        if g[y][x] == 'R' and (x * 3 + y * 2) % 7 == 0 and ((x - bx) ** 2 + (y - by) ** 2) ** .5 / far > .88: g[y][x] = 'w'
+    # 鱗粉の 白：波の 山の 先に だけ 置く（谷と 谷の あいだ）
+    for (ex, ey) in [((a[0] + b[0]) / 2, (a[1] + b[1]) / 2) for a, b in zip(bites, bites[1:])]:
+        n = max(abs(ex - bx), abs(ey - by)); n = int(n)
+        for i in range(n, 0, -1):
+            x, y = round(bx + (ex - bx) * i / n), round(by + (ey - by) * i / n)
+            if 0 <= y < 64 and 0 <= x < 64 and g[y][x] in 'RQ': g[y][x] = 'w'; break
     cx = sum(x for x, y in cells) / len(cells); cy = sum(y for x, y in cells) / len(cells)
     cx, cy = cx + (cx - bx) * spot, cy + (cy - by) * spot
     S = SPOT_S if small else SPOT_GLOW if glow else SPOT
-    put(g, round(cx) - len(S[0]) // 2, round(cy) - len(S) // 2, S)
+    if not nospot: put(g, round(cx) - len(S[0]) // 2, round(cy) - len(S) // 2, S)
     return g
 def wing(pose, far=False, glow=False):
-    g = wingpart(FW[pose], .35, glow, base=FW_BASE, veins=FW_VEIN)
+    g = wingpart(FW[pose], .35, glow, base=FW_BASE, veins=FW_VEIN, bites=FW_BITES[pose], nospot=far)
     if far: g = recolor(g, DARK)
     return rows_of(g)
 def hindwing(pose, far=False):
-    g = wingpart(HW[pose], .2, small=True, base=HW_BASE, veins=HW_VEIN)
+    g = wingpart(HW[pose], .2, small=True, base=HW_BASE, veins=HW_VEIN, bites=HW_BITES[pose])
     if far: g = recolor(g, DARK)
     return rows_of(g)
 
@@ -248,7 +272,7 @@ def layers():
     H = {p: hindwing(p) for p in HW}; HF = {p: hindwing(p, True) for p in HW}
     return [
         dict(n='hindB', g='wingB', x=3, y=-3, rows=HF['rest'], alt={'walk2': HF['down']}),
-        dict(n='wingB', g='wingB', x=3, y=-3, rows=WF['hi'], alt={'idle1|idle3|walk1|walk3|atk1|atk2': WF['mid'], 'walk0|atk0|hit': WF['up'], 'walk2': WF['down']}),
+        dict(n='wingB', g='wingB', x=3, y=-3, rows=WF['up'], alt={'idle1|idle3|walk1|walk3|atk1|atk2': WF['hi'], 'walk0|atk0|hit': WF['up'], 'walk2': WF['down']}),
         dict(n='legB', g='legs', x=33, y=40, rows=OL(LEGS_BACK) if False else LEGS_BACK),
         dict(n='hindF', g='wingF', x=0, y=0, rows=H['rest'], alt={'walk2': H['down']}),
         dict(n='body', g='body', x=0, y=0, rows=body()),

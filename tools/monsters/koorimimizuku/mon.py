@@ -56,10 +56,11 @@ def body():
         for x in range(S):
             if c[y][x] == 'W' and g[y][x] != '.':
                 g[y][x] = 'I' if (x >= 42 or y >= 51) else 'W'
-    for y in range(36, 55, 3):   # 横じま（V字の 羽の もよう）
-        for x in range(34, 45, 4):
-            for (dx, dy) in ((0, 0), (1, 1), (2, 0)):
-                if g[y + dy][x + dx] in 'WI': g[y + dy][x + dx] = 'J'
+    for j, y in enumerate(range(37, 55, 4)):   # 波うつ 横じま（とちゅうで 切れる）
+        for x in range(30, 48):
+            if (x + j * 2) % 6 in (0, 5): continue
+            yy = y + (1 if (x + j * 2) % 6 in (2, 3) else 0)
+            if g[yy][x] in 'WI': g[yy][x] = 'J' if g[yy][x] == 'W' else 'K'
     return ol(g)
 
 # ---------- 頭（大きく、まゆの ひさしが 重い）----------
@@ -81,49 +82,61 @@ BEAK = [
     '..kgk.',
     '...k..',
 ]
-CRYSTAL_B = [  # うしろの 羽角：氷の 結晶（2本の 刃）
-    'k.........',
-    'Wk........',
-    'WIk.......',
-    'kWIk...k..',
-    '.kWIk.kWk.',
-    '.kWIJkWIk.',
-    '..kWIJIJk.',
-    '..kIJJJKk.',
-    '...kJJKk..',
-    '...kJKk...',
+CRYSTAL_B = [  # うしろの 羽角：氷の 結晶（3本の 刃が うしろへ 反る）
+    'kk...........',
+    'kWk..........',
+    '.kWk.........',
+    '.kWIk...k....',
+    '..kWIk.kWk...',
+    'k.kWIJkWIk...',
+    'Wk.kWIJIJk...',
+    'kWkkWIJJKk...',
+    '.kWIIJJKKk...',
+    '..kIJJJKKk...',
+    '...kkJJKk....',
+    '.....kKk.....',
 ]
 CRYSTAL_F = [
-    '.......k.',
-    '......kW.',
-    '.....kWI.',
-    '..k.kWIJk',
-    '.kWkWIJKk',
-    '.kWIIJKk.',
-    'kWIJJKKk.',
-    'kIJJKKk..',
-    '.kJKKk...',
-    '..kKk....',
+    '.........kk',
+    '........kWk',
+    '.......kWIk',
+    '...k..kWIJk',
+    '..kWk.kWJKk',
+    '..kWIkWIJKk',
+    '.kWIIJIJKk.',
+    '.kWIJJJKKk.',
+    'kWIJJKKKk..',
+    'kIJJKKKk...',
+    '.kkJKKk....',
+    '...kkk.....',
+]
+# 顔（手打ち）：重い まゆの ひさし、つり上がった 光る 目、白い 霜の 顔、かぎくちばし。'.'は 頭の 地のまま
+FACE = [
+    'MM.................',
+    'MMMM............MM.',
+    'lMMMMMM.......MMMM.',
+    '.llMMMMMM...MMMMMl.',
+    '.WWllMMMMM.MMMllWW.',
+    'WWWWWllMMMMMlWWWWW.',
+    'WWWWWWWlkMMklWWWWW.',
+    'WWWWWWWWkllkWWWWIW.',
+    'WIWWWWWWkGGkWWWIIW.',
+    'WIIWWWWkGGGGkWWIII.',
+    '.IIWWWWkGGGGgkWII..',
+    '.JIIIIIkGGGggkIIJ..',
+    '..JIIIIkGGGgkIIJ...',
+    '...JJIIIkGgkIIJ....',
+    '....JJJIkgkIJJ.....',
+    '......JJJkJJ.......',
 ]
 def head():
     g = canvas()
-    pix.ellipse(g, 38.5, 20.5, 11, 9.5, 'N')
+    pix.ellipse(g, 38.5, 20.5, 12.5, 10.5, 'N')
     g = shade(g, 'N', 'n', 'N', 'M', 2)
-    # 顔の 皿：目の 下〜くちばしの まわりは 白い 霜の 羽
-    f = canvas(); pix.ellipse(f, 41.5, 23.5, 7.5, 6.5, 'I')
-    for y in range(S):
-        for x in range(S):
-            if f[y][x] == 'I' and g[y][x] != '.': g[y][x] = 'W' if (x < 41 and y < 25) else 'I' if y < 28 else 'J'
-    pix.stamp(g, BROW, 30, 14)
-    # 目：つり上がった 水色の 光、たての ひとみ
-    put(g, [(34, 19, 'E'), (35, 19, 'E'), (36, 19, 'E'), (37, 19, 'W'), (38, 20, 'k'),
-            (33, 20, 'k'), (34, 20, 'E'), (35, 20, 'k'), (36, 20, 'E'), (37, 20, 'E'), (38, 21, 'k'),
-            (34, 21, 'k'), (35, 21, 'k'), (36, 21, 'k'), (37, 21, 'k'),
-            (45, 19, 'E'), (46, 19, 'E'), (47, 19, 'k'), (45, 20, 'k'), (46, 20, 'k')])
-    pix.stamp(g, BEAK, 39, 21)
+    pix.stamp(g, FACE, 29, 14)
     g = ol(g)
-    pix.stamp(g, CRYSTAL_B, 26, 3)
-    pix.stamp(g, CRYSTAL_F, 42, 3)
+    pix.stamp(g, CRYSTAL_B, 22, 2)
+    pix.stamp(g, CRYSTAL_F, 42, 2)
     return g
 
 # ---------- 翼：つららの 刃の 羽（羽の 根もと＝紺、先へ いくほど 氷）----------
@@ -152,9 +165,9 @@ def wing_raised(dy=0, spread=0):
     g = canvas()
     wx, wy = 9 - spread, 9 + dy - spread       # 手首
     # 刃（奥 → 手前）
-    for i in range(6):
-        bx, by = wx + 3 + i * 3, wy + 2 + i * 3 - (0 if i < 3 else (i - 2))
-        blade(g, (bx - 1, by), (bx + 4, by + 1), (bx - 5 + i, by + 20 - i * 1), .55)
+    for i in range(5):
+        bx, by = wx + 2 + i * 4, wy + 2 + i * 4
+        blade(g, (bx - 1, by), (bx + 4, by + 1), (bx - 7 + i, by + 24 - i * 2), .4)
     c = canvas(); pix.poly(c, [(31, 31), (wx + 3, wy - 1), (wx - 1, wy + 2), (wx + 5, wy + 7), (22, 22), (30, 37)], 'N')
     c = shade(c, 'N', 'n', 'N', 'M', 1)
     # 雨覆いの 氷の うろこ（手で）
@@ -168,9 +181,9 @@ def wing_raised(dy=0, spread=0):
 def wing_folded(lift=0):
     """たたんだ 翼（手前）：体の 横に そい、下の ふちから つららの 刃が うしろへ"""
     g = canvas()
-    for i in range(4):
-        bx, by = 22 + i * 2, 38 + i * 3 - lift
-        blade(g, (bx, by), (bx + 5, by + 2), (12 + i * 3, 52 + i * 2 - lift), .5)
+    for i in range(3):
+        bx, by = 22 + i * 3, 40 + i * 3 - lift
+        blade(g, (bx, by), (bx + 5, by + 3), (13 + i * 5, 56 + i - lift), .55)
     c = canvas(); pix.poly(c, [(31, 28 - lift), (24, 32 - lift), (21, 42 - lift), (25, 49 - lift), (33, 44 - lift), (35, 34 - lift)], 'N')
     c = shade(c, 'N', 'n', 'N', 'M', 1)
     for (x, y) in ((27, 35), (30, 37), (25, 40), (28, 42)):
@@ -196,15 +209,15 @@ def wing_strike():
 
 def tail():
     g = canvas()
-    blade(g, (26, 49), (30, 52), (13, 59), .5)
-    blade(g, (27, 51), (31, 54), (17, 61), .5)
+    blade(g, (27, 50), (31, 53), (20, 60), .5)
     return g
-TALON = [
-    '.kNNk.kNNk.',
-    '.kMMk.kMMk.',
-    'kGgGkkGgGk.',
-    'kgkgkkgkgk.',
-    'k.k.kk.k.k.',
+TALON = [  # 羽毛の 足と 金の かぎ爪
+    '.knNk..knNk..',
+    '.kNMk..kNMk..',
+    'kGGGGk.kGGGGk',
+    'kGkGkGkkGkGkG',
+    'kgkgkgkkgkgkg',
+    '.k.k.k..k.k.k',
 ]
 def dark(g): return [[{'W': 'I', 'I': 'J', 'J': 'K', 'n': 'N', 'N': 'M', 'M': 'l'}.get(c, c) for c in r] for r in g]
 def rows(g): return pix.rows_of(g)
@@ -218,10 +231,13 @@ VOLLEY1 = volley([(0, 1), (9, 8), (1, 15)])
 VOLLEY2 = volley([(10, 0), (20, 8), (12, 15)])
 FROST = ['..k.....k..', '.kWk...kIk.', 'kWEWk.kIWIk', '.kWk...kIk.', '..k.....k..']
 
-EYE = ['EEEW', 'kEkE']                   # 手前の 目（頭の 中の 目を 上書き）
-EYE_ALT = {'blink': ['MMMM', 'kkkk'], 'atk0|atk1|atk2': ['WWWW', 'kWkW'], 'hit': ['kkEk', 'EkkE'], 'ko': ['EkkE', 'kEEk']}
-EYEF = ['EE']
-EYEF_ALT = {'blink': ['MM'], 'atk0|atk1|atk2': ['WW'], 'hit': ['kE'], 'ko': ['kk']}
+# 目（手打ち）：外側が 高く、くちばし側へ 下がる つり目。黒い ふちで 光を きわだたせる
+EYE = ['kkkk.....', 'kWEEkkk..', 'kEEEEEEkk', 'kEEkEEEEk', '.kEkEEEk.', '..kkkkk..']
+EYE_ALT = {'blink': ['kkkk.....', 'kMMMkkk..', 'kMMMMMMkk', 'kkkkkkkkk', '.WWWWWW..', '.........'],
+           'atk0|atk1|atk2': ['kkkk.....', 'kWWWkkk..', 'kWWWWWWkk', 'kWWkWWWWk', '.kWkWWWk.', '..kkkkk..'],
+           'hit': ['kkkk.....', 'kMMMkkk..', 'kkkkkkkkk', 'kEkkkkEkk', '.kkEEkk..', '..kkkkk..']}
+EYEF = ['...kk', '.kkEk', 'kEEEk', 'kEkEk', '.kkk.']
+EYEF_ALT = {'blink': ['...kk', '.kkMk', 'kMMMk', 'kkkkk', '.....'], 'atk0|atk1|atk2': ['...kk', '.kkWk', 'kWWWk', 'kWkWk', '.kkk.'], 'hit': ['...kk', '.kkMk', 'kkkkk', 'kEkEk', '.kkk.']}
 
 # ---------- ダウン：あおむけ ではなく 横だおし。翼は 地面に 広がり、目は × ----------
 def ko_pose():
@@ -263,16 +279,16 @@ def layers():
     WR, WR1, WR2 = UP_WING[0], UP_WING[1], UP_WING[2]
     WH = wing_raised(-3, 2)
     return [
-        dict(n='wingB', g='wingB', x=0, y=0, rows=rows(WR), alt={'idle1|idle3|walk1|walk3': rows(WR1), 'idle2|walk2|atk2': rows(WR2), 'atk0|atk1': rows(WH), 'hit': rows(WR2)}, not_='ko'),
+        dict(n='wingB', g='wingB', x=0, y=2, rows=rows(WR), alt={'idle1|idle3|walk1|walk3': rows(WR1), 'idle2|walk2|atk2': rows(WR2), 'atk0|atk1': rows(WH), 'hit': rows(WR2)}, not_='ko'),
         dict(n='tail', g='body', x=0, y=0, rows=rows(tail()), not_='ko'),
-        dict(n='talonB', g='talon', x=29, y=55, rows=pix.rows_of(dark(pix.grid_of(TALON))), not_='ko'),
+        dict(n='talonB', g='talon', x=27, y=54, rows=pix.rows_of(dark(pix.grid_of(TALON))), not_='ko'),
         dict(n='body', g='body', x=0, y=0, rows=rows(body()), not_='ko'),
-        dict(n='talon', g='talon', x=33, y=55, rows=TALON, not_='ko'),
+        dict(n='talon', g='talon', x=32, y=54, rows=TALON, not_='ko'),
         dict(n='wingF', g='wingF', x=0, y=0, rows=rows(wing_folded()), alt={'atk0': rows(wing_folded(3)), 'atk1|atk2': rows(wing_strike())}, not_='ko'),
-        dict(n='head', g='head', x=0, y=0, rows=rows(head()), not_='ko'),
-        dict(n='eye', g='head', x=34, y=19, rows=EYE, alt=EYE_ALT, not_='ko'),
-        dict(n='eyeF', g='head', x=45, y=19, rows=EYEF, alt=EYEF_ALT, not_='ko'),
-        dict(n='frost', g='head', x=24, y=0, rows=FROST, only='atk0'),
+        dict(n='head', g='head', x=0, y=3, rows=rows(head()), not_='ko'),
+        dict(n='eye', g='head', x=28, y=20, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='eyeF', g='head', x=41, y=20, rows=EYEF, alt=EYEF_ALT, not_='ko'),
+        dict(n='frost', g='head', x=22, y=2, rows=FROST, only='atk0'),
         dict(n='volley1', g='fx', x=50, y=24, rows=VOLLEY1, only='atk1'),
         dict(n='volley2', g='fx', x=46, y=24, rows=VOLLEY2, only='atk2'),
         dict(n='ko', g='root', x=0, y=0, rows=rows(ko_pose()), only='ko'),
