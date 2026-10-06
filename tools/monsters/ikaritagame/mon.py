@@ -88,7 +88,17 @@ HEAD = P(M(19, 16, ('p', '1', [(0, 6), (7, 0), (14, 1), (19, 7), (15, 12), (5, 1
 # 目（D 複眼）：琥珀の 丸い ドーム。ななめの あみ目の すじ（暗い 色の 線）と たての 白い 反射の 帯。ひとみは ない。
 # 上に 前へ 下がる 太い まゆの 線
 def ceye(mode=''):
-    rows = ['kk.......', '.kkkkk...', '.kwYYYkkk', 'kYwYOYYOk', 'kYOwYYOOk', 'kOOOwOQOk', '.kQOOQOk.', '..kkkkk..']
+    rows = ['kk.......', '.kkkkk...', '.k.....kk', 'k.......k', 'k.......k', 'k.......k', '.k.....k.', '..kkkkk..']
+    rows = [list(r) for r in rows]
+    for y in range(2, 7):
+        ks = [i for i, ch in enumerate(rows[y]) if ch == 'k']
+        for x in range(ks[0] + 1, ks[-1]):
+            if rows[y][x] != '.': continue
+            c = 'Y' if y <= 3 else 'O' if y <= 5 else 'Q'
+            if (x + 2 * y) % 4 == 0: c = {'Y': 'O', 'O': 'Q', 'Q': 'Q'}[c]          # あみ目の 点
+            if (x, y) in ((2, 2), (2, 3), (3, 4), (4, 5)): c = 'w'                     # 反射の 帯
+            rows[y][x] = c
+    rows = [''.join(r) for r in rows]
     if mode == 'atk': rows = ['k........', 'kkkkk....', '.kwwYYkkk', 'kYwwYYYOk', 'kYwYwYOYk', 'kOYOYOYOk', '.kOQOQOk.', '..kkkkk..']
     if mode == 'hit': rows = ['.........', '..kkkk...', 'kk.kwYk..', 'kYwYkOOk.', 'kOkOYkQOk', 'kQOkOQkQk', '.kQOQkQk.', '..kkkkk..']
     if mode == 'blink': rows = ['kk.......', '.kkkkk...', '.kDDDDkkk', 'kkkkkkkkk', 'kOQOQOQOk', 'kQOQOQOQk', '.kQOQOQk.', '..kkkkk..']
