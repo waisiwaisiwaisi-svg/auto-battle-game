@@ -199,29 +199,36 @@ def inpoly(x, y, P):
         if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1: c = not c
     return c
 def wing(darker=False):
-    W, H = 34, 34; g = [['.'] * W for _ in range(H)]
-    root, wrist = (27, 31), (19, 10)
-    tips = [(3, 1), (6, 13), (12, 21)]
+    W, H = 38, 36; g = [['.'] * W for _ in range(H)]
+    root, wrist = (31, 33), (21, 9)
+    tips = [(1, 1), (2, 14), (9, 24)]
     # 膜（指と指の あいだ）。ふちは ほたて形に へこませる
     panels = [
-        ([wrist, tips[0], (4, 4), (5, 9), tips[1]], 'r'),
-        ([wrist, tips[1], (8, 16), (10, 19), tips[2]], 's'),
-        ([wrist, tips[2], (15, 24), (19, 27), (22, 29), root], 't'),
+        ([wrist, tips[0], (2, 5), (4, 10), tips[1]], 'r'),
+        ([wrist, tips[1], (5, 18), (7, 22), tips[2]], 's'),
+        ([wrist, tips[2], (14, 26), (19, 29), (24, 31), root], 's'),
     ]
     for P, c in panels:
         for y in range(H):
             for x in range(W):
                 if inpoly(x + .5, y + .5, P): g[y][x] = c
-    # 膜の 影（骨の 下側を 一段 暗く）
+    # 膜の さかいめを 市松模様（ディザ）で なじませる（GBAの 翼の ぬり方）
+    src = [r[:] for r in g]
     for y in range(H):
         for x in range(W):
-            if g[y][x] in 'rst' and y + 1 < H and x + 1 < W and g[y][x] != '.':
-                pass
+            c = src[y][x]
+            if c not in 'rst' or (x + y) % 2: continue
+            for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+                yy, xx = y + dy, x + dx
+                if 0 <= yy < H and 0 <= xx < W and src[yy][xx] in 'rst' and src[yy][xx] > c:
+                    g[y][x] = src[yy][xx]; break
     # 骨
     def bone(a, b, c1='B', c2='D'):
         for (x, y) in bres(*a, *b):
             g[y][x] = c1
             if y + 1 < H and g[y + 1][x] in 'rst.': g[y + 1][x] = c2
+            # 骨の すぐ下の 膜に 影（濃い膜色）
+            if y + 2 < H and g[y + 2][x] in 'rs': g[y + 2][x] = 't'
     bone(root, wrist, 'B', 'C'); bone((root[0] + 1, root[1]), (wrist[0] + 1, wrist[1]), 'C', 'D')
     for t in tips: bone(wrist, t, 'A' if t == tips[0] else 'B', 'D')
     # つめ（手首）
@@ -238,7 +245,7 @@ def wing(darker=False):
 # ---- 組み立て（下から 順に 重ねる）----
 def layers():
     return [
-        dict(n='wing2', g='wing2', x=15, y=-3, rows=wing(True)),
+        dict(n='wing2', g='wing2', x=12, y=-5, rows=wing(True)),
         dict(n='horn2', g='head', x=39, y=0, rows=HORN2),
         dict(n='legFF', g='legB', x=41, y=42, rows=dark(FRONT)),
         dict(n='legFH', g='legA', x=22, y=36, rows=dark(HIND)),
@@ -247,7 +254,7 @@ def layers():
         dict(n='sp1', g='body', x=32, y=21, rows=SPINE), dict(n='sp2', g='body', x=31, y=25, rows=SPINE), dict(n='sp3', g='body', x=29, y=29, rows=SPINE),
         dict(n='legH', g='legB', x=13, y=36, rows=HIND),
         dict(n='legF', g='legA', x=35, y=42, rows=FRONT),
-        dict(n='wing', g='wing', x=4, y=-1, rows=wing()),
+        dict(n='wing', g='wing', x=0, y=-3, rows=wing()),
         dict(n='head', g='head', x=36, y=4, rows=HEAD),
         dict(n='fin', g='head', x=34, y=13, rows=FIN),
         dict(n='mouth', g='head', x=50, y=19, rows=MOUTH, only='atk1|atk2'),
