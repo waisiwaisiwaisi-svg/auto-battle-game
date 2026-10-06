@@ -136,12 +136,12 @@ def stalks():
     s = [[DARK.get(c, c) if x < 42 and y < 40 else c for x, c in enumerate(r)] for y, r in enumerate(s)]
     return rows_of(ink(s))
 # するどい 目：上が 平らな つり目＋たての ひとみ（まゆの とげ つき）
-EYE_N = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kOYYYYkYYOk', '.kOYYYYkYYYk', '.kOOYYYkYYOk', '..kkOOOOOOk.', '....kkkkkk..']
+EYE_N = ['kk..........', 'kHkk........', '.kHHkkkk....', '..kHHHHHkkk.', '.kOYYYYkkHHk', '.kOYYYkYYkHk', '.kOOYYkYYYOk', '..kkOOOOOOk.', '....kkkkkk..']
 EYE_F = ['kkkk..', '.kOOkk', '.kOkOk', '..kkk.']
-EYE_ATK = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kYwYYYYYYYk', '.kYYYYYYYYYk', '.kOYYYYYYYOk', '..kkOOOOOOk.', '....kkkkkk..']
-EYE_BL = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kHHHHHHHHHk', '.kkkkkkkkkkk', '.kFFFFFFFFFk', '..kkFFFFFFk.', '....kkkkkk..']
-EYE_HIT = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kFkkFFFFFkk', '.kFFFkkFkkFk', '.kFFFFFkFFFk', '..kkFFFFFFk.', '....kkkkkk..']
-EYE_KO = ['kkk.........', 'kHHkkkkkk...', '.kHHHHHHHkk.', '.kFkFFFkFkFk', '.kFFkFFFkFFk', '.kFkFkFkFkFk', '..kkFFFFFFk.', '....kkkkkk..']
+EYE_ATK = ['kk..........', 'kHkk........', '.kHHkkkk....', '..kHHHHHkkk.', '.kYwYYYYkHHk', '.kYYYYYYYYHk', '.kOYYYYYYYOk', '..kkOOOOOOk.', '....kkkkkk..']
+EYE_BL = ['kk..........', 'kHkk........', '.kHHkkkk....', '..kHHHHHkkk.', '.kHHHHHHkHHk', '.kkkkkkkkkHk', '.kFFFFFFFFFk', '..kkFFFFFFk.', '....kkkkkk..']
+EYE_HIT = ['kk..........', 'kHkk........', '.kHHkkkk....', '..kHHHHHkkk.', '.kFkkFFFkHHk', '.kFFFkkFFkHk', '.kFFFFFkkFFk', '..kkFFFFFFk.', '....kkkkkk..']
+EYE_KO = ['kk..........', 'kHkk........', '.kHHkkkk....', '..kHHHHHkkk.', '.kFkFFkFkHHk', '.kFFkFFkFkHk', '.kFkFkkFkFFk', '..kkFFFFFFk.', '....kkkkkk..']
 EYE_FKO = ['kkkk..', '.kkHkk', '.kHkHk', '..kkk.']
 
 def leg(path, far=False):
@@ -210,7 +210,7 @@ def layers():
         dict(n='body', g='body', x=0, y=0, rows=body()),
         dict(n='legA1', g='legA', x=0, y=0, rows=leg([(37, 47), (32, 53), (30, 59)])),
         dict(n='legB1', g='legB', x=0, y=0, rows=leg([(42, 49), (46, 55), (49, 60)])),
-        dict(n='eyeN', g='head', x=40, y=23, rows=EYE_N, alt={'blink': EYE_BL, 'atk0|atk1|atk2': EYE_ATK, 'hit': EYE_HIT, 'ko': EYE_KO}),
+        dict(n='eyeN', g='head', x=40, y=22, rows=EYE_N, alt={'blink': EYE_BL, 'atk0|atk1|atk2': EYE_ATK, 'hit': EYE_HIT, 'ko': EYE_KO}),
         dict(n='claw', g='claw', x=0, y=0, rows=CL, alt={'atk1': CO}),
         dict(n='spark', g='claw', x=55, y=36, rows=SPARK1, only='atk2'),
         dict(n='spark0', g='claw', x=58, y=38, rows=SPARK2, only='atk0'),

@@ -146,7 +146,7 @@ def smoke(ph=0):
 # 攻撃：夢の 煙の 大きな かたまり（中に にらむ 目玉）
 def blast(big=True):
     p = grid(30, 24)
-    for (cx, cy, r) in ((8, 13, 6), (15, 9, 7), (22, 12, 6.5), (15, 16, 6), (4, 15, 3)) if big else ((6, 12, 3), (14, 8, 3.5), (21, 13, 3), (12, 16, 2.5)):
+    for (cx, cy, r) in ((6, 14, 5), (12, 9, 6), (18, 12, 5.5), (12, 16, 5.5), (2.5, 17, 2.2)) if big else ((6, 12, 3), (14, 8, 3.5), (21, 13, 3), (12, 16, 2.5)):
         for y in range(24):
             for x in range(30):
                 if (x + .5 - cx) ** 2 + ((y + .5 - cy) * 1.15) ** 2 <= r * r: p[y][x] = 'Q'
@@ -158,7 +158,7 @@ def blast(big=True):
         for x in range(30):
             if p[y][x] == '.' and any(0 <= y + dy < 24 and 0 <= x + dx < 30 and p[y + dy][x + dx] != '.' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): g[y][x] = 'k'
     if big:
-        stamp(g, ['..kkkkk..', '.kRRRRwk.', 'kRRkkkRRk', '.kRRRRRk.', '..kkkkk..'], 10, 10)
+        stamp(g, ['..kkkkk..', '.kRRRRwk.', 'kRRkkkRRk', '.kRRRRRk.', '..kkkkk..'], 8, 10)
     else:
         for y in range(24):
             for x in range(30):
@@ -181,11 +181,11 @@ def layers():
         dict(n='legH', g='legA', x=0, y=0, rows=rows_of(leg(9))),
         dict(n='legF', g='legB', x=0, y=0, rows=rows_of(leg(24))),
         dict(n='smoke', g='nose', x=0, y=0, rows=SM[0], alt={'idle1|walk1|walk2': SM[1], 'idle2|idle3|walk3|blink': SM[2]}, not_='atk1|atk2|hit|ko'),
+        dict(n='blast', g='nose', x=50, y=15, rows=blast(), only='atk1'),
         dict(n='nose', g='nose', x=0, y=0, rows=N0, alt={'atk0|atk1|atk2': N1}),
         dict(n='head', g='head', x=0, y=0, rows=rows_of(head())),
         dict(n='eye', g='head', x=33, y=28, rows=EYE, alt=EYE_ALT),
-        dict(n='blast', g='nose', x=56, y=18, rows=blast(), only='atk1'),
-        dict(n='blast2', g='nose', x=62, y=18, rows=blast(False), only='atk2'),
+        dict(n='blast2', g='nose', x=52, y=16, rows=blast(False), only='atk2'),
     ]
 
 FRAMES = {

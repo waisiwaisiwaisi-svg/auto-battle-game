@@ -71,7 +71,7 @@ WP = {   # S=肩 E=ひじ W=手首 F=指先（前→後ろ） A=膜の 胴への
     'up':   dict(E=(35, 14), W=(33, 2), F=[(22, -8), (16, 4), (20, 18)], A=(28, 32)),
     'hi':   dict(E=(33, 16), W=(28, 5), F=[(8, -1), (6, 13), (15, 25)], A=(27, 33)),
     'mid':  dict(E=(31, 18), W=(24, 10), F=[(1, 6), (4, 21), (14, 30)], A=(27, 33)),
-    'down': dict(E=(30, 35), W=(24, 43), F=[(3, 45), (9, 55), (21, 58)], A=(33, 36)),
+    'down': dict(E=(30, 35), W=(24, 43), F=[(2, 41), (6, 53), (19, 58)], A=(33, 36)),
 }
 S0 = (37, 28)
 def segd(px, py, a, b):
@@ -82,9 +82,9 @@ def wing(pose, far=False):
     def sh(p): return (p[0], p[1] + WOY)
     P = WP[pose]; S, E, W, A = sh(S0), sh(P['E']), sh(P['W']), sh(P['A']); F = [sh(f) for f in P['F']]
     # 膜の りんかく：指先と 指先の あいだは 手首へ 向かって えぐる（スカラップ）
-    def notch(a, b, k=.42):
+    def notch(a, b, k=.32):
         mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2; return (round(mx + (W[0] - mx) * k), round(my + (W[1] - my) * k))
-    edge = [F[0], notch(F[0], F[1]), F[1], notch(F[1], F[2]), F[2], notch(F[2], A, .3), A]
+    edge = [F[0], notch(F[0], F[1]), F[1], notch(F[1], F[2]), F[2], notch(F[2], A, .25), A]
     g = grid(64, H); p = grid(64, H); poly(p, [S, E, W] + edge, 'n')
     # 膜の 色：骨の すぐ 下（光の 側）は 明、まん中は 中、うしろの ふちと 骨の 影は 暗（市松は 使わない）
     bones = [(S, E), (E, W)] + [(W, f) for f in F]
@@ -93,7 +93,7 @@ def wing(pose, far=False):
             if p[y][x] != 'n': continue
             d = min(segd(x, y, a, b) for a, b in bones)
             de = min(segd(x, y, a, b) for a, b in zip(edge, edge[1:]))
-            p[y][x] = 'o' if de < 1.6 else 'm' if d < 2.2 else 'n'
+            p[y][x] = 'o' if de < 1.5 else 'm' if d < 1.8 and y < max(by for _, (bx, by) in bones) else 'n'
     if far:   # 奥の 翼は 影絵：外の 輪郭だけ、骨は 色の すじ（内側に 黒線を 入れない）
         for y in range(H):
             for x in range(64):
@@ -109,10 +109,16 @@ def wing(pose, far=False):
                 if q[y][x] != '.': p[y][x] = 'Q' if (y > 0 and q[y - 1][x] != '.') else 'R'
         ink(g, p)
         return rows_of(recolor(g, {'R': 'Q', 'Q': 'P', 'k': 'k'}))
-    ink(g, p)
-    # 指の 骨（細い）→ 腕の 骨（太い）の 順に 重ねる
+    # 指の 骨：膜の 中の すじ（上がわ 明・下がわ 中。内がわには 黒線を 入れず すっきり）
     for f in F:
-        q = grid(64, H); stroke(q, W[0], W[1], f[0], f[1], 1.0, .5, '5'); ink(g, q)
+        q = grid(64, H); stroke(q, W[0], W[1], f[0], f[1], .9, .4, 'Q')
+        for y in range(H):
+            for x in range(64):
+                if q[y][x] != '.' and p[y][x] != '.': p[y][x] = 'R' if (y > 0 and q[y - 1][x] == '.') else 'Q'
+        for y in range(H - 1):   # 骨の すぐ 下に 影
+            for x in range(64):
+                if q[y][x] != '.' and q[y + 1][x] == '.' and p[y + 1][x] in 'mn': p[y + 1][x] = 'o'
+    ink(g, p)
     q = grid(64, H); stroke(q, S[0], S[1], E[0], E[1], 2.4, 1.8, '1'); stroke(q, E[0], E[1], W[0], W[1], 1.8, 1.4, '1'); ink(g, q)
     g = shade(g, {'1': 'RQP', '5': 'RPP'})
     # 手首の 刃の かぎ爪（手で）

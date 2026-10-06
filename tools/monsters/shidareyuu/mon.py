@@ -77,48 +77,55 @@ RB = {'1': 'ABD', '2': 'EFH', '3': 'UUX'}
 
 def trunk():
     p = G()
-    poly(p, [(19, 61), (22, 54), (24, 42), (25, 30), (24, 20), (40, 20), (39, 30), (37, 42), (39, 53), (44, 61)], '1')
-    oval(p, 31, 26, 8, 7, '1')
+    # 前へ かがむ 幹（上が 右へ ずれる）
+    poly(p, [(18, 61), (22, 54), (24, 44), (26, 32), (27, 20), (42, 18), (42, 30), (39, 44), (40, 53), (45, 61)], '1')
+    oval(p, 35, 26, 8, 8, '1')
     s = shade(p, RB, r=2)
-    # 木の すじ（縦の みぞ）
-    for (x0, y0, x1, y1) in ((27, 40, 26, 58), (34, 44, 36, 58), (30, 46, 30, 56)):
+    for (x0, y0, x1, y1) in ((28, 42, 26, 58), (35, 44, 37, 58), (31, 46, 31, 56)):
         line(s, x0, y0, x1, y1, 'D')
-    for (x0, y0, x1, y1) in ((28, 40, 27, 56), (31, 46, 31, 55)):
+    for (x0, y0, x1, y1) in ((29, 42, 27, 56), (32, 46, 32, 55)):
         line(s, x0, y0, x1, y1, 'A')
+    # 顔の くぼみ（暗い うろ）
+    for y in range(21, 30):
+        for x in range(29, 43):
+            if s[y][x] in 'AB' and ((x - 36) / 7.5) ** 2 + ((y - 25) / 4.5) ** 2 < 1: s[y][x] = 'D'
     g = ink(s)
-    # 口：幹の うろが 裂けて ぎざぎざの 歯
-    put(g, 27, 33, ['kkkkkkkkkk', 'kUkUkkUkUk', '.kkrrrrkk.', '.kUkkkUk..', '..kkkkk...'])
+    # 口：幹の 裂け目、ふぞろいの 木の 牙
+    put(g, 29, 32, ['kk..........k', '.kkkkkkkkkkkk', '.kUkUkUkkUkUk', '..kkrrrrrrrk.', '..kUkkUkkUkk.', '...kkkkkkkk..'])
     return g
 def roots(side):
     p = G()
     if side == 0: tube(p, [(24, 57), (16, 59), (10, 60)], [3, 2, 1], '1'); tube(p, [(23, 59), (18, 61)], [2, 1], '1')
-    else: tube(p, [(38, 57), (46, 59), (52, 60)], [3, 2, 1], '1'); tube(p, [(39, 59), (44, 61)], [2, 1], '1')
+    else: tube(p, [(39, 57), (47, 59), (53, 60)], [3, 2, 1], '1'); tube(p, [(40, 59), (45, 61)], [2, 1], '1')
     return ink(shade(p, RB, r=1, hi=.15, lo=-.2))
 
-# ---------- 垂れ枝の 髪：葉の すじ（左ほど 明るい ふち）----------
-CROWN = [(26, 13, 18, 9), (16, 11, 9, 7), (30, 7, 10, 6), (40, 12, 7, 6)]
+# ---------- 垂れ枝の 髪：頭の 上から 長く 垂れる 葉の すじ ----------
+CROWN = [(27, 12, 14, 6), (19, 10, 7, 6), (27, 6, 8, 5), (35, 8, 6, 5), (40, 12, 4, 4)]
 def crown():
     p = G()
     for c in CROWN: oval(p, *c, '2')
     s = shade(p, RB, r=3, hi=.3, lo=-.25)
-    # 葉の 房の 切れこみ（下向きの 暗い v）
-    for (x, y) in ((14, 9), (22, 7), (30, 5), (38, 9), (20, 14), (30, 12), (12, 16), (36, 16), (26, 18)):
-        dots(s, 'H', [(x, y), (x + 1, y + 1), (x + 2, y)])
-        if s[y - 1][x + 1] in 'FH': s[y - 1][x + 1] = 'E'
+    # 頭の 葉の 流れ（後ろへ なでつけた すじ）
+    # 頭の てっぺんから 左右へ 流れる 髪の すじ（分け目）
+    for (x0, y0, x1, y1) in ((28, 3, 20, 8), (29, 5, 15, 12), (30, 7, 19, 16), (32, 5, 38, 9), (33, 8, 41, 13), (28, 9, 25, 17)):
+        line(s, x0, y0, x1, y1, 'H')
+    for (x0, y0, x1, y1) in ((27, 4, 19, 9), (27, 9, 21, 13)):
+        line(s, x0, y0, x1, y1, 'E')
     return ink(s)
 def strands(sway=0, front=False):
     p = G()
-    # (x, 下の はし)：顔の 前は 短く、後ろ・左は 長い
-    S = [(9, 40), (11, 48), (13, 52), (16, 50), (18, 54), (21, 46), (24, 32)] if not front else [(38, 30), (41, 40), (43, 44), (45, 34)]
-    for i, (x, y1) in enumerate(S):
-        y0 = 14 if not front else 17
+    # (x, 上, 下)：後ろ・左は 地面まで 長い 髪、顔の 前は 短い
+    S = [(8, 12, 44), (10, 10, 50), (12, 9, 55), (14, 8, 58), (16, 8, 53), (18, 8, 57), (20, 8, 49), (22, 9, 54), (24, 10, 44), (26, 12, 36)] if not front else \
+        [(43, 13, 34), (45, 14, 30)]
+    for i, (x, y0, y1) in enumerate(S):
         for y in range(y0, y1):
             t = (y - y0) / max(1, y1 - y0)
-            xx = x + round(sway * t * t * 2) + (1 if (y // 5 + i) % 3 == 0 else 0)
-            w = 2 if t < .7 else 1
+            xx = x - round(t * 3) + round(sway * t * t * 2) + (1 if (y // 6 + i) % 3 == 0 else 0)
+            w = 2 if t < .75 else 1
             for d in range(w):
-                c = 'E' if d == 0 and (y + i) % 3 else 'F'
-                if t > .6 and d == 0: c = 'F' if (y + i) % 2 else 'H'
+                c = 'E' if d == 0 else 'F'
+                if (y + i * 2) % 4 == 0: c = 'F' if d == 0 else 'H'
+                if t > .7: c = 'F' if d == 0 and (y + i) % 2 else 'H'
                 if 0 <= xx + d < 64: p[y][xx + d] = c
     return ink(p)
 
@@ -126,57 +133,60 @@ def strands(sway=0, front=False):
 def arm(back=False, reach=0):
     p = G()
     if not back:
-        path = [(38, 18), (46, 13), (53, 15), (56, 22 + reach), (57 + reach, 32 + reach)]
-        tube(p, path, [3, 2.6, 2.2, 2, 1.8], '1')
+        path = [(40, 17), (47, 12), (53, 13), (56, 19 + reach), (57 + reach, 27 + reach)]
+        tube(p, path, [3.2, 2.8, 2.4, 2.2, 2.2], '1')
     else:
-        path = [(14, 20), (8, 22), (5, 30), (5, 38)]
+        path = [(18, 16), (10, 18), (6, 26), (5, 34)]
         tube(p, path, [2.6, 2.2, 1.8, 1.6], '1')
     s = shade(p, RB, r=1, hi=.15, lo=-.2)
-    # 枝から 垂れる 葉
-    if not back:
-        for (x, y0, y1) in ((45, 15, 26), (49, 15, 30), (52, 17, 24)):
-            for y in range(y0, y1): s[y][x] = 'E' if y % 3 else 'F'
     g = ink(s)
     if back: recol(g, {'A': 'B', 'B': 'D'})
+    else:
+        for (x, y0, y1) in ((46, 15, 24), (50, 14, 27)):   # 枝から 垂れる 葉
+            for y in range(y0, y1): g[y][x] = 'E' if y % 3 else 'F'; g[y][x + 1] = 'k'
     return g
-CLAW = [   # 3本の かぎ爪（下へ 曲がる）
-    '..kkkkkk....',
-    '.kBBBBBBkk..',
-    'kBkkBkkBBBk.',
-    'kUkkUkk.kUk.',
-    'kUUkkUUk.kUk',
-    'kUXk.kUXk.kUk',
-    '.kUXk.kUXk.kUk',
-    '.kUXk..kUXk.kXk',
-    '..kXk...kUXkkXk',
-    '..kXk....kXk.kk',
-    '...kk....kXk...',
-    '..........kk...',
+CLAW = [   # 3本の 長い かぎ爪（先が 前へ 曲がる）
+    '...kkkkkk.......',
+    '..kABBBBDkk.....',
+    '.kABBBBBBDDk....',
+    '.kBBkkBBkkBDk...',
+    'kUUk.kUUk.kBDk..',
+    'kUUk.kUUk..kUk..',
+    'kUXk.kUXk..kUXk.',
+    'kUXk.kUXk..kUXk.',
+    'kUXk.kUXk..kUXk.',
+    '.kUXk.kUXk..kUXk',
+    '.kUXk.kUXk..kUXk',
+    '..kXk..kUXk..kXk',
+    '..kXkk..kXkk.kXk',
+    '...kXk...kXk.kk.',
+    '....k.....k.....',
 ]
 CLAW_BACK = [
     '.kkkkk..',
     'kDDDDDk.',
     'kXkXkXk.',
     'kXkkXkXk',
+    'kXk.kXk.',
     '.kXk.kXk',
-    '.kXk..kk',
-    '..kk....',
+    '.kXk..k.',
+    '..k.....',
 ]
-EYE = ['kk.......kk', '.kkk...kkk.', '.kYYk.kYYk.', '..kkk.kkk..']   # つり上がる 光る 目（まゆ つき）
-EYE_ALT = {'blink': ['kk.......kk', '.kkk...kkk.', '..kkk.kkk..', '...........'],
-           'atk0|atk1|atk2': ['kk.......kk', '.kkk...kkk.', '.kYrk.krYk.', '..kkk.kkk..'],
-           'hit': ['...........', 'k.k.....k.k', '.kkk...kkk.', '...........']}
+EYE = ['kk..........k', '.kkkk.....kkk', '..kWYYkk.kWYk', '...kkYYk.kYk.', '.....kkk..kk.']
+EYE_ALT = {'blink': ['kk..........k', '.kkkk.....kkk', '..kkkkkk.kkkk', '.....kkk..kk.', '.............'],
+           'atk0|atk1|atk2': ['kk..........k', '.kkkk.....kkk', '..kWYrrk.kWrk', '...kkrrk.krk.', '.....kkk..kk.'],
+           'hit': ['.............', 'k...k.....k.k', '.kkkkk....kk.', '.....kk...kk.', '.............']}
 WISP = ['.k.', 'kCk', 'kWk', '.k.']
 WISP2 = ['..k', '.kC', 'kWk', '.k.']
-SLASH = ['.......C', '......CW', '....CWC.', '..CWC...', '.CW.....', 'C.......']
+SLASH = ['........CW', '......CWC.', '....CWC...', '..CWC.....', '.CW.......', 'C.........']
 
 def full_tree(eye='ko'):
     """ダウン用：木 全体を 1枚に（右へ 倒れる → 90度 回す）"""
     g = G()
     for L in [arm(True), roots(0), roots(1), trunk(), crown(), strands(), arm(), strands(0, True)]:
         stamp(g, rows_of(L), 0, 0)
-    stamp(g, CLAW, 51 + 1, 31); stamp(g, CLAW_BACK, 2, 37)
-    stamp(g, ['kk...kk..k.k', '.k.k.....k..', '..k.....k.k.'], 28, 26)
+    stamp(g, CLAW, 48, 26); stamp(g, CLAW_BACK, 1, 33)
+    stamp(g, ['YkY.....YkY', 'kYk.....kYk', 'YkY.....YkY'], 31, 23)
     return g
 
 def layers():
@@ -184,20 +194,20 @@ def layers():
     KO = [r for r in KO]
     return [
         dict(n='armB', g='armB', x=0, y=0, rows=rows_of(arm(True)), not_='ko'),
-        dict(n='clawB', g='armB', x=2, y=37, rows=CLAW_BACK, not_='ko'),
+        dict(n='clawB', g='armB', x=1, y=33, rows=CLAW_BACK, not_='ko'),
         dict(n='strB', g='hair', x=0, y=0, rows=rows_of(strands()), alt={'idle1|idle2|walk1|walk3|hit': rows_of(strands(-1))}, not_='ko'),
         dict(n='rootL', g='legA', x=0, y=0, rows=rows_of(roots(0)), not_='ko'),
         dict(n='rootR', g='legB', x=0, y=0, rows=rows_of(roots(1)), not_='ko'),
         dict(n='trunk', g='body', x=0, y=0, rows=rows_of(trunk()), not_='ko'),
-        dict(n='eye', g='head', x=26, y=24, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='eye', g='head', x=29, y=22, rows=EYE, alt=EYE_ALT, not_='ko'),
         dict(n='crown', g='head', x=0, y=0, rows=rows_of(crown()), not_='ko'),
         dict(n='arm', g='arm', x=0, y=0, rows=rows_of(arm()), alt={'atk1|atk2': rows_of(arm(False, 3))}, not_='ko'),
-        dict(n='claw', g='arm', x=51, y=31, rows=CLAW, alt={'atk1|atk2': CLAW}, not_='ko'),
+        dict(n='claw', g='arm', x=48, y=26, rows=CLAW, not_='ko'),
         dict(n='strF', g='hair', x=0, y=0, rows=rows_of(strands(0, True)), alt={'idle1|idle2|walk1|walk3|hit': rows_of(strands(-1, True))}, not_='ko'),
         dict(n='wisp1', g='fx', x=4, y=6, rows=WISP, alt={'idle1|idle3|walk1|walk3': WISP2}, not_='ko'),
         dict(n='wisp2', g='fx', x=46, y=3, rows=WISP2, alt={'idle1|idle3|walk1|walk3': WISP}, not_='ko'),
-        dict(n='slash', g='arm', x=56, y=24, rows=SLASH, only='atk1'),
-        dict(n='ko', g='root', x=-4, y=10, rows=KO, only='ko'),
+        dict(n='slash', g='arm', x=56, y=16, rows=SLASH, only='atk1'),
+        dict(n='ko', g='root', x=-6, y=6, rows=KO, only='ko'),
     ]
 
 FRAMES = {
