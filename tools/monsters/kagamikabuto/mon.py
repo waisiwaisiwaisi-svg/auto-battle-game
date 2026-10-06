@@ -139,14 +139,14 @@ def big_eye(mode=''):
             elif d > 4.6: ch = 'k'
             elif mode == 'blink': ch = 'k' if abs(dy) < .6 else ('O' if dy < 0 else 'o')
             elif d > 3.3: ch = 'w' if lit > -3 else 'C'                         # 白目（右下は 影）
-            elif d > 2.6: ch = 'C' if mode != 'atk' else 'V'                     # 虹彩の 外の ふち
-            elif d > 1.9: ch = 'v' if mode != 'atk' else 'V'
-            elif d > 1.1: ch = 'V' if mode != 'atk' else 'w'
+            elif d > 2.9: ch = 'C' if mode != 'atk' else 'V'                     # 虹彩の 外の ふち
+            elif d > 2.2: ch = 'v' if mode != 'atk' else 'V'
+            elif d > 1.5: ch = 'V' if mode != 'atk' else 'w'
             else: ch = 'k'
             g[y][x] = ch
     if mode != 'blink':
         for (x, y) in ((2, 5), (3, 4), (2, 8), (9, 2), (10, 3), (10, 9), (9, 10), (4, 10)): g[y][x] = 'r'   # 血管
-        if mode in ('', 'atk'): g[4][5] = 'w' if mode == '' else 'S'
+        if mode in ('', 'atk'): g[4][4] = 'w' if mode == '' else 'S'
     if mode == 'hit':
         for y in range(3, 10):
             for x in range(3, 10):

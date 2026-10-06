@@ -1,5 +1,6 @@
 # モリシシ（くさ・じめん × イノシシ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭、苔の こぶの 胴は 小さく 丸く、足は 短く 太く）
 import pix
+EYE_BOX = (39, 33, 8, 6)
 META = dict(id='morishishi', name='モリシシ', types=['grass', 'ground'], base='イノシシ', size='L')
 PAL = {
     'k': '#101018', 'l': '#33261a',
@@ -112,12 +113,13 @@ HEAD_M = [
     "....###&&&&&&&&&&............",
     ".......&&&&&&&...............",
 ]
+# 目（C 三白眼）：白目が 多く、小さな 赤い 瞳が 上まぶたに くっついて 前上へ 寄る。下まぶたの 線を 2段に 濃く して にらむ
 EYES = {
-    'open':  ['kk......', '.kkkkk..', '.kwEEkEk', 'kFFFFkFk', '.kkkkkk.'],
-    'blink': ['kk......', '.kkkkk..', '.kBBBBBk', 'kkkkkkkk', '.kCCCCk.'],
-    'hit':   ['kk......', '.kkkkk..', '.kEkkEkk', 'kkFkFkFk', '.kkkkkk.'],
-    'glow':  ['kk......', '.kkkkk..', '.kwwEEEk', 'kEEEEkEk', '.kFFkFk.'],
-    'ko':    ['........', '.kEFFEk.', '.kFkkFk.', '.kkFFkk.', '.kFkkFk.'],
+    'open':  ['kk......', '.kkkkkkk', '.kwwEkwk', 'kRwwFFwk', 'kkRwwwRk', '.kkkkkk.'],
+    'blink': ['kk......', '.kkkkkkk', '.kBBBBBk', 'kkkkkkkk', '.kCCCCCk', '..kkkkk.'],
+    'hit':   ['kk......', '.kkkkkkk', '.kwwwwwk', 'kRwwkwwk', 'kkRwwwRk', '.kkkkkk.'],
+    'glow':  ['kk......', '.kkkkkkk', '.kwEEkEk', 'kRwFEEwk', 'kkRwwwRk', '.kkkkkk.'],
+    'ko':    ['........', '.kkkkkkk', '.kkwwkkk', '.kwkkwRk', '.kkwwkkk', '.kkkkkk.'],
 }
 def head(eye='open', mouth=False):
     g = pix.grid_of(shade(HEAD_M, {'#': 'ABC', '@': 'RSS', '&': 'BCC', '%': 'ABC'}, low=14))

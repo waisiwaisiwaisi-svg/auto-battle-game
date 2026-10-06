@@ -107,21 +107,12 @@ PFIN = [
 ]
 # K 魚の 目：まぶたの ない まん丸の 目。白く にごった 目玉（A・左上に 白 w）、細い 青緑の 輪（N）の 中に 平たい 大きな ひとみが
 # 霊火で 光る（C・芯は c）。まわりは 骨の ふち（D）
-EYE = [
-    '.DDDDD..',
-    'DkkkkkD.',
-    'kwAAAAkD',
-    'kwNNNNAk',
-    'kANcCNAk',
-    'kANCCNDk',
-    'kAANNDDk',
-    '.kkkkkk.',
-]
+EYE = ['..DDDD..', '.DkkkkD.', 'DkwAAAkD', 'kwANNAAk', 'kANcCNAk', 'kANCCNDk', '.kANNDk.', '..kkkk..']
 EYE_ALT = {
-    'blink': ['.DDDDD..', 'DkkkkkD.', 'kwAAAAkD', 'kwAAAAAk', 'kAANNAAk', 'kAANNADk', 'kAAAADDk', '.kkkkkk.'],
-    'atk0|atk1|atk2': ['.DDDDD..', 'DkkkkkD.', 'kwCCCCkD', 'kCcccCAk', 'kCcwwcCk', 'kCcccCDk', 'kACCCDDk', '.kkkkkk.'],
-    'hit': ['.DDDDD..', 'DkkkkkD.', 'kwAAAAkD', 'kAAAAAAk', 'kAAAAANk', 'kAAAANDk', 'kAAAADDk', '.kkkkkk.'],
-    'ko': ['.DDDDD..', 'DkkkkkD.', 'kwAAAAkD', 'kAkAkAAk', 'kAAkAAAk', 'kAkAkADk', 'kAAAADDk', '.kkkkkk.'],
+    'blink': ['..DDDD..', '.DkkkkD.', 'DkwAAAkD', 'kwAAAAAk', 'kAANNAAk', 'kAANNADk', '.kAAADk.', '..kkkk..'],
+    'atk0|atk1|atk2': ['..DDDD..', '.DkkkkD.', 'DkwCCAkD', 'kwCccCAk', 'kCcwwcCk', 'kCcccCDk', '.kCccDk.', '..kkkk..'],
+    'hit': ['..DDDD..', '.DkkkkD.', 'DkwAAAkD', 'kwAAAAAk', 'kAAAAANk', 'kAAAANDk', '.kAAADk.', '..kkkk..'],
+    'ko': ['..DDDD..', '.DkkkkD.', 'DkwAAAkD', 'kAkAkAAk', 'kAAkAAAk', 'kAkAkADk', '.kAAADk.', '..kkkk..'],
 }
 # 口の 中（暗い 紫）
 def _maw():
