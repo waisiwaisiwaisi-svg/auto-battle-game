@@ -1,5 +1,6 @@
 # ショベリカン（ノーマル・みず × ペリカン）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭と バケットの くちばし、胴は 小さく まるく、足は 短く）
 META = dict(id='shoberikan', name='ショベリカン', types=['normal', 'water'], base='ペリカン', size='M')
+EYE_BOX = (33, 13, 10, 8)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#2a2c3e',
     'A': '#eef0f6', 'B': '#b2bacc', 'C': '#687088',                    # 羽（白〜灰青）
@@ -181,5 +182,4 @@ FRAMES = {
     'atk0': {'head': (-2, -1), 'body': (-1, 0)}, 'atk1': {'root': (4, 0), 'head': (1, 2)}, 'atk2': {'root': (5, 0), 'head': (1, 2), 'fx': (1, 0)},
     'hit': {'root': (-3, 0), 'head': (-2, -1)}, 'ko': {'_flip': True},
 }
-EYE_BOX = (33, 13, 10, 8)
 PARENT = {'head': 'root', 'wing': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

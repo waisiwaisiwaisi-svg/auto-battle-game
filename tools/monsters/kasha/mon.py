@@ -126,6 +126,7 @@ EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit':
 # ===END KIT===
 
 META = dict(id='kasha', name='カシャ', types=['fire', 'dark'], base='猫', size='M')
+EYE_BOX = (41, 30, 10, 6)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#2c1630',
     'A': '#9886b0', 'B': '#5c4a78', 'D': '#2e2244',      # 毛（闇の 黒紫）
@@ -270,5 +271,4 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'tail': (1, 1)},
     'ko': {'body': (0, 6), 'head': (3, 7), 'tail': (-2, 2)},
 }
-EYE_BOX = (41, 30, 10, 6)
 PARENT = {'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

@@ -1,5 +1,6 @@
 # ホオズキグモ（フェアリー・ゴースト × クモ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭胸部、足は 短く 太く、ホオズキの 腹は 大きく）
 META = dict(id='hoozukigumo', name='ホオズキグモ', types=['fairy', 'ghost'], base='クモ', size='S')
+EYE_BOX = (38, 32, 14, 8)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#2a1838',
     'D': '#9a82c8', 'E': '#5c4888', 'F': '#33264e',          # 甲（むらさき）
@@ -195,5 +196,4 @@ FRAMES = {
     'atk0': {'body': (-2, 1), 'legA': (-1, 0), 'legB': (-1, 0)}, 'atk1': {'root': (5, 0), 'head': (1, 1)}, 'atk2': {'root': (7, 0), 'head': (1, 1), 'fx2': (2, 0)},
     'hit': {'root': (-3, 0), 'head': (-1, -1)}, 'ko': {'_flip': True},
 }
-EYE_BOX = (38, 32, 14, 8)
 PARENT = {'head': 'body', 'abd': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'abd', 'fx2': 'root'}

@@ -125,6 +125,7 @@ EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit':
 # ===END KIT===
 
 META = dict(id='hyoujinpengin', name='ヒョウジンペンギン', types=['ice', 'steel'], base='ペンギン', size='M')
+EYE_BOX = (31, 23, 10, 9)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#1c2440',
     'A': '#5a6ea4', 'B': '#34406c', 'D': '#1e2444',      # 背の 羽（濃い 紺）
@@ -252,5 +253,4 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'fin': (-1, 1)},
     'ko': {},
 }
-EYE_BOX = (31, 23, 10, 9)
 PARENT = {'head': 'body', 'fin': 'body', 'finB': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

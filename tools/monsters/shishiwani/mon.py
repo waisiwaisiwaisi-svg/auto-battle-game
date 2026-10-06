@@ -1,5 +1,6 @@
 # シシワニ（ノーマル・ほのお × ワニ）手打ち GBA風・デフォルメ（2〜3頭身：獅子舞の 大きな 頭、胴は 布に つつまれ 小さく まるく、足は 短く 太く）
 META = dict(id='shishiwani', name='シシワニ', types=['normal', 'fire'], base='ワニ', size='M')
+EYE_BOX = (32, 9, 13, 11)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#3c1418',
     'R': '#ff6e4a', 'S': '#c4262a', 'T': '#6c1222',          # 朱ぬりの 頭
@@ -192,5 +193,4 @@ FRAMES = {
     'atk0': {'head': (-2, -1), 'mane': (-1, 0), 'body': (-1, 1)}, 'atk1': {'root': (4, 0), 'head': (2, -2)}, 'atk2': {'root': (6, 0), 'head': (2, 0), 'fx': (1, 0)},
     'hit': {'root': (-3, 0), 'head': (-2, -1)}, 'ko': {'_flip': True},
 }
-EYE_BOX = (32, 9, 13, 11)
 PARENT = {'head': 'root', 'mane': 'root', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

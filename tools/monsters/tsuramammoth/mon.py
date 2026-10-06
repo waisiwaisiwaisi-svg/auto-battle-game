@@ -125,6 +125,7 @@ EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit':
 # ===END KIT===
 
 META = dict(id='tsuramammoth', name='ツラマンモス', types=['ice', 'rock'], base='マンモス', size='L')
+EYE_BOX = (41, 28, 8, 5)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#2e1e1a',
     'A': '#b88452', 'B': '#7c4c2e', 'D': '#462a1e',      # 毛（こげ茶）
@@ -240,5 +241,4 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1)},
     'ko': {'body': (0, 5), 'head': (1, 2)},
 }
-EYE_BOX = (41, 28, 8, 5)
 PARENT = {'head': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

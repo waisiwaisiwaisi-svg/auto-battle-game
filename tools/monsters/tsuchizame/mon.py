@@ -1,5 +1,6 @@
 # ツチザメ（みず・かくとう × シュモクザメ）手打ち GBA風・デフォルメ（2〜3頭身：頭の 左右が 槌の ように はり出す 大きな 頭、胴は 短く 太く、胸びれの こぶしに さらし）
 META = dict(id='tsuchizame', name='ツチザメ', types=['water', 'fighting'], base='シュモクザメ', size='L')
+EYE_BOX = (50, 14, 13, 37)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#1c2436',
     'P': '#a2bcd2', 'Q': '#5c7a9a', 'R': '#34485e',                    # サメの はだ
@@ -149,5 +150,4 @@ FRAMES = {
     'atk0': {'root': (-2, 0), 'fin': (-2, 0)}, 'atk1': {'root': (4, 0), 'fin': (6, -3)}, 'atk2': {'root': (5, 0), 'fin': (3, -3)},
     'hit': {'root': (-3, 0), 'fin': (-1, -1)}, 'ko': {'_flip': True},
 }
-EYE_BOX = (50, 14, 13, 37)
 PARENT = {'head': 'body', 'tail': 'body', 'fin': 'body', 'finF': 'body', 'body': 'root'}

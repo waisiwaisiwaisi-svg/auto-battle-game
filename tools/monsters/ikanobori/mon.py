@@ -130,6 +130,7 @@ EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit':
 # ===END KIT===
 
 META = dict(id='ikanobori', name='イカノボリ', types=['dragon', 'wind'], base='竜', size='L')
+EYE_BOX = (36, 18, 12, 8)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#1c3a32',
     'A': '#86dca0', 'B': '#3c9c6c', 'D': '#1e5a4a',      # うろこ（ひすい色）
@@ -261,5 +262,4 @@ FRAMES = {
     'hit': {'root': (-3, -1), 'head': (-1, -1)},
     'ko': {'_flip': True},
 }
-EYE_BOX = (36, 18, 12, 8)
 PARENT = {'head': 'body', 'wing': 'body', 'wingB': 'body', 'tail': 'body', 'leg': 'body', 'arm': 'body', 'body': 'root', 'fx': 'root'}

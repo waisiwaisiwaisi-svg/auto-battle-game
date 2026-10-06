@@ -1,5 +1,6 @@
 # カマダヌキ（ノーマル・はがね × タヌキ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭、胴は 鉄の 茶釜で まるく、手足は 短く 太く）
 META = dict(id='kamadanuki', name='カマダヌキ', types=['normal', 'steel'], base='タヌキ', size='M')
+EYE_BOX = (32, 19, 16, 9)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#2c1c1c',
     'F': '#e6b674', 'G': '#a8703a', 'H': '#5c3820', 'D': '#352628',   # 毛（明・中・暗）＋ くまどり・手足
@@ -215,5 +216,4 @@ FRAMES = {
     'atk0': {'body': (-1, 1), 'head': (0, 1), 'arm': (-1, 0)}, 'atk1': {'root': (3, 0), 'arm': (1, -2)}, 'atk2': {'root': (4, 0), 'arm': (1, -2), 'fx': (1, 0)},
     'hit': {'root': (-3, 0), 'head': (-1, -1)}, 'ko': {'_flip': True},
 }
-EYE_BOX = (32, 19, 16, 9)
 PARENT = {'head': 'body', 'tail': 'body', 'arm': 'body', 'armB': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

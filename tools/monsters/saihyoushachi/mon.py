@@ -1,5 +1,6 @@
 # サイヒョウシャチ（みず・こおり × シャチ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭、胴は 短く まるく、背びれ＝砕氷船の 船首は 大きく）
 META = dict(id='saihyoushachi', name='サイヒョウシャチ', types=['water', 'ice'], base='シャチ', size='L')
+EYE_BOX = (44, 29, 12, 7)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#1a2032',
     'B': '#56627e', 'C': '#2e354e', 'D': '#1c2032',                    # シャチの 黒
@@ -192,5 +193,4 @@ FRAMES = {
     'atk0': {'root': (-3, 0), 'head': (-1, -1), 'fin': (0, -1)}, 'atk1': {'root': (5, 0), 'head': (1, 0)}, 'atk2': {'root': (6, 0), 'head': (1, 0), 'fx': (1, 0)},
     'hit': {'root': (-3, -1), 'head': (-1, -1)}, 'ko': {'_flip': True},
 }
-EYE_BOX = (44, 29, 12, 7)
 PARENT = {'head': 'body', 'fin': 'body', 'tail': 'body', 'pec': 'body', 'body': 'root', 'fx': 'root'}

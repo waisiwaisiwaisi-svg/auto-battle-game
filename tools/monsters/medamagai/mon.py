@@ -69,6 +69,7 @@ def swap(g, mapping, box=None):
 def L(n, grp, g, **kw): return dict(n=n, g=grp, x=0, y=0, rows=rows_of(g) if isinstance(g[0], list) else g, **kw)
 
 META = dict(id='medamagai', name='メダマガイ', types=['water', 'psychic'], base='オウムガイ', size='M')
+EYE_BOX = (32, 20, 19, 20)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#2a1a3e',
     'A': '#f6ecd4', 'B': '#cbb48e', 'C': '#86704e',      # 殻（象牙色）
@@ -323,5 +324,4 @@ FRAMES = {
     'hit': {'root': (-3, 1), 'eye': (-1, 0), 'tent': (-1, -1)},
     'ko': {'root': (0, 6), 'hood': (0, 2)},
 }
-EYE_BOX = (32, 20, 19, 20)
 PARENT = {'body': 'root', 'eye': 'body', 'hood': 'body', 'tent': 'body', 'fx': 'root'}

@@ -117,6 +117,7 @@ EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit':
 # ===END KIT===
 
 META = dict(id='sukekameleo', name='スケカメレオ', types=['psychic', 'ghost'], base='カメレオン', size='M')
+EYE_BOX = (40, 26, 11, 10)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#2a1838',
     'A': '#a8eccc', 'B': '#52ae9c', 'D': '#2a6470',      # 皮（霊の 青みどり）
@@ -275,5 +276,4 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'tail': (1, 1)},
     'ko': {'body': (0, 5), 'head': (2, 6), 'tail': (-1, 0)},
 }
-EYE_BOX = (40, 26, 11, 10)
 PARENT = {'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

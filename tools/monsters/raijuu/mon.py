@@ -129,6 +129,7 @@ EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit':
 # ===END KIT===
 
 META = dict(id='raijuu', name='ライジュウ', types=['elec', 'normal'], base='ハクビシン', size='M')
+EYE_BOX = (35, 31, 15, 7)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#3a2c2a',
     'A': '#cbbca4', 'B': '#8e7c68', 'D': '#54463e',      # 毛（灰茶）
@@ -268,5 +269,4 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'tail': (1, 1)},
     'ko': {'body': (0, 6), 'head': (3, 7), 'tail': (-2, 2)},
 }
-EYE_BOX = (35, 31, 15, 7)
 PARENT = {'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

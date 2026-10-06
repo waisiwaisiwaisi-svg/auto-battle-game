@@ -117,6 +117,7 @@ EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit':
 # ===END KIT===
 
 META = dict(id='yamidaiou', name='ヤミダイオウ', types=['dark', 'water'], base='ダイオウイカ', size='L')
+EYE_BOX = (32, 31, 10, 7)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#22122e',
     'A': '#8a64b0', 'B': '#563678', 'D': '#2a1a44',      # 体（闇の 紫）
@@ -147,7 +148,7 @@ BIGEYE = ['kk........', '.kkkkkkkk.', '.kwYYYYYOk', '.kYkkkkYOk', '.kYkkkkOOk', 
 BIGEYE_ATK = ['kk........', '.kkkkkkkk.', '.kwwYYYYYk', '.kYkkkkkOk', '.kYYYYYOOk', '..kOOOOOk.', '...kkkkk..']
 OCTO_EYE = {
     'blink': ['kk........', '.kkkkkkkk.', '.kAAAAAAAk', '.kBBBBBBBk', '..kkkkkkk.', '..........', '..........'],
-    'hit':   ['kk........', '.kkk...kk.', '...kk.kk..', '....kkk...', '...kk.kk..', '.kkk...kk.', '..........'],
+    'hit':   ['kk........', '.kkk......', '...kkk....', '......kkk.', '...kkk....', '.kkk......', '..........'],
     'ko':    ['..........', '..A....A..', '...A..A...', '....AA....', '...A..A...', '..A....A..', '..........'],
 }
 # ---------- 頭：大きな 丸い 頭に 闇の 中で 光る 目 ----------
@@ -234,5 +235,4 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'body': (-1, -1), 'head': (-1, 0)},
     'ko': {'body': (-2, 9), 'head': (0, 6), 'armB': (0, 0)},
 }
-EYE_BOX = (32, 31, 10, 7)
 PARENT = {'body': 'root', 'head': 'root', 'arm': 'root', 'armB': 'root', 'fx': 'root', 'fx2': 'root'}

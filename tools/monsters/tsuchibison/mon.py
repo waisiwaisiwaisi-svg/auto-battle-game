@@ -1,5 +1,6 @@
 # ツチバイソン（ノーマル・じめん × バイソン）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭と 角、胴は 小さく まるく、足は 短く 太く。肩の 大槌こぶは 大きく）
 META = dict(id='tsuchibison', name='ツチバイソン', types=['normal', 'ground'], base='バイソン', size='L')
+EYE_BOX = (45, 33, 10, 6)   # 目の 位置（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#2a1810',
     'F': '#c08a52', 'G': '#84522e', 'H': '#4a2c1a', 'D': '#2e2020',   # 毛（明・中・暗）＋ こい たてがみ
@@ -180,5 +181,4 @@ FRAMES = {
     'atk0': {'body': (-2, 0), 'head': (-1, -2), 'hump': (0, -1)}, 'atk1': {'root': (4, 0), 'head': (1, 2), 'hump': (1, 1)}, 'atk2': {'root': (6, 0), 'head': (1, 2), 'hump': (1, 1)},
     'hit': {'root': (-3, 0), 'head': (-1, -2)}, 'ko': {'_flip': True},
 }
-EYE_BOX = (45, 33, 10, 6)
 PARENT = {'head': 'body', 'hump': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}
