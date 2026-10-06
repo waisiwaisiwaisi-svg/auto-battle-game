@@ -1,4 +1,4 @@
-# ライエリマキ（でんき・ドラゴン × エリマキトカゲ）手打ち GBA風
+# ライエリマキ（でんき・ドラゴン × エリマキトカゲ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭と えりまき、胴は 小さく、足は 短く 太く）
 from pix import outline
 META = dict(id='raierimaki', name='ライエリマキ', types=['elec', 'dragon'], base='エリマキトカゲ', size='M')
 PAL = {
@@ -21,39 +21,49 @@ def place(parts, W=40, H=40):
                 if c != '.': g[dy + j][dx + i] = c
     return [''.join(r) for r in g]
 
-HEAD = [
-    "....AAAAA..........",
-    "..AABBBBBAAA.......",
-    ".ABBBBBBBBBBAA.....",
-    "ABBBBBBBBBBBBBAA...",
-    "ABBBBBBBBBBBBBBBAA.",
-    "ABBBBBBBBBBBBBBBBBA",
-    "ABBBBBBBBBBBBBBBBBC",
-    "CBBBBBkkkkkkkkkkkkk",
-    ".CBBBkwkwkkwkkwkwC.",
-    "..CBBEEEEEEEEEEEC..",
-    "...CCFFFFFFFFFCC...",
-    ".....CCCCCCCCC.....",
+HEAD_T = [
+    ".....AAAAAA.............",
+    "...AABBBBBBAAA..........",
+    "..ABBBBBBBBBBBAA........",
+    ".ABBBBBBBBBBBBBBAA......",
+    "ABBBBBBBBBBBBBBBBBAA....",
+    "ABBBBBBBBBBBBBBBBBBBAA..",
+    "ABBBBBBBBBBBBBBBBBBBBBA.",
+    "ABBBBBBBBBBBBBBBBBBBBBBA",
+    "ABBBBBBBBBBBBBBBBBBBBBBC",
 ]
-HEAD_OPEN = [
-    "....AAAAA..........",
-    "..AABBBBBAAA.......",
-    ".ABBBBBBBBBBAA.....",
-    "ABBBBBBBBBBBBBAA...",
-    "ABBBBBBBBBBBBBBBAA.",
-    "ABBBBBBBBBBBBBBBBBA",
-    "CBBBBBBBBBBBBBBBBBC",
-    ".CBBBBkwkwkkwkkwkwk",
-    "..CBkkkkkkkkkkkkk..",
-    "..CBkOOOOOOOOk.....",
-    "..CBBkkwkkwkkwk....",
-    "...CBBEEEEEEEEEC...",
-    "....CCFFFFFFFCC....",
-    "......CCCCCCC......",
+HEAD_SHUT = [
+    "CBBBBBBkkkkkkkkkkkkkkkkk",
+    "CBBBBBkwkwkkwkkwkkwkkwC.",
+    ".CBBBEEEEEEEEEEEEEEEEC..",
+    "..CBBEEEEEEEEEEEEEEC....",
+    "...CCFFFFFFFFFFFFCC.....",
+    ".....CCCCCCCCCCCC.......",
 ]
-EYE = ['kkkkk.', 'kYYYkk', 'kYkYYk', '.kkkk.']
-EYE_ALT = {'blink': ['kkkkk.', 'kkkkkk', '.CCCC.', '......'], 'hit': ['.kkk..', 'kYkYk.', 'kkYkk.', '.kkk..'],
-           'atk0|atk1|atk2': ['kkkkk.', 'kwwYkk', 'kwkwYk', '.kkkk.'], 'ko': ['k...k.', '.k.k..', '..k...', '.k.k..']}
+HEAD_GAPE = [
+    "CBBBBBBkwkwkkwkkwkkwkkwk",
+    "CBBBBkkkkkkkkkkkkkkkkk..",
+    "CBBBkOOOOOOOOOOOOk......",
+    "CBBBkkwkkwkkwkkwkk......",
+    ".CBBEEEEEEEEEEEEEC......",
+    "..CCFFFFFFFFFFFCC.......",
+    "....CCCCCCCCCCC.........",
+]
+EYES = {
+    'open':  ['kk........', '.kkkkkkkk.', '..kwYYYkYk', '.kOOOOOkOk', '..kkkkkkk.'],
+    'glow':  ['kk........', '.kkkkkkkk.', '..kwwwYYYk', '.kYYwYYkYk', '..kOOOkOk.'],
+    'blink': ['kk........', '.kkkkkkkk.', '..kBBBBBBk', '.kkkkkkkkk', '..CCCCCC..'],
+    'hit':   ['kk........', '.kkkkkkkk.', '..kYkkkYkk', '.kkkOkkkOk', '..kkkkkkk.'],
+    'ko':    ['..........', '..kYOOYk..', '..kOkkOk..', '..kkOOkk..', '..kOkkOk..'],
+}
+def head(eye='open', gape=False):
+    g = [list(r) for r in HEAD_T + (HEAD_GAPE if gape else HEAD_SHUT)]
+    for j, r in enumerate(EYES[eye]):
+        for i, c in enumerate(r):
+            if c != '.': g[2 + j][9 + i] = c
+    for (x, y) in ((6, 1), (7, 1), (3, 3), (2, 4)): g[y][x] = 'A'
+    for (x, y) in ((3, 7), (4, 8), (17, 6), (18, 7), (19, 7)): g[y][x] = 'C'
+    return outline([''.join(r) for r in g])
 HORN = ['GG......', '.GGH....', '..GHHH..', '...HHHH.', '....HHH.']
 # えりまき：骨の すじ（G/H）の あいだに でんきの 膜（W/V）、いなずまの もよう（Y）
 FRILL = [
@@ -116,17 +126,11 @@ LEG = [
     "..AAAABBB...",
     ".ABBBBBBBC..",
     "ABBBBBBBBBC.",
-    "ABBBBBBBBBC.",
     "ABBBBBBBBC..",
     ".ABBBBBBC...",
     "..ABBBBC....",
-    "...ABBBC....",
-    "....ABBC....",
-    "....ABBC....",
     "...ABBC.....",
-    "...ABC......",
     "..ABBC......",
-    "..ABC.......",
     "..ABBBBBBC..",
     "..ABBBBBBBCw",
     "..CCCCCCCCC.",
@@ -157,29 +161,26 @@ SPARK = ['..k..', '.kYk.', 'kYwYk', '.kYk.', '..k..']
 
 def base():
     return [
-        dict(n='legB', g='legB', x=17, y=38, rows=outline(dk(LEG))),
-        dict(n='armB', g='armB', x=46, y=31, rows=outline(dk(ARM)), alt={'atk1': outline(dk(ARM_STRIKE))}),
-        dict(n='tail', g='tail', x=6, y=35, rows=outline(TAIL)),
-        dict(n='bolt', g='tail', x=3, y=38, rows=outline(BOLT)),
-        dict(n='sp0', g='body', x=20, y=26, rows=outline(SPIKE)),
-        dict(n='sp1', g='body', x=24, y=24, rows=outline(SPIKE)),
-        dict(n='sp2', g='body', x=28, y=22, rows=outline(SPIKE)),
-        dict(n='sp3', g='body', x=32, y=21, rows=outline(SPIKE)),
-        dict(n='frill', g='frill', x=24, y=4, rows=outline(FRILL), alt={'atk0|atk1': outline([r.replace('W', 'w').replace('V', 'W').replace('H', 'V') for r in FRILL])}),
-        dict(n='body', g='body', x=19, y=24, rows=outline(BODY)),
-        dict(n='legA', g='legA', x=25, y=40, rows=outline(LEG)),
-        dict(n='horn', g='head', x=36, y=12, rows=outline(HORN)),
-        dict(n='head', g='head', x=40, y=14, rows=outline(HEAD), alt={'atk1|atk2': outline(HEAD_OPEN)}),
-        dict(n='eye', g='head', x=48, y=17, rows=EYE, alt=EYE_ALT),
-        dict(n='armF', g='armF', x=42, y=33, rows=outline(ARM), alt={'atk1': outline(ARM_STRIKE)}),
+        dict(n='legB', g='legB', x=16, y=48, rows=outline(dk(LEG))),
+        dict(n='armB', g='armB', x=44, y=37, rows=outline(dk(ARM)), alt={'atk1': outline(dk(ARM_STRIKE))}),
+        dict(n='tail', g='tail', x=2, y=42, rows=outline(TAIL)),
+        dict(n='bolt', g='tail', x=0, y=44, rows=outline(BOLT)),
+        dict(n='sp0', g='body', x=20, y=37, rows=outline(SPIKE)),
+        dict(n='sp1', g='body', x=24, y=34, rows=outline(SPIKE)),
+        dict(n='frill', g='frill', x=16, y=6, rows=outline(FRILL), alt={'atk0|atk1': outline([r.replace('W', 'w').replace('V', 'W').replace('H', 'V') for r in FRILL])}),
+        dict(n='body', g='body', x=17, y=33, rows=outline(BODY)),
+        dict(n='legA', g='legA', x=24, y=48, rows=outline(LEG)),
+        dict(n='horn', g='head', x=30, y=15, rows=outline(HORN)),
+        dict(n='head', g='head', x=33, y=17, rows=head(), alt={'blink': head('blink'), 'hit': head('hit'), 'atk0': head('glow'), 'atk1|atk2': head('glow', True)}),
+        dict(n='armF', g='armF', x=40, y=39, rows=outline(ARM), alt={'atk1': outline(ARM_STRIKE)}),
     ]
 def fx():
     return [
-        dict(n='zap', g='root', x=56, y=17, rows=LIGHTNING, only='atk1'),
-        dict(n='sp1', g='root', x=62, y=14, rows=SPARK, only='atk2'),
+        dict(n='zap', g='root', x=58, y=24, rows=LIGHTNING, only='atk1'),
+        dict(n='sp1', g='root', x=62, y=18, rows=SPARK, only='atk2'),
         dict(n='sp2', g='root', x=68, y=24, rows=SPARK, only='atk2'),
-        dict(n='spi', g='frill', x=27, y=2, rows=SPARK, only='idle1|atk0'),
-        dict(n='spi2', g='frill', x=36, y=0, rows=SPARK, only='idle3|atk0'),
+        dict(n='spi', g='frill', x=19, y=4, rows=SPARK, only='idle1|atk0'),
+        dict(n='spi2', g='frill', x=28, y=2, rows=SPARK, only='idle3|atk0'),
     ]
 def layers():
     return base() + fx()
