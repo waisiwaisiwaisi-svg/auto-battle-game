@@ -90,22 +90,53 @@ namespace PixelMonsterArena
         // ---------- モンスター／トレーナー ----------
         public class MonSprites { public Sprite Normal, White; public int W, H; }
         static readonly Dictionary<string, MonSprites> MonCache = new Dictionary<string, MonSprites>();
+        /// <summary>
+        /// Resources/Sprites の PNG（index.html の SpriteGen から tools/export-sprites.js で書き出したもの）を読む。
+        /// .png.bytes にしてあるので 圧縮されず、ドットが そのまま 出る。
+        /// </summary>
+        static Texture2D LoadPng(string name)
+        {
+            var ta = Resources.Load<TextAsset>("Sprites/" + name + ".png");
+            if (ta == null) return null;
+            var t = new Texture2D(2, 2, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+            t.LoadImage(ta.bytes, false);
+            t.filterMode = FilterMode.Point;
+            return t;
+        }
+        static Texture2D WhiteOf(Texture2D src)
+        {
+            var px = src.GetPixels32();
+            for (int i = 0; i < px.Length; i++) if (px[i].a > 0) px[i] = new Color32(255, 255, 255, 255);
+            return MakeTex(src.width, src.height, px);
+        }
+
         public static MonSprites Mon(string sid)
         {
             if (MonCache.TryGetValue(sid, out var s)) return s;
-            var sp = Data.Species[sid];
-            var hi = Scale2x(sp.Rows);
-            var n = Bake(hi, sp.Pal, null, true);
-            var wt = Bake(hi, sp.Pal, Color.white, false);
+            var n = LoadPng(sid);
+            if (n == null)
+            { // 画像が ないときは 文字マップから 作る（予備）
+                var sp = Data.Species[sid]; var hi = Scale2x(sp.Rows);
+                n = Bake(hi, sp.Pal, null, true);
+            }
+            var wt = WhiteOf(n);
             s = new MonSprites { Normal = ToSprite(n, new Vector2(.5f, 0)), White = ToSprite(wt, new Vector2(.5f, 0)), W = n.width, H = n.height };
             MonCache[sid] = s;
             return s;
         }
 
+        static readonly Dictionary<string, Sprite> TrainerCache = new Dictionary<string, Sprite>();
         public static Sprite Trainer(string hat, string coat)
         {
-            var pal = new Dictionary<char, string> { { 'h', hat }, { 'H', hat }, { 's', "#f2c79b" }, { 'k', "#1a1626" }, { 'c', coat }, { 'p', "#3a3350" }, { 'b', "#2a1e1e" } };
-            return ToSprite(Bake(Scale2x(Data.TrainerRows), pal, null, true), new Vector2(.5f, 0));
+            string key = $"trainer_{hat.Substring(1)}_{coat.Substring(1)}";
+            if (TrainerCache.TryGetValue(key, out var spr)) return spr;
+            var t = LoadPng(key);
+            if (t == null)
+            {
+                var pal = new Dictionary<char, string> { { 'h', hat }, { 'H', hat }, { 's', "#f2c79b" }, { 'k', "#1a1626" }, { 'c', coat }, { 'p', "#3a3350" }, { 'b', "#2a1e1e" } };
+                t = Bake(Scale2x(Data.TrainerRows), pal, null, true);
+            }
+            return TrainerCache[key] = ToSprite(t, new Vector2(.5f, 0));
         }
 
         // ---------- 図形スプライト（白で作り、色は SpriteRenderer.color で付ける） ----------

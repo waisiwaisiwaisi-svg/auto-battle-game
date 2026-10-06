@@ -19,8 +19,8 @@
 
 ## そうさ
 
-- スマホ：左下のスティックで移動、右のボタンで こうげき・わざ（4つ）・かわす・こうたい/カプセル・オート
-- PC：WASD／矢印=移動、J=こうげき、K・L・U・I=わざ、Space=かわす、C=カプセル、X=こうたい
+- モンスターは自分で動きます。ボタンで わざ（4つ）・こうげき・かわす・こうたい・カプセル・オート を指示します
+- PC：J=こうげき、K・L・U・I=わざ、Space=かわす、C=カプセル、X=こうたい
 
 ## スマホ向けにビルドする
 
@@ -38,6 +38,7 @@ IMGUI の標準フォントは OS のフォントで日本語を表示します�
 ブラウザ版（`index.html`）のモンスターやわざを変えたら、リポジトリ直下で次を実行して C# 側を作りなおします。
 
 ```sh
+node tools/export-sprites.js index.html unity/PixelMonsterArena/Assets/Resources/Sprites   # ドット絵
 node unity/gen-data.js index.html unity/PixelMonsterArena/Assets/Scripts/PixelMonsterArena/Data.Generated.cs
 ```
 
@@ -48,7 +49,7 @@ node unity/gen-data.js index.html unity/PixelMonsterArena/Assets/Scripts/PixelMo
 | `Game.cs` | 起動・画面（タイトル／最初の1匹／ハブ／へんせい／バトル）・UI・入力 |
 | `Battle.cs` | リアルタイムバトルの中身（わざ・状態異常・AI・捕獲・経験値） |
 | `BattleRenderer.cs` / `Painter.cs` | バトル画面の描画（SpriteRenderer を使い回して描く） |
-| `Stage.cs` / `PixelArt.cs` | スタジアムとくさむらの背景、ドット絵の生成 |
+| `Stage.cs` / `PixelArt.cs` | スタジアムとくさむらの背景、ドット絵の読みこみ（`Resources/Sprites` の PNG） |
 | `Data.cs` / `Data.Generated.cs` | 型定義と、`index.html` から生成したデータ |
 | `SaveData.cs` | セーブ（PlayerPrefs） |
 | `InputAdapter.cs` | タッチ・マウス・キーボード（旧 Input Manager／新 Input System 両対応） |

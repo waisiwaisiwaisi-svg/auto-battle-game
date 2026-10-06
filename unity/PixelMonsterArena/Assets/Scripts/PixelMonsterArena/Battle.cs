@@ -31,7 +31,7 @@ namespace PixelMonsterArena
         public MonData Mon; public Species Sp; public int Side, Lvl;
         public float Hp, MaxHp, Atk, Def; public int BaseSpd;
         public List<string> Moves;
-        public float X, Y, R = 19; public int Face;
+        public float X, Y, R = 23; public int Face;
         public string State = "bench"; public float StT;
         public Dictionary<string, float> Cd = new Dictionary<string, float>();
         public string Queued; public MoveExec Cur;
@@ -785,6 +785,7 @@ namespace PixelMonsterArena
                     if (Util.Value < .8f) f.Queued = AiPickMove(f, o);
                 }
             }
+            if (f.Queued != null && MoveBlocked(f, f.Queued) != null) f.Queued = null;
             if (f.Queued != null)
             {
                 var m = Data.Moves[f.Queued];
@@ -911,27 +912,12 @@ namespace PixelMonsterArena
                 case "free":
                     {
                         if (!CanAct(f)) break; // ねむり・こおり
-                        if (!oT) { if (f.Side == 0 && InputActive) MoveDir(f, InputVec.x, InputVec.y, dt); break; }
+                        if (!oT) break;
                         AiDodgeCheck(f, o);
                         if (f.State != "free") break;
                         if (f.V.EncoreId != null && f.Queued != null && f.Queued != f.V.EncoreId) f.Queued = null;
-                        if (f.Side == 0 && !S.auto && f.V.Rampage == 0)
-                        {
-                            if (f.Queued != null)
-                            {
-                                var m = Data.Moves[f.Queued]; float d = Dist(f, o);
-                                if (MoveBlocked(f, f.Queued) != null) f.Queued = null;
-                                else if (d <= MoveReach(f, o, m)) { var q = f.Queued; f.Queued = null; BeginMove(f, q); }
-                                else if (InputActive) MoveDir(f, InputVec.x, InputVec.y, dt);
-                                else { float a = Mathf.Atan2(o.Y - f.Y, o.X - f.X); MoveDir(f, Mathf.Cos(a), Mathf.Sin(a), dt); }
-                            }
-                            else if (InputActive) MoveDir(f, InputVec.x, InputVec.y, dt);
-                        }
-                        else if (f.Side == 0 && f.V.Rampage == 0)
-                        {
-                            if (InputActive && f.Queued == null) MoveDir(f, InputVec.x, InputVec.y, dt); else AiMove(f, o, dt, true);
-                        }
-                        else AiMove(f, o, dt, f.V.Rampage == 0);
+                        // 移動は モンスター自身が おこなう。オートOFFなら わざは プレイヤーの 指示だけ
+                        AiMove(f, o, dt, f.Side == 0 ? (S.auto && f.V.Rampage == 0) : f.V.Rampage == 0);
                         break;
                     }
                 case "wind":
@@ -1136,7 +1122,7 @@ namespace PixelMonsterArena
             {
                 tx = vis.Average(f => f.X); ty = vis.Average(f => f.Y) - 40;
                 float d = vis.Count > 1 ? Dist(vis[0], vis[1]) : 0;
-                tz = Util.Clamp(1.12f - d / 900, St.Kind == "stadium" ? .66f : .72f, 1.05f);
+                tz = Util.Clamp(1.02f - d / 900, St.Kind == "stadium" ? .6f : .66f, .96f);
             }
             if (Mode == "catch" && Catch != null) tx = (Catch.X + (A != null ? A.X : Catch.X)) / 2;
             Cam.z += (tz - Cam.z) * Mathf.Min(1, dt * 3);

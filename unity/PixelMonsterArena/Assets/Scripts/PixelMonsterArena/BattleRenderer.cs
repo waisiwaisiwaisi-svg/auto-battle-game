@@ -173,7 +173,7 @@ namespace PixelMonsterArena
             if (f.Sp.Flying) oy = -8 - Mathf.Round(Mathf.Sin(B.T * 4 + f.Side) * 3);
             var ms = PixelArt.Mon(f.Mon.sid);
             int o = Ord(f.Y);
-            P.Ellipse(f.X, f.Y, ms.W * .9f, ms.W * .36f, new Color(10 / 255f, 8 / 255f, 18 / 255f, .35f), o - 5);
+            P.Ellipse(f.X, f.Y, ms.W * .62f, ms.W * .25f, new Color(10 / 255f, 8 / 255f, 18 / 255f, .35f), o - 5);
             var spr = (f.Flash > 0 || f.State == "enter" || f.State == "return") ? ms.White : ms.Normal;
             P.Sprite(spr, f.X, f.Y + 3 + oy - bob, 2 * sx * f.Face, 2 * sy, A(Color.white, alpha), o);
             float top = Mathf.Round(f.Y + oy - ms.H * 2 - 6);

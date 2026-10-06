@@ -136,12 +136,8 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 .swaplist canvas{width:36px;height:36px}
 
 #ctrl{flex:1;min-height:0;display:flex;gap:10px;align-items:stretch}
-#stickZone{flex:0 0 42%;position:relative;touch-action:none;display:flex;align-items:center;justify-content:center}
-#stickBase{width:min(128px,100%);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#2e2648 0 55%,#241d38 56%);box-shadow:0 0 0 2px var(--edge);position:relative}
-#stickKnob{position:absolute;left:50%;top:50%;width:42%;height:42%;margin:-21% 0 0 -21%;border-radius:50%;background:var(--panel2);box-shadow:0 0 0 2px var(--acc),0 3px 0 #0d0b14}
-#stickZone .hint{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:10px;color:var(--dim)}
 #ctrl{position:relative}
-#swapBar{position:absolute;right:0;top:0;bottom:0;width:56%;z-index:5;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+#swapBar{position:absolute;left:0;right:0;top:0;bottom:0;z-index:5;background:var(--bg);display:flex;flex-direction:column;gap:6px}
 #swapBar[hidden]{display:none}
 #swapBar .sbHead{font-size:11px;color:var(--acc);text-align:center}
 #swapList{flex:1;display:flex;flex-direction:column;gap:6px;min-height:0}
@@ -150,7 +146,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 #swapList .hpb{height:4px;background:#0d0b14;margin-top:3px}
 #swapList .hpb i{display:block;height:100%;background:var(--good)}
 #swapCancel{min-height:34px;flex:none}
-#btns{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:6px;min-height:0}
+#btns{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-auto-rows:1fr;gap:6px;min-height:0}
 .cmd{
   position:relative;overflow:hidden;background:var(--panel);box-shadow:0 0 0 2px var(--edge),0 3px 0 #0d0b14;
   display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;min-height:38px;touch-action:none;
@@ -207,9 +203,9 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
     <div class="sec-title"><span>パーティ（上から3匹が しゅつじょう）</span><button class="dim" id="btnTeam" style="text-decoration:underline">へんせい ›</button></div>
     <div class="partyrow" id="hubParty"></div>
     <div class="card dim" style="line-height:1.7">
-      <b style="color:var(--ink)">そうさ</b>：左のスティックで いどう／右のボタンで こうげき・わざ・かわす。<br>
+      <b style="color:var(--ink)">そうさ</b>：モンスターは じぶんで うごきます。あなたは ボタンで わざ・かわす・こうたい を しじ！<br>
       赤い はんいは あいての わざの よちょう。<b style="color:var(--ink)">かわす</b>で むてきに なれる！<br>
-      ◎の わざは 命中100未満：むいた方向・はんいに うつので よけられる（自分も ねらって あてよう）<br>PC：WASD／矢印=移動　J=こうげき　K・L・U・I=わざ　Space=かわす
+      ◎の わざは 命中100未満：だした しゅんかんの 方向・はんいに うつので よけられる<br>PC：J=こうげき　K・L・U・I=わざ　Space=かわす　X=こうたい
     </div>
     <button class="dim" id="btnReset" style="align-self:center;text-decoration:underline;margin-top:auto">セーブデータを けす</button>
   </section>
@@ -242,7 +238,6 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
     </div>
     <div id="banner"></div>
     <div id="ctrl">
-      <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div><div class="hint">いどう</div></div>
       <div id="swapBar" hidden><div class="sbHead">こうたい（バトルは とまりません）</div><div id="swapList"></div><button class="cmd" id="swapCancel"><span class="a">やめる</span></button></div>
       <div id="btns">
         <button class="cmd mv" data-mv="0"><span class="a"></span><span class="b"></span><i class="cdv"></i></button>
@@ -594,7 +589,7 @@ const SPECIES = {
 };
 const STARTERS = ['hinokon', 'mizupuku', 'happamogu'];
 // 見た目を大きくしたぶん、距離・速さも K 倍にそろえる
-const K = 1.6, BODY = 22;
+const K = 1.6, BODY = 30;
 for (const id in MOVES) { const m = MOVES[id]; for (const p of ['len', 'rad', 'wid', 'spd', 'r']) if (m[p]) m[p] *= K; }
 for (const id in MOVES) { const m = MOVES[id]; Object.assign(m, { cat: m.k === 'melee' || m.k === 'dash' ? 'phys' : 'spec', acc: 100, aim: 'lock', prio: 0, e: {} }); }
 Object.assign(MOVES, MOVES100);
@@ -703,19 +698,276 @@ function bake(rows, pal, solid, shade) {
   }
   return c;
 }
+// ====== ここから SPRITEGEN（図形の組み合わせから 陰影つきドット絵を 作る） ======
+const SpriteGen = (() => {
+  const hex2rgb = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+  function rgb2hsl([r, g, b]) {
+    r /= 255; g /= 255; b /= 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+    if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+      h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
+    return [h, s, l];
+  }
+  function hsl2rgb([h, s, l]) {
+    h = ((h % 360) + 360) % 360; s = Math.max(0, Math.min(1, s)); l = Math.max(0, Math.min(1, l));
+    const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+    const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  }
+  // 色相を すこし ずらす（影は青紫へ、光は黄色へ）＝ドット絵の 定番テク
+  const toward = (h, target, amt) => { let d = ((target - h + 540) % 360) - 180; return h + Math.sign(d) * Math.min(Math.abs(d), amt); };
+  function ramp(hex) {
+    const [h, s, l] = rgb2hsl(hex2rgb(hex));
+    return {
+      hi: hsl2rgb([toward(h, 55, 10), s * .95 + .05, l + (1 - l) * .38]),
+      base: hex2rgb(hex),
+      sh: hsl2rgb([toward(h, 250, 14), Math.min(1, s * 1.05), l * .74]),
+      dp: hsl2rgb([toward(h, 260, 24), Math.min(1, s * 1.1), l * .52]),
+      line: hsl2rgb([toward(h, 265, 30), Math.min(1, s * .9 + .1), Math.min(.2, l * .32)]),
+    };
+  }
+  const L = (() => { const v = [-.55, -.65, .52], n = Math.hypot(...v); return v.map(x => x / n); })();
+
+  // 図形の内側判定と 立体の法線（だ円で近似）
+  function inPoly(x, y, pts) {
+    let c = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const [xi, yi] = pts[i], [xj, yj] = pts[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+    }
+    return c;
+  }
+  function render(spec, W, H) {
+    const col = new Array(W * H).fill(null), part = new Int16Array(W * H).fill(-1), info = [];
+    spec.forEach((p, pi) => {
+      const shapes = [];
+      const add = (q) => { shapes.push(q); if (p.mirror) shapes.push(Object.assign({}, q, { mx: true })); };
+      add(p);
+      for (const q of shapes) {
+        let bx0, by0, bx1, by1, inside, ecx, ecy, erx, ery;
+        if (q.e) { // だ円 [cx, cy, rx, ry]
+          let [cx, cy, rx, ry] = q.e; if (q.mx) cx = p.mirror - (cx - p.mirror);
+          ecx = cx; ecy = cy; erx = rx; ery = ry;
+          inside = (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+          bx0 = cx - rx; bx1 = cx + rx; by0 = cy - ry; by1 = cy + ry;
+        } else {
+          let pts = q.p; if (q.mx) pts = pts.map(([x, y]) => [p.mirror - (x - p.mirror), y]);
+          bx0 = Math.min(...pts.map(v => v[0])); bx1 = Math.max(...pts.map(v => v[0])); by0 = Math.min(...pts.map(v => v[1])); by1 = Math.max(...pts.map(v => v[1]));
+          ecx = (bx0 + bx1) / 2; ecy = (by0 + by1) / 2; erx = (bx1 - bx0) / 2 + .5; ery = (by1 - by0) / 2 + .5;
+          inside = (x, y) => inPoly(x, y, pts);
+        }
+        const rp = ramp(p.c);
+        for (let y = Math.max(0, Math.floor(by0)); y <= Math.min(H - 1, Math.ceil(by1)); y++)
+          for (let x = Math.max(0, Math.floor(bx0)); x <= Math.min(W - 1, Math.ceil(bx1)); x++) {
+            if (!inside(x + .5, y + .5)) continue;
+            let c = rp.base;
+            if (!p.flat) {
+              const nx = (x + .5 - ecx) / erx, ny = (y + .5 - ecy) / ery, d = Math.min(1, nx * nx + ny * ny), nz = Math.sqrt(1 - d);
+              const i = nx * L[0] + ny * L[1] + nz * L[2] + (p.lift || 0);
+              c = i > .78 ? rp.hi : i > .32 ? rp.base : i > -.05 ? rp.sh : rp.dp;
+            }
+            col[y * W + x] = c; part[y * W + x] = pi;
+          }
+      }
+      info.push({ line: ramp(p.c).line, noLine: !!p.noLine });
+    });
+    // パーツの さかいめに 線（手前のパーツの ふちを こく する）
+    const out = col.slice();
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x, pi = part[i]; if (pi < 0 || info[pi].noLine) continue;
+      const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      for (const [dx, dy] of nb) {
+        const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+        const pj = part[yy * W + xx];
+        if (pj >= 0 && pj < pi && !info[pi].soft) { out[i] = info[pi].line; break; }
+      }
+    }
+    // 外側の 輪郭（となりの色の 濃い版＝セルアウト）
+    const res = out.slice();
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x; if (out[i]) continue;
+      let best = -1;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+        const pj = part[yy * W + xx]; if (pj > best) best = pj;
+      }
+      if (best >= 0) res[i] = info[best].line;
+    }
+    const rgba = new Uint8ClampedArray(W * H * 4);
+    for (let i = 0; i < W * H; i++) if (res[i]) { rgba[i * 4] = res[i][0]; rgba[i * 4 + 1] = res[i][1]; rgba[i * 4 + 2] = res[i][2]; rgba[i * 4 + 3] = 255; }
+    return rgba;
+  }
+
+  // ---------- パーツの かんたん記法 ----------
+  const E = (cx, cy, rx, ry, c, o) => Object.assign({ e: [cx, cy, rx, ry], c }, o);
+  const P = (pts, c, o) => Object.assign({ p: pts, c }, o);
+  // 目：白目＋黒目＋ハイライト（向きは右）
+  const eye = (x, y, s = 1, iris = '#2a1a3a', o = {}) => [
+    E(x, y, 2.4 * s, 2.9 * s, '#fbfbff', Object.assign({ flat: true, noLine: false }, o)),
+    E(x + .7 * s, y + .3 * s, 1.6 * s, 2.3 * s, iris, Object.assign({ flat: true, noLine: true }, o)),
+    E(x + .1 * s, y - .9 * s, .75 * s, .75 * s, '#ffffff', Object.assign({ flat: true, noLine: true }, o)),
+  ];
+
+  // ---------- モンスター（40x40、右むき、足もと y≒38） ----------
+  const MON = {
+    hinokon: () => [
+      P([[12, 25], [3, 22], [1, 13], [5, 6], [6, 13], [9, 9], [10, 16], [14, 20]], '#ff5a2a', { lift: .2 }),
+      P([[11, 23], [5, 20], [4, 14], [7, 16], [9, 13], [12, 20]], '#ffc23a', { flat: true, noLine: true }),
+      E(14, 33, 3, 4.5, '#d8642a'), E(18, 34, 3, 4, '#d8642a'),
+      E(19, 27, 9, 7, '#f2833a'),
+      E(24, 34, 2.6, 4.6, '#f2833a'), E(28, 34, 2.6, 4.4, '#f2833a'),
+      E(24, 38, 2.6, 1.3, '#fff0d8', { flat: true }), E(28, 38, 2.6, 1.3, '#fff0d8', { flat: true }),
+      E(25, 27, 4, 5, '#ffe2b8', { noLine: true, lift: .2 }),
+      P([[20, 13], [20.5, 1], [26, 9]], '#f2833a'), P([[21.5, 10], [21.7, 4], [24.5, 9]], '#7a2f1a', { flat: true, noLine: true }),
+      E(27, 15, 9.5, 8.5, '#f2833a'),
+      P([[29, 9], [35, 0], [35, 11]], '#f2833a'), P([[31, 9], [34.3, 3], [34, 9.5]], '#7a2f1a', { flat: true, noLine: true }),
+      E(32, 19.5, 5.5, 3.6, '#ffe2b8', { noLine: true, lift: .15 }),
+      E(37, 17.6, 1.6, 1.3, '#3a1a1a', { flat: true }),
+      ...eye(29.5, 14.5, 1.05),
+      E(33, 22.5, 1.6, .9, '#ff9a9a', { flat: true, noLine: true }),
+      P([[24, 7.5], [26, 3], [27, 7.5], [29, 4], [29, 9]], '#ffc23a', { flat: true }),
+    ],
+    mizupuku: () => [
+      P([[8, 22], [0, 14], [2, 24], [0, 33], [9, 27]], '#2f74d0'),
+      P([[16, 11], [21, 2], [27, 10]], '#2f74d0'),
+      E(20, 23, 13.5, 12.5, '#4aa8ff'),
+      E(23, 28, 8.5, 6.5, '#d8f0ff', { noLine: true, lift: .2 }),
+      ...eye(26, 18, 1.35),
+      E(32, 25, 1.8, 1.6, '#1d3d7a', { flat: true }),
+      E(14, 15, 2.2, 2.2, '#bfe6ff', { noLine: true }), E(11, 19, 1.1, 1.1, '#bfe6ff', { noLine: true, flat: true }),
+      E(33, 9, 2.5, 2.5, '#bfe6ff', { lift: .3 }), E(37, 4, 1.4, 1.4, '#bfe6ff', { lift: .3 }),
+    ],
+    happamogu: () => [
+      E(19, 9, 2.2, 6, '#3e8a3a', { flat: true }),
+      P([[19, 6], [9, 2], [6, 7], [12, 9]], '#62d26f'), P([[20, 6], [29, 0], [33, 4], [25, 8]], '#62d26f'),
+      E(12, 34, 3.5, 4, '#6a4a32'), E(28, 35, 3.5, 3.5, '#6a4a32'),
+      E(19, 26, 13, 11, '#8a6a4a'),
+      E(22, 29, 8, 7, '#e0c49a', { noLine: true, lift: .15 }),
+      E(31, 26, 5, 3.6, '#e0c49a'),
+      E(35.5, 24.5, 2.2, 1.8, '#ff8aa0', { flat: true }),
+      P([[23, 35], [24, 39], [26, 35]], '#f4ecd8', { flat: true }), P([[27, 35], [28, 39], [30, 35]], '#f4ecd8', { flat: true }),
+      ...eye(26, 20, .9),
+      E(30.5, 28.5, 1.4, .8, '#ff9a9a', { flat: true, noLine: true }),
+    ],
+    birikurage: () => [
+      P([[12, 22], [9, 28], [12, 31], [9, 36], [12, 39], [14, 36], [12, 31], [15, 28], [14, 22]], '#ffae3a', { flat: true }),
+      P([[19, 22], [17, 28], [21, 32], [18, 37], [21, 40], [23, 37], [21, 32], [23, 28], [22, 22]], '#ffae3a', { flat: true }),
+      P([[26, 22], [29, 28], [26, 31], [29, 36], [26, 39], [24, 36], [27, 31], [24, 28], [24, 22]], '#ffae3a', { flat: true }),
+      E(19, 17, 13, 11, '#ffd84a'),
+      P([[6, 18], [32, 18], [30, 24], [8, 24]], '#ffe680', { lift: -.2 }),
+      E(13, 9, 3, 2, '#fff7c0', { flat: true, noLine: true }),
+      ...eye(15, 15, 1.05), ...eye(24, 15, 1.05),
+      E(19.5, 20, 2, 1.2, '#b8641a', { flat: true }),
+      P([[33, 8], [36, 4], [35, 9], [38, 8], [34, 14]], '#fff26a', { flat: true }),
+    ],
+    gorotan: () => [
+      E(10, 33, 3.5, 4, '#7aa860'), E(26, 34, 3.5, 4, '#7aa860'),
+      E(34, 24, 5.5, 5, '#8fc070'),
+      E(19, 23, 14, 10, '#9a8070'),
+      E(14, 20, 4, 3, '#b8a088', { noLine: false }), E(23, 18, 4, 3, '#b8a088'), E(20, 26, 4.5, 3, '#b8a088'), E(10, 26, 3, 2.4, '#b8a088'), E(28, 25, 3, 2.4, '#b8a088'),
+      E(19, 31, 15, 3.4, '#d8c8a0'),
+      E(15, 35, 3.5, 4, '#8fc070'), E(30, 35, 3.5, 4, '#8fc070'),
+      ...eye(35.5, 22.5, .85),
+      E(38, 26, 1.5, .7, '#3a2a1a', { flat: true }),
+    ],
+    soyodori: () => [
+      P([[12, 26], [1, 22], [4, 27], [0, 31], [11, 31]], '#4fa8a0'),
+      P([[18, 35], [17, 39], [19, 39]], '#ffb13a', { flat: true }), P([[23, 35], [22, 39], [25, 39]], '#ffb13a', { flat: true }),
+      E(19, 26, 9.5, 9, '#7fd8d0'),
+      E(21, 29, 5.5, 5.5, '#f4fbff', { noLine: true, lift: .2 }),
+      P([[11, 22], [21, 21], [19, 30], [10, 30], [8, 26]], '#4fa8a0', { lift: .2 }),
+      E(25, 15, 8, 7.5, '#7fd8d0'),
+      P([[21, 9], [18, 1], [24, 7], [24, 0], [27, 8]], '#4fa8a0'),
+      P([[32, 15], [39, 17], [32, 19]], '#ffc84a'),
+      ...eye(28, 14, 1.0),
+      E(30, 19, 1.4, .8, '#ffb0c0', { flat: true, noLine: true }),
+    ],
+    dokukino: () => [
+      E(14, 37, 3.5, 2, '#d8c8b0'), E(26, 37, 3.5, 2, '#d8c8b0'),
+      E(20, 28, 8.5, 9, '#f4ecd8'),
+      E(20, 15, 17, 10, '#b05ad8'),
+      E(20, 22, 15, 3, '#7a3a98', { noLine: true, flat: true }),
+      E(11, 12, 3, 2.4, '#fff4ff', { noLine: true }), E(21, 8, 3.5, 2.4, '#fff4ff', { noLine: true }), E(29, 14, 2.6, 2.2, '#fff4ff', { noLine: true }), E(16, 18, 2, 1.5, '#fff4ff', { noLine: true }),
+      ...eye(16.5, 28, .9), ...eye(24, 28, .9),
+      P([[18, 33], [22, 33], [20, 35]], '#7a3a3a', { flat: true }),
+    ],
+    yorukoumo: () => [
+      P([[14, 20], [1, 10], [0, 22], [4, 20], [5, 27], [9, 23], [13, 28]], '#3a2a6a'),
+      P([[26, 20], [39, 10], [40, 22], [36, 20], [35, 27], [31, 23], [27, 28]], '#3a2a6a'),
+      P([[14, 13], [12, 2], [19, 10]], '#5a4a8a'), P([[26, 13], [28, 2], [21, 10]], '#5a4a8a'),
+      E(20, 23, 9, 10, '#6a5a9a'),
+      E(20, 27, 5, 5, '#8a7ab8', { noLine: true }),
+      ...eye(16.5, 20, .95, '#ff3a4a'), ...eye(24, 20, .95, '#ff3a4a'),
+      P([[18, 26], [19, 29], [20, 26]], '#ffffff', { flat: true }), P([[21, 26], [22, 29], [23, 26]], '#ffffff', { flat: true }),
+      E(16, 36, 2, 2, '#3a2a6a'), E(24, 36, 2, 2, '#3a2a6a'),
+    ],
+    gouen: () => [
+      P([[7, 22], [0, 18], [3, 14], [1, 8], [7, 14], [9, 20]], '#ff6a2a'),
+      E(10, 33, 3.2, 5, '#5a2418'), E(22, 33, 3.2, 5, '#5a2418'),
+      E(17, 25, 12, 8.5, '#8a3a2a'),
+      E(14, 35, 3.2, 5, '#8a3a2a'), E(26, 35, 3.2, 5, '#8a3a2a'),
+      E(14, 39, 3, 1.4, '#2a1a1a', { flat: true }), E(26, 39, 3, 1.4, '#2a1a1a', { flat: true }),
+      P([[20, 10], [16, 3], [22, 7], [23, 0], [26, 7], [30, 2], [30, 10], [24, 20], [18, 20]], '#ff8a3a', { lift: .2 }),
+      E(30, 18, 7.5, 7.5, '#a8483a'),
+      P([[27, 12], [24, 3], [22, 6], [25, 13]], '#f4ecd8'), P([[33, 12], [37, 3], [39, 6], [35, 13]], '#f4ecd8'),
+      E(35, 22, 4.5, 3.5, '#e8a080', { noLine: true }),
+      E(37, 21, .8, .8, '#3a1a1a', { flat: true }), E(35, 23, .8, .8, '#3a1a1a', { flat: true }),
+      ...eye(31, 16, .9, '#ffcc3a'),
+    ],
+    tsuraran: () => [
+      P([[6, 18], [3, 23], [6, 28], [9, 23]], '#bfe8ff'), P([[34, 10], [31, 15], [34, 20], [37, 15]], '#bfe8ff'),
+      P([[20, 1], [32, 18], [20, 37], [8, 18]], '#9fe0ff'),
+      P([[20, 1], [20, 37], [8, 18]], '#d8f4ff', { noLine: true, lift: .3 }),
+      P([[12, 22], [5, 30], [7, 31], [14, 25]], '#9fe0ff'), P([[28, 22], [34, 31], [32, 32], [26, 25]], '#9fe0ff'),
+      ...eye(16.5, 17, .95, '#2a4a8a'), ...eye(23.5, 17, .95, '#2a4a8a'),
+      E(20, 23, 1.8, 1, '#3a6aa0', { flat: true }),
+      E(14, 21, 1.4, .8, '#ffb0d0', { flat: true, noLine: true }), E(26, 21, 1.4, .8, '#ffb0d0', { flat: true, noLine: true }),
+    ],
+  };
+  // トレーナー（32x40、右むき）
+  const TRAINER = (hat, coat) => [
+    E(12, 37, 3, 2, '#2a1e1e'), E(19, 37, 3, 2, '#2a1e1e'),
+    P([[10, 28], [21, 28], [21, 36], [10, 36]], '#3a3350'),
+    P([[8, 19], [23, 19], [24, 30], [7, 30]], coat),
+    E(6, 25, 2.2, 4, coat), E(25, 25, 2.2, 4, coat),
+    E(6, 29, 2, 2, '#f8d4b0', { lift: .25 }), E(25, 29, 2, 2, '#f8d4b0', { lift: .25 }),
+    E(16, 12, 8, 7.5, '#f8d4b0', { lift: .25 }),
+    P([[7, 10], [9, 3], [17, 1], [24, 4], [25, 10], [16, 8]], hat),
+    P([[17, 8], [30, 9], [24, 11]], hat),
+    ...eye(19, 13, .8), ...eye(13.5, 13, .8),
+    E(17, 17, 1.2, .6, '#c06a5a', { flat: true }),
+  ];
+  return { render, MON, TRAINER, W: 40, H: 40, TW: 32, TH: 40 };
+})();
+// ====== ここまで SPRITEGEN ======
+
+// RGBA → キャンバス（すきまを 切りおとして 足もとを 下端に そろえる）。white=true で 白シルエット
+function rgbaCanvas(px, W, H, white) {
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (px[(y * W + x) * 4 + 3]) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  const w = x1 - x0 + 1, h = y1 - y0 + 1, c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'), img = g.createImageData(w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const si = ((y + y0) * W + x + x0) * 4, di = (y * w + x) * 4;
+    if (!px[si + 3]) continue;
+    img.data[di] = white ? 255 : px[si]; img.data[di + 1] = white ? 255 : px[si + 1]; img.data[di + 2] = white ? 255 : px[si + 2]; img.data[di + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return c;
+}
 const SPR = {};
 for (const id in SPECIES) {
-  const hi = scale2x(SPECIES[id].rows);
-  SPR[id] = { n: bake(hi, SPECIES[id].pal, null, true), w: bake(hi, SPECIES[id].pal, '#ffffff') };
+  const px = SpriteGen.render(SpriteGen.MON[id](), SpriteGen.W, SpriteGen.H);
+  SPR[id] = { n: rgbaCanvas(px, SpriteGen.W, SpriteGen.H), w: rgbaCanvas(px, SpriteGen.W, SpriteGen.H, true) };
 }
-const trainerSpr = (hat, coat) => bake(scale2x(TRAINER_ROWS), { h: hat, H: hat, s: '#f2c79b', k: '#1a1626', c: coat, p: '#3a3350', b: '#2a1e1e' }, null, true);
+const trainerSpr = (hat, coat) => rgbaCanvas(SpriteGen.render(SpriteGen.TRAINER(hat, coat), SpriteGen.TW, SpriteGen.TH), SpriteGen.TW, SpriteGen.TH);
 const TR_PLAYER = trainerSpr('#e84a5f', '#3a6ee8');
 
 function spriteCanvas(sid, size) {
   const img = SPR[sid].n, c = document.createElement('canvas');
   c.width = size; c.height = size; c.className = 'pix';
   const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
-  const s = Math.floor(size / Math.max(img.width, img.height));
+  const s = Math.max(1, Math.floor(size / Math.max(img.width, img.height) * 2) / 2);
   g.drawImage(img, Math.floor((size - img.width * s) / 2), Math.floor((size - img.height * s) / 2), img.width * s, img.height * s);
   return c;
 }
@@ -1058,7 +1310,7 @@ function mkFighter(mon, side) {
   return {
     mon, sp, side, lvl: mon.lvl, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, baseSpd: st.spd,
     moves: equipped(mon).slice(),
-    x: 0, y: 0, r: 19, face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
+    x: 0, y: 0, r: 23, face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
     inv: 0, flash: 0, kx: 0, ky: 0, dodgeCd: 0, aiT: 1, plan: null, planFor: 0, strafe: 1, stratT: 0,
     scale: 1, fainted: false, moving: false, walk: 0, ghostT: 0, splashT: 0,
     st: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, status: '', statusT: 0, tickT: TICK, toxN: 1, parT: 2.5,
@@ -1674,6 +1926,7 @@ function aiMove(f, o, dt, autoSpecial) {
       if (Math.random() < .8) f.queued = aiPickMove(f, o);
     }
   }
+  if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
   if (f.queued) {
     const m = MOVES[f.queued];
     if (d <= moveReach(f, o, m)) { const q = f.queued; f.queued = null; beginMove(f, q); return; }
@@ -1710,14 +1963,7 @@ function moveDir(f, mx, my, dt) {
 
 /* ---------- 入力 ---------- */
 const input = { sx: 0, sy: 0, keys: new Set() };
-function playerVec() {
-  let x = input.sx, y = input.sy;
-  const K_ = input.keys;
-  if (K_.has('a') || K_.has('arrowleft')) x -= 1; if (K_.has('d') || K_.has('arrowright')) x += 1;
-  if (K_.has('w') || K_.has('arrowup')) y -= 1; if (K_.has('s') || K_.has('arrowdown')) y += 1;
-  const L = Math.hypot(x, y); if (L > 1) { x /= L; y /= L; }
-  return { x, y, active: L > .2 };
-}
+function playerVec() { return { x: 0, y: 0, active: false }; } // 移動は自動（スティックなし）
 
 /* ---------- 時間で すすむ 効果 ---------- */
 function updateEffects(f, dt) {
@@ -1781,25 +2027,13 @@ function updateFighter(f, dt) {
     case 'free': {
       if (!canAct(f)) break; // ねむり・こおり
       if (!oT) {
-        if (f.side === 0) { const v = playerVec(); if (v.active) moveDir(f, v.x, v.y, dt); }
         break;
       }
       aiDodgeCheck(f, o);
       if (f.state !== 'free') break;
       if (f.v.encore && f.queued !== f.v.encore.id && f.queued !== null) f.queued = null;
-      if (f.side === 0 && !S.auto && !f.v.rampage) {
-        const v = playerVec();
-        if (f.queued) { // コマンドされたわざ：とどく距離まで自動で近づく
-          const m = MOVES[f.queued], d = dist(f, o);
-          if (moveBlocked(f, f.queued)) f.queued = null;
-          else if (d <= moveReach(f, o, m)) { const q = f.queued; f.queued = null; beginMove(f, q); }
-          else if (v.active) moveDir(f, v.x, v.y, dt);
-          else { const a = Math.atan2(o.y - f.y, o.x - f.x); moveDir(f, Math.cos(a), Math.sin(a), dt); }
-        } else if (v.active) moveDir(f, v.x, v.y, dt);
-      } else if (f.side === 0 && !f.v.rampage) {
-        const v = playerVec();
-        if (v.active && !f.queued) moveDir(f, v.x, v.y, dt); else aiMove(f, o, dt, true);
-      } else aiMove(f, o, dt, !f.v.rampage);
+      // 移動は モンスター自身が おこなう。オートOFFなら わざは プレイヤーの 指示だけ
+      aiMove(f, o, dt, f.side === 0 ? (S.auto && !f.v.rampage) : !f.v.rampage);
       break;
     }
     case 'wind': {
@@ -1958,7 +2192,7 @@ function bStep(dt) {
   else if (vis.length) {
     tx = vis.reduce((s, f) => s + f.x, 0) / vis.length; ty = vis.reduce((s, f) => s + f.y, 0) / vis.length - 40;
     const d = vis.length > 1 ? dist(vis[0], vis[1]) : 0;
-    tz = clamp(1.12 - d / 900, st.kind === 'stadium' ? .66 : .72, 1.05);
+    tz = clamp(1.02 - d / 900, st.kind === 'stadium' ? .6 : .66, .96);
   }
   if (B.mode === 'catch' && B.catchO) { tx = (B.catchO.x + (a ? a.x : B.catchO.x)) / 2; }
   B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 3);
@@ -2038,7 +2272,7 @@ function setupCmds() {
     const m = MOVES[id];
     b.querySelector('.a').textContent = m.n;
     b.querySelector('.a').style.fontSize = m.n.length > 8 ? '10.5px' : m.n.length > 6 ? '11.5px' : '';
-    b.querySelector('.b').textContent = moveSub(m);
+    b.querySelector('.b').textContent = moveSub(m); b.querySelector('.b')._t = null; b.dataset.eff = '';
     b.style.setProperty('--c', TYPES[m.t].c);
   });
 }
@@ -2283,7 +2517,7 @@ function drawFighter(f) {
   const bob = f.moving ? (Math.floor(f.walk * 9) % 2) * 2 : 0;
   if (FLYING.includes(f.mon.sid)) oy = -8 - Math.round(Math.sin(B.t * 4 + f.side) * 3);
   const img0 = SPR[f.mon.sid].n;
-  shadow(f.x, f.y, img0.width * .9);
+  shadow(f.x, f.y, img0.width * .62);
   const img = (f.flash > 0 || f.state === 'enter' || f.state === 'return') ? SPR[f.mon.sid].w : img0;
   drawSprite(img, f.x, f.y + 3 + oy - bob, f.face, 2, alpha, sx, sy);
   const top = Math.round(f.y + oy - img0.height * 2 - 6);
@@ -2328,7 +2562,9 @@ function drawCrowd(front) {
 }
 
 function render() {
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  fitCanvas();
+  const RS = cv.width / VW; // 画面の解像度に あわせて 描く（ドットが きれいに 出る）
+  ctx.setTransform(RS, 0, 0, RS, 0, 0);
   ctx.fillStyle = '#141022'; ctx.fillRect(0, 0, VW, VH);
   if (!B) return;
   const st = B.st, cam = B.cam, z = cam.z;
@@ -2336,7 +2572,7 @@ function render() {
   const cx = st.W > hw * 2 ? clamp(cam.x, hw, st.W - hw) : st.W / 2;
   const cy = st.H > hh * 2 ? clamp(cam.y, hh, st.H - hh) : st.H / 2;
   const sh = B.shake > 0 ? [rand(-B.shake, B.shake), rand(-B.shake, B.shake)] : [0, 0];
-  ctx.setTransform(z, 0, 0, z, Math.round(VW / 2 - cx * z + sh[0]), Math.round(VH / 2 - cy * z + sh[1]));
+  ctx.setTransform(z * RS, 0, 0, z * RS, Math.round((VW / 2 - cx * z + sh[0]) * RS), Math.round((VH / 2 - cy * z + sh[1]) * RS));
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(st.bg, 0, 0);
   if (st.crowd.length) drawCrowd(false);
@@ -2433,7 +2669,7 @@ function render() {
   ctx.globalAlpha = 1;
 
   // ミニマップ（広いステージの全体像）
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.setTransform(RS, 0, 0, RS, 0, 0);
   if (B.trickRoom > 0) { ctx.fillStyle = `rgba(255,120,200,${.08 + Math.sin(B.t * 3) * .03})`; ctx.fillRect(0, 0, VW, VH); ctx.strokeStyle = 'rgba(255,150,220,.6)'; ctx.lineWidth = 3; ctx.strokeRect(2, 2, VW - 4, VH - 4); }
   const mw = 54, mh = Math.round(mw * (st.fy1 - st.fy0) / (st.fx1 - st.fx0)), mx = VW - mw - 4, my = 4;
   ctx.fillStyle = 'rgba(13,11,20,.6)'; ctx.fillRect(mx - 1, my - 1, mw + 2, mh + 2);
@@ -2447,21 +2683,6 @@ function render() {
 /* =====================================================================
    入力（スティック・ボタン・キーボード）
    ===================================================================== */
-(() => {
-  const zone = $('stickZone'), base = $('stickBase'), knob = $('stickKnob');
-  let pid = null;
-  const setKnob = (dx, dy) => { knob.style.transform = `translate(${dx}px,${dy}px)`; };
-  const upd = (ev) => {
-    const r = base.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = r.width / 2;
-    let dx = ev.clientX - cx, dy = ev.clientY - cy; const L = Math.hypot(dx, dy);
-    if (L > R) { dx = dx / L * R; dy = dy / L * R; }
-    input.sx = dx / R; input.sy = dy / R; setKnob(dx * .6, dy * .6);
-  };
-  zone.addEventListener('pointerdown', (ev) => { ev.preventDefault(); pid = ev.pointerId; zone.setPointerCapture(pid); upd(ev); });
-  zone.addEventListener('pointermove', (ev) => { if (ev.pointerId === pid) upd(ev); });
-  const end = (ev) => { if (ev.pointerId !== pid) return; pid = null; input.sx = input.sy = 0; setKnob(0, 0); };
-  zone.addEventListener('pointerup', end); zone.addEventListener('pointercancel', end);
-})();
 const tap = (el, fn) => el.addEventListener('pointerdown', (ev) => { ev.preventDefault(); fn(); });
 document.querySelectorAll('.cmd.mv').forEach(b => tap(b, () => cmdMove(+b.dataset.mv)));
 tap($('cAtk'), cmdAttack); tap($('cDodge'), cmdDodge); tap($('cSwap'), cmdSwap);
@@ -2529,7 +2750,12 @@ function startCup() {
   });
 }
 
-function fitCanvas() { /* CSS で 4:3 に合わせる。内部解像度は 320x240 固定 */ }
+// キャンバスの 内部解像度を 表示サイズ×画素密度に あわせる（論理座標は 320x240 のまま）
+function fitCanvas() {
+  const r = cv.getBoundingClientRect(); if (!r.width) return;
+  const w = Math.min(1600, Math.round(r.width * Math.min(3, window.devicePixelRatio || 1))), h = Math.round(w * .75);
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; ctx.imageSmoothingEnabled = false; }
+}
 
 /* =====================================================================
    ループ

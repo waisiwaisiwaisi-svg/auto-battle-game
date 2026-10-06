@@ -5,7 +5,7 @@ namespace PixelMonsterArena
 {
     public static partial class Data
     {
-        public const float K = 1.6f, Body = 22f;
+        public const float K = 1.6f, Body = 30f;
 
         public static readonly Dictionary<string, TypeInfo> Types = new Dictionary<string, TypeInfo>
         {

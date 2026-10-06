@@ -30,8 +30,7 @@ namespace PixelMonsterArena
 
         // バトルUIの状態
         bool _swapOpen, _pauseOpen, _resultOpen;
-        int _joyId = int.MinValue; Vector2 _joyVec;
-        Rect _rView, _rJoy; readonly Dictionary<string, Rect> _btnRects = new Dictionary<string, Rect>();
+        Rect _rView; readonly Dictionary<string, Rect> _btnRects = new Dictionary<string, Rect>();
         // へんせい画面
         int _openUid = -1; Vector2 _scroll; float _dragLastY; int _dragId = int.MinValue; float _dragDist;
         string _confirmMsg; System.Action _confirmYes;
@@ -133,30 +132,11 @@ namespace PixelMonsterArena
         {
             var ptrs = InputAdapter.Pointers();
             bool overlay = _pauseOpen || _resultOpen;
+            // 移動は モンスターが じぶんで する。タッチは ボタンだけ
             foreach (var p in ptrs)
-            {
                 if (p.Began && !overlay)
-                {
-                    if (_rJoy.Contains(p.Pos)) _joyId = p.Id;
-                    else foreach (var kv in _btnRects.ToList()) if (kv.Value.Contains(p.Pos)) { PressButton(kv.Key); break; }
-                }
-                if (p.Id == _joyId)
-                {
-                    if (p.Ended) { _joyId = int.MinValue; _joyVec = Vector2.zero; }
-                    else
-                    {
-                        var c = _rJoy.center; float R = _rJoy.width / 2;
-                        var d = p.Pos - c; if (d.magnitude > R) d = d.normalized * R;
-                        _joyVec = d / R; // GUI 座標なので y 下向き＝ゲーム座標と同じ
-                    }
-                }
-            }
-            if (!ptrs.Any(p => p.Id == _joyId)) { _joyId = int.MinValue; _joyVec = Vector2.zero; }
-            var v = _joyVec;
-            if (InputAdapter.Held(InputAdapter.Key.Left)) v.x -= 1; if (InputAdapter.Held(InputAdapter.Key.Right)) v.x += 1;
-            if (InputAdapter.Held(InputAdapter.Key.Up)) v.y -= 1; if (InputAdapter.Held(InputAdapter.Key.Down)) v.y += 1;
-            if (v.magnitude > 1) v.Normalize();
-            B.InputVec = v; B.InputActive = v.magnitude > .2f;
+                    foreach (var kv in _btnRects.ToList()) if (kv.Value.Contains(p.Pos)) { PressButton(kv.Key); break; }
+            B.InputVec = Vector2.zero; B.InputActive = false;
             if (overlay) return;
             if (InputAdapter.Pressed(InputAdapter.Key.Attack)) PressButton("atk");
             if (InputAdapter.Pressed(InputAdapter.Key.Move1)) PressButton("mv0");
@@ -377,7 +357,7 @@ namespace PixelMonsterArena
                 if (i < 3) { GUI.DrawTexture(new Rect(pr.x + 3, pr.y + 3, U * 2, U), _tAcc); GUI.Label(new Rect(pr.x + 3, pr.y + 2, U * 2, U * 1.1f), "出場", new GUIStyle(_small) { alignment = TextAnchor.MiddleCenter, normal = { textColor = Util.Hex("#1a1626") } }); }
             }
             y += Mathf.CeilToInt(S.party.Count / 3f) * U * 6.5f + U * .5f;
-            GUI.Label(new Rect(x, y, w, U * 6), "<b>そうさ</b>：左のスティックで いどう／右のボタンで こうげき・わざ・かわす。赤い はんいは あいての わざの よちょう。◎の わざ（命中100未満）は むいた方向・はんいに うつので よけられる。\nPC：WASD=移動 J=こうげき K/L/U/I=わざ Space=かわす", _small);
+            GUI.Label(new Rect(x, y, w, U * 6), "<b>そうさ</b>：モンスターは じぶんで うごく。あなたは ボタンで わざ・かわす・こうたい を しじ。赤い はんいは あいての わざの よちょう。◎の わざ（命中100未満）は むいた方向・はんいに うつので よけられる。\nPC：J=こうげき K/L/U/I=わざ Space=かわす X=こうたい", _small);
             if (GUI.Button(new Rect(x + w / 2 - U * 6, Screen.height - U * 2.5f, U * 12, U * 1.6f), "セーブデータを けす", _btnSub))
                 Confirm("セーブデータを けしますか？\nもとに もどせません。", () => { SaveData.Delete(); S = null; _scr = Scr.Title; });
         }
@@ -597,17 +577,9 @@ namespace PixelMonsterArena
 
         void ControlsGUI(Rect area)
         {
-            // スティック
-            float js = Mathf.Min(area.width * .38f, area.height * .8f);
-            _rJoy = new Rect(area.x + (area.width * .4f - js) / 2, area.y + (area.height - js) / 2, js, js);
+            // ボタン（スティックは なし。横3列）
             var o = GUI.color;
-            GUI.color = Util.Hex("#2e2648"); GUI.DrawTexture(_rJoy, CircleTex());
-            var knob = new Rect(_rJoy.center.x + _joyVec.x * js * .3f - js * .2f, _rJoy.center.y + _joyVec.y * js * .3f - js * .2f, js * .4f, js * .4f);
-            GUI.color = Util.Hex("#ffd166"); GUI.DrawTexture(new Rect(knob.x - 3, knob.y - 3, knob.width + 6, knob.height + 6), CircleTex());
-            GUI.color = Util.Hex("#3d3360"); GUI.DrawTexture(knob, CircleTex());
-            GUI.color = o;
-            // ボタン
-            float bx = area.x + area.width * .42f, bw = area.width * .58f;
+            float bx = area.x, bw = area.width;
             var f = B.Active(0);
             var list = new List<(string id, string a, string b, Color c, float cd, bool hot, bool dim)>();
             for (int i = 0; i < 4; i++)
@@ -633,14 +605,14 @@ namespace PixelMonsterArena
             list.Add(("auto", "オート", S.auto ? "ON" : "OFF", S.auto ? Util.Hex("#4fd1a5") : Util.Hex("#a49ac0"), 0, S.auto, false));
             foreach (var key in _btnRects.Keys.Where(k => k != "pause").ToList()) _btnRects.Remove(key);
             if (_swapOpen) { SwapBar(new Rect(bx, area.y, bw, area.height)); return; }
-            int rows = Mathf.CeilToInt(list.Count / 2f);
-            float gh = (area.height - (rows - 1) * U * .4f) / rows, gw = (bw - U * .4f) / 2;
+            int rows = Mathf.CeilToInt(list.Count / 3f);
+            float gh = (area.height - (rows - 1) * U * .4f) / rows, gw = (bw - U * .8f) / 3;
             var sa = new GUIStyle(_lbl) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, wordWrap = false, fontSize = Mathf.RoundToInt(U * .85f) };
             var sb = new GUIStyle(_small) { alignment = TextAnchor.MiddleCenter, wordWrap = false, richText = true };
             for (int i = 0; i < list.Count; i++)
             {
                 var it = list[i];
-                var r = new Rect(bx + (i % 2) * (gw + U * .4f), area.y + (i / 2) * (gh + U * .4f), gw, gh);
+                var r = new Rect(bx + (i % 3) * (gw + U * .4f), area.y + (i / 3) * (gh + U * .4f), gw, gh);
                 _btnRects[it.id] = r;
                 Panel(r, it.hot ? Tex2("#3d3360") : _tPanel, it.hot ? _tAcc : null);
                 GUI.color = it.c; GUI.DrawTexture(new Rect(r.x, r.y, U * .35f, r.height), _tWhite); GUI.color = o;
