@@ -53,7 +53,7 @@ namespace PixelMonsterArena
 
             Fighter a = B.Active(0), e = B.Active(1);
             foreach (var f in new[] { a, e }) if (f != null && f.State == "wind" && f.Cur != null) DrawTele(B, f);
-            foreach (var fx in B.Fxs) if (fx.Type == "ghost" && fx.Sid != null) { var ms = PixelArt.Mon(fx.Sid); P.Sprite(ms.Frame("walk1", true), fx.X, fx.Y + 3, MS * fx.Face, MS, A(Color.white, .3f * fx.Life / fx.Max), O_GHOST); }
+            foreach (var fx in B.Fxs) if (fx.Type == "ghost" && fx.Sid != null) { var ms = PixelArt.Mon(fx.Sid); P.Sprite(ms.Frame("walk1", true), fx.X, fx.Y + 3, ms.Ms * fx.Face, ms.Ms, A(Color.white, .3f * fx.Life / fx.Max), O_GHOST); }
 
             foreach (var sd in B.Sides) if (sd.Trainer != null) DrawTrainer(B, sd);
             foreach (var f in new[] { a, e }) if (f != null) DrawFighter(B, f);
@@ -192,10 +192,10 @@ namespace PixelMonsterArena
             if (f.Sp.Flying) oy = -6 - Mathf.Round(Mathf.Sin(B.T * 4 + f.Side) * 2);
             var ms = PixelArt.Mon(f.Mon.sid);
             int o = Ord(f.Y);
-            P.Ellipse(f.X, f.Y, ms.W * MS * .31f, ms.W * MS * .125f, new Color(10 / 255f, 8 / 255f, 18 / 255f, .35f), o - 5);
+            P.Ellipse(f.X, f.Y, ms.W * ms.Ms * .31f, ms.W * ms.Ms * .125f, new Color(10 / 255f, 8 / 255f, 18 / 255f, .35f), o - 5);
             bool white = f.Flash > 0 || f.State == "enter" || f.State == "return";
-            P.Sprite(ms.Frame(MonFrame(B, f), white), f.X, f.Y + 3 + oy, MS * sx * f.Face, MS * sy, A(Color.white, alpha), o);
-            float top = Mathf.Round(f.Y + oy - ms.H * MS - 4);
+            P.Sprite(ms.Frame(MonFrame(B, f), white), f.X, f.Y + 3 + oy, ms.Ms * sx * f.Face, ms.Ms * sy, A(Color.white, alpha), o);
+            float top = Mathf.Round(f.Y + oy - ms.H * ms.Ms - 4);
             if (f.State != "faint" && f.State != "enter" && f.State != "return")
             {
                 // 頭上のHPバー
@@ -212,7 +212,7 @@ namespace PixelMonsterArena
 
         void DrawConditions(Battle B, Fighter f, float top, float oy, PixelArt.MonSprites ms, int o)
         {
-            float h = ms.H * MS, cx = f.X, cy = f.Y - h / 2 + oy;
+            float h = ms.H * ms.Ms, cx = f.X, cy = f.Y - h / 2 + oy;
             if (f.State == "lag")
             { // 交代直後の スキ：のこり時間バー
                 float w = 46, x = Mathf.Round(cx - w / 2), k = Mathf.Clamp01(f.StT / (f.LagMax > 0 ? f.LagMax : Battle.SwapLag));
@@ -223,7 +223,7 @@ namespace PixelMonsterArena
             if (f.Status != "")
             {
                 WorldTexts.Add((new Vector2(cx, top - 10), Battle.StatusNames[f.Status], C(StCol[f.Status]), 10));
-                if (f.Status == "frz") P.Rect(cx - ms.W * MS / 2, cy - h / 2, ms.W * MS, h, new Color(160 / 255f, 230 / 255f, 1, .45f), o + 2);
+                if (f.Status == "frz") P.Rect(cx - ms.W * ms.Ms / 2, cy - h / 2, ms.W * ms.Ms, h, new Color(160 / 255f, 230 / 255f, 1, .45f), o + 2);
                 if (f.Status == "slp" && Mathf.FloorToInt(B.T * 2) % 2 == 1) WorldTexts.Add((new Vector2(cx + 22, top - 18 - (B.T * 10 % 10)), "Z", Color.white, 14));
             }
             if (f.V.Protect > 0) { P.Ellipse(cx, cy, ms.W * 1.25f, h * .7f, new Color(160 / 255f, 240 / 255f, 1, .18f), o + 2); P.RingE(cx, cy, ms.W * 1.25f, h * .7f, new Color(160 / 255f, 240 / 255f, 1, .7f), o + 2); }

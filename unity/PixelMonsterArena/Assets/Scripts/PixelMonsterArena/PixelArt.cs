@@ -94,6 +94,8 @@ namespace PixelMonsterArena
         public class MonSprites
         {
             public Sprite Normal, White; public int W, H;
+            /// <summary>表示倍率。生成AIの 絵（約70px）は 小さめ、手打ち（約48px）は 1.6</summary>
+            public float Ms = 1.6f;
             public readonly Dictionary<string, Sprite> N = new Dictionary<string, Sprite>(), Wt = new Dictionary<string, Sprite>();
             public Sprite Frame(string name, bool white) => (white ? Wt : N).TryGetValue(name, out var sp) ? sp : (white ? White : Normal);
         }
@@ -121,7 +123,7 @@ namespace PixelMonsterArena
         static MonSprites Load(string name, Texture2D fallback)
         {
             var n = LoadPng(name) ?? fallback;
-            var s = new MonSprites { Normal = ToSprite(n, new Vector2(.5f, 0)), White = ToSprite(WhiteOf(n), new Vector2(.5f, 0)), W = n.width, H = n.height };
+            var s = new MonSprites { Normal = ToSprite(n, new Vector2(.5f, 0)), White = ToSprite(WhiteOf(n), new Vector2(.5f, 0)), W = n.width, H = n.height, Ms = n.height > 56 ? 1.15f : 1.6f };
             foreach (var f in Frames)
             {
                 var t = LoadPng(name + "_" + f);
