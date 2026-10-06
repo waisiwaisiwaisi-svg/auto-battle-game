@@ -135,7 +135,7 @@ def cable(path, end, far=False, hot=False):
     return make(d, RAMP, r=1, dk=DARK if far else None, post=post)
 C1 = ([(41, 40), (49, 46), (56, 48), (61, 43)], (61, 39))
 C1A = ([(41, 40), (48, 40), (55, 37), (59, 32)], (60, 28))
-C2 = ([(29, 40), (21, 49), (14, 53), (8, 50)], (6, 46))
+C2 = ([(29, 40), (22, 49), (16, 53), (11, 50)], (9, 46))
 # 目：まゆの 線＋白い 光＋電気の 虹彩（明 Y・暗 O）＋たての ひとみ
 EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwYYkYYk', '.kwYYOkOYk', '.kYOOOkOOk', '..kOOkkOk.', '...kkkkk..']
 EYE_ALT = {
@@ -162,7 +162,7 @@ def layers():
         dict(n='zap', g='cable', x=58, y=31, rows=ZAP, only='idle1|idle3|walk1|walk3'),
         dict(n='zap2', g='cable', x=57, y=24, rows=ZAP2, only='atk1'),
         dict(n='bolt', g='cable', x=56, y=22, rows=BOLT, only='atk2'),
-        dict(n='zap3', g='legB', x=1, y=38, rows=ZAP, only='idle2|walk2|atk0'),
+        dict(n='zap3', g='legB', x=4, y=38, rows=ZAP, only='idle2|walk2|atk0'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'head': (0, 1), 'legA': (0, 1)}, 'idle2': {'head': (0, 1), 'body': (0, 1), 'legA': (0, 1), 'cable': (0, 1)}, 'idle3': {'body': (0, 1)}, 'blink': {},
