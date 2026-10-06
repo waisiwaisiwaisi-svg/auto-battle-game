@@ -2,7 +2,7 @@
 META = dict(id='ikaritagame', name='イカリタガメ', types=['bug', 'water'], base='タガメ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2c2618',
-    'B': '#c4b06c', 'C': '#7e6c38', 'D': '#40361e',      # 体（どろ色）
+    'B': '#dcc47c', 'C': '#96793e', 'D': '#4e3a1e',      # 体（どろ色）
     'I': '#d4dce8', 'J': '#828ca0', 'K': '#40465c',      # 鉄の 錨
     'A': '#a8eaff', 'W': '#3e94d4',                      # 水
     'Y': '#ffe24c', 'O': '#c4741a',                      # 目
@@ -59,18 +59,18 @@ def eye(A, B, glow='w'):
 BUG = {'1': 'BCD'}
 DK = {'B': 'C', 'C': 'D', 'D': 'l', 'I': 'J', 'J': 'K', 'K': 'l', 'A': 'W', 'w': 'J'}
 
-# ---- 背（平たい だ円の 羽）：小さく、羽の 重なりの すじ、ふちに 水の つや ----
-BODY = P(M(26, 15, ('e', '1', 13, 7.5, 13, 7.5)), BUG, [
-    (['..AAAA', '.A', 'A'], 3, 1),                           # 水に ぬれた つや
-    (['......DD', '....DD', '..DD', 'DD'], 12, 2),            # 羽の 重なり
-    (['DDDDDDDDDD'], 2, 9),
+# ---- 背（平たい だ円の 羽）：小さく、カメムシの なかまの X字の 羽の 重なり、おしりに 呼吸管 ----
+BODY = P(M(22, 14, ('e', '1', 12, 7, 10, 7), ('p', '1', [(4, 4), (0, 8), (4, 11)])), BUG, [
+    (['..AAAA', '.A', 'A'], 4, 1),                           # 水に ぬれた つや
+    (['DDDD.......', '....DDD....', '.......DDDD'], 8, 3),     # 羽の 重なり（X字）
+    (['.......DDDD', '....DDD....', 'DDDD.......'], 8, 8),
 ], lw=2, dw=3)
+SIPHON = ['kkkkk.', 'kCCDDk', '.kkkkk']
 
 # ---- 頭（大きい くさび形）：前へ とがる、下に 針の くちばし ----
-HEAD = P(M(21, 17, ('e', '1', 9, 9, 9, 8), ('p', '1', [(6, 1), (17, 4), (21, 9), (17, 14), (6, 17)])), BUG, [
+HEAD = P(M(19, 16, ('e', '1', 7, 9, 7, 7), ('p', '1', [(3, 2), (11, 0), (19, 8), (14, 14), (3, 16)])), BUG, [
     (['..BBB', '.B', 'B'], 3, 2),
-    (['DDDDDDDDD'], 1, 12),                                    # 頭と むねの さかい
-    (['D', 'D', 'D'], 14, 13),
+    (['DDDDDDDD'], 1, 12),                                    # 頭と むねの さかい
 ], lw=2, dw=3)
 EYE, EYE_ALT = eye('Y', 'O')
 BEAK = ['kkk...', 'kCCkk.', '.kCDDk', '..kDwk', '...kwk', '....kk']
@@ -100,23 +100,34 @@ ANCHOR = [
     '..kkIJJJJJKkk...',
     '....kkkkkkk.....',
 ]
+def grow(rows, keep=3):
+    """3ドットごとに 1ドット ふやして 大きく（内側の 線は はずして 輪郭を つけ直す）"""
+    g = [r.replace('k', '.') for r in rows]
+    g = [''.join(c * (2 if i % keep == 1 else 1) for i, c in enumerate(r)) for r in g]
+    out = []
+    for j, r in enumerate(g): out += [r] * (2 if j % keep == 1 else 1)
+    w = max(len(r) for r in out)
+    return pix.outline([r.ljust(w, '.') for r in out])
+ANCHOR = grow(ANCHOR)
 ANCHOR_SWING = pix.rot90(pix.rot90(pix.rot90(ANCHOR)))   # 前へ ふり出す（90度）
-FEMUR = P(M(15, 17, ('p', '1', [(1, 17), (0, 13), (10, 1), (13, 0), (15, 3), (5, 17)])), BUG, [(['B', 'B', 'B'], 9, 3)], lw=1, dw=2)
-FEMUR_FWD = P(M(17, 9, ('p', '1', [(0, 9), (0, 4), (14, 0), (17, 3), (16, 6), (4, 9)])), BUG, [], lw=1, dw=2)
+FEMUR = P(M(15, 10, ('p', '1', [(0, 9), (0, 4), (11, 0), (15, 2), (13, 6), (3, 10)])), BUG, [(['BBB'], 5, 3)], lw=1, dw=2)
+FEMUR_FWD = P(M(14, 9, ('p', '1', [(0, 9), (0, 4), (11, 0), (14, 3), (13, 6), (4, 9)])), BUG, [], lw=1, dw=2)
 
 # ---- 泳ぐ 足（4本 → 2本に まとめる）：短く 太く、すその 毛は 水色 ----
 LEG = [
-    '.kkkkk...',
-    'kBBCCCk..',
-    'kBCCCDk..',
-    '.kBCCk...',
-    '.kBCDk...',
-    '..kBCk...',
-    '..kBCk...',
-    '.kBCCDk..',
-    '.kBCDDk..',
-    'kACACACk.',
-    '.kkkkkkk.',
+    '.kkkk.....',
+    'kBCCCk....',
+    'kBCCDk....',
+    '.kBCDk....',
+    '..kBCDk...',
+    '...kBCDkk.',
+    '...kBBCCDk',
+    '....kkBCDk',
+    '.....kBCk.',
+    '....kBCk..',
+    '...kACAk..',
+    '..kAkAkAk.',
+    '..kkkkkkk.',
 ]
 LEG_N = opentop(LEG); LEG_F = dark(LEG, DK)
 SPLASH = [
@@ -131,24 +142,25 @@ SPLASH = [
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='anchorF', g='armF', x=40, y=22, rows=dark(ANCHOR, DK), not_=NB),
-        dict(n='femurF', g='armF', x=35, y=24, rows=dark(FEMUR, DK), not_=NB),
-        dict(n='legF', g='legB', x=12, y=47, rows=LEG_F),
-        dict(n='body', g='body', x=4, y=33, rows=BODY),
-        dict(n='legN', g='legA', x=22, y=47, rows=LEG_N),
-        dict(n='head', g='head', x=24, y=21, rows=HEAD),
-        dict(n='eye', g='head', x=34, y=25, rows=EYE, alt=EYE_ALT),
-        dict(n='beak', g='head', x=42, y=35, rows=BEAK),
-        dict(n='femur', g='arm', x=38, y=25, rows=FEMUR, alt={NB: FEMUR_FWD}),
-        dict(n='anchor', g='arm', x=44, y=23, rows=ANCHOR, not_=NB),
-        dict(n='anchorS', g='arm', x=53, y=22, rows=ANCHOR_SWING, only=NB),
-        dict(n='splash', g='arm', x=62, y=36, rows=SPLASH, only='atk2'),
+        dict(n='anchorF', g='armF', x=34, y=28, rows=dark(ANCHOR, DK), not_=NB),
+        dict(n='femurF', g='armF', x=30, y=31, rows=dark(FEMUR, DK), not_=NB),
+        dict(n='legF', g='legB', x=10, y=48, rows=LEG_F),
+        dict(n='siphon', g='body', x=4, y=40, rows=SIPHON),
+        dict(n='body', g='body', x=6, y=34, rows=BODY),
+        dict(n='legN', g='legA', x=19, y=48, rows=LEG_N),
+        dict(n='head', g='head', x=24, y=22, rows=HEAD),
+        dict(n='eye', g='head', x=33, y=26, rows=EYE, alt=EYE_ALT),
+        dict(n='beak', g='head', x=40, y=35, rows=BEAK),
+        dict(n='femur', g='arm', x=34, y=33, rows=FEMUR, alt={NB: FEMUR_FWD}, ),
+        dict(n='anchor', g='arm', x=39, y=31, rows=ANCHOR, not_=NB),
+        dict(n='anchorS', g='arm', x=46, y=24, rows=ANCHOR_SWING, only=NB),
+        dict(n='splash', g='arm', x=56, y=40, rows=SPLASH, only='atk2'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'body': (0, 1)}, 'idle2': {'body': (0, 1), 'arm': (0, 1)}, 'idle3': {'arm': (0, 1)}, 'blink': {},
     'walk0': {'legA': (2, -1), 'legB': (-1, 0), 'body': (0, -1)}, 'walk1': {'body': (0, -1), 'arm': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (2, -1), 'body': (0, -1)}, 'walk3': {'arm': (0, -1)},
-    'atk0': {'body': (-2, 1), 'arm': (-2, -2), 'armF': (-2, -2)}, 'atk1': {'root': (3, 0), 'arm': (0, 8)}, 'atk2': {'root': (5, 0), 'arm': (0, 8)},
+    'atk0': {'body': (-2, 1), 'arm': (-2, -2), 'armF': (-2, -2)}, 'atk1': {'root': (2, 0)}, 'atk2': {'root': (2, 0), 'arm': (0, 1)},
     'hit': {'root': (-3, 0), 'head': (-2, -1), 'arm': (-1, 1)}, 'ko': {'_flip': True},
 }
 PARENT = {'arm': 'head', 'armF': 'head', 'head': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

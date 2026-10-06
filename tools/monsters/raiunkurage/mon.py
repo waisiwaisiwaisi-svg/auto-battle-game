@@ -135,8 +135,8 @@ BOLT = [
 ]
 def limp_d(g):
     for x0, x1 in ((12, 2), (22, 16), (40, 46), (47, 58)):
-        for o in (0, 1): Ln(g, x0, 57 + o, x1, 59 + o - (1 if x1 > x0 else 0), '7')
-LIMP = part(limp_d, {'7': 'Yyg'})
+        for o in (0, 1, 2): Ln(g, x0, 56 + o, x1, 58 + o - (1 if x1 > x0 else 0), '7')
+LIMP = part(limp_d, {'7': 'Yyy'})
 SPARK = ['k.k.k', '.kCk.', 'kCwCk', '.kCk.', 'k.k.k']
 
 def layers():

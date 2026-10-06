@@ -46,8 +46,8 @@ EYES = {
     'open': ['kk......', '.kkkkk..', '..kwRkSk', '..kRSkSk', '...kkkk.'],
     'atk':  ['kk......', '.kkkkk..', '..kwwwRk', '..kRwRSk', '...kkkk.'],
     'blink': ['kk......', '.kkkkk..', '........', '..kkkkkk', '........'],
-    'hit':  ['........', '.kk..kk.', '...kk...', '.kk..kk.', '........'],
-    'ko':   ['........', '.k...k..', '..k.k...', '...k....', '..k.k...'],
+    'hit':  ['kk......', '.kkkkk..', '..RR....', '....RRR.', '..RR....'],
+    'ko':   ['........', '..R...R.', '...R.R..', '....R...', '...R.R..', '..R...R.'],
 }
 @lru_cache(None)
 def head(eye='open'):
@@ -86,10 +86,11 @@ def nose(lift=0, hot=False):
             for X in range(W):
                 x = X - MX
                 if g[Y][X] == '1' and (48 <= x <= 49 or x >= 56): g[Y][X] = '3'
+                elif g[Y][X] == '1' and x >= 50: g[Y][X] = '2'                  # 羅宇（白い 竹の 管）
     def p(g):
         for x in (51, 54):                                            # 羅宇の ふし
             for y in range(30, 46):
-                if at(g, x, y) in 'ABD' and at(g, x, y - 1) not in '.': put(g, x, y, 'l')
+                if at(g, x, y) in 'EFH' and at(g, x, y - 1) not in '.': put(g, x, y, 'H')
     g = part(d, RAMP, p, open=[(42, 30, 47, 41)], r=1, tilt=.6)
     stamp(g.g, 55, 44 - lift, GAN_HOT if hot else GAN)
     return g
@@ -147,8 +148,11 @@ def frame(f):
     items = [add(leg(15, True), lb), add(leg(30, True), la), add(body(), b), add(leg(11), la), add(leg(26), lb)]
     if f not in ('atk1', 'atk2', 'hit', 'ko'): items.append(add(smoke(ph), hh))
     items += [add(nose(lift, hot), hh), add(head(E), hh)] + fx
+    if f == 'ko':   # 横だおれ：胴が しずみ、頭は 地面に。煙管の 鼻も 投げ出す。目は ×
+        items = [add(leg(15, True), (0, 2)), add(body(), (0, 6)), add(leg(11), (-3, 1)), add(leg(26), (3, 1)),
+                 add(nose(2), (3, 12)), add(head('ko'), (3, 12))]
     g = compose(items)
-    return flip_ko(g) if f == 'ko' else g
+    return g
 
 def layers(): return one_layer({f: frame(f) for f in FR})
 FRAMES = {f: {} for f in FR}

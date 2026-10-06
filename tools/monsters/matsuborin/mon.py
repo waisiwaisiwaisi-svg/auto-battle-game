@@ -77,11 +77,11 @@ def scales(g, on='STU', tile=TILE, dx=6, dy=4, ox=0, oy=0):
 ST = {'1': 'STU'}; SK = {'2': 'FGH'}; SKD = {'2': 'GHH'}
 # ---- しっぽ（太い 鱗の 尾。先に 松葉）----
 def tail_d(g):
-    P(g, [(19, 40), (12, 38), (6, 41), (3, 47), (5, 53), (9, 50), (12, 46), (19, 50)], '1')
+    P(g, [(19, 40), (13, 38), (8, 41), (5, 47), (7, 53), (10, 50), (13, 46), (19, 50)], '1')
 TAIL = part(tail_d, ST, dw=2, post=lambda g: scales(g, tile=TILE_S, dx=5, dy=3))
 # ---- 胴＝松ぼっくりの ドーム（鉄の 鱗片）----
 def body_d(g):
-    E(g, 27, 43, 12.5, 10.5, '1')
+    E(g, 27, 42, 12, 11.5, '1'); P(g, [(20, 34), (26, 27), (33, 33)], '1')
     for y in range(50, N):
         for x in range(N):
             if g[y][x] == '1': g[y][x] = '2'
@@ -94,7 +94,7 @@ NEEDLE = ['..k...k...', '.kAk.kAk.k', '.kAkkABkkA', 'kABkABkAB.', '.kBBBBBBk.']
 NEEDLE2 = ['...k...k..', '..kAk.kAkk', '.kABkkABkA', 'kABkABkAB.', '.kBBBBBBk.']
 # ---- 足（短く 太い。大きな 爪）----
 def leg(x, ramp, cut=True):
-    def d(g): P(g, [(x - 1, 48), (x + 7, 48), (x + 7, 56), (x + 8, 58), (x + 8, 61), (x - 1, 61), (x - 1, 56)], '2')
+    def d(g): E(g, x + 3, 51, 4.5, 4, '2'); P(g, [(x + 1, 52), (x + 6, 52), (x + 6, 57), (x + 8, 58), (x + 8, 61), (x - 1, 61), (x, 58)], '2')
     def p(g):
         hand(g, x + 5, 57, ['.w.', 'wTw', 'wT.', '.T.'] if ramp[0] == 'F' else ['.T.', 'TUT', 'TU.', '.U.'])
         dots(g, 'w' if ramp[0] == 'F' else 'T', [(x + 1, 60), (x + 3, 60)])
@@ -138,7 +138,7 @@ def layers():
         L('legHF', 'legB', LEG_HF, not_=NB),
         L('legFF', 'legA', LEG_FF, not_=NB),
         L('tail', 'tail', TAIL, not_=NB),
-        H('needle', 'body', 16, 29, NEEDLE, alt={'idle1|idle3|walk1|walk3': NEEDLE2}, not_=NB),
+        H('needle', 'body', 21, 23, NEEDLE, alt={'idle1|idle3|walk1|walk3': NEEDLE2}, not_=NB),
         L('body', 'body', BODY, not_=NB),
         L('legH', 'legA', LEG_H, not_=NB),
         L('legF', 'legB', LEG_F, not_=NB),

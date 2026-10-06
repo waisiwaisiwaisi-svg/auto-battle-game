@@ -107,7 +107,7 @@ def back_p(g, flower=False):
 BACK = part(back_d, {'1': 'ABD', '3': 'wSS'}, lw=2, dw=2, post=back_p)
 # ---- 足（短く 太い。砂の 皮＋つめ）----
 def leg(x, ramp, cut=True):
-    def d(g): P(g, [(x, 49), (x + 6, 49), (x + 5, 55), (x + 8, 57), (x + 8, 61), (x - 1, 61), (x, 56)], '2')
+    def d(g): E(g, x + 3, 51, 4.5, 4, '2'); P(g, [(x + 1, 52), (x + 6, 52), (x + 6, 57), (x + 8, 58), (x + 8, 61), (x - 1, 61), (x, 58)], '2')
     def p(g): dots(g, 'w', [(x + 3, 60), (x + 6, 60), (x + 8, 60)]); dots(g, 'U', [(x + 2, 52), (x + 3, 52)])
     return part(d, {'2': ramp}, post=p, cut=((x - 1, 47, x + 7, 50),) if cut else ())
 LEG_F = leg(33, 'STU'); LEG_H = leg(17, 'STU'); LEG_FF = leg(37, 'TUU', False); LEG_HF = leg(22, 'TUU', False)

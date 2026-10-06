@@ -194,7 +194,7 @@ def layers():
 FRAMES = {
     'idle0': {}, 'idle1': {'root': (0, -1)}, 'idle2': {'root': (0, -1)}, 'idle3': {}, 'blink': {},
     'walk0': {'root': (0, 0), 'tail': (0, -1)}, 'walk1': {'root': (1, -1)}, 'walk2': {'root': (1, -2), 'tail': (0, 1)}, 'walk3': {'root': (0, -1)},
-    'atk0': {'root': (-3, 1), 'tail': (1, 0)}, 'atk1': {'root': (2, 0), 'fx': (0, 0)}, 'atk2': {'root': (5, 0), 'fx': (3, 0)},
+    'atk0': {'root': (-3, 1), 'tail': (1, 0)}, 'atk1': {'root': (2, 0), 'fx': (0, 0)}, 'atk2': {'root': (4, 0), 'fx': (1, 0)},
     'hit': {'root': (-4, -1), 'tail': (1, 1)}, 'ko': {'_flip': True},
 }
 PARENT = {'tail': 'body', 'spout': 'body', 'fin': 'body', 'body': 'root', 'fx': 'root'}

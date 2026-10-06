@@ -155,7 +155,7 @@ def layers():
         dict(n='mouth', g='head', x=42, y=30, rows=MOUTH),
         dict(n='fistN', g='fistN', x=36, y=29, rows=FIST_N),
         dict(n='pow', g='fistN', x=60, y=31, rows=POW, only='atk1'),
-        dict(n='pow2', g='fistF', x=62, y=21, rows=POW, only='atk2'),
+        dict(n='pow2', g='fistF', x=59, y=21, rows=POW, only='atk2'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'body': (0, 1)}, 'idle2': {'body': (0, 1), 'fistN': (0, -1)}, 'idle3': {'fistF': (0, -1)}, 'blink': {},

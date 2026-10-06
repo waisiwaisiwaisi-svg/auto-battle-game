@@ -72,7 +72,7 @@ import math
 PAL = {
     'k': '#101018', 'l': '#3e2a26',
     'A': '#f2d8a6', 'B': '#c48c58', 'C': '#7c4e32',      # 毛（明・中・暗）
-    'D': '#f6f0dc', 'E': '#c6b894',                      # 膜（帆布の 色：明・暗）
+    'D': '#f8f4e4', 'E': '#b4a07c',                      # 膜（帆布の 色：明・暗）
     'c': '#e0fff6', 'm': '#6ad6bc', 'T': '#23806e',      # 風（白・みどり・濃い みどり）＝目の 虹彩も
     'R': '#a02838',                                      # 口の 中
     'w': '#ffffff',
@@ -84,21 +84,21 @@ DARK = {'A': 'B', 'B': 'C', 'D': 'E'}
 HUB = (29, 36)
 
 def vec(a): return math.cos(math.radians(a)), math.sin(math.radians(a))
-def blade(a, L=23, w=10):
+def blade(a, L=24, w=12):
     """風車の 羽根 ＝ 手足の あいだに 張った 四角い 膜。前の ふちは 手足の 骨、うしろに 帆の 格子"""
     ux, uy = vec(a); vx, vy = -uy, ux; hx, hy = HUB
-    P = lambda t, s: (hx + ux * t + vx * s, hy + uy * t + vy * s)
-    def d(p): poly(p, [P(5, 0), P(L, 0), P(L, w), P(9, w * .55)], '2')
+    P = lambda t, s: (round(hx + ux * t + vx * s), round(hy + uy * t + vy * s))
+    def d(p): poly(p, [P(4, 0), P(L, 0), P(L, w), P(8, w * .7)], '2')
     def post(s):
         for t in (11, 16, 21):          # 帆の 格子（よこ）
-            line(s, *map(round, P(t, 1)), *map(round, P(t, w * .9)), 'E')
-        line(s, *map(round, P(10, w * .5)), *map(round, P(L - 1, w * .5)), 'E')
+            line(s, *P(t, 1), *P(t, w - 1), 'E')
+        line(s, *P(10, w // 2), *P(L - 1, w // 2), 'E')
     return make(d, RAMP, r=1, post=post)
-def limb(a, L=23):
+def limb(a, L=24):
     ux, uy = vec(a); hx, hy = HUB
     P = lambda t: (hx + ux * t, hy + uy * t)
     def d(p):
-        tube(p, [P(2), P(L * .55), P(L)], [3, 2.2, 1.8], '1')
+        tube(p, [P(2), P(L * .5), P(L)], [2.8, 2, 1.6], '1')
     def post2(g):
         # 先の かぎ爪（白）
         x, y = map(round, P(L + 1.5)); x2, y2 = map(round, P(L + 2.5))
@@ -113,19 +113,19 @@ ANG2 = (270, 0, 90, 180)         # まわった 向き（攻撃：＋）
 def body():
     def d(p):
         ellipse(p, 29, 37, 7, 7.5, '1')
-        tube(p, [(29, 42), (30, 50), (32, 56)], [3, 3.6, 2.6], '1')       # 平たい しっぽ（短く）
+        tube(p, [(29, 42), (29, 47), (30, 51)], [3, 4, 3.2], '1')       # 平たい しっぽ（短く）
     def post(s):
         for y in range(36, 44):
             for x in range(27, 32):
                 if s[y][x] == 'B' and (x + y) % 3: s[y][x] = 'A'      # おなかの 白い 毛
-        dots(s, 'C', [(31, 50), (31, 53), (29, 48)])
+        dots(s, 'C', [(31, 50), (32, 52), (27, 51)])
     return make(d, RAMP, post=post)
 def head(open_=False):
     def d(p):
         ellipse(p, 29, 22, 10.5, 9, '1')
         poly(p, [(34, 18), (42, 21), (43, 24), (38, 29), (32, 29)], '1')      # 鼻づら（右むき）
-        poly(p, [(20, 16), (20, 6), (26, 14)], '1')                          # 耳（とがった 房）
-        poly(p, [(27, 14), (32, 5), (34, 15)], '1')
+        poly(p, [(20, 16), (20, 8), (26, 14)], '1')                          # 耳（とがった 房）
+        poly(p, [(27, 14), (31, 7), (34, 15)], '1')
     def post(s):
         line(s, 21, 9, 22, 14, 'C'); line(s, 31, 8, 31, 14, 'C')
         for (x, y) in ((33, 27), (34, 28), (35, 28), (36, 28), (37, 27), (32, 26), (22, 26), (21, 25), (23, 27)): s[y][x] = 'A'
@@ -134,8 +134,8 @@ def head(open_=False):
             put(s, ['kkkkkk', 'kRRRRk', 'kRRRRR', 'kkkkkk'], 37, 24)
             dots(s, 'w', [(41, 25), (41, 26), (40, 25)])
         else:
-            line(s, 36, 25, 42, 24, 'k')
-            dots(s, 'w', [(40, 26), (41, 26), (40, 27), (41, 27)]); dots(s, 'k', [(39, 26), (39, 27), (42, 26), (42, 27), (40, 28), (41, 28)])
+            line(s, 35, 26, 42, 24, 'k')
+            dots(s, 'w', [(40, 25), (41, 25), (40, 26), (38, 26), (38, 27)]); dots(s, 'C', [(41, 26), (39, 27), (37, 27)])
     return make(d, RAMP, lo=-.34, post=post)
 # 目：まゆの 毛＋白い 光＋風色の 虹彩（明 m・暗 T）＋たての ひとみ
 EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwmmkmmk', '.kwmmTkTmk', '.kmTTTkTTk', '..kTTkkTk.', '...kkkkk..']
@@ -155,10 +155,10 @@ def layers():
     lay = []
     for i, (a, a2) in enumerate(zip(ANG, ANG2)):
         g = 'legA' if i % 2 else 'legB'
-        lay.append(dict(n='bl%d' % i, g=g, x=0, y=0, rows=BL[a], alt={'atk1': BL[a2]}))
+        lay.append(dict(n='bl%d' % i, g=g, x=0, y=0, rows=BL[a], alt={'atk1|walk1|walk3': BL[a2]}))
     for i, (a, a2) in enumerate(zip(ANG, ANG2)):
         g = 'legA' if i % 2 else 'legB'
-        lay.append(dict(n='lm%d' % i, g=g, x=0, y=0, rows=LM[a], alt={'atk1': LM[a2]}))
+        lay.append(dict(n='lm%d' % i, g=g, x=0, y=0, rows=LM[a], alt={'atk1|walk1|walk3': LM[a2]}))
     H = head(); HO = head(True)
     lay += [
         dict(n='body', g='body', x=0, y=0, rows=body()),

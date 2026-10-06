@@ -97,33 +97,32 @@ def shell(hot=False):
 # ---- 首＝注ぎ口：鉄の 筒が 前へ 上がり、その 先から 首が 出る ----
 def spout():
     g = G(14, 12)
-    pl(g, [(0, 4), (8, 1), (13, 0), (13, 6), (8, 7), (0, 11)], 'i')
+    pl(g, [(0, 4), (6, 1), (10, 0), (10, 6), (6, 7), (0, 11)], 'i')
     edge(g, 'i')
     shade(g, RAMP, dk=2, dr=1)
-    at(g, 11, 0, 'k'); at(g, 11, 1, 'I'); at(g, 11, 2, 'I'); at(g, 11, 3, 'J'); at(g, 11, 4, 'J'); at(g, 11, 5, 'K')   # 口の 輪
+    at(g, 8, 0, 'k'); at(g, 8, 1, 'I'); at(g, 8, 2, 'I'); at(g, 8, 3, 'J'); at(g, 8, 4, 'J'); at(g, 8, 5, 'K')   # 口の 輪
     return done(g, open_left=2)
 
 # ---- 頭：大きく、かぎ形の くちばし（ワニガメ風）、するどい 目 ----
+BEAK = ['.kkkk...', 'kFFFGkk.', 'kFGGGGGk', 'kGGGGGHk', 'kGGGGHHk', '.kHHHHHk', '..kkkHHk', '.....kHk', '......k.']
 def head(eye=None, mouth=0, ko=False):
-    g = G(21, 18)
+    g = G(22, 19)
     ell(g, 9, 9, 8.5, 7.5, 'f')
-    pl(g, [(10, 3), (17, 4), (20, 8), (19, 12), (16, 10), (10, 12)], 'f')          # 鼻先
-    if mouth: pl(g, [(10, 12), (17, 11), (19, 16), (12, 16), (6, 15)], 'f')
-    pl(g, [(13, 4), (17, 4), (20, 8), (19, 12), (17, 10), (13, 9)], 'i')          # 鉄の くちばし（注ぎ口の 先と 同じ 鉄）
+    pl(g, [(9, 4), (15, 5), (15, 12), (9, 12)], 'f')
+    if mouth: pl(g, [(8, 12), (17, 12), (19, 17), (12, 17), (6, 15)], 'f')
     pl(g, [(2, 4), (7, 0), (8, 4)], 'f')                                            # 後ろへ 反る 頭の とげ
-    edge(g, 'i')
     shade(g, RAMP, hl=1, dk=3, dr=1)
-    at(g, 4, 10, 'O'); at(g, 5, 11, 'R'); at(g, 3, 6, 'G'); at(g, 4, 8, 'GH'); at(g, 2, 11, 'H')         # うろこ
-    at(g, 18, 6, 'k')                                               # 鼻の あな
+    at(g, 4, 10, 'O'); at(g, 5, 11, 'R'); at(g, 3, 6, 'G'); at(g, 4, 8, 'GH'); at(g, 2, 11, 'H')   # 熱い ひび・うろこ
+    at(g, 13, 3, *BEAK)                                             # かぎ形の くちばし（ワニガメ）
+    at(g, 17, 5, 'k')                                               # 鼻の あな
     if mouth:
-        at(g, 9, 11, 'kkkkkkkkkkk', '.kRRRRRRRkk', '.kROOOORRk.', '.kRRRRRk...', '.kkkkkkk...')
-        at(g, 17, 11, 'kw'); at(g, 10, 12, 'w'); at(g, 14, 12, 'w')
+        at(g, 7, 12, 'kkkkkkkkkkkkk', '.kRRRRRRRRRk', '.kROOOORRRk.', '.kRRRRRkkk..', '.kkkkkkk....')
+        at(g, 10, 13, 'w'); at(g, 14, 13, 'w')
     else:
-        at(g, 8, 12, 'kkkkkkkkkkkk'); at(g, 18, 12, 'w'); at(g, 18, 13, 'k')   # かぎ形の くちばしの 先
-        at(g, 7, 11, 'k')
+        at(g, 6, 12, 'kkkkkkkkkkkk'); at(g, 11, 13, 'w')
     if ko: e = ['k...k', '.k.k.', '..k..', '.k.k.', 'k...k']
     else: e = eye or ['kkk.....', '.kkkkkk.', 'kwYYOkk.', 'kYOOkRk.', '.kkkkk..']
-    at(g, 7, 3, *e)
+    at(g, 6, 3, *e)
     return done(g)
 EYE_BLINK = ['kkk.....', '.kkkkkk.', 'kGGGGGk.', 'kkkkkkk.', '.HHHHH..']
 EYE_HIT = ['k.......', '.kkk....', 'kOOkkkk.', '.kkkkOk.', '........']
@@ -147,23 +146,23 @@ def breath(big=False):
         ell(g, cx, cy, r, r * .85, m)
     shade(g, RAMP, hl=2, dk=2, dr=2)
     return done(g)
-WISP = ['..kkk..', '.kSSTk.', 'kSSTk..', '.kTk....', '..kSk..', '...kTk.', '...kk..']
-WISP2 = ['.kkk...', 'kSSTk..', '.kSSTk.', '..kTk..', '.kSk...', 'kTk....', '.kk....']
+WISP = ['.kkk..', 'kSSTk.', 'kSTTk.', '.kkSk.', '..kTk.', '..kk..']
+WISP2 = ['..kkk.', '.kSSTk', '.kSTTk', '.kSkk.', '.kTk..', '..kk..']
 
 NB = 'atk1|atk2'
 def layers():
     return [
-        dict(n='wisp', g='lid', x=19, y=11, rows=WISP, alt={'idle1|idle3|walk1|walk3': WISP2}, not_='ko|hit|' + NB),
-        dict(n='tail', g='body', x=3, y=47, rows=TAIL),
+        dict(n='wisp', g='lid', x=19, y=25, rows=WISP, alt={'idle1|idle3|walk1|walk3': WISP2}, not_='ko|hit|' + NB),
+        dict(n='tail', g='body', x=4, y=47, rows=TAIL),
         dict(n='legHF', g='legB', x=12, y=48, rows=dark(leg())),
         dict(n='legFF', g='legB', x=31, y=48, rows=dark(leg())),
         dict(n='spout', g='neck', x=31, y=34, rows=spout()),
         dict(n='shell', g='body', x=5, y=19, rows=shell(), alt={'idle1|idle3|walk1|walk3|atk0|' + NB: shell(True)}),
         dict(n='legH', g='legA', x=8, y=49, rows=leg()),
         dict(n='legF', g='legA', x=27, y=49, rows=leg()),
-        dict(n='head', g='head', x=41, y=23, rows=head(),
+        dict(n='head', g='head', x=37, y=23, rows=head(),
              alt={'blink': head(EYE_BLINK), 'hit': head(EYE_HIT), 'atk0': head(EYE_ATK), NB: head(EYE_ATK, 1), 'ko': head(ko=True)}),
-        dict(n='breath', g='fx', x=60, y=34, rows=breath(), alt={'atk2': breath(True)}, only=NB),
+        dict(n='breath', g='fx', x=53, y=34, rows=breath(), alt={'atk2': breath(True)}, only=NB),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'head': (0, 1)}, 'idle2': {'body': (0, 1), 'neck': (0, 1), 'head': (0, 1)}, 'idle3': {'body': (0, 1), 'neck': (0, 1)},

@@ -183,7 +183,7 @@ FRAMES = {
     'walk0': {'legA': (2, -1), 'legB': (-1, 0), 'body': (0, -1)}, 'walk1': {'body': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (2, -1), 'body': (0, -1)}, 'walk3': {},
     'atk0': {'body': (-2, 1), 'head': (-1, 1), 'tail': (1, 0)},
-    'atk1': {'root': (4, 0), 'head': (2, 1), 'fx': (0, 0)}, 'atk2': {'root': (6, 0), 'head': (1, 0), 'fx': (4, 0)},
+    'atk1': {'root': (4, 0), 'head': (2, 1), 'fx': (0, 0)}, 'atk2': {'root': (6, 0), 'head': (1, 0), 'fx': (1, 0)},
     'hit': {'root': (-3, 0), 'head': (-2, -1)}, 'ko': {'_flip': True},
 }
 PARENT = {'comb': 'head', 'head': 'body', 'tail': 'body', 'wing': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

@@ -149,18 +149,21 @@ def head():
     # 鼻と 口
     dots(g, 'k', [(51, 25), (52, 25), (51, 26), (52, 26), (52, 27)]); dots(g, 'G', [(51, 24)])
     hline(g, 'k', 43, 51, 29); dots(g, 'k', [(42, 28)])
-    dots(g, 'w', [(47, 30), (49, 30)]); dots(g, 'k', [(46, 30), (48, 30), (50, 30), (47, 31), (49, 31)])
+    dots(g, 'w', [(46, 30), (49, 30), (49, 31)]); dots(g, 'k', [(45, 30), (47, 30), (48, 30), (50, 30), (50, 31), (46, 31), (48, 31), (49, 32)])
     return g
 # 目：白い 光＋金と だいだいの 虹彩＋たての ひとみ（くまどりの 中）。上に 太い まゆ
-EYE = ['kkk.....', '.kkkkkk.', '.kwYYkOk', '..kOOkkk']
-EYE_ALT = {'blink': ['kkk.....', '.kkkkkk.', '.DDDDDDk', '..kkkkk.'], 'hit': ['.kk...k.', '..kk.kk.', '.kk.kk..', '........'],
-           'atk0|atk1|atk2': ['kkk.....', '.kkkkkkk', '.kwwYkYk', '..kYOkOk'], 'ko': ['........', '.kD.kD..', '..kD....', '.kD.kD..']}
+EYE = ['kkkk....', '.kkkkkkk', '.kwYYkYk', '.kYOOkOk', '..kkkkk.']
+EYE_ALT = {'blink': ['kkkk....', '.kkkkkkk', '.DDDDDDD', '.kkkkkkk', '........'], 'hit': ['........', '.kk...kk', '..kk.kk.', '.kk...kk', '........'],
+           'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkYk', '.kYYOkOk', '..kkkkk.'], 'ko': ['........', '.k..k...', '..kk....', '..kk....', '.k..k...']}
 # 湯気の 一撃
 def steam(ph):
     g = G(80, 64)
     for (x, y, r) in (((46, 44, 3), (51, 42, 3.6), (57, 44, 4)) if ph == 0 else ((50, 43, 3.4), (56, 41, 4.2), (63, 44, 4.6), (59, 48, 3))):
         ball(g, x, y, r, r, 'wSS')
-    return ol(g)
+    g = ol(g)
+    for (x, y, r) in (((46, 44, 3), (51, 42, 3.6), (57, 44, 4)) if ph == 0 else ((50, 43, 3.4), (56, 41, 4.2), (63, 44, 4.6), (59, 48, 3))):
+        dots(g, 'T', [(int(x + r * .5), int(y + r * .6))]); dots(g, 'k', [(int(x - r * .7), int(y + r * .5))])
+    return g
 NB = 'atk1|atk2'
 def layers():
     return [
@@ -170,7 +173,7 @@ def layers():
         L('kettle', 'body', kettle(), alt={'atk0': kettle(1), NB: kettle(2)}),
         dict(n='legA', g='legA', x=25, y=53, rows=LEG_N),
         L('head', 'head', head()),
-        dict(n='eye', g='head', x=37, y=20, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=37, y=19, rows=EYE, alt=EYE_ALT),
         dict(n='arm', g='arm', x=42, y=38, rows=ARM, alt={NB: ARM_UP}),
         L('steam', 'fx', steam(0), alt={'atk2': steam(1)}, only=NB),
     ]
