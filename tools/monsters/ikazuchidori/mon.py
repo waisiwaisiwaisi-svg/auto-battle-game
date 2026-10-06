@@ -75,12 +75,12 @@ BODY = [
     '..kkZZZZZZZZZk..........',
     '....kkkkkkkkk...........',
 ]
-HEAD = [
-    'k.........k.........',
-    'kYk......kYk........',
-    '.kYk....kYk.........',
-    '..kEk..kEk..........',
-    '..kPPkkPPk..........',
+HEAD = [  # 避雷針の 角は 2ドットの 太さ
+    'kk........kk........',
+    'kYYk.....kYYk.......',
+    '.kYEk...kYEk........',
+    '..kEPk.kEPQk........',
+    '..kPPkkPPQk.........',
     '..kPPPPPPQkk........',
     '.kPPPPPPPPQQkk......',
     '.kPPkkkkkkkQQQk.....',
@@ -175,7 +175,67 @@ MANE = [
     '..kkk.kkkk.kkk..',
 ]
 
+def lying_body(W, H):
+    """あたり：たおれた 胴（横長の だ円）。光は 左上、右下は 影"""
+    g = pix.grid(W, H); cx, cy, rx, ry = W / 2, H / 2, W / 2 - .2, H / 2 - .2
+    for y in range(H):
+        for x in range(W):
+            nx, ny = (x + .5 - cx) / rx, (y + .5 - cy) / ry
+            if nx * nx + ny * ny > 1: continue
+            l = -nx * .5 - ny * .85
+            g[y][x] = 'P' if l > .55 else 'Z' if l < -.35 else 'Q'
+    return pix.outline(pix.rows_of(g))
+# ダウン：力なく 地面に たれた 翼（手打ち）。上の ふちの ぎざぎざは 残し、稲妻の 帯は 消えて 灰色
+WING_KO = [
+    '...................kkkk.........',
+    '.............kk..kkPPPPkk.......',
+    '..........kkkPPkkPPPPQQQQkk.....',
+    '.......kkkPPPPPPPPQQQQQQQQQk....',
+    '.....kkPPPQQQQQQQQQQQgQQQQZk....',
+    '....kPPQQQkQQQQkQQQgQQQQZZZk....',
+    '...kPQQkkPQQQkkPQgQkQQQZZZk.....',
+    '..kPQkkkPQQkkkPQQkkkPQZZkk......',
+    '.kPQk.kPQQk.kPQQk.kPQZZk........',
+    'kPQZk.kPQZk.kPQZk.kPZk..........',
+    'kQZk..kQZk..kQZk..kZk...........',
+    '.kk....kk....kk....k............',
+]
+TAIL_KO = [
+    '..........kk......',
+    '..kk....kkPQk.....',
+    '.kPQkkkkPQQZk.....',
+    'kPQQQQPQQZZkkkk...',
+    '.kkZZZQQZZkkQQZk..',
+    '...kkkkkkk..kkkk..',
+]
+SMOKE = [  # 角から 立ちのぼる 消えた 電気の けむり
+    '..kk...kk.',
+    '.kggk.kgGk',
+    '.kgk..kgk.',
+    'kgk..kgk..',
+    '.kk...kk..',
+]
+def head_ko():
+    """たおれた 頭：目は ×、角の 電気は 消えて 灰色"""
+    g = pix.grid_of(pix.recolor(HEAD, {'Y': 'g', 'E': 'Q'}))
+    for (x, y, c) in ((4, 7, 'w'), (6, 7, 'w'), (5, 8, 'w'), (4, 9, 'w'), (6, 9, 'w'), (5, 7, 'k'), (4, 8, 'k'), (6, 8, 'k'), (7, 8, 'k'), (5, 9, 'k'), (3, 8, 'k'), (3, 9, 'k'), (7, 9, 'k')): g[y][x] = c
+    return pix.rows_of(g)
+def ko_layers():
+    return [
+        dict(n='ko_tail', g='root', x=-6, y=54, rows=TAIL_KO),
+        dict(n='ko_body', g='root', x=11, y=46, rows=lying_body(30, 13)),
+        dict(n='ko_talon', g='root', x=31, y=51, rows=pix.flip_v(TALON)),
+        dict(n='ko_mane', g='root', x=36, y=48, rows=MANE),
+        dict(n='ko_head', g='root', x=42, y=45, rows=head_ko()),
+        dict(n='ko_wingF', g='root', x=2, y=49, rows=WING_KO),
+        dict(n='ko_smoke', g='root', x=44, y=38, rows=SMOKE),
+    ]
+
 def layers():
+    L = base_layers()
+    for l in L: l['not_'] = (l['not_'] + '|ko') if l.get('not_') else 'ko'
+    return L + [dict(l, only='ko') for l in ko_layers()]
+def base_layers():
     return [
         dict(n='wingB_up', g='wingB', x=18, y=1, rows=dark(WING_UP), only=UP),
         dict(n='wingB_mid', g='wingB', x=10, y=13, rows=dark(WING_MID), only=MID),
@@ -209,6 +269,6 @@ FRAMES = {
     'atk1': {'root': (2, 1), 'head': (2, 1), 'talon': (2, -1)},
     'atk2': {'root': (4, 1), 'head': (1, 1)},
     'hit': {'root': (-4, 0), 'head': (-1, -1), 'talon': (1, 0), 'tail': (1, 0)},
-    'ko': {'root': (-2, 6), 'head': (3, 4), 'talon': (0, -2), 'tail': (0, -3)},
+    'ko': {},
 }
 PARENT = {'head': 'body', 'tail': 'body', 'talon': 'body', 'wingF': 'body', 'wingB': 'body', 'body': 'root', 'fx': 'root'}

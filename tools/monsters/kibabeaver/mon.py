@@ -37,43 +37,76 @@ def rot90(rows):
     h, w = len(rows), max(len(r) for r in rows); rows = [r.ljust(w, '.') for r in rows]
     return [''.join(rows[h - 1 - y][x] for y in range(h)) for x in range(w)]
 
-# ---- 胴：まるく 盛り上がった 背中。ぬれた 毛の すじと 水てきは 手で ----
-SPAN = [(12, 20), (8, 24), (6, 26), (4, 27), (3, 28), (2, 29), (1, 29), (0, 30), (0, 30), (0, 30), (0, 30), (0, 30),
-        (0, 30), (0, 30), (0, 30), (1, 30), (2, 29), (3, 28), (5, 27), (8, 25)]
+# ---- 胴：肩が もり上がった 前のめりの 体（あたりは 多角形）→ ぬれた 毛の たば・筋肉・きずあとは 手で ----
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
+from pix import grid, poly, outline, rows_of
+def run(g, x, y, dx, dy):
+    n = 0
+    while 0 <= y < len(g) and 0 <= x < len(g[0]) and g[y][x] != '.': n += 1; x += dx; y += dy
+    return n
 def body():
-    g = shade(SPAN, 31, 'FGH', lit=2, dk=3)
-    for (x, y) in ((8, 4), (9, 5), (9, 6), (14, 3), (15, 4), (15, 5), (20, 4), (21, 5), (21, 6), (5, 8), (6, 9), (11, 9), (12, 10), (17, 8),
-                   (18, 9), (23, 8), (24, 9), (4, 12), (9, 13), (14, 12), (15, 13), (20, 12), (25, 12)):
-        if g[y][x] == 'G': g[y][x] = 'H'
-    for (x, y) in ((7, 4), (13, 3), (19, 3), (4, 7), (10, 8), (16, 7), (22, 7), (3, 11), (8, 12), (13, 11), (19, 11)):
-        if g[y][x] == 'G': g[y][x] = 'F'
-    for (x, y) in ((11, 2), (17, 2), (6, 5)):   # 水てきの つや
-        g[y][x] = 'C'; g[y + 1][x] = 'A'
-    return [''.join(r) for r in _ol(g)]
+    W, H = 34, 30; g = grid(W, H)
+    poly(g, [(0, 16), (2, 9), (7, 5), (13, 3), (19, 0), (25, 1), (30, 6), (33, 13), (32, 22), (28, 28), (20, 26), (14, 29), (4, 29), (0, 23)], '#')
+    # 背中の ぬれた 毛の たば（後ろへ とがる）
+    for (x, y) in ((5, 6), (6, 5), (10, 3), (11, 2), (16, 1), (17, 0)):
+        if 0 <= y < H: g[y][x] = '#'
+    out = grid(W, H)
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] == '.': continue
+            up, lf, dn, rt = run(g, x, y, 0, -1), run(g, x, y, -1, 0), run(g, x, y, 0, 1), run(g, x, y, 1, 0)
+            c = 'G'
+            if dn <= 4 or rt <= 2: c = 'H'
+            elif dn == 5 and (x + y) % 2: c = 'H'
+            if up <= 2 or (lf <= 2 and dn > 4): c = 'F'
+            if x >= 27 and y >= 16 and c == 'G' and (x + y) % 2: c = 'H'      # 頭の 下の 影（ディザ）
+            out[y][x] = c
+    # 毛の すじ（後ろ下へ ながれる）
+    for (x, y) in ((8, 7), (9, 8), (13, 5), (14, 6), (19, 3), (20, 4), (24, 4), (25, 5), (5, 11), (6, 12), (11, 10), (12, 11), (17, 8), (18, 9)):
+        if out[y][x] == 'G': out[y][x] = 'H'
+        if out[y][x - 1] == 'G': out[y][x - 1] = 'F'
+    # ももの 筋肉（大きな 弧）
+    for (x, y) in ((10, 13), (9, 14), (8, 15), (8, 16), (8, 17), (8, 18), (9, 19), (10, 20), (11, 21), (12, 22), (13, 23)):
+        out[y][x] = 'l'
+        if out[y][x + 1] == 'G': out[y][x + 1] = 'F'
+    # 肩の きずあと（3本の 爪あと）
+    for i in range(3):
+        for j in range(5):
+            x, y = 19 + i * 2 + j // 2, 6 + j + i
+            out[y][x] = 'l'
+            if out[y][x - 1] in 'GH': out[y][x - 1] = 'N'
+    # 水てき
+    for (x, y) in ((9, 5), (15, 2), (4, 10), (26, 4)):
+        out[y][x] = 'C'; out[y + 1][x] = 'A'
+    return outline(rows_of(out))
 
-# 頭：太い まゆ、小さな 耳、つき出た オレンジの のみの 歯
+# 頭：低く 前へ つき出す。重い まゆの ひさし・きずあと・するどい 目・大きな のみの 歯
 HEAD = [
-    '....kkkkkk........',
-    '..kkFFFFFGkk......',
-    '.kFFkkFGGGGGkk....',
-    'kFFkGHkGGGGGGGk...',
-    'kFGkkkGGGGHGGGGk..',
-    'kFGFkkkkkGGHGGGGk.',
-    'kFGGGGGGGGGGHGGGGk',
-    'kGGGGGGGGGGGGHGGHk',
-    'kGGGGGGGGGGGGGGkkk',
-    '.kGGGGGGGGGGGGHHHk',
-    '.kHGGGGGGGGkkkkkk.',
-    '..kHHGGGGGkYYYTk..',
-    '...kkHHHHHkYYTTk..',
-    '.....kkkkkkYYTTk..',
-    '..........kYYTTk..',
-    '..........kYTTk...',
-    '..........kkkk....',
+    '..kk..kkkkkk...........',
+    '.kFHkkFFFFFFkk.........',
+    '.kGHkFGGGGGGFFkk.......',
+    'kFGGGGGGGGGGGGGFkk.....',
+    'kFGGGGGGGNkkkkkkGFkk...',
+    'kGGGGGGGkNlHHHHHkkGFk..',
+    'kGGGGGGkHHl......HkGFk.',
+    'kGGGGGGGkkkN......GGGFk',
+    'kGGGGGGGGGGlNGGGNNNNkkk',
+    'kHGGGGGGGGGGlGNNNNNNkkk',
+    'kHGGGGGGGGGGGNNNNNNNLLk',
+    '.kHGGGGGGGGGGGNNNNLLLk.',
+    '.kHHGGGGGGGkkkkkkkkkk..',
+    '..kHHGGGGGkYYYkYTk.....',
+    '...kkHHHHkYYYYkYTTk....',
+    '.....kkkkkYYYTkYTTk....',
+    '.........kYYYTkYTTk....',
+    '.........kYYTTkTTTk....',
+    '.........kYYTTkTTk.....',
+    '..........kkkkkkk......',
 ]
 TEETH_GLINT = ['w', 'w', 'w']
-EYE = ['CAAkk', '.AAAk', '..kk.']
-EYE_ALT = {'blink': ['kkkkk', '.GGGk', '..GG.'], 'atk0|atk1|atk2': ['CCCkk', '.CCCk', '..kk.'], 'hit': ['AkkAk', '.kAkk', '..GG.'], 'ko': ['AkAkk', '.kAkk', '.AkA.']}
+EYE = ['CCAkAk', '.kkkkk']
+EYE_ALT = {'blink': ['kkkkkk', '.GGGGk'], 'atk0|atk1|atk2': ['wCCkCk', '.kkkkk'], 'hit': ['kkAkkk', '.kkkkk'], 'ko': ['AkAkAk', '.kAkGk']}
 # 丸太の しっぽ：木の 皮の すじ と 切り口の 年輪
 TAIL = [
     '..kkkkkkkkkkkkkk..',
@@ -90,25 +123,28 @@ TAIL_UP = rot90(TAIL)
 DRIP = ['C.', 'A.', '..', '.A', '.B']
 DRIP2 = ['..', 'C.', 'A.', '..', '.A']
 FLEG = [
-    '.kkkkk.',
-    'kFGGGHk',
-    'kFGGGHk',
-    'kGGGHHk',
-    'kGGGHHk',
-    'kGGHHHk',
-    'kHHHHHkk',
-    'kwkwkwk.',
+    '.kkkkkkk..',
+    'kFGGGGGHk.',
+    'kFGGGGGHHk',
+    'kFGGGGGHHk',
+    '.kFGGGGHHk',
+    '.kFGGGGHk.',
+    '.kFGGGHHk.',
+    '.kGGGGHHk.',
+    '.kFGGGGHHk',
+    'kFGGGGGHHk',
+    'kGGGlGGlHk',
+    'kHHHlHHlHk',
+    'kwkkwkkwk.',
 ]
 HLEG = [
-    '.kkkkkk...',
-    'kFGGGGHk..',
-    'kFGGGGHk..',
-    'kGGGGHHk..',
-    'kGGGHHHk..',
-    '.kGGHHk...',
-    'kGGHHHHkk.',
-    'kHAkHAkHBk',
-    'kkkkkkkkkk',
+    '..kkkkkk.....',
+    '.kGGGGGHk....',
+    'kGGGGGGHHk...',
+    'kGGGGHHHHkk..',
+    'kHHHHHHHHHHk.',
+    'kHAAkHAAkHBBk',
+    'kkkkkkkkkkkkk',
 ]
 PUDDLE = ['..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..', '.kAACCAAAAAACCAAAAAAAACCAAAAAAAACAABk.', '..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..']
 PUDDLE2 = ['..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..', '.kAAAACCAAAAAAAACCAAAAAAACCAAAAAAAABk.', '..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..']
@@ -143,20 +179,20 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 BODY = body()
 def layers():
     return [
-        dict(n='puddle', g='root', x=4, y=58, rows=PUDDLE, alt={'idle1|idle3|walk1|walk3': PUDDLE2}, not_='ko'),
-        dict(n='tail', g='tail', x=1, y=44, rows=TAIL, not_='atk0'),
-        dict(n='tailup', g='tail', x=8, y=25, rows=TAIL_UP, only='atk0'),
-        dict(n='drip', g='tail', x=4, y=53, rows=DRIP, alt={'idle1|idle3|walk1|walk3': DRIP2}, not_='atk0|atk1|atk2|ko'),
-        dict(n='splash', g='root', x=0, y=40, rows=SPLASH, only='atk1'),
-        dict(n='legHF', g='legB', x=21, y=52, rows=dark(HLEG)),
-        dict(n='legFF', g='legA', x=41, y=53, rows=dark(FLEG)),
-        dict(n='body', g='body', x=13, y=34, rows=BODY),
-        dict(n='legH', g='legA', x=13, y=52, rows=HLEG),
-        dict(n='legF', g='legB', x=35, y=53, rows=FLEG),
-        dict(n='head', g='head', x=37, y=30, rows=HEAD),
-        dict(n='eye', g='head', x=42, y=36, rows=EYE, alt=EYE_ALT),
-        dict(n='glint', g='head', x=48, y=41, rows=TEETH_GLINT, only='atk0|atk1'),
-        dict(n='wave', g='fx', x=54, y=48, rows=WAVE, alt={'atk2': WAVE2}, only='atk1|atk2'),
+        dict(n='puddle', g='root', x=1, y=58, rows=PUDDLE, alt={'idle1|idle3|walk1|walk3': PUDDLE2}, not_='ko'),
+        dict(n='tail', g='tail', x=0, y=40, rows=TAIL, not_='atk0'),
+        dict(n='tailup', g='tail', x=3, y=21, rows=TAIL_UP, only='atk0'),
+        dict(n='drip', g='tail', x=3, y=49, rows=DRIP, alt={'idle1|idle3|walk1|walk3': DRIP2}, not_='atk0|atk1|atk2|ko'),
+        dict(n='splash', g='root', x=0, y=36, rows=SPLASH, only='atk1'),
+        dict(n='legHF', g='legB', x=17, y=53, rows=dark(HLEG)),
+        dict(n='legFF', g='legA', x=40, y=47, rows=dark(FLEG)),
+        dict(n='body', g='body', x=9, y=26, rows=BODY),
+        dict(n='legH', g='legA', x=9, y=53, rows=HLEG),
+        dict(n='legF', g='legB', x=33, y=47, rows=FLEG),
+        dict(n='head', g='head', x=34, y=33, rows=HEAD),
+        dict(n='eye', g='head', x=44, y=39, rows=EYE, alt=EYE_ALT),
+        dict(n='glint', g='head', x=45, y=47, rows=TEETH_GLINT, only='atk0|atk1'),
+        dict(n='wave', g='fx', x=50, y=50, rows=WAVE, alt={'atk2': WAVE2}, only='atk1|atk2'),
     ]
 
 FRAMES = {

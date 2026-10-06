@@ -105,6 +105,21 @@ WING_UP = [
     '...............kkBBBBBCCk...',
     '.................kkkkkkk....',
 ]
+NECK = [  # 首（頭と 胴を つなぐ。頭が 上下しても すき間が できない よう 長め）
+    '....kkkkkk',
+    '...kBAAABk',
+    '..kBAAABBk',
+    '..kAAABBBk',
+    '.kBAABBBBk',
+    '.kAABBBBCk',
+    'kBAABBBBCk',
+    'kAABBBBCk.',
+    'kAABBBCCk.',
+    'kABBBBCCk.',
+    'kBBBBCCk..',
+    'kBBBCCCk..',
+    '.kkkkkk...',
+]
 TALON = [
     '..kBBk...',
     '..kBCCk..',
@@ -126,7 +141,36 @@ def swept(rows):
         out[-1] = out[-1][sh:] if sh else out[-1]
     w = max(len(r) for r in out); return [r.ljust(w, '.') for r in out]
 WING_MID = swept(WING_UP)
-WING_DN = pix.flip_v(WING_MID)
+def fan(W, H, cov, feathers):
+    """あたり：打ちおろしの 翼。羽を 1枚ずつ（奥 → 手前）多角形で ぬり、黒で ふちどり、先に 炎。仕上げは 手で"""
+    g = pix.grid(W, H)
+    def put(pts, body):
+        t = pix.grid(W, H); pix.poly(t, pts, body)
+        o = pix.grid_of(pix.outline(pix.rows_of(t)))
+        for y in range(H):
+            for x in range(W):
+                c = o[y + 1][x + 1]
+                if c == '.': continue
+                if c == body:
+                    left = x == 0 or t[y][x - 1] == '.'
+                    c = 'A' if left else 'B'
+                    if x + 1 < W and t[y][x + 1] == '.' and body != 'C': c = 'C'
+                g[y][x] = c
+    for pts in feathers: put(pts, 'B')
+    put(cov, 'B')
+    # 炎の 先（手で：羽の いちばん 下の 3ドットを 赤 → だいだい → 黄）
+    for x in range(W):
+        ys = [y for y in range(H) if g[y][x] in 'ABC']
+        if not ys: continue
+        b = ys[-1]
+        for d, c in ((0, 'Y'), (1, 'O'), (2, 'O'), (3, 'R')):
+            if b - d >= 0 and g[b - d][x] in 'ABC' and b > H * .55: g[b - d][x] = c
+    return pix.rows_of(g)
+WING_DN = fan(26, 30, [(17, 1), (24, 0), (25, 5), (22, 10), (13, 11), (12, 7)],
+              [[(20, 6), (24, 8), (21, 24), (18, 25)], [(15, 7), (21, 8), (15, 27), (12, 27)],
+               [(11, 7), (17, 9), (9, 29), (6, 28)], [(8, 6), (13, 9), (3, 28), (1, 26)]])
+for (x, y, c) in ((18, 3, 'O'), (19, 3, 'R'), (21, 6, 'R'), (15, 7, 'O')):   # 雨覆いの 残り火（手打ち）
+    WING_DN[y] = WING_DN[y][:x] + c + WING_DN[y][x + 1:]
 EYE = ['YYYO']
 EYE_ALT = {'blink': ['kkkk'], 'atk0|atk1|atk2': ['wYYY'], 'hit': ['kYkk'], 'ko': ['OkOk']}
 def dark(rows): return pix.recolor(rows, {'A': 'B', 'B': 'C', 'Y': 'O', 'O': 'R', 'R': 'r'})
@@ -150,19 +194,79 @@ GUST = [  # 攻撃：炎の つむじ風
 ]
 UP, MID, DN = 'idle0|blink|walk0|atk0', 'idle1|idle3|walk1|walk3|atk2|hit|ko', 'idle2|walk2|atk1'
 
+def lying_body(W, H):
+    """あたり：たおれた 胴（横長の だ円）。光は 左上、右下は 影。仕上げは 下で 手で"""
+    g = pix.grid(W, H); cx, cy, rx, ry = W / 2, H / 2, W / 2 - .2, H / 2 - .2
+    for y in range(H):
+        for x in range(W):
+            nx, ny = (x + .5 - cx) / rx, (y + .5 - cy) / ry
+            if nx * nx + ny * ny > 1: continue
+            l = -nx * .5 - ny * .85
+            g[y][x] = 'A' if l > .55 else 'C' if l < -.35 else 'B'
+    return pix.rows_of(g)
+def ko_body():
+    g = pix.grid_of(pix.outline(lying_body(32, 13)))
+    for (x, y, c) in ((9, 4, 'r'), (10, 4, 'R'), (16, 6, 'r'), (21, 3, 'R'), (22, 3, 'r'), (13, 9, 'r'), (25, 7, 'r')): g[y][x] = c   # 消えかけの 残り火
+    return pix.rows_of(g)
+def squash(rows, drop=3):
+    return [r for y, r in enumerate(rows) if y % drop != 1]
+def cool(rows): return pix.recolor(rows, {'Y': 'O', 'O': 'R', 'R': 'r', 'w': 'Y'})   # ダウン：炎が 弱まる
+TAIL_KO = [
+    '...........kkkk.........',
+    '.kk......kkROOOkk.......',
+    'kROk...kkRORRRRROkkkkk..',
+    '.kROkkkRRkk...kkRRROOOk.',
+    '..kRRRROk.......kkkkkkk.',
+    '...kkkkk................',
+]
+TALON_KO = pix.flip_v(TALON)
+# ダウン：力なく 地面に たれた 翼（手打ち）。炎の 先は 消えかけ
+WING_KO = [
+    '...................kkkkkkkk.....',
+    '..............kkkkkAAAAAAABkk...',
+    '..........kkkkAAAAABBBBBBBBBBk..',
+    '.......kkkAAABBBBBBBBBRBBBBBCk..',
+    '.....kkAABBBkBBBBkBBBBBBBBBCCk..',
+    '....kABBBkkABBBkkABBBkBBBBCCk...',
+    '...kABBkkABBBkkABBBkkABBCCCk....',
+    '..kABkkkABBkkkABBkkkABBCCkk.....',
+    '.kABk.kABBk.kABBk.kABCCk........',
+    'kRBk.kRBBk.kRBBk.kRBCk..........',
+    'kOrk.kOrk..kOrk..kOrk...........',
+    '.kk...kk....kk....kk............',
+]
+def head_ko():
+    g = pix.grid_of(HEAD)
+    for (x, y, c) in ((7, 6, 'Y'), (9, 6, 'Y'), (8, 7, 'O'), (7, 8, 'Y'), (9, 8, 'Y'), (8, 6, 'k'), (7, 7, 'k'), (9, 7, 'k'), (10, 7, 'k'), (11, 7, 'k'), (8, 8, 'k')): g[y][x] = c
+    return pix.rows_of(g)
+EYE_KO = ['kVk', 'VkV', 'kVk']
+def ko_layers():
+    return [
+        dict(n='ko_tail', g='root', x=-9, y=54, rows=cool(TAIL_KO)),
+        dict(n='ko_body', g='root', x=10, y=46, rows=ko_body()),
+        dict(n='ko_talon', g='root', x=30, y=52, rows=TALON_KO),
+        dict(n='ko_head', g='root', x=40, y=45, rows=head_ko()),
+        dict(n='ko_wingF', g='root', x=3, y=49, rows=WING_KO),
+    ]
+
 def layers():
+    L = base_layers()
+    for l in L: l['not_'] = (l['not_'] + '|ko') if l.get('not_') else 'ko'
+    return L + [dict(l, only='ko') for l in ko_layers()]
+def base_layers():
     return [
         dict(n='wingB_up', g='wingB', x=18, y=0, rows=dark(WING_UP), only=UP),
         dict(n='wingB_mid', g='wingB', x=9, y=8, rows=dark(WING_MID), only=MID),
-        dict(n='wingB_dn', g='wingB', x=9, y=24, rows=dark(WING_DN), only=DN),
+        dict(n='wingB_dn', g='wingB', x=20, y=24, rows=dark(WING_DN), only=DN),
         dict(n='tail', g='tail', x=1, y=33, rows=TAIL0, alt={'idle1|idle3|walk1|walk3|atk1': TAIL1}),
+        dict(n='neck', g='head', x=38, y=17, rows=NECK),
         dict(n='body', g='body', x=17, y=22, rows=BODY),
         dict(n='talon', g='talon', x=31, y=40, rows=TALON),
         dict(n='head', g='head', x=40, y=8, rows=HEAD),
         dict(n='eye', g='head', x=48, y=15, rows=EYE, alt=EYE_ALT),
         dict(n='wingF_up', g='wingF', x=9, y=2, rows=WING_UP, only=UP),
         dict(n='wingF_mid', g='wingF', x=0, y=10, rows=WING_MID, only=MID),
-        dict(n='wingF_dn', g='wingF', x=0, y=26, rows=WING_DN, only=DN),
+        dict(n='wingF_dn', g='wingF', x=9, y=29, rows=WING_DN, only=DN),
         dict(n='gust', g='fx', x=57, y=17, rows=GUST, only='atk1'),
     ]
 
@@ -180,6 +284,6 @@ FRAMES = {
     'atk1': {'root': (3, 2), 'head': (2, 1), 'talon': (2, -1)},
     'atk2': {'root': (5, 2), 'head': (1, 1)},
     'hit': {'root': (-4, 0), 'head': (-1, -1), 'talon': (1, 0)},
-    'ko': {'root': (-2, 9), 'head': (3, 6), 'talon': (0, -2)},
+    'ko': {},
 }
 PARENT = {'head': 'body', 'tail': 'body', 'talon': 'body', 'wingF': 'body', 'wingB': 'body', 'body': 'root', 'fx': 'root'}

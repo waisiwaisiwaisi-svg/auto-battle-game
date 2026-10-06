@@ -49,26 +49,28 @@ EYE_ALT = {
 }
 # 大あご（白い 牙の はさみ）
 MAND = [
-    "BB..BC",
-    "AwC.Bw",
-    ".wk..w",
-    "..w...",
+    "BBB..BBC",
+    "ABwC.ABw",
+    ".Aw...Bw",
+    "..w....w",
 ]
 MAND_OPEN = [
-    "BB...BC",
-    "AwC..Bw",
-    ".wk...w",
-    "..w..w.",
+    "BBB...BBC",
+    "ABwC..ABw",
+    ".Aw.....w",
+    ".w.....w.",
+    "w.......w",
 ]
 ANT = ['..........kk', '.......kkk..', '.....kk.....', '...kk.......', 'kkk.........']
 # 葉の とさか（頭の 後ろ）
 CREST = [
+    "G........",
     "GG.......",
-    "GHHG.....",
-    ".GHHHG...",
-    ".JHHHHHG.",
-    "..JJHHHHG",
-    "....JJJHH",
+    ".GHG.....",
+    ".JHHHG...",
+    "..JHHHHG.",
+    "...JJHHHH",
+    ".....JJJ.",
 ]
 
 # ---- よろいの 胸（前胸＝首 は 太い 板の かさね）----
@@ -89,16 +91,16 @@ NECK = [
 ]
 BODY = [
     "........AAAAAA....",
-    ".....AAABBBBBBA...",
-    "...AABBBBBBBBBBA..",
-    "..ABBBBBBBBBBBBBC.",
-    ".ABBBBBBBBBBBBBBC.",
-    ".ABBBBBBBBBBBBBBBC",
-    "ABBBBBBBBBBBBBBBBC",
-    "ABBBBBBBBBBBBBBBCC",
-    "ABBBBBBBBBBBBBBBC.",
-    ".CBBBBBBBBBBBBBCC.",
-    "..CCBBBBBBBBBCCC..",
+    ".....AAAAABBCAA...",
+    "...AAABCBBBBCABB..",
+    "..AABBBCBBBBBCABC.",
+    ".AABBBBBCBBBBCABC.",
+    ".ABBBBBBCBBBBCBBCC",
+    "ABBBBBBBCBBBBCBCCC",
+    "ABBBBBBCBBBBCBCCCC",
+    "ABBBBBBCBBBCCCCCC.",
+    ".CBBBBCBBBCCCCCCC.",
+    "..CCCBBBBCCCCCC...",
     "....CCCCCCCCCC....",
 ]
 # よろいの 板の さかい目（左上が 光る 弧）を 手で 置く
@@ -113,25 +115,24 @@ def plates(rows):
     for (x, y) in ((3, 4), (7, 3), (11, 3), (2, 6)):
         if g[y][x] == 'B': g[y][x] = 'A'
     return [''.join(r) for r in g]
-BODY = plates(BODY)
 NECK = [r[:-4] + r[-4:].replace('B', 'C', 1) if i % 3 == 2 else r for i, r in enumerate(NECK)]
 # 背の とげ（後ろへ 反る）
 THORN = ['k....', 'Akk..', 'kABk.', '.kABk']
 
 # ---- 葉の 腹（大きな 一枚葉。葉脈は 手で）----
 ABD = [
-    "...............GGGGGG.",
-    "...........GGGGHHHHHHH",
-    "........GGGHHHHHHHHHHH",
-    ".....GGGHHHHHGHHHHHHHH",
-    "...GGHHHHGHHGHHHHHHHHJ",
-    ".GGHHHHGGGGGGGGGGGGHHJ",
-    "GHHHHHHHHJHJHHHHHHHHJJ",
-    ".JHHHHHHJHHHJHHHHHHJJJ",
-    "..JJHHHJHHHHHJHHHHJJJ.",
-    "....JJHHHHHHHHHHJJJJ..",
-    "......JJJJHHHHJJJJ....",
-    "..........JJJJJ.......",
+    ".............GGGGGG.",
+    ".........GGGGHHHHHHH",
+    "......GGGHHHHHHHHHHH",
+    "....GGHHHHHGHHHHHHHH",
+    "..GGHHHGHHGHHHHHHHHJ",
+    ".GHHHGGGGGGGGGGGHHHJ",
+    "GHHHHHHHJHJHHHHHHHJJ",
+    ".JHHHHHJHHHJHHHHHJJJ",
+    "..JJHHJHHHHHJHHHJJJ.",
+    "....JJHHHHHHHHHJJJ..",
+    "......JJJJHHHJJJ....",
+    ".........JJJJJ......",
 ]
 
 # ---- 葉の 鎌（のこぎり歯は 内がわ＝下と 左に 白で）----
@@ -139,23 +140,23 @@ BLADE = [
     "AAGGGGG....",
     "BBHHHHHGG..",
     "CCJHHHHHHG.",
-    "..wJGHHHHHJ",
-    "..wwJGHHHHJ",
-    "...wJHGHHHJ",
-    "....JHGHHHJ",
-    "...wJHGHHHJ",
-    "..wwJHGHHHJ",
-    "...wJHGHHJ.",
-    "....JHGHHJ.",
-    "...wJHGHHJ.",
-    "..wwJHGHJ..",
-    "...wJGHHJ..",
-    "....JGHJ...",
-    "...wJGHJ...",
-    "..wwJGJ....",
-    "...wGJ.....",
+    "..JJGHHHHHJ",
+    ".wGJHGHHHHJ",
+    "..GJHGHHHHJ",
+    "...JHHGHHHJ",
+    "...JHHGHHHJ",
+    ".wGJHHGHHHJ",
+    "..GJHHGHHJ.",
+    "...JHHGHHJ.",
+    "...JHHGHHJ.",
+    ".wGJHHGHJ..",
+    "..GJHGHHJ..",
+    "...JHGHJ...",
+    "..wGHGHJ...",
+    "...GJGJ....",
+    "....GJ.....",
     "...GJ......",
-    "..GJ.......",
+    "..wJ.......",
 ]
 # 鎌を ふりあげた 形（攻撃の ため）
 def _up(rows):
@@ -164,59 +165,62 @@ def _up(rows):
 BLADE_UP = _up(BLADE)
 # 鎌を 前へ ふりぬいた 形（よこ）
 BLADE_SWING = [
-    "AAAGGGGGGGGGGG....",
-    "BBBHHHHHGHHHHHHGG.",
-    "CCCJHHHHHHGHHHHHHG",
-    "...wJJJHHHHHGHHHHG",
-    "......w.wJJJHHHHG.",
-    "............wJJHG.",
-    "..............wJG.",
-    "...............G..",
+    "AAAGGGGGGGGGGG.....",
+    "BBBHHHHHHHHHHHGGG..",
+    "CCCJGGGGGGGGGGGHHG.",
+    "...JHHHHHHHHHHHHHHG",
+    "...JJJJJHHHHHHHHHJG",
+    "...GG.GG.JJJJHHHJJ.",
+    "....w..w..GG.GJJJG.",
+    "...........w...GJ..",
+    "................w..",
 ]
 # 腕の つけね（樹皮）
+UPPER_L = [
+    "AAAAAAAAAA..",
+    "BBBBBBBBBBBA",
+    "CCCCCCCCCBBB",
+    ".........CCB",
+]
 UPPER = [
-    "AAAA..",
-    "BBBBA.",
-    "CBBBBA",
-    ".CBBBB",
-    "..CBBC",
+    "AAAAAA.",
+    "BBBBBBA",
+    "CCCCCBB",
 ]
 # 太い 足：もも は 上へ、すね は 下へ
 LEG_F = [
-    ".....AAA..",
-    "..AAABBBA.",
-    "ABBBBBBBBA",
-    "BBBBCCCBBB",
-    "CCC....ABBC",
-    "......ABBBC",
-    "......ABBC.",
-    "......ABBC.",
-    ".....ABBBC.",
-    ".....ABBC..",
-    ".....ABBC..",
-    ".....ABBC..",
-    "....ABBBC..",
-    "....ABBC...",
-    "....ABBBBBw",
-    "....CCCCCC.",
+    ".....AAAA.......",
+    "..AAABBBBA......",
+    "AABBBBBBBBA.....",
+    "BBBBCCCCBBBA....",
+    "CCC.....CBBBC...",
+    ".........ABBC...",
+    ".........ABBC...",
+    "..........ABBC..",
+    "..........ABBC..",
+    "..........ABBC..",
+    "...........ABBC.",
+    "...........ABBC.",
+    "............ABC.",
+    "............ABBBw",
+    "...........CCCCC.",
 ]
 LEG_B = [
-    "...AAA.....",
-    "..ABBBAAA..",
-    ".ABBBBBBBBA",
-    ".BBBCCCBBBB",
-    "ABBC....CCC",
-    "ABBC.......",
-    "ABBC.......",
-    ".ABBC......",
-    ".ABBC......",
-    ".ABBC......",
-    "..ABBC.....",
-    "..ABBC.....",
-    "..ABBC.....",
-    "..ABBC.....",
-    "wABBBBB....",
-    ".CCCCCC....",
+    ".......AAAA....",
+    "......ABBBBAAA.",
+    ".....ABBBBBBBBA",
+    "....ABBBCCCCBBB",
+    "...ABBC.....CCC",
+    "...ABBC........",
+    "...ABBC........",
+    "..ABBC.........",
+    "..ABBC.........",
+    "..ABBC.........",
+    ".ABBC..........",
+    ".ABBC..........",
+    "ABBC...........",
+    "ABBBBw.........",
+    "CCCCC..........",
 ]
 # 葉の 斬撃（三日月）と 舞う 葉
 SLASH = [
@@ -240,10 +244,11 @@ ATK_UP = 'atk0'
 ATK_SW = 'atk1|atk2'
 def base():
     return [
-        dict(n='legB', g='legB', x=12, y=43, rows=outline(dk(LEG_B))),
-        dict(n='abd', g='tail', x=3, y=29, rows=outline(ABD)),
-        dict(n='armB_u', g='armB', x=40, y=24, rows=outline(dk(UPPER))),
-        dict(n='armB', g='armB', x=43, y=6, rows=outline(dk(BLADE_UP)), alt={ATK_UP: outline(dk(BLADE_UP)), ATK_SW: outline(dk(BLADE_SWING))}),
+        dict(n='legB', g='legB', x=9, y=44, rows=outline(dk(LEG_B))),
+        dict(n='abd', g='tail', x=5, y=29, rows=outline(ABD)),
+        dict(n='armB_u', g='armB', x=38, y=25, rows=outline(dk(UPPER_L))),
+        dict(n='armB', g='armB', x=48, y=7, rows=outline(dk(BLADE_UP)), not_=ATK_SW),
+        dict(n='armBs', g='armB', x=47, y=24, rows=outline(dk(BLADE_SWING)), only=ATK_SW),
         dict(n='body', g='body', x=19, y=31, rows=outline(BODY)),
         dict(n='thorn1', g='body', x=21, y=28, rows=THORN),
         dict(n='thorn2', g='body', x=26, y=27, rows=THORN),
@@ -252,21 +257,23 @@ def base():
         dict(n='crest', g='head', x=21, y=4, rows=outline(CREST)),
         dict(n='ant', g='head', x=43, y=2, rows=ANT),
         dict(n='head', g='head', x=28, y=7, rows=outline(HEAD)),
-        dict(n='mand', g='head', x=38, y=21, rows=outline(MAND), alt={'atk0|atk1|atk2': outline(MAND_OPEN)}),
+        dict(n='mand', g='head', x=35, y=20, rows=outline(MAND), alt={'atk0|atk1|atk2': outline(MAND_OPEN)}),
         dict(n='eye', g='head', x=37, y=9, rows=EYE, alt=EYE_ALT),
-        dict(n='armF_u', g='armF', x=35, y=29, rows=outline(UPPER)),
-        dict(n='armF', g='armF', x=39, y=29, rows=outline(BLADE), alt={ATK_UP: outline(BLADE_UP), ATK_SW: outline(BLADE_SWING)}),
+        dict(n='armF_u', g='armF', x=34, y=30, rows=outline(UPPER)),
+        dict(n='armF', g='armF', x=39, y=29, rows=outline(BLADE), not_=ATK_SW),
+        dict(n='armFs', g='armF', x=38, y=29, rows=outline(BLADE_SWING), only=ATK_SW),
     ]
 def fx():
     return [
-        dict(n='slash', g='root', x=50, y=18, rows=SLASH, only='atk1'),
-        dict(n='leaf1', g='root', x=62, y=34, rows=LEAF1, only='atk1|atk2'),
+        dict(n='slash', g='root', x=60, y=14, rows=SLASH, only='atk1'),
+        dict(n='leaf1', g='root', x=66, y=36, rows=LEAF1, only='atk1|atk2'),
         dict(n='leaf2', g='root', x=66, y=22, rows=LEAF2, only='atk2'),
         dict(n='leaf3', g='root', x=58, y=46, rows=LEAF2, only='atk2'),
     ]
 def knocked():
     g = [['.'] * 80 for _ in range(70)]
     for l in base():
+        if l.get('only'): continue
         rows = l['rows']
         for k, v in (l.get('alt') or {}).items():
             if 'ko' in k.split('|'): rows = v
@@ -279,16 +286,16 @@ def knocked():
     return [''.join(g[y][w - 1 - x] for y in range(h)) for x in range(w)]
 def layers():
     ko = knocked()
-    return [dict(l, not_='ko') for l in base()] + fx() + [dict(n='ko', g='root', x=0, y=61 - len(ko), rows=ko, only='ko')]
+    return [dict(l, not_=(l.get('not_', '') + '|ko').strip('|')) for l in base()] + fx() + [dict(n='ko', g='root', x=0, y=61 - len(ko), rows=ko, only='ko')]
 
 FRAMES = {
     'idle0': {}, 'idle1': {'body': (0, 1), 'tail': (0, -1)}, 'idle2': {'body': (0, 1), 'tail': (-1, -1), 'armF': (0, -1)}, 'idle3': {'armF': (0, -1), 'armB': (0, 1), 'tail': (-1, 0)},
     'blink': {},
     'walk0': {'legA': (2, -1), 'legB': (-1, 0)}, 'walk1': {'body': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (2, -1)}, 'walk3': {'body': (0, -1)},
-    'atk0': {'body': (-2, 1), 'head': (-1, 0), 'armF': (-2, -16), 'armB': (-3, -1)},
-    'atk1': {'root': (5, 0), 'body': (1, 1), 'armF': (2, 4), 'armB': (3, 2)},
-    'atk2': {'root': (6, 0), 'body': (1, 2), 'armF': (2, 10), 'armB': (3, 8)},
+    'atk0': {'body': (-2, 1), 'head': (-1, 0), 'armF': (-4, -2), 'armB': (-2, -3), 'legA': (-1, 0)},
+    'atk1': {'root': (5, 0), 'body': (1, 1), 'armF': (3, 1), 'armB': (4, -2)},
+    'atk2': {'root': (6, 0), 'body': (1, 2), 'armF': (2, 6), 'armB': (3, 4)},
     'hit': {'root': (-3, 0), 'head': (-2, 1), 'armF': (-2, 1), 'armB': (-1, 1)},
     'ko': {},
 }

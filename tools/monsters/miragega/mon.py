@@ -65,14 +65,24 @@ def recolor(g, m): return [[m.get(c, c) for c in r] for r in g]
 DARK = {'R': 'Q', 'Q': 'P', 'P': 'l', 'F': 'G', 'G': 'H', 'Y': 'O', 'O': 'n', 'm': 'n', 'w': 'R', 'c': 'Q'}
 
 # ---------- 翅（前翅に 大きな 目玉もよう、外の ふちは 鱗粉の 帯）----------
-FW = {   # 前翅：先が かぎ形に とがる
-    'up':   [(41, 25), (39, 12), (37, 2), (33, 0), (24, 5), (27, 20), (37, 30)],
-    'hi':   [(41, 25), (30, 9), (15, 1), (10, 2), (11, 14), (26, 28), (37, 31)],
-    'mid':  [(41, 25), (24, 10), (7, 4), (2, 5), (5, 21), (24, 32), (37, 32)],
-    'down': [(41, 27), (27, 32), (13, 42), (8, 51), (17, 53), (31, 44), (39, 34)],
-}
-HW = {'rest': [(38, 31), (26, 34), (16, 39), (15, 46), (24, 50), (35, 42)],
-      'down': [(38, 33), (30, 40), (24, 48), (27, 53), (34, 50), (39, 39)]}
+import math
+# 前翅の りんかく（手で 打った 点）：前の ふちは 弧、先は かぎ形、外の ふちは 波（スカラップ）、後ろの ふちは ゆるい 弧
+FW_BASE = (41, 25)
+FW_PTS = [(41, 24), (36, 17), (29, 11), (21, 7), (13, 4), (7, 2), (2, 1),    # 前の ふち → 先
+          (4, 4), (6, 6),                                                     # かぎの 内がわ
+          (4, 9), (3, 12), (6, 13), (4, 16), (7, 17), (6, 20), (9, 21), (9, 24), (12, 24),   # 波の ふち
+          (15, 27), (21, 30), (28, 32), (34, 32), (39, 29)]                    # 後ろの ふち
+FW_VEIN = [5, 12, 16, 20]          # 翅脈を のばす 先（点の 番号）
+HW_BASE = (38, 31)
+HW_PTS = [(38, 30), (31, 31), (23, 34), (17, 38), (14, 43), (16, 45), (15, 48), (19, 48), (20, 51), (24, 50),
+          (27, 52), (29, 48), (33, 47), (36, 42), (39, 36)]
+HW_VEIN = [4, 8, 11]
+def turn(pts, base, deg):
+    """あたりの 点を つけねで まわす（下書き用。ぬりは あとで）"""
+    a = math.radians(deg); bx, by = base
+    return [(round(bx + (x - bx) * math.cos(a) - (y - by) * math.sin(a)), round(by + (x - bx) * math.sin(a) + (y - by) * math.cos(a))) for x, y in pts]
+FW = {'mid': FW_PTS, 'hi': turn(FW_PTS, FW_BASE, 14), 'up': turn(FW_PTS, FW_BASE, 34), 'down': turn(FW_PTS, FW_BASE, -112)}
+HW = {'rest': HW_PTS, 'down': turn(HW_PTS, HW_BASE, -30)}
 SPOT = [   # 翅の 目玉：アーモンド形に たての ひとみ（にらむ 目）
     '....kkkkk....',
     '..kkYYYYYkk..',
@@ -92,21 +102,21 @@ SPOT_GLOW = [
     '....kkkkk....',
 ]
 SPOT_S = ['.kkkk.', 'kYOkYk', '.kkkk.']
-def wingpart(pts, spot, glow=False, small=False):
+def wingpart(pts, spot, glow=False, small=False, base=None, veins=()):
     g = G(); p = G(); poly(p, pts, '1'); ink(g, p)
     g = shade(g, dk=.8)
-    bx, by = pts[0]
+    bx, by = base or pts[0]
     cells = [(x, y) for y in range(64) for x in range(64) if g[y][x] in 'RQP']
     far = max(((x - bx) ** 2 + (y - by) ** 2) ** .5 for x, y in cells)
     for x, y in cells:
         d = ((x - bx) ** 2 + (y - by) ** 2) ** .5 / far
         z = .035 * ((x // 2 + y // 2) % 2)
         # 中ほどに 暗い 波形の 帯、外の ふちは 明るい 鱗粉の 帯（境に 細い 線）
-        if .44 + z < d < .56 + z: g[y][x] = 'n' if .47 + z < d < .53 + z else 'P'
+        if .40 + z < d < .52 + z: g[y][x] = 'n' if .43 + z < d < .49 + z else 'P'
         elif .82 + z < d < .87 + z: g[y][x] = 'P'
         elif d >= .87 + z: g[y][x] = 'R' if g[y][x] != 'P' else 'Q'
     # 翅脈（つけねから 外へ、手で 打つ 線）
-    for (ex, ey) in pts[2:5]:
+    for (ex, ey) in [pts[v] for v in veins]:
         n = max(abs(ex - bx), abs(ey - by))
         for i in range(3, n - 2):
             x, y = round(bx + (ex - bx) * i / n), round(by + (ey - by) * i / n)
@@ -119,11 +129,11 @@ def wingpart(pts, spot, glow=False, small=False):
     put(g, round(cx) - len(S[0]) // 2, round(cy) - len(S) // 2, S)
     return g
 def wing(pose, far=False, glow=False):
-    g = wingpart(FW[pose], .35, glow)
+    g = wingpart(FW[pose], .35, glow, base=FW_BASE, veins=FW_VEIN)
     if far: g = recolor(g, DARK)
     return rows_of(g)
 def hindwing(pose, far=False):
-    g = wingpart(HW[pose], .2, small=True)
+    g = wingpart(HW[pose], .2, small=True, base=HW_BASE, veins=HW_VEIN)
     if far: g = recolor(g, DARK)
     return rows_of(g)
 
