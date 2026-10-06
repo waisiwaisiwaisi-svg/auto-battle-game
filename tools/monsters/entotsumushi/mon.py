@@ -5,6 +5,7 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_kit.py'), e
 from functools import lru_cache
 
 META = dict(id='entotsumushi', name='エントツムシ', types=['poison', 'fire'], base='イモムシ', size='M')
+EYE_BOX = (44, 37, 9, 6)
 PAL = {
     'k': '#101018', 'l': '#2a1a22',
     'A': '#bce452', 'B': '#6c9c2c', 'D': '#305224',      # 体（黄緑）
@@ -75,12 +76,14 @@ def smoke(ph=0, big=False):
     return Part(ink(g))
 
 # ---------- 頭：大きく 丸い。つり目、口の 左右に 大あご ----------
+# 目（E 光る目）：ひとみの ない 熾火の 目。白い 芯 ＋ 黄 ＋ だいだい、まわりに 1ドットの 暗い 赤の にじみ（輪郭線の かわり）。
+# 前へ 下がる つり目の 形で こわく 光る
 EYES = {
-    'open': ['kk......', '.kkkkk..', '..kwYkOk', '..kYOkOk', '...kkkk.'],
-    'atk':  ['kk......', '.kkkkk..', '..kwwYYk', '..kYwYOk', '...kkkk.'],
-    'blink': ['kk......', '.kkkkk..', '........', '..kkkkkk', '........'],
-    'hit':  ['........', '.kk..kk.', '...kk...', '.kk..kk.', '........'],
-    'ko':   ['........', '.k...k..', '..k.k...', '...k....', '..k.k...'],
+    'open': ['RR.......', 'ROORR....', '.RYYOORR.', '.ROwwYYOR', '..RYYYOOR', '...RRRRR.'],
+    'atk':  ['RRR......', 'ROOORR...', 'RYYYYOORR', 'RYwwwwYOR', '.RYwwYYOR', '..RRRRRR.'],
+    'blink': ['RR.......', '.RRR.....', '...RRRRR.', '..ROOOOOR', '...RRRRR.', '.........'],
+    'hit':  ['.R.......', 'ROR..R...', 'RYOR.ROR.', '.RwYR.RYR', '..RR..ROR', '.......R.'],
+    'ko':   ['.........', '.R...R...', '..O.O....', '...R.....', '..O.O....', '.R...R...'],
 }
 @lru_cache(None)
 def head(eye='open', bite=False):
@@ -88,7 +91,7 @@ def head(eye='open', bite=False):
         ell(g, 46.5, 43, 10.5, 10, '1')
         poly(g, [(51, 48), (58, 47), (59, 53), (53, 55)], '1')                 # あご
     def p(g):
-        stamp(g, 45, 37, EYES[eye])
+        stamp(g, 44, 37, EYES[eye])
         # 口と 大あご（茶色の かぎ ＝ 鉄の 色）
         if bite:
             stamp(g, 53, 46, ['kkkk..', 'kRRRkk', 'kRwwwk', 'kRRRRk', 'kwwwRk', 'kkkkkk'])

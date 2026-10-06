@@ -1,4 +1,5 @@
 # ワダツミ（みず・ドラゴン × 海竜）手打ち GBA風
+EYE_BOX = (41, 21, 8, 5)
 META = dict(id='watatsumi', name='ワダツミ', types=['water', 'dragon'], base='海竜', size='L')
 PAL = {
     'k': '#101018', 'l': '#123038',
@@ -7,7 +8,7 @@ PAL = {
     'c': '#c4f0ff', 'C': '#4aa6e8', 'N': '#2a5cb0',
     'w': '#ffffff',
     'Y': '#ffd23c', 'O': '#c4741a',
-    'r': '#a01c30',
+    'r': '#a01c30', 'G': '#4ae8c8',                     # G：虹彩の 青緑
 }
 LIGHT = set('AEcwY')
 KEEP_BLACK = set('wYr')
@@ -226,15 +227,19 @@ HEAD_OPEN = HEAD[:12] + [
     '...kkFFFFFFFFFFFFFFFFFkk....',
     '.....kkkkkkkkkkkkkkkkkk.....',
 ]
-def _eye(h, a, b):
-    h = list(h); h[7] = h[7][:6] + a + h[7][6 + len(a):]; h[8] = h[8][:6] + b + h[8][6 + len(b):]; return h
-# 目：白い 光＋金の 虹彩（明 Y・暗 O）＋たての ひとみ（まゆと 下まぶたで かこむ）
-HEAD_ATK0 = _eye(HEAD, 'wwkYk', 'YOkOk')
-HEAD_OPEN = _eye(HEAD_OPEN, 'wwkYk', 'YOkOk')
-HEAD_BLINK = _eye(HEAD, 'kkkkk', 'BBBBk')
-HEAD_HIT = _eye(HEAD, 'kYkYk', 'BkBkk')
-HEAD_KO = _eye(HEAD, 'BkBkB', 'BBkBk')
-HEAD = _eye(HEAD, 'wYkYk', 'OOkOk')
+# 目（A 爬虫類の つり目）：大きく した アーモンド形。上まぶたは 太い 2段の 黒線、下は 細い 線。
+# 虹彩は 後ろ上が 青緑（G）・前下が 金（Y・O）、まん中に 細い たての スリット
+def _eye(h, rows):
+    h = list(h)
+    for j, r in enumerate(rows): h[5 + j] = h[5 + j][:4] + r + h[5 + j][4 + len(r):]
+    return h
+EYE_OPEN = ['BBkkkkBBBB', 'BkkkkkkkkB', 'BkGGYkYOkB', 'BBkYYkOkBB', 'BBBkkkkBBB']
+HEAD_ATK0 = _eye(HEAD, ['BBkkkkBBBB', 'BkkkkkkkkB', 'BkwGYkYYkB', 'BBkYYkOkBB', 'BBBkkkkBBB'])
+HEAD_OPEN = _eye(HEAD_OPEN, ['BBkkkkBBBB', 'BkkkkkkkkB', 'BkwGYkYYkB', 'BBkYYkOkBB', 'BBBkkkkBBB'])
+HEAD_BLINK = _eye(HEAD, ['BBkkkkBBBB', 'BkBBBBBBBB', 'BBkkkkkkkB', 'BBBBBBBBBB', 'BBBBBBBBBB'])
+HEAD_HIT = _eye(HEAD, ['BBkkkkBBBB', 'BkkkkkkkkB', 'BBkGkYkkBB', 'BBBkkkBBBB', 'BBBBBBBBBB'])
+HEAD_KO = _eye(HEAD, ['BBkkkkBBBB', 'BkBBBkBBBB', 'BBBBkBBBBB', 'BBBkBkBBBB', 'BBBBBBBBBB'])
+HEAD = _eye(HEAD, EYE_OPEN)
 # デフォルメ：首を 14行 みじかく（まっすぐな ところを ぬく）、頭は そのまま
 NECK = [r for i, r in enumerate(NECK) if i not in (8, 9, 14, 15, 16, 17, 18, 19, 29, 30, 31, 32, 33, 34)]
 NSPLIT = 14

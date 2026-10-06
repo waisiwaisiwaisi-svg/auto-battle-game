@@ -1,6 +1,7 @@
 # ヨドグモ（どく・むし × クモ）手打ち GBA風
 import pix
 META = dict(id='yodogumo', name='ヨドグモ', types=['poison', 'bug'], base='クモ', size='M')
+EYE_BOX = (38, 37, 10, 7)   # 多眼 8つ（idle0）
 PAL = {
     'k': '#101018', 'l': '#2c1640',
     'A': '#9a7ac4', 'B': '#563e7e', 'C': '#2e2048',      # 体（よどんだ 紫）
@@ -94,12 +95,12 @@ def abdomen(hot=False):
 
 CEPH = [
     '......kkkkkk........',
-    '....kkAAAAAkRkk.....',
-    '...kAAAABBkRRkRk....',
-    '..kAABBBBBBkkkkkk...',
-    '.kAABBBBBBBk.....k..',
-    'kAABBBBBBBBBk.....k.',
-    'kABBBBBBBBBBBkkkkkBk',
+    '....kkAAAAAkkk......',
+    '...kAAAABBkBBBk.....',
+    '..kAABBBBBBBBBBkk...',
+    '.kAABBBBBBBBBBBBBk..',
+    'kAABBBBBBBBBBBBBBBk.',
+    'kABBBBBBBBBBBBBBBBBk',
     'kBBBBBBBBBBBBBBBBBBk',
     'kBBBBBBBBBBBBBBBBBCk',
     'kCBBBBBBBBBBBBBBBCCk',
@@ -107,11 +108,13 @@ CEPH = [
     '..kkCCCCCCCCCCCCkk..',
     '....kkkkkkkkkkkkk...',
 ]
-# 目：大きな 赤い つり目（後ろへ 上がる）＋ 小さな 目が 6つ
-# 大きな 目 2つ：ハイライト w ＋ 虹彩 2色（R 明・r 暗）＋ たての ひとみ k
-EYE = ['wRkRRkwR', 'rrkrrkrr']
-EYE_ALT = {'blink': ['kkkkkkkk', 'BBkkkkkk'], 'atk0|atk1|atk2': ['wwkRRkwR', 'RrkrRkRr'],
-           'hit': ['kRkkkRkk', 'kkRRkkRk'], 'ko': ['RkRkRkRk', 'kRkkkRkk']}
+# 目：多眼（N）。赤い 目が 8つ、大きさを 変えて 頭胸部の 前に ならぶ：
+#   大 2つ（3×3：つやの w ＋ R 明 ＋ r 暗、下に 黒い ふち）・中 1つ（2×2）・小 5つ（1ドットの R に 黒い 影）。たての ひとみは なし
+EYE = ['....R.....', 'R.R.k.R...', 'k.k...k...', 'wR.wRR.wRR', 'Rr.RRr.RRr', 'kk.Rrr.Rrr', '...kkk.kkk']
+EYE_ALT = {'blink': ['....r.....', 'r.r.k.r...', 'k.k...k...', 'rr.rrr.rrr', 'rr.rrr.rrr', 'kk.rrr.rrr', '...kkk.kkk'],
+           'atk0|atk1|atk2': ['....w.....', 'R.R.k.R...', 'k.k...k...', 'wR.wwR.wwR', 'RR.wRR.wRR', 'kk.RRr.RRr', '...kkk.kkk'],
+           'hit': ['....k.....', 'R.r.k.k...', 'k.k...k...', 'kR.kkk.kkk', 'Rr.RkR.RkR', 'kk.kkk.kkk', '...kkk.kkk'],
+           'ko': ['....k.....', 'k.k.k.k...', 'k.k...k...', 'kr.kRk.kRk', 'rk.RkR.RkR', 'kk.kRk.kRk', '...kkk.kkk']}
 FANG = [
     '.kkkk...',
     'kABBCk..',
@@ -167,7 +170,7 @@ def layers():
         dict(n='l1', g='legF', x=0, y=0, rows=leg(L1), alt={'atk0': leg(L1_UP)}),
         dict(n='fangF', g='head', x=48, y=44, rows=dark(FANG), alt={'atk0': dark(FANG_OPEN)}),
         dict(n='ceph', g='head', x=30, y=35, rows=CEPH),
-        dict(n='eye', g='head', x=42, y=39, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=38, y=37, rows=EYE, alt=EYE_ALT),
         dict(n='fang', g='head', x=45, y=45, rows=FANG, alt={'atk0': FANG_OPEN}),
         dict(n='drop', g='head', x=46, y=54, rows=DROP['idle0|walk0|walk2'], alt=DROP, not_=A + '|hit|ko'),
         dict(n='glob', g='head', x=55, y=44, rows=GLOB, only='atk1'),

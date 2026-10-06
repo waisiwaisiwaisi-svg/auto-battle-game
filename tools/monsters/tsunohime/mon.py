@@ -8,6 +8,7 @@ PAL = {
     'E': '#6ef4ff', 'e': '#2a9cc8', 'w': '#ffffff',
 }
 LIGHT = set('FCSEw')
+EYE_BOX = (45, 21, 7, 5)   # 目（idle0 の 64x64 座標）
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, poly, ellipse, outline, rows_of
@@ -53,7 +54,8 @@ class Part:
     def rows(s): return rows_of(s.g)
 
 # ---- 頭（大きく）：戦馬の 頭。金の 面よろいが 鼻すじを おおう ----
-EYE = ['kwEEkEk', 'kEeekek', '.kkeekk']
+# 目（P：星の 瞳）：虹彩は 上が 赤むらさき（Q）→ 下が 青（e）の グラデーション。その 中に 水色の 十字星の 瞳（E）、芯は 白（w）
+EYE = ['kQQEQkk', 'kQEwEek', 'keeEeek', '.kkkkk.']
 def head():
     h = Part([(35, 30), (37, 25), (41, 21), (47, 19), (52, 20), (55, 23), (58, 27), (61, 31), (61.5, 35), (60, 37.5), (55, 38), (51, 37), (48, 39.5), (41, 39.5), (37, 36)], 'FGH', 1, 2)
     h.P([(51, 36), (50, 35), (49, 34), (48, 33)], 'H', 'FG')                         # あごの 線（ほおと 口先を 分ける）
@@ -66,11 +68,10 @@ def head():
         h.P([(x, y0)], 'S'); h.P([(x, y0 + 1)], 'T'); h.P([(x, y0 + 2)], 'U')
     h.P([(46, 20), (46, 21)], 'S'); h.P([(45, 21)], 'T')
     h.P([(59, 31), (59, 32)], 'U')
-    # 目：つり上がった まゆの 線、白い 光＋水色 2段＋たての ひとみ、下まぶた
+    # 目：つり上がった まゆの 線の 下に 星の 瞳の 目（EYE）
     h.P([(42, 22), (43, 22), (43, 23), (44, 23), (45, 23), (46, 24), (47, 24), (48, 24), (49, 24), (50, 24), (51, 24), (52, 25), (53, 25)], 'k')
     h.P([(44, 22), (45, 22)], 'F')
     h.S(45, 25, EYE)
-    h.P([(47, 28), (48, 28), (49, 28), (50, 28)], 'H')
     # 鼻の あな・口（牙）
     h.P([(58, 32), (57, 32), (57, 33), (58, 33)], 'k'); h.P([(59, 32)], 'F')
     h.P([(61, 36), (60, 36), (59, 36), (58, 36), (57, 36), (56, 36), (55, 37), (54, 37), (53, 37), (52, 37)], 'k')
@@ -85,8 +86,8 @@ def eye_alt():
             for i, c in enumerate(r):
                 if c != '.': h[25 + j - HEAD.y][45 + i - HEAD.x] = c
         return rows_of(h)
-    return {'blink': with_eye('FFFFFFF', 'kkkkkkk', '.GGGGGG'), 'hit': with_eye('FkkFFFF', 'FFFkkkk', 'FkkFFFF'),
-            'atk0|atk1|atk2': with_eye('kwwEkEk', 'kEEEkEk', '.kkEEkk'), 'ko': with_eye('FkFFkFF', 'FFkkFFF', 'FkFFkFF')}
+    return {'blink': with_eye('FFFFFFF', 'kkkkkkk', '.GGGGGG', 'GGHHHHG'), 'hit': with_eye('FkkFFFF', 'FFFkkkk', 'FkkFFFF', 'GGHHHHG'),
+            'atk0|atk1|atk2': with_eye('kPQEQkk', 'kEEwEEk', 'kePEPek', '.kkkkk.'), 'ko': with_eye('FkFFkFF', 'FFkkFFF', 'FkFFkFF', 'GGHHHHG')}
 HEAD_ALT = eye_alt()
 # 耳（後ろへ ねる・付け根は 頭に 食いこむ）
 EAR = ['kk....', 'kFk...', 'kFGk..', 'kFGGk.', '.kFGGk', '.kFGGG', '..kGGG']

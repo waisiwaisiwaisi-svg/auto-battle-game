@@ -1,4 +1,5 @@
 # キネウサギ（フェアリー・かくとう × ウサギ）手打ち GBA風・デフォルメ（2〜3頭身）
+EYE_BOX = (29, 23, 9, 7)
 META = dict(id='kineusagi', name='キネウサギ', types=['fairy', 'fighting'], base='ウサギ', size='M')
 PAL = {
     'k': '#101018', 'l': '#3c1c2a',
@@ -106,14 +107,20 @@ def head(eye=None, ko=False, mouth=0):
     at(g, 3, 12, 'GG'); at(g, 4, 14, 'G'); at(g, 5, 15, 'H')         # ほおの 毛
     if mouth: at(g, 14, 15, 'kkkkkkkk', 'kRRRRRRk', '.kwwkkk.', '..kk')
     else: at(g, 15, 15, 'kkkkkkk', '.kwwk..', '..kk...'); at(g, 21, 14, 'k')
-    if ko: e = ['k...k', '.k.k.', '..k..', '.k.k.', 'k...k']
-    else: e = eye or ['kkk.....', '.kkkkkk.', 'kwRRkDk.', 'kRDDkDk.', '.kkkkk..']
-    at(g, 10, 5, *e)
-    at(g, 9, 4, 'kk')
+    at(g, 9, 3, *(EYE_KO if ko else (eye or EYE)))                  # 目（C 三白眼）
     return done(g)
-EYE_BLINK = ['kkk.....', '.kkkkkk.', 'kGGGGGk.', 'kkkkkkk.', '........']
-EYE_HIT = ['k.......', '.kkk....', 'kRRkkkk.', '.kkkkRk.', '........']
-EYE_ATK = ['kkk.....', '.kkkkkk.', 'kwwRkRk.', 'kRRDkDk.', '.kkkkk..']
+# 三白眼（C）：たてに 見開いた 白目の 上の まん中に、赤い 小さな 瞳が まぶたに 半分 かくれて 寄る（下と 左右が 白い）。下まぶたは 太く 赤く 血走る
+EYE = ['kk.......',
+       'lkkkkkkk.',
+       'kGwRkRwwk',
+       'kGwwRwwGk',
+       'kDGwwwGDk',
+       '.kDDDDDk.',
+       '..kkkkk..']
+EYE_BLINK = ['kk.......', 'lkkkkkkk.', 'kGGGGGGGk', '.kkkkkkk.', '..kDDDk..', '.........', '.........']
+EYE_HIT = ['kk.......', 'lkkkk....', 'kGwkkkk..', '.kkwRwkk.', '..kDDDk..', '.........', '.........']     # ぎゅっと つぶり、瞳が 下へ ずれる
+EYE_ATK = ['kk.......', 'lkkkkkkk.', 'kGwwkwwwk', 'kGwwRwwGk', 'kGwwwwwGk', 'kDDwwwDDk', '.kkDDDkk.']   # 白目を むいて 瞳が 点に
+EYE_KO = ['kk.......', 'lkkkkkkk.', '.kGGGGk..', '..kGGk...', '..GkkG...', '.kG..Gk..', '.........']
 
 # ---- 胴：小さく 丸い、赤い 帯（格闘の しるし）----
 def body():

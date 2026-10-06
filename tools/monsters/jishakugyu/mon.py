@@ -1,4 +1,5 @@
 # ジシャクギュウ（はがね・でんき × 牛）手打ち GBA風・デフォルメ（2〜3頭身）
+EYE_BOX = (38, 26, 10, 7)
 META = dict(id='jishakugyu', name='ジシャクギュウ', types=['steel', 'elec'], base='牛', size='L')
 PAL = {
     'k': '#101018', 'l': '#1e2030',
@@ -104,14 +105,20 @@ def head(eye=None, ko=False, mouth=0):
     if mouth: at(g, 15, 18, 'kkkkkkkkkkk', 'kDDDDDDDDk', '.kwkkkkkk')
     else: at(g, 16, 19, 'kkkkkkkkk')
     at(g, 21, 19, 'kSSk', 'kTPTk', '.kSTk', '..kk')                  # 鉄の 鼻輪
-    if ko: e = ['k...k.', '.k.k..', '..k...', '.k.k..', 'k...k.']
-    else: e = eye or ['kkkkk....', '.kkkkkkk.', 'kwYYYkOk.', 'kYOOOkOk.', '.kkkkkk..']
-    at(g, 10, 6, *e)
-    at(g, 9, 5, 'kkkk')                                              # まゆの ひさし
+    at(g, 9, 4, *(EYE_KO if ko else (eye or EYE)))                  # 目（C 三白眼）と まゆの ひさし
     return done(g)
-EYE_BLINK = ['kkkkk....', '.kkkkkkk.', 'kBBBBBBk.', 'kkkkkkkk.', '.........']
-EYE_HIT = ['k........', '.kkkkk...', 'kOOOkkkk.', '.kkkkkOk.', '.........']
-EYE_ATK = ['kkkkk....', '.kkkkkkk.', 'kwwYYkYk.', 'kYYOOkOk.', '.kkkkkk..']
+# 三白眼（C）：大きな 白目の 前上の すみに 小さな 赤い 瞳が 寄り、横目で にらむ。前へ 下がる 重い まゆの ひさしと 太い 下まぶた
+EYE = ['kkkk......',
+       'BkkkkkkC..',
+       '.kTwwwkkkk',
+       'kTwwwwwRkk',
+       '.kTwwwwDRk',
+       '..kkkkkkk.',
+       '...CCCCC..']
+EYE_BLINK = ['kkkk......', 'BkkkkkkC..', '.kBBBBkkkk', 'kBBBBBBBkk', '.kkkkkkkkk', '..CCCCCC..', '..........']
+EYE_HIT = ['kkkk......', 'BkkkkC....', '.kkkkkkk..', 'kTwRkwwkk.', '.kkkkkkk..', '..CCCC....', '..........']    # 目を ゆがめ、瞳が 下へ はずれる
+EYE_ATK = ['kkkkk.....', 'BkkkkkkkC.', '.kkTwwwkkk', 'kTwwwwwwRk', '.kTwwwwRDk', '..kkkkkkk.', '...CCCCC..']   # まゆが 下がり、瞳が さらに 小さく 前へ
+EYE_KO = ['kkkk......', 'BkkkkkkC..', '.kBkBBBkB.', '..BBkBkBB.', '..BBBkBBB.', '..BBkBkBB.', '...CCCCC..']
 
 # ---- 胴：小さく ずんぐり、鋼の 板と 稲妻の もよう ----
 def body():

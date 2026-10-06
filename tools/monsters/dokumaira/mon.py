@@ -1,6 +1,7 @@
 # ドクマイラ（どく・ドラゴン × キマイラ）手打ち GBA風
 from pix import grid, rows_of, ellipse, poly, line, outline, recolor
 META = dict(id='dokumaira', name='ドクマイラ', types=['poison', 'dragon'], base='キマイラ', size='L')
+EYE_BOX = (41, 27, 11, 7)   # 隈取りの 目（idle0）
 PAL = {
     'k': '#101018', 'l': '#3c1a40',
     'F': '#ecc472', 'G': '#b8823e', 'H': '#6e442c',      # 獅子の 毛（明・中・暗）
@@ -217,9 +218,13 @@ RUFF = [
     '...kNOk...',
     '....kk....',
 ]
-# 目：ひさしの 下で 光る つり目（たての ひとみ）
-EYE = ['wVVkU', 'UUTkT']
-EYE_ALT = {'blink': ['HHHHH', 'kkkkk'], 'hit': ['kVkVk', 'VkTkV'], 'atk0|atk1|atk2': ['wwVkV', 'VUUkU'], 'ko': ['kGGGk', 'GkkkG', 'kGGGk']}
+# 目：隈取りの 目（L）。毒の 紫の 隈（N 中・O 暗・M 明）が 目じりから 後ろへ はね上がり、下まぶたの 下にも 帯と しずくが たれる。
+#   目の 形は つり目：白目 w ＋ 緑の 虹彩（V 明・U 暗）＋ たての ひとみ k
+EYE = ['M...........', 'NM..........', '.NM.........', '..NMkwVkVkk.', '...NkUUkUUk.', '...NMkkkkkk.', '....NMMMMMN.', '......NMN...']
+EYE_ALT = {'blink': ['M...........', 'NM..........', '.NM.........', '..NMkHHHHkk.', '...Nkkkkkkk.', '...NMGGGGGk.', '....NMMMMMN.', '......NMN...'],
+           'hit': ['M...........', 'NM..........', '.NM.........', '..NMkkkkkkk.', '...NkVkkUkk.', '...NMkkkkGk.', '....NMMMMMN.', '......NMN...'],
+           'atk0|atk1|atk2': ['M...........', 'MM..........', '.MM.........', '..MMkwwkVkk.', '...MkVVkVUk.', '...MMkkkkkk.', '....MMMMMMM.', '......MMM...'],
+           'ko': ['M...........', 'NM..........', '.NM.........', '..NMkGkGkGk.', '...NGkGkGkk.', '...NMkGkGkk.', '....NMMMMMN.', '......NMN...']}
 HORN = ['kk......', 'kMkk....', '.kMNkk..', '.kMNNNkk', '..kMNNOk', '...kkkk.']
 # 毒蛇の しっぽ（S字に 立ち上がり、前を にらむ）
 SNAKE = [
@@ -317,7 +322,7 @@ def layers():
         dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
         dict(n='ruff', g='head', x=HX - 2, y=HY - 3, rows=RUFF),
         dict(n='horn', g='head', x=HX + 5, y=HY - 4, rows=HORN),
-        dict(n='eye', g='head', x=HX + 12, y=HY + 8, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 7, y=HY + 5, rows=EYE, alt=EYE_ALT),
         dict(n='drip', g='drip', x=HX + 19, y=HY + 20, rows=DRIP, only='idle1|idle2|walk1|walk3'),
         dict(n='breath1', g='fx', x=HX + 23, y=HY + 13, rows=BREATH1, only='atk1'),
         dict(n='breath2', g='fx', x=HX + 19, y=HY + 10, rows=BREATH2, only='atk2'),

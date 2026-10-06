@@ -5,6 +5,7 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_kit.py'), e
 from functools import lru_cache
 
 META = dict(id='sunajigoku', name='スナジゴク', types=['ground', 'bug'], base='アリジゴク', size='M')
+EYE_BOX = (37, 33, 11, 8)
 PAL = {
     'k': '#101018', 'l': '#2e2014',
     'A': '#e6c690', 'B': '#b08850', 'D': '#684828',      # 体（砂色）
@@ -14,7 +15,7 @@ PAL = {
     'w': '#ffffff',
 }
 LIGHT = set('AScYw')
-KEEP_BLACK = set('wY')
+KEEP_BLACK = set('wYO')
 RAMP = {'1': 'ABD', '3': 'STU', '6': 'cCC'}
 
 def bez(p0, p1, p2, n=16):
@@ -55,19 +56,21 @@ def legs(sw=0):
     return Part(ink(g), [(20, 45, 44, 52)])
 
 # ---------- 頭：平たく はばの ある 頭。目は 上に ----------
+# 目（N 多眼）：大きさの ちがう 小さな 目が 4つ（前の 大・下の 中・後ろの 小・その下の 点）。
+# どれも 黄〜だいだいの 玉に 白い 光、前の 大きい 目の 上に 前へ 下がる 殻の ふち
 EYES = {
-    'open': ['kk......', '.kkkkk..', '..kwYkOk', '..kYOkOk', '...kkkk.'],
-    'atk':  ['kk......', '.kkkkk..', '..kwwYYk', '..kYwYOk', '...kkkk.'],
-    'blink': ['kk......', '.kkkkk..', '........', '..kkkkkk', '........'],
-    'hit':  ['........', '.kk..kk.', '...kk...', '.kk..kk.', '........'],
-    'ko':   ['........', '.k...k..', '..k.k...', '...k....', '..k.k...'],
+    'open': ['.....kkkk..', '..k...kkkkk', '.kYk..kwYOk', '..k...kYOOk', '.kk...kkkk.', 'kwOk.kk....', '.kk.kYOk...', '.....kkk...'],
+    'atk':  ['.....kkkk..', '..k...kkkkk', '.kwk..kwwYk', '..k...kYwOk', '.kk...kkkk.', 'kwYk.kk....', '.kk.kwYk...', '.....kkk...'],
+    'blink': ['.....kkkk..', '..k...kkkkk', '.kkk..kkkkk', '.......DDD.', '.kk........', 'kkkk.kk....', '....kkkk...', '...........'],
+    'hit':  ['.....kkkk..', '..k....kkk.', '..kk..kk..k', '..........k', '.k....kkkk.', 'k.k........', '.k..kk.k...', '......k....'],
+    'ko':   ['.....kkkk..', '..k........', '..k.k.k...k', '...k...k.k.', '..k.k...k..', '.......k.k.', '.k.k..k...k', '..k........'],
 }
 @lru_cache(None)
 def head(eye='open'):
     def d(g):
         poly(g, [(34, 40), (37, 34), (43, 32), (49, 34), (52, 38), (52, 44), (48, 48), (40, 48), (35, 46)], '1')
     def p(g):
-        stamp(g, 38, 34, EYES[eye])
+        stamp(g, 37, 33, EYES[eye])
         dots(g, 'D', [(37, 44), (39, 46), (42, 46)])
         dots(g, 'k', [(51, 41), (50, 41)])                                     # 口
     return part(d, RAMP, p, open=[(32, 38, 37, 50)], r=2, tilt=.7)

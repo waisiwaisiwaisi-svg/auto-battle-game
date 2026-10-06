@@ -9,7 +9,7 @@ PAL = {
     'r': '#8a1a3a', 'w': '#ffffff',
 }
 LIGHT = set('PEVYw')
-KEEP_BLACK = set('wEY')
+KEEP_BLACK = set('wEYO')
 import pix
 # ---- 下書き用の 小道具（あたりの マスク → 左上 光の 3段階 → 手打ちの 仕上げ → 輪郭）----
 def M(W, H, *sh):
@@ -85,9 +85,16 @@ def body():
         (['PP', 'P'], 37, 4),
     ], lw=2, dw=2)
 BODY = body()
-EYE, EYE_ALT = eye('Y', 'O')
-EYE_FAR = ['kkkk.', 'kwYOk', '.kOkk']
-EYE_FAR_ALT = {'blink|hit': ['kkkk.', '.kkkk', '.....'], 'ko': ['k.k..', '.k...', 'k.k..']}
+# 目（K：魚の 目）：槌の 両はしに まぶたの ない 丸い 目。大きく 平たい 黒瞳＋細い 黄〜だいだいの 輪＋白い 光、上に 骨の ふち（明るい はだ色）
+# まばたきは 白い 瞬膜（灰）が おおう、被弾は 瞳が 点に ちぢむ、攻撃は 輪が 白く 光る
+EYE = ['.PPPP..', '.kkkkk.', 'kwYYYOk', 'kYkkkOk', 'kYkkkOk', '.kOOOk.', '..kkk..']
+EYE_ALT = {'blink': ['.PPPP..', '.kkkkk.', 'kETTTTk', 'kETTTTk', 'kTTTTQk', '.kTTQk.', '..kkk..'],
+           'hit': ['.PPPP..', '.kkkkk.', 'kwYYYOk', 'kYYkYOk', 'kYOYOOk', '.kOOOk.', '..kkk..'],
+           'atk0|atk1|atk2': ['.PPPP..', '.kkkkk.', 'kwwwYYk', 'kwkkkYk', 'kYkkkOk', '.kYYOk.', '..kkk..'],
+           'ko': ['.PPPP..', '.kkkkk.', 'kEkTkTk', 'kTEkTTk', 'kEkTkTk', '.kTTQk.', '..kkk..']}
+EYE_FAR = ['.kkk.', 'kwkYk', 'kYkOk', '.kkk.']
+EYE_FAR_ALT = {'blink': ['.kkk.', 'kETTk', 'kTTQk', '.kkk.'], 'hit': ['.kkk.', 'kwYYk', 'kYkOk', '.kkk.'],
+               'ko': ['.kkk.', 'kkTkk', 'kTkTk', '.kkk.']}
 # 口：槌の 頭の 下（首の 前の 下）に 三日月に ひらき、するどい 歯が 並ぶ
 MOUTH = ['kkkkkkkk.', '.kwkwkwkk', '..kkkkkk.']
 MOUTH_OPEN = ['kkkkkkkk..', 'kwrwrwrwk.', '.krrrrrrrk', '.kwrwrwkk.', '..kkkkkk..']
@@ -131,7 +138,7 @@ def layers():
         dict(n='dorsal', g='body', x=19, y=13, rows=DORSAL),
         dict(n='body', g='body', x=11, y=10, rows=BODY),
         dict(n='eyeF', g='body', x=50, y=14, rows=EYE_FAR, alt=EYE_FAR_ALT),
-        dict(n='eye', g='body', x=56, y=46, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='body', x=56, y=44, rows=EYE, alt=EYE_ALT),
         dict(n='mouth', g='body', x=46, y=38, rows=MOUTH, alt={NB: MOUTH_OPEN}),
         dict(n='fin', g='fin', x=29, y=42, rows=FIN, alt={NB: FIN_P}),
         dict(n='splash', g='fin', x=44, y=41, rows=SPLASH, only='atk1'),
@@ -142,4 +149,5 @@ FRAMES = {
     'atk0': {'root': (-2, 0), 'fin': (-2, 0)}, 'atk1': {'root': (4, 0), 'fin': (6, -3)}, 'atk2': {'root': (5, 0), 'fin': (3, -3)},
     'hit': {'root': (-3, 0), 'fin': (-1, -1)}, 'ko': {'_flip': True},
 }
+EYE_BOX = (50, 14, 13, 37)
 PARENT = {'head': 'body', 'tail': 'body', 'fin': 'body', 'finF': 'body', 'body': 'root'}

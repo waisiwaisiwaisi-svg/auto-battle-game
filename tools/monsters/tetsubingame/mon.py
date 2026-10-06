@@ -7,9 +7,10 @@ PAL = {
     'Y': '#ffe46a', 'O': '#ff8a28', 'R': '#c8361c',
     'F': '#e6b070', 'G': '#b06a3c', 'H': '#62321e',
     'S': '#eef2f6', 'T': '#a6aec0',
-    'w': '#ffffff',
+    'w': '#ffffff', 'x': '#08080c',      # ビーズ目の 黒
 }
 LIGHT = set('IYFSw')
+KEEP_BLACK = set('wx')
 import pix
 from pix import grid, rows_of, outline, ellipse, poly, line, recolor
 
@@ -129,13 +130,13 @@ EYE = ['kkk.....',
        '.kJJIkk.',
        '..kkJJIk',
        '....kkKk',
-       '...kwk..',
-       '...kkK..',
-       '....k...']
-EYE_BLINK = ['kkk.....', 'kIIkk...', '.kJJIkk.', '..kkJJIk', '....kkKk', '...KKK..', '........', '........']
-EYE_HIT = ['........', 'kkk.....', 'kIIkkk..', '.kJJJIkk', '..kkkKKk', '..kw.k..', '...kk...', '........']   # 眉が はね上がり、目が ずれる
-EYE_ATK = ['........', 'kkkk....', 'kIIIkkk.', '.kJJJJIk', '..kkkKKk', '...kwkR.', '...kkkR.', '....RR..']   # 眉が さらに 下がり、赤く 熱を おびる
-EYE_KO = ['kkk.....', 'kIIkk...', '.kJJIkk.', '..kkJJIk', '..k.kkKk', '...k.k..', '....k...', '...k.k..']
+       '...xwxx.',
+       '...xxxx.',
+       '....xx..']
+EYE_BLINK = ['kkk.....', 'kIIkk...', '.kJJIkk.', '..kkJJIk', '....kkKk', '...xxxx.', '....HH..', '........']
+EYE_HIT = ['........', 'kkk.....', 'kIIkkk..', '.kJJJIkk', '..kkkKKk', '..xw.x..', '...xx...', '........']   # 眉が はね上がり、目が ずれる
+EYE_ATK = ['........', 'kkkk....', 'kIIIkkk.', '.kJJJJIk', '..kkkKKk', '...xwxR.', '...xxxR.', '....RR..']   # 眉が さらに 下がり、赤く 熱を おびる
+EYE_KO = ['kkk.....', 'kIIkk...', '.kJJIkk.', '..kkJJIk', '..x.kkKk', '...x.x..', '....x...', '...x.x..']
 
 # ---- 足：短く 太い 四つ足、白い つめ ----
 LEG_M = ['.ffffff.', 'ffffffff', 'ffffffff', 'ffffffff', 'ffffffff', '.fffffff', '.fffffff', '.ffffffff', 'fffffffff']

@@ -5,6 +5,7 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_kit.py'), e
 from functools import lru_cache
 
 META = dict(id='donabekaba', name='ドナベカバ', types=['ground', 'fire'], base='カバ', size='L')
+EYE_BOX = (33, 21, 8, 7)
 PAL = {
     'k': '#101018', 'l': '#2e1a14',
     'A': '#cc9c6a', 'B': '#8e5e3a', 'D': '#4e3020',      # 土の 皮（素焼き）
@@ -45,12 +46,14 @@ def leg(x0, far=False, lift=0):
     return part(d, RAMP, p, open=[(x0 - 2, 47, x0 + 10, 52)], r=1, tilt=.6)
 
 # ---------- 頭：上あご＝ふた（つまみ・釉）、下あご＝鍋。間の すき間が 赤く 光る ----------
+# 目（M 重い まぶた）：こぶの 上の 小さめの 目。黒い 釉の ぶあつい 上まぶたが 後ろへ 下がって 虹彩の 上半分を おおう。
+# 下に 赤橙の 虹彩（明 O・暗 R）と 黒い ひとみ、白い 光 1点。ねむそうで 冷たい 見下す 目
 EYES = {
-    'open': ['kk......', '.kkkkk..', '..kwYkOk', '..kYOkOk', '...kkkk.'],
-    'atk':  ['kk......', '.kkkkk..', '..kwwYYk', '..kYwYOk', '...kkkk.'],
-    'blink': ['kk......', '.kkkkk..', '........', '..kkkkkk', '........'],
-    'hit':  ['kk......', '.kkkkk..', '..OO....', '....OOO.', '..OO....'],
-    'ko':   ['........', '..O...O.', '...O.O..', '....O...', '...O.O..', '..O...O.'],
+    'open': ['.GGGGG..', 'GGGGGGG.', 'kkkkGGGk', 'kOOkkkkk', 'kROkOwk.', '.kRRRk..', '..kkk...'],
+    'atk':  ['.GGGGG..', 'GGGGGGG.', 'kkkkkkkk', 'kOOkkOwk', 'kROkkOOk', '.kRRRRk.', '..kkkk..'],
+    'blink': ['.GGGGG..', 'GGGGGGG.', 'GGGGGGGk', 'kkkkkkkk', '........', '........', '........'],
+    'hit':  ['.GGGGG..', 'GGGGGGG.', 'GGkkkkkk', 'kkkk....', '..kkk...', '........', '........'],
+    'ko':   ['.GGGGG..', 'GGGGGGG.', 'kkkkGGGk', '.O...Okk', '..O.O...', '...O....', '..O.O...', '.O...O..'],
 }
 LIDS = {   # 上あご（ふた）の 形：ひらき ぐあいで 前が 上がる
     0: [(33, 33), (35, 27), (40, 23.5), (48, 23), (56, 24.5), (61, 28), (63, 33)],
@@ -84,7 +87,7 @@ def lid(op=0, eye='open'):
         kx = (48, 48, 46)[op]; ky = (23, 19, 12)[op]
         stamp(g, kx - 2, ky - 4, ['.kkk.', 'kEEFk', 'kEFBk', '.kkk.'])           # ふたの つまみ
         stamp(g, (59, 59, 58)[op], (26, 22, 11)[op], ['kk', '.k'])            # 鼻の 穴
-        stamp(g, 34, 20 - (1 if op == 2 else 0), EYES[eye])
+        stamp(g, 33, 21 - (1 if op == 2 else 0), EYES[eye])
     return part(d, RAMP, p, open=[(31, 26, 36, 35)], r=2, tilt=.7)
 
 # 口の 中（ひらいた ときだけ）：煮える 溶岩と 牙

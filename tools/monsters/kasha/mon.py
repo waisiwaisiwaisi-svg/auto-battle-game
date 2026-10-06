@@ -107,12 +107,21 @@ EYES_BIG = {
     'ko':    ['........', '.k....k.', '..k..k..', '...kk...', '..k..k..', '.k....k.'],
 }
 def eye(g, x, y, mode='idle', A='Y', B='O', big=False):
-    E = (EYES_BIG if big else EYES)[mode]
+    E = GLOW[mode] if big == 'glow' else (EYES_BIG if big else EYES)[mode]
     for j, r in enumerate(E):
         for i, c in enumerate(r):
             if c == '.': continue
             put(g, x + i, y + j, {'A': A, 'B': B}.get(c, c))
     return g
+# 目（E：光る目・瞳なし）：炎の 黄と だいだいの 発光＋白い 芯。黒い 輪郭は なく、まわりに 1ドットの 赤い にじみ（光の ふち）。後ろ上へ 火の 粉の 尾
+GLOW_XY = (41, 28)
+GLOW = {
+    'idle':  ['R.........', 'RORR......', '.ROYORRR..', '.RYwwYYOR.', '..RYYYOR..', '...RRRR...'],
+    'atk':   ['RR........', 'ROORRR....', 'RYYYYOORR.', '.RYwwwYYOR', '.RYwwYYOR.', '..RRYYRR..', '....RR....'],
+    'blink': ['R.........', 'R.........', '.RRRRRR...', '.ROOOOORR.', '..RRRRRR..', '..........'],
+    'hit':   ['R.........', 'RRR.......', '.ROR.RRR..', '.RwR.ROR..', '..RR..RR..', '..........'],
+    'ko':    ['..........', '.r...r....', '..r.r.....', '...r......', '..r.r.....', '.r...r....'],
+}
 EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit': 'hit', 'ko': 'ko'}
 # ===END KIT===
 
@@ -211,7 +220,7 @@ def head(mode='idle'):
     dots(g, 'r', [(36, 23), (36, 24), (37, 24), (37, 25), (38, 25), (36, 25)]); dots(g, 'R', [(36, 22), (37, 23)])          # 耳の 中（熾火）
     dots(g, 'r', [(47, 22), (47, 23), (48, 23), (47, 24), (48, 24), (48, 25), (46, 25)]); dots(g, 'R', [(47, 21), (46, 24)])
     dots(g, 'R', [(36, 30), (37, 31), (35, 33), (36, 34), (37, 34)]); dots(g, 'O', [(36, 31), (35, 34)])   # くまどり
-    eye(g, 42, 27, {'idle': 'idle'}.get(mode, mode), 'Y', 'O', big=True)
+    eye(g, GLOW_XY[0], GLOW_XY[1], mode, big='glow')
     stamp(g, ['kk', 'kD'], 55, 34)                     # 鼻
     if mode == 'atk':                                  # シャーッ：大きく 開いた 口と 上下の 牙
         cut(g, (46, 40, 56, 43))
@@ -261,4 +270,5 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'tail': (1, 1)},
     'ko': {'body': (0, 6), 'head': (3, 7), 'tail': (-2, 2)},
 }
+EYE_BOX = (41, 30, 10, 6)
 PARENT = {'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

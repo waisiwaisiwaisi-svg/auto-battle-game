@@ -76,9 +76,10 @@ PAL = {
     'T': '#74dce0', 'U': '#2e8eac', 'V': '#1a4870',      # 頭巾・触手（深海の 青）
     'Y': '#fff4b8', 'M': '#ff62d4', 'N': '#a8188c',      # 目玉（白目・念の 虹彩）
     'w': '#ffffff', 'Z': '#bff0ff',                      # 光・泡
+    'R': '#ffbcec',                                      # 虹彩の 内の 輪（うす桃）
 }
 LIGHT = set('ATYMwZ')
-KEEP_BLACK = set('wYM')
+KEEP_BLACK = set('wYMR')
 
 SC = (22, 30); SR = 15.5          # 殻の 中心と 半径
 EC = (41, 30)                     # 目玉（殻口）の 中心
@@ -148,21 +149,30 @@ EYE = [
     '....kkBBBBBBBkk....',
     '......kkkkkkk......',
 ]
-def eye_var(kind):
+# 目（H：単眼・大目玉）：白目に 血管の 線、虹彩は 桃の 3色の 輪（濃い 紫・桃・うす桃）、まん中に 丸い 黒瞳と 白い 光
+VEINS = [(1, 10), (2, 11), (3, 11), (2, 14), (3, 14), (4, 15), (6, 17), (7, 16), (15, 15), (16, 14), (14, 16)]
+def eye_draw(pr=2.0, core=False, hot=False):
     e = [list(r) for r in EYE]
-    if kind == 'glow':      # ため：ひとみが 針の ように 細まり、虹彩が 光る
-        for y in range(4, 16):
-            for x in range(19):
-                if e[y][x] == 'k' and 2 < x < 16 and 1 < y < 18: e[y][x] = 'M' if not (x == 9 and 6 < y < 13) else 'k'
-                elif e[y][x] == 'N' and 5 < y < 14: e[y][x] = 'M'
-        for y in range(5, 15): e[y][9] = 'k'
-        dots(e, 'w', [(9, 4), (9, 15)]) if False else None
-    if kind == 'wide':      # 決め：ひとみが 開いて 白く 光る 芯
-        for y in range(5, 15):
-            for x in range(7, 12):
-                if e[y][x] in 'kM' and abs(x - 9) + abs(y - 9.5) * .5 < 3.2: e[y][x] = 'k'
-        for (x, y) in ((9, 8), (9, 9), (9, 10), (9, 11)): e[y][x] = 'w'
+    for y in range(20):
+        for x in range(19):
+            if e[y][x] not in 'YBNMw' and not (e[y][x] == 'k' and 2 < x < 16 and 2 < y < 17): continue
+            d = ((x - 9) ** 2 + (y - 9.6) ** 2) ** .5
+            if d <= pr: c = 'k'
+            elif d <= pr + 1.1: c = 'R' if not hot else 'w'
+            elif d <= 4.6: c = 'M'
+            elif d <= 5.7: c = 'N'
+            else: c = 'B' if (x - 9) * .6 + (y - 9.6) * .8 > 5.2 else 'Y'
+            e[y][x] = c
+    for (x, y) in VEINS:
+        if e[y][x] in 'YB': e[y][x] = 'N'
+    for (x, y) in ((6, 9), (7, 8), (8, 7), (12, 12)): e[y][x] = 'w'     # 光（左上に 大、右下に 小）
+    if core:
+        for (x, y) in ((9, 9), (9, 10)): e[y][x] = 'w'
     return [''.join(r) for r in e]
+def eye_var(kind):
+    if kind == 'glow': return eye_draw(pr=1.2, hot=True)     # ため：瞳が 点に ちぢみ、内の 輪が 白く 光る
+    if kind == 'wide': return eye_draw(pr=2.9, core=True)    # 決め：瞳が 開いて 白く 光る 芯
+    return eye_draw()
 def eye_shut(kind):
     """まぶた（頭巾と 同じ 色）を とじる。blink＝細い 線、hit＝ゆがむ、ko＝×"""
     rows = []
@@ -294,7 +304,7 @@ def layers():
         L('tback', 'tent', tentacles(TENT_BACK_A, True), alt={'idle2|idle3|walk1|walk3|atk1|atk2': rows_of(tentacles(TENT_BACK_B, True)), 'ko': rows_of(tentacles(TENT_BACK_A, True))}),
         L('shell', 'body', SH),
         L('lip', 'body', LIP),
-        dict(n='eye', g='eye', x=EC[0] - 9, y=EC[1] - 10, rows=EYE,
+        dict(n='eye', g='eye', x=EC[0] - 9, y=EC[1] - 10, rows=eye_draw(),
              alt={'atk0': eye_var('glow'), 'atk1|atk2': eye_var('wide'), 'blink': eye_shut('blink'), 'hit': eye_shut('hit'), 'ko': eye_shut('ko')}),
         L('hood', 'hood', hood(3), alt={'atk0|atk1|atk2': rows_of(hood(4)), 'hit': rows_of(hood(1))}),
         L('tent', 'tent', tentacles(TENT_A), alt={'idle2|idle3|walk1|walk3|atk1|atk2': rows_of(tentacles(TENT_B)), 'ko': rows_of(tentacles(TENT_LIMP))}),
@@ -313,4 +323,5 @@ FRAMES = {
     'hit': {'root': (-3, 1), 'eye': (-1, 0), 'tent': (-1, -1)},
     'ko': {'root': (0, 6), 'hood': (0, 2)},
 }
+EYE_BOX = (32, 20, 19, 20)
 PARENT = {'body': 'root', 'eye': 'body', 'hood': 'body', 'tent': 'body', 'fx': 'root'}

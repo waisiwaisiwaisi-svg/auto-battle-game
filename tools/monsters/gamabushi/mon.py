@@ -1,5 +1,6 @@
 # ガマブシ（みず・かくとう × ガマガエル）手打ち GBA風
 from pix import outline
+EYE_BOX = (39, 15, 10, 7)
 META = dict(id='gamabushi', name='ガマブシ', types=['water', 'fighting'], base='ガマガエル', size='M')
 PAL = {
     'k': '#101018', 'l': '#1c3040',
@@ -91,12 +92,12 @@ HELM = [
     "STTTT............",
 ]
 CREST = ['w....w', 'Wk..kW', 'VWkkWV', '.VWWV.', '..YY..']
-# 目：金の 虹彩（明 Y・暗 O）＋白い 光＋横長の ひとみ。黒い まぶたが 前へ つり下がる
-EYE = ['.kkk.....', 'kYYYkkk..', 'kYwYYYYkk', 'kYOkkkOYk', '.kOOOOOk.', '..kkkkk..']
-EYE_ALT = {'blink': ['.kkk.....', 'kBBBkkk..', 'kBBBBBBkk', 'kkkkkkkkk', '.CBBBBBC.', '..CCCCC..'],
-           'hit': ['..kk.....', '.kYYkk...', 'kYkwYOkk.', 'kkOOOkkk.', '.kkkkkk..', '.........'],
-           'atk0|atk1|atk2': ['.kkk.....', 'kwwYkkk..', 'kYwwYYYkk', 'kYYkkkwYk', '.kOYYYOk.', '..kkkkk..'],
-           'ko': ['.........', '.k...k...', '..k.k....', '...k.....', '..k.k....', '.k...k...']}
+# 目（G よこ瞳）：頭の 上に もり上がる 大きな 金の 目。広い 虹彩に だいだいの 斑、まん中を 横一文字の 黒い ひとみが 走る。黒い まぶたが 前へ つり下がる
+EYE = ['.kkkk.....', 'kYYYYkkk..', 'kYwYOYYOkk', 'kYOkkkkOYk', 'kYYkkkkYYk', '.kOOYOOOk.', '..kkkkkk..']
+EYE_ALT = {'blink': ['.kkkk.....', 'kBBBBkkk..', 'kBBBBBBBkk', 'kBBBBBBBBk', 'kkkkkkkkkk', '.CBBBBBBC.', '..CCCCCC..'],
+           'hit': ['.kkkk.....', 'kBBBBkkk..', 'kBBBBBBBkk', 'kkkkkkkkkk', 'kYOYkkYOYk', '.kkkkkkkk.', '..........'],
+           'atk0|atk1|atk2': ['.kkkk.....', 'kwwYYkkk..', 'kYwYYOYYkk', 'kYkkkkkkYk', 'kYYOYYOYYk', '.kOOYYOOk.', '..kkkkkk..'],   # ひとみが 細く
+           'ko': ['..........', '.k....k...', '..k..k....', '...kk.....', '..k..k....', '.k....k...', '..........']}
 # 刀は 舌で にぎる。刀の 絵は 40x34 の 板に 手描きの 部品を 置く（原点 x=44, y=6）
 def place(parts, W=50, H=34):
     g = [['.'] * W for _ in range(H)]

@@ -1,11 +1,12 @@
 # イバラジャ（フェアリー・どく × ヘビ）手打ち GBA風・デフォルメ（2〜3頭身：大きな バラの 頭、胴は 短く まるく とぐろ）
+EYE_BOX = (40, 15, 9, 5)
 META = dict(id='ibaraja', name='イバラジャ', types=['fairy', 'poison'], base='ヘビ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2c1630',
     'F': '#b6e25e', 'G': '#5ea23e', 'H': '#2a5c30',          # いばらの 茎（胴）
     'P': '#ffa6cf', 'Q': '#e2457f', 'R': '#8e1c4e',          # バラの 花びら
     'V': '#d48af4', 'U': '#7a34a8',                          # 毒
-    'Y': '#fff27a', 'O': '#e88a1c',                          # 目（虹彩 明・暗）
+    'Y': '#ffb4dc', 'O': '#d42a7c',                          # 目（桃色の 虹彩 明・暗）
     'w': '#ffffff',
 }
 LIGHT = set('FPVYw')
@@ -194,10 +195,16 @@ def head(open_=False):
     return [''.join(r) for r in rows]
 # 頭の 上の いばらの つの（後ろへ 反る）
 HORN = ['kk.....', 'kQkk...', '.kQQkk.', '..kRQQk', '...kRRk', '....kk.']
-# 目：白い 光＋金と だいだいの 虹彩＋たての ひとみ。まゆは 前へ 下がる（怒り）
-EYE = ['kkk.....', '.kkkkkkk', '.kwYYkOk', '..kOOkkk']
-EYE_ALT = {'blink': ['kkk.....', '.kkkkkkk', '.GGGGGGk', '..kkkkk.'], 'hit': ['..kk..k.', '.kGGkkG.', '.GkkGGkG', '..GGGGG.'],
-           'atk0|atk1|atk2': ['kkk.....', '.kkkkkkk', '.kwwYkYk', '..kYOkOk']}
+# 爬虫類の つり目（A）：ヘビの 丸い 目に 桃色の 虹彩（明・暗）と 細い たての スリット。目の 上の うろこ（眉板）が 前へ 下がって 上半分に かぶさる。下まぶたは 細い 暗い みどり
+EYE = ['GHkkkk...',
+       'HkkYkkkkk',
+       'kYwYkYOOk',
+       '.kOYkOOk.',
+       '..HHkHH..']
+EYE_ALT = {'blink': ['GHkkkk...', 'HkkGkkkkk', 'kGGGGGGGk', '.kkkkkkk.', '..HHHHH..'],
+           'hit': ['GHkkk....', 'HkkGkkkk.', 'kGkOkkGk.', '.kkYkkk..', '..HHHH...'],     # ぎゅっと 細め、スリットが ずれる
+           'atk0|atk1|atk2': ['GHkkk....', 'kYYYkkkkk', 'kYwYkYYOk', 'kYOYkYOOk', '.kOOkOOk.']}   # 見開き、スリットが のびる
+
 # 毒の しずく・毒の 霧（攻撃）
 DRIP = ['kVk', 'kUk', '.k.']
 def spray(ph):
@@ -219,7 +226,7 @@ def layers():
         L('sepal', 'head', sepal(), not_='ko'),
         dict(n='horn', g='head', x=30, y=10, rows=HORN, not_='ko'),
         dict(n='head', g='head', x=33, y=13, rows=head(), alt={NB: head(True)}, not_='ko'),
-        dict(n='eye', g='head', x=41, y=15, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='eye', g='head', x=40, y=15, rows=EYE, alt=EYE_ALT, not_='ko'),
         dict(n='drip', g='head', x=53, y=26, rows=DRIP, only='idle0|idle1|idle2|idle3|blink|walk0|walk1|walk2|walk3'),
         L('spray', 'fx', spray(0), alt={'atk2': spray(1)}, only=NB),
         dict(n='sp1', g='fx', x=12, y=9, rows=SPARK, only='idle1|idle3|walk1'),

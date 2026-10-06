@@ -1,13 +1,15 @@
 # モグラドン（じめん・はがね × モグラ）手打ち GBA風
 META = dict(id='mogurado', name='モグラドン', types=['ground', 'steel'], base='モグラ', size='M')
+EYE_BOX = (30, 33, 8, 5)   # ゴーグル（idle0）
 PAL = {
     'k': '#101018', 'l': '#3c2a2a',
     'S': '#e4ecf4', 'T': '#94a2b8', 'U': '#4c5870',
     'F': '#c08a58', 'G': '#84553a', 'H': '#4e3026',
-    'Y': '#ffe25a', 'O': '#ff8a1e',
+    'Y': '#ffe25a', 'O': '#ff8a1e', 'A': '#a8480e',
     'D': '#d8b880', 'R': '#a8283a', 'w': '#ffffff',
 }
 LIGHT = set('SFYDw')
+KEEP_BLACK = set('wYOA')   # ゴーグルの 黒い 枠は 黒の まま
 
 def _outline(rows):
     W = max(len(r) for r in rows); g = [['.'] * (W + 2)] + [list('.' + r.ljust(W, '.') + '.') for r in rows] + [['.'] * (W + 2)]
@@ -95,8 +97,13 @@ HEAD = [
     '.kHHHHHHkkkkkk....',
     '..kkkkkkk.........',
 ]
-EYE = ['TkkkkT', 'kwYkOk', 'YYYkOk', 'kOOkk.']
-EYE_ALT = {'blink': ['TkkkkT', 'kTTTTk', 'kkkkkk', 'kTTTk.'], 'atk0|atk1|atk2': ['TkkkkT', 'kwwkYk', 'YYYkYk', 'kOOkk.'], 'hit': ['TkkkkT', 'kOkkOk', 'kTOOkk', 'kOkkO.'], 'ko': ['TkkkkT', 'kOkOkk', 'kTOkTk', 'kOkOk.']}
+# 目：ゴーグル（J）。黒い 枠の 中は 琥珀色の レンズ（Y 明・O 中・A 暗）。ひとみは なく、左下へ ななめに 走る 反射（w）と 上の 明るい 帯（Y）。
+#   上の ふちは かぶとの 板で つぶれて つり目に 見える
+EYE = ['Skkkkkk.', 'kYYwYYOk', 'kOwOOOAk', 'kwOOAAk.', '.kkkkk..']
+EYE_ALT = {'blink': ['Skkkkkk.', 'kHHHHHHk', 'kHHHHHHk', 'kAHHHHk.', '.kkkkk..'],
+           'atk0|atk1|atk2': ['Skkkkkk.', 'kwwwwwYk', 'kYwYYYOk', 'kwYYYOk.', '.kkkkk..'],
+           'hit': ['Skkkkkk.', 'kYYkYYOk', 'kOkOkOAk', 'kkOOAkk.', '.kkkkk..'],
+           'ko': ['Skkkkkk.', 'kOkOAkAk', 'kOOkAAAk', 'kOkAkAk.', '.kkkkk..']}
 SPK = ['.k....', 'kSk...', 'kSUk..', 'kSTUk.', 'kSTUUk', 'kSTTUk']
 ARM = [
     '..kkkkk...........',
@@ -171,7 +178,7 @@ def layers():
         dict(n='body', g='body', x=4, y=29, rows=BODY),
         dict(n='legH', g='legA', x=6, y=51, rows=LEG),
         dict(n='head', g='head', x=HX, y=HY, rows=HEAD),
-        dict(n='eye', g='head', x=HX + 5, y=HY + 4, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 4, y=HY + 4, rows=EYE, alt=EYE_ALT),
         dict(n='drill', g='head', x=HX + 16, y=HY + 3, rows=drill(0), alt={'idle1|walk1|walk3': drill(1), 'idle2': drill(2), 'idle3': drill(3), 'atk0': drill(2, True), 'atk1': drill(1, True), 'atk2': drill(3, True)}),
         dict(n='arm', g='legB', x=HX - 3, y=HY + 11, rows=ARM),
         dict(n='fx', g='head', x=HX + 28, y=HY + 4, rows=SPARK, alt={'atk2': SPARK2}, only='atk1|atk2'),

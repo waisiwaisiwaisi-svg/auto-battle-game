@@ -1,6 +1,7 @@
 # イワケラトプス（いわ・ドラゴン × トリケラトプス）手打ち GBA風
 import math
 from pix import grid, rows_of, ellipse, poly, line, outline, recolor
+EYE_BOX = (42, 33, 8, 5)
 META = dict(id='iwakeratops', name='イワケラトプス', types=['rock', 'dragon'], base='トリケラトプス', size='L')
 PAL = {
     'k': '#101018', 'l': '#381c1c',
@@ -110,9 +111,13 @@ HEAD_ROAR = HEAD[:9] + [
     '....kHHHHHHHHHHk.......',
     '.....kkkkkkkkkk........',
 ]
-# 目：まゆの ひさしの 下、白い 光＋ こはくの 虹彩 2色（Y/O）＋ たての ひとみ、下に まぶたの 線
-EYE = ['wYYkY', 'YOOkO']
-EYE_ALT = {'blink': ['kkkkk', 'GGGGG'], 'hit': ['kYkYk', 'YkYkY'], 'atk0|atk1|atk2': ['wwYkY', 'YYOkO'], 'ko': ['GkGkG', 'GGkGG', 'GkGkG']}
+# C 三白眼：白目が 大きく、こはくの 小さい 瞳（Y/O＋黒い ひとみ）が 前の 上へ 寄って 上まぶたに おしつけられる。
+# 前へ 下がる 上まぶた、下まぶたは 太く 濃い 線。下と 後ろに 白目が 見える にらみ目
+EYE = ['kkkk....', 'kwwwkkkk', 'kwwwYkYk', '.kwwwOwk', '..kkkkk.']
+EYE_ALT = {'blink': ['kkkk....', 'kGGGkkkk', 'kGGGGGGk', '.kkkkkkk', '..HHHHH.'],
+           'hit': ['kkkk....', 'kkkkkkkk', 'kwwwwYkk', '.kkkkkkk', '..GGGGG.'],
+           'atk0|atk1|atk2': ['kkkk....', 'kwwwkkkk', 'kwwwYwYk', '.kwwwYwk', '..kkkkk.'],
+           'ko': ['kkkk....', 'kGGkGkGk', 'kGGGkGGk', '.kGkGkGk', '..kkkkk.']}
 # 額の 長い 角（2本：手前／おく）と 鼻の 角
 HORN = [
     '...........kk',
@@ -172,7 +177,7 @@ def layers():
         dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={'atk1|atk2': HEAD_ROAR}),
         dict(n='horn', g='head', x=HX + 6, y=HY - 6, rows=HORN),
         dict(n='nhorn', g='head', x=HX + 17, y=HY + 2, rows=NHORN),
-        dict(n='eye', g='head', x=HX + 7, y=HY + 5, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 6, y=HY + 4, rows=EYE, alt=EYE_ALT),
         dict(n='legF', g='fl', x=31, y=52, rows=LEG),
         dict(n='shock1', g='fx', x=40, y=52, rows=SHOCK1, only='atk1'),
         dict(n='shock2', g='fx', x=40, y=51, rows=SHOCK2, only='atk2'),

@@ -1,20 +1,21 @@
 # デンシャコ（でんき・かくとう × シャコ）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：電気を おびた 金の こぶし（捕脚の こぶ ⇔ ボクシングの こぶし）
+EYE_BOX = (37, 5, 13, 15)
 META = dict(id='denshako', name='デンシャコ', types=['elec', 'fighting'], base='シャコ', size='M')
 PAL = {
     'k': '#101018', 'l': '#15283e',
     'A': '#8ee0e8', 'B': '#3c98b4', 'D': '#1f5470',      # 甲羅（青緑）
     'O': '#ffa250', 'P': '#d05a28', 'o': '#7a2a1a',      # 脚・尾扇（だいだい）
     'Y': '#fff27a', 'y': '#f0aa20', 'g': '#9a5410',      # 金の こぶし・目
-    'w': '#ffffff', 'C': '#9cf6ff',                      # 光・火花
+    'w': '#ffffff', 'C': '#9cf6ff', 'm': '#ff5ab4',        # 光・火花（m＝目の 虹の 帯の 桃）
     't': '#c8c8d8', 'r': '#b81c34',                      # テープ・口の 中
 }
 LIGHT = set('AOYwCt')
-KEEP_BLACK = set('wYCr')
+KEEP_BLACK = set('wYCrm')
 # ---------- 下書きの 道具（あたり → 左上光の 3段 → 輪郭。目・牙・模様・線は 手で 打つ）----------
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
-from pix import grid, rows_of, outline, ellipse, poly, line
+from pix import grid, rows_of, outline, ellipse, poly, line, stamp
 N = 64
 def G(): return grid(N, N)
 def at(g, x, y): return g[y][x] if 0 <= y < N and 0 <= x < N else '.'
@@ -109,14 +110,22 @@ def ant_d(g):
     Ln(g, 37, 23, 31, 15, '1'); Ln(g, 38, 23, 32, 15, '1'); Ln(g, 41, 21, 38, 13, '1'); Ln(g, 42, 21, 39, 13, '1')
     P(g, [(29, 13), (26, 11), (27, 9), (31, 11), (33, 16), (31, 17)], '2')
 ANT = part(ant_d, {'1': 'ABD', '2': 'OPo'}, dw=1)
-# ---- 目：白い 光＋金の 虹彩（明 Y・暗 y）＋たての ひとみ。厚い まゆ板で かこむ ----
-EYE = ['kkk.....', '.kkkkkk.', '.kwYYkYk', '..kyykyk', '...kkkk.']
-EYE_ALT = {
-    'blink': ['kkk.....', '.kkkkkk.', '..kkkkkk', '........', '........'],
-    'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkYk', '..kyykk.', '...kkk..'],
-    'hit': ['kkk.....', '.kkkkkk.', '..kk....', '....kkk.', '..kk....'],
-    'ko': ['........', '.k...k..', '..k.k...', '...k....', '..k.k...', '.k...k..'],
-}
+# ---- 目：柄の 先の 目（R）。シャコの 目：頭の 台から のびる 柄の 先に たて長の 目玉。
+#      上下の 半球（青緑）の あいだに 虹の 帯（黄・水色・桃）、帯の まん中に よこ長の 黒い 瞳 ----
+BAND = {'': ('YYYYY', 'CkkkC', 'mmmmm'), 'blink': ('DDDDD', 'kkkkk', 'DDDDD'), 'hit': ('mYYCm', 'CCkYY', 'YmmCC'),
+        'atk': ('wwwww', 'CwkwC', 'YYYYY'), 'ko': ('YkYkY', 'CCkCC', 'mkmkm')}
+def eyes(mode=''):
+    g = grid(15, 19); b = BAND[mode]
+    near = ['.kkkkk.', 'kwBBBDk', 'kBDDDDk', 'k' + b[0] + 'k', 'k' + b[1] + 'k', 'k' + b[2] + 'k', 'kBDDDDk', '.kDDDk.', '..kkk..']
+    far = ['.kkk.', 'kBDDk', 'k' + b[0][:3] + 'k', 'k' + b[1][1:4] + 'k', 'k' + b[2][:3] + 'k', 'kDDDk', '.kkk.']
+    if mode == 'ko':
+        near[1] = 'kwkBkDk'; near[2] = 'kBDkDDk'; far[1] = 'kkDkk'
+    for y in range(9, 14): stamp(g, ['kBk' if y < 12 else 'kDk'], 9, y)          # 柄（近い）
+    for y in range(10, 17): stamp(g, ['kDk'], 2, y)                               # 柄（遠い）
+    stamp(g, far, 1, 4); stamp(g, near, 7, 1)
+    return rows_of(g)
+EYE = eyes()
+EYE_ALT = {'blink': eyes('blink'), 'hit': eyes('hit'), 'atk0|atk1|atk2': eyes('atk'), 'ko': eyes('ko')}
 # ---- 脚（短く 太い 2本）----
 def leg_d(x, top=50):
     def d(g): P(g, [(x, top), (x + 5, top), (x + 5, 57), (x + 7, 58), (x + 7, 60), (x - 1, 60), (x, 57)], '2')
@@ -174,7 +183,7 @@ def layers():
         L('body', 'body', BODY),
         L('legA', 'legA', LEG_F),
         L('head', 'head', HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        H('eye', 'head', 41, 19, EYE, alt=EYE_ALT),
+        H('eye', 'head', 36, 4, EYE, alt=EYE_ALT),
         L('arm', 'arm', ARM, alt={'atk0': ARM_BACK, 'atk1': ARM_PUNCH, 'atk2': ARM_2}),
         H('spk', 'arm', 52, 32, SPARK1, alt={'idle1|idle3|walk1|walk3': SPARK2}, not_='atk0|atk1|atk2|hit|ko'),
         H('bolt', 'arm', 64, 38, BOLT, only='atk1'),

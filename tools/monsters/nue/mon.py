@@ -1,5 +1,6 @@
 # ヌエ（ノーマル・あく × 妖怪ぬえ）手打ち GBA風・デフォルメ（2〜3頭身：猿の 顔と たてがみを 大きく、虎の 胴と 足は 短く 太く）
 META = dict(id='nue', name='ヌエ', types=['normal', 'dark'], base='ぬえ（妖怪）', size='L')
+EYE_BOX = (45, 30, 7, 4)   # 目（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#3e1e16',
     'Y': '#ffc858', 'O': '#d47e22', 'B': '#7e3c16',
@@ -112,10 +113,10 @@ FACE_OPEN = FACE[:9] + [
     '...kBBBBBBBBk.....',
     '....kkkkkkkk......',
 ]
-# 目：まゆの でっぱりの 下で 黄緑に 光る つり目（白い 光＋黄緑 2段＋たての ひとみ）
-EYE = ['kwEEkEk', 'kEeekek', '.kkeekk']
-EYE_ALT = {'blink': ['BBBBBBB', 'kkkkkkk', '.RRRRRR'], 'atk0|atk1|atk2': ['kwwEkEk', 'kEEEkEk', '.kkEEkk'],
-           'hit': ['RkkRRRR', 'RRRkkkk', 'RkkRRRR'], 'ko': ['RkRRkRR', 'RRkkRRR', 'RkRRkRR']}
+# 目（C：三白眼）：まゆの でっぱりの 下、白目（w／影 V）が 大きく、黄緑の 小さな 虹彩（E）と 黒い 点の 瞳が 上の 前すみに 押しつけられる。下まぶたは 太い 黒線＋赤茶の 影
+EYE = ['kwwEkEk', 'kVwwEwk', '.kkkkkk', '..BBBB.']
+EYE_ALT = {'blink': ['BBBBBBB', 'kkkkkkk', '.RRRRRR', '.......'], 'atk0|atk1|atk2': ['kwwEkEk', 'kwwwEwk', 'kVwwwwk', '.kkkkkk'],
+           'hit': ['RkkRRRR', 'RRRkkkk', 'RkkRRRR', '.......'], 'ko': ['RkRRkRR', 'RRkkRRR', 'RkRRkRR', '.......']}
 
 # ---- 蛇の しっぽ：中心の 道すじを 手で 決めた 太い 管（上左が 明）＋うろこ ----
 PATH = [(9, 33), (7, 30), (5, 26), (4, 22), (5, 18), (7, 14), (10, 11), (14, 9), (18, 8)]

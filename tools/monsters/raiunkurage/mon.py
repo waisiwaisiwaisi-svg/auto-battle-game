@@ -1,5 +1,6 @@
 # ライウンクラゲ（でんき・かぜ × クラゲ）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：積乱雲の かさ（傘の ふくらみ ⇔ もこもこの 雲）
+EYE_BOX = (31, 14, 20, 7)
 META = dict(id='raiunkurage', name='ライウンクラゲ', types=['elec', 'wind'], base='クラゲ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2c3050',
@@ -103,13 +104,28 @@ def tents(ph=0):
                 if g[y][x] == 'Y' and at(g, x + 1, y) in 'yg' and (x + y) % 5 == 0: g[y][x] = 'w'
     return part(d, {'7': 'Yyg'}, lw=1, dw=1, post=p)
 T0, T1 = tents(0), tents(1)
-# ---- 目：白い 光＋金の 虹彩（明 Y・暗 y）＋ひとみ。V字の まゆ ----
-EYE_L = ['kkk....', '.kkkkkk', '.kwYYkk', '..kyykk', '...kkk.']
-EYE_R = ['....kkk', 'kkkkkk.', 'kwYYkk.', '.kyykk.', '..kkk..']
-EYE_L_ALT = {'blink': ['kkk....', '.kkkkkk', '..kkkk.'], 'hit': ['kk.....', '..kk...', '....kk.', '..kk...'],
-             'atk0|atk1|atk2': ['kkkk...', '.kkkkkk', '.kwwYkk', '..kyykk', '...kkk.'], 'ko': ['k...k.', '.k.k..', '..k...', '.k.k..', 'k...k.']}
-EYE_R_ALT = {'blink': ['....kkk', 'kkkkkk.', '.kkkk..'], 'hit': ['.....kk', '...kk..', '.kk....', '...kk..'],
-             'atk0|atk1|atk2': ['...kkkk', 'kkkkkk.', 'kwwYkk.', '.kyykk.', '..kkk..'], 'ko': ['k...k.', '.k.k..', '..k...', '.k.k..', 'k...k.']}
+# ---- 目：光る目（E）。瞳も 輪郭線も ない 稲妻色の 光。白い 芯 w ＋ 黄 Y、まわりに 1ドットの にじみ y。
+#      内がわ（顔の まん中）へ 下がる くさび形で にらむ。雲の 下に 嵐の 影 E を しいて 光を うかせる ----
+def mirror(rows): return [r[::-1] for r in rows]
+EYE_L = ['yy......', 'yYYyy...', 'EyYwwYyy', '.EyYwwYy', '..EyyyyE']
+EYE_L_ALT = {
+    'blink': ['........', 'yy......', 'EyyYYyy.', '.EEyyyyy', '..EEEEE.'],
+    'hit':   ['y.......', 'yY.y....', 'E.Yw.Y.y', '.Ey.wY.y', '..E.y.yE'],
+    'atk0|atk1|atk2': ['yyy.....', 'yYYYyyy.', 'yYwwwwYy', '.yYwwwwY', '..yyYYyy'],
+    'ko':    ['........', '.D...D..', '..D.D...', '...D....', '..D.D...'],
+}
+def socket(rows):
+    """光の まわりに 嵐の 影（E）を 1ドット：白い 雲の 上でも 光が うく"""
+    g = [list('.' + r + '.') for r in ['.' * len(rows[0])] + rows + ['.' * len(rows[0])]]
+    H, W = len(g), len(g[0])
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] == '.' and any(0 <= y + dy < H and 0 <= x + dx < W and g[y + dy][x + dx] in 'yYw' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): g[y][x] = 'E'
+    return [''.join(r) for r in g]
+EYE_L = socket(EYE_L); EYE_L_ALT = {k: (v if k == 'ko' else socket(v)) for k, v in EYE_L_ALT.items()}
+EYE_L_ALT['ko'] = ['.' * 10] + ['.' + r + '.' for r in EYE_L_ALT['ko']]
+EYE_R = mirror(EYE_L)
+EYE_R_ALT = {k: mirror(v) for k, v in EYE_L_ALT.items()}
 # ---- 攻撃：触手から 前へ 落ちる 雷（はなれた エフェクト＝意図的）----
 BOLT = [
     'kk..........',
@@ -144,8 +160,8 @@ def layers():
         H('wind', 'bell', 2, 16, WIND, alt={'idle1|idle3|walk1|walk3': WIND2}),
         L('tent', 'tent', T0, not_='ko', alt={'idle2|idle3|walk1|walk3|atk1': T1}),
         L('bell', 'bell', BELL, alt={'atk0|idle1': BELL_HOT, 'atk1|atk2': BELL_OPEN}),
-        H('eyeL', 'bell', 33, 16, EYE_L, alt=EYE_L_ALT),
-        H('eyeR', 'bell', 42, 16, EYE_R, alt=EYE_R_ALT),
+        H('eyeL', 'bell', 31, 14, EYE_L, alt=EYE_L_ALT),
+        H('eyeR', 'bell', 41, 14, EYE_R, alt=EYE_R_ALT),
         L('limp', 'root', LIMP, only='ko'),
         H('bolt', 'root', 45, 38, BOLT, only='atk1'),
         H('spk', 'root', 47, 50, SPARK, only='atk2'),

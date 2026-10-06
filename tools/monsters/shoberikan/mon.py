@@ -146,10 +146,13 @@ def bill(up=0):
         if g[23 - up][x] != '.' and x % 4 == 0: g[23 - up][x] = 'O'
     dots(g, 'O', [(62, 25 - up), (62, 26 - up)])
     return ol(g)
-# 目：白い 光＋金と だいだいの 虹彩＋たての ひとみ。黒い まゆが 前へ 下がる
-EYE = ['kkkk....', '.kkkkkkk', '.kwYYkYk', '.kYOOkOk', '..kkkkk.']
-EYE_ALT = {'blink': ['kkkk....', '.kkkkkkk', '........', '.kkkkkkk', '........'], 'hit': ['........', '.kk...kk', '..kk.kk.', '.kk...kk', '........'],
-           'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkYk', '.kYYOkOk', '..kkkkk.'], 'ko': ['........', '.k..k...', '..kk....', '..kk....', '.k..k...']}
+# 目（S：ビーズ目＋太い 眉）：小さな 黒い ビーズの 目に 白い 光 1点、まわりを 黄色の ふち（黄・だいだい）。上から 太く 前へ 下がる 黒い 眉が かぶさる
+BROW = ['..........', '.kkk......', '..kkkkkk..', '....kkkkkk']
+EYE = BROW + ['...YwkkOk.', '...YkkkOk.', '...kYOOk..', '....kkk...']
+EYE_ALT = {'blink': BROW + ['...kkkkkk.', '...YOOOOk.', '....kkkk..'],
+           'hit': ['..........', '.kkk......', '..kkkkk...', '...kkkk...', '......kkk.', '...YkkO...', '....kkOk..', '...kO..k..'],
+           'atk0|atk1|atk2': ['..........', '.kkkk.....', '..kkkkkkk.', '...kkkkkkk', '...YwwkOk.', '...YwkkOk.', '...kYOOk..', '....kkk...'],
+           'ko': BROW + ['...kYYkOk.', '...YkOkOk.', '...YOkOO..', '...kYOkk..', '....kkk...']}
 # 水の 一撃
 def splash(ph):
     g = G(80, 64)
@@ -168,7 +171,7 @@ def layers():
         L('head', 'head', head()),
         L('bucket', 'head', bucket(), alt={'atk0': bucket(1), NB: bucket(4)}),
         L('bill', 'head', bill(), alt={'atk0': bill(1), NB: bill(3)}),
-        dict(n='eye', g='head', x=34, y=15, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=33, y=13, rows=EYE, alt=EYE_ALT),
         L('splash', 'fx', splash(0), alt={'atk2': splash(1)}, only=NB),
     ]
 FRAMES = {
@@ -178,4 +181,5 @@ FRAMES = {
     'atk0': {'head': (-2, -1), 'body': (-1, 0)}, 'atk1': {'root': (4, 0), 'head': (1, 2)}, 'atk2': {'root': (5, 0), 'head': (1, 2), 'fx': (1, 0)},
     'hit': {'root': (-3, 0), 'head': (-2, -1)}, 'ko': {'_flip': True},
 }
+EYE_BOX = (33, 13, 10, 8)
 PARENT = {'head': 'root', 'wing': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

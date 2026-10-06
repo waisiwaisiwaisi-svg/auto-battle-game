@@ -4,6 +4,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 from pix import grid, rows_of, poly, line, stamp
 
 META = dict(id='jadoku', name='ジャドク', types=['poison', 'dark'], base='コブラ', size='M')
+EYE_BOX = (44, 21, 10, 6)   # ヘビの つり目（idle0）
 PAL = {
     'k': '#101018', 'l': '#24162e',
     'A': '#9a74b8', 'B': '#5a3c7c', 'D': '#30204a',      # うろこ（黒紫）
@@ -192,14 +193,28 @@ HEAD_OPEN = [
     '...kkFFFFFFFFFFFkk....',
     '.....kkkkkkkkkkk......',
 ]
-def _eye(h, a, b, c='BkkkkB'):
-    h = list(h)
-    h[5] = h[5][:6] + a + h[5][6 + len(a):]; h[6] = h[6][:6] + b + h[6][6 + len(b):]; h[7] = h[7][:6] + c + h[7][6 + len(c):]
-    return h
-HEAD_BLINK = _eye(HEAD, 'BBBBBBk', 'kkkkkkk', 'BBBBBB')
-HEAD_HIT = _eye(HEAD, 'BkBBkBk', 'BBkkBBk', 'BkBBkB')
-HEAD_KO = _eye(HEAD, 'BkBkBBk', 'BBkBBBk', 'BkBkBB')
-HEAD_ATK0 = _eye(HEAD, 'kwwkYYk', 'kYYkyyk', 'BkkkkkB')
+# 目：爬虫類の つり目（A）。ヘビらしく 細長い アーモンド形で、後ろが 高く 前へ 下がる。白目なし。
+#   黄（Y 明）・こい 黄（y 暗）の 虹彩に 細い たての スリット k。上には 目の 上の うろこ板（A の ひさし）が 張り出し、上まぶたは 太く、下は 細い
+EYE_AT = (4, 3)
+EYES = {
+    'open':  ['..kkkk....', '.kAAAAkkk.', 'kYYYYkYYkk', '.kYyykyyk.', '..kyykyk..', '...kkkk...'],
+    'atk0':  ['..kkkk....', '.kAAAAkkk.', 'kwYYYkYwkk', 'kYYYYkYYk.', '.kyyykyk..', '..kkkkk...'],
+    'blink': ['..kkkk....', '.kAAAAkkk.', 'kBBBBBBBkk', '.kBBBBBBk.', '..kkkkkk..', '...DDDD...'],
+    'hit':   ['..kkkk....', '.kAAAAkkk.', 'kkkkkkkkkk', '.kYyykyyk.', '..kkkkkk..', '..........'],
+    'ko':    ['..kkkk....', '.kAAAAkkk.', '.BkBBBkBB.', '..BBkBBB..', '.BkBBBkB..', '..........'],
+}
+def _eye(h, e):
+    g = [list(r) for r in h]
+    for j, r in enumerate(EYES[e]):
+        for i, c in enumerate(r):
+            if c != '.': g[EYE_AT[1] + j][EYE_AT[0] + i] = c
+    return [''.join(r) for r in g]
+HEAD = _eye(HEAD, 'open')
+HEAD_OPEN = _eye(HEAD_OPEN, 'open')
+HEAD_BLINK = _eye(HEAD, 'blink')
+HEAD_HIT = _eye(HEAD, 'hit')
+HEAD_KO = _eye(HEAD, 'ko')
+HEAD_ATK0 = _eye(HEAD, 'atk0')
 DRIP = ['G', 'g']
 DRIP2 = ['.', 'G', 'g']
 SPIT = [

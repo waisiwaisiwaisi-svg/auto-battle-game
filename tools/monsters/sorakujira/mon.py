@@ -1,5 +1,6 @@
 # ソラクジラ（かぜ・みず × クジラ）手打ち GBA風・デフォルメ（大きな 頭と 口が 体の 大半、うしろは 短く しぼって 飛行船の 尾翼）
 META = dict(id='sorakujira', name='ソラクジラ', types=['wind', 'water'], base='クジラ', size='L')
+EYE_BOX = (34, 22, 10, 9)
 PAL = {
     'k': '#101018', 'l': '#1c2a50',
     'B': '#94d0f4', 'C': '#4a88cc', 'D': '#28488a',      # 体（空色）
@@ -7,7 +8,9 @@ PAL = {
     'G': '#ffe070', 'H': '#c0862a',                      # 真ちゅう（帯・プロペラ・目）
     'R': '#d23a52', 'E': '#5a1428',                      # 口の 中
     'A': '#c4f2ff', 'w': '#ffffff',                      # 風・しぶき
+    'I': '#5a7cff', 'J': '#1c249c',                      # 目（こい 青の 虹彩 明・暗）
 }
+KEEP_BLACK = set('wIJ')
 LIGHT = set('BVGAw')
 import pix
 # ---- 下書き用の 小道具（あたりの マスク → 左上 光の 3段階 → 手打ちの 仕上げ → 輪郭）----
@@ -163,7 +166,15 @@ PROP3 = [  # 横
     'kkkkkkkkkkk.',
     '............',
 ]
-EYE, EYE_ALT = eye('G', 'H')
+# 目（O 傷の目）：白目＋こい 青の 虹彩（明 I・暗 J）＋丸い ひとみ。古い 傷（白っぽい 線 W）が 目を たてに 切り、
+# 上下の まぶたが 傷の ところで 切れて いる。まぶたは 太く 前へ 下がる
+EYE = ['......W...', '.....WW...', 'kkkkk.Wkk.', '.kkwIIWkkk', '.kwIJkWJIk', '..kJJJWJk.', '...kkk.k..', '......W...', '......W...']
+EYE_ALT = {
+    'blink': ['......W...', '.....WW...', 'kkkkk.Wkk.', '.kkkkkWkkk', '..DDDDWDD.', '......W...', '......W...', '......W...', '..........'],
+    'hit': ['......W...', '.....WW...', 'kkkk..W...', '...kkkWk..', '.....kWkkk', '...kkkW...', '.kkk..W...', '......W...', '..........'],
+    'atk0|atk1|atk2': ['......W...', '.....WW...', 'kkkkk.Wkk.', '.kwwIIWkkk', '.kwIIkWwIk', '..kIJJWIk.', '...kkk.k..', '......W...', '......W...'],
+    'ko': ['......W...', '.....WW...', '..k...Wk..', '...k.kW...', '....k.W...', '...k.kW...', '..k...Wk..', '......W...', '..........'],
+}
 # 潮ふき（みず）：穴から 立つ 水の 柱（付け根は 穴に つながる）
 SPOUT = ['.k.kk.k.', 'kAkAAkAk', '.kAwAAk.', '..kAAk..', '..kAwk..', '...kk...']
 SPOUT2 = ['..k..k..', '.kAkkAk.', '..kAAk..', '..kwAk..', '...kk...']
@@ -186,7 +197,7 @@ def layers():
         dict(n='tail', g='tail', x=0, y=15, rows=TAIL, alt={'idle1|idle2|walk1|walk2': TAIL2}),
         dict(n='body', g='body', x=5, y=12, rows=BODY, alt={NB: BODY_OPEN}),
         dict(n='spout', g='spout', x=38, y=8, rows=SPOUT, alt={'idle1|idle3|walk1|walk3': SPOUT2}, not_='ko|hit|atk0'),
-        dict(n='eye', g='body', x=35, y=24, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='body', x=34, y=22, rows=EYE, alt=EYE_ALT),
         dict(n='arm', g='fin', x=27, y=44, rows=ARM),
         dict(n='prop', g='fin', x=23, y=52, rows=PROP, alt={'idle1|idle3|walk1|walk3|atk1|hit': PROP2, 'idle2|walk2|atk2': PROP3}),
         dict(n='gust', g='fx', x=60, y=24, rows=GUST, only=NB),

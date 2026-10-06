@@ -1,12 +1,15 @@
 # カザミドリ（かぜ・はがね × ニワトリ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 鉄の 頭に 風見の 矢の とさか、胴は 小さく 丸く、足は 短く 太く）
 META = dict(id='kazamidori', name='カザミドリ', types=['wind', 'steel'], base='ニワトリ', size='M')
+EYE_BOX = (40, 17, 8, 8)
 PAL = {
     'k': '#101018', 'l': '#2c2e48',
     'S': '#eef2fa', 'T': '#9ea8c4', 'U': '#565c7e',      # 鋼
     'C': '#ffb878', 'D': '#d4622c', 'E': '#7a2a1e',      # 銅（矢の とさか・肉垂れ・目）
     'Y': '#ffe466', 'O': '#d08a1c',                      # くちばし・足
     'A': '#a4ecff', 'w': '#ffffff',                      # 風
+    'R': '#ff4a3a', 'r': '#a01420', 'K': '#06060a',     # 目（猛禽の 赤い 輪 明・暗／ひとみ）
 }
+KEEP_BLACK = set('wRr')
 LIGHT = set('SCYAw')
 import pix
 # ---- 下書き用の 小道具（あたりの マスク → 左上 光の 3段階 → 手打ちの 仕上げ → 輪郭）----
@@ -100,7 +103,15 @@ BEAK_OPEN = [
     'kkkkkk....',
 ]
 WATTLE = ['kkkkk', 'kCCDk', 'kCDDk', 'kDDEk', '.kDEk', '..kk.']
-EYE, EYE_ALT = eye('Y', 'O')
+# 目（B 猛禽の 目）：白目なし。大きな 丸い 黒い ひとみの まわりに 赤い 輪（明 R・暗 r）。
+# 上半分を 鉄の まゆの ひさし（前へ 下がる）が 切る。光は ひとみの 上に 1点
+EYE = ['.TTTTT..', 'UUUUUUUU', 'kkkkkkUU', 'kRKKKwRk', 'kRKKKKRk', 'kRKKKKrk', '.kRrrrk.', '..kkkk..']
+EYE_ALT = {
+    'blink': ['.TTTTT..', 'UUUUUUUU', 'UUUUUUUU', 'UUUUUUUU', 'kkkkkkkk', '.kDDDDk.', '..kkkk..', '........'],
+    'hit': ['TTTT....', 'UUUUUU..', 'kkkkUUUU', 'kRRRkkkk', 'kRRRRRRk', 'kRRRRkrk', '.kRrrrk.', '..kkkk..'],
+    'atk0|atk1|atk2': ['.TTTT...', 'UUUUUUU.', 'kkkkkkUU', 'kRRRRwRk', 'kRRKKRRk', 'kRRKKRrk', '.kRrrrk.', '..kkkk..'],
+    'ko': ['.TTTTT..', 'UUUUUUUU', 'kkkkkkkk', '.r...r..', '..r.r...', '...r....', '..r.r...', '.r...r..'],
+}
 
 # ---- 胴（小さく 丸い）と 翼の 板 ----
 BODY = P(M(20, 18, ('e', '1', 10, 9, 10, 9)), STEEL, [
@@ -175,7 +186,7 @@ def layers():
         dict(n='head', g='head', x=27, y=12, rows=HEAD),
         dict(n='wattle', g='head', x=46, y=29, rows=WATTLE),
         dict(n='beak', g='head', x=49, y=21, rows=BEAK, alt={NB: BEAK_OPEN}),
-        dict(n='eye', g='head', x=41, y=19, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=40, y=17, rows=EYE, alt=EYE_ALT),
         dict(n='gust', g='fx', x=58, y=16, rows=GUST, alt={'atk2': GUST2}, only=NB),
     ]
 FRAMES = {

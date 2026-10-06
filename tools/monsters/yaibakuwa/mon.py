@@ -1,5 +1,6 @@
 # ヤイバクワ（むし・はがね × クワガタ）手打ち GBA風
 import pix
+EYE_BOX = (34, 43, 7, 3)
 META = dict(id='yaibakuwa', name='ヤイバクワ', types=['bug', 'steel'], base='クワガタ', size='M')
 PAL = {
     'k': '#101018', 'l': '#1e2434',
@@ -81,10 +82,10 @@ HEAD = [
     '..kCCCCCCCCCCCCk..',
     '...kkkkkkkkkkkk...',
 ]
-# 目：重い まゆの 下、白い 光＋ 赤の 虹彩 2色（R/P）＋ たての ひとみ
-EYE = ['wRRRRkR', 'RRPPPkP', '.PPPPkk']
-EYE_ALT = {'blink': ['kkkkkkk', 'BBBBBBB', '.BBBBkk'], 'atk0|atk1|atk2': ['wwRRRkR', 'RRRRRkR', '.PPPPkk'],
-           'hit': ['BkBBBBB', 'BBkkkkk', '.kBBBBB'], 'ko': ['BBkBkBB', 'BBBkBBB', '.BkBkBB']}
+# J バイザー：かぶとの 目の 穴は 黒い 面頬。その 中に 横一文字の 赤く 光る スリット（後ろは 暗い 赤 → 前へ 白く 強まる）
+EYE = ['kkkkkkk', 'QPRRwwR', '.kkkkkk']
+EYE_ALT = {'blink': ['kkkkkkk', 'kQQQQQQ', '.kkkkkk'], 'atk0|atk1|atk2': ['kPRRRRR', 'PRwwwww', '.kPRRRR'],
+           'hit': ['kkkkkkk', 'QkPkRkQ', '.kkkkkk'], 'ko': ['kkPkPkk', 'kkkPkkk', '.kPkPkk']}
 # ---- 刀の あご：金の つば ＋ 反った 刃。刃先（内がわ）は 白く 光る ----
 BLADE = [
     '................kk',

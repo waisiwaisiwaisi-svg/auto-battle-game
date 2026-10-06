@@ -2,6 +2,7 @@
 import math
 import pix
 META = dict(id='zutsukihitsuji', name='ズツキヒツジ', types=['fighting', 'rock'], base='ヒツジ', size='M')
+EYE_BOX = (44, 32, 8, 6)   # よこ瞳（idle0）
 PAL = {
     'k': '#101018', 'l': '#3c3028',
     'A': '#f6f0e0', 'B': '#d0c4a6', 'C': '#8e8066',
@@ -149,10 +150,12 @@ HEAD_OPEN = HEAD[:11] + [
     '....kkFFFFFFFFkk....',
     '......kkkkkkkk......',
 ]
-# 目：ハイライト w ＋ 虹彩 2色（Y 明・y 暗）＋ 横長の ひとみ k（ヒツジの 目）。上は 岩の まゆ
-EYE = ['kwYYYk', 'kYkkkk', 'Ekyyyk', 'EEkkkE']
-EYE_ALT = {'blink': ['kkkkkk', 'EEEEEk', 'EEEEEk', 'EEEEEE'], 'hit': ['kEEEkk', 'EkkkEk', 'EEkkkE', 'EEEEEE'],
-           'atk0|atk1|atk2': ['kwwYYk', 'kYkkkk', 'EkYyyk', 'EEkkkE'], 'ko': ['kEEEkk', 'EkEkEk', 'EEkEEk', 'EkEkEE']}
+# 目：よこ瞳（G）。大きく 広い 金の 虹彩（Y 明・y 暗）の まん中に 横長の 四角い ひとみ（k、4×2）。白い ハイライト 1点。上まぶたは 前へ 下がる
+EYE = ['.kkkkkkk', 'kwYYYkkk', 'kYkkkkyk', 'kykkkkyk', '.kyyyyk.', '..kkkk..']
+EYE_ALT = {'blink': ['.kkkkkkk', 'kEEEEEkk', 'kEEEEEEk', 'kkkkkkkk', '.EEEEEE.', '........'],
+           'hit': ['.kkkkkkk', 'kkkkkkkk', 'kEEEEEkk', 'kYkkkkyk', '.kkkkkk.', '........'],
+           'atk0|atk1|atk2': ['.kkkkkkk', 'kwwwYkkk', 'kYYYYYYk', 'kYkkkkyk', '.kyyyyk.', '..kkkk..'],
+           'ko': ['.kkkkkkk', '.EkEEkE.', '..EkkE..', '..EkkE..', '.EkEEkE.', '........']}
 FLUFF = [
     '..kk.kk..',
     '.kAAkAAk.',
@@ -236,7 +239,7 @@ def layers():
         dict(n='fleg', g='legA', x=31, y=50, rows=FLEG),
         dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={NB: HEAD_OPEN}),
         dict(n='horn', g='head', x=HX - 8, y=HY - 3, rows=HORN),
-        dict(n='eye', g='head', x=HX + 11, y=HY + 5, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 10, y=HY + 4, rows=EYE, alt=EYE_ALT),
         dict(n='impact', g='head', x=HX + 17, y=HY - 2, rows=IMPACT, alt={'atk2': IMPACT2}, only=NB),
     ]
 

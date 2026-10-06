@@ -1,5 +1,6 @@
 # シオガニ（みず・いわ × カニ）手打ち GBA風
 import pix
+EYE_BOX = (25, 21, 14, 9)
 META = dict(id='shiogani', name='シオガニ', types=['water', 'rock'], base='カニ', size='M')
 PAL = {
     'k': '#101018', 'l': '#1e2a48',
@@ -77,27 +78,24 @@ SHELL_D = [
     '..lllllllllllllllllllllllllll..',
     '...PPPPPPPPPPPPPPPPPPPPPPPPPP..',
 ]
-# 顔：甲羅の 前の 面。目の 柄（2本）の 先に 岩の まぶた＋黄色い つり目（たての ひとみ）
-STALK = [
-    '..kkkkkk.',
-    '.kRRRRRQk',
-    'kRQQQQQPk',
-    'kkkkkkkkk',
-    'kYYYYkYYk',
-    'kYYYYkYYk',
-    'kYYYYkYYk',
-    '.kkkkkkk.',
+# 目（R 柄の 先の 目）：2本の 柄の 先に 丸い 黄色の 目玉。横長の 四角い 黒瞳、白い 光、下半分は こはくの かげ
+BALL = {   # 岩の まぶたが 前へ ななめに かぶさって にらむ
+    'open':  ['..kkkk...', '.kRRQQkk.', 'kYwkkQQPk', 'kYYYYkkkk', 'kYkkkkkOk', 'kYYYYYOOk', '.kOOOOOk.', '..kkkkk..'],
+    'blink': ['..kkkk...', '.kRRQQkk.', 'kRQQQQQPk', 'kQQQQQPPk', 'kkkkkkkkk', 'kOOOOOOOk', '.kOOOOOk.', '..kkkkk..'],
+    'atk':   ['..kkkk...', '.kRRQQkk.', 'kwwkkQQPk', 'kYYYYkkkk', 'kYkkkkkkk', 'kYYOOOOOk', '.kOOOOOk.', '..kkkkk..'],
+    'hit':   ['..kkkk...', '.kRRQQkk.', 'kRQQQQQPk', 'kkkkkkkkk', 'kYOkkkOOk', 'kOOOOOOOk', '.kOOOOOk.', '..kkkkk..'],
+    'ko':    ['..kkkk...', '.kRRQQkk.', 'kRQQQQQPk', 'kkkkkkkkk', 'kOkOOOkOk', 'kOOkOkOOk', '.kOOkOOk.', '..kkkkk..'],
+}
+STALK = BALL['open'] + [
     '...kBNk..',
     '...kBNk..',
     '...kNMk..',
     '...kNMk..',
 ]
-# 目（デフォルメで 大きく）：岩の まぶたの 下、白い 光＋黄と こはく色の 虹彩＋たての ひとみ
-EYEL = ['wYYYkkk', 'YYOOkOk', 'OOOOkOk']
-EYEL_ALT = {'blink': ['QQQQQQQ', 'QQQQQQQ', 'kkkkkkk'], 'atk0|atk1|atk2': ['wwYYkYk', 'YYYOkOk', 'OOOOkOk'],
-            'hit': ['kkQQQkk', 'QQkkkQQ', 'QQQQQQQ'], 'ko': ['QQkQkQQ', 'QQQkQQQ', 'QQkQkQQ']}
-EYEF = ['wYkkk', 'YOkOk', 'OOkOk']
-EYEF_ALT = {'blink': ['PPPPP', 'PPPPP', 'kkkkk'], 'atk0|atk1|atk2': ['wYkYk', 'YOkOk', 'OOkOk'], 'hit': ['kPPkk', 'PkkPP', 'PPPPP'], 'ko': ['kPkPP', 'PkPPP', 'kPkPP']}
+EYEL = BALL['open']
+EYEL_ALT = {'blink': BALL['blink'], 'atk0|atk1|atk2': BALL['atk'], 'hit': BALL['hit'], 'ko': BALL['ko']}
+def _far(r): return [x.replace('Y', 'O').replace('w', 'Y') for x in r]   # 奥の 目は 少し 暗く
+EYEF, EYEF_ALT = _far(EYEL), {k: _far(v) for k, v in EYEL_ALT.items()}
 # 口：岩の 口板と 左右に ひらく 大あご（白い 牙）
 MOUTH = [
     'kkkkkk..',
@@ -226,8 +224,8 @@ def layers():
         dict(n='coral2', g='body', x=16, y=26, rows=CORAL2),
         dict(n='coral3', g='body', x=23, y=29, rows=dark(CORAL2)),
         dict(n='stalk', g='head', x=30, y=21, rows=STALK),
-        dict(n='eyeF', g='head', x=26, y=26, rows=EYEF, alt=EYEF_ALT),
-        dict(n='eye', g='head', x=31, y=25, rows=EYEL, alt=EYEL_ALT),
+        dict(n='eyeF', g='head', x=25, y=22, rows=EYEF, alt=EYEF_ALT),
+        dict(n='eye', g='head', x=30, y=21, rows=EYEL, alt=EYEL_ALT),
         dict(n='arm', g='body', x=37, y=30, rows=ARM[:10] + ['.kkkk.......'], not_=NA),
         dict(n='armF', g='body', x=35, y=42, rows=ARM_FWD, only=NA),
         dict(n='shell', g='body', x=5, y=32, rows=shell()),

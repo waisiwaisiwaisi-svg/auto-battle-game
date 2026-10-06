@@ -1,5 +1,6 @@
 # ヨミアンコウ（ゴースト・みず × チョウチンアンコウ）手打ち GBA風
 import pix
+EYE_BOX = (34, 26, 8, 8)
 META = dict(id='yomiankou', name='ヨミアンコウ', types=['ghost', 'water'], base='チョウチンアンコウ', size='M')
 PAL = {
     'k': '#101018', 'l': '#1e2238',
@@ -104,21 +105,23 @@ PFIN = [
     'kk.kDk..',
     '...kk...',
 ]
-# 目：くぼんだ 黒い 目の 穴に 霊火の ひとみ
-# 目：くぼんだ 黒い 穴に 霊火の ひとみ（白い 光＋白緑と 青緑の 2色＋たての ひとみ）。上は 太い まゆで つり目
+# K 魚の 目：まぶたの ない まん丸の 目。白く にごった 目玉（A・左上に 白 w）、細い 青緑の 輪（N）の 中に 平たい 大きな ひとみが
+# 霊火で 光る（C・芯は c）。まわりは 骨の ふち（D）
 EYE = [
-    'kkk.......',
-    '.kkkkkkk..',
-    '.kwccCkCk.',
-    '.kcCCCkNk.',
-    '..kNNNkkk.',
-    '...kkkk...',
+    '.DDDDD..',
+    'DkkkkkD.',
+    'kwAAAAkD',
+    'kwNNNNAk',
+    'kANcCNAk',
+    'kANCCNDk',
+    'kAANNDDk',
+    '.kkkkkk.',
 ]
 EYE_ALT = {
-    'blink': ['kkk.......', '.kkkkkkk..', '.kkkkkkkk.', '..NNNNNk..', '...kkkk...', '..........'],
-    'atk0|atk1|atk2': ['kkk.......', '.kkkkkkk..', 'kwwccCkck.', 'kcccCCkCk.', '.kCNNNkkk.', '..kkkkk...'],
-    'hit': ['kkk.......', '.kkkkkkk..', '.kCkkkkCk.', '..kCkkCk..', '...kCCk...', '....kk....'],
-    'ko': ['..........', '.kk..kk...', '...kk.....', '.kk..kk...', '..........', '..........'],
+    'blink': ['.DDDDD..', 'DkkkkkD.', 'kwAAAAkD', 'kwAAAAAk', 'kAANNAAk', 'kAANNADk', 'kAAAADDk', '.kkkkkk.'],
+    'atk0|atk1|atk2': ['.DDDDD..', 'DkkkkkD.', 'kwCCCCkD', 'kCcccCAk', 'kCcwwcCk', 'kCcccCDk', 'kACCCDDk', '.kkkkkk.'],
+    'hit': ['.DDDDD..', 'DkkkkkD.', 'kwAAAAkD', 'kAAAAAAk', 'kAAAAANk', 'kAAAANDk', 'kAAAADDk', '.kkkkkk.'],
+    'ko': ['.DDDDD..', 'DkkkkkD.', 'kwAAAAkD', 'kAkAkAAk', 'kAAkAAAk', 'kAkAkADk', 'kAAAADDk', '.kkkkkk.'],
 }
 # 口の 中（暗い 紫）
 def _maw():
@@ -209,7 +212,7 @@ def layers():
         dict(n='maw', g='body', x=29, y=34, rows=MAW),
         dict(n='body', g='body', x=9, y=24, rows=BODY),
         dict(n='dots', g='body', x=15, y=36, rows=DOTS),
-        dict(n='eye', g='body', x=34, y=28, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='body', x=34, y=26, rows=EYE, alt=EYE_ALT),
         dict(n='ut', g='body', x=32, y=41, rows=UTEETH),
         dict(n='jaw', g='jaw', x=27, y=34, rows=JAW),
         dict(n='lt', g='jaw', x=35, y=30, rows=LTEETH),

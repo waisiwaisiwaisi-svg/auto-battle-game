@@ -5,7 +5,7 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_kit.py'), e
 from functools import lru_cache
 
 META = dict(id='dokutsubo', name='ドクツボ', types=['poison', 'water'], base='ウツボ', size='M')
-EYE_BOX = (39, 17, 8, 7)
+EYE_BOX = (39, 16, 8, 8)
 PAL = {
     'k': '#101018', 'l': '#2c1a36',
     'A': '#dce672', 'B': '#96aa3a', 'D': '#4e5e22',      # ウツボの 皮（黄緑）
@@ -70,11 +70,11 @@ def neck(mode='rest'):
 # 目（K 魚の 目）：まぶたの ない 丸い 目。白く にごった 黄の 細い 輪＋平たい 大きな ひとみ（上に にごりの 膜の 点）。
 # まわりは 濃い うろこの ふち
 EYES = {
-    'open': ['..DDDD..', '.DkkkkD.', 'DkwYYYkD', 'kYkYkYOk', 'kYkkkkOk', 'DkOOOOkD', '.DkkkkD.'],
-    'atk':  ['..DDDD..', '.DkkkkD.', 'DkwYYYkD', 'kYYYYYOk', 'kYYkkYOk', 'DkOOOOkD', '.DkkkkD.'],
-    'blink': ['..DDDD..', '.DkkkkD.', 'DkYYYYkD', 'kkkkkkkk', 'kOOOOOOk', 'DkOOOOkD', '.DkkkkD.'],
-    'hit':  ['..DDDD..', '.DkkkkD.', 'DkYYkYkD', 'kYYkkYOk', 'kYYYYOOk', 'DkOOOOkD', '.DkkkkD.'],
-    'ko':   ['..DDDD..', '.DkkkkD.', 'DkYYYYkD', 'kYkYYkOk', 'kYYkkOOk', 'kYkOOkOk', '.DkkkkD.'],
+    'open': ['DDD.....', '.DDDDDD.', '.kkkkkDD', 'kwYYYYk.', 'kYkYkkOk', 'kYkkkYOk', '.kYOOOk.', '..kkkk..'],
+    'atk':  ['DD......', '.DDDDDD.', '.kkkkkDD', 'kwYYYYkD', 'kYYOkYOk', 'kYYkkYOk', '.kOOOOk.', '..kkkk..'],
+    'blink': ['DDD.....', '.DDDDDD.', '.kkkkkDD', 'kDDDDDk.', 'kkkkkkkk', 'kOOOOOOk', '.kOOOOk.', '..kkkk..'],
+    'hit':  ['........', '.DDDD...', 'DDkkkkD.', 'kYYkkYk.', 'kYYkkYOk', 'kYYYYOOk', '.kOOOOk.', '..kkkk..'],
+    'ko':   ['DDD.....', '.DDDDDD.', '.kkkkkDD', 'kkYYYkk.', 'kYkYkOOk', 'kYYkOOOk', '.kOkOkk.', '.kkkkkk.'],
 }
 @lru_cache(None)
 def head(eye='open', gape=1):
@@ -99,7 +99,7 @@ def head(eye='open', gape=1):
         recol(g, {'1': 'B'}, None)
         for x, y in ((38, 18), (36, 22), (40, 30), (46, 16), (35, 27), (44, 33)):   # 毒の 斑
             if at(g, x, y) in 'ABD': put(g, x, y, 'Q'); put(g, x + 1, y, 'P')
-        stamp(g, 39, 17, EYES[eye])
+        stamp(g, 39, 16, EYES[eye])
         dots(g, 'k', [(57, 19), (56, 19)])                                      # 鼻の 管
     return part(d, RAMP, p, open=[(30, 22, 37, 34)], r=2, tilt=.6)
 

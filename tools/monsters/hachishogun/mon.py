@@ -3,6 +3,7 @@ import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, grid_of, poly, ellipse, stamp, outline
 
+EYE_BOX = (46, 18, 7, 11)
 META = dict(id='hachishogun', name='ハチショウグン', types=['bug', 'poison'], base='スズメバチ', size='M')
 PAL = {
     'k': '#101018', 'l': '#3a2412',
@@ -10,7 +11,7 @@ PAL = {
     'S': '#d4dcea', 'T': '#72809c', 'U': '#363e5a',      # はがねの よろい
     'g': '#c8ff5c', 'G': '#4eae30',                      # 毒
     'w': '#f4fbff', 'c': '#a6c6e2',                      # すきとおる 翅
-    'r': '#ff3a3a', 'd': '#8a1420',                      # 目
+    'r': '#ff3a3a', 'd': '#8a1420', 'o': '#ff9c8c',      # 目（複眼の 赤・濃い 赤・反射）
 }
 LIGHT = set('RSgwr')
 RAMP = {'1': 'RQP', '4': 'STU', '6': 'TUU', '7': 'gGG', '8': 'wcc'}
@@ -175,13 +176,14 @@ def head():
     dots(g, 'P', [(46, 32), (47, 32), (48, 32), (49, 33)])
     return rows_of(g)
 
-# 複眼：まゆの 板で つり上がり、白い 光＋ 赤の 虹彩 2色（r/d）＋ たての ひとみ
-EYE = ['kkkkkkk...', '.kkkkkkkk.', '.kwwrrrkrk', '.krrrrdkdk', '..kdddddk.', '...kkkkk..']
+# D 複眼：たて長の そら豆形（前の ふちが へこむ）。赤い 地に 濃い 赤の 点の 段（あみ目）、上に 白〜うす赤の 反射の 帯。
+# ひとみは なし。前へ 下がる 黒い まゆの 板で 怒り顔
+EYE = ['kkk....', '.kkkkkk', 'kwwookk', 'korrrrk', 'krdrdrk', 'krrrrk.', 'kdrdrk.', 'krrrrrk', 'krdrdrk', '.kdddk.', '..kkk..']
 EYE_ALT = {
-    'blink': ['kkkkkkk...', '.kkkkkkkk.', '.kkkkkkkk.', '.kddddddk.', '..kkkkkk..', '..........'],
-    'atk0|atk1|atk2': ['kkkkkkk...', '.kkkkkkkk.', '.kwwwwwkwk', '.kwrrrrkrk', '..krrrddk.', '...kkkkk..'],
-    'hit': ['.........', '.kk...kk.', '...kkk...', '.kk...kk.', '.........'],
-    'ko': ['.........', '..k...k..', '...k.k...', '....k....', '...k.k...', '..k...k..'],
+    'blink': ['kkk....', '.kkkkkk', 'kkkkkkk', 'kkkkkkk', 'krdrdrk', 'krrrrk.', 'kdrdrk.', 'krrrrrk', 'krdrdrk', '.kdddk.', '..kkk..'],
+    'atk0|atk1|atk2': ['kkk....', '.kkkkkk', 'kwwwwkk', 'kwooook', 'kororok', 'kooook.', 'krorok.', 'koooook', 'kororok', '.krrrk.', '..kkk..'],
+    'hit': ['....kkk', '.kkkk..', 'kddrrdk', 'kdrdrdk', 'kddddk.', 'kddddk.', 'kdrdrk.', 'kdddddk', 'kdrdrdk', '.kdddk.', '..kkk..'],
+    'ko': ['.......', '.kkkkk.', 'kddddkk', 'kkdddkk', 'kdkdkdk', 'kddkdk.', 'kdkdkk.', 'kkdddkk', 'kddddkk', '.kdddk.', '..kkk..'],
 }
 
 LEGS = [   # 3対の 足（短く 太く：こはくの 関節、はがねの すね、白い かぎ爪）。前足は つかみかかる 形
@@ -214,7 +216,7 @@ def layers():
         dict(n='legs', g='legs', x=31, y=35, rows=LEGS),
         dict(n='thorax', g='body', x=0, y=0, rows=thorax()),
         dict(n='head', g='head', x=0, y=0, rows=head()),
-        dict(n='eye', g='head', x=47, y=20, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=46, y=18, rows=EYE, alt=EYE_ALT),
         dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|atk0|hit': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
         dict(n='drip', g='abd', x=12, y=51, rows=OL(DRIP), only='idle1|idle2|walk1|walk3'),
         dict(n='splash', g='root', x=58, y=47, rows=OL(SPLASH), only='atk1'),

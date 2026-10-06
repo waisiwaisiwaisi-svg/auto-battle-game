@@ -1,13 +1,15 @@
 # アリムシャ（むし・かくとう × アリ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭＋こぶしの 大あご、細い くびれで 胸・腹に わかれ、2本足で 立つ）
 META = dict(id='arimusha', name='アリムシャ', types=['bug', 'fighting'], base='アリ', size='M')
+EYE_BOX = (34, 19, 8, 6)
 PAL = {
     'k': '#101018', 'l': '#3c1418',
     'C': '#e47c4c', 'D': '#a83a2a', 'E': '#58181e',      # 赤アリの 殻
     'F': '#ffe4a4', 'G': '#d69a50', 'H': '#80502c',      # 大あご（こぶし）・前立て
-    'Y': '#dcff6c', 'Z': '#62a42a',                      # 目（明・暗）
+    'Y': '#b4c4ec', 'Z': '#3c4058', 'X': '#141420',     # 目（黒い 複眼：光の 帯・あみ目・地）
     'V': '#b4bccc', 'w': '#ffffff',                      # さらし（包帯）
 }
 LIGHT = set('CFYw')
+KEEP_BLACK = set('wYZX')
 import pix
 # ---- 下書き用の 小道具（あたりの マスク → 左上 光の 3段階 → 手打ちの 仕上げ → 輪郭）----
 def M(W, H, *sh):
@@ -72,7 +74,15 @@ HEAD = P(M(23, 20, ('e', '1', 11.5, 9, 11.5, 9), ('r', '1', 3, 9, 20, 15), ('e',
     (['EEEEE'], 13, 18),                                     # あごの 下
 ], lw=2, dw=3)
 CREST = ['kk......', 'kFkk....', '.kFGkk..', '..kFGGk.', '...kGGHk', '....kkk.']
-EYE, EYE_ALT = eye('Y', 'Z')
+# 目（D 複眼）：黒い だ円の ドーム。あみ目の 点（Z）と 左上から ななめに 走る 光の 帯（Y・w）。ひとみは ない。
+# 上を かぶとの ひさし（まゆ）が 前へ 下がって 切る
+EYE = ['.kkkkkk.', 'kwYXZXZk', 'kYXZXZXk', 'kXYXZXZk', 'kZXYXZXk', '.kZXZXk.']
+EYE_ALT = {
+    'blink': ['.kkkkkk.', 'kEEEEEEk', 'kkkkkkkk', 'kXZXZXZk', 'kZXZXZXk', '.kZXZXk.'],     # まゆ（ひさし）が 下がる
+    'hit': ['.kkkkkk.', 'kwYXZXk.', 'kYX.kXZk', 'kX.YXkZk', 'kZXk.XZk', '.kZXZXk.'],        # 光の 帯が 割れる
+    'atk0|atk1|atk2': ['.kkkkkk.', 'kwwYYXZk', 'kwYYXZXk', 'kYYXZXZk', 'kZYXZXYk', '.kZXZYk.'],
+    'ko': ['.kkkkkk.', 'kXZXZXZk', 'kYkXZkXk', 'kXZkkXZk', 'kZkXZkXk', '.kZXZXk.'],
+}
 BROW = ['kkkkkkkkk', '.EEEEEEEk']                           # かぶとの ひさし（つり上がった まゆ）
 
 # ---- 触角：くの字（ひじ）に 折れて 前へ。付け根は 頭に 2ドット もぐる ----
@@ -140,7 +150,7 @@ def layers():
         dict(n='head', g='head', x=21, y=12, rows=HEAD),
         dict(n='ant', g='ant', x=27, y=2, rows=ANT, alt={'idle1|idle3|walk1|walk3': ANT2}),
         dict(n='brow', g='head', x=33, y=17, rows=BROW),
-        dict(n='eye', g='head', x=34, y=18, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=34, y=19, rows=EYE, alt=EYE_ALT),
         dict(n='fang', g='head', x=39, y=30, rows=FANG),
         dict(n='jaw', g='head', x=38, y=25, rows=JAW),
         dict(n='fistN', g='fistN', x=37, y=24, rows=FIST),

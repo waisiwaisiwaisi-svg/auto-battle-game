@@ -7,9 +7,11 @@ PAL = {
     'M': '#f47cb6', 'N': '#b83e86', 'O': '#661c50',
     'Y': '#f8cc58', 'y': '#a87428',
     'S': '#e6eef8', 's': '#8a96b8',
-    'w': '#ffffff',
+    'w': '#ffffff', 'x': '#08060c',                      # x＝瞳の 黒
 }
 LIGHT = set('PMYSwi')
+KEEP_BLACK = set('wx')
+EYE_BOX = (36, 22, 11, 7)   # 両目と くまどり（idle0 の 64x64 座標）
 
 # 頭：黒うるしの 髪（姫カット）＋ 金の かんざし、白い 面の 顔
 HEAD = [
@@ -34,13 +36,20 @@ HEAD = [
     'khhhhhhk.kkkkkk.....',
     'khhhhhk.............',
 ]
-# 目：つり上がった まぶたの 線、白い 光＋桃色 2段（明・暗）＋たての ひとみ。目じりに 赤い くまどり
-EYE = ['kkkkkkPPkkk', 'wMkMMkPkwkM', 'NNkNNkPkNkN', 'MkkkkPPPkkM']
+# 目（L：くまどりの 目）：つり目の まわりに 桃色の 隈取り（M 明／N 暗）。目じりから 上へ はね上がり、下まぶたに そって 太く 引く。目は 白目（w）＋暗い 紫の 虹彩（O）＋黒い 瞳（x）が 前上に 寄る
+EYE = [
+    'M.........M',
+    'MMkkkkPPkkM',
+    'NkwOxkPkOxN',
+    'NkwwOkPkwON',
+    'MNkkkPPPkNM',
+    '.MNN...NNM.',
+]
 EYE_ALT = {
-    'blink': ['PPPPPPPPPPP', 'kkkkkkPkkkk', 'PPPPPPPPPPP', 'MPPPPPPPPPM'],
-    'atk0|atk1|atk2': ['kkkkkkPPkkk', 'wwkwwkPkwkw', 'MMkMMkPkMkM', 'NkkkkPPPkkN'],
-    'hit': ['PPPPPPPPPPP', 'kkkkkPPkkkk', 'PPPkkPPPkkP', 'MPPPPPPPPPM'],
-    'ko': ['kPPPkPPkPkP', 'PkPkPPPPkPP', 'kPPPkPPkPkP', 'PPPPPPPPPPP'],
+    'blink': ['M.........M', 'MPPPPPPPPPM', 'NPPPPPPPPPN', 'NkkkkPPkkkN', 'MNkkkPPPkNM', '.MNN...NNM.'],
+    'atk0|atk1|atk2': ['M.........M', 'MMkkkkPPkkM', 'NkwMxkPkMxN', 'NkwwMkPkwMN', 'MNkkkPPPkNM', '.MNN...NNM.'],
+    'hit': ['M.........M', 'MPPPPPPPPPM', 'NkkkkPPkkkN', 'NPPkkPPPkPN', 'MNkkkPPPkNM', '.MNN...NNM.'],
+    'ko': ['M.........M', 'MxPPxPPxPxM', 'NPxxPPPPxPN', 'NxPPxPPxPxN', 'MNPPPPPPPNM', '.MNN...NNM.'],
 }
 BUN = ['..kkkk..', '.khiihk.', 'khiihhhk', 'khhhhhhk', '.kkkkkk.']
 HAIR = [
@@ -176,7 +185,7 @@ KO_POOL = [
 ]
 def ko_head():
     g = pix.grid_of(HEAD)
-    pix.stamp(g, EYE_ALT['ko'], 8, 8)
+    pix.stamp(g, EYE_ALT['ko'], 8, 7)
     r = pix.rows_of(g)
     for _ in range(3): r = pix.rot90(r)
     return r
@@ -198,7 +207,7 @@ def layers():
         dict(n='key', g='body', x=21, y=32, rows=KEY0, alt={'idle1|idle3|walk1|walk3|atk0': KEY1}, not_=N),
         dict(n='kimono', g='body', x=24, y=25, rows=KIMONO, not_=N),
         dict(n='head', g='head', x=28, y=9, rows=HEAD, not_=N),
-        dict(n='eye', g='head', x=36, y=17, rows=EYE, alt=EYE_ALT, not_=N),
+        dict(n='eye', g='head', x=36, y=16, rows=EYE, alt=EYE_ALT, not_=N),
         dict(n='sleeveF', g='body', x=33, y=30, rows=SLEEVE_F, not_=N),
         dict(n='armF', g='armF', x=40, y=32, rows=ARM_F, not_=N),
         dict(n='hand', g='armF', x=52, y=33, rows=HAND, not_=N),

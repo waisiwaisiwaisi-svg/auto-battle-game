@@ -2,6 +2,7 @@
 # 胴は 肩の 高い 小さな ゴリラ型、足は 短く 曲げて 見せる。見せ所の 鉄の こてと こぶしは 大きく）
 from pix import grid, rows_of, outline, poly, ellipse
 META = dict(id='tekkenzaru', name='テッケンザル', types=['fighting', 'steel'], base='大猿（ゴリラ）', size='L')
+EYE_BOX = (37, 22, 8, 5)   # 三白眼（idle0）
 PAL = {
     'k': '#101018', 'l': '#2e1a1c',
     'A': '#a8705a', 'B': '#6c4036', 'C': '#3c2224',      # 毛（赤黒）
@@ -81,10 +82,13 @@ HEAD_ROAR = HEAD[:9] + [
     "..CCBBBEEEEEEE....",
     "....CCCCCC........",
 ]
-# 目：ハイライト w ＋ 虹彩 2色（O 明・R 暗）＋ たての ひとみ k、まゆと 下まぶたで かこむ
-EYE = ['kkkkkk', 'kwOkOk', '.kRkRk', '..kkk.']
-EYE_ALT = {'blink': ['kkkkkk', 'Ekkkkk', '.EEEEE', '..EEE.'], 'hit': ['.kk.kk', 'DDkkDD', '.kkDkk', '..DDD.'],
-           'atk0|atk1|atk2': ['kkkkkk', 'kwwkOk', '.kOkRk', '..kkk.'], 'ko': ['.k.k..', '..k...', '.k.k..', '......']}
+# 目：三白眼（C）。白目（w）が 広く、小さな 赤い 虹彩（O 明・R 暗）と ひとみ k が 上の 前へ 寄って 上まぶたに くっつく。
+#   下に 白目が 見え、下まぶたは 太く 濃い（k ＋ はだの 影 E）。はちがねの 下から にらむ
+EYE = ['.kkkkkkk', 'kwwwOkRk', 'kwwwwRwk', '.kkkkkkk', '..EEEEE.']
+EYE_ALT = {'blink': ['.kkkkkkk', 'kDDDDDDk', 'kkkkkkkk', '.EEEEEEk', '..EEEEE.'],
+           'hit': ['.kkkkkkk', 'kkkkkkkk', 'kwwRkwwk', '.kkkkkkk', '..EEEEE.'],
+           'atk0|atk1|atk2': ['.kkkkkkk', 'kwwwOkOk', 'kwwwwOwk', '.kkkkkkk', '..EEEEE.'],
+           'ko': ['.kkkkkkk', '.DkDDkD.', '..DkkD..', '.DkDDkD.', '........']}
 
 # ---- こぶし（見せ所）：下向き（地面に つく）。手の 甲は 上、指 4本が ならび、指先の 関節に 鉄の キャップ ----
 def fist():
@@ -187,7 +191,7 @@ def layers():
         dict(n='legA', g='legA', x=13, y=48, rows=LEG),
         dict(n='armUp', g='armF', x=24, y=10, rows=ARM_UP, only='atk0'),
         dict(n='head', g='head', x=32, y=15, rows=outline(HEAD), alt={'atk1|atk2|hit': outline(HEAD_ROAR)}),
-        dict(n='eye', g='head', x=38, y=22, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=37, y=22, rows=EYE, alt=EYE_ALT),
         dict(n='armF', g='armF', x=37, y=32, rows=ARM, not_=NB),
         dict(n='armShot', g='armF', x=37, y=34, rows=ARM_SHOT, alt={'atk2': ARM_BACK}, only='atk1|atk2'),
         dict(n='bang', g='fx', x=72, y=33, rows=BANG, only='atk1'),

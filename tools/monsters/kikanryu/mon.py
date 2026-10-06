@@ -116,15 +116,15 @@ HEAD = head(); HEAD_ATK = head('atk')
 # 汽笛の 角（真ちゅう）
 HORN = ['kk.........', 'kYkk.......', 'kYYOkk.....', '.kYYOOkk...', '.kkYYOOOkk.', '..kYYYOOOk.', '..kkYYOOOOk', '...kkkkkkkk']
 # バイザー（J）：機関車の 前照灯。鋼の ひさしの 下に 横長の 光る レンズ（黄・薄黄・真ちゅう）と 斜めの 反射線。瞳なし
-EYE = ['kkkkkkkkk.',
-       'kyywyYYYOk',
+EYE = ['kkkkkkk...',
+       'kyywyYYkkk',
        'kYwyYYYOOk',
        '.kkkkkkkkk',
        '..UUUUUU..']
-EYE_ALT = {'blink': ['kkkkkkkkk.', 'kOOUOOOOUk', 'kUUUUUUUUk', '.kkkkkkkkk', '..UUUUUU..'],     # 灯が 落ちる
-           'hit': ['kkkkkkkkk.', 'kyOkYUYkOk', 'kOkYkOkOUk', '.kkkkkkkkk', '..UUUUUU..'],      # レンズに ひび、ちらつく
-           'atk0|atk1|atk2': ['kkkkkkkkk.', 'kywwyyyyyky', 'kwwyyyyyYkyy', '.kkkkkkkkky', '..UUUUUU..'],   # 全開で 照らす
-           'ko': ['kkkkkkkkk.', 'kUkUUUkUUk', 'kUUkUkUUUk', '.kkkkkkkkk', '..UUUUUU..']}
+EYE_ALT = {'blink': ['kkkkkkk...', 'kOOUOOOkkk', 'kUUUUUUUUk', '.kkkkkkkkk', '..UUUUUU..'],     # 灯が 落ちる
+           'hit': ['kkkkkkk...', 'kyOkYUYkkk', 'kOkYkOkOUk', '.kkkkkkkkk', '..UUUUUU..'],      # レンズに ひび、ちらつく
+           'atk0|atk1|atk2': ['kkkkkkk...', 'kywwyyykkky', 'kwwyyyyyYkyy', '.kkkkkkkkky', '..UUUUUU..'],   # 全開で 照らす
+           'ko': ['kkkkkkk...', 'kUkUUUkkkk', 'kUUkUkUUUk', '.kkkkkkkkk', '..UUUUUU..']}
 
 # ---- 首（煙突の ような 太い 筒。真ちゅうの 輪）----
 NECK = outline(over(shade(mask(14, 16, [('p', [(0, 16), (3, 0), (13, 0), (13, 16)], '#')]), {'#': 'STU'}, 2, 2, 2), [

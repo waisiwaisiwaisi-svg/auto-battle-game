@@ -1,4 +1,5 @@
 # マンゲクジャク（フェアリー・エスパー × クジャク）手打ち GBA風・デフォルメ（2〜3頭身）
+EYE_BOX = (40, 20, 9, 9)
 META = dict(id='mangekujaku', name='マンゲクジャク', types=['fairy', 'psychic'], base='クジャク', size='L')
 PAL = {
     'k': '#101018', 'l': '#1c1a3c',
@@ -126,14 +127,22 @@ def head(eye=None, ko=False, mouth=0):
     # くちばし：するどく 下へ 曲がる
     if mouth: at(g, 17, 12, 'kkkkkk..', 'kOOOOOkk', 'kOOOOOOk', 'kkkkkkkk', 'kQQQQk..', 'kOOOOk..', '.kkkk...')
     else: at(g, 17, 13, 'kkkkkk..', 'kOOOOOkk', 'kOOOOOOk', '.kkkkkOk', '..kOOkk.', '...kk...')
-    if ko: e = ['k...k', '.k.k.', '..k..', '.k.k.', 'k...k']
-    else: e = eye or ['kkkkkk...', '.kkkkkkk.', 'kwPPPkQk.', 'kPPQQkQk.', '.kkkkkk..', '.CCCCC...']
-    at(g, 8, 11, *e)
-    at(g, 7, 10, 'kk')
+    at(g, 7, 9, *(EYE_KO if ko else (eye or EYE)))                  # 目（P 十字の 瞳）
     return done(g)
-EYE_BLINK = ['kkkkkk...', '.kkkkkkk.', 'kNNNNNNk.', 'kkkkkkkk.', '.NNNNNN..', '.CCCCC...']
-EYE_HIT = ['k........', '.kkkkk...', 'kPPPPkkk.', '.kkkkkPk.', '.NNNNNN..', '.CCCCC...']
-EYE_ATK = ['kkkkkk...', '.kkkkkkk.', 'kwwPPkPk.', 'kwPPQkQk.', '.kkkkkk..', '.CCCCC...']
+# 星・十字の 瞳（P）：丸い 目に 赤紫→桃→黄の 輪の 虹彩、中心に 黒い 十字の 瞳。前上を 上まぶたが 切って にらむ。下に 水色の くま
+EYE = ['kkk......',
+       '.kkkkkk..',
+       'kwPPYPkkk',
+       'kPPYkYPPk',
+       'kPYkkkYQk',
+       'kQPYkYPQk',
+       '.kQPPPQk.',
+       '..kkkkk..',
+       '.CCCCC...']
+EYE_BLINK = ['kkk......', '.kkkkkk..', 'kNNNNNkkk', 'kNNNNNNNk', 'kkkkkkkkk', '.NNNNNNN.', '..NNNNN..', '.........', '.CCCCC...']
+EYE_HIT = ['kkk......', '.kkkkk...', 'kNNNkkkk.', 'kNkPYkkk.', 'kkPkkkPk.', '.kkPYPkk.', '..kkkkk..', '.........', '.CCCCC...']     # 目が ゆがみ、十字が 小さく くずれる
+EYE_ATK = ['kkk......', '.kkkkkk..', 'kwPYwYkkk', 'kPYwkwYPk', 'kYwkwkwYk', 'kQPwkwPQk', '.kQPYPQk.', '..kkkkk..', '.CCCCC...']   # 十字が 光って 星に なる
+EYE_KO = ['kkk......', '.kkkkkk..', 'kNkNNNkN.', 'kNNkNkNNk', 'kNNNkNNNk', 'kNNkNkNNk', '.kkNNNkk.', '..kkkkk..', '.CCCCC...']
 
 LEG = ['..kkk...', '..kOk...', '..kOk...', '..kOk...', '.kOOOk..', 'kOOkOOk.', 'kwk.kwk.']
 def legs(): return ['........'] + LEG

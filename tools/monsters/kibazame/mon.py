@@ -1,4 +1,5 @@
 # キバザメ（みず・あく × サメ）手打ち GBA風
+EYE_BOX = (41, 24, 8, 7)
 META = dict(id='kibazame', name='キバザメ', types=['water', 'dark'], base='サメ', size='L')
 PAL = {
     'k': '#101018', 'l': '#1c1d3a',
@@ -246,21 +247,21 @@ MAW = [
     'kkrrrrrrrrrrrrrkk...',
     '.kkkkkkkkkkkkkk.....',
 ]
-# 目：骨の ひさしの 下、白い 光＋赤い 虹彩（明・暗）＋黒い たての ひとみ
-EYE = [
-    '.kkkkkk....',
-    'kUUUUUUkkk.',
-    '.kkkkVVUUVk',
-    '..kwRRkRkk.',
-    '..kRrrkrk..',
-    '...kkkkk...',
-]
-def _eye(a, b): return EYE[:3] + [a, b, '...kkkkk...']
+# 目（K 魚の 目）：まぶたの ない 丸い 目。灰白の 細い 虹彩の 輪に 平たく 大きな 黒い 瞳、まわりを 骨の ふち（U・V・X）が かこむ
+def _fish(inner):
+    return ['BVUUUUUVB',
+            'VUkkkkUUV',
+            'Uk' + inner[0] + 'kVB',
+            'Uk' + inner[1] + 'kVB',
+            'Uk' + inner[2] + 'kVB',
+            'VVk' + inner[3] + 'kVBB',
+            'BXVVVVXBB']
+EYE = _fish(['EEkk', 'Ewkk', 'Ekkk', 'FF'])
 EYE_ALT = {
-    'blink': _eye('..kBBBBBkk.', '..kkkkkkk..'),
-    'atk0|atk1|atk2': _eye('..kwwRkRkk.', '..kRRRkRk..'),
-    'hit': _eye('..kkBBBkkk.', '..kBkkkBk..'),
-    'ko': _eye('..kXkXkBkk.', '..kBXkBBk..'),
+    'blink': _fish(['EEEE', 'EEEF', 'Ekkk', 'FF']),        # まぶたは なく、白い 膜が 上から かぶさる
+    'atk0|atk1|atk2': _fish(['kkkk', 'kwkk', 'kkkk', 'kk']),   # 瞳が 開ききって 黒い 穴に
+    'hit': _fish(['EEFF', 'EEkF', 'EFFF', 'FF']),           # 瞳が 点に ちぢむ
+    'ko': _fish(['kEEk', 'EkkE', 'EkkE', 'kk']),
 }
 def layers():
     return [
@@ -272,7 +273,7 @@ def layers():
         dict(n='maw', g='head', x=34, y=36, rows=MAW, only='atk1|atk2'),
         dict(n='jaw', g='jaw', x=33, y=34, rows=JAW),
         dict(n='head', g='head', x=31, y=21, rows=HEAD),
-        dict(n='eye', g='head', x=40, y=23, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=41, y=24, rows=EYE, alt=EYE_ALT),
         dict(n='pec', g='fin', x=29, y=41, rows=PEC),
         dict(n='splash', g='head', x=60, y=28, rows=SPLASH, only='atk1'),
     ]

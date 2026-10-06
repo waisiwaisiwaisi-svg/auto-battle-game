@@ -1,5 +1,6 @@
 # キノコモリ（くさ・どく × コウモリ）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：毒キノコの かさの 翼（翼膜の 骨 ⇔ かさの うらの ひだ）
+EYE_BOX = (36, 18, 10, 6)
 META = dict(id='kinokomori', name='キノコモリ', types=['grass', 'poison'], base='コウモリ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2c1632',
@@ -7,10 +8,10 @@ PAL = {
     'P': '#ee6a9a', 'p': '#a02a62',                      # 毒キノコの かさ
     'S': '#f6e8c4', 'T': '#c8a47a',                      # かさの うらの ひだ
     'G': '#c4f466', 'g': '#5ea432',                      # 毒の 胞子・目
-    'w': '#ffffff',
+    'w': '#ffffff', 'x': '#060208',                      # 目の 黒い 強膜
 }
 LIGHT = set('ASPGw')
-KEEP_BLACK = set('wG')
+KEEP_BLACK = set('wGgx')
 # ---------- 下書きの 道具（あたり → 左上光の 3段 → 輪郭。目・牙・模様・線は 手で 打つ）----------
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
@@ -131,13 +132,14 @@ def head_p(g, open_=False):
     dots(g, 'D', [(x, 32) for x in range(30, 46)], 'AB')
 HEAD = part(head_d, FUR, lw=1, dw=2, post=head_p)
 HEAD_OPEN = part(head_d, FUR, lw=1, dw=2, post=lambda g: head_p(g, True))
-# ---- 目：白い 光＋毒の 黄緑の 虹彩（明 G・暗 g）＋たての ひとみ ----
-EYE = ['kkkk....', '.kkkkkk.', '.kwGGkGk', '..kggkgk', '...kkkk.']
+# ---- 目：黒い 強膜（F）。白目の かわりに まっ黒な 目（x）、その 中に 毒の 黄緑の 細い たて瞳（G、にじみ g）。
+#      光は 左上に 小さく 1点（つやの ある 黒） ----
+EYE = ['kkk.......', '.kkkkkkk..', '.kwxxgGxkk', '..kxxgGxxk', '..kxxxGxk.', '...kkkkk..']
 EYE_ALT = {
-    'blink': ['kkkk....', '.kkkkkk.', '..kkkkkk'],
-    'atk0|atk1|atk2': ['kkkkk...', '.kkkkkkk', '.kwwGkGk', '..kggkk.', '...kkk..'],
-    'hit': ['kkk.....', '..kk....', '....kkk.', '..kk....'],
-    'ko': ['.k...k..', '..k.k...', '...k....', '..k.k...', '.k...k..'],
+    'blink': ['kkk.......', '.kkkkkkk..', '.kBBBBBBkk', '..kkkkkkkk', '...kkkkk..', '..........'],
+    'atk0|atk1|atk2': ['kkk.......', '.kkkkkkk..', '.kwxgGGgkk', '..kxgGGgxk', '..kxxgGxk.', '...kkkkk..'],
+    'hit': ['kkk.......', '.kkkkkkk..', '.kBBBBBBkk', '..kxxxgxxk', '..kkkkkkk.', '..........'],
+    'ko': ['kkk.......', '.kkkkkkk..', '.kxgxxgxkk', '..kxxgxxxk', '..kxgxxgk.', '...kkkkk..'],
 }
 # ---- 毒の 胞子（翼の ふちから こぼれる：はなれた つぶ＝意図的）----
 SPORE1 = ['.G...', 'GgG..', '.G..G', '...Gg', '.G.....', 'GgG..']
@@ -161,7 +163,7 @@ def layers():
         L('body', 'body', BODY),
         L('footA', 'body', FOOT_A),
         L('head', 'head', HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        H('eye', 'head', 37, 19, EYE, alt=EYE_ALT),
+        H('eye', 'head', 36, 18, EYE, alt=EYE_ALT),
         L('wnear', 'wnear', W_NEAR, alt={'idle1|walk1|walk2|atk0': W_NEAR_UP, 'walk3|atk1': W_NEAR_DN}),
         H('sp', 'wnear', 3, 40, SPORE1, alt={'idle2|idle3|walk2|walk3': SPORE2}, not_='atk1|atk2|hit|ko'),
         H('cloud', 'root', 52, 26, CLOUD, only='atk1'),

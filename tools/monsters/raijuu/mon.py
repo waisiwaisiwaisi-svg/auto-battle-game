@@ -113,6 +113,18 @@ def eye(g, x, y, mode='idle', A='Y', B='O', big=False):
             if c == '.': continue
             put(g, x + i, y + j, {'A': A, 'B': B}.get(c, c))
     return g
+# 目（L）の 差しかえ：とじ・被弾・ダウンは 黒い 仮面の 上でも 見える 明るい 毛の 色で かく
+RAI_EYE = {
+    'idle':  ['kk........', '.kkkkk....', '..kwYYkkk.', '..kYYOkYOk', '...kkOOkk.', '.....kk...'],
+    'atk':   ['kk........', '.kkkkk....', '..kwwYkkk.', '..kwYYkYYk', '...kkYOkk.', '.....kk...'],
+    'blink': ['kk........', '.kkkkk....', '...BBBBB..', '....BBBBB.', '..........', '..........'],
+    'hit':   ['..........', '..AA......', '....AA....', '......AA..', '....AA....', '..AA......'],
+    'ko':    ['..........', '..A...A...', '...A.A....', '....A.....', '...A.A....', '..A...A...'],
+}
+def put_rows(g, x, y, rows):
+    for j, r in enumerate(rows):
+        for i, c in enumerate(r):
+            if c != '.': put(g, x + i, y + j, c)
 EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit': 'hit', 'ko': 'ko'}
 # ===END KIT===
 
@@ -189,11 +201,14 @@ def head(mode='idle'):
         if at(g, x, y) in 'ABD': put(g, x, y, 'w')
     for x, y in ((40, 25), (41, 25), (42, 26), (43, 26), (44, 27), (45, 27)):
         if at(g, x, y) in 'ABD': put(g, x, y, 'A')
-    for y in range(28, 37):                                      # 目の まわりの 黒い 隈どり
-        for x in range(37, 48):
-            if ((x - 41) ** 2 / 25 + (y - 33.5) ** 2 / 4 <= 1 or (x < 41 and (x - 38) ** 2 / 6 + (y - 31) ** 2 / 8 <= 1)) and at(g, x, y) in 'ABD': put(g, x, y, 'M')
-    eye(g, 39, 28, {'idle': 'idle'}.get(mode, mode), 'Y', 'O', big=True)
-    if mode == 'ko': swap(g, {'k': 'A'}, (39, 28, 47, 34))           # 黒い 隈の 上でも 見える ×
+    # 目（L：隈取り）：ハクビシンの 黒い 仮面。後ろから 前へ 下がる 帯で 目を つつみ、下に 明るい 毛の ふち。中に 後ろが 上がった 細い つり目（黄）
+    for x in range(35, 50):
+        t = 28.5 + (x - 35) * .22; bt = 35.5 + (x - 35) * .1 - max(0, x - 46) * .9
+        for y in range(28, 39):
+            if t <= y <= bt and at(g, x, y) in 'ABD': put(g, x, y, 'M')
+        yb = int(bt) + 1
+        if at(g, x, yb) in 'BD' and x < 47: put(g, x, yb, 'A')
+    put_rows(g, 39, 29, RAI_EYE[mode])
     stamp(g, ['kk', 'kM'], 57, 35)                     # 鼻
     dots(g, 'C', [(32, 38), (30, 41)])                 # ほおの 電気
     if mode == 'atk':
@@ -253,4 +268,5 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'tail': (1, 1)},
     'ko': {'body': (0, 6), 'head': (3, 7), 'tail': (-2, 2)},
 }
+EYE_BOX = (35, 30, 15, 10)
 PARENT = {'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

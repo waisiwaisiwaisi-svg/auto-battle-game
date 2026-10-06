@@ -1,10 +1,11 @@
 # ハガマ（くさ・むし × カマキリ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 三角の 頭、胴は 小さく 丸く、足は 短く 太く）
+EYE_BOX = (40, 15, 10, 8)
 META = dict(id='hagama', name='ハガマ', types=['grass', 'bug'], base='カマキリ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2e2014',
     'A': '#d2a874', 'B': '#8c6038', 'C': '#4e3220',      # 樹皮の よろい
     'G': '#c4ee6a', 'H': '#5cb444', 'J': '#246a3a',      # 葉の 鎌
-    'O': '#ff9a3c', 'R': '#c0302c', 'Y': '#fff07a',      # 複眼（明・暗の 虹彩＋赤い ふち）
+    'O': '#8cd040', 'R': '#3a7a2a', 'Y': '#fff07a',      # 複眼（黄緑の 中・暗＋反射の 黄）
     'w': '#ffffff',
 }
 LIGHT = set('AGYw')
@@ -44,12 +45,26 @@ def head(eye='open'):
     put(g, [(7, 3), (6, 4), (5, 5), (5, 6), (5, 7), (5, 8), (6, 9), (7, 10)], 'C')
     put(g, [(8, 3), (7, 4), (6, 5), (6, 6), (6, 7), (6, 8), (7, 9), (8, 10)], 'A')
     put(g, [(10, 12), (11, 13), (12, 14), (13, 15), (12, 12), (13, 13), (14, 14)], 'C')
-    # 大きな 複眼：まゆの ひさし（前へ 下がる）＋ 2段の 虹彩（黄・だいだい）＋ たての ひとみ ＋ 赤い ふち
-    E = {'open':  ['kk........', '.kkkk.....', '..kkkkkkk.', '.kwYYYkYYk', 'kRYYYYkYOk', 'kROOOOkOOk', '.kRROOkOk.', '..kkkkkk..'],
-         'blink': ['kk........', '.kkkk.....', '..kkkkkkk.', '.kBBBBBBBk', 'kkkkkkkkkk', '.kBBBBBBk.', '..kkkkkk..', '..........'],
-         'hit':   ['kk........', '.kkkk.....', '..kkkkkkk.', '.kOkkkOkkk', 'kkkOkOkOkk', '.kOkkkOkk.', '..kkkkkk..', '..........'],
-         'glow':  ['kk........', '.kkkk.....', '..kkkkkkk.', '.kwwYYkYYk', 'kOYwYYkYYk', 'kOYYYYkYOk', '.kOOYYkOk.', '..kkkkkk..'],
-         'ko':    ['..........', '.kkkkkkk..', '.kOOOOOk..', '.kkOOOkk..', '.kOkOkOk..', '.kOOkOOk..', '.kOkOkOk..', '..kkkkk...']}[eye]
+    # 大きな 複眼（D）：黄緑の ドーム。1つおきの 点で 六角の あみ目、左上に 反射の 帯、瞳は なし。まゆの ひさしで 怒りを 出す
+    E = [list(r) for r in ['kk........', '.kkkk.....', '..kkkkkkk.', '.k.......k', 'k........k', 'k........k', '.k......k.', '..kkkkkk..']]
+    M = {3: range(2, 9), 4: range(1, 9), 5: range(1, 9), 6: range(2, 8)}
+    ramp = {'open': 'GOR', 'glow': 'YGO', 'hit': 'ORR', 'ko': 'RRR', 'blink': 'GOR'}[eye]
+    for y, xs in M.items():
+        for x in xs:
+            t = x + y - 4                                      # 左上ほど 明るい
+            c = 0 if t <= 2 else (2 if t >= 9 else 1)
+            if (x + y) % 2 == 0 and c < 2: c += 1               # あみ目の 点
+            E[y][x] = ramp[c]
+    if eye in ('open', 'glow', 'blink'):
+        for (x, y) in ((3, 3), (4, 3), (2, 4)): E[y][x] = 'w' if eye == 'glow' or (x, y) != (2, 4) else 'Y'   # 反射の 帯
+        if eye == 'glow': E[4][3] = 'Y'; E[5][2] = 'Y'
+    if eye == 'blink':                                         # まばたき：まゆが 下がって ドームの 上を おおう
+        E[2] = list('.kkkkkkkk.'); E[3] = list('.kkkkkkkkk'); E[4][1:9] = list('kkkkkkkk')
+    if eye == 'hit':                                           # 被弾：まゆが 下がり、ドームに ひび
+        E[3] = list('.kkkkkkkkk')
+        for (x, y) in ((3, 4), (4, 5), (5, 4), (6, 5), (7, 6)): E[y][x] = 'k'
+    if eye == 'ko':
+        for (x, y) in ((2, 3), (7, 3), (3, 4), (6, 4), (4, 5), (5, 5), (3, 6), (6, 6)): E[y][x] = 'k'
     for j, r in enumerate(E):
         for i, c in enumerate(r):
             if c != '.': g[2 + j][13 + i] = c

@@ -155,10 +155,19 @@ def head(gape=0):
         dots(g, 'k', [(x, yy + 1)]); dots(g, 'w', [(x + 1, yy)])
     dots(g, 'k', [(58, 39), (59, 39)])
     return g
-# 目：白い 光＋金と だいだいの 虹彩＋たての ひとみ、まゆの ひさし（前へ 下がる）
-EYE = ['kkkk....', '.kkkkkkk', '.kwYYkYk', '.kYOOkOk', '..kkkkk.']
-EYE_ALT = {'blink': ['kkkk....', '.kkkkkkk', '.FFFFFFF', '.kkkkkkk', '........'], 'hit': ['........', '.EE...EE', '..EE.EE.', '.EE...EE', '........'],
-           'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkYk', '.kYYOkOk', '..kkkkk.'], 'ko': ['........', '.E..E...', '..EE....', '..EE....', '.E..E...']}
+# 目（K：魚の 目）：シャチの 白い 斑を 前へ のばし、その 中に 小さく まぶたの ない 丸い 目。平たい 黒瞳＋細い 氷色の 輪（水色・青）＋白い 光
+PATCH = ['...EEEEEE....', 'EEEEEEEEEEE..', 'EEEEEEEEEEEF.', 'EEEEEEEEEEF..', 'FEEEEEEEEEF..', '.FFFFFFFFF...', '...FFFFF.....']
+def eyerows(cells):
+    g = [list(r) for r in PATCH]
+    for y, x, s in cells:
+        for i, c in enumerate(s):
+            if c != ' ': g[y][x + i] = c
+    return [''.join(r) for r in g]
+EYE = eyerows([(1, 5, 'kkkk'), (2, 4, 'kwWWXk'), (3, 4, 'kWkkXk'), (4, 4, 'kXXXXk'), (5, 5, 'kkkk')])
+EYE_ALT = {'blink': eyerows([(2, 4, 'kkkkkk'), (3, 5, 'FFFF')]),
+           'hit': eyerows([(1, 5, 'kk'), (2, 6, 'kk'), (3, 7, 'kk'), (4, 5, 'kk'), (4, 7, ' '), (3, 5, '  ')]),
+           'atk0|atk1|atk2': eyerows([(1, 5, 'kkkk'), (2, 4, 'kwwWWk'), (3, 4, 'kwkkWk'), (4, 4, 'kWWXXk'), (5, 5, 'kkkk')]),
+           'ko': eyerows([(1, 5, 'k  k'), (2, 6, 'kk'), (3, 6, 'kk'), (4, 5, 'k  k')])}
 # 氷の いぶき（攻撃）
 def breath(ph):
     g = G(90, 64)
@@ -173,7 +182,7 @@ def layers():
         L('fin', 'fin', fin(), alt={'atk0|atk1|atk2': fin(1)}),
         L('body', 'body', body()),
         L('head', 'head', head(), alt={'atk0': head(1), NB: head(4)}),
-        dict(n='eye', g='head', x=46, y=31, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=44, y=29, rows=EYE, alt=EYE_ALT),
         L('pec', 'pec', pec(), alt={'idle1|idle3|walk1|walk3': pec(1)}),
         L('breath', 'fx', breath(0), alt={'atk2': breath(1)}, only=NB),
     ]
@@ -183,4 +192,5 @@ FRAMES = {
     'atk0': {'root': (-3, 0), 'head': (-1, -1), 'fin': (0, -1)}, 'atk1': {'root': (5, 0), 'head': (1, 0)}, 'atk2': {'root': (6, 0), 'head': (1, 0), 'fx': (1, 0)},
     'hit': {'root': (-3, -1), 'head': (-1, -1)}, 'ko': {'_flip': True},
 }
+EYE_BOX = (44, 29, 12, 7)
 PARENT = {'head': 'body', 'fin': 'body', 'tail': 'body', 'pec': 'body', 'body': 'root', 'fx': 'root'}

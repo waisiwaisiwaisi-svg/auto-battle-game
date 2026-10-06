@@ -1,5 +1,6 @@
 # マツボリン（くさ・はがね × センザンコウ）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：松ぼっくりの 形に 重なる 鉄の うろこ（丸まると 鉄の 松ぼっくり）
+EYE_BOX = (41, 29, 10, 10)
 META = dict(id='matsuborin', name='マツボリン', types=['grass', 'steel'], base='センザンコウ', size='M')
 PAL = {
     'k': '#101018', 'l': '#1c2232',
@@ -7,11 +8,11 @@ PAL = {
     'P': '#d0904c', 'p': '#7a4826',                      # 松の 木の 色（うろこの ふち）
     'F': '#ecbe96', 'G': '#b27c5a', 'H': '#6a4434',      # 顔・足の 皮
     'A': '#9ad866', 'B': '#3a7c3a',                      # 松葉
-    'Y': '#ffd23c', 'O': '#e0601c',                      # 目
+    'x': '#08080c',                                      # 目（まっ黒の ビーズ）
     'w': '#ffffff',
 }
-LIGHT = set('SPFAYw')
-KEEP_BLACK = set('wY')
+LIGHT = set('SPFAw')
+KEEP_BLACK = set('wx')
 # ---------- 下書きの 道具（あたり → 左上光の 3段 → 輪郭。目・牙・模様・線は 手で 打つ）----------
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
@@ -114,13 +115,15 @@ def head_p(g, open_=False):
     for x in range(36, 52): dots(g, 'H', [(x, 45)], 'FG')
 HEAD = part(head_d, {'1': 'STU', '2': 'FGH'}, lw=1, dw=2, post=head_p)
 HEAD_OPEN = part(head_d, {'1': 'STU', '2': 'FGH'}, lw=1, dw=2, post=lambda g: head_p(g, True))
-# ---- 目：白い 光＋金の 虹彩（明 Y・暗 O）＋ひとみ。鉄の ひさしの 下 ----
-EYE = ['kkkkk...', '.kkkkkk.', '.kwYYkYk', '..kOOkOk', '...kkkk.']
+# ---- 目：ビーズ目＋太い 眉（S）。小さな まっ黒い 丸い 目（x）に 強い 白の 光 1点。その 上に 鉄の 針を 束ねた
+#      太い 眉が 前へ 下がって かぶさる（針の 眉：とげの 先が 後ろ上へ 立つ） ----
+BROW = ['kk........', 'kTkk.k....', '.kUTkSk...', '.kkUUTTkk.', '..kkkUUUTk', '....kkkkkk']
+EYE = BROW + ['.....xxx..', '....xwxxx.', '....xxxxx.', '.....xxx..']
 EYE_ALT = {
-    'blink': ['kkkkk...', '.kkkkkk.', '..kkkkkk'],
-    'atk0': ['kkkkkk..', '.kkkkkkk', '.kwwYkYk', '..kOOkk.', '...kkk..'],
-    'hit': ['kkk.....', '..kk....', '....kkk.', '..kk....'],
-    'ko': ['.k...k..', '..k.k...', '...k....', '..k.k...', '.k...k..'],
+    'blink': BROW + ['..........', '....xxxxx.', '.....HHH..', '..........'],
+    'atk0': ['..........', 'kk........', 'kTkk.k....', '.kUTkSkkk.', '.kkUUTTUTk', '..kkkkkkkk', '....xxxx..', '....xwwxx.', '.....xxx..', '..........'],
+    'hit': BROW + ['....x.....', '.....xx...', '.......xx.', '.....xx...'],
+    'ko': BROW + ['....x...x.', '.....x.x..', '......x...', '.....x.x..'],
 }
 # ---- 攻撃：丸まって 鉄の 松ぼっくりに なり 転がる ----
 def ball_d(g):
@@ -143,7 +146,7 @@ def layers():
         L('legH', 'legA', LEG_H, not_=NB),
         L('legF', 'legB', LEG_F, not_=NB),
         L('head', 'head', HEAD, not_=NB),
-        H('eye', 'head', 40, 30, EYE, alt=EYE_ALT, not_=NB),
+        H('eye', 'head', 41, 29, EYE, alt=EYE_ALT, not_=NB),
         L('ball', 'root', BALL, alt={'atk2': BALL2}, only=NB),
         H('dust', 'root', 10, 56, DUST, only=NB),
     ]

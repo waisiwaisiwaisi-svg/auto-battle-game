@@ -1,4 +1,5 @@
 # ヒムカデ（むし・ほのお × ムカデ）手打ち GBA風・デフォルメ（大きな 頭、短い 体を 前で 持ち上げる）
+EYE_BOX = (45, 31, 7, 3)
 META = dict(id='himukade', name='ヒムカデ', types=['bug', 'fire'], base='ムカデ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2c1014',
@@ -67,10 +68,10 @@ HEAD = [
     '....kkkkkkkkkkk.....',
 ]
 assert all(len(r) == 20 for r in HEAD)
-# 目：白い 光＋ 黄と だいだいの 虹彩＋ たての ひとみ
-EYE = ['wYYYkYk', 'YOOOkOk', '.OOOkkk']
-EYE_ALT = {'blink': ['kkkkkkk', 'BBBBBBB', '.BBBBBB'], 'atk0|atk1|atk2': ['wwYYkYk', 'YYYYkYk', '.OOOkkk'],
-           'hit': ['BkBBBBB', 'BBkkkkk', '.kBBBBB'], 'ko': ['BBkBkBB', 'BBBkBBB', '.BkBkBB']}
+# F 黒い 強膜：白目の かわりに 黒に 近い 赤黒（l）、左上に 熾火の 照り返し（D）。中に 細い たての 瞳が だいだい→黄に 光る
+EYE = ['DDlOlll', 'DllYlll', '.llOlll']
+EYE_ALT = {'blink': ['kkkkkkk', 'BBBBBBB', '.BBBBBB'], 'atk0|atk1|atk2': ['DlOYOll', 'DlYwYll', '.lOYOll'],
+           'hit': ['kkkkkkk', 'DlOllll', '.kkkkkk'], 'ko': ['DlOlOll', 'lllOlll', '.lOlOll']}
 # 毒あご（顎肢）：頭の 下から 前へ 大きく 曲がる 二本の 牙（見せ所）。先は 熾火色
 FANG = [
     'kkkkk.......',

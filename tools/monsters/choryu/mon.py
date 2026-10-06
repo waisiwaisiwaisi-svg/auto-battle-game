@@ -14,6 +14,7 @@ PAL = {
 }
 LIGHT = set('AEXYwU')
 KEEP_BLACK = set('Yyr')
+EYE_BOX = (47, 19, 8, 5)   # 目（idle0 の 64x64 座標）
 
 # ---------- 下書きの 道具 ----------
 def G(): return grid(64, 64)
@@ -161,12 +162,13 @@ class Part:
             for i, c in enumerate(r):
                 if c != '.': s.P([(x0 + i, y0 + j)], c)
     def rows(s): o = G(); ink(o, s.g); return rows_of(o)
-EYE = ['kwYYkYk', 'kYyykyk', '.kkyykk']
+# 目（A：爬虫類の つり目）：金の 虹彩（Y 明／y 暗）に 細い たての スリット瞳（k）。上まぶたの 線だけ 太く（2段）、下まぶたは 細い 暗むらさき（D）
+EYE = ['kkkkkkk.', '.kkYkYYk', '.kYYkYyD', '..DykyyD', '...DDDD.']
 EYE_ALT = {
-    'blink': ['BBBBBBB', 'kkkkkkk', '.BBBBBB'],
-    'atk0|atk1|atk2': ['kwwYkYk', 'kYYYkYk', '.kkYYkk'],
-    'hit': ['BkkBBBB', 'BBBkkkk', 'BkkBBBB'],
-    'ko': ['BkBBkBB', 'BBkkBBB', 'BkBBkBB'],
+    'blink': ['kkkkkkk.', '.kkkkkkk', '..BBBBB.', '..DDDDD.', '........'],
+    'atk0|atk1|atk2': ['kkkkkkk.', '.kkYkYYk', '.kYYkYYr', '..DYkYrD', '...DDDD.'],
+    'hit': ['.......', 'BkkBBBB', 'BBBkkkk', 'BkkBBBB'],
+    'ko': ['.......', 'BkBBkBB', 'BBkkBBB', 'BkBBkBB'],
 }
 def jaw(p, open_):
     """下あご：骨色の 板。開くと 赤い 口の 中と 牙"""
@@ -181,7 +183,7 @@ def head(open_=False, eye=None):
     h.P([(43, 17), (44, 17), (45, 18), (46, 18), (47, 19), (48, 19), (49, 19), (50, 19), (51, 19), (52, 20), (53, 20), (54, 21)], 'k')
     h.P([(44, 16), (45, 16), (46, 17), (47, 17), (48, 18), (49, 18), (50, 18), (51, 18), (52, 19)], 'A')
     h.P([(55, 18), (56, 18), (57, 19), (58, 19), (59, 20), (60, 20)], 'A')               # 鼻すじの 光
-    h.S(46, 20, eye or EYE)
+    h.S(46, 19, eye or EYE)
     h.P([(41, 22), (40, 23), (40, 24), (41, 26), (42, 27)], 'D', 'B')                 # ほおの すじ
     h.P([(61, 22), (60, 22)], 'k')                                  # 鼻の あな
     if open_:

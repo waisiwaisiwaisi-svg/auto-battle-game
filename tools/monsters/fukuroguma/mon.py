@@ -8,10 +8,11 @@ PAL = {
     'C': '#f4d26c', 'c': '#ac7428',
     'O': '#ff9a1e', 'Y': '#fff27a',
     'R': '#e2483a', 'r': '#8c2430',
-    'w': '#ffffff',
+    'w': '#ffffff', 'x': '#060408',                      # x＝猛禽の 丸い 黒瞳
 }
 LIGHT = set('FDCYRw')
-KEEP_BLACK = set('wOY')   # 目の まわりの まゆは 黒の まま
+KEEP_BLACK = set('wOYx')   # 目の まわりの まゆは 黒の まま
+EYE_BOX = (37, 22, 16, 5)   # 両目（idle0 の 64x64 座標）
 
 def make_head():
     """あたり：まるい 頭（円）＋ 顔の 皿（だ円）を 計算で 置き、まゆ・くちばし・羽角は 手で 打った 部品を はる"""
@@ -220,16 +221,16 @@ ARM_F_LONG = fur(ARM_F, 3)
 ARM_F = fur(cut(ARM_F, {3, 5, 7, 9, 11, 13, 14, 17, 22}), 3)
 ARM_B = fur(cut(ARM_B, {13, 15, 17, 19}), 2)
 
-# 目：白い 光＋だいだいの 虹彩 2段（黄・だいだい）＋たての ひとみ。上は 黒い まゆの ひさし
-EYEN = ['wYYkO', 'YOOkO', 'kOOkk']
+# 目（B：猛禽の 目）：白目なし。だいだいの 丸い 虹彩（Y 明／O）の 中に 大きな 丸い 黒瞳（x）、外側に こい 金の 輪（c）。V字の まゆの ひさしが 上半分を 切る
+EYEN = ['kkkkkk', 'YOxxxO', 'YOxxxO', 'cYOOOc', '.cccc.']
 EYEN_ALT = {
-    'blink': ['kkkkk', 'EEEEE', 'kEEEk'],
-    'atk0|atk1|atk2': ['wwYkY', 'YYYkY', 'kYYkk'],
-    'hit': ['kkkkk', 'kOkOk', 'kkOkk'],
-    'ko': ['wkkkw', 'kwkwk', 'kkwkk'],
+    'blink': ['kkkkkk', 'kkkkkk', 'cEEEEc', '.cccc.', '......'],
+    'atk0|atk1|atk2': ['kkkkkk', 'YOOxOO', 'YOxxxO', 'cYYOOc', '.cccc.'],
+    'hit': ['kkkkkk', 'kOkkOk', 'kkOOkk', '.cccc.', '......'],
+    'ko': ['kkkkkk', 'xOOxOc', 'OxxOOc', 'OxxOOc', 'xOOxc.'],
 }
-EYEF = ['wkY', 'OkO']
-EYEF_ALT = {'blink': ['kkk', 'EEE'], 'atk0|atk1|atk2': ['wkw', 'YkY'], 'hit': ['kkk', 'kOk'], 'ko': ['wkw', 'kwk']}
+EYEF = ['kkk', 'xxO', 'cOc']
+EYEF_ALT = {'blink': ['kkk', 'kkk', 'cEc'], 'atk0|atk1|atk2': ['kkk', 'OxO', 'cYc'], 'hit': ['kkk', 'kOk', 'ccc'], 'ko': ['kkk', 'xOx', 'OxO']}
 # 攻撃：まっすぐの 正拳（腕を 前へ）
 PUNCH = [
     '..kkkkkkk.........................',
@@ -280,7 +281,7 @@ def lying(W, H):
     return pix.outline(pix.rows_of(g))
 def head_ko():
     g = pix.grid_of(HEAD)
-    pix.stamp(g, EYEN_ALT['ko'], 9, 12); pix.stamp(g, EYEF_ALT['ko'], 22, 12)
+    pix.stamp(g, EYEN_ALT['ko'], 9, 11); pix.stamp(g, EYEF_ALT['ko'], 22, 11)
     return pix.rows_of(g)
 PAW_KO = fur(ARM_F_LONG[20:], 1)
 PUNCH = fur(PUNCH, 4)
@@ -307,8 +308,8 @@ def base_layers():
         dict(n='body', g='body', x=15, y=19, rows=BODY),
         dict(n='legA', g='legA', x=29, y=47, rows=LEG),
         dict(n='head', g='head', x=28, y=0, rows=HEAD),
-        dict(n='eyeN', g='head', x=37, y=12, rows=EYEN, alt=EYEN_ALT),
-        dict(n='eyeF', g='head', x=50, y=12, rows=EYEF, alt=EYEF_ALT),
+        dict(n='eyeN', g='head', x=37, y=11, rows=EYEN, alt=EYEN_ALT),
+        dict(n='eyeF', g='head', x=50, y=11, rows=EYEF, alt=EYEF_ALT),
         dict(n='armF', g='armF', x=36, y=22, rows=ARM_F, not_='atk1'),
         dict(n='ruff', g='head', x=29, y=20, rows=RUFF),
         dict(n='punch', g='armF', x=36, y=22, rows=PUNCH, only='atk1'),

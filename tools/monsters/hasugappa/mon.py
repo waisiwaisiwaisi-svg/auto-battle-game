@@ -1,5 +1,6 @@
 # ハスガッパ（くさ・みず × 河童）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：水かきの ついた 大きな 爪の 手
+EYE_BOX = (33, 18, 9, 8)
 META = dict(id='hasugappa', name='ハスガッパ', types=['grass', 'water'], base='河童', size='M')
 PAL = {
     'k': '#101018', 'l': '#16301e',
@@ -114,13 +115,13 @@ def leaf_p(g, drop=0):
     hand(g, 26 + drop, 10, ['wC', 'Cc'])          # 葉の 上の しずく
 LEAF = part(leaf_d, {'4': 'FAB'}, lw=1, dw=1, post=leaf_p)
 LEAF2 = part(leaf_d, {'4': 'FAB'}, lw=1, dw=1, post=lambda g: leaf_p(g, 1))
-# ---- 目：白い 光＋赤い 虹彩（明 R・暗 r）＋たての ひとみ。太い まゆ ----
-EYE = ['kkkk....', '.kkkkkk.', '.kwRRkRk', '..krrkrk', '...kkkk.']
+# ---- 目：重い まぶた（M）。ぶあつい みどりの 上まぶたが 虹彩の 上半分を おおい、赤い 目の 下半分だけが 冷たく 見下ろす ----
+EYE = ['.kkkkkkk.', 'kBBBBBBBk', 'kDDDDDDDk', 'kkkkkkkkk', 'kwRRkkRRk', 'kRRrkkrrk', '.krrrrrk.', '..kkkkk..']
 EYE_ALT = {
-    'blink': ['kkkk....', '.kkkkkk.', '..kkkkkk'],
-    'atk0|atk1|atk2': ['kkkkk...', '.kkkkkkk', '.kwwRkRk', '..krrkk.', '...kkk..'],
-    'hit': ['kkk.....', '..kk....', '....kkk.', '..kk....'],
-    'ko': ['.k...k..', '..k.k...', '...k....', '..k.k...', '.k...k..'],
+    'blink': ['.kkkkkkk.', 'kBBBBBBBk', 'kBBBBBBBk', 'kBBBBBBBk', 'kDDDDDDDk', 'kDDDDDDDk', '.kkkkkkk.', '.........'],
+    'atk0|atk1|atk2': ['.kkkkkkk.', 'kBBBBBBBk', 'kkkkkkkkk', 'kwwRkkRRk', 'kRRRkkRRk', 'kRRrkkrrk', '.krrrrrk.', '..kkkkk..'],
+    'hit': ['.kkkkkkk.', 'kBBBBBBBk', 'kBBBBBBBk', 'kDDkkDDDk', 'kkkDDkkkk', 'kDDDDDDDk', '.kkkkkkk.', '.........'],
+    'ko': ['.kkkkkkk.', 'kBBBBBBBk', 'kBkBBBkBk', 'kDDkDkDDk', 'kDDDkDDDk', 'kDDkDkDDk', '.kkDDDkk.', '..kkkkk..'],
 }
 # ---- 手：水かきの 大きな 爪（見せ所）。腕の つけ根は 胴に 3ドット もぐる ----
 def arm(hx, hy, sx=34, sy=39, ramp='ABD'):
@@ -171,7 +172,7 @@ def layers():
         L('legA', 'legA', LEG_F),
         H('head', 'head', -1, 1, HEAD, alt={'atk1|atk2': HEAD_OPEN}),
         H('leaf', 'leaf', -1, 1, LEAF, alt={'idle1|idle2|walk1|walk3': LEAF2}),
-        H('eye', 'head', 34, 19, EYE, alt=EYE_ALT),
+        H('eye', 'head', 33, 18, EYE, alt=EYE_ALT),
         L('arm', 'arm', ARM, alt={'atk0': ARM_UP, 'atk1': ARM_HIT, 'atk2': ARM_2}),
         H('slash', 'arm', 63, 34, SLASH, only='atk1'),
         H('spl', 'arm', 63, 44, SPL, only='atk2'),

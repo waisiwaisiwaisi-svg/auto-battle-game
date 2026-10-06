@@ -1,4 +1,5 @@
 # ムシャボロ（ゴースト・はがね × 中身の ない よろい武者）手打ち GBA風
+EYE_BOX = (40, 31, 12, 3)
 META = dict(id='mushaboro', name='ムシャボロ', types=['ghost', 'steel'], base='空の よろい武者', size='M')
 PAL = {
     'k': '#101018', 'l': '#2c2440',
@@ -34,13 +35,13 @@ HEAD = [
     'kRrRrRrRrrkkkkkkTTwkwkwk....',
     '.kkkkkkkkkk..kkkkkkkkkkk....',
 ]
-# かぶとの 中の 霊火の 目（つり目）
-# かぶとの 中の 霊火の 目（つり目）：白い 光＋水色と 青緑の 2色＋たての ひとみ（闇）
-EYE = ['wCkkkkwCCkCCk', 'DDkkkkCDDkDkk', 'kkkkkkkDDkkkk']
+# J バイザー／スリット：からっぽの かぶとの 闇に、横一文字の 霊火の 切れ目が 1本。後ろは 細く 高く、前へ 太く 下がる（怒りの かたむき）。
+# 芯は 白（W）→ 水色（C）→ 青緑（D）の にじみ。ひとみは なし
+EYE = ['DCCWWCD......', '..DCCWWWWCCD.', '.......DDDD..']
 EYE_ALT = {
-    'blink': ['kkkkkkkkkkkkk', 'DDkkkkDDDDDkk', 'kkkkkkkkkkkkk'],
-    'atk0|atk1|atk2': ['wWkkkkwWWkWWk', 'CCkkkkWCCkCkk', 'kkkkkkkCCkkkk'],
-    'hit': ['CkkkkkCkkkCkk', 'kCkkkkkCkCkkk', 'kkkkkkkkCkkkk'],
+    'blink': ['DDDDDD.......', '...DDDDDDDD..', '.............'],
+    'atk0|atk1|atk2': ['CWWWWWC......', 'DCWWWWWWWWWC.', '..DDCCCCCCD..'],
+    'hit': ['D.C.W.D......', '..D.CW.C.D...', '.......D.D...'],
 }
 # 鍬形（くわがた）の 金の 角
 CREST = [

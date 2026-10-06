@@ -10,10 +10,12 @@ PAL = {
     'S': '#f6faff', 'T': '#b4c0d4', 'U': '#6e7a96', 'V': '#3a4260',   # 鋼
     'c': '#b4f6ff', 'C': '#38a4f0',                      # 水
     'Y': '#ffdc4a', 'O': '#c4781a',                      # 金（目・つば）
-    'r': '#e8304a',                                      # 目の 奥の 赤
+    'r': '#e8304a',                                      # 口の 赤
+    'x': '#05070e',                                      # 魚の 目の 平たい 瞳
 }
 LIGHT = set('ASTcY')
-KEEP_BLACK = set('Yr')
+KEEP_BLACK = set('Yrx')
+EYE_BOX = (40, 40, 8, 6)   # 目（idle0 の 64x64 座標）
 
 # ---------- 下書きの 道具 ----------
 def G(): return grid(64, 64)
@@ -196,13 +198,12 @@ PEC_B = [
 ANAL = ['kkk...', 'kTUkk.', '.kUVVk', '..kkVk', '....kk']
 DORS2 = ['..kk', '.kAk', 'kABk', 'kBDk']
 
-# 目：かぶとの ひさしの 下、金の つり目に 赤い 奥
-# 目：ひさしの 下の 金の つり目。光 S＋虹彩 2色（Y／O）＋たての ひとみ＋赤い 奥＋下まぶた
-EYE = ['kkkkkkkk.', '.kSSYYkrk', '.kSYYYkrk', '..kOOOkrk', '...kkkkk.']
-EYE_ALT = {'blink': ['kkkkkkkk.', '.kkkkkkkk', '..UUUUUU.', '...UUUU..', '.........'],
-           'atk0|atk1|atk2': ['kkkkkkkk.', '.kSSYYkYk', '.kSYYYkYk', '..kYYYkYk', '...kkkkk.'],
-           'hit': ['kkkkkkkk.', '..kk..kk.', '....kk...', '..kk..kk.', '.........'],
-           'ko': ['.........', '.kT...kT.', '..kT.kT..', '...kTT...', '..kT.kT..']}
+# 目（K：魚の 目）：まぶたの ない 丸い 目。平たく 大きな 黒い 瞳（x）を 金の 細い 輪（Y 明／O 暗）が かこむ。光は 瞳の 左上に 1点（S）
+EYE = ['..kkkk..', '.kYYYYk.', 'kYSxxxOk', 'kYxxxxOk', '.kOOOOk.', '..kkkk..']
+EYE_ALT = {'blink': ['..kkkk..', '.kkkkkk.', 'kUUUUUUk', 'kTTTTTTk', '.kOOOOk.', '..kkkk..'],   # 鋼の 膜が おりる
+           'atk0|atk1|atk2': ['..kkkk..', '.kYYYYk.', 'kYYSxYYk', 'kYYxxYOk', '.kOYYOk.', '..kkkk..'],
+           'hit': ['..kkkk..', '.kYYYYk.', 'kYYYYOOk', 'kYYxYOOk', '.kOOOOk.', '..kkkk..'],
+           'ko': ['..kkkk..', '.kxYYxk.', 'kYYxxYOk', 'kYYxxOOk', '.kxOOxk.', '..kkkk..']}
 GLINT = ['...c...', '...S...', '..cSc..', 'cSSSSSc', '..cSc..', '...S...', '...c...']
 SPEED = [
     'cCCCCCC.......',

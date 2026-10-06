@@ -1,5 +1,6 @@
 # カガミカブト（エスパー・はがね × カブトガニ）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：銅鏡の 甲羅（丸く 平らな 板）。鏡の まん中の 鈕（つまみ）が 第三の 目
+EYE_BOX = (20, 25, 29, 15)
 META = dict(id='kagamikabuto', name='カガミカブト', types=['psychic', 'steel'], base='カブトガニ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2a1c22',
@@ -10,7 +11,7 @@ PAL = {
     'w': '#ffffff', 'r': '#a01c34',
 }
 LIGHT = set('YSAVw')
-KEEP_BLACK = set('wV')
+KEEP_BLACK = set('wVvC')
 # ---------- 下書きの 道具（あたり → 左上光の 3段 → 輪郭。目・牙・模様・線は 手で 打つ）----------
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
@@ -126,21 +127,43 @@ def mirror(glow=False):
             dots(g, 'l' if i % 2 else 'Y', [(x, y)], 'YOo')
     return part(d, {}, post=p)
 MIRROR = mirror(); MIRROR_GLOW = mirror(True)
-# 鈕＝第三の 目（白い 光＋むらさきの 虹彩 明 V・暗 v＋たての ひとみ。まぶたの 銅の 輪で かこむ）
-EYE3 = ['..kkkkk..', '.kOYYYOk.', 'kOkkkkkOk', 'kkwVVkVkk', 'kkVvvkvkk', 'kOkkkkkOk', '.kOooOok.', '..kkkkk..']
-EYE3_ALT = {
-    'blink': ['..kkkkk..', '.kOYYYOk.', 'kOYYYYYOk', 'kOkkkkkOk', 'kOOOOOOOk', 'kOoooooOk', '.kooooook.', '..kkkkk..'],
-    'atk0|atk1|atk2': ['..kkkkk..', '.kOYYYOk.', 'kOkkkkkOk', 'kkwwVkVkk', 'kkVwVkvkk', 'kOkkkkkOk', '.kOooOok.', '..kkkkk..'],
-    'hit': ['..kkkkk..', '.kOYYYOk.', 'kOkkkkkOk', 'kkkkkkkkk', 'kOOOkOOOk', 'kOkkkkkOk', '.kOooOok.', '..kkkkk..'],
-    'ko': ['..kkkkk..', '.kOYYYOk.', 'kOkOOOkOk', 'kOOkOkOOk', 'kOOOkOOOk', 'kOOkOkOOk', '.kkoooOkk.', '..kkkkk..'],
-}
-# 顔の 目（白い 光＋むらさきの 虹彩＋ひとみ。銅の まゆ）
-EYE = ['kkkk...', '.kkkkkk', '.kwVkVk', '..kvkvk', '...kkk.']
+# 鈕＝第三の 目（H：大目玉）。銅の まぶたの 輪の 中に 白目の 大きな 目玉。白目に 赤い 血管の すじ、
+#   虹彩は むらさきの 2色の 輪（外 v・内 V）＋ 鏡の 水色の ふち（C）、まん中に 黒い 瞳。白い 光 1点
+def big_eye(mode=''):
+    W = 13; c = 6.5; g = [['.'] * W for _ in range(W)]
+    for y in range(W):
+        for x in range(W):
+            dx, dy = x + .5 - c, y + .5 - c; d = math.hypot(dx, dy); lit = -dx - dy
+            if d > 6.4: continue
+            if d > 5.4: ch = 'Y' if lit > 2 else 'o' if lit < -2 else 'O'      # 銅の まぶたの 輪
+            elif d > 4.6: ch = 'k'
+            elif mode == 'blink': ch = 'k' if abs(dy) < .6 else ('O' if dy < 0 else 'o')
+            elif d > 3.3: ch = 'w' if lit > -3 else 'C'                         # 白目（右下は 影）
+            elif d > 2.6: ch = 'C' if mode != 'atk' else 'V'                     # 虹彩の 外の ふち
+            elif d > 1.9: ch = 'v' if mode != 'atk' else 'V'
+            elif d > 1.1: ch = 'V' if mode != 'atk' else 'w'
+            else: ch = 'k'
+            g[y][x] = ch
+    if mode != 'blink':
+        for (x, y) in ((2, 5), (3, 4), (2, 8), (9, 2), (10, 3), (10, 9), (9, 10), (4, 10)): g[y][x] = 'r'   # 血管
+        if mode in ('', 'atk'): g[4][5] = 'w' if mode == '' else 'S'
+    if mode == 'hit':
+        for y in range(3, 10):
+            for x in range(3, 10):
+                if g[y][x] in 'CvVk' and math.hypot(x + .5 - c, y + .5 - c) <= 3.3: g[y][x] = 'w'
+        g[6][7] = 'k'; g[5][7] = g[7][7] = g[6][6] = g[6][8] = 'v'
+    if mode == 'ko':
+        for i in range(3, 10): g[i][i] = 'k'; g[i][12 - i] = 'k'
+    return [''.join(r) for r in g]
+EYE3 = big_eye()
+EYE3_ALT = {'blink': big_eye('blink'), 'atk0|atk1|atk2': big_eye('atk'), 'hit': big_eye('hit'), 'ko': big_eye('ko')}
+# 顔の 目（K：魚の 目、小さく）。まぶたの ない 丸い 目、むらさきの 細い 輪に 平たい 大きな 黒い 瞳
+EYE = ['.kkkk.', 'kVwVVk', 'kVkkvk', 'kvkkvk', '.kkkk.']
 EYE_ALT = {
-    'blink': ['kkkk...', '.kkkkkk', '..kkkkk'],
-    'atk0|atk1|atk2': ['kkkkk..', '.kkkkkk', '.kwwVkk', '..kvkk.', '...kk..'],
-    'hit': ['kk.....', '..kk...', '....kk.', '..kk...'],
-    'ko': ['k...k', '.k.k.', '..k..', '.k.k.', 'k...k'],
+    'blink': ['.kkkk.', 'kYOOOk', 'kkkkkk', 'koooOk', '.kkkk.'],
+    'atk0|atk1|atk2': ['.kkkk.', 'kwwVVk', 'kVkkVk', 'kVVVvk', '.kkkk.'],
+    'hit': ['.kkkk.', 'kVVVVk', 'kVVkvk', 'kvvvvk', '.kkkk.'],
+    'ko': ['.kkkk.', 'kkVVkk', 'kVkkvk', 'kkvvkk', '.kkkk.'],
 }
 # ---- 念力の 光線（鏡から 前へ。はなれた エフェクト＝意図的）----
 BEAM = [
@@ -168,7 +191,7 @@ def _layers():
         L('abd', 'body', ABD),
         H('claw', 'head', 48, 44, CLAW, not_='ko'),
         L('mirror', 'body', MIRROR, alt={'atk0|atk1|atk2': MIRROR_GLOW}),
-        H('eye3', 'body', 23, 28, EYE3, alt=EYE3_ALT),
+        H('eye3', 'body', 20, 25, EYE3, alt=EYE3_ALT),
         H('spk', 'body', 17, 23, SPARK, only='idle1|idle2|walk1'),
         L('head', 'head', HEAD, alt={'atk1|atk2': HEAD_OPEN}),
         H('eye', 'head', 43, 35, EYE, alt=EYE_ALT),

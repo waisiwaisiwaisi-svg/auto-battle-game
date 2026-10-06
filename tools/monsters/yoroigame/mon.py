@@ -1,5 +1,6 @@
 # ヨロイガメ（いわ・みず × リクガメ）手打ち GBA風
 from pix import grid, rows_of, ellipse, poly, line, outline, recolor
+EYE_BOX = (50, 26, 8, 5)
 META = dict(id='yoroigame', name='ヨロイガメ', types=['rock', 'water'], base='リクガメ', size='L')
 PAL = {
     'k': '#101018', 'l': '#22223c',
@@ -122,9 +123,13 @@ HEAD_OPEN = HEAD[:10] + [
     '...kkCCCCCkkkkkkk.....',
     '.....kkkkkk...........',
 ]
-# 目：2段（ハイライト＋黄と だいだいの 虹彩＋たての ひとみ）。前は まゆで 切れて つり目
-EYE = ['wYYkYk', 'OOOkOk']
-EYE_ALT = {'blink': ['CCCCCC', 'kkkkkk'], 'hit': ['kkCCkk', 'CYkkYC'], 'atk0|atk1|atk2': ['wwYkYY', 'YOOkOk'], 'ko': ['kCkCkC', 'CkCkCk']}
+# M 重い まぶた（半目）：ぶあつい 皮の 上まぶた（ふくらみに 明るい ふち）が 平らに 下りて 虹彩の 上半分を かくす。
+# 下に 橙の 虹彩の 下半分と ひとみが のぞき、冷たく 見下ろす
+EYE = ['kAAAAAAk', 'kBBBBBBk', 'kkkkkkkk', 'kwYOkOOk', '.kkkkkk.']
+EYE_ALT = {'blink': ['kAAAAAAk', 'kBBBBBBk', 'kBBBBBBk', 'kkkkkkkk', '.BBBBBB.'],
+           'hit': ['kAAAAAAk', 'kBBBBBBk', 'kkkkkkkk', 'kBkOOkBk', '.kkkkkk.'],
+           'atk0|atk1|atk2': ['kAAAAAAk', 'kkkkkkkk', 'kYYwkYYk', 'kOOOkOOk', '.kkkkkk.'],
+           'ko': ['kAAAAAAk', 'kBBBBBBk', 'kBkBkBBk', 'kBBkBBBk', '.BkBkBB.']}
 # 太い 首（しわの 帯と 背の 小さな とげ）
 NECK = [
     '......kk.kk...',
@@ -195,7 +200,7 @@ def layers():
         dict(n='legF', g='legB', x=30, y=53, rows=LEG),
         dict(n='shell', g='body', x=8, y=23, rows=SHELL, alt={'idle1|idle2|atk0|atk1|atk2': SHELL_G}),
         dict(n='head', g='head', x=40, y=22, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='eye', g='head', x=51, y=27, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=50, y=26, rows=EYE, alt=EYE_ALT),
         dict(n='jet1', g='fx', x=40, y=35, rows=jet(16), only='atk1'),
         dict(n='jet2', g='fx', x=40, y=35, rows=jet(18, True), only='atk2'),
     ]

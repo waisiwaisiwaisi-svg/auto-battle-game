@@ -1,11 +1,13 @@
 # イワサイ（いわ・じめん × サイ）手打ち GBA風
 from pix import grid, rows_of, ellipse, poly, line, outline, recolor
+EYE_BOX = (43, 32, 5, 9)
 META = dict(id='iwasai', name='イワサイ', types=['rock', 'ground'], base='サイ', size='L')
 PAL = {
     'k': '#101018', 'l': '#28242e',
     'D': '#a8aab8', 'E': '#6c6e84', 'F': '#3e4052',      # 花こう岩の 皮（明・中・暗）
     'S': '#f2d496', 'T': '#c8924a', 'U': '#7c5428',      # 砂岩の 角・よろい（明・中・暗）
     'r': '#ff4a2a', 'q': '#9a1a24', 'w': '#ffffff',
+    'p': '#e6a69c',                                      # 古傷（うす桃）
 }
 LIGHT = set('DSw')
 KEEP_BLACK = set('wrq')
@@ -112,9 +114,13 @@ HEAD_ROAR = HEAD[:14] + [
     '...kFFFFFFFFFFFk...........',
     '....kkkkkkkkkkk............',
 ]
-# 目：白い 光＋赤と 暗い 赤の 2色＋たての ひとみ。上は 砂岩の まゆ板で つり目に
-EYE = ['wrrkq', 'Eqqkq']
-EYE_ALT = {'blink': ['kkkkk', 'EEEEE'], 'hit': ['kkqkk', 'EqkqE'], 'atk0|atk1|atk2': ['wwrkr', 'rqqkq'], 'ko': ['kEEEk', 'EkEkE']}
+# O 傷の 目：額から ほおへ たてに 走る 古傷（うす桃 p）。砂岩の まゆ板は 傷の ところで 欠け、まぶたも 切れて いる。
+# 傷を またいで 暗い 赤の 虹彩（q）に 赤い 光（r）と 黒い ひとみ。見えて いる 片目に 傷（横向きなので もう片方は 見えない）
+def _scar(e1, e2, lid='.'):
+    return ['....p..', '....p..', '...k...', '...k...', '.' + e1 + '.', '.' + e2 + '.', '...' + ('p' if lid == '.' else lid) + '...', '..p....', '..p....']
+EYE = _scar('rqpkq', 'qqpkq')
+EYE_ALT = {'blink': _scar('kkpkk', 'EEpEE'), 'hit': _scar('kkpkk', 'EqpqE'), 'atk0|atk1|atk2': _scar('wrprr', 'rqpkq'),
+           'ko': _scar('kEpEk', 'EkpkE')}
 HORN = [
     '.......kk',
     '......kSk',
@@ -181,7 +187,7 @@ def layers():
         dict(n='horn2', g='head', x=45, y=24, rows=HORN2),
         dict(n='head', g='head', x=34, y=27, rows=HEAD, alt={'atk2': HEAD_ROAR}),
         dict(n='horn', g='head', x=49, y=21, rows=HORN),
-        dict(n='eye', g='head', x=43, y=36, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=42, y=32, rows=EYE, alt=EYE_ALT),
         dict(n='legF', g='legA', x=29, y=53, rows=LEG),
         dict(n='rocks', g='fx', x=52, y=8, rows=ROCKS, only='atk2'),
     ]

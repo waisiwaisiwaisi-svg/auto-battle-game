@@ -1,15 +1,17 @@
 # サボトカゲ（くさ・じめん × トゲトカゲ）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：サボテンの とげの 背中（体の とげ ⇔ サボテンの とげ）
+EYE_BOX = (39, 28, 9, 7)
 META = dict(id='sabotokage', name='サボトカゲ', types=['grass', 'ground'], base='トゲトカゲ', size='M')
 PAL = {
     'k': '#101018', 'l': '#1e2c16',
     'A': '#b0e070', 'B': '#5c9e3e', 'D': '#2e5e2c',      # サボテン（みどり）
     'S': '#f2d898', 'T': '#c69a58', 'U': '#7a5630',      # 砂の 皮
     'R': '#ff5a6a', 'r': '#b01c3c', 'Y': '#ffe066', 'O': '#e0861e',   # 花・目
+    'q': '#9a3e12',                                      # 目の 虹彩の 暗い 橙
     'w': '#ffffff',
 }
 LIGHT = set('ASYw')
-KEEP_BLACK = set('wY')
+KEEP_BLACK = set('wYO')
 # ---------- 下書きの 道具（あたり → 左上光の 3段 → 輪郭。目・牙・模様・線は 手で 打つ）----------
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
@@ -135,13 +137,14 @@ HORN = ['kk.....', 'kwkk...', '.kATkk.', '..kATBk', '...kBDk', '....kk.']
 # 頭の 赤い 花（サボテンの 花）
 FLOWER = ['..kk.kk..', '.kRRkRRk.', 'kRRRkRRrk', 'kRRYYYRrk', '.kRYYYrk.', 'kRrRYrRrk', '.kkrrrkk.', '...kBk...', '...kDk...']
 FLOWER2 = ['.........', '..kk.kk..', '.kRRkRRk.', 'kRRRYRRrk', 'kRRYYYrrk', '.krRYrRk.', '..kkrkk..', '...kBk...', '...kDk...']
-# ---- 目：白い 光＋金の 虹彩（明 Y・暗 O）＋たての ひとみ ----
-EYE = ['kkkk....', '.kkkkkk.', '.kwYYkYk', '..kOOkOk', '...kkkk.']
+# ---- 目：爬虫類の つり目（A）。丸みの ある 大きめの トカゲの 目。2段の 太い 上まぶた（k＋サボテンの 影 D）、細い 下まぶた。
+#      白目なし、橙の 虹彩（上 Y → O → 下 q）を 長い たての スリットが 上から 下まで 割る ----
+EYE = ['.kkkkkkk.', 'kDDDDDDkk', 'kkwYYkYYk', 'kYOOOkOOk', 'kOOqqkqOk', '.kqqqkqk.', '..kkkkk..']
 EYE_ALT = {
-    'blink': ['kkkk....', '.kkkkkk.', '..kkkkkk'],
-    'atk0|atk1|atk2': ['kkkkk...', '.kkkkkkk', '.kwwYkYk', '..kOOkk.', '...kkk..'],
-    'hit': ['kkk.....', '..kk....', '....kkk.', '..kk....'],
-    'ko': ['.k...k..', '..k.k...', '...k....', '..k.k...', '.k...k..'],
+    'blink': ['.kkkkkkk.', 'kDDDDDDkk', 'kDDDDDDDk', 'kDDDDDDDk', 'kkkkkkkkk', '.kTTTTTk.', '..kkkkk..'],
+    'atk0|atk1|atk2': ['.kkkkkkk.', 'kkYYYkYkk', 'kYYYYkYYk', 'kYOOOkOOk', 'kOOOqkqOk', '.kqqqkqk.', '..kkkkk..'],
+    'hit': ['.kkkkkkk.', 'kDDDDDDkk', 'kDDDDDDDk', 'kkkkkkkkk', 'kOOkkkkOk', '.kkqqqkk.', '..kkkkk..'],
+    'ko': ['.kkkkkkk.', 'kDDDDDDkk', 'kkYYYYYkk', 'kOkOOOkOk', 'kOOkOkOOk', '.kqqkqqk.', '..kkkkk..'],
 }
 # ---- 攻撃：背中の とげを 前へ 飛ばす（はなれた エフェクト＝意図的）----
 NEEDLES = ['kkkk.......', 'TTTwwk.....', 'kkkk..kkkk.', '......TTTww', '..kkkkkkkk.', '..TTTTTwwk.', '..kkkk.....']
@@ -159,7 +162,7 @@ def layers():
         H('flower', 'head', 35, 16, FLOWER, alt={'idle1|idle2|walk1|walk3': FLOWER2}),
         L('head', 'head', HEAD, alt={'atk1|atk2': HEAD_OPEN}),
         H('horn', 'head', 31, 25, HORN),
-        H('eye', 'head', 40, 30, EYE, alt=EYE_ALT),
+        H('eye', 'head', 39, 28, EYE, alt=EYE_ALT),
         H('ndl', 'root', 60, 29, NEEDLES, only='atk1'),
         H('dust', 'root', 6, 56, DUST, only='atk0'),
     ]
