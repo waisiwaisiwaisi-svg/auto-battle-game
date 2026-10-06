@@ -1,4 +1,4 @@
-# ヌエ（ノーマル・あく × 妖怪ぬえ）手打ち GBA風
+# ヌエ（ノーマル・あく × 妖怪ぬえ）手打ち GBA風・デフォルメ（2〜3頭身：猿の 顔と たてがみを 大きく、虎の 胴と 足は 短く 太く）
 META = dict(id='nue', name='ヌエ', types=['normal', 'dark'], base='ぬえ（妖怪）', size='L')
 PAL = {
     'k': '#101018', 'l': '#3e1e16',
@@ -6,7 +6,7 @@ PAL = {
     'W': '#fbf8ee', 'V': '#cfc5b2', 'D': '#7e706a',
     'R': '#d8382e',
     'P': '#8a6aa8', 'Q': '#4c3466', 'Z': '#261a34',
-    'E': '#d4ff3a', 'w': '#ffffff',
+    'E': '#d4ff3a', 'e': '#6a9a10', 'w': '#ffffff',
 }
 LIGHT = set('YWPEw')
 
@@ -34,74 +34,88 @@ def shade(spans, W, ramp='YOB', lit=1, dk=2):
             g[y][x] = c
     return g
 
-# ---- 胴：肩が 高く 腰が 低い 虎の 体。しまは 手で ----
-SPAN = [(26, 34), (22, 36), (19, 37), (16, 38), (12, 38), (8, 39), (5, 39), (3, 39), (2, 39), (1, 39), (1, 39), (1, 39),
-        (1, 39), (1, 39), (1, 39), (1, 38), (2, 38), (3, 37), (5, 36), (8, 35), (14, 34), (20, 33)]
+# ---- 胴（デフォルメ：短く 丸く）：肩が 高い 虎の 体。しまは 手で ----
+SPAN = [(20, 27), (14, 29), (9, 30), (5, 30), (3, 30), (2, 30), (1, 30), (1, 30), (1, 30), (1, 30), (1, 30), (1, 30),
+        (1, 30), (2, 29), (3, 28), (5, 27), (8, 25)]
 STRIPES = [  # しま：上は 太く、下へ 細く（手で 1ドットずつ）
-    [(9, 5), (10, 5), (11, 5), (9, 6), (10, 6), (10, 7), (11, 7), (11, 8), (11, 9)],
-    [(14, 4), (15, 4), (16, 4), (14, 5), (15, 5), (15, 6), (16, 6), (15, 7), (16, 8), (16, 9), (16, 10)],
-    [(19, 2), (20, 2), (21, 2), (19, 3), (20, 3), (20, 4), (21, 4), (20, 5), (21, 6), (21, 7), (21, 8)],
-    [(24, 1), (25, 1), (26, 1), (24, 2), (25, 2), (25, 3), (26, 3), (25, 4), (26, 5), (26, 6)],
-    [(5, 7), (6, 7), (5, 8), (6, 8), (5, 9), (6, 10), (6, 11)], [(2, 11), (3, 11), (3, 12), (4, 12), (4, 13), (5, 14)],
-    [(11, 12), (12, 12), (12, 13), (12, 14), (13, 15), (13, 16)], [(18, 12), (19, 12), (19, 13), (19, 14), (20, 15)],
-    [(25, 10), (26, 10), (26, 11), (26, 12), (27, 13), (27, 14)], [(30, 6), (31, 6), (31, 7), (31, 8), (32, 9)],
+    [(8, 3), (9, 3), (8, 4), (9, 4), (9, 5), (9, 6), (10, 7)],
+    [(14, 1), (15, 1), (14, 2), (15, 2), (15, 3), (15, 4), (16, 5), (16, 6), (16, 7)],
+    [(20, 0), (21, 0), (20, 1), (21, 1), (21, 2), (21, 3), (22, 4), (22, 5)],
+    [(25, 0), (26, 0), (25, 1), (26, 2), (26, 3), (27, 4)],
+    [(4, 6), (5, 6), (4, 7), (5, 8), (5, 9)],
+    [(10, 11), (11, 11), (11, 12), (12, 13)], [(17, 10), (18, 10), (18, 11), (18, 12), (19, 13)], [(24, 9), (25, 9), (25, 10), (25, 11), (26, 12)],
 ]
 def body():
-    g = shade(SPAN, 40, 'YOB', lit=2, dk=3)
+    g = shade(SPAN, 31, 'YOB', lit=2, dk=3)
     for s in STRIPES:
         for (x, y) in s:
             if g[y][x] != '.': g[y][x] = 'k'
-    for (x, y) in ((8, 7), (13, 6), (18, 4), (23, 3), (7, 9)):
+    for (x, y) in ((7, 5), (13, 3), (19, 2), (24, 2), (3, 8)):
         if g[y][x] == 'O': g[y][x] = 'Y'
     return [''.join(r) for r in _ol(g)]
 
-# ---- たてがみ（白い 毛の えり）：外がわへ のびる 毛たばを 手で ----
-MANE = [
-    '.......kk.k..........',
-    '.....kkWWkWk.........',
-    '...kkWWWWWVWkk.......',
-    '..kWWWWVVVVVVVkk.....',
-    '.kWWWWWWDWWVVVVVk....',
-    'kWWWWWVDDWWVVVVVVk...',
-    'kkWWWVDDVWVVDVVVVVk..',
-    'kWWVVDVVVVVDDVVVVVk..',
-    '.kWVVVVVVVDVVVVVVVVk.',
-    'kWVVVVVVDDVVVVVVVVVk.',
-    'kkVVVVVDVVVVVDVVVVDk.',
-    'kWVVVVDVVVVVDDVVVVDk.',
-    '.kVVVVVVVVVDVVVVVDDk.',
-    'kWVVVVVVVVDVVVVVDDk..',
-    '.kDVVVVVVDVVVVVDDDk..',
-    'kDDVVVVVDVVVVDDDk....',
-    '.kkDDVVDDVVDDDk......',
-    '...kDDkDDkDDkk.......',
-    '....kk.kk.kk.........',
-]
-# 顔：赤い 猿の 顔、太い まゆの でっぱり、長い 口に 牙
+# ---- たてがみ（白い 毛の えり）：大きく 丸く、後ろへ 毛たばが なびく ----
+import math
+def mane():
+    import sys, os
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
+    from pix import poly, ellipse
+    W, H = 32, 30; cx, cy = 18, 14.5; g = [['.'] * W for _ in range(H)]
+    ellipse(g, cx, cy, 10.5, 11, "#")
+    # 毛たば：まわりから 外へ、後ろ（左）へ なびく 三角
+    for deg in (-70, -100, -130, -160, 170, 140, 110, 80):
+        a = math.radians(deg); ex, ey = cx + 9.5 * math.cos(a), cy + 10 * math.sin(a)
+        tx, ty = cx + 14.5 * math.cos(a) - 3.5, cy + 14 * math.sin(a)
+        nx, ny = -math.sin(a) * 3, math.cos(a) * 3
+        poly(g, [(ex + nx, ey + ny), (ex - nx, ey - ny), (tx, ty)], '#')
+    out = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] != '#': continue
+            up = next(i for i in range(1, 9) if y - i < 0 or g[y - i][x] == '.' or i == 8)
+            lf = next(i for i in range(1, 9) if x - i < 0 or g[y][x - i] == '.' or i == 8)
+            dn = next(i for i in range(1, 9) if y + i >= H or g[y + i][x] == '.' or i == 8)
+            v = (x - cx) * .5 + (y - cy) * .8
+            out[y][x] = 'D' if (dn <= 2 or v > 8) else 'W' if (up <= 2 or lf <= 1 or v < -6) else 'V'
+    # 毛の すじ（たばの 中心線を 濃く）
+    for deg in (-70, -100, -130, -160, 170, 140, 110, 80):
+        a = math.radians(deg)
+        for t in (.62, .72, .82):
+            x, y = round(cx + 15 * t * math.cos(a) - 3.5 * t), round(cy + 15 * t * math.sin(a))
+            if 0 <= y < H and 0 <= x < W and out[y][x] in 'WV': out[y][x] = 'D' if out[y][x] == 'V' else 'V'
+    return [''.join(r) for r in _ol(out)]
+MANE = mane()
+# 顔（大きく）：赤い 猿の 顔、太い まゆの でっぱり、長い 口に 上下の 牙
 FACE = [
-    '..kkkkkkk.....',
-    '.kYYYRRRRkk...',
-    'kYYRRRRRRRRk..',
-    'kkkkkkkkRRRRk.',
-    'kBBBBBkkkRRRRk',
-    'kRRBRRRRRYYRRk',
-    '.kRRRRRRRRRRBk',
-    '.kBRRRRRRkkkk.',
-    '..kBRRRkwkwkwk',
-    '..kBRRkZZZZZk.',
-    '...kBBkwkwkk..',
-    '....kkkkkk....',
+    '...kkkkkkkk.......',
+    '..kYYYRRRRRkk.....',
+    '.kYYRRRRRRRRRkk...',
+    'kYRRRRRRRRRRRRRk..',
+    'kkkkkkkkkkRRRRRRk.',
+    'kBBBBBBBBkkRRRRRk.',
+    'kRRRRRRRRRkRRRRRRk',
+    'kRRRRRRRRRRRRRYYRk',
+    '.kBRRRRRRRRRRRRkRk',
+    '.kBRRRRRRRRRkkkkk.',
+    '..kBRRRRRkwkwkwkwk',
+    '..kBRRRRkZZZZZZZk.',
+    '...kBRRRkwkwkwkk..',
+    '...kBBBBBBBBBk....',
+    '....kkkkkkkkk.....',
 ]
-EYE = ['EEEk', 'kEk.']
-EYE_ALT = {'blink': ['kkkk', 'RBB.'], 'atk0|atk1|atk2': ['wwEk', 'kwk.'], 'hit': ['EkEk', 'kEk.'], 'ko': ['kBkB', 'BkB.']}
-FACE_OPEN = FACE[:7] + [
-    '.kBRRRRRkkkkk.',
-    '..kRRRRkwZwZwk',
-    '..kRRRkZZZZZk.',
-    '..kRRRkZZZZk..',
-    '...kRBkwZwk...',
-    '....kkkkkk....',
+FACE_OPEN = FACE[:9] + [
+    '.kBRRRRRRRkkkkkkk.',
+    '..kBRRRRkwZwZwZwk.',
+    '..kBRRRkZZZZZZZk..',
+    '..kBRRkZZZZZZZk...',
+    '...kBRkwZwZwZk....',
+    '...kBBBBBBBBk.....',
+    '....kkkkkkkk......',
 ]
+# 目：まゆの でっぱりの 下で 黄緑に 光る つり目（白い 光＋黄緑 2段＋たての ひとみ）
+EYE = ['kwEEkEk', 'kEeekek', '.kkeekk']
+EYE_ALT = {'blink': ['BBBBBBB', 'kkkkkkk', '.RRRRRR'], 'atk0|atk1|atk2': ['kwwEkEk', 'kEEEkEk', '.kkEEkk'],
+           'hit': ['RkkRRRR', 'RRRkkkk', 'RkkRRRR'], 'ko': ['RkRRkRR', 'RRkkRRR', 'RkRRkRR']}
 
 # ---- 蛇の しっぽ：中心の 道すじを 手で 決めた 太い 管（上左が 明）＋うろこ ----
 PATH = [(9, 33), (7, 30), (5, 26), (4, 22), (5, 18), (7, 14), (10, 11), (14, 9), (18, 8)]
@@ -137,8 +151,8 @@ SHEAD = [
     '..kkkkk.....',
     '.kPPPPQkk...',
     'kPPkkkkPQkk.',
-    'kPkEEkkQQQQk',
-    'kQQkkQQQQQkk',
+    'kPkwEkkQQQQk',
+    'kQkeekQQQQkk',
     'kQQQQQkkkkk.',
     '.kZZkwkwk...',
     '..kkkk......',
@@ -147,26 +161,22 @@ SHEAD_OPEN = [
     '..kkkkk.....',
     '.kPPPPQkk...',
     'kPPkkkkPQkk.',
-    'kPkwwkkQQQQk',
-    'kQQkkQQQkkk.',
+    'kPkwEkkQQQQk',
+    'kQkeekQQkkk.',
     'kQQQQkwkwk..',
     'kQQQkZZZZRR.',
     'kZZZkwkwk..R',
     '.kkkkkkk....',
 ]
 
+# 足（デフォルメ：短く 太く）。上の 3行は 胴に 食いこむ もも
 FLEG = [
-    '.kkkkkkk..',
-    'kYYOOOOOBk',
-    'kYOkkOOOBk',
-    'kYOOOOOOBk',
-    '.kYOOkkOBk',
-    '.kOOOOOOBk',
-    '..kYOOOBk.',
-    '..kOkkOBk.',
-    '..kOOOOBk.',
-    '..kYOOOBk.',
-    '.kYOOOOOBk',
+    'kYYOOOOOBk.',
+    'kYOOOOOOBk.',
+    'kYOOOOOOBk.',
+    '.kYOOkkOBk.',
+    '.kYOOOOOBk.',
+    '.kYOOOOBBk.',
     'kYOOOOOOBBk',
     'kOOOOOOOBBk',
     '.kBBBBBBBk.',
@@ -174,7 +184,6 @@ FLEG = [
 ]
 # 前足を ふり上げた 形（攻撃）
 FLEG_UP = [
-    'kkkkkk...........',
     'kYYOOOkkkkkk.....',
     'kYOOOOOOOOOYkk...',
     'kOOkkOOkkOOOOYkwk',
@@ -185,17 +194,11 @@ FLEG_UP = [
     '.......kkkk......',
 ]
 HLEG = [
-    '..kkkkkkk..',
-    '.kYYOOOOOkk',
+    'kYYOOOOOOBk',
     'kYYOOkkOOBk',
-    'kYOOOOOkOBk',
     'kYOOOOOOOBk',
-    'kOkkOOOOBBk',
     '.kOOOOOOBk.',
     '..kOOOOBk..',
-    '...kOOBk...',
-    '...kOkBk...',
-    '...kOOBk...',
     '..kYOOOBk..',
     '.kYOOOOOBk.',
     '.kOOOOOBBk.',
@@ -234,23 +237,24 @@ DARK = {'Y': 'O', 'O': 'B', 'B': 'l', 'W': 'V', 'V': 'D'}
 def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 
 BODY = body()
+SX, SY = 7, 3   # 蛇の しっぽの ずらし（付け根は 腰に 食いこむ）
 def layers():
     return [
-        dict(n='snake', g='tail', x=-1, y=4, rows=SNAKE, alt={'atk0': SNAKE_B, 'atk1|atk2': SNAKE_A}),
-        dict(n='shead', g='shead', x=16, y=7, rows=SHEAD, not_='atk0|atk1|atk2'),
-        dict(n='sheadB', g='tail', x=12, y=5, rows=SHEAD, only='atk0'),
-        dict(n='sheadA', g='tail', x=30, y=12, rows=SHEAD_OPEN, only='atk1|atk2'),
-        dict(n='legHF', g='legB', x=13, y=45, rows=dark(HLEG)),
-        dict(n='legFF', g='legA', x=30, y=45, rows=dark(FLEG)),
-        dict(n='body', g='body', x=4, y=28, rows=BODY),
-        dict(n='legH', g='legA', x=6, y=45, rows=HLEG),
-        dict(n='mane', g='head', x=33, y=19, rows=MANE),
-        dict(n='face', g='head', x=45, y=25, rows=FACE, alt={'atk1|atk2': FACE_OPEN}),
-        dict(n='eye', g='head', x=46, y=29, rows=EYE, alt=EYE_ALT),
-        dict(n='legF', g='legB', x=36, y=46, rows=FLEG, not_='atk1'),
-        dict(n='legFup', g='body', x=38, y=42, rows=FLEG_UP, only='atk1'),
-        dict(n='cloud', g='root', x=2, y=55, rows=CLOUD, alt={'idle1|idle3|walk1|walk3|atk1': CLOUD2}, not_='ko'),
-        dict(n='slash', g='root', x=56, y=40, rows=SLASH, only='atk2'),
+        dict(n='snake', g='tail', x=-1 + SX, y=4 + SY, rows=SNAKE, alt={'atk0': SNAKE_B, 'atk1|atk2': SNAKE_A}),
+        dict(n='shead', g='shead', x=16 + SX, y=7 + SY, rows=SHEAD, not_='atk0|atk1|atk2'),
+        dict(n='sheadB', g='tail', x=12 + SX, y=5 + SY, rows=SHEAD, only='atk0'),
+        dict(n='sheadA', g='tail', x=30 + SX, y=12 + SY, rows=SHEAD_OPEN, only='atk1|atk2'),
+        dict(n='legHF', g='legB', x=19, y=48, rows=dark(HLEG)),
+        dict(n='legFF', g='legA', x=37, y=47, rows=dark(FLEG)),
+        dict(n='body', g='body', x=10, y=33, rows=BODY),
+        dict(n='legH', g='legA', x=12, y=48, rows=HLEG),
+        dict(n='legF', g='legB', x=31, y=48, rows=FLEG, not_='atk1'),
+        dict(n='legFup', g='body', x=33, y=45, rows=FLEG_UP, only='atk1'),
+        dict(n='mane', g='head', x=27, y=18, rows=MANE),
+        dict(n='face', g='head', x=44, y=25, rows=FACE, alt={'atk1|atk2': FACE_OPEN}),
+        dict(n='eye', g='head', x=45, y=30, rows=EYE, alt=EYE_ALT),
+        dict(n='cloud', g='root', x=7, y=55, rows=CLOUD, alt={'idle1|idle3|walk1|walk3|atk1': CLOUD2}, not_='ko'),
+        dict(n='slash', g='root', x=58, y=38, rows=SLASH, only='atk2'),
     ]
 
 FRAMES = {

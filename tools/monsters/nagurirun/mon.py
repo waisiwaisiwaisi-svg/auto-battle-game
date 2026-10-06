@@ -7,10 +7,10 @@ PAL = {
     'E': '#f6e0b4', 'F': '#cca474',                      # はら・耳の 内がわ
     'R': '#f44a44', 'S': '#a4243a',                      # 拳闘の グローブ
     'G': '#c4c4d4', 'H': '#6c6c80',                      # 鉄の びょう・石
-    'Y': '#ffe23a', 'w': '#ffffff',
+    'Y': '#ffe23a', 'y': '#d0821e', 'w': '#ffffff',
 }
 LIGHT = set('AERGYw')
-KEEP_BLACK = set('wY')
+KEEP_BLACK = set('wYy')
 DK = {'A': 'B', 'B': 'C', 'E': 'F', 'R': 'S', 'G': 'H'}
 def dk(rows): return [''.join(DK.get(c, c) for c in r) for r in rows]
 def place(parts, W=40, H=30):
@@ -53,9 +53,10 @@ HEAD_YELL = [
     "...CCBBBFFFkkkC.....",
     ".....CCCCCCC........",
 ]
-EYE = ['kkE....', 'kkkEk..', 'kYYEYk.', '.kkkE..']
-EYE_ALT = {'blink': ['kk.....', 'kkkkk..', 'BkkkkkB', '.BBBB..'], 'hit': ['..k....', '.kkkk..', 'kYkkYk.', '.kkkk..'],
-           'atk0|atk1|atk2': ['kkE....', 'kkkEk..', 'kwYEwk.', '.kkkE..'], 'ko': ['.......', 'k...k..', '.k.k...', '..k....']}
+# 目：ハイライト w ＋ 虹彩 2色（Y 明・y 暗）＋ たての ひとみ k。上を 古傷（E）が ななめに 走る
+EYE = ['kkE....', 'kkkEkk.', 'kwYkYk.', '.kykyk.', '..kkE..']
+EYE_ALT = {'blink': ['kkE....', 'kkkEkk.', 'BkkkkkB', '.BBBBB.', '..BBE..'], 'hit': ['..E....', '.kkEk..', 'kkBBkk.', '.BkkB..', '..BBE..'],
+           'atk0|atk1|atk2': ['kkE....', 'kkkEkk.', 'kwwkYk.', '.kYkyk.', '..kkE..'], 'ko': ['..E....', 'k...k..', '.k.k...', '..k....', '.k.k...']}
 EAR = [
     "A.......",
     "AA......",
@@ -68,66 +69,51 @@ EAR = [
     "...CBBBC",
     "....CCC.",
 ]
+# 胴（デフォルメ：小さく 丸く）。はらの ふくろに お守りの 石
 BODY = [
-    "......AAAAAAAA........",
-    "....AABBBBBBBBAA......",
-    "...ABBBBBBBBBBBBA.....",
-    "..ABBBBBBBBBBBEEEA....",
-    "..ABBBBBBBBBBEEEEEB...",
-    ".ABBBBBBBBBBEEEEEEEB..",
-    ".ABBBBBBBBBBEEFFEEEEC.",
-    ".ABBBBBBBBBBEEEEEEEEC.",
-    "ABBBBBBBBBBEEEFFEEEEC.",
-    "ABBBBBBBBBBEEEEEEEEEC.",
-    "ABBBBBBBBBBEEEEEEEEEC.",
-    "ABBBBBBBBBBEEEEGGEEEFC",
-    "ABBBBBBBBBEEEEGGGHEEFC",
-    "ABBBBBBBBBEFFFHHHFFFFC",
-    "ABBBBBBBBBEEEEEEEEEEFC",
-    "ABBBBBBBBBEEFEEEEEEFFC",
-    "ABBBBBBBBBEEEEEEEEFFC.",
-    "BBBBBBBBBBEEEEEEEFFC..",
-    "BBBBBBBBBCFEEEEEFFCC..",
-    "CBBBBBBBCCFFFFFFFCC...",
-    ".CCBBBBCCCCCCCCCC.....",
-    "...CCCCCC.............",
+    "....AAAAAA......",
+    "..AABBBBBBAA....",
+    ".ABBBBBBBBEEA...",
+    ".ABBBBBBBEEEEB..",
+    "ABBBBBBBEEEEEEC.",
+    "ABBBBBBBEEFFEEC.",
+    "ABBBBBBEEEEEEEEC",
+    "ABBBBBBEEEGGEEFC",
+    "ABBBBBBEEGGGHEFC",
+    "ABBBBBBEFFHHHFFC",
+    "BBBBBBBEEEEEEFFC",
+    "CBBBBBBCFEEEFFC.",
+    ".CCBBBCCCFFFCC..",
+    "...CCCCC........",
 ]
+# 後ろ足（短く した ももと 大きな 足）
 LEG = [
-    "...AAAAAA...............",
-    ".AABBBBBBAA.............",
-    "ABBBBBBBBBBA............",
-    "ABBBBBBBBBBBA...........",
-    "ABBBBBBBBBBBC...........",
-    "ABBBBBBBBBBBC...........",
-    "ABBBBBBBBBBCC...........",
-    ".ABBBBBBBBCC............",
-    ".ABBBBBBBCC.............",
-    "..ABBBBBCC..............",
-    "...ABBBBC...............",
-    "...ABBBC................",
-    "....ABBC................",
-    "....ABBC................",
-    "....ABBBC...............",
-    "....ABBBBAAAAAAAAAA.....",
-    "....ABBBBBBBBBBBBBBBBA..",
-    "....CBBBBBBBBBBBBBBBBBBw",
-    ".....CCCCCCCCCCCCCCCCCCw",
+    "..AAAAAA..........",
+    ".ABBBBBBA.........",
+    "ABBBBBBBBA........",
+    "ABBBBBBBBC........",
+    "ABBBBBBBCC........",
+    ".ABBBBBCC.........",
+    "..ABBBC...........",
+    "..ABBBC...........",
+    "..ABBBBAAAAAAAA...",
+    "..ABBBBBBBBBBBBBA.",
+    "..CBBBBBBBBBBBBBBw",
+    "...CCCCCCCCCCCCCCw",
 ]
 TUFT = ['A..A..', 'AA.AA.', 'ABAABA', 'BBBBBC']
+# 太い 尾（見せ所の ひとつ：地面を ささえて けりを 出す）
 TAIL = [
+    "....................AB",
     "..................ABBB",
-    "................ABBBBB",
-    "..............ABBBBBBC",
-    "............ABBBBBBBC.",
-    "..........ABBBBBBBCC..",
+    "...............AABBBBC",
+    ".............ABBBBBBC.",
+    "..........AABBBBBBCC..",
     "........ABBBBBBBCC....",
-    "......ABBBBBBBCC......",
-    ".....ABBBBBBCC........",
+    "......ABBBBBBCC.......",
     "....ABBBBBCC..........",
-    "...ABBBBCC............",
-    "..ABBBCC..............",
-    ".ABBCC................",
-    "ABCC..................",
+    "..ABBBBCC.............",
+    "ABBCC.................",
 ]
 GLOVE = [
     "..RRRRR...",
@@ -140,24 +126,22 @@ GLOVE = [
     "..GHGHG...",
 ]
 ARM = [
-    "AAB.........",
-    "ABBC........",
-    "ABBBC.......",
-    ".ABBBC......",
-    "..ABBBC.....",
-    "...ABBBAAAA.",
-    "....ABBBBBBC",
-    ".....CCCCCC.",
+    "AAB......",
+    "ABBC.....",
+    ".ABBC....",
+    "..ABBAAA.",
+    "...ABBBBC",
+    "....CCCC.",
 ]
 ARM_PUNCH = [
-    "AAAAAAAAAAAAAAA",
-    "ABBBBBBBBBBBBBB",
-    "BBBBBBBBBBBBBBC",
-    "CCCCCCCCCCCCCC.",
+    "AAAAAAAAAAAA",
+    "ABBBBBBBBBBB",
+    "BBBBBBBBBBBC",
+    "CCCCCCCCCCC.",
 ]
 ARMS = {
-    'base': place([(outline(ARM), 0, 4), (outline(GLOVE), 11, 0)]),
-    'punch': place([(outline(ARM_PUNCH), 0, 8), (outline(GLOVE), 15, 5)]),
+    'base': place([(outline(ARM), 0, 4), (outline(GLOVE), 8, 0)]),
+    'punch': place([(outline(ARM_PUNCH), 0, 6), (outline(GLOVE), 12, 3)]),
 }
 IMPACT = [
     "....k.....",
@@ -172,36 +156,25 @@ IMPACT = [
 ]
 SWEAT = ['.k.', 'kwk', 'kGk', '.k.']
 
+HX, HY = 28, 22     # 頭の 位置（頭は 元の 大きさ）
 def base():
     return [
-        dict(n='armB', g='armB', x=35, y=15, rows=dk(ARMS['base']), alt={'atk2': dk(ARMS['punch'])}),
-        dict(n='earB', g='head', x=29, y=2, rows=outline(dk(EAR))),
-        dict(n='tail', g='tail', x=2, y=46, rows=outline(TAIL)),
-        dict(n='legB', g='legB', x=12, y=40, rows=outline(dk(LEG))),
-        dict(n='body', g='body', x=18, y=20, rows=outline(BODY)),
-        dict(n='legA', g='legA', x=16, y=40, rows=outline(LEG)),
-        dict(n='tuft', g='head', x=31, y=6, rows=outline(TUFT)),
-        dict(n='ear', g='head', x=26, y=3, rows=outline(EAR)),
-        dict(n='head', g='head', x=28, y=8, rows=outline(HEAD), alt={'atk1|atk2|hit': outline(HEAD_YELL)}),
-        dict(n='eye', g='head', x=37, y=10, rows=EYE, alt=EYE_ALT),
-        dict(n='armF', g='armF', x=32, y=22, rows=ARMS['base'], alt={'atk1': ARMS['punch']}),
+        dict(n='armB', g='armB', x=33, y=31, rows=dk(ARMS['base']), alt={'atk2': dk(ARMS['punch'])}),
+        dict(n='earB', g='head', x=HX + 1, y=HY - 6, rows=outline(dk(EAR))),
+        dict(n='tail', g='tail', x=4, y=44, rows=outline(TAIL)),
+        dict(n='legB', g='legB', x=16, y=47, rows=outline(dk(LEG))),
+        dict(n='body', g='body', x=24, y=33, rows=outline(BODY)),
+        dict(n='legA', g='legA', x=21, y=47, rows=outline(LEG)),
+        dict(n='tuft', g='head', x=HX + 3, y=HY - 2, rows=outline(TUFT)),
+        dict(n='ear', g='head', x=HX - 2, y=HY - 5, rows=outline(EAR)),
+        dict(n='head', g='head', x=HX, y=HY, rows=outline(HEAD), alt={'atk1|atk2|hit': outline(HEAD_YELL)}),
+        dict(n='eye', g='head', x=HX + 9, y=HY + 2, rows=EYE, alt=EYE_ALT),
+        dict(n='armF', g='armF', x=30, y=33, rows=ARMS['base'], alt={'atk1': ARMS['punch']}),
     ]
 def fx():
-    return [dict(n='impact', g='root', x=61, y=24, rows=IMPACT, only='atk1')]
-def knocked():
-    g = [['.'] * 80 for _ in range(70)]
-    for l in base():
-        rows = l['rows']
-        for j, r in enumerate(rows):
-            for i, c in enumerate(r):
-                if c != '.' and 0 <= l['y'] + j < 70: g[l['y'] + j][l['x'] + i] = c
-    ys = [y for y in range(70) if any(c != '.' for c in g[y])]; xs = [x for x in range(80) if any(g[y][x] != '.' for y in range(70))]
-    g = [r[xs[0]:xs[-1] + 1] for r in g[ys[0]:ys[-1] + 1]]
-    h, w = len(g), len(g[0])
-    return [''.join(g[y][w - 1 - x] for y in range(h)) for x in range(w)]
+    return [dict(n='impact', g='root', x=58, y=35, rows=IMPACT, only='atk1')]
 def layers():
-    ko = knocked()
-    return [dict(l, not_='ko') for l in base()] + fx() + [dict(n='ko', g='root', x=0, y=61 - len(ko), rows=ko, only='ko')]
+    return base() + fx()
 
 FRAMES = {
     'idle0': {}, 'idle1': {'body': (0, 1), 'armF': (1, 0)}, 'idle2': {'body': (0, 1), 'armB': (0, 1)}, 'idle3': {'armF': (1, 0)},
@@ -212,6 +185,6 @@ FRAMES = {
     'atk1': {'root': (4, 0), 'body': (2, 0), 'armF': (0, 0), 'armB': (-3, 1)},
     'atk2': {'root': (5, 0), 'body': (2, 0), 'armF': (-6, 2), 'armB': (2, 0)},
     'hit': {'root': (-3, 0), 'head': (-2, 1), 'armF': (-3, 2)},
-    'ko': {},
+    'ko': {'_flip': True},
 }
 PARENT = {'head': 'body', 'armF': 'body', 'armB': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

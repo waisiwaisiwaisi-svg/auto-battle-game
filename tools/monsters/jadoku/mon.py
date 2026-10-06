@@ -9,11 +9,11 @@ PAL = {
     'A': '#9a74b8', 'B': '#5a3c7c', 'D': '#30204a',      # うろこ（黒紫）
     'E': '#dcec80', 'F': '#8ca234',                      # 腹の 板（黄緑）
     'G': '#b8ff6c', 'g': '#30b03a',                      # 毒の 光
-    'Y': '#ffe14a', 'w': '#ffffff', 'r': '#9a1838',
+    'Y': '#ffe14a', 'y': '#c08a14', 'w': '#ffffff', 'r': '#9a1838',
     'U': '#ece4d4', 'V': '#9a8e80',                      # 骨の とげ
 }
 LIGHT = set('AEGYwU')
-KEEP_BLACK = set('wGgYr')
+KEEP_BLACK = set('wGgYyr')
 
 # ---------- 下書きの 道具 ----------
 def G(): return grid(64, 64)
@@ -72,20 +72,20 @@ def scutes(s, step=3):
 
 # ---------- とぐろ：なめらかな 2段の 輪 ----------
 def coil_low():
-    p = G(); path = ell(29, 53, 21, 5.5, 0, 360, 40); tube(p, path, [4.4] * len(path), belly=.3)
+    p = G(); path = ell(30, 54, 16, 5, 0, 360, 40); tube(p, path, [4.1] * len(path), belly=.3)
     s = scutes(shade(p, RAMP, r=2))
     g = G(); ink(g, s); return g
 def coil_up_back():
-    p = G(); path = ell(31, 46, 15, 4.6, 180, 360, 20); tube(p, path, [4.2] * len(path))
+    p = G(); path = ell(32, 48.5, 11, 4, 180, 360, 20); tube(p, path, [3.9] * len(path))
     s = shade(p, RAMP, r=2); g = G(); ink(g, s); return g
 def coil_up_front():
-    p = G(); path = ell(31, 46, 15, 4.6, -10, 190, 24); tube(p, path, [4.2] * len(path), belly=.35)
+    p = G(); path = ell(32, 48.5, 11, 4, -10, 190, 24); tube(p, path, [3.9] * len(path), belly=.35)
     s = scutes(shade(p, RAMP, r=2)); g = G(); ink(g, s)
     return g
 def tail_g():
-    p = G(); path = [(10, 54), (6, 51), (3, 49)]; tube(p, path, [3, 2, 1.2])
+    p = G(); path = [(15, 55), (11, 52), (8, 50)]; tube(p, path, [3, 2, 1.2])
     s = shade(p, RAMP, r=1); g = G(); ink(g, s)
-    stamp(g, ['kk...', 'kUkk.', '.kUVk', '..kk.'], 0, 46)
+    stamp(g, ['kk...', 'kUkk.', '.kUVk', '..kk.'], 5, 47)
     return g
 def dorsal_marks(g, pts):
     """背の 山形もよう（手で）：暗い くの字"""
@@ -94,27 +94,29 @@ def dorsal_marks(g, pts):
             if g[y + dy][x + dx] in 'AB': g[y + dy][x + dx] = 'D'
 
 # ---------- 首（腹の 板が 前がわ）----------
-NECK_PATH = [(39, 46), (41, 41), (41, 34), (39, 27), (38, 20), (41, 15)]
+NECK_PATH = [(39, 49), (41, 45), (41, 39), (39, 33), (38, 28), (41, 24)]   # デフォルメ：首を 短く
 def neck():
     p = G()
-    tube(p, NECK_PATH, [4.6, 4.4, 4.2, 4.2, 4, 3.6])
+    tube(p, NECK_PATH, [4.4, 4.2, 4.1, 4, 3.9, 3.6])
     # 前がわ（右）は 腹の 板
     for y in range(64):
         xs = [x for x in range(64) if p[y][x] != '.']
         if xs:
             for x in xs[-3:]: p[y][x] = '2'
     s = shade(p, RAMP, r=1)
-    for y in range(15, 48, 3):     # 腹の 板の 区切り
+    for y in range(24, 50, 3):     # 腹の 板の 区切り
         xs = [x for x in range(64) if s[y][x] in 'EF']
         for x in xs: s[y][x] = 'F'
     g = G(); ink(g, s); return g
 
 # ---------- フード：大きく 弧を えがいて 広がる 膜（背中がわ）----------
-HOOD_TOP, HOOD_BOT = 4, 40
+HOOD_TOP, HOOD_BOT = 14, 44
 # 行ごとの 半はば（手で 決める）：上は 丸く、肩で いちばん 広がり、下は えぐれて 首へ しぼむ
 HW = [4, 8, 10.5, 12, 13.5, 14.5, 15.2, 15.8, 16.3, 16.6, 16.8, 16.8, 16.8, 16.6, 16.4, 16, 15.5, 14.8, 14, 13, 11.8, 10.4, 9, 7.6, 6.5, 5.6, 5, 4.6, 4.4, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2]
+# デフォルメ：フード（見せ所）は 少しだけ 小さく（高さ 31・はば .9）
+HW = [HW[min(len(HW) - 1, round(i * 36 / 30))] * .9 for i in range(31)]
 def hood_w(y): return HW[y - HOOD_TOP]
-def hood_c(y): return 34.5 + (y - 22) * .1
+def hood_c(y): return 34.5 + (y - 31) * .1
 def hood(flare=0):
     p = G()
     for y in range(HOOD_TOP, HOOD_BOT + 1):
@@ -126,18 +128,18 @@ def hood(flare=0):
     for ang in (-52, -22, 22, 52):
         a = math.radians(ang - 90)
         for i in range(6, 30):
-            x, y = round(hood_c(36) + math.cos(a) * i * .62), round(36 + math.sin(a) * i)
+            x, y = round(hood_c(42) + math.cos(a) * i * .6), round(42 + math.sin(a) * i * .85)
             if 0 <= y < 64 and s[y][x] in 'AB':
                 s[y][x] = 'D' if s[y][x] == 'B' else s[y][x]
     # ふちの 内がわは うすい 膜（明るく）
     for y in range(64):
         for x in range(64):
-            if s[y][x] != '.' and y < 34 and (at(s, x - 2, y) == '.' or at(s, x, y - 2) == '.') and s[y][x] in 'BD': s[y][x] = 'A'
+            if s[y][x] != '.' and y < 39 and (at(s, x - 2, y) == '.' or at(s, x, y - 2) == '.') and s[y][x] in 'BD': s[y][x] = 'A'
     g = G(); ink(g, s)
     # 目玉もよう：めがねの ように つながった 2つの 毒の 目（つり上がる）
-    stamp(g, OCELLUS_L, 23, 13); stamp(g, OCELLUS_R, 36, 13)
+    stamp(g, OCELLUS_L, 24, 21); stamp(g, OCELLUS_R, 35, 21)
     # 目玉の 下の 暗い くまどり（にらむ 形）
-    for (x, y) in ((25, 21), (26, 22), (27, 22), (28, 23), (42, 21), (41, 22), (40, 22), (39, 23)):
+    for (x, y) in ((26, 29), (27, 30), (28, 30), (29, 31), (41, 29), (40, 30), (39, 30), (38, 31)):
         if g[y][x] in 'ABD': g[y][x] = 'D'
     return g
 OCELLUS_L = [
@@ -161,9 +163,9 @@ HEAD = [
     '..kkAAABBBBBAAAAkkk...',
     '.kAABBBBBBBBBBBBAAAkk.',
     'kAABBBkkkkkBBBBBBBBAAk',
-    'kABBBBBYYkYkkBBBBBBBBk',
-    'kBBBBBBYYkYYkBBBBBBBBk',
-    'kBBBBBBBkkkkBBBBBBBkBk',
+    'kABBBBkwYkYYkBBBBBBBBk',
+    'kBBBBBkYykyykBBBBBBBBk',
+    'kBBBBBBkkkkkBBBBBBBkBk',
     'kDBBBBBBBBBBBBBBBBBBDk',
     'kDDBBBBBBBBBkkkkkkkkkk',
     '.kDDBkkkkkkkkkkwkkwk..',
@@ -177,9 +179,9 @@ HEAD_OPEN = [
     '..kkAAABBBBBAAAAkkk...',
     '.kAABBBBBBBBBBBBAAAkk.',
     'kAABBBkkkkkBBBBBBBBAAk',
-    'kABBBBBYYYYkkBBBBBBBBk',
-    'kBBBBBBYkYYYkBBBBBBBBk',
-    'kBBBBBBBkkkkBBBBBBBkBk',
+    'kABBBBkwYkYYkBBBBBBBBk',
+    'kBBBBBkYykyykBBBBBBBBk',
+    'kBBBBBBkkkkkBBBBBBBkBk',
     'kDBBBBBkkkkkkkkkkkkkkk',
     'kDDBBkrrrrrrrrrwkkwk..',
     'kDDBkrrrrrrrrrrwkkwk..',
@@ -194,10 +196,10 @@ def _eye(h, a, b, c='BkkkkB'):
     h = list(h)
     h[5] = h[5][:6] + a + h[5][6 + len(a):]; h[6] = h[6][:6] + b + h[6][6 + len(b):]; h[7] = h[7][:6] + c + h[7][6 + len(c):]
     return h
-HEAD_BLINK = _eye(HEAD, 'BBBBBkk', 'BkkkkkB', 'BBBBBB')
+HEAD_BLINK = _eye(HEAD, 'BBBBBBk', 'kkkkkkk', 'BBBBBB')
 HEAD_HIT = _eye(HEAD, 'BkBBkBk', 'BBkkBBk', 'BkBBkB')
 HEAD_KO = _eye(HEAD, 'BkBkBBk', 'BBkBBBk', 'BkBkBB')
-HEAD_ATK0 = _eye(HEAD, 'BYYYYkk', 'BYYkYYk', 'BBkkkk')
+HEAD_ATK0 = _eye(HEAD, 'kwwkYYk', 'kYYkyyk', 'BkkkkkB')
 DRIP = ['G', 'g']
 DRIP2 = ['.', 'G', 'g']
 SPIT = [
@@ -210,6 +212,7 @@ SPIT = [
 ]
 SPIT2 = ['.......G...G..', '..G.GgG..G..g.', 'GgGG.g..g.....', '.g.....g......']
 
+def spx(y): return round(hood_c(y) - hood_w(y)) - 5
 def layers():
     LOW = rows_of(coil_low()); UB = rows_of(coil_up_back()); UF = coil_up_front()
     UF = rows_of(UF)
@@ -219,22 +222,23 @@ def layers():
         dict(n='low', g='coil', x=0, y=0, rows=LOW),
         dict(n='upb', g='coil', x=0, y=0, rows=UB),
         dict(n='neck', g='neck', x=0, y=0, rows=NECK, not_='ko'),
-        dict(n='spk0', g='hood', x=14, y=4, rows=SPK, not_='ko'),
-        dict(n='spk1', g='hood', x=13, y=10, rows=SPK, not_='ko'),
-        dict(n='spk2', g='hood', x=13, y=17, rows=SPK, not_='ko'),
-        dict(n='spk3', g='hood', x=16, y=25, rows=SPK2, not_='ko'),
+        # 骨の とげ：付け根を フードの ふちの 中へ 3ドット 食いこませる（フードの 下から 生える）
+        dict(n='spk0', g='hood', x=spx(16), y=14, rows=SPK, not_='ko'),
+        dict(n='spk1', g='hood', x=spx(21), y=19, rows=SPK, not_='ko'),
+        dict(n='spk2', g='hood', x=spx(27), y=25, rows=SPK, not_='ko'),
+        dict(n='spk3', g='hood', x=spx(33), y=32, rows=SPK2, not_='ko'),
         dict(n='hood', g='hood', x=0, y=0, rows=HOOD, alt={'atk0|atk1|atk2': HOOD_F}, not_='ko'),
         dict(n='upf', g='coil', x=0, y=0, rows=UF),
-        dict(n='head', g='head', x=39, y=7, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN, 'atk0': HEAD_ATK0, 'blink': HEAD_BLINK, 'hit': HEAD_HIT, 'ko': HEAD_KO}),
-        dict(n='drip', g='head', x=57, y=20, rows=DRIP, alt={'idle2|idle3|walk1|walk3': DRIP2}, not_='atk1|atk2|ko'),
-        dict(n='spit', g='head', x=61, y=15, rows=SPIT, only='atk1'),
-        dict(n='spit2', g='head', x=63, y=16, rows=SPIT2, only='atk2'),
+        dict(n='head', g='head', x=40, y=17, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN, 'atk0': HEAD_ATK0, 'blink': HEAD_BLINK, 'hit': HEAD_HIT, 'ko': HEAD_KO}),
+        dict(n='drip', g='head', x=58, y=30, rows=DRIP, alt={'idle2|idle3|walk1|walk3': DRIP2}, not_='atk1|atk2|ko'),
+        dict(n='spit', g='head', x=62, y=25, rows=SPIT, only='atk1'),
+        dict(n='spit2', g='head', x=64, y=26, rows=SPIT2, only='atk2'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'neck': (0, 1)}, 'idle2': {'neck': (0, 1), 'hood': (0, 0)}, 'idle3': {'neck': (0, 0), 'hood': (0, -1)},
     'blink': {},
     'walk0': {'neck': (-1, 0)}, 'walk1': {'neck': (0, 1)}, 'walk2': {'neck': (1, 0)}, 'walk3': {'neck': (0, 1)},
     'atk0': {'neck': (-2, 1), 'hood': (0, -1), 'head': (-1, 0)}, 'atk1': {'neck': (2, -1), 'head': (2, 0)}, 'atk2': {'neck': (2, 0), 'head': (1, 0)},
-    'hit': {'neck': (-2, 1), 'head': (-2, 1)}, 'ko': {'head': (2, 38)},
+    'hit': {'neck': (-2, 1), 'head': (-2, 1)}, 'ko': {'head': (2, 29)},
 }
 PARENT = {'head': 'neck', 'hood': 'neck', 'neck': 'root', 'coil': 'root'}

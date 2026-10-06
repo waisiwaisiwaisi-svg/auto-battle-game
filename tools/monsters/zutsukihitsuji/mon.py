@@ -7,9 +7,10 @@ PAL = {
     'A': '#f6f0e0', 'B': '#d0c4a6', 'C': '#8e8066',
     'D': '#76708a', 'E': '#4a4560', 'F': '#2c283a',
     'R': '#dcc8a4', 'S': '#a08868', 'T': '#5e4a38',
-    'Y': '#ffd030', 'X': '#d83a3a', 'w': '#ffffff',
+    'Y': '#ffd030', 'y': '#b07818', 'X': '#d83a3a', 'w': '#ffffff',
 }
 LIGHT = set('ADRYw')
+KEEP_BLACK = set('wYy')
 
 def shade(rows, ramps, low=99):
     g = pix.grid_of(rows); H, W = len(g), len(g[0]); o = [r[:] for r in g]
@@ -42,9 +43,12 @@ def notop(r): return ['.' * len(r[0])] + r[1:]
 PUFFS = [(6, 7, 4.5), (12, 4, 4.5), (19, 3, 4.5), (26, 4, 4.5), (32, 8, 4.2), (3, 13, 4), (34, 14, 3.6),
          (5, 19, 4), (12, 21, 4), (20, 21, 4), (28, 20, 4), (33, 18, 3.4),
          (11, 11, 3.6), (19, 10, 3.6), (26, 11, 3.6), (15, 16, 3.4), (23, 15, 3.4), (8, 15, 3)]
+# デフォルメ：玉の 位置を 横 .76・たて .82 に ちぢめ、小さく 丸い 胴に
+SX, SY, SR = .76, .82, .8
+PUFFS = [(round(cx * SX + 1, 1), round(cy * SY + 1, 1), round(r * SR + .3, 1)) for (cx, cy, r) in PUFFS]
 def body():
-    W, H = 38, 26; g = pix.grid(W, H)
-    pix.ellipse(g, 18.5, 13, 15, 9, 'B')
+    W, H = 31, 23; g = pix.grid(W, H)
+    pix.ellipse(g, 15, 11.5, 12, 8, 'B')
     for (cx, cy, r) in PUFFS: pix.ellipse(g, cx, cy, r, r, 'B')
     # 玉ごとに 左上が 明るく 右下が 暗い（手前の 玉が 上書き）
     for (cx, cy, r) in PUFFS:
@@ -57,7 +61,7 @@ def body():
                 elif g[y][x] not in 'AC': g[y][x] = 'B'
     for y in range(H):
         for x in range(W):
-            if g[y][x] != '.' and y > 20 and g[y][x] == 'B': g[y][x] = 'C'
+            if g[y][x] != '.' and y > 18 and g[y][x] == 'B': g[y][x] = 'C'
     return pix.outline(pix.rows_of(g))
 BODY = body()
 # 背中から つき出る 岩の とげ
@@ -89,32 +93,27 @@ ROCK2 = [
     '.kkk..',
 ]
 # ---- 足：こげた 灰色、前足に 赤い 布、石の ひづめ ----
+# デフォルメ：短く 太く（付け根は 羊毛の 中へ 3ドット 食いこむ）
 FLEG_M = [
     '.#####.',
     '######.',
     '######.',
-    '.#####.',
     '.XXXX..',
     '.XXXX..',
     '.####..',
     '.XXXX..',
-    '.XXXX..',
-    '.####..',
     '.####..',
     '.%%%%..',
     '%%%%%%.',
 ]
 FLEG = notop(pix.outline(put(shade(FLEG_M, {'#': 'DEF', '%': 'RST', 'X': 'XXl'}), [
-    '', '', '', '', '', '.X..l', '', '', '.X..l', '', '', '', '...k',
+    '', '', '', '', '.X..l', '', '.X..l', '', '', '...k',
 ])))
 HLEG_M = [
     '..######.',
     '.########',
-    '#########',
-    '.#######.',
-    '..#####..',
-    '...###...',
-    '...###...',
+    '..######.',
+    '...####..',
     '...###...',
     '...###...',
     '...###...',
@@ -123,7 +122,7 @@ HLEG_M = [
     '.%%%%%%..',
 ]
 HLEG = notop(pix.outline(put(shade(HLEG_M, {'#': 'DEF', '%': 'RST'}), [
-    '', '', '', '', '', '', '', '', '', '', '', '', '....k',
+    '', '', '', '', '', '', '', '', '', '....k',
 ])))
 
 # ---- 頭（手打ち）：ローマ鼻の 黒い 顔、横長の ひとみ ----
@@ -150,8 +149,10 @@ HEAD_OPEN = HEAD[:11] + [
     '....kkFFFFFFFFkk....',
     '......kkkkkkkk......',
 ]
-EYE = ['YkkY', 'kkkk']
-EYE_ALT = {'blink': ['kkkk', 'EEEE'], 'hit': ['kEEk', 'EkkE'], 'atk0|atk1|atk2': ['YkkY', 'YYYY'], 'ko': ['kEkE', 'EkEk']}
+# 目：ハイライト w ＋ 虹彩 2色（Y 明・y 暗）＋ 横長の ひとみ k（ヒツジの 目）。上は 岩の まゆ
+EYE = ['kwYYYk', 'kYkkkk', 'Ekyyyk', 'EEkkkE']
+EYE_ALT = {'blink': ['kkkkkk', 'EEEEEk', 'EEEEEk', 'EEEEEE'], 'hit': ['kEEEkk', 'EkkkEk', 'EEkkkE', 'EEEEEE'],
+           'atk0|atk1|atk2': ['kwwYYk', 'kYkkkk', 'EkYyyk', 'EEkkkE'], 'ko': ['kEEEkk', 'EkEkEk', 'EEkEEk', 'EkEkEE']}
 FLUFF = [
     '..kk.kk..',
     '.kAAkAAk.',
@@ -221,21 +222,22 @@ TAIL = [
 ]
 
 NB = 'atk1|atk2'
+HX, HY = 34, 28     # 頭の 位置（頭は 元の 大きさ）
 def layers():
     return [
-        dict(n='hlegF', g='legB', x=14, y=45, rows=dark(HLEG), not_='ko'),
-        dict(n='flegF', g='legB', x=36, y=45, rows=dark(FLEG), not_='ko'),
-        dict(n='tail', g='body', x=2, y=27, rows=TAIL),
-        dict(n='sp1', g='body', x=8, y=15, rows=SPIKE),
-        dict(n='sp2', g='body', x=16, y=12, rows=SPIKE),
-        dict(n='sp3', g='body', x=24, y=13, rows=SPIKE),
-        dict(n='body', g='body', x=3, y=20, rows=BODY),
-        dict(n='hleg', g='legA', x=8, y=45, rows=HLEG, not_='ko'),
-        dict(n='fleg', g='legA', x=31, y=45, rows=FLEG, not_='ko'),
-        dict(n='head', g='head', x=38, y=24, rows=HEAD, alt={NB: HEAD_OPEN}),
-        dict(n='horn', g='head', x=30, y=21, rows=HORN),
-        dict(n='eye', g='head', x=50, y=29, rows=EYE, alt=EYE_ALT),
-        dict(n='impact', g='head', x=55, y=22, rows=IMPACT, alt={'atk2': IMPACT2}, only=NB),
+        dict(n='hlegF', g='legB', x=17, y=50, rows=dark(HLEG)),
+        dict(n='flegF', g='legB', x=25, y=50, rows=dark(FLEG)),
+        dict(n='tail', g='body', x=8, y=35, rows=TAIL),
+        dict(n='sp1', g='body', x=13, y=25, rows=SPIKE),
+        dict(n='sp2', g='body', x=20, y=23, rows=SPIKE),
+        dict(n='sp3', g='body', x=27, y=24, rows=SPIKE),
+        dict(n='body', g='body', x=10, y=31, rows=BODY),
+        dict(n='hleg', g='legA', x=12, y=50, rows=HLEG),
+        dict(n='fleg', g='legA', x=31, y=50, rows=FLEG),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={NB: HEAD_OPEN}),
+        dict(n='horn', g='head', x=HX - 8, y=HY - 3, rows=HORN),
+        dict(n='eye', g='head', x=HX + 11, y=HY + 5, rows=EYE, alt=EYE_ALT),
+        dict(n='impact', g='head', x=HX + 17, y=HY - 2, rows=IMPACT, alt={'atk2': IMPACT2}, only=NB),
     ]
 
 FRAMES = {
@@ -252,6 +254,6 @@ FRAMES = {
     'atk1': {'root': (7, 0), 'head': (2, 2)},
     'atk2': {'root': (5, 0), 'head': (1, 1)},
     'hit': {'root': (-3, 0), 'head': (-2, -2)},
-    'ko': {'body': (0, 9), 'head': (1, 2)},
+    'ko': {'_flip': True, 'head': (0, 2)},
 }
 PARENT = {'head': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

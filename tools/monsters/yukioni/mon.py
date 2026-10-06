@@ -42,12 +42,12 @@ def fur(W, H, pts, tufts=(), strands=(), shadow=1.0):
             if 0 <= X < W and 0 <= Y < H and o[Y][X] in 'AB': o[Y][X] = c
     return rows_of(o)
 
-# 胴：肩が いちばん 高く（前の 上）、背中は 後ろへ 下がる 前かがみ
-BODY = fur(44, 44, [(8, 32), (6, 22), (9, 12), (15, 4), (23, 0), (32, 0), (38, 4), (41, 12), (41, 24), (36, 34), (26, 40), (12, 40)],
-           tufts=[(11, 9, 'u'), (16, 5, 'u'), (22, 1, 'u'), (28, 0, 'u'), (34, 1, 'u'), (8, 15, 'l'), (6, 21, 'l'), (6, 27, 'l'), (8, 32, 'l'),
-                  (12, 40, 'd'), (17, 40, 'd'), (23, 40, 'd'), (29, 37, 'd'), (34, 34, 'd')],
-           strands=[(16, 10), (23, 6), (30, 6), (12, 17), (19, 15), (26, 13), (33, 12), (12, 25), (18, 23), (25, 21), (14, 32), (20, 31)], shadow=.9)
-# 頭：毛の ずきんに あい色の 鬼の 顔。せり出した まゆ、赤く 光る 目、下あごから 上向きの きば
+# 胴（デフォルメ）：小さく 丸い 毛の かたまり。肩が いちばん 高い 前かがみ
+BODY = fur(32, 23, [(5, 19), (2, 12), (4, 6), (10, 1), (18, 0), (25, 1), (30, 5), (31, 12), (28, 18), (20, 22), (9, 22)],
+           tufts=[(8, 5, 'u'), (13, 2, 'u'), (19, 0, 'u'), (25, 1, 'u'), (4, 10, 'l'), (3, 15, 'l'), (5, 20, 'l'),
+                  (9, 22, 'd'), (15, 22, 'd'), (21, 21, 'd')],
+           strands=[(10, 6), (17, 4), (24, 5), (8, 12), (15, 10), (22, 11), (11, 16), (18, 16)], shadow=.95)
+# 頭：毛の ずきんに あい色の 鬼の 顔（頭は 元の 大きさの まま）。せり出した まゆ、赤く 光る 目、下あごから 上向きの きば
 HEAD = [
     ".....AAAAAAA..........",
     "...AAAABBBBBAA........",
@@ -70,21 +70,22 @@ HEAD = [
 ]
 _ = "......................"
 def face(eye, mouth):
-    return [_] * 8 + [eye[0], eye[1], eye[2], "..................kk.."] + mouth
-EYE = ["..........kkkkkk......", "..........kRRROwk.....", "...........kRkkk......"]
+    return [_] * 7 + [eye[0], eye[1], eye[2], eye[3], "..................kk.."] + mouth
+# 目：まゆの 線（前へ 下がる つり目）＋ ハイライト w ＋ 虹彩 2色（O 明・R 暗）＋ たての ひとみ k
+EYE = ["..........kk..........", "...........kkkkk......", "..........kwOOkOk.....", "...........kRRkRk....."]
 MOUTH = ["...........w.....w....", "..........kwkkkkkkwkkk", "...........kEEEEEEEEk.", _]
 ROAR = ["..........kkkkkkkkkkkk", "..........kwkwkkkwkwkk", "..........kRRRRRRRRRk.", "...........kwkkkkkwk.."]
 FACE = face(EYE, MOUTH)
 FACE_ALT = {
-    'blink': face(["..........kkkkkk......", "..........EEEEEEE.....", _], MOUTH),
-    'atk0|atk1|atk2': face(["..........kkkkkk......", "..........kOwwwwk.....", "...........kOkkk......"], ROAR),
-    'hit': face(["..........k.kk.k......", "..........kRkkRkk.....", "...........kkRkk......"], ROAR),
-    'ko': face(["..........k.k.........", "...........k..........", "..........k.k........."], [_, "..........kwkkkkkkwkkk", _, _]),
+    'blink': face(["..........kk..........", "...........kkkkk......", "..........EkkkkkE.....", "..........DDDDDDD....."], MOUTH),
+    'atk0|atk1|atk2': face(["..........kk..........", "...........kkkkkk.....", "..........kwwOkOOk....", "...........kOOkRRk...."], ROAR),
+    'hit': face(["..........kk..........", "...........kk..kk.....", "............kkkk......", "...........kk..kk....."], ROAR),
+    'ko': face(["..........kk..........", "...........k.k........", "............k.........", "...........k.k........"], [_, "..........kwkkkkkkwkkk", _, _]),
 }
 # つららの 角（前へ 反る）
 HORN = ['.....I', '....IJ', '....IJ', '...IJK', '...IJK', '..IIJK', '..IJJK', '.IIJK.', '.IJJK.', 'IIJKK.', 'IJJK..']
 HORN_S = ['...I', '..IJ', '..IJ', '.IJK', '.IJK', 'IIJK', 'IJK.']
-# 氷の こぶし（ぎざぎざの 結晶）
+# 氷の こぶし（ぎざぎざの 結晶）：見せ所 なので 大きい まま
 FIST = [
     ".....I...I......",
     "....IIJ.IJ..I...",
@@ -100,29 +101,23 @@ FIST = [
     "..JKKJKKJKKKK...",
     "...K..K..K......",
 ]
-# 長い 腕：肩が 太く、手首で 毛が はねる
-ARM = fur(16, 26, [(0, 0), (11, 0), (14, 6), (13, 14), (11, 20), (15, 25), (1, 25), (3, 20), (1, 12)],
-          tufts=[(1, 6, 'l'), (1, 13, 'l'), (2, 22, 'l'), (13, 9, 'r'), (12, 16, 'r'), (14, 22, 'r')],
-          strands=[(5, 4), (8, 9), (5, 13), (7, 18)], shadow=1.05)
-ARM_UP = fur(16, 26, [(6, 0), (15, 0), (15, 8), (13, 18), (11, 25), (1, 25), (3, 12)],
-             tufts=[(3, 10, 'l'), (2, 17, 'l'), (14, 6, 'r'), (13, 14, 'r')],
-             strands=[(8, 5), (10, 12), (6, 17)])
-ARM_SLAM = fur(26, 14, [(0, 0), (10, 1), (25, 4), (25, 13), (12, 13), (1, 11)],
-               tufts=[(6, 0, 'u'), (13, 1, 'u'), (19, 3, 'u'), (6, 12, 'd'), (12, 13, 'd'), (18, 13, 'd')],
-               strands=[(7, 5), (14, 6), (20, 8)])
+# 腕：短く 太く（肩は 胴の 中へ 食いこむ）
+ARM = fur(15, 15, [(0, 0), (8, 0), (13, 7), (15, 14), (6, 14), (1, 7)],
+          tufts=[(2, 7, 'l'), (5, 12, 'l'), (12, 8, 'r')], strands=[(5, 4), (8, 8)], shadow=1.1)
+ARM_UP = fur(12, 18, [(2, 0), (12, 0), (12, 7), (11, 17), (1, 17), (1, 8)],
+             tufts=[(2, 8, 'l'), (2, 13, 'l'), (11, 5, 'r')], strands=[(6, 5), (7, 11)])
+ARM_SLAM = fur(22, 17, [(0, 0), (9, 0), (17, 6), (21, 12), (16, 16), (11, 13), (1, 8)],
+               tufts=[(6, 0, 'u'), (12, 3, 'u'), (4, 9, 'd'), (11, 13, 'd')],
+               strands=[(6, 4), (12, 8)])
 # 太く 短い 足：毛の すその 下に あい色の 足と 白い 爪
 LEG = [
-    "AABBBBBBBBC..",
-    "ABBBBBBBBBCC.",
-    "ABBCBBBBBBCC.",
-    "ABBBCBBBBCCC.",
-    ".ABBBBBBBCC..",
-    "..ABBBBCBCC..",
-    "..ABCBBCCC...",
-    "..DDDDDDDDE..",
-    ".DDDDDDDDDDE.",
-    "DDDDDDDDDDDEw",
-    "EEwEEwEEEEEE.",
+    "ABBBBBBBBBC.",
+    "ABBCBBBBBCC.",
+    ".ABBBBCBCC..",
+    ".ABBCBBCCC..",
+    ".DDDDDDDDDE.",
+    "DDDDDDDDDDEw",
+    "EEwEEwEEEEE.",
 ]
 SHARDS = [
     "....k.......k....",
@@ -134,49 +129,35 @@ SHARDS = [
     "kIJJKkIJKkIJKKkIJ",
 ]
 SNOW = ['.k.', 'kAk', '.k.']
-
+HX, HY = 36, 15     # 頭の 位置
 def base():
+    A = 'atk0|atk1|atk2'
     return [
-        dict(n='armB', g='armB', x=31, y=25, rows=outline(dk(ARM)), not_='atk0|atk1|atk2'),
-        dict(n='fistB', g='armB', x=29, y=47, rows=outline(dk(FIST)), not_='atk0|atk1|atk2'),
-        dict(n='legB', g='legB', x=10, y=49, rows=outline(dk(LEG))),
-        dict(n='hornB', g='head', x=40, y=5, rows=outline(dk(HORN_S))),
-        dict(n='body', g='body', x=2, y=8, rows=outline(BODY)),
-        dict(n='legA', g='legA', x=20, y=49, rows=outline(LEG)),
-        dict(n='armF', g='armF', x=38, y=24, rows=outline(ARM), not_='atk0|atk1|atk2'),
-        dict(n='fistF', g='armF', x=41, y=47, rows=outline(FIST), not_='atk0|atk1|atk2'),
-        dict(n='armS', g='armF', x=36, y=26, rows=outline(ARM_SLAM), only='atk1|atk2'),
-        dict(n='fistS', g='armF', x=56, y=34, rows=outline(FIST), only='atk1|atk2'),
-        dict(n='horn', g='head', x=46, y=1, rows=outline(HORN)),
-        dict(n='head', g='head', x=38, y=12, rows=outline(HEAD)),
-        dict(n='face', g='head', x=39, y=13, rows=FACE, alt=FACE_ALT),
-        dict(n='armU', g='armF', x=26, y=0, rows=outline(ARM_UP), only='atk0'),
-        dict(n='fistU', g='armF', x=28, y=-10, rows=outline(FIST), only='atk0'),
+        dict(n='armB', g='armB', x=27, y=33, rows=outline(dk(ARM)), not_=A),
+        dict(n='fistB', g='armB', x=34, y=45, rows=outline(dk(FIST)), not_=A),
+        dict(n='legB', g='legB', x=11, y=52, rows=outline(dk(LEG))),
+        dict(n='legA', g='legA', x=22, y=52, rows=outline(LEG)),
+        dict(n='hornB', g='head', x=HX + 2, y=HY - 7, rows=outline(dk(HORN_S))),
+        dict(n='body', g='body', x=8, y=28, rows=outline(BODY)),
+        dict(n='horn', g='head', x=HX + 8, y=HY - 11, rows=outline(HORN)),
+        dict(n='head', g='head', x=HX, y=HY, rows=outline(HEAD)),
+        dict(n='face', g='head', x=HX + 1, y=HY + 1, rows=FACE, alt=FACE_ALT),
+        dict(n='armF', g='armF', x=33, y=32, rows=outline(ARM), not_=A),
+        dict(n='fistF', g='armF', x=41, y=45, rows=outline(FIST), not_=A),
+        dict(n='armS', g='armF', x=32, y=32, rows=outline(ARM_SLAM), only='atk1|atk2'),
+        dict(n='fistS', g='armF', x=47, y=46, rows=outline(FIST), only='atk1|atk2'),
+        dict(n='armU', g='armF', x=27, y=19, rows=outline(ARM_UP), only='atk0'),
+        dict(n='fistU', g='armF', x=24, y=7, rows=outline(FIST), only='atk0'),
     ]
 def fx():
     return [
-        dict(n='shards', g='root', x=56, y=53, rows=SHARDS, only='atk1|atk2'),
-        dict(n='snow1', g='root', x=6, y=8, rows=SNOW, only='idle1|idle2'),
-        dict(n='snow2', g='root', x=58, y=6, rows=SNOW, only='idle2|idle3'),
-        dict(n='snow3', g='root', x=4, y=30, rows=SNOW, only='idle3|idle0'),
+        dict(n='shards', g='root', x=60, y=53, rows=SHARDS, only='atk1|atk2'),
+        dict(n='snow1', g='root', x=6, y=22, rows=SNOW, only='idle1|idle2'),
+        dict(n='snow2', g='root', x=60, y=12, rows=SNOW, only='idle2|idle3'),
+        dict(n='snow3', g='root', x=4, y=40, rows=SNOW, only='idle3|idle0'),
     ]
-def knocked():
-    g = [['.'] * 90 for _ in range(80)]
-    for l in base():
-        if l.get('only'): continue
-        rows = l['rows']
-        for k, v in (l.get('alt') or {}).items():
-            if 'ko' in k.split('|'): rows = v
-        for j, r in enumerate(rows):
-            for i, c in enumerate(r):
-                if c != '.': g[l['y'] + j + 10][l['x'] + i] = c
-    ys = [y for y in range(80) if any(c != '.' for c in g[y])]; xs = [x for x in range(90) if any(g[y][x] != '.' for y in range(80))]
-    g = [r[xs[0]:xs[-1] + 1] for r in g[ys[0]:ys[-1] + 1]]
-    h, w = len(g), len(g[0])
-    return [''.join(g[y][w - 1 - x] for y in range(h)) for x in range(w)]
 def layers():
-    ko = knocked()
-    return [dict(l, not_=(l.get('not_', '') + '|ko').strip('|')) for l in base()] + fx() + [dict(n='ko', g='root', x=0, y=61 - len(ko), rows=ko, only='ko')]
+    return base() + fx()
 
 FRAMES = {
     'idle0': {}, 'idle1': {'body': (0, 1), 'armF': (0, 0)}, 'idle2': {'body': (0, 1), 'head': (0, 0)}, 'idle3': {'body': (0, 0), 'head': (0, -1)},
@@ -187,6 +168,6 @@ FRAMES = {
     'atk1': {'root': (2, 0), 'body': (1, 2), 'head': (1, 1)},
     'atk2': {'root': (3, 0), 'body': (1, 3), 'head': (1, 2), 'armF': (0, 2)},
     'hit': {'root': (-3, 0), 'head': (-2, 1), 'armF': (-2, 0), 'armB': (-1, 0)},
-    'ko': {},
+    'ko': {'_flip': True, 'armF': (-4, -3)},
 }
 PARENT = {'head': 'body', 'armF': 'body', 'armB': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

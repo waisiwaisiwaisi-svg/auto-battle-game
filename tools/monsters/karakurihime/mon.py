@@ -1,4 +1,4 @@
-# カラクリヒメ（フェアリー・はがね × からくり人形）手打ち GBA風
+# カラクリヒメ（フェアリー・はがね × からくり人形）手打ち GBA風・デフォルメ（2〜3頭身：頭は そのまま、着物の たけと 袖を 短く）
 META = dict(id='karakurihime', name='カラクリヒメ', types=['fairy', 'steel'], base='からくり人形', size='M')
 PAL = {
     'k': '#101018', 'l': '#3c1634',
@@ -34,11 +34,13 @@ HEAD = [
     'khhhhhhk.kkkkkk.....',
     'khhhhhk.............',
 ]
-EYE = ['NPPPPPPPPNN', 'kkPPPPPPkkN', 'MwkPPPkMwMk', 'NPPPPPPNNPP']
+# 目：つり上がった まぶたの 線、白い 光＋桃色 2段（明・暗）＋たての ひとみ。目じりに 赤い くまどり
+EYE = ['kkkkkkPPkkk', 'wMkMMkPkwkM', 'NNkNNkPkNkN', 'MkkkkPPPkkM']
 EYE_ALT = {
-    'blink': ['PPPPPPPPPNN', 'PPPPPPPPPPN', 'kkkPPPkkkkk', 'NPPPPPPNNPP'],
-    'atk0|atk1|atk2': ['NPPPPPPPPNN', 'kkkPPPPkkkN', 'MwkPPPkwwMk', 'NNPPPPPNNNP'],
-    'hit|ko': ['PPPPPPPPPNN', 'kPkPPPkPkPN', 'PkPPPPPkPPP', 'kPkPPPkPkPP'],
+    'blink': ['PPPPPPPPPPP', 'kkkkkkPkkkk', 'PPPPPPPPPPP', 'MPPPPPPPPPM'],
+    'atk0|atk1|atk2': ['kkkkkkPPkkk', 'wwkwwkPkwkw', 'MMkMMkPkMkM', 'NkkkkPPPkkN'],
+    'hit': ['PPPPPPPPPPP', 'kkkkkPPkkkk', 'PPPkkPPPkkP', 'MPPPPPPPPPM'],
+    'ko': ['kPPPkPPkPkP', 'PkPkPPPPkPP', 'kPPPkPPkPkP', 'PPPPPPPPPPP'],
 }
 BUN = ['..kkkk..', '.khiihk.', 'khiihhhk', 'khhhhhhk', '.kkkkkk.']
 HAIR = [
@@ -54,7 +56,7 @@ HAIR = [
     '.kk..',
 ]
 # 胴（えり・帯）と すそ広がりの 着物
-KIMONO = [
+KIMONO_FULL = [
     '......kkkkkkk.........',
     '.....kYyYkkPPk........',
     '....kMkkkPkPNNk.......',
@@ -88,6 +90,8 @@ KIMONO = [
     'kMMMMMMNNNNNNNNNNOkOOk',
     '.kkkkkkkkkkkkkkkkkkkk.',
 ]
+KEEP = list(range(0, 12)) + [14, 15, 16, 20, 21, 22, 25, 26, 27, 29, 30, 31]
+KIMONO = [KIMONO_FULL[i] for i in KEEP]
 # 奥の うで：ふり上げて 扇を 頭の 後ろに
 ARM_B = [
     'kYk.......',
@@ -110,8 +114,6 @@ SLEEVE_F = [
     'kMNNNNNOOk',
     'kMNNPNNOOk',
     'kNNPMPNOOk',
-    'kNNNPNOOOk',
-    'kNNNNNOOOk',
     'kNNNNOOOk.',
     'kOOOOOOOk.',
     'kQQQQVVk..',
@@ -148,7 +150,7 @@ def fan(R, a0, a1, dark=False):
 import pix
 FAN = fan(9, -40, 80)
 FAN_B = fan(9, 95, 215, dark=True)
-GETA = ['kPQk', 'kkkkk', 'kyyyk', '.k.k.']
+GETA = ['kPPQk', 'kPPQk', 'kPPQk', 'kQQVk', 'kkkkkk', 'kyyyyk', '.k..k.']
 
 PETAL = ['kk.', 'kMk', '.kPk', '..k']
 PETAL2 = ['.kk', 'kMk', 'kPk.', 'k..']
@@ -174,7 +176,7 @@ KO_POOL = [
 ]
 def ko_head():
     g = pix.grid_of(HEAD)
-    pix.stamp(g, EYE_ALT['hit|ko'], 8, 7)
+    pix.stamp(g, EYE_ALT['ko'], 8, 8)
     r = pix.rows_of(g)
     for _ in range(3): r = pix.rot90(r)
     return r
@@ -184,18 +186,19 @@ KO_FAN = fan(7, 0, 110)
 KEY0 = ['.kk.....', 'kYyk....', 'kykkkkkk', 'kYyYYYyk', 'kykkkkkk', 'kYyk....', '.kk.....']
 KEY1 = ['.k......', 'kYk.....', 'kYkkkkkk', 'kYyYYYyk', 'kykkkkkk', 'kyk.....', '.k......']
 
+DY = 6
 def layers():
     N = 'ko'
-    return [
+    L = [
         dict(n='fanB', g='armB', x=17, y=2, rows=FAN_B, not_=N),
         dict(n='bun', g='head', x=28, y=6, rows=BUN, not_=N),
         dict(n='hair', g='head', x=28, y=26, rows=HAIR, not_=N),
-        dict(n='getaB', g='legB', x=27, y=56, rows=GETA, not_=N),
-        dict(n='getaA', g='legA', x=37, y=56, rows=GETA, not_=N),
-        dict(n='key', g='body', x=17, y=32, rows=KEY0, alt={'idle1|idle3|walk1|walk3|atk0': KEY1}, not_=N),
+        dict(n='getaB', g='legB', x=29, y=48, rows=GETA, not_=N),
+        dict(n='getaA', g='legA', x=36, y=48, rows=GETA, not_=N),
+        dict(n='key', g='body', x=21, y=32, rows=KEY0, alt={'idle1|idle3|walk1|walk3|atk0': KEY1}, not_=N),
         dict(n='kimono', g='body', x=24, y=25, rows=KIMONO, not_=N),
         dict(n='head', g='head', x=28, y=9, rows=HEAD, not_=N),
-        dict(n='eye', g='head', x=36, y=16, rows=EYE, alt=EYE_ALT, not_=N),
+        dict(n='eye', g='head', x=36, y=17, rows=EYE, alt=EYE_ALT, not_=N),
         dict(n='sleeveF', g='body', x=33, y=30, rows=SLEEVE_F, not_=N),
         dict(n='armF', g='armF', x=40, y=32, rows=ARM_F, not_=N),
         dict(n='hand', g='armF', x=52, y=33, rows=HAND, not_=N),
@@ -211,6 +214,9 @@ def layers():
         dict(n='koPool', g='ko', x=14, y=52, rows=KO_POOL, only=N),
         dict(n='koHead', g='ko', x=30, y=43, rows=ko_head(), only=N),
     ]
+    for l in L:
+        if l['g'] != 'ko': l['y'] += DY
+    return L
 
 FRAMES = {
     'idle0': {},

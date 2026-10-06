@@ -28,39 +28,32 @@ def shade(g, Lc='S', Mc='T', Dc='U', lt=2, dk=4):
             out[y][x] = c
     return out
 
-# ---- 胴：すわった もも＋ 立てた 胸（守り獣の かまえ）。陰影の あと、石の われ目と 念の 紋様を 手で ----
+# ---- 胴（デフォルメ：小さく 丸い すわった もも＋ 立てた 胸）。陰影の あと、石の われ目と 念の 紋様を 手で ----
 def body(glow=False):
-    W, H = 50, 44; g = grid(W, H)
-    ellipse(g, 14, 31, 12.5, 12, '#')
-    poly(g, [(4, 32), (12, 20), (24, 16), (32, 6), (40, 2), (47, 6), (48, 30), (42, 36), (30, 43), (10, 43)], '#')
-    out = shade(g, lt=3, dk=5)
-    for y in range(H):
-        for x in range(W):
-            if out[y][x] == 'T' and run(g, x, y, 0, 1) == 6 and (x + y) % 2: out[y][x] = 'U'
-            if out[y][x] == 'T' and (run(g, x, y, 0, -1) == 4 or run(g, x, y, -1, 0) == 4) and (x + y) % 2: out[y][x] = 'S'
-    # もも の ふち（弧）：前側に 濃い 線、その 外に 光
+    W, H = 34, 26; g = grid(W, H)
+    ellipse(g, 11, 15, 10.5, 10.5, '#')
+    poly(g, [(2, 16), (8, 8), (18, 6), (25, 0), (32, 2), (33, 20), (28, 25), (18, 26), (6, 26)], '#')
+    out = shade(g, lt=2, dk=4)
     import math
-    for t in range(-70, 75, 4):
-        a = math.radians(t); x = round(14 + 12 * math.cos(a)); y = round(31 + 12 * math.sin(a))
-        if 0 <= y < H and out[y][x] in 'STU':
+    for t in range(-70, 75, 5):
+        a = math.radians(t); x = round(11 + 10 * math.cos(a)); y = round(15 + 10 * math.sin(a))
+        if 0 <= y < H and 0 <= x < W and out[y][x] in 'STU':
             out[y][x] = 'l'
             if x + 1 < W and out[y][x + 1] in 'TU': out[y][x + 1] = 'S' if t < 0 else 'T'
-    # 石の われ目（ブロックの 継ぎ目）
-    for pts in (((24, 17), (25, 18), (25, 19), (26, 20)), ((38, 14), (38, 15), (39, 16), (39, 17), (39, 18)),
-                ((4, 36), (5, 37), (6, 37)), ((44, 26), (45, 27), (45, 28)), ((30, 30), (31, 31), (31, 32))):
+    # 石の われ目
+    for pts in (((18, 7), (19, 8), (19, 9)), ((3, 20), (4, 21)), ((29, 17), (30, 18))):
         for (x, y) in pts: out[y][x] = 'l'
-    # 胸と もものの 筋肉の みぞ
-    for (x, y) in ((33, 10), (32, 11), (31, 12), (31, 13), (31, 14), (32, 15), (33, 16), (34, 17)):
+    # 胸の 筋肉の みぞ
+    for (x, y) in ((26, 4), (25, 5), (24, 6), (24, 7), (24, 8), (25, 9), (26, 10)):
         out[y][x] = 'l'; out[y][x + 1] = 'S' if out[y][x + 1] == 'T' else out[y][x + 1]
-    # もも に うず巻きの 紋様（念力で 光る みぞ）
+    # もも の うず巻き（念力で 光る みぞ）
     c1, c2 = ('P', 'Q') if glow else ('Q', 'R')
-    cx, cy = 9, 13
-    rune = [(12, 26), (13, 26), (14, 26), (15, 26), (16, 26), (17, 27), (18, 28), (18, 29), (18, 30), (18, 31), (17, 32), (16, 33), (15, 33),
-            (14, 33), (13, 33), (12, 32), (11, 31), (11, 30), (12, 29), (13, 29), (14, 29), (15, 30), (14, 31)]
+    rune = [(9, 12), (10, 12), (11, 12), (12, 12), (13, 13), (14, 14), (14, 15), (14, 16), (13, 17), (12, 18), (11, 18), (10, 18),
+            (9, 17), (8, 16), (8, 15), (9, 14), (10, 14), (11, 14), (12, 15), (11, 16)]
     for i, (x, y) in enumerate(rune): out[y][x] = c1 if i % 3 == 0 else c2
     # 胸の 三本の 紋様
-    for (x, y) in ((40, 9), (40, 10), (40, 11), (43, 8), (43, 9), (43, 10), (43, 11), (43, 12), (46, 9), (46, 10), (46, 11)):
-        out[y][x] = c1 if y in (9, 10) else c2
+    for (x, y) in ((28, 6), (28, 7), (28, 8), (30, 5), (30, 6), (30, 7), (30, 8), (30, 9)):
+        out[y][x] = c1 if y in (6, 7) else c2
     return outline(rows_of(out))
 
 # ---- 石の 翼（たたんで 上へ）：板の 羽を 1枚ずつ ----
@@ -79,23 +72,20 @@ def wing(up=0):
 # ---- 頭の 後ろの 石の 円盤（たてがみ）：青石に 念の 文字が 光る ----
 def disc(glow=False):
     import math
-    N = 33; c = (N - 1) / 2; g = grid(N, N)
+    N = 27; c = (N - 1) / 2; g = grid(N, N)
     star = []
-    for i in range(24):
-        a = math.pi * 2 * i / 24 + .1; r = 16.2 if i % 2 == 0 else 12.6
+    for i in range(20):
+        a = math.pi * 2 * i / 20 + .1; r = 13.4 if i % 2 == 0 else 10.6
         star.append((N / 2 + r * math.cos(a), N / 2 + r * math.sin(a)))
     poly(g, star, '#')
-    out = shade(g, 'A', 'B', 'C', lt=2, dk=4)
-    # 内側の みぞ（輪）と 放射の 刻み
+    out = shade(g, 'A', 'B', 'C', lt=2, dk=3)
     for y in range(N):
         for x in range(N):
             d = ((x - c) ** 2 + (y - c) ** 2) ** .5
-            if 8.6 <= d < 9.6: out[y][x] = 'l'
-            elif 9.6 <= d < 10.4 and out[y][x] == 'B' and x + y < 2 * c: out[y][x] = 'A'
-    dots = [(5, 16), (6, 10), (10, 6), (16, 5), (7, 22), (11, 25), (16, 27)]
-    for i, (x, y) in enumerate(dots):
+            if 7.4 <= d < 8.4: out[y][x] = 'l'
+            elif 8.4 <= d < 9.2 and out[y][x] == 'B' and x + y < 2 * c: out[y][x] = 'A'
+    for (x, y) in ((4, 13), (5, 8), (8, 5), (13, 4), (6, 18), (9, 21)):
         out[y][x] = ('P' if glow else 'Q'); out[y + 1][x] = 'R'
-    # ふちの とげ（光の 方向に 4本）
     return outline(rows_of(out))
 DISC = disc(); DISC_G = disc(True)
 
@@ -105,10 +95,10 @@ HEAD = [
     '.kSSSTTTTTTTTTTk..',
     'kSSTTTTTTTTTTTTTk.',
     'kSTTTTTTTTTTTTTTk.',
-    'kSTTTTkkkkkkkTTTTk',
-    'kSTTTTTUUUUUUkkkTk',
-    'kSTTTTTTTTTTTTTTTk',
-    'kSTTTlTTTTTTTTTSSk',
+    'kSTTTkkkkkkkkTTTTk',
+    'kSTTTTkUUUUUUkkkTk',
+    'kSTTTTkTTTTTTkTTTk',
+    'kSTTTlTkkkkkkTTSSk',
     'kTTTTTlTTTTTTTSSSUk',
     'kTTTTTTTTTTTTTTkkkk',
     'kTTTTTTTTTkkkkkkkk.',
@@ -127,16 +117,19 @@ HEAD_ROAR = HEAD[:11] + [
     '..kUUUUUUUUUUk....',
     '...kkkkkkkkkk.....',
 ]
-EYE = ['kPPQk', '.kQQk']
-EYE_ALT = {'blink': ['kkkkk', '.TTTT'], 'hit': ['kQkQk', '.kTkT'], 'atk0|atk1|atk2': ['kwwPk', '.kPPk'], 'ko': ['kTkTk', '.TkTk']}
-EYE3 = ['.k.', 'kQk', 'kPk', 'kQk', '.k.']
-EYE3_ALT = {'blink|hit|ko': ['...', '.k.', 'kTk', '.k.', '...'], 'atk0|atk1|atk2': ['kPk', 'PwP', 'PwP', 'PwP', 'kPk'],
-            'idle1|idle2': ['.k.', 'kPk', 'kwk', 'kPk', '.k.']}
+# 目：白い 光＋ 虹彩 2色（P/Q）＋ たての ひとみ。上は まゆの ひさし、下は まぶたの 線
+EYE = ['wPPkQ', 'QQRkR']
+EYE_ALT = {'blink': ['kkkkk', 'TTTTT'], 'hit': ['kQTQk', 'TkQkT'], 'atk0|atk1|atk2': ['wwPkP', 'PQQkQ'],
+           'ko': ['TkTkT', 'TTkTT', 'TkTkT']}
+# 額の 第三の 目（たて長）
+EYE3 = ['.kkk.', 'kwPQk', 'kPkQk', 'kQkRk', '.kkk.']
+EYE3_ALT = {'blink|hit|ko': ['.....', '..k..', '.kTk.', '..k..', '.....'], 'atk0|atk1|atk2': ['.kkk.', 'kwwPk', 'kPkPk', 'kPkQk', '.kkk.'],
+            'idle1|idle2': ['.kkk.', 'kwwQk', 'kPkQk', 'kQkRk', '.kkk.']}
+# 前足（短く 太く、上は 胴に 食いこむ ので 上の 輪郭なし）
 LEG_F = [
-    'kkkkkkk.', 'kSSTTTUk', 'kSTTTTUk', 'kSTTTTUk', 'kSTTTTUk', 'kSTTTlUk', 'kSTTTTUk', 'kSTTTTUk',
-    'kSTTTTUk', 'kSTTTlUk', 'kSTTTTUk', 'kSTTTTUUk', 'kSSTTTTUk', 'kSTTTTTUUk', 'kUUUUUUUUk', 'kwkwkwkkk.',
+    'kSTTTUk', 'kSTTTUk', 'kSTTTUk', 'kSTTTUk', 'kSTTTUk', 'kSTTlUk', 'kSTTTUk', 'kSTTTUUk', 'kSTTTTUUk', 'kUUUUUUUk', 'kwkwkwkk.',
 ]
-PAW_H = ['....kkkkk.....', '..kkSTTTUkk...', '.kSSTTTTTUUkk.', 'kSTTTTTTTTUUUk', 'kUUUUUUUUUUUUk', '.kwkwkwkkkkkk.']
+PAW_H = ['..kkkkk...', '.kSTTTUkk.', 'kSTTTTTUUk', 'kUUUUUUUUk', '.kwkwkkkk.']
 TAIL = [
     '....kk...', '...kSk...', '..kSTUk..', '..kSUk...', '.kkTk....', 'kQQk.....', 'kPQk.....',
     'kQRk.....', '.kkSkk...', '..kSTTkk.', '...kUTTTk', '....kkUUk', '......kk.',
@@ -153,28 +146,28 @@ def beam(n, ring=False):
         core = [c + r for c, r in zip(core, R)]
     return core
 BODY = body(); BODY_G = body(True)
-
+HX, HY = 40, 13
 def layers():
     return [
-        dict(n='wingF', g='wing', x=22, y=4, rows=dark(wing()), alt={'atk0|atk1|atk2': dark(wing(2))}),
-        dict(n='legFF', g='legB', x=48, y=45, rows=dark(LEG_F)),
-        dict(n='tail', g='tail', x=0, y=47, rows=TAIL),
-        dict(n='wing', g='wing', x=12, y=8, rows=wing(), alt={'atk0|atk1|atk2': wing(2)}),
-        dict(n='body', g='body', x=3, y=16, rows=BODY, alt={'idle1|idle2|atk0|atk1|atk2': BODY_G}),
-        dict(n='pawH', g='legA', x=20, y=55, rows=PAW_H),
-        dict(n='legF', g='legA', x=41, y=45, rows=LEG_F),
-        dict(n='disc', g='head', x=28, y=-2, rows=DISC, alt={'idle1|idle2|atk0|atk1|atk2': DISC_G}),
-        dict(n='head', g='head', x=44, y=8, rows=HEAD, alt={'atk1|atk2': HEAD_ROAR}),
-        dict(n='eye', g='head', x=51, y=14, rows=EYE, alt=EYE_ALT),
-        dict(n='eye3', g='head', x=53, y=9, rows=EYE3, alt=EYE3_ALT),
-        dict(n='beam1', g='fx', x=57, y=8, rows=beam(8), only='atk1'),
-        dict(n='beam2', g='fx', x=57, y=8, rows=beam(10, True), only='atk2'),
+        dict(n='wingF', g='wing', x=18, y=3, rows=dark(wing()), alt={'atk0|atk1|atk2': dark(wing(2))}),
+        dict(n='legFF', g='legB', x=42, y=49, rows=dark(LEG_F)),
+        dict(n='tail', g='tail', x=1, y=41, rows=TAIL),
+        dict(n='wing', g='wing', x=9, y=7, rows=wing(), alt={'atk0|atk1|atk2': wing(2)}),
+        dict(n='body', g='body', x=6, y=28, rows=BODY, alt={'idle1|idle2|atk0|atk1|atk2': BODY_G}),
+        dict(n='pawH', g='legA', x=13, y=55, rows=PAW_H),
+        dict(n='legF', g='legA', x=35, y=49, rows=LEG_F),
+        dict(n='disc', g='head', x=HX - 13, y=HY - 6, rows=DISC, alt={'idle1|idle2|atk0|atk1|atk2': DISC_G}),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={'atk1|atk2': HEAD_ROAR}),
+        dict(n='eye', g='head', x=HX + 7, y=HY + 6, rows=EYE, alt=EYE_ALT),
+        dict(n='eye3', g='head', x=HX + 7, y=HY + 1, rows=EYE3, alt=EYE3_ALT),
+        dict(n='beam1', g='fx', x=HX + 13, y=HY - 1, rows=beam(8), only='atk1'),
+        dict(n='beam2', g='fx', x=HX + 13, y=HY - 1, rows=beam(10, True), only='atk2'),
     ]
 
 FRAMES = {
     'idle0': {},
-    'idle1': {'body': (0, 0), 'head': (0, 1), 'wing': (0, 0)},
-    'idle2': {'body': (0, 1), 'head': (0, 1), 'wing': (0, 1)},
+    'idle1': {'head': (0, 1)},
+    'idle2': {'body': (0, 1), 'head': (0, 1), 'wing': (0, 0)},
     'idle3': {'body': (0, 1), 'head': (0, 0)},
     'blink': {},
     'walk0': {'legA': (1, -1), 'legB': (-1, 0), 'body': (0, 1)},
@@ -184,7 +177,7 @@ FRAMES = {
     'atk0': {'body': (-1, 1), 'head': (-1, -1), 'wing': (0, -2), 'tail': (0, -1)},
     'atk1': {'root': (2, 0), 'head': (1, 0), 'wing': (0, -2)},
     'atk2': {'root': (2, 0), 'head': (1, 0), 'wing': (0, -1)},
-    'hit': {'root': (-3, 0), 'head': (-3, 2), 'wing': (-1, 1)},
+    'hit': {'root': (-3, 0), 'head': (-2, 2), 'wing': (-1, 1)},
     'ko': {'_flip': True},
 }
 PARENT = {'head': 'body', 'wing': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'head'}

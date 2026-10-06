@@ -7,15 +7,16 @@ PAL = {
     'i': '#e6fbff', 'j': '#8cd6f2', 'h': '#3f86c0',      # 氷（明・中・暗）
     'w': '#ffffff', 'e': '#ff5a3c',                      # きらめき・目の 芯
     'm': '#7a2638', 'b': '#e8cfa8',                      # 口の 中・ひげ
+    'r': '#a8203a',                                      # 目（虹彩の 暗）
 }
 LIGHT = set('Aiwb')
-KEEP_BLACK = set('wije')
+KEEP_BLACK = set('wijer')
 
-# ---- 胴（あたりは だ円 → 陰影は 行・列の きょりで 3段 → しわ・いぼは 手で 打つ）----
+# ---- 胴（デフォルメ：小さく 丸い 肉の 山。あたりは だ円 → 陰影は 行・列の きょりで 3段 → しわ・いぼは 手で 打つ）----
 def body():
-    W, H = 50, 40; g = grid(W, H)
-    ellipse(g, 28, 23, 19, 15, '#'); ellipse(g, 33, 16, 14, 14, '#'); ellipse(g, 15, 28, 14, 9.5, '#'); ellipse(g, 6, 32, 5.5, 5, '#')
-    for y in range(37, H):
+    W, H = 34, 27; g = grid(W, H)
+    ellipse(g, 18, 14, 12, 12, '#'); ellipse(g, 22, 11, 9.5, 10, '#'); ellipse(g, 9, 17, 8.5, 8, '#'); ellipse(g, 4.5, 21, 4.5, 4, '#')
+    for y in range(25, H):
         for x in range(W): g[y][x] = '.'
     def run(x, y, dx, dy):
         n = 0
@@ -27,26 +28,25 @@ def body():
             if g[y][x] == '.': continue
             up, lf, dn, rt = run(x, y, 0, -1), run(x, y, -1, 0), run(x, y, 0, 1), run(x, y, 1, 0)
             c = 'B'
-            if dn <= 6 or (rt <= 4 and up > 4): c = 'C'
-            if dn == 7 and (x + y) % 2: c = 'C'
-            if up <= 2 or lf <= 2 or (up <= 4 and lf <= 6): c = 'A'
-            if up <= 1 and rt <= 4: c = 'B'
+            if dn <= 4 or (rt <= 3 and up > 3): c = 'C'
+            if dn == 5 and (x + y) % 2: c = 'C'
+            if up <= 2 or lf <= 2 or (up <= 3 and lf <= 5): c = 'A'
+            if up <= 1 and rt <= 3: c = 'B'
             out[y][x] = c
-    # 脂肪の ひだ（たてに 弧を えがく みぞ）と 首の しわ：1点ずつ 手で
-    folds = [[(31, 5), (30, 6), (30, 7), (29, 8), (29, 9), (29, 10), (29, 11), (30, 12), (30, 13), (31, 14)],
-             [(36, 3), (35, 4), (35, 5), (34, 6), (34, 7), (34, 8), (34, 9), (34, 10), (35, 11), (35, 12), (36, 13)],
-             [(23, 12), (22, 13), (21, 14), (21, 15), (21, 16), (21, 17), (21, 18), (21, 19), (21, 20), (22, 21), (22, 22), (23, 23), (23, 24), (24, 25)],
-             [(13, 16), (12, 17), (11, 18), (11, 19), (11, 20), (11, 21), (11, 22), (11, 23), (12, 24), (12, 25), (13, 26), (13, 27)],
-             [(4, 22), (4, 23), (4, 24), (4, 25), (5, 26), (5, 27)]]
+    # 脂肪の ひだ（たてに 弧を えがく みぞ）：1点ずつ 手で
+    folds = [[(22, 4), (21, 5), (21, 6), (21, 7), (21, 8), (22, 9), (22, 10)],
+             [(15, 8), (14, 9), (14, 10), (14, 11), (14, 12), (14, 13), (15, 14), (15, 15), (16, 16)],
+             [(9, 12), (8, 13), (8, 14), (8, 15), (8, 16), (9, 17), (9, 18)],
+             [(3, 17), (3, 18), (3, 19), (4, 20)]]
     for f in folds:
         for (x, y) in f:
             if out[y][x] != '.': out[y][x] = 'l'
             if out[y][x - 1] in 'B': out[y][x - 1] = 'A'
             if out[y][x + 1] in 'AB': out[y][x + 1] = 'C'
     # 古傷（ななめの 線）といぼ
-    for (x, y) in ((16, 13), (17, 14), (18, 15), (17, 13)):
+    for (x, y) in ((11, 9), (12, 10), (13, 11)):
         out[y][x] = 'C'
-    for (x, y) in ((8, 20), (17, 21), (26, 18), (7, 28), (16, 29), (27, 27), (40, 18), (40, 24)):
+    for (x, y) in ((6, 15), (12, 18), (18, 12), (26, 9), (20, 20), (28, 17)):
         if out[y][x] in 'BC': out[y][x] = 'A'; out[y + 1][x] = 'l'
     return outline(rows_of(out))
 
@@ -85,8 +85,10 @@ HEAD_OPEN = HEAD[:19] + [
     '.....kkkkk.................',
 ]
 # するどい 目：まゆの ひさしの 下で 氷色に 光る、たての ひとみ
-EYE = ['kkweek', '.kweek', '..kkk']
-EYE_ALT = {'blink': ['kkkkkk', '.BBBBk', '..BBB'], 'hit': ['kkBkBk', '.BkBk', '..BBB'], 'atk0|atk1|atk2': ['kkwwek', '.kweek', '..kkk'], 'ko': ['kBkBkB', '.BkBk', '..BBB']}
+# 目：ハイライト w ＋ 虹彩 2色（e 明・r 暗）＋ たての ひとみ k、下まぶたで かこむ
+EYE = ['kkkkkk', 'kweekk', '.krrkk', '..kkk.']
+EYE_ALT = {'blink': ['kkkkkk', 'BkkkkB', '.BBBBB', '..BBB.'], 'hit': ['kkB.Bk', 'BBkBkB', '.BBkBB', '..BBB.'],
+           'atk0|atk1|atk2': ['kkkkkk', 'kwwekk', '.kerkk', '..kkk.'], 'ko': ['kBBBkB', 'BkBkBB', '.BkBBB', '.kBkB.']}
 
 # つららの きば（左＝光、右＝影、先が とがる）
 TUSK = [
@@ -153,7 +155,9 @@ def burst(big=False):
     ]
 FROST = ['.w.', 'wiw', '.w.']
 BODY = body()
-def top(x, x0=-1, y0=17):
+BX, BY = 6, 29
+HX, HY = 29, 14     # 頭の 位置（頭は 元の 大きさ）
+def top(x, x0=BX, y0=BY):
     for j, r in enumerate(BODY):
         if 0 <= x - x0 < len(r) and r[x - x0] != '.': return y0 + j
     return 60
@@ -161,22 +165,21 @@ def on_back(x, rows, sink=3): return dict(x=x, y=top(x + len(rows[-1]) // 2) - l
 
 def layers():
     return [
-        dict(n='flipFF', g='legB', x=46, y=50, rows=dark(FLIP_F)),
-        dict(n='flipHF', g='legA', x=5, y=52, rows=dark(FLIP_H)),
-        dict(n='body', g='body', x=-1, y=17, rows=BODY),
-        dict(n='flipH', g='legB', x=1, y=53, rows=FLIP_H),
-        dict(n='shA', g='body', **on_back(7, SHARD_C)),
-        dict(n='shB', g='body', **on_back(13, SHARD_A), alt={'idle2|idle3': SHARD_GLINT}),
+        dict(n='flipFF', g='legB', x=38, y=51, rows=dark(FLIP_F)),
+        dict(n='flipHF', g='legA', x=11, y=52, rows=dark(FLIP_H)),
+        dict(n='body', g='body', x=BX, y=BY, rows=BODY),
+        dict(n='flipH', g='legB', x=5, y=53, rows=FLIP_H),
+        dict(n='shA', g='body', **on_back(9, SHARD_C)),
+        dict(n='shB', g='body', **on_back(14, SHARD_A), alt={'idle2|idle3': SHARD_GLINT}),
         dict(n='shC', g='body', **on_back(20, SHARD_B, 2)),
         dict(n='shD', g='body', **on_back(26, SHARD_A)),
-        dict(n='shE', g='body', **on_back(32, SHARD_B, 2)),
-        dict(n='ftusk', g='head', x=52, y=31, rows=FTUSK),
-        dict(n='head', g='head', x=37, y=12, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='eye', g='head', x=51, y=22, rows=EYE, alt=EYE_ALT),
-        dict(n='tusk', g='head', x=46, y=31, rows=TUSK),
-        dict(n='flipF', g='legA', x=36, y=51, rows=FLIP_F),
-        dict(n='frost', g='fx', x=59, y=22, rows=FROST, only='idle1|idle2|atk0'),
-        dict(n='burst', g='fx2', x=50, y=48, rows=burst(), alt={'atk2': burst(True)}, only='atk1|atk2'),
+        dict(n='ftusk', g='head', x=HX + 15, y=HY + 19, rows=FTUSK),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
+        dict(n='eye', g='head', x=HX + 14, y=HY + 10, rows=EYE, alt=EYE_ALT),
+        dict(n='tusk', g='head', x=HX + 9, y=HY + 19, rows=TUSK),
+        dict(n='flipF', g='legA', x=29, y=51, rows=FLIP_F),
+        dict(n='frost', g='fx', x=HX + 22, y=HY + 9, rows=FROST, only='idle1|idle2|atk0'),
+        dict(n='burst', g='fx2', x=HX + 15, y=48, rows=burst(), alt={'atk2': burst(True)}, only='atk1|atk2'),
     ]
 
 FRAMES = {

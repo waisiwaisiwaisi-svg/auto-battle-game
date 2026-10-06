@@ -1,4 +1,4 @@
-# ヨイマント（あく・ゴースト × コウモリの 魔物）手打ち GBA風
+# ヨイマント（あく・ゴースト × コウモリの 魔物）手打ち GBA風・デフォルメ（2〜3頭身：頭を 大きく 描きなおし、胴は 小さく 丸く。翼の マントは 大きい まま）
 import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, grid_of, poly, ellipse, stamp, outline
@@ -120,25 +120,27 @@ def wing(pose, far=False, inner=False, v=0):
 def cape():
     """ため：マントで 体を つつむ"""
     g = G()
-    p = G(); poly(p, [(31, 23), (42, 24), (47, 31), (48, 42), (45, 52), (40, 50), (36, 54), (32, 50), (27, 52), (26, 40), (28, 29)], '1'); ink(g, p)
+    Y = lambda y: round(23 + (y - 23) * .66)
+    p = G(); poly(p, [(x, Y(y)) for x, y in [(31, 23), (42, 24), (47, 31), (48, 42), (45, 52), (40, 50), (36, 54), (32, 50), (27, 52), (26, 40), (28, 29)]], '1'); ink(g, p)
     g = shade(g, dk=.8)
-    for x0, y0, y1 in ((33, 28, 50), (38, 27, 49), (43, 29, 50)):     # ひだ（骨）
+    for x0, y0, y1 in ((33, 27, 41), (38, 26, 40), (43, 27, 41)):     # ひだ（骨）
         for y in range(y0, y1):
             if g[y][x0] in 'RQP': g[y][x0] = 'P'
             if g[y][x0 - 1] in 'Q': g[y][x0 - 1] = 'R'
-    for i, (x, y) in enumerate([(27, 53), (36, 55), (45, 53)]): flame(g, x, y, i % 2)
+    for i, (x, y) in enumerate([(27, 43), (36, 45), (45, 43)]): flame(g, x, y, i % 2)
     return rows_of(g)
 
 # ---------- 胴と 足 ----------
 def body():
     g = G()
-    p = G(); ellipse(p, 39, 35, 6.5, 9.5, '1'); ink(g, p)
+    p = G(); ellipse(p, 39, 32, 7, 7.5, '1'); ink(g, p)
     g = shade(g)
     # 胸の 毛（明るい ふさ）と 霊火の 紋
-    put(g, 40, 28, ['.R.', 'RQR', '.R.'])
-    put(g, 41, 34, ['.h.', 'hGh', '.g.'])
+    put(g, 38, 27, ['.R.', 'RQR', '.R.'])
+    put(g, 40, 31, ['.h.', 'hGh', '.g.'])
     return rows_of(g)
-FEET = outline([   # 足：さかさまに ぶら下がる ための かぎ爪
+FEET = outline([   # 足：さかさまに ぶら下がる ための かぎ爪（根もとは 胴に 食いこむ）
+    'QP...QP.',
     'QP...QP.',
     'QP...QP.',
     'PwP..PwP',
@@ -146,42 +148,46 @@ FEET = outline([   # 足：さかさまに ぶら下がる ための かぎ爪
 ])
 
 # ---------- 頭（大きな 耳、霊火の 目、牙）----------
-HEAD = [   # 手打ち：しかめた 顔、深紅の 鼻、長い 牙
-    '....kkkkkkkk......',
-    '..kkRRRRRRRRkk....',
-    '.kRRRQQQQQQQRRk...',
-    'kRRQQQQQQQQQQQRk..',
-    'kRQQQQQQQQQQQQQRk.',
-    'kQQQQQQQQQQQQQQQRk',
-    'kQQQQQQQQQQQQQkkDk',
-    'kQQQQQQQQQQQQkCDDk',
-    'kPQQQQQQQkkkkkkkk.',
-    'kPQQQQQQkwkQQQkwk.',
-    '.kPQQQQQkwkPPPkwk.',
-    '..kPPPPPPkkkkkkk..',
-    '...kkkkkk.........',
+HEAD = [   # 手打ち：大きな 頭（たて 16）、しかめた 顔、深紅の 鼻、長い 牙
+    '.....kkkkkkkkkk.......',
+    '...kkRRRRRRRRRRkk.....',
+    '..kRRRQQQQQQQQQRRk....',
+    '.kRRQQQQQQQQQQQQQRk...',
+    'kRQQQQQQQQQQQQQQQQRk..',
+    'kRQQQQQQQQQQQQQQQQQRk.',
+    'kQQQQQQQQQQQQQQQQQQQRk',
+    'kQQQQQQQQQQQQQQQQQkkDk',
+    'kQQQQQQQQQQQQQQQQkCDDk',
+    'kQQQQQQQQQQQQQQQQQkkk.',
+    'kPQQQQQQQQkkkkkkkkkk..',
+    'kPQQQQQQQkwkQQQQQkwk..',
+    '.kPQQQQQQkwkPPPPPkwk..',
+    '..kPQQQQQQkkkkkkkkk...',
+    '...kPPPPPPPPkk........',
+    '....kkkkkkkk..........',
 ]
 def head():
     g = G()
-    for (bx, by, tx, ty) in [(36, 13, 29, 1), (43, 11, 47, 0)]:
-        p = G(); stroke(p, bx, by, tx, ty, 3.4, .5, '1'); ink(g, p)
+    for (bx, by, tx, ty) in [(34, 13, 27, 0), (45, 12, 49, 0)]:
+        p = G(); stroke(p, bx, by, tx, ty, 3.6, .5, '1'); ink(g, p)
     # 耳の あいだの とがった 毛
-    for (bx, by, tx, ty) in [(39, 11, 37, 5), (41, 11, 41, 6)]:
+    for (bx, by, tx, ty) in [(39, 11, 37, 5), (42, 11, 42, 5)]:
         p = G(); stroke(p, bx, by, tx, ty, 1.5, .5, '1'); ink(g, p)
     g = shade(g)
-    for (x0, y0, x1, y1) in [(34, 10, 30, 4), (44, 8, 46, 3)]:
+    for (x0, y0, x1, y1) in [(32, 10, 28, 3), (46, 8, 48, 3)]:
         n = max(abs(x1 - x0), abs(y1 - y0))
         for i in range(n + 1):
             x, y = round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n)
             if g[y][x] in 'RQP': g[y][x] = 'D' if i < n - 1 else 'C'
-    put(g, 32, 9, HEAD)
+    put(g, 30, 9, HEAD)
     return rows_of(g)
-EYE = ['kkkk....', '.kkkkkk.', '.kgggGk.', '..kGhk..', '...kk...']   # 太い まゆの 下で 霊火が 燃える つり目
+# 太い まゆの 下で 霊火が 燃える つり目：光 w＋虹彩（g／G／h）＋たての ひとみ＋下まぶた
+EYE = ['kkkk.....', '.kkkkkkk.', '.kwwgGkGk', '.kwGGGkGk', '..khhhkhk', '...kkkkk.']
 EYE_ALT = {
-    'blink': ['kkkk....', '.kkkkkk.', '.kkkkkk.', '........', '........'],
-    'atk0|atk1|atk2': ['kkkk....', '.kkkkkk.', '.kwwggk.', '..kggk..', '...kk...'],
-    'hit': ['........', '.kk..kk.', '...kk...', '.kk..kk.', '........'],
-    'ko': ['........', '..k.k...', '...k....', '..k.k...', '........'],
+    'blink': ['kkkk.....', '.kkkkkkk.', '.kQQQQQQk', '.kkkkkkkk', '..PPPPPP.', '.........'],
+    'atk0|atk1|atk2': ['kkkk.....', '.kkkkkkk.', '.kwwwwkwk', '.kwggggwk', '..kGGGkGk', '...kkkkk.'],
+    'hit': ['.........', 'kkkkkkkk.', '.Rkk.kkR.', '..RkkkR..', '.kkR.Rkk.', '.........'],
+    'ko': ['.........', '.kR..kR..', '..kRkR...', '...kR....', '..kRkR...', '.kR..kR..'],
 }
 MOUTH = [   # 攻撃：大きく 開く 口
     'kkkkkkkk.',
@@ -217,10 +223,10 @@ def layers():
     WF = {p: wing(p, False, True) for p in WP}
     return [
         dict(n='wingB', g='wingB', x=5, y=-3, rows=WF['up'], alt={'walk0|atk1|hit': WF['up'], 'walk2|atk0': WF['mid'], 'walk1|walk3|atk2': WF['mid']}),
-        dict(n='feet', g='body', x=35, y=44, rows=FEET),
+        dict(n='feet', g='body', x=35, y=37, rows=FEET),
         dict(n='body', g='body', x=0, y=0, rows=body()),
         dict(n='head', g='head', x=0, y=0, rows=head()),
-        dict(n='mouth', g='head', x=40, y=17, rows=MOUTH, only='atk1|atk2|hit'),
+        dict(n='mouth', g='head', x=40, y=19, rows=MOUTH, only='atk1|atk2|hit'),
         dict(n='eye', g='head', x=37, y=12, rows=EYE, alt=EYE_ALT),
         dict(n='wingF', g='wingF', x=0, y=0, rows=W[('mid', 0)], alt={'idle1|idle3': W[('mid', 1)], 'walk0|hit': W[('up', 0)], 'walk2': W[('down', 1)], 'walk1|walk3|atk2': W[('mid', 1)], 'atk1': WI}, not_='atk0'),
         dict(n='cape', g='wingF', x=0, y=0, rows=cape(), only='atk0'),

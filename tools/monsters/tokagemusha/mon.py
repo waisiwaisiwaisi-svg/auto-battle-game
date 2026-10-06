@@ -1,4 +1,4 @@
-# トカゲムシャ（ドラゴン・かくとう × リザードマン）手打ち GBA風
+# トカゲムシャ（ドラゴン・かくとう × リザードマン）手打ち GBA風・デフォルメ（2〜3頭身：頭を 大きく 描きなおし、胴と 足は 短く。曲刀・角・しっぽは 大きい まま）
 META = dict(id='tokagemusha', name='トカゲムシャ', types=['dragon', 'fighting'], base='リザードマン', size='M')
 PAL = {
     'k': '#101018', 'l': '#1e3a2c',
@@ -12,21 +12,25 @@ PAL = {
 LIGHT = set('GBASYRw')
 
 HEAD = [
-    '......kkkk..............',
-    '....kkGGGGkk............',
-    '...kGGGGGGGGkkkk........',
-    '..kGGGGGGGGGGGGGkkkk....',
-    '..kGGkkkkkkGGGGGGGGGkkk.',
-    '.kGGHkYYYkkkkGGGGGGHHHHk',
-    '.kGHHkYkYYkHHHHHHHHHkHHk',
-    '.kHHHHkkkkHHHHHHHHHHHHJk',
-    'kHHHHHHHHHHHHHJJJJJJJJk.',
-    'kHHJJkkkkkkkkkkkkkkkkk..',
-    'kHJJkwkkwkkkwkkwkkwkwk..',
-    'kJJJkkkkkkkkkkkkkkkkkk..',
-    'kJJkBkwkkkwkkwkkwkk.....',
-    '.kJkBBBBbbbbbbbbbk......',
-    '..kkkkkkkkkkkkkkk.......',
+    '.......kkkkk................',
+    '.....kkGGGGGkk..............',
+    '....kGGGGGGGGGkkk...........',
+    '...kGGGGGGGGGGGGGkkkk.......',
+    '..kGGGGGGGGGGGGGGGGGGkkkk...',
+    '..kGGGHHHHHHHHGGGGGGGGGGGk..',
+    '.kGGHHHHHHHHHHHHHGGGGGGGGGk.',
+    '.kGHHHHHHHHHHHHHHHHHHHHHHGk.',
+    '.kGHHHHHHHHHHHHHHHHHHHHkHHk.',
+    'kHHHHHHHHHHHHHHHHHHHHHHHHJk.',
+    'kHHHHHHHHHHHHHHHHHJJJJJJJk..',
+    'kHHJJkkkkkkkkkkkkkkkkkkkk...',
+    'kHJJkwkkwkkkwkkwkkwkkwkwk...',
+    'kJJJkrrrrrrrrrrrrrrrrrrk....',
+    'kJJJkwkwkkwkkwkkwkkwkk......',
+    'kJJkBBBBbbbbbbbbbbbbbk......',
+    '.kJkBBBbbbbbbbbbbbbk........',
+    '..kkkbbbbbbbbbbbkk..........',
+    '....kkkkkkkkkkkk............',
 ]
 HORN = [
     'kkk..........',
@@ -48,29 +52,23 @@ FIN = [  # 首の うしろの 赤い ひれ
     'kkkkkkkkk.',
 ]
 TORSO = [
-    '..............kkkk......',
-    '.............kGGGHk.....',
-    '............kGGGHHk.....',
-    '...........kGGGHHBk.....',
-    '..........kGGGHHBBk.....',
-    '.......kkkGGGHHHBbk.....',
-    '.....kkGGGGGAHHHBBbk....',
-    '....kGGGGGGAaHHHkBbbk...',
-    '...kGGGGGHAaHHHHHBBbk...',
-    '..kGGGHHHAaHHHHHkkkkk...',
-    '..kGGHHHAaHHHHHHkBBbk...',
-    '.kGGHHHAaHHHHHHJkkkkk...',
-    '.kGHHHAaHHHHHHJJkBBbk...',
-    '.kGHHAaHHHHHJJJkkkkk....',
-    '.kHHAaHHHHHJJJJkBbbk....',
-    'kHHAaHHHHJJJJJJkkkk.....',
-    'kkkkkkkkkkkkkkkkkkk.....',
-    'kAAAARRRRAAaaaaaazk.....',
-    'kaaaRRrrRaaazzzzzk......',
-    '.kkkRrrRkkkkkkkkk.......',
-    '....kRrrk...............',
-    '....kRrk................',
-    '.....kk.................',
+    '..........kkkkk.....',
+    '........kkGGGHHk....',
+    '......kkGGGGHHBBk...',
+    '....kkGGGGGAHHBBk...',
+    '...kGGGGGGAaHHBBbk..',
+    '..kGGGGHHAaHHHkkkk..',
+    '..kGGHHHAaHHHHkBBbk.',
+    '.kGGHHHAaHHHHJkkkkk.',
+    '.kGHHHAaHHHHJJkBBbk.',
+    '.kGHHAaHHHHJJJkkkk..',
+    '.kkkkkkkkkkkkkkkkk..',
+    '.kAAARRRRAAaaaaazk..',
+    '.kaaRRrrRaaazzzzk...',
+    '..kkRrrRkkkkkkkk....',
+    '...kRrrk............',
+    '...kRrk.............',
+    '....kk..............',
 ]
 TAIL = [
     '..................kk..',
@@ -89,27 +87,19 @@ TAIL = [
     'kkk...................',
 ]
 LEG = [
-    '..kkkkkkk.....',
-    '.kGGGGGHHk....',
-    'kGGHHHHHHJk...',
-    'kGHHHHHHHJk...',
-    'kGHHHHHHJJk...',
-    '.kHHHHHHJk....',
-    '..kHHHHJJk....',
-    '...kkHHJJk....',
-    '....kHHJk.....',
-    '....kGHJk.....',
-    '...kGHHJk.....',
-    '...kGHJJk.....',
-    '..kGHHJk......',
-    '..kGHHJJkk....',
-    '..kGHHHHJJk...',
-    '.kGGHHHHHJJkk.',
-    'kwkGHkwkHJkwk.',
-    'kwkkkkwkkkkwwk',
-    '.k....k....kk.',
+    '.kkkkkkk..',
+    'kGGGGHHJk.',
+    'kGHHHHHJJk',
+    '.kGHHHHJk.',
+    '..kGHHJk..',
+    '..kGHHJk..',
+    '.kGGHHJJk.',
+    'kGGHHHHHJk',
+    'kwkGkwkHwk',
+    'kwkkkwkkwk',
+    '.k...k..k.',
 ]
-DLEG = [r.replace('G', 'H').replace('H', 'J', 0) for r in LEG]
+DLEG = [r.replace('G', 'H') for r in LEG]
 SCIM = [
     'kkk.....................',
     'kSSkkk..................',
@@ -127,30 +117,24 @@ SCIM = [
     '................kk......',
 ]
 ARM_B = [
-    '.kkkk.....',
-    'kHHJJk....',
-    'kHJJJk....',
-    '.kkHJJk...',
-    '...kHJJk..',
-    '...kHJJk..',
-    '....kHJJk.',
-    '....kHJJk.',
-    '.....kHJk.',
-    '.....kkk..',
+    '.kkkk....',
+    'kHHJJk...',
+    'kHJJJk...',
+    '.kkHJJk..',
+    '...kHJJk.',
+    '....kHJJk',
+    '.....kkk.',
 ]
-ARM_F = [
-    '.kkkkkkk...........',
-    'kAAAAAaak..........',
-    'kAAaaaaazk.....kk..',
-    'kaaazzzzzk...kkGwk.',
-    '.kkGHHHHJk..kGGHHwk',
-    '...kGHHHJJk.kAAaazk',
-    '....kGHHHJk.kAaazkw',
-    '....kGHHHJJkAaazkk.',
-    '.....kGHHHJAaazk...',
-    '.....kGHHJJAazk....',
-    '......kHHJJJzk.....',
-    '.......kkkkkk......',
+ARM_F = [   # 肩当て → 短い うで → こて → 前に 出した こぶし
+    '.kkkkkk.........',
+    'kAAAAaak.....kk.',
+    'kAaaaazk...kkGwk',
+    'kaazzzzk..kGGHHw',
+    '.kkGHHJk.kAAaazk',
+    '...kGHHJkAAazkw.',
+    '...kGHHJAaazk...',
+    '....kGHJJazk....',
+    '.....kkkkkk.....',
 ]
 
 DORSAL = [
@@ -166,8 +150,14 @@ DORSAL = [
     'kRrrk.........',
     'kkkkk.........',
 ]
-EYE = ['YYYk', 'YkYY']
-EYE_ALT = {'blink': ['GGGk', 'kkkk'], 'atk0|atk1|atk2': ['wYYk', 'YkYw'], 'hit': ['kYkk', 'YkYk'], 'ko': ['YkYk', 'kYkk']}
+# 目：まゆの 骨の ひさし＋光 w＋虹彩 2色（Y／A）＋たての ひとみ＋下まぶた
+EYE = ['kkkkkk...', '.kkkkkkkk', '.kwwYYkYk', '.kYAAAkAk', '..kkkkkk.']
+EYE_ALT = {
+    'blink': ['kkkkkk...', '.kkkkkkkk', '.kHHHHHHk', '.kkkkkkkk', '..HHHHHH.'],
+    'atk0|atk1|atk2': ['kkkkkk...', '.kkkkkkkk', '.kwwYYkYk', '.kwYYYkYk', '..kkkkkk.'],
+    'hit': ['.........', 'kkkkkkkkk', '.kkk.kkk.', '...kkk...', '.........'],
+    'ko': ['.........', '.kH..kH..', '..kHkH...', '..kHkH...', '.kH..kH..'],
+}
 # 攻撃：曲刀を 前へ ふりぬく
 SCIM_F = [
     '.kkkk.....................',
@@ -210,54 +200,52 @@ ARC = [  # 竜の 気を まとった 横なぎの 斬撃（金）
     '...........kkAAakk....',
     '............kkkk......',
 ]
+# ダウン：うつぶせに たおれ、曲刀を 手放す
 KO_BODY = [
-    '...k.....k....k.....k.........',
-    '..kRk...kRk..kRk...kRk........',
-    '..kRrkkkkRrkkkRrkkkkRrkkkk....',
-    '...kkkGGGGGGGGGGGGGGGGGGGGkk..',
-    '...kGGGGHHHHHHHHHHHHHHHHHHGGk.',
-    '..kGGHHHHHHHHJHHHHHJHHHHHHHGk.',
-    '..kGHHHJHHHHHHHHHHHHHHHHJHHHk.',
-    '.kGHHHHHHHHHHHHHHHHHHHHHHHHJk.',
-    '.kHHAAARRRRAAaaaaaHHHHHHHJJJk.',
-    '.kHHaaaRrrRaaazzzzHHJJJJJJJk..',
-    'kHHHHHJJJJJJJJJJJJJJJJJJJJk...',
-    'kkkkkkkkkkkkkkkkkkkkkkkkkkk...',
+    '..k....k....k.......',
+    '.kRk..kRk..kRk......',
+    '.kRrkkkRrkkkRrkkk...',
+    '..kkGGGGGGGGGGGGGkk.',
+    '.kGGGHHHHHHHHHHHHHGk',
+    '.kGHHHHJHHHHHHHJHHHk',
+    'kGHHAAARRRRAAaaaHHJk',
+    'kHHHaaaRrrRaaazzHJk.',
+    'kHHHHJJJJJJJJJJJJJk.',
+    'kkkkkkkkkkkkkkkkkk..',
 ]
-KO_LEG = ['..kkkk..', '.kGHHJk.', 'kGHHJJk.', 'kHHJJk..', 'kkkkkk..']
+KO_LEG = ['..kkkk..', '.kGHHJk.', 'kGHHJJk.', 'kHHJJk..', 'kwkwkk..']
 KO_SCIM = [
     '.kkkkkkkkkkkkkkk....',
     'kwwwwwSSSSSSSSSSkkk.',
     '.kkssssssSSSSSSSSSkAk',
     '...kkkkkkkkkkkkkkkkRRk',
 ]
-
 def layers():
     N = 'atk1|atk2|ko'
     return [
-        dict(n='scim', g='armB', x=8, y=6, rows=SCIM, not_=N),
-        dict(n='armB', g='armB', x=23, y=17, rows=ARM_B, not_=N),
-        dict(n='dorsal', g='body', x=19, y=19, rows=DORSAL, not_='ko'),
-        dict(n='tail', g='tail', x=2, y=36, rows=TAIL, not_='ko'),
-        dict(n='legB', g='legB', x=20, y=42, rows=DLEG, not_='ko'),
-        dict(n='torso', g='body', x=20, y=22, rows=TORSO, not_='ko'),
-        dict(n='legA', g='legA', x=31, y=42, rows=LEG, not_='ko'),
-        dict(n='fin', g='head', x=31, y=10, rows=FIN, not_='ko'),
-        dict(n='horn', g='head', x=27, y=6, rows=HORN, not_='ko'),
-        dict(n='head', g='head', x=34, y=12, rows=HEAD, not_='ko'),
-        dict(n='eye', g='head', x=40, y=17, rows=EYE, alt=EYE_ALT, not_='ko'),
-        dict(n='armF', g='armF', x=35, y=26, rows=ARM_F, not_='ko'),
-        dict(n='scimF', g='armF', x=38, y=28, rows=SCIM_F, only='atk1'),
-        dict(n='scimD', g='armF', x=40, y=29, rows=SCIM_D, only='atk2'),
-        dict(n='arc', g='fx', x=54, y=25, rows=ARC, only='atk1'),
-        # ダウン（うつぶせに たおれる）
-        dict(n='koTail', g='ko', x=0, y=44, rows=TAIL, only='ko'),
-        dict(n='koLeg', g='ko', x=20, y=55, rows=KO_LEG, only='ko'),
-        dict(n='koBody', g='ko', x=14, y=48, rows=KO_BODY, only='ko'),
-        dict(n='koScim', g='ko', x=2, y=56, rows=KO_SCIM, only='ko'),
-        dict(n='koHorn', g='ko', x=33, y=42, rows=HORN, only='ko'),
-        dict(n='koHead', g='ko', x=38, y=46, rows=HEAD, only='ko'),
-        dict(n='koEye', g='ko', x=44, y=51, rows=EYE, alt=EYE_ALT, only='ko'),
+        dict(n='scim', g='armB', x=9, y=22, rows=SCIM, not_=N),
+        dict(n='armB', g='armB', x=25, y=33, rows=ARM_B, not_=N),
+        dict(n='dorsal', g='body', x=17, y=33, rows=DORSAL, not_='ko'),
+        dict(n='tail', g='tail', x=4, y=40, rows=TAIL, not_='ko'),
+        dict(n='legB', g='legB', x=25, y=50, rows=DLEG, not_='ko'),
+        dict(n='torso', g='body', x=21, y=37, rows=TORSO, not_='ko'),
+        dict(n='legA', g='legA', x=33, y=50, rows=LEG, not_='ko'),
+        dict(n='fin', g='head', x=26, y=25, rows=FIN, not_='ko'),
+        dict(n='horn', g='head', x=24, y=18, rows=HORN, not_='ko'),
+        dict(n='head', g='head', x=30, y=21, rows=HEAD, not_='ko'),
+        dict(n='eye', g='head', x=35, y=25, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='armF', g='armF', x=34, y=40, rows=ARM_F, not_='ko'),
+        dict(n='koTail', g='ko', x=0, y=47, rows=TAIL, only='ko'),
+        dict(n='koLeg', g='ko', x=12, y=47, rows=KO_LEG, only='ko'),
+        dict(n='koBody', g='ko', x=12, y=51, rows=KO_BODY, only='ko'),
+        dict(n='koFin', g='ko', x=24, y=44, rows=FIN, only='ko'),
+        dict(n='koHorn', g='ko', x=25, y=39, rows=HORN, only='ko'),
+        dict(n='koHead', g='ko', x=30, y=42, rows=HEAD, only='ko'),
+        dict(n='koEye', g='ko', x=35, y=46, rows=EYE, alt=EYE_ALT, only='ko'),
+        dict(n='koScim', g='ko', x=40, y=57, rows=KO_SCIM, only='ko'),
+        dict(n='scimF', g='armF', x=37, y=41, rows=SCIM_F, only='atk1'),
+        dict(n='scimD', g='armF', x=39, y=42, rows=SCIM_D, only='atk2'),
+        dict(n='arc', g='fx', x=54, y=36, rows=ARC, only='atk1'),
     ]
 
 FRAMES = {

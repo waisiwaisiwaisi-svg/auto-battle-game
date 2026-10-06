@@ -1,4 +1,4 @@
-# イカヅチドリ（でんき・ひこう(風) × 雷鳥）手打ち GBA風
+# イカヅチドリ（でんき・ひこう(風) × 雷鳥）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭、胴は 小さく、翼は 大きい まま）
 import pix
 META = dict(id='ikazuchidori', name='イカヅチドリ', types=['elec', 'wind'], base='雷鳥（神話）', size='L')
 PAL = {
@@ -6,8 +6,9 @@ PAL = {
     'P': '#7ca6b8', 'Q': '#3e5f78', 'Z': '#1f2f48',
     'G': '#eaeef6', 'g': '#9ca6be',
     'Y': '#ffec3a', 'E': '#7af4ff', 'w': '#ffffff',
-    'O': '#f4c64a', 'o': '#a6702a',
+    'O': '#f4c64a', 'o': '#a6702a', 'c': '#2a8cb8',   # c：目の 暗い 虹彩
 }
+KEEP_BLACK = set('wEcY')
 LIGHT = set('PGYEwO')
 
 # 翼：上の ふちが 稲妻の ぎざぎざ、青い 羽に 電気の すじ
@@ -75,26 +76,54 @@ BODY = [
     '..kkZZZZZZZZZk..........',
     '....kkkkkkkkk...........',
 ]
-HEAD = [  # 避雷針の 角は 2ドットの 太さ
-    'kk........kk........',
-    'kYYk.....kYYk.......',
-    '.kYEk...kYEk........',
-    '..kEPk.kEPQk........',
-    '..kPPkkPPQk.........',
-    '..kPPPPPPQkk........',
-    '.kPPPPPPPPQQkk......',
-    '.kPPkkkkkkkQQQk.....',
-    'kPPkEEwkkkkkQQQk....',
-    'kPQQkkkkOOOOkkQk....',
-    'kQQQQQQkOOOOOOkk....',
-    'kZQQQQQkOOooOOOOk...',
-    'kZZQQQQkOoookkOOk...',
-    '.kZZQQQkkooYk.kOk...',
-    '..kkZZZk.kkkk.kok...',
-    '....kkk........kk...',
+# 頭（大きく）：丸い 頭、重い まゆ、かぎ形の くちばし
+HEAD_C = [
+    "......PPPPPP............",
+    "....PPPPPPPPPP..........",
+    "...PPPQQQQQQQQQ.........",
+    "..PPQQQQQQQQQQQQQ.......",
+    ".PPQQQQQQQQQQQQQQQ......",
+    ".PQQQQQQQQQQQQQQQQQ.....",
+    "PPQQQQQQQQQQQQQQQQQQ....",
+    "PQQQQQQQQQQQQQQQQkOOOO..",
+    "PQQQQQQQQQQQQQQQkOOOOOOO",
+    "QQQQQQQQQQQQQQQkOOOOOOOO",
+    "QQQQQQQQQQQQQQQkOOOOoooO",
+    "ZQQQQQQQQQQQQQkOOoookkoO",
+    "ZQQQQQQQQQQQQQkooook.koO",
+    ".ZQQQQQQQQQQQQkkokk..kOo",
+    ".ZZQQQQQQQQQQZ.kk....ko.",
+    "..ZZZQQQQQQZZZ.......k..",
+    "....ZZZZZZZZ............",
 ]
-EYE = ['EEw']
-EYE_ALT = {'blink': ['kkk'], 'atk0|atk1|atk2': ['www'], 'hit': ['kEk'], 'ko': ['EkE']}
+HEAD_OPEN_BEAK = {   # 口を あけた くちばし（上と 下が ひらく）
+    10: "QQQQQQQQQQQQQQQkOOOOoooO",
+    11: "ZQQQQQQQQQQQQQkOOkkkkkoO",
+    12: "ZQQQQQQQQQQQQQkk.....kOo",
+    13: ".ZQQQQQQQQQQQQkooOk...ko.",
+    14: ".ZZQQQQQQQQQQZ.kooOOk.k..",
+    15: "..ZZZQQQQQQZZZ..kkkkk....",
+}
+EYES = {
+    'open':  ['kk........', '.kkkkkkkk.', '..kwEEEkEk', '.kEccccckc', '..kkkkkkk.'],
+    'glow':  ['kk........', '.kkkkkkkk.', '..kwwwEEEk', '.kEEwEEkEk', '..kccckck.'],
+    'blink': ['kk........', '.kkkkkkkk.', '..kQQQQQQk', '.kkkkkkkkk', '..ZZZZZZ..'],
+    'hit':   ['kk........', '.kkkkkkkk.', '..kEkkkEkk', '.kkkckkkck', '..kkkkkkk.'],
+    'ko':    ['..........', '..kEccEk..', '..kckkck..', '..kkcckk..', '..kckkck..'],
+}
+def head(eye='open', beak=False):
+    rows = list(HEAD_C)
+    if beak:
+        for y, r in HEAD_OPEN_BEAK.items(): rows[y] = r
+    g = [list(r) for r in rows]
+    for j, r in enumerate(EYES[eye]):
+        for i, c in enumerate(r):
+            if c != '.': g[4 + j][7 + i] = c
+    for (x, y) in ((5, 1), (6, 1), (3, 3), (2, 4), (9, 2), (10, 2)): g[y][x] = 'P'
+    for (x, y) in ((3, 10), (4, 11), (5, 12), (10, 12), (11, 13)): g[y][x] = 'Z'
+    return pix.outline([''.join(r) for r in g])
+HORN = ['kk....', 'kYYk..', '.kYEk.', '..kEPk', '..kPPk', '..kPPk']
+HORN_KO = pix.recolor(HORN, {'Y': 'g', 'E': 'Q'})
 TAIL = [
     '..............kk..',
     '............kkPQk.',
@@ -117,7 +146,6 @@ TAIL = [
 TALON = [
     '.kkkkk...',
     'kPQQQZk..',
-    'kQQQZZk..',
     'kQQZZZk..',
     '.kQZZk...',
     '.kOOok...',
@@ -215,20 +243,17 @@ SMOKE = [  # 角から 立ちのぼる 消えた 電気の けむり
     'kgk..kgk..',
     '.kk...kk..',
 ]
-def head_ko():
-    """たおれた 頭：目は ×、角の 電気は 消えて 灰色"""
-    g = pix.grid_of(pix.recolor(HEAD, {'Y': 'g', 'E': 'Q'}))
-    for (x, y, c) in ((4, 7, 'w'), (6, 7, 'w'), (5, 8, 'w'), (4, 9, 'w'), (6, 9, 'w'), (5, 7, 'k'), (4, 8, 'k'), (6, 8, 'k'), (7, 8, 'k'), (5, 9, 'k'), (3, 8, 'k'), (3, 9, 'k'), (7, 9, 'k')): g[y][x] = c
-    return pix.rows_of(g)
 def ko_layers():
     return [
         dict(n='ko_tail', g='root', x=-6, y=54, rows=TAIL_KO),
         dict(n='ko_body', g='root', x=11, y=46, rows=lying_body(30, 13)),
         dict(n='ko_talon', g='root', x=31, y=51, rows=pix.flip_v(TALON)),
-        dict(n='ko_mane', g='root', x=36, y=48, rows=MANE),
-        dict(n='ko_head', g='root', x=42, y=45, rows=head_ko()),
+        dict(n='ko_mane', g='root', x=32, y=49, rows=MANE),
+        dict(n='ko_horn', g='root', x=44, y=38, rows=HORN_KO),
+        dict(n='ko_horn2', g='root', x=49, y=37, rows=HORN_KO),
+        dict(n='ko_head', g='root', x=39, y=42, rows=head('ko', True)),
         dict(n='ko_wingF', g='root', x=2, y=49, rows=WING_KO),
-        dict(n='ko_smoke', g='root', x=44, y=38, rows=SMOKE),
+        dict(n='ko_smoke', g='root', x=46, y=31, rows=SMOKE),
     ]
 
 def layers():
@@ -244,12 +269,13 @@ def base_layers():
         dict(n='talonB', g='talon', x=29, y=42, rows=pix.recolor(TALON, {'P': 'Q', 'Q': 'Z'})),
         dict(n='body', g='body', x=18, y=30, rows=BODY),
         dict(n='talon', g='talon', x=34, y=41, rows=TALON),
-        dict(n='mane', g='head', x=35, y=24, rows=MANE),
-        dict(n='head', g='head', x=40, y=10, rows=HEAD),
-        dict(n='eye', g='head', x=44, y=18, rows=EYE, alt=EYE_ALT),
-        dict(n='spark', g='head', x=37, y=0, rows=SPARK, only='atk0'),
-        dict(n='bolt', g='fx', x=51, y=13, rows=BOLT, only='atk1'),
-        dict(n='burst', g='fx', x=60, y=12, rows=BURST, only='atk2'),
+        dict(n='horn1', g='head', x=39, y=6, rows=HORN),
+        dict(n='horn2', g='head', x=45, y=5, rows=HORN),
+        dict(n='mane', g='head', x=33, y=26, rows=MANE),
+        dict(n='head', g='head', x=36, y=10, rows=head(), alt={'blink': head('blink'), 'hit': head('hit'), 'atk0': head('glow'), 'atk1|atk2': head('glow', True)}),
+        dict(n='spark', g='head', x=38, y=-3, rows=SPARK, only='atk0'),
+        dict(n='bolt', g='fx', x=58, y=16, rows=BOLT, only='atk1'),
+        dict(n='burst', g='fx', x=63, y=14, rows=BURST, only='atk2'),
         dict(n='wingF_up', g='wingF', x=6, y=9, rows=WING_UP, only=UP),
         dict(n='wingF_mid', g='wingF', x=-3, y=18, rows=WING_MID, only=MID),
         dict(n='wingF_dn', g='wingF', x=-3, y=33, rows=WING_DN, only=DN),

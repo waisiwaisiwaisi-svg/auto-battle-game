@@ -6,10 +6,10 @@ PAL = {
     'k': '#101018', 'l': '#1e2a4c',
     'W': '#f4f8ff', 'I': '#b4e2f8', 'J': '#6aa8d8', 'K': '#3a64a0',
     'n': '#7c8cc0', 'N': '#4c5a8c', 'M': '#2c3560',
-    'E': '#8ffff0', 'G': '#d8c48e', 'g': '#7a6a52',
+    'E': '#8ffff0', 'e': '#26a6b4', 'G': '#d8c48e', 'g': '#7a6a52',
 }
 LIGHT = set('WInEG')
-KEEP_BLACK = set('Ew')   # 目の まわりの 黒は 濃い まま
+KEEP_BLACK = set('Eew')   # 目の まわりの 黒は 濃い まま
 
 S = 64
 def canvas(): return pix.grid(S, S)
@@ -48,10 +48,10 @@ def merge(*gs):
 # ---------- 体（たまご形・直立）----------
 def body():
     g = canvas()
-    pix.ellipse(g, 34, 42, 10.5, 13.5, 'N')
+    pix.ellipse(g, 34, 42.5, 10.5, 11.5, 'N')
     g = shade(g, 'N', 'n', 'N', 'M', 2)
     # 胸：白い 羽毛に 水色の 横じま（右前）
-    c = canvas(); pix.ellipse(c, 38.5, 44, 6.5, 11, 'W')
+    c = canvas(); pix.ellipse(c, 38.5, 44, 6.5, 9.5, 'W')
     for y in range(S):
         for x in range(S):
             if c[y][x] == 'W' and g[y][x] != '.':
@@ -211,8 +211,10 @@ def tail():
     g = canvas()
     blade(g, (27, 50), (31, 53), (20, 60), .5)
     return g
-TALON = [  # 羽毛の 足と 金の かぎ爪
+TALON = [  # 羽毛の 足（短いが 見える）と 金の かぎ爪
     '.knNk..knNk..',
+    '.knNk..knNk..',
+    '.knMk..knMk..',
     '.kNMk..kNMk..',
     'kGGGGk.kGGGGk',
     'kGkGkGkkGkGkG',
@@ -232,12 +234,13 @@ VOLLEY2 = volley([(10, 0), (20, 8), (12, 15)])
 FROST = ['..k.....k..', '.kWk...kIk.', 'kWEWk.kIWIk', '.kWk...kIk.', '..k.....k..']
 
 # 目（手打ち）：外側が 高く、くちばし側へ 下がる つり目。黒い ふちで 光を きわだたせる
-EYE = ['kkkk.....', 'kWEEkkk..', 'kEEEEEEkk', 'kEEkEEEEk', '.kEkEEEk.', '..kkkkk..']
+# 目：ハイライト W ＋ 虹彩 2色（E 明・e 暗）＋ たての ひとみ k
+EYE = ['kkkk.....', 'kWWEkkk..', 'kWEEkEEkk', 'keEEkEEek', '.keekeek.', '..kkkkk..']
 EYE_ALT = {'blink': ['kkkk.....', 'kMMMkkk..', 'kMMMMMMkk', 'kkkkkkkkk', '.WWWWWW..', '.........'],
-           'atk0|atk1|atk2': ['kkkk.....', 'kEWEkkk..', 'kWWWWWEkk', 'kEWkWWWEk', '.kEkEWEk.', '..kkkkk..'],
+           'atk0|atk1|atk2': ['kkkk.....', 'kWWWkkk..', 'kWWEkWEkk', 'kEWEkWEEk', '.keekeek.', '..kkkkk..'],
            'hit': ['kkkk.....', 'kMMMkkk..', 'kkkkkkkkk', 'kEkkkkEkk', '.kkEEkk..', '..kkkkk..']}
-EYEF = ['...kk', '.kkEk', 'kEEEk', 'kEkEk', '.kkk.']
-EYEF_ALT = {'blink': ['...kk', '.kkMk', 'kMMMk', 'kkkkk', '.....'], 'atk0|atk1|atk2': ['...kk', '.kkWk', 'kWWWk', 'kWkWk', '.kkk.'], 'hit': ['...kk', '.kkMk', 'kkkkk', 'kEkEk', '.kkk.']}
+EYEF = ['...kk', '.kWEk', 'kEkEk', 'kekek', '.kkk.']
+EYEF_ALT = {'blink': ['...kk', '.kkMk', 'kMMMk', 'kkkkk', '.....'], 'atk0|atk1|atk2': ['...kk', '.kWWk', 'kWkEk', 'kekek', '.kkk.'], 'hit': ['...kk', '.kkMk', 'kkkkk', 'kEkEk', '.kkk.']}
 
 # ---------- ダウン：あおむけに たおれる。頭は 横に ころがり（羽角が 右、顔が 上）、目は ×、爪は 上を 向く ----------
 EYE_KO = ['kEkkkEk', 'kkEkEkk', 'kkkEkkk', 'kkEkEkk', 'kEkkkEk']
@@ -288,13 +291,13 @@ def layers():
     return [
         dict(n='wingB', g='wingB', x=0, y=2, rows=rows(WR), alt={'idle1|idle3|walk1|walk3': rows(WR1), 'idle2|walk2|atk2': rows(WR2), 'atk0|atk1': rows(WH), 'hit': rows(WR2)}, not_='ko'),
         dict(n='tail', g='body', x=0, y=0, rows=rows(tail()), not_='ko'),
-        dict(n='talonB', g='talon', x=27, y=54, rows=pix.rows_of(dark(pix.grid_of(TALON))), not_='ko'),
+        dict(n='talonB', g='talon', x=27, y=52, rows=pix.rows_of(dark(pix.grid_of(TALON))), not_='ko'),
         dict(n='body', g='body', x=0, y=0, rows=rows(body()), not_='ko'),
-        dict(n='talon', g='talon', x=32, y=54, rows=TALON, not_='ko'),
+        dict(n='talon', g='talon', x=32, y=52, rows=TALON, not_='ko'),
         dict(n='wingF', g='wingF', x=0, y=0, rows=rows(wing_folded()), alt={'atk0': rows(wing_folded(3)), 'atk1|atk2': rows(wing_strike())}, not_='ko'),
-        dict(n='head', g='head', x=0, y=3, rows=rows(head()), not_='ko'),
-        dict(n='eye', g='head', x=28, y=20, rows=EYE, alt=EYE_ALT, not_='ko'),
-        dict(n='eyeF', g='head', x=41, y=20, rows=EYEF, alt=EYEF_ALT, not_='ko'),
+        dict(n='head', g='head', x=0, y=4, rows=rows(head()), not_='ko'),
+        dict(n='eye', g='head', x=28, y=21, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='eyeF', g='head', x=41, y=21, rows=EYEF, alt=EYEF_ALT, not_='ko'),
         dict(n='frost', g='head', x=22, y=2, rows=FROST, only='atk0'),
         dict(n='volley1', g='fx', x=50, y=24, rows=VOLLEY1, only='atk1'),
         dict(n='volley2', g='fx', x=46, y=24, rows=VOLLEY2, only='atk2'),

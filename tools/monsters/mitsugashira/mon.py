@@ -1,4 +1,4 @@
-# ミツガシラ（はがね・あく × ケルベロス）手打ち GBA風
+# ミツガシラ（はがね・あく × ケルベロス）手打ち GBA風・デフォルメ（2〜3頭身：3つの 頭を 大きく 描きなおし、胴は 短く 丸く、足は 短く 太く）
 META = dict(id='mitsugashira', name='ミツガシラ', types=['steel', 'dark'], base='ケルベロス', size='L')
 PAL = {
     'k': '#101018', 'l': '#2c2440',
@@ -36,15 +36,15 @@ def shade(spans, W, lit=1, dk=2):
     return g
 
 # ---- 胴：胸が 深く 腰が しまった 番犬の 体 ----
-SPAN = [(26, 31), (19, 35), (6, 35), (4, 36), (3, 37), (2, 38), (1, 38), (1, 38), (1, 39), (1, 39), (1, 39), (1, 39),
-        (1, 39), (1, 39), (2, 38), (3, 38), (4, 38), (6, 37), (17, 36), (22, 35), (23, 34), (26, 31)]
+SPAN = [(9, 20), (5, 25), (3, 27), (2, 28), (1, 29), (1, 29), (0, 29), (0, 29), (0, 29), (0, 29), (0, 29), (1, 29),
+        (1, 29), (2, 28), (3, 28), (5, 27), (8, 26), (12, 24)]
 def body():
-    g = shade(SPAN, 40, lit=2, dk=3)
+    g = shade(SPAN, 30, lit=2, dk=3)
     # 筋肉の すじ・毛の 流れ（手で 打つ）
-    for (x, y) in ((8, 6), (9, 7), (10, 8), (10, 9), (9, 10), (13, 12), (14, 12), (15, 13), (20, 11), (21, 12), (22, 12),
-                   (27, 8), (28, 9), (29, 10), (29, 11), (28, 12), (26, 15), (27, 15), (30, 16), (31, 17)):
+    for (x, y) in ((6, 6), (7, 7), (8, 8), (8, 9), (7, 10), (11, 11), (12, 11), (13, 12), (19, 8), (20, 9), (21, 10),
+                   (21, 11), (20, 12), (17, 14), (18, 14)):
         if g[y][x] == 'G': g[y][x] = 'H'
-    for (x, y) in ((7, 5), (8, 5), (11, 7), (25, 6), (26, 7), (17, 9), (18, 10), (6, 9), (32, 13)):
+    for (x, y) in ((5, 5), (6, 5), (9, 7), (18, 6), (19, 7), (14, 8), (15, 9), (4, 9), (23, 11)):
         if g[y][x] == 'G': g[y][x] = 'F'
     return [''.join(r) for r in _ol(g)]
 
@@ -60,35 +60,56 @@ ARMOR = [
     '.kkkkkkkkkkkkkkk.',
 ]
 # 頭（犬の 頭・耳は 鉄の 先）：口は いつも うなって 牙が 見える
-HEAD = [
-    '..kk................',
-    '.kSUk...............',
-    '.kSTUk..............',
-    '..kTUGk..kkkk.......',
-    '..kGGGGkkFFFFkk.....',
-    '.kGGGFFFFFGGGGGkk...',
-    'kGGFFFGGGGGGGGGGGkk.',
-    'kGFFGGkkkkkGGGGGGGGk',
-    'kGFGGkGGGGkkGGGGGkkk',
-    'kGGGGGkGGkGGGGGGGkHk',
-    'kGGGGGGkkGGGGkkkkkk.',
-    'kHGGGGGGGGGkwMwkMwk.',
-    '.kHGGGGGGGkMMMMMMk..',
-    '..kHHGGGHHkwkkwkk...',
-    '...kkHHHHHHHHkk.....',
-    '.....kkkkkkkk.......',
+HEAD = [   # 大きく 描きなおした 頭（23×18）
+    '..kk...................',
+    '.kSUk..................',
+    '.kSTUk.................',
+    '..kTUGk...kkkkk........',
+    '..kGGGGkkkFFFFFkk......',
+    '.kGGGFFFFFFGGGGGGkk....',
+    'kGGFFFFGGGGGGGGGGGGkk..',
+    'kGFFGGGGGGGGGGGGGGGGGk.',
+    'kGFFGGGGGGGGGGGGGGGGGGk',
+    'kGFGGGGGGGGGGGGGGGGGkkk',
+    'kGGGGGGGGGGGGGGGGGGGkHk',
+    'kGGGGGGGGGGGGGGGGGGGGkk',
+    'kGGGGGGGGGGkkkkkkkkkkk.',
+    'kHGGGGGGGGkwMwkkMwkMwk.',
+    '.kHGGGGGGkMMMMMMMMMMk..',
+    '..kHHGGGHkkwkkwkkwkk...',
+    '...kkHHHHHHHHHHkk......',
+    '.....kkkkkkkkkk........',
 ]
-HEAD_OPEN = HEAD[:10] + [
-    'kGGGGGGkkGkkkkkkkk..',
-    'kHGGGGGGGkwMwMMwMk..',
-    '.kHGGGGGkMMMMMMMk...',
-    '..kHGGGkMMMMMMk.....',
-    '..kHGGGGkwMMwMwk....',
-    '...kHHHHHHHHHHk.....',
-    '....kkkkkkkkkk......',
+HEAD_OPEN = HEAD[:12] + [
+    'kGGGGGGGGGkkkkkkkkkkkk.',
+    'kHGGGGGGGkwMwMMwMMwMk..',
+    '.kHGGGGGkMMMMMMMMMMk...',
+    '..kHGGGkMMMMMMMMk......',
+    '..kHGGGGkwMMwMMwk......',
+    '...kHHHHHHHHHHHk.......',
+    '....kkkkkkkkkkk........',
 ]
-EYE = ['YYRR', 'kRRk']
-EYE_ALT = {'blink': ['kkkk', 'GkkG'], 'atk0|atk1|atk2': ['YYYY', 'kYRk'], 'hit': ['RkkR', 'kRRk'], 'ko': ['RkRk', 'kRkG']}
+def hshade(rows):
+    """頭の 広い G に 光と 影：上の ふちは F、下・右の ふちは H（手打ちの 下地を こわす）"""
+    g = [list(r) for r in rows]; H, W = len(g), len(g[0]); o = [r[:] for r in g]
+    def at(y, x): return g[y][x] if 0 <= y < H and 0 <= x < W else '.'
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] != 'G': continue
+            if at(y - 1, x) in 'k.' or at(y - 2, x) in 'k.' and y < 8: o[y][x] = 'F'
+            elif at(y + 1, x) in 'k.' or at(y, x + 1) in 'k.' or at(y + 2, x) in 'k.': o[y][x] = 'H'
+    for (x, y) in ((14, 9), (15, 10), (16, 10), (12, 11), (17, 8)):   # ほおの 毛すじ
+        if o[y][x] == 'G': o[y][x] = 'H'
+    return [''.join(r) for r in o]
+HEAD = hshade(HEAD); HEAD_OPEN = hshade(HEAD_OPEN)
+# 目：黒い まゆ＋光 w＋虹彩 2色（Y／R）＋たての ひとみ＋下まぶた
+EYE = ['kkkkkkk.', '.kwYRkRk', '.kRMMkMk', '..kkkkk.']
+EYE_ALT = {
+    'blink': ['kkkkkkk.', '.kkkkkkk', '..GGGGG.', '........'],
+    'atk0|atk1|atk2': ['kkkkkkk.', '.kwYYkYk', '.kYYYkYk', '..kkkkk.'],
+    'hit': ['kkkkkkk.', '..RkkkR.', '...RkR..', '..kkkkk.'],
+    'ko': ['........', '.kR..kR.', '..kRkR..', '.kR..kR.'],
+}
 COLLAR = [
     '.......',
     'k......',
@@ -117,13 +138,10 @@ FLEG = [
     '.kkkkkk.',
     'kFFGGGHk',
     'kFGGGGHk',
-    'kFGGGGHk',
     'kGGGGHHk',
-    '.kGGGHHk',
     '.kGGGHk.',
     '.kSSTUk.',
     '.kSTTUk.',
-    '.kSTUUk.',
     'kSTTUUUk',
     'kkkkkkkkk',
     '.kwkwkwk.',
@@ -132,17 +150,11 @@ HLEG = [
     '..kkkkkkk...',
     '.kFFFGGGGkk.',
     'kFFGGGGGGGHk',
-    'kFGGGGGGGGHk',
     'kFGGGGGGGHHk',
-    'kGGGGGGGHHHk',
-    '.kGGGGGHHHk.',
+    '.kGGGGGGHHk.',
     '..kGGGGHHk..',
-    '...kGGGHk...',
     '..kGGGHk....',
-    '.kGGGHk.....',
     '.kSTTUk.....',
-    '.kSTUUk.....',
-    '.kTTUUk.....',
     '.kSTTUUk....',
     '.kkkkkkkk...',
     '..kwkwkwk...',
@@ -221,25 +233,26 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 BODY = body()
 def layers():
     return [
-        dict(n='tail', g='tail', x=0, y=22, rows=TAIL, alt={'idle1|idle3|walk1|walk3': TAIL2}),
-        dict(n='legHF', g='legB', x=11, y=42, rows=dark(HLEG)),
-        dict(n='legFF', g='legA', x=40, y=46, rows=dark(FLEG)),
-        dict(n='mane', g='body', x=29, y=17, rows=MANE, alt={'idle1|idle3|walk1|walk3': MANE2}),
-        dict(n='body', g='body', x=5, y=30, rows=BODY),
-        dict(n='armor', g='body', x=12, y=28, rows=ARMOR),
-        dict(n='neckB', g='body', x=38, y=21, rows=dark(NECK)),
-        dict(n='headB', g='h1', x=39, y=9, rows=dark(HEAD), alt={'atk1': dark(HEAD_OPEN)}),
-        dict(n='eyeB', g='h1', x=45, y=17, rows=EYE, alt=EYE_ALT),
-        dict(n='collB', g='h1', x=37, y=15, rows=COLLAR),
-        dict(n='headM', g='h2', x=43, y=19, rows=HEAD, alt={'atk1': HEAD_OPEN}),
-        dict(n='eyeM', g='h2', x=49, y=27, rows=EYE, alt=EYE_ALT),
-        dict(n='collM', g='h2', x=41, y=25, rows=COLLAR),
-        dict(n='legH', g='legA', x=5, y=43, rows=HLEG),
-        dict(n='legF', g='legB', x=35, y=47, rows=FLEG),
-        dict(n='headF', g='h3', x=40, y=31, rows=HEAD, alt={'atk1': HEAD_OPEN}),
-        dict(n='eyeF', g='h3', x=46, y=39, rows=EYE, alt=EYE_ALT),
-        dict(n='collF', g='h3', x=38, y=37, rows=COLLAR),
-        dict(n='slash', g='root', x=64, y=25, rows=SLASH, alt={'atk2': SLASH2}, only='atk1|atk2'),
+        dict(n='tail', g='tail', x=10, y=29, rows=TAIL, alt={'idle1|idle3|walk1|walk3': TAIL2}),
+        dict(n='legHF', g='legB', x=19, y=49, rows=dark(HLEG)),
+        dict(n='legFF', g='legA', x=40, y=50, rows=dark(FLEG)),
+        dict(n='mane', g='body', x=25, y=23, rows=MANE, alt={'idle1|idle3|walk1|walk3': MANE2}),
+        dict(n='body', g='body', x=14, y=36, rows=BODY),
+        dict(n='armor', g='body', x=16, y=33, rows=ARMOR),
+        dict(n='neckB', g='body', x=35, y=19, rows=dark(NECK)),
+        dict(n='neckB2', g='body', x=33, y=26, rows=dark(NECK)),
+        dict(n='headB', g='h1', x=35, y=5, rows=dark(HEAD), alt={'atk1': dark(HEAD_OPEN)}),
+        dict(n='eyeB', g='h1', x=40, y=13, rows=EYE, alt=EYE_ALT),
+        dict(n='collB', g='h1', x=33, y=12, rows=COLLAR),
+        dict(n='headM', g='h2', x=42, y=18, rows=HEAD, alt={'atk1': HEAD_OPEN}),
+        dict(n='eyeM', g='h2', x=47, y=26, rows=EYE, alt=EYE_ALT),
+        dict(n='collM', g='h2', x=40, y=25, rows=COLLAR),
+        dict(n='legH', g='legA', x=14, y=49, rows=HLEG),
+        dict(n='legF', g='legB', x=35, y=50, rows=FLEG),
+        dict(n='headF', g='h3', x=38, y=31, rows=HEAD, alt={'atk1': HEAD_OPEN}),
+        dict(n='eyeF', g='h3', x=43, y=39, rows=EYE, alt=EYE_ALT),
+        dict(n='collF', g='h3', x=36, y=38, rows=COLLAR),
+        dict(n='slash', g='root', x=64, y=27, rows=SLASH, alt={'atk2': SLASH2}, only='atk1|atk2'),
     ]
 
 FRAMES = {

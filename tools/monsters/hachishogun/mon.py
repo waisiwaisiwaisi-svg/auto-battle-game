@@ -72,9 +72,9 @@ def rell(g, cx, cy, a, b, ang, ch):
 
 # ---------- 腹（こはくと はがねの しま、先に 光る 毒ぶくろ と 槍の 針）----------
 AB = {   # 腰の つけね → 先の 向き、中心、針の 先
-    'rest': dict(c=(23, 38), d=(-1, .55), a=10.5, b=6.5, sting=(8, 47)),
-    'curl': dict(c=(30, 42), d=(-.15, 1), a=10.5, b=6.5, sting=(36, 59)),
-    'stab': dict(c=(37, 41), d=(.75, .66), a=10.5, b=6.5, sting=(60, 52)),
+    'rest': dict(c=(26, 40), d=(-1, .55), a=8.5, b=5.8, sting=(12, 49)),
+    'curl': dict(c=(31, 44), d=(-.15, 1), a=8.5, b=5.8, sting=(35, 59)),
+    'stab': dict(c=(37, 43), d=(.75, .66), a=8.5, b=5.8, sting=(58, 54)),
 }
 def abdomen(pose):
     P = AB[pose]; g = G()
@@ -106,7 +106,7 @@ def abdomen(pose):
 WG = {'up': [(28, 1), (24, 9)], 'hi': [(19, 6), (22, 14)], 'mid': [(13, 13), (19, 20)], 'down': [(14, 28), (20, 30)]}
 def wings(pose, far=False):
     g = G()
-    for (tx, ty), (bx, by), bb in reversed(list(zip(WG[pose], [(38, 21), (36, 23)], (3.6, 2.6)))):
+    for (tx, ty), (bx, by), bb in reversed(list(zip(WG[pose], [(38, 28), (36, 29)], (3.6, 2.6)))):
         p = G(); ang = math.atan2(ty - by, tx - bx); L = ((tx - bx) ** 2 + (ty - by) ** 2) ** .5
         rell(p, (bx + tx) / 2, (by + ty) / 2, L / 2 + .5, bb, ang, '8'); ink(g, p)
     g = shade(g, {'8': 'wcc'}, dk=.6)
@@ -114,7 +114,7 @@ def wings(pose, far=False):
     for y in range(64):
         for x in range(64):
             if g[y][x] == 'c' and (x + y) % 2 == 0 and y > 0 and g[y - 1][x] == 'w': g[y][x] = 'w'
-    for (tx, ty), (bx, by) in zip(WG[pose], [(38, 21), (36, 23)]):
+    for (tx, ty), (bx, by) in zip(WG[pose], [(38, 28), (36, 29)]):
         n = max(abs(tx - bx), abs(ty - by))
         for i in range(2, n - 2):
             x, y = round(bx + (tx - bx) * i / n), round(by + (ty - by) * i / n + 1)
@@ -125,17 +125,17 @@ def wings(pose, far=False):
 # ---------- 胸（はがねの よろい、こはくの ふち）----------
 def thorax():
     g = G()
-    p = G(); rell(p, 31, 32, 3, 2.5, 0, '6'); ink(g, p)          # くびれた 腰
-    p = G(); rell(p, 40, 29, 8.5, 7, -.3, '4')
+    p = G(); rell(p, 32, 35, 2.6, 2.2, 0, '6'); ink(g, p)          # くびれた 腰
+    p = G(); rell(p, 39, 32, 6.8, 5.6, -.3, '4')
     for y in range(64):
         for x in range(64):
-            if p[y][x] == '4' and 0 <= (x - 40) * .5 + (y - 29) - 3 < 2.2: p[y][x] = '1'   # こはくの 帯
+            if p[y][x] == '4' and 0 <= (x - 39) * .5 + (y - 32) - 2 < 2.2: p[y][x] = '1'   # こはくの 帯
     ink(g, p)
     # 肩の 大袖（よろいの 板）
-    p = G(); poly(p, [(39, 23), (47, 22), (49, 27), (43, 30), (38, 28)], '4'); ink(g, p)
+    p = G(); poly(p, [(37, 27), (43, 26), (45, 30), (41, 32), (36, 31)], '4'); ink(g, p)
     g = shade(g)
-    dots(g, 'k', [(44, 26), (42, 34)])
-    dots(g, 'S', [(43, 25), (41, 33)])     # 鋲
+    dots(g, 'k', [(42, 29), (40, 36)])
+    dots(g, 'S', [(41, 28), (39, 35)])     # 鋲
     return rows_of(g)
 
 LEGS = [   # 3対の 足（こはくの 関節、はがねの すね、白い かぎ爪）
@@ -154,15 +154,15 @@ LEGS = [   # 3対の 足（こはくの 関節、はがねの すね、白い �
 def head():
     g = G()
     # 三日月の 触角（ひじで 折れて 前へ）：かぶとの 前立ての よう
-    for pts, ch in [([(50, 20), (49, 12), (54, 6)], '6'), ([(52, 20), (53, 11), (59, 6)], '1')]:
+    for pts, ch in [([(48, 20), (46, 10), (51, 3)], '6'), ([(51, 20), (52, 9), (58, 4)], '1')]:
         p = G()
         for (x0, y0), (x1, y1) in zip(pts, pts[1:]): stroke(p, x0, y0, x1, y1, 1.0, .7, ch)
         ink(g, p)
-    p = G(); rell(p, 51, 25, 7.5, 6.8, .2, '1')
-    poly(p, [(44, 21), (50, 16), (57, 18), (54, 22), (45, 26)], '4')    # かぶとの 板
+    p = G(); rell(p, 50, 25, 9.2, 8.2, .15, '1')
+    poly(p, [(42, 21), (48, 15), (56, 16), (53, 20), (43, 26)], '4')    # かぶとの 板
     ink(g, p)
     g = shade(g)
-    put(g, 54, 26, [   # 刃の あご（上下で はさむ）
+    put(g, 55, 27, [   # 刃の あご（上下で はさむ）
         '.kkkk.....',
         'kSSSTkk...',
         'kTSSSSTk..',
@@ -172,27 +172,26 @@ def head():
         '.kTTTTk...',
         '..kkkk....',
     ])
-    dots(g, 'P', [(48, 31), (49, 31), (50, 31)])
+    dots(g, 'P', [(46, 32), (47, 32), (48, 32), (49, 33)])
     return rows_of(g)
 
-EYE = ['kkkkkk...', '.kkkkkkk.', '.krrrrwk.', '.krdrrrrk', '.krrdrrdk', '..krrrrk.', '...kkkk..']
+# 複眼：まゆの 板で つり上がり、白い 光＋ 赤の 虹彩 2色（r/d）＋ たての ひとみ
+EYE = ['kkkkkkk...', '.kkkkkkkk.', '.kwwrrrkrk', '.krrrrdkdk', '..kdddddk.', '...kkkkk..']
 EYE_ALT = {
-    'blink': ['kkkkkk...', '.kkkkkkk.', '.kkkkkkk.', '.kddddddk', '..kkkkkk.', '.........', '.........'],
-    'atk0|atk1|atk2': ['kkkkkk...', '.kkkkkkk.', '.kwwwwwk.', '.kwrrrwwk', '.krrwrrrk', '..krrrrk.', '...kkkk..'],
+    'blink': ['kkkkkkk...', '.kkkkkkkk.', '.kkkkkkkk.', '.kddddddk.', '..kkkkkk..', '..........'],
+    'atk0|atk1|atk2': ['kkkkkkk...', '.kkkkkkkk.', '.kwwwwwkwk', '.kwrrrrkrk', '..krrrddk.', '...kkkkk..'],
     'hit': ['.........', '.kk...kk.', '...kkk...', '.kk...kk.', '.........'],
     'ko': ['.........', '..k...k..', '...k.k...', '....k....', '...k.k...', '..k...k..'],
 }
 
-LEGS = [   # 3対の 足（こはくの 関節、はがねの すね、白い かぎ爪）。前足は つかみかかる 形
+LEGS = [   # 3対の 足（短く 太く：こはくの 関節、はがねの すね、白い かぎ爪）。前足は つかみかかる 形
     '.kk.....kk.....kkk.',
     'kQRk...kQRk...kRQQk',
     'kTUk...kTUk..kTUkk.',
-    'kTUk...kTUk..kTUk..',
     '.kTUk..kTUk...kTUk.',
     '.kTUk..kTUk....kTSk',
-    '..kTUk.kTUk.....kSk',
-    '..kSSk.kSSk......k.',
-    '...kSk..kSk........',
+    '..kSSk.kSSk.....kSk',
+    '...kSk..kSk......k.',
     '....k....k.........',
 ]
 
@@ -212,12 +211,12 @@ def layers():
     return [
         dict(n='wingB', g='wingB', x=3, y=-2, rows=WF['hi'], alt={'idle1|idle3|walk1|walk3|atk2': WF['mid'], 'walk0|atk0|hit': WF['up'], 'walk2|atk1': WF['down']}),
         dict(n='abd', g='abd', x=0, y=0, rows=A['rest'], alt={'atk0': A['curl'], 'atk1|atk2': A['stab']}),
-        dict(n='legs', g='legs', x=33, y=33, rows=LEGS),
+        dict(n='legs', g='legs', x=31, y=35, rows=LEGS),
         dict(n='thorax', g='body', x=0, y=0, rows=thorax()),
         dict(n='head', g='head', x=0, y=0, rows=head()),
         dict(n='eye', g='head', x=47, y=20, rows=EYE, alt=EYE_ALT),
         dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|atk0|hit': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
-        dict(n='drip', g='abd', x=8, y=49, rows=OL(DRIP), only='idle1|idle2|walk1|walk3'),
+        dict(n='drip', g='abd', x=12, y=51, rows=OL(DRIP), only='idle1|idle2|walk1|walk3'),
         dict(n='splash', g='root', x=58, y=47, rows=OL(SPLASH), only='atk1'),
     ]
 

@@ -1,4 +1,4 @@
-# フクログマ（ノーマル・かくとう × オウルベア）手打ち GBA風
+# フクログマ（ノーマル・かくとう × オウルベア）手打ち GBA風・デフォルメ（2〜3頭身：頭は そのまま、胴・うで・足を 短く 太く）
 import pix
 META = dict(id='fukuroguma', name='フクログマ', types=['normal', 'fighting'], base='オウルベア', size='L')
 PAL = {
@@ -66,6 +66,8 @@ BEAK = [
     '.......kk..',
 ]
 HEAD = make_head()
+def cut(rows, drop): return [r for i, r in enumerate(rows) if i not in drop]
+def notop(rows): return [rows[1]] + rows[1:]     # 付け根の 輪郭を 消して 胴に 食いこませる
 def fur(rows, seed=0):
     """毛の 陰影：茶色の 面を 光（左上）と 影（右下）で ぬり分け、毛束の V字を 手で 打つ 代わりに 規則で 置いて から 手直し"""
     g = pix.grid_of(rows); H, W = len(g), len(g[0]); B = set('FGH')
@@ -203,7 +205,7 @@ LEG = [
     'kwkkwkkwkkwkk.',
     '.k..k..k..k...',
 ]
-LEG = fur(LEG, 1)
+LEG = fur(notop(cut(LEG, {7, 8, 9, 10})), 1)
 DLEG = [r.replace('F', 'G') for r in LEG]
 def hump(rows):
     """胴の 左上の 角を まるく 落として 熊の 背中の こぶに する（あたり）"""
@@ -213,19 +215,21 @@ def hump(rows):
         for x in range(len(g[0])):
             if x < 12 and y < 10 and ((x - 12) / 12) ** 2 + ((y - 10) / 10) ** 2 > 1: g[y][x] = '.'
     return pix.outline(pix.rows_of(g))
-BODY = fur(hump(BODY))
-ARM_F = fur(ARM_F, 3)
-ARM_B = fur(ARM_B, 2)
+BODY = fur(hump(cut(BODY, {9, 11, 13, 15, 17, 19, 21})))
+ARM_F_LONG = fur(ARM_F, 3)
+ARM_F = fur(cut(ARM_F, {3, 5, 7, 9, 11, 13, 14, 17, 22}), 3)
+ARM_B = fur(cut(ARM_B, {13, 15, 17, 19}), 2)
 
-EYEN = ['OYYYO', 'YYkOO', 'kOOOk']
+# 目：白い 光＋だいだいの 虹彩 2段（黄・だいだい）＋たての ひとみ。上は 黒い まゆの ひさし
+EYEN = ['wYYkO', 'YOOkO', 'kOOkk']
 EYEN_ALT = {
     'blink': ['kkkkk', 'EEEEE', 'kEEEk'],
-    'atk0|atk1|atk2': ['YwwwY', 'wwkYY', 'kYYYk'],
+    'atk0|atk1|atk2': ['wwYkY', 'YYYkY', 'kYYkk'],
     'hit': ['kkkkk', 'kOkOk', 'kkOkk'],
     'ko': ['wkkkw', 'kwkwk', 'kkwkk'],
 }
-EYEF = ['OYO', 'kOk']
-EYEF_ALT = {'blink': ['kkk', 'EEE'], 'atk0|atk1|atk2': ['YwY', 'kYk'], 'hit': ['kkk', 'kOk'], 'ko': ['wkw', 'kwk']}
+EYEF = ['wkY', 'OkO']
+EYEF_ALT = {'blink': ['kkk', 'EEE'], 'atk0|atk1|atk2': ['wkw', 'YkY'], 'hit': ['kkk', 'kOk'], 'ko': ['wkw', 'kwk']}
 # 攻撃：まっすぐの 正拳（腕を 前へ）
 PUNCH = [
     '..kkkkkkk.........................',
@@ -278,14 +282,14 @@ def head_ko():
     g = pix.grid_of(HEAD)
     pix.stamp(g, EYEN_ALT['ko'], 9, 12); pix.stamp(g, EYEF_ALT['ko'], 22, 12)
     return pix.rows_of(g)
-PAW_KO = fur(ARM_F[20:], 1)
+PAW_KO = fur(ARM_F_LONG[20:], 1)
 PUNCH = fur(PUNCH, 4)
 LEG_KO = fur(pix.rot90(DLEG), 2)
 def ko_layers():
     hk = head_ko(); hb = max(i for i, r in enumerate(hk) if r.strip('.'))
     return [
         dict(n='ko_leg', g='root', x=0, y=61 - len(LEG_KO), rows=LEG_KO),
-        dict(n='ko_body', g='root', x=6, y=43, rows=fur(lying(38, 17))),
+        dict(n='ko_body', g='root', x=8, y=45, rows=fur(lying(34, 15))),
         dict(n='ko_head', g='root', x=33, y=60 - hb, rows=hk),
         dict(n='ko_ruff', g='root', x=31, y=60 - hb + 20, rows=RUFF[:6]),
         dict(n='ko_paw', g='root', x=21, y=61 - len(PAW_KO), rows=PAW_KO),
@@ -295,12 +299,13 @@ def layers():
     L = base_layers()
     for l in L: l['not_'] = (l['not_'] + '|ko') if l.get('not_') else 'ko'
     return L + [dict(l, only='ko') for l in ko_layers()]
+DY = 11
 def base_layers():
-    return [
-        dict(n='armB', g='armB', x=6, y=4, rows=ARM_B, not_='ko'),
-        dict(n='legB', g='legB', x=18, y=44, rows=DLEG),
+    L = [
+        dict(n='armB', g='armB', x=6, y=19, rows=ARM_B, not_='ko'),
+        dict(n='legB', g='legB', x=19, y=47, rows=DLEG),
         dict(n='body', g='body', x=15, y=19, rows=BODY),
-        dict(n='legA', g='legA', x=30, y=44, rows=LEG),
+        dict(n='legA', g='legA', x=29, y=47, rows=LEG),
         dict(n='head', g='head', x=28, y=0, rows=HEAD),
         dict(n='eyeN', g='head', x=37, y=12, rows=EYEN, alt=EYEN_ALT),
         dict(n='eyeF', g='head', x=50, y=12, rows=EYEF, alt=EYEF_ALT),
@@ -310,6 +315,9 @@ def base_layers():
         dict(n='impact', g='fx', x=66, y=20, rows=IMPACT, only='atk1'),
         dict(n='rake', g='fx', x=55, y=28, rows=RAKE, only='atk2'),
     ]
+    for l in L:
+        if l['n'] not in ('legA', 'legB', 'armB'): l['y'] += DY
+    return L
 
 FRAMES = {
     'idle0': {},

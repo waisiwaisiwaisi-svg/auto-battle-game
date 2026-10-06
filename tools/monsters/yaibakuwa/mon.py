@@ -37,51 +37,54 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 
 # ---- 前ばね：ひらたく 長い 鋼の 板。赤い おどしで つづる（手で 置く）----
 def elytra():
-    g = pix.grid(28, 17); pix.ellipse(g, 14, 10, 14.3, 10.5, '#')
+    """デフォルメ：小さく 丸い ドーム"""
+    W, H = 24, 20
+    g = pix.grid(W, H); pix.ellipse(g, 12, 13.5, 12.3, 13.5, '#')
     rows = shade(pix.rows_of(g), 'A', 'B', 'C', t=3, lf=2, r=3, b=3)
     g = pix.grid_of(rows)
-    for y in (6, 11):                                  # 板の さかい目
-        for x in range(1, 27):
+    for y in (8, 14):                                  # 板の さかい目
+        for x in range(1, W - 1):
             if g[y][x] != '.' and g[y][x - 1] != '.' and g[y][x + 1] != '.': g[y][x] = 'l'
-        for x in range(28):
-            if g[y + 1][x] in 'BC' and g[y][x] == 'l' and x < 20: g[y + 1][x] = 'A' if x < 12 else 'B'
-    for y in (6, 11):                                  # おどし：さかい目を またぐ 赤い ひも
-        for x in range(4, 26, 4):
+        for x in range(W):
+            if g[y + 1][x] in 'BC' and g[y][x] == 'l' and x < 17: g[y + 1][x] = 'A' if x < 10 else 'B'
+    for y in (8, 14):                                  # おどし：さかい目を またぐ 赤い ひも
+        for x in range(3, 22, 4):
             if g[y][x] != 'l' or g[y - 1][x] == '.' or g[y + 2][x] == '.': continue
             g[y - 1][x] = 'P'; g[y][x] = 'P'; g[y + 1][x] = 'Q'
-    for (x, y) in ((8, 1), (9, 1), (10, 1), (5, 3)):
+    for (x, y) in ((8, 1), (9, 1), (10, 1), (4, 3), (3, 4)):
         if g[y][x] in 'AB': g[y][x] = 'w' if y == 1 else 'A'
     return pix.outline(pix.rows_of(g))
 
 PRO = [
-    '...kkkkkkk....',
-    '.kkAAAAAABkk..',
-    'kAAABBBBBBBBk.',
-    'kABBBBBBBBBBBk',
-    'kABPBBBPBBBPBk',
-    'kAlPllllPllllk',
-    'kBBQBBBBQBBCCk',
-    'kBBBBBBBBBCCk.',
-    'kCBBBBBBBCCCk.',
-    '.kCCCCCCCCkk..',
-    '..kkkkkkkk....',
+    '..kkkkkk..',
+    '.kAAAAABk.',
+    'kABBBBBBBk',
+    'kABPBBBPBk',
+    'kBBQBBBQBk',
+    'kCBBBBBBCk',
+    '.kCCCCCCk.',
+    '..kkkkkk..',
 ]
 HEAD = [
-    '...kkkkkkk.....',
-    '.kkAAAAAABkkk..',
-    'kAAABBBBBBBBBk.',
-    'kABBBBBBBBBBBBk',
-    'kABkkkkkkkBBBBk',
-    'kBk.......kkBBk',
-    'kBBkk......kBBk',
-    'kCBBBkkkkkkBBCk',
-    'kCCBBBBBBBBBCCk',
-    '.kCCCBBBBBCCCk.',
-    '..kkkkkkkkkkk..',
+    '...kkkkkkkkk......',
+    '.kkAAAAAAAABkk....',
+    'kAABBBBBBBBBBBkk..',
+    'kABBBBBBBBBBBBBBk.',
+    'kABBBkkkkkkkkBBBk.',
+    'kABBBBkkkkkkkkkBBk',
+    'kBBBBk.......kkBBk',
+    'kBBBBk.......kBBBk',
+    'kCBBBBk......kBBCk',
+    'kCBBBBBkkkkkkBBBCk',
+    'kCCBBBBBBBBBBBBCCk',
+    '.kCCBBBBBBBBBBCCk.',
+    '..kCCCCCCCCCCCCk..',
+    '...kkkkkkkkkkkk...',
 ]
-EYE = ['RRRRRRwk', 'kkkRRRkk']
-EYE_ALT = {'blink': ['kkkkkkkk', 'BBkkkkkk'], 'atk0|atk1|atk2': ['RRRRRRRw', 'kkRRRRRk'],
-           'hit': ['kRkkkkRk', 'kkRRRRkk'], 'ko': ['RkRkRkRk', 'kRkkkRkk']}
+# 目：重い まゆの 下、白い 光＋ 赤の 虹彩 2色（R/P）＋ たての ひとみ
+EYE = ['wRRRRkR', 'RRPPPkP', '.PPPPkk']
+EYE_ALT = {'blink': ['kkkkkkk', 'BBBBBBB', '.BBBBkk'], 'atk0|atk1|atk2': ['wwRRRkR', 'RRRRRkR', '.PPPPkk'],
+           'hit': ['BkBBBBB', 'BBkkkkk', '.kBBBBB'], 'ko': ['BBkBkBB', 'BBBkBBB', '.BkBkBB']}
 # ---- 刀の あご：金の つば ＋ 反った 刃。刃先（内がわ）は 白く 光る ----
 BLADE = [
     '................kk',
@@ -131,56 +134,50 @@ SLASH = [
 ]
 SPARK = ['E.w.', '.w..', 'w.E.', '....']
 LEG = [
-    '.....kkkk',
-    '....kABBk',
-    '...kABCk.',
-    '..kABCk..',
-    '.kBBCk...',
-    '.kBCkk...',
-    'kkBCk....',
-    '.kBCk....',
-    'kkBCk....',
-    '.kBCk....',
-    '.kCCk....',
-    'kCCk.....',
-    'kkk......',
+    '....kkkk',
+    '...kABBk',
+    '..kABCCk',
+    '.kABCkk.',
+    'kkBBCk..',
+    '.kBCCk..',
+    'kkCCk...',
+    'kkkk....',
 ]
-LEGF = pix.flip_h(LEG)
+# 前足：頭の 下から 出る ので 長めに し、付け根は 頭の うらへ もぐらせる
+LEG_LONG = ['....kkkk', '...kABBk', '...kABCk', '..kABCk.', '..kABCk.', '..kABCk.', '.kABCkk.', 'kkBBCk..', '.kBCCk..', 'kkCCk...', 'kkkk....']
+LEGF = pix.flip_h(LEG_LONG)
 LEGM = [
-    '.kkk..',
+    '.kkkk.',
     'kABBk.',
     'kBBCk.',
-    '.kBCk.',
     '.kBCkk',
     'kkBCk.',
-    '.kBCk.',
     '.kBCkk',
-    '..kBCk',
-    '..kCCk',
-    '.kCCkk',
+    '.kCCk.',
     '.kkk..',
 ]
 
+HX, HY = 28, 37
 def layers():
     return [
-        dict(n='legF1', g='legB', x=9, y=46, rows=dark(LEG)),
-        dict(n='legF2', g='legA', x=21, y=47, rows=dark(LEGM)),
-        dict(n='legF3', g='legB', x=34, y=46, rows=dark(LEGF)),
-        dict(n='jawU', g='jawU', x=45, y=26, rows=BLADE_U, not_='atk0'),
-        dict(n='jawUo', g='jawU', x=45, y=21, rows=OPEN_U, only='atk0'),
-        dict(n='ely', g='body', x=4, y=31, rows=elytra()),
-        dict(n='leg1', g='legA', x=5, y=47, rows=LEG),
-        dict(n='leg2', g='legB', x=17, y=48, rows=LEGM),
-        dict(n='pro', g='body', x=26, y=33, rows=PRO),
-        dict(n='crest', g='head', x=39, y=27, rows=CREST),
-        dict(n='head', g='head', x=34, y=31, rows=HEAD),
-        dict(n='eye', g='head', x=36, y=35, rows=EYE, alt=EYE_ALT),
-        dict(n='leg3', g='legA', x=33, y=47, rows=LEGF),
-        dict(n='jawL', g='jawL', x=45, y=35, rows=BLADE, not_='atk0'),
-        dict(n='jawLo', g='jawL', x=45, y=36, rows=OPEN, only='atk0'),
-        dict(n='spark', g='jawL', x=60, y=30, rows=SPARK, only='idle1|idle3'),
-        dict(n='slash', g='root', x=62, y=26, rows=SLASH, only='atk1'),
-        dict(n='slash2', g='root', x=60, y=26, rows=dark(SLASH), only='atk2'),
+        dict(n='legF1', g='legB', x=9, y=52, rows=dark(LEG)),
+        dict(n='legF2', g='legA', x=20, y=52, rows=dark(LEGM)),
+        dict(n='legF3', g='legB', x=36, y=49, rows=dark(LEGF)),
+        dict(n='crest', g='head', x=HX + 3, y=HY - 4, rows=CREST),
+        dict(n='jawU', g='jawU', x=HX + 14, y=HY - 1, rows=BLADE_U, not_='atk0'),
+        dict(n='jawUo', g='jawU', x=HX + 14, y=HY - 7, rows=OPEN_U, only='atk0'),
+        dict(n='ely', g='body', x=4, y=34, rows=elytra()),
+        dict(n='leg1', g='legA', x=4, y=53, rows=LEG),
+        dict(n='leg2', g='legB', x=16, y=53, rows=LEGM),
+        dict(n='pro', g='body', x=22, y=40, rows=PRO),
+        dict(n='leg3', g='legA', x=31, y=50, rows=LEGF),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD),
+        dict(n='eye', g='head', x=HX + 6, y=HY + 6, rows=EYE, alt=EYE_ALT),
+        dict(n='jawL', g='jawL', x=HX + 14, y=HY + 8, rows=BLADE, not_='atk0'),
+        dict(n='jawLo', g='jawL', x=HX + 14, y=HY + 9, rows=OPEN, only='atk0'),
+        dict(n='spark', g='jawL', x=HX + 29, y=HY - 2, rows=SPARK, only='idle1|idle3'),
+        dict(n='slash', g='root', x=HX + 31, y=HY - 6, rows=SLASH, only='atk1'),
+        dict(n='slash2', g='root', x=HX + 29, y=HY - 6, rows=dark(SLASH), only='atk2'),
     ]
 
 FRAMES = {

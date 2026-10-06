@@ -1,4 +1,4 @@
-# クロヤタ（あく・かぜ × 三本足の カラス）手打ち GBA風
+# クロヤタ（あく・かぜ × 三本足の カラス）手打ち GBA風・デフォルメ（2〜3頭身：頭を 大きく、胴は 小さく 丸く、足は 短く。翼は 見せ所なので 大きい まま）
 import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, grid_of, poly, ellipse, stamp, outline
@@ -11,9 +11,10 @@ PAL = {
     'r': '#ff2a3c', 'Y': '#ffd862',                      # 赤い 目
     'v': '#b070f0', 'm': '#5c2c90',                      # 影の もや
     'c': '#dce6ff',                                      # 風
+    'w': '#ffffff', 'd': '#9a1430',                      # 目の 光・虹彩の 暗
 }
-LIGHT = set('RSYvc')
-KEEP_BLACK = set('S')
+LIGHT = set('RSYvcw')
+KEEP_BLACK = set('Sw')
 RAMP = {'1': 'RQP', '4': 'STU', '5': 'vmm', '6': 'QPP'}
 
 # ---------- 下書き用の 小道具 ----------
@@ -80,9 +81,10 @@ WP = {
 }
 def wing(pose, far=False):
     g = G(); sx, sy = 39, 27
-    S_ = .81
-    sc = lambda q: (round(sx + (q[0] - sx) * S_), round(sy + (q[1] - sy) * S_))
+    S_ = .72; DX, DY = -4, 9   # 肩を 小さく なった 胴の 上へ
+    sc = lambda q: (round(sx + (q[0] - sx) * S_) + DX, round(sy + (q[1] - sy) * S_) + DY)
     P = {k: (sc(v) if k == 'w' else [sc(q) for q in v]) for k, v in WP[pose].items()}; wx, wy = P['w']
+    sx, sy = sx + DX, sy + DY
     bases = [(round(sx + (wx - sx) * t), round(sy + (wy - sy) * t)) for t in (.85, .65, .45, .25)]
     for (bx, by), (tx, ty) in reversed(list(zip(bases, P['sec']))):
         p = G(); stroke(p, bx, by, tx, ty, 2.4, 1.3, '1', '5', .88); ink(g, p)
@@ -101,54 +103,58 @@ def wing(pose, far=False):
 
 # ---------- 胴（ぼさぼさの 首の 羽、くさび形の 尾）----------
 def body():
+    """小さく 丸い 胴（首の ぼさぼさは 頭の 下に 食いこませる）"""
     g = G()
-    p = G(); rell(p, 35, 33, 12, 7.5, -.3, '1')
-    # 首の ぼさぼさ（とがった 羽を 後ろ下へ）
-    for (bx, by, tx, ty) in [(47, 22, 41, 31), (46, 25, 39, 33), (48, 28, 43, 36), (45, 20, 38, 27)]:
-        stroke(p, bx, by, tx, ty, 2.2, .6, '1')
+    p = G(); rell(p, 35, 42, 10.5, 7.5, -.25, '1')
+    for (bx, by, tx, ty) in [(44, 33, 38, 40), (42, 32, 34, 37), (46, 36, 41, 43)]:
+        stroke(p, bx, by, tx, ty, 2.4, .6, '1')
     ink(g, p)
-    # 首の 羽の すじ（とがった 先を 黒線で 分ける）
     g = shade(g)
-    for (x, y) in [(42, 30), (41, 31), (40, 32), (44, 33), (43, 34), (40, 27), (39, 28)]:
+    for (x, y) in [(39, 39), (38, 40), (42, 41), (41, 42), (35, 37), (34, 38)]:
         if g[y][x] != '.': g[y][x] = 'k'
-    dots(g, 'R', [(43, 29), (45, 32), (41, 26), (30, 29), (31, 29), (34, 28), (26, 31)])
-    # 胸の うろこ羽
-    for (x, y) in [(36, 36), (40, 37), (32, 38), (44, 36)]:
-        if g[y][x] in 'QP': g[y][x] = 'P'; g[y - 1][x - 1] = 'Q' if g[y - 1][x - 1] == 'P' else g[y - 1][x - 1]
+    dots(g, 'R', [(40, 38), (43, 40), (36, 36), (29, 38), (30, 38), (33, 37)])
+    for (x, y) in [(36, 45), (40, 45), (32, 46)]:
+        if g[y][x] in 'QP': g[y][x] = 'P'
     return rows_of(g)
 
 def tail():
     g = G()
     for (tx, ty) in [(12, 42), (13, 46), (16, 49), (20, 50)]:
-        p = G(); stroke(p, 27, 37, tx, ty, 2.6, 1.6, '1', '5', .8); ink(g, p)
+        p = G(); stroke(p, 28, 44, tx, ty + 6, 2.6, 1.6, '1', '5', .8); ink(g, p)
     g = shade(g, dk=.8)
     return rows_of(g)
 
 # ---------- 頭（太い 鉄の くちばし、赤く 光る 目、ぼさぼさの 冠）----------
 def head():
+    """大きな 頭（たて 約20）：ぼさぼさの 冠、太い 鉄の くちばし"""
     g = G()
-    for (bx, by, tx, ty) in [(46, 18, 39, 14), (48, 17, 43, 10), (45, 21, 37, 19)]:
-        p = G(); stroke(p, bx, by, tx, ty, 1.8, .6, '1'); ink(g, p)
-    p = G(); rell(p, 50, 22, 6.5, 5.8, 0, '1'); rell(p, 45, 19, 3, 2.2, -.4, '1'); ink(g, p)
+    for (bx, by, tx, ty) in [(42, 17, 35, 13), (45, 15, 41, 9), (40, 21, 33, 20), (48, 14, 47, 9)]:
+        p = G(); stroke(p, bx, by, tx, ty, 2.2, .6, '1'); ink(g, p)
+    p = G(); rell(p, 45, 22, 9.5, 9, 0, '1'); rell(p, 40, 30, 5, 3.5, 0, '1'); ink(g, p)
     g = shade(g)
-    put(g, 54, 17, [   # 太く 重い 鉄の くちばし（先が かぎ）
-        '.kkkk.....',
-        'kSSSSkk...',
-        'kSSSSSSkk.',
-        'kTSSSSSSTk',
-        'kkkkkkkTTk',
-        'kTTTTTkkk.',
-        '.kUUUk....',
-        '..kkk.....',
+    for (x, y) in [(38, 16), (41, 14), (37, 22), (44, 15)]:
+        if g[y][x] in 'QP': g[y][x] = 'R'
+    put(g, 52, 16, [   # 太く 重い 鉄の くちばし（先が かぎ）
+        '.kkkkk......',
+        'kSSSSSkk....',
+        'kSSSSSSSkk..',
+        'kTSSSSSSSSk.',
+        'kTTSSSSSSTTk',
+        'kkkkkkkkkTTk',
+        'kTTTTTTkkTk.',
+        'kUUUUUUk.k..',
+        '.kUUUUk.....',
+        '..kkkk......',
     ])
     return rows_of(g)
 
-EYE = ['kkkkk..', '.kkkkkk', 'rkrrrYk', '.rkrrk.', '...kk..']      # ひくい まゆの 下で 赤く 光る 目（光が 後ろへ 尾を 引く）
+# 目：ひくい まゆの ひさし＋光 w＋虹彩 2色（r／d）＋たての ひとみ。光が 後ろへ 尾を 引く
+EYE = ['kkkkkkk...', '.kkkkkkkk.', 'rkwwrrkrk.', '.kwrrrkrk.', '..kdddkdk.', '...kkkkk..']
 EYE_ALT = {
-    'blink': ['kkkkk..', '.kkkkkk', '..kkkkk', '.......', '.......'],
-    'atk0|atk1|atk2': ['kkkkk..', '.kkkkkk', 'rkYYYYk', 'r.krrk.', '...kk..'],
-    'hit': ['.......', '.kk..kk', '...kk..', '.kk..kk', '.......'],
-    'ko': ['.......', '..k.k..', '...k...', '..k.k..', '.......'],
+    'blink': ['kkkkkkk...', '.kkkkkkkk.', '..kkkkkkk.', '..........', '..........', '..........'],
+    'atk0|atk1|atk2': ['kkkkkkk...', '.kkkkkkkk.', 'YkwwYYkYk.', 'rkwYYYkYk.', '..krrrkrk.', '...kkkkk..'],
+    'hit': ['..........', 'kkkkkkkkk.', '.kkk..kkk.', '....kk....', '.kkk..kkk.', '..........'],
+    'ko': ['..........', '..T...T...', '...T.T....', '....T.....', '...T.T....', '..T...T...'],
 }
 LEG = outline([   # 鉄の すねと 白い かぎ爪（ふちは 自動）
     'TU....',
@@ -184,13 +190,13 @@ def layers():
     return [
         dict(n='wingB', g='wingB', x=3, y=-3, rows=WF['hi'], alt={'idle1|idle3|walk1|walk3|atk2': WF['mid'], 'walk0|atk0|hit': WF['up'], 'walk2|atk1': WF['down']}),
         dict(n='tail', g='tail', x=0, y=0, rows=tail()),
-        dict(n='smoke', g='tail', x=8, y=47, rows=OL(SMOKE_A), alt={'idle1|idle3|walk1|walk3': OL(SMOKE_B)}, not_='ko'),
-        dict(n='leg3', g='legs', x=27, y=40, rows=far(LEG), alt={'atk1|atk2': far(LEG_ATK)}),
-        dict(n='leg1', g='legs', x=39, y=39, rows=far(LEG), alt={'atk1|atk2': far(LEG_ATK)}),
+        dict(n='smoke', g='tail', x=8, y=53, rows=OL(SMOKE_A), alt={'idle1|idle3|walk1|walk3': OL(SMOKE_B)}, not_='ko'),
+        dict(n='leg3', g='legs', x=30, y=48, rows=far(LEG), alt={'atk1|atk2': far(LEG_ATK)}),
+        dict(n='leg1', g='legs', x=39, y=48, rows=far(LEG), alt={'atk1|atk2': far(LEG_ATK)}),
         dict(n='body', g='body', x=0, y=0, rows=body()),
-        dict(n='leg2', g='legB', x=33, y=42, rows=LEG, alt={'atk1|atk2': LEG_ATK}),
+        dict(n='leg2', g='legB', x=34, y=49, rows=LEG, alt={'atk1|atk2': LEG_ATK}),
         dict(n='head', g='head', x=0, y=0, rows=head()),
-        dict(n='eye', g='head', x=46, y=18, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=42, y=17, rows=EYE, alt=EYE_ALT),
         dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|atk0|hit': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
         dict(n='gust', g='root', x=14, y=56, rows=OL(GUST), only='walk2'),
         dict(n='dart1', g='root', x=52, y=29, rows=OL(DART), only='atk1'),

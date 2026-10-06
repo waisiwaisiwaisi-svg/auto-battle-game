@@ -1,4 +1,5 @@
-# ライデンウナギ（でんき・みず × ウナギ）手打ち GBA風
+# ライデンウナギ（でんき・みず × ウナギ）手打ち GBA風・デフォルメ（2〜3頭身：頭を 大きく、体の うねりは そのまま）
+from pix import outline
 META = dict(id='raidenunagi', name='ライデンウナギ', types=['elec', 'water'], base='ウナギ', size='M')
 PAL = {
     'k': '#101018', 'l': '#181c36',
@@ -63,9 +64,41 @@ BODY_HOT = [
     '.....................kkFFFFFFFFEFFk..........',
     '.......................kkkkkkkkkkk...........',
 ]
+# ---- デフォルメの 体：太く 短い S字（あたりは 道すじ＋太さ、発電板と 模様は 手で 置く）----
+PATH = [(5, 52), (10, 47), (17, 45), (24, 48), (31, 51), (37, 48), (41, 42), (43, 36)]
+RAD = [2.2, 3.4, 4.6, 5.4, 6.0, 6.3, 6.5, 6.5]
+def body(hot=False):
+    W, H = 64, 64; g = [['.'] * W for _ in range(H)]
+    for y in range(30, 62):
+        for x in range(0, 54):
+            best = None
+            for i in range(len(PATH) - 1):
+                (ax, ay), (bx, by) = PATH[i], PATH[i + 1]
+                dx, dy = bx - ax, by - ay; L2 = dx * dx + dy * dy
+                t = max(0, min(1, ((x + .5 - ax) * dx + (y + .5 - ay) * dy) / L2))
+                px, py = ax + t * dx, ay + t * dy; d = ((x + .5 - px) ** 2 + (y + .5 - py) ** 2) ** .5
+                L = L2 ** .5; nx, ny = -dy / L, dx / L
+                if nx + 2 * ny > 0: nx, ny = -nx, -ny
+                r = RAD[i] + (RAD[i + 1] - RAD[i]) * t
+                if best is None or d - r < best[0]: best = (d - r, ((x + .5 - px) * nx + (y + .5 - py) * ny) / r, i, t)
+            if best[0] <= 0:
+                v = best[1]
+                g[y][x] = 'A' if v > .62 else 'B' if v > .05 else 'D' if v > -.25 else 'E' if v > -.7 else 'F'
+    # 発電板：わき腹（B と D の さかい）に 2ドットずつ 手で 置く
+    for x in range(0, 54):
+        col = [y for y in range(H) if g[y][x] == 'D']
+        if not col or x % 4 > 1: continue
+        y = col[0]
+        g[y][x] = 'Y' if hot else 'y'
+        if y + 1 < H and g[y + 1][x] == 'D': g[y + 1][x] = 'y' if hot else 'O'
+    out = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] == '.' and any(0 <= y + dy < H and 0 <= x + dx < W and g[y + dy][x + dx] != '.' for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0))): out[y][x] = 'k'
+    return [''.join(r) for r in out]
+BODY, BODY_HOT = body(), body(True)
 def cut(rows, x0, x1): return [r[x0:x1] for r in rows]
-SEG = [(0, 12), (12, 24), (24, 35), (35, 45)]   # うねり用に 4つに 切る
-
+SEG = [(0, 14), (14, 26), (26, 36), (36, 64)]   # うねり用に 4つに 切る
 # 稲妻形の 背びれ（先が うしろ上へ）
 BOLT = [
     'kk.....',
@@ -98,42 +131,47 @@ TAILBOLT = [
     'kYk...',
     'kk....',
 ]
-# 頭：平たく 大きな 口、光る つり目、ほおにも 発電板
-HEAD = [
-    '.....kkkkk...........',
-    '...kkAAAAAkkk........',
-    '..kAAAAAAAAAAkk......',
-    '.kAABBBBBBBAAAAkk....',
-    '.kABBBBBBBBBBBAAAkk..',
-    'kAABBkkkkkBBBBBBBAAk.',
-    'kABBBBkYYwkkkBBBBBBAk',
-    'kABBBBkyyYkBBBBBBBBBk',
-    'kByykBBkkkBBBBBBBBBDk',
-    'kBOOkBBBBBBBBBBBBBDDk',
-    'kDBBBBkkkkkkkkkkkkkk.',
-    'kDBBBkwkwkkwkkwkkwk..',
-    'kDDBkEEEkEEEkEEEkEk..',
-    '.kDDEEEEEEEEEEEEEEk..',
-    '..kDFFFFFFFFFFFFFk...',
-    '...kkkkkkkkkkkkkk....',
+# 頭（大きく）：平たく 大きな 口、光る つり目（2段の 虹彩＋たての ひとみ）、ほおにも 発電板
+HEAD_TOP = [
+    ".......AAAAAAA............",
+    "....AAAAAAAAAAAAA.........",
+    "..AAABBBBBBBBBBBAAA.......",
+    ".AABBBBBBBBBBBBBBBAAA.....",
+    "AABBBBBBBBBBBBBBBBBBAAA...",
+    "ABBBBBBBBBBBBBBBBBBBBBAA..",
+    "ABBBBBBBBBBBBBBBBBBBBBBBA.",
+    "ABBBBBBBBBBBBBBBBBBBBBBBBA",
+    "BBBBBBBBBBBBBBBBBBBBBBBBBD",
+    "BBBBBBBBBBBBBBBBBBBBBBBBDD",
+    "BBBBBBBBBBBBBBBBBBBBBBBDD.",
 ]
-def _eye(h, a, b):
-    h = list(h); h[6] = h[6][:6] + a + h[6][6 + len(a):]; h[7] = h[7][:6] + b + h[7][6 + len(b):]; return h
-HEAD_OPEN = HEAD[:10] + [
-    'kDBBBBkkkkkkkkkkkkkk.',
-    'kDBBBkwkwkrrrrrrrrrk.',
-    'kDDBkrrrrrrrrrrrrrk..',
-    '.kDDkrrrrrrrrrrrrrrk.',
-    '.kDDkwkkwkkwkkwkkwkk.',
-    '..kDEEEEEEEEEEEEEEk..',
-    '...kFFFFFFFFFFFFFk...',
-    '....kkkkkkkkkkkkk....',
+HEAD_BOT = [
+    "DDBBBBkEEEkEEEkEEEkEEk....",
+    ".DDBBEEEEEEEEEEEEEEEEk....",
+    "..DDEEEEEEEEEEEEEEEEk.....",
+    "...DFFFFFFFFFFFFFFFk......",
+    "....FFFFFFFFFFFFF.........",
 ]
-HEAD_OPEN = _eye(HEAD_OPEN, 'kYYYwk', 'kYYYYk')
-HEAD_HOT = _eye(HEAD, 'kYYYwk', 'kYYYYk')
-HEAD_BLINK = _eye(HEAD, 'kkkkkk', 'kBBBBk')
-HEAD_HIT = _eye(HEAD, 'kYkYkk', 'kkykBk')
-HEAD_KO = _eye(HEAD, 'kykykk', 'kBkBkk')
+EYES = {
+    'open':  ['kk.......', '.kkkkkkk.', '..kwYYkYk', '.kYYyykyk', '.kyyyOkOk', '..kkkkkk.'],
+    'hot':   ['kk.......', '.kkkkkkk.', '..kwwYYYk', '.kYwYYkYk', '.kYYYykyk', '..kyykyk.'],
+    'blink': ['kk.......', '.kkkkkkk.', '..kBBBBBk', '.kBBBBBBk', '.kkkkkkkk', '..DDDDDD.'],
+    'hit':   ['kk.......', '.kkkkkkk.', '..kYkkYkk', '.kkykkykk', '.kykkykkk', '..kkkkkk.'],
+    'ko':    ['.........', '..kYyyYk.', '..kykkyk.', '..kkyykk.', '..kykkyk.', '..kyyyyk.'],
+}
+def head(eye='open', gape=0):
+    rows = list(HEAD_TOP) + ["DBBBBBBBkkkkkkkkkkkkkkkk..", "DBBBBBBkwkwkkwkkwkkwkkwk.."]
+    rows += ["DBBBBBkrrrrrrrrrrrrrrrrk.." if i < gape - 1 else "DBBBBBkwkkwkkwkkwkkwkkk..." for i in range(gape)]
+    rows += HEAD_BOT
+    g = [list(r) for r in rows]
+    for j, r in enumerate(EYES[eye]):
+        for i, c in enumerate(r):
+            if c != '.': g[3 + j][9 + i] = c
+    for (x, y, c) in ((2, 8, 'k'), (3, 8, 'y'), (4, 8, 'y'), (5, 8, 'k'), (2, 9, 'k'), (3, 9, 'O'), (4, 9, 'O'), (5, 9, 'k')):   # ほおの 発電板
+        g[y][x] = c
+    for (x, y) in ((6, 2), (7, 2), (3, 4), (2, 5)): g[y][x] = 'A'
+    for (x, y) in ((19, 6), (20, 7), (21, 7), (17, 9), (18, 10)): g[y][x] = 'D'
+    return outline([''.join(r) for r in g])
 # 頭の 稲妻の つの
 HBOLT = [
     'kkk.....',
@@ -171,24 +209,24 @@ def layers():
     L = []
     hot = 'atk0|atk1'
     for i, (a, b) in enumerate(SEG):
-        L.append(dict(n=f's{i}', g=f's{i}', x=2 + a, y=33, rows=cut(BODY, a, b), alt={hot: cut(BODY_HOT, a, b)}))
+        L.append(dict(n=f's{i}', g=f's{i}', x=a, y=0, rows=cut(BODY, a, b), alt={hot: cut(BODY_HOT, a, b)}))
     return [
-        dict(n='tbolt', g='s0', x=2, y=49, rows=TAILBOLT),
-        dict(n='bolt1', g='s0', x=6, y=27, rows=BOLT_S),
-        dict(n='bolt2', g='s1', x=12, y=26, rows=BOLT),
-        dict(n='bolt3', g='s2', x=29, y=36, rows=BOLT_S),
-        dict(n='bolt4', g='s3', x=34, y=31, rows=BOLT),
+        dict(n='tbolt', g='s0', x=0, y=50, rows=TAILBOLT),
+        dict(n='bolt1', g='s0', x=8, y=37, rows=BOLT_S),
+        dict(n='bolt2', g='s1', x=17, y=35, rows=BOLT),
+        dict(n='bolt3', g='s2', x=27, y=39, rows=BOLT_S),
+        dict(n='bolt4', g='s3', x=33, y=33, rows=BOLT),
     ] + L + [
-        dict(n='hbolt', g='head', x=35, y=19, rows=HBOLT),
-        dict(n='head', g='head', x=37, y=24, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN, 'atk0': HEAD_HOT, 'blink': HEAD_BLINK, 'hit': HEAD_HIT, 'ko': HEAD_KO}),
-        dict(n='spark', g='head', x=29, y=22, rows=SPARK, only='idle2'),
-        dict(n='z1', g='s0', x=1, y=21, rows=ZIG, only='atk1'),
-        dict(n='z2', g='s1', x=17, y=19, rows=ZIG2, only='atk1'),
-        dict(n='z3', g='s1', x=12, y=47, rows=ZIG2, only='atk1'),
-        dict(n='z4', g='s2', x=28, y=54, rows=ZIG, only='atk1'),
-        dict(n='z5', g='s3', x=45, y=48, rows=ZIG2, only='atk1'),
-        dict(n='z6', g='head', x=31, y=15, rows=ZIG, only='atk1|atk0'),
-        dict(n='zap', g='head', x=58, y=34, rows=ZAP, only='atk1|atk2'),
+        dict(n='hbolt', g='head', x=36, y=13, rows=HBOLT),
+        dict(n='head', g='head', x=35, y=17, rows=head(), alt={'atk1|atk2': head('hot', 3), 'atk0': head('hot'), 'blink': head('blink'), 'hit': head('hit'), 'ko': head('ko')}),
+        dict(n='spark', g='head', x=28, y=17, rows=SPARK, only='idle2'),
+        dict(n='z1', g='s0', x=1, y=36, rows=ZIG, only='atk1'),
+        dict(n='z2', g='s1', x=21, y=28, rows=ZIG2, only='atk1'),
+        dict(n='z3', g='s1', x=14, y=53, rows=ZIG2, only='atk1'),
+        dict(n='z4', g='s2', x=30, y=56, rows=ZIG, only='atk1'),
+        dict(n='z5', g='s3', x=47, y=50, rows=ZIG2, only='atk1'),
+        dict(n='z6', g='head', x=29, y=10, rows=ZIG, only='atk1|atk0'),
+        dict(n='zap', g='head', x=60, y=30, rows=ZAP, only='atk1|atk2'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'s1': (0, -1), 'head': (0, 0)}, 'idle2': {'s1': (0, -1), 's2': (0, -1), 'head': (0, -1)}, 'idle3': {'s2': (0, -1)},

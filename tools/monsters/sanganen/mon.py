@@ -42,17 +42,17 @@ _MOUTH = [".............kkkkkkkkk", "............kwkMMMMwkw", "............kMMMM
 _ROAR = ["............kkkkkkkkkk", "............kwkwkkwkwk", "............kMMMMMMMMk", "............kMMMMMMMk.", ".............kwkkkkwk."]
 def _face(e1, e2, mouth=_MOUTH, under="............kkkk......"):
     return [_B] * 6 + _BROW + [e1, e2, under] + mouth
-FACE = _face("..........kYYYwkkCC...", "...........kYYkYk...kk")
+FACE = _face("..........kwYYkYkCC...", "...........kSTkTk...kk")
 FACE_ALT = {
     'blink': _face("..........kkkkkkkCC...", "...........DDDDDD...kk", under=_B),
-    'atk0|atk1|atk2': _face("..........kwwwwkkCC...", "...........kwwkwk...kk", _ROAR[:1] + _ROAR[1:], under=_B),
+    'atk0|atk1|atk2': _face("..........kwwYkYkCC...", "...........kYYkYk...kk", _ROAR[:1] + _ROAR[1:], under=_B),
     'hit': _face("..........kYkYkkkCC...", "...........kkYkYk...kk"),
     'ko': _face("..........k.k...kCC...", "...........k.k.....kk", [_B, ".............kkkkkkkkk", "............kwkMMMMwk.", ".............kkkkkkk.."], under=".........k.k.........."),
 }
 # 額の 第三の 目（たての まぶた、光る）
-EYE3 = ['.kk.', 'kPPk', 'PwYP', 'PYwP', 'kPQk', '.kk.']
+EYE3 = ['.kk.', 'kwPk', 'PPkQ', 'PQkQ', 'kQQk', '.kk.']
 EYE3_ALT = {'blink': ['....', '.kk.', 'kQQk', 'kkkk', '.kk.', '....'],
-            'atk0|atk1|atk2': ['.PP.', 'PwwP', 'wwww', 'wwww', 'PwwP', '.PP.'],
+            'atk0|atk1|atk2': ['.PP.', 'PwwP', 'wwkP', 'wPkP', 'PPQP', '.PP.'],
             'ko': ['....', '.kk.', 'kkkk', 'kQQk', '.kk.', '....']}
 # 逆立つ たてがみ（後ろへ なびく とげ）
 MANE = [
@@ -75,15 +75,11 @@ BODY = [
     ".......AAAAAAAA.....",
     "....AAABBBBBBBBAA...",
     "..AABBBBBBBBBBBBBA..",
-    ".ABBBBBBBBBBBBBBBBA.",
-    "ABBBBBBBBBBBBBBDDDB.",
+    ".ABBBBBBBBBBBBBDDDB.",
     "ABBBBBBBBBBBBBDDDDDE",
     "ABBBBBBBBBBBBBDDDDDE",
     ".ABBBBBBBBBBBBEEDDE.",
-    ".ABBBBBBBBBBBBDDEDE.",
     "..ABBBBBBBBBBBEDDE..",
-    "..ABBBBBBBBBBBEDDE..",
-    "...ABBBBBBBBBBEDE...",
     "...ABBBBBBBBBBBEE...",
     "..SSSSSSSSSSSSSSST..",
     "..STSSSSTSSSSSSSTT..",
@@ -95,18 +91,11 @@ LEG_F = [
     "AAAAAAA.......",
     "ABBBBBBBA.....",
     "ABBBBBBBBBA...",
-    ".BBBBBBBBBBA..",
-    ".CBBBBBBBBBBA.",
-    "..CCBBBBBBBBC.",
-    "....CCBBBBBBC.",
-    ".......ABBBBC.",
-    ".......ABBBC..",
+    ".CBBBBBBBBBA..",
+    "..CCBBBBBBBC..",
     "......ABBBBC..",
-    "......ABBBC...",
-    "......ABBBC...",
+    "......ABBBBC..",
     ".....ABBBBC...",
-    ".....ABBBC....",
-    ".....ABBBC....",
     ".....ABBBBC...",
     "....ADDDDDDE..",
     "...ADDDDDDDDEw",
@@ -114,20 +103,13 @@ LEG_F = [
 ]
 LEG_B = [
     ".....AAAAAAA",
-    "....ABBBBBBB",
     "...ABBBBBBBC",
-    "..ABBBBBBBC.",
-    ".ABBBBBBBC..",
-    "ABBBBBBCC...",
+    ".ABBBBBBBBC.",
+    "ABBBBBBBCC..",
     "ABBBBBC.....",
-    "ABBBBC......",
-    ".ABBBC......",
-    ".ABBBC......",
-    "..ABBBC.....",
-    "..ABBBC.....",
-    "..ABBBC.....",
-    "...ABBC.....",
-    "...ABBC.....",
+    ".ABBBBC.....",
+    "..ABBBBC....",
+    "..ABBBBC....",
     "...ABBBC....",
     "..ADDDDDE...",
     ".ADDDDDDDEw.",
@@ -157,8 +139,6 @@ TAIL = [
 ARMF = [
     ".AAAA.............",
     "ABBBBA............",
-    "ABBBBBA...........",
-    "ABBBBBA...........",
     "ABBBBBBA..........",
     ".BBBBBBA......DD..",
     ".BBBBBBBA....DDDDw",
@@ -211,10 +191,10 @@ WAVE = [
 def ring(cx, cy, r, a0, step, n):
     return [(round(cx + r * math.cos(math.radians(a0 + i * step))) - 2, round(cy + r * math.sin(math.radians(a0 + i * step))) - 2) for i in range(n)]
 BEADS = {
-    'a': ring(28, 26, 19, 150, 19, 9),
-    'b': ring(28, 26, 19, 160, 19, 9),
-    'atk0': ring(36, 16, 14, 140, 26, 9),
-    'atk1': [(56 + i * 4, 20 + (2 if i % 2 else 0)) for i in range(5)],
+    'a': ring(29, 32, 18, 150, 19, 9),
+    'b': ring(29, 32, 18, 160, 19, 9),
+    'atk0': ring(37, 28, 14, 140, 26, 9),
+    'atk1': [(56 + i * 4, 32 + (2 if i % 2 else 0)) for i in range(5)],
 }
 def beads():
     L = []
@@ -223,20 +203,25 @@ def beads():
             L.append(dict(n=f'bead{key}{i}', g='beads', x=x, y=y, rows=BEAD if (i % 3 == 1) else BEAD_S, only=frames))
     return L
 
+def mane_joined():
+    """たてがみを 頭の 毛に 3ドット 食いこませ、つなぎ目の 輪郭を 消す"""
+    rows = [r + ('BBB' if r.rstrip('.')[-1:] in 'BC' and len(r.rstrip('.')) >= 10 else '') for r in MANE]
+    o = outline(rows)
+    return [''.join('.' if (c == 'k' and i >= 12) else c for i, c in enumerate(r)) for r in o]
 def base():
     return [
-        dict(n='tail', g='tail', x=3, y=24, rows=outline(TAIL)),
-        dict(n='armB', g='armB', x=36, y=21, rows=outline(dk(ARMB))),
-        dict(n='legB', g='legB', x=13, y=40, rows=outline(dk(LEG_B))),
-        dict(n='mane', g='head', x=19, y=7, rows=outline(MANE)),
-        dict(n='body', g='body', x=18, y=24, rows=outline(BODY)),
-        dict(n='sash', g='body', x=19, y=40, rows=outline(SASH)),
-        dict(n='legA', g='legA', x=25, y=40, rows=outline(LEG_F)),
-        dict(n='head', g='head', x=29, y=6, rows=outline(HEAD)),
-        dict(n='face', g='head', x=29, y=6, rows=FACE, alt=FACE_ALT),
-        dict(n='eye3', g='head', x=40, y=7, rows=EYE3, alt=EYE3_ALT),
-        dict(n='armF', g='armF', x=24, y=27, rows=outline(ARMF), not_='atk1|atk2'),
-        dict(n='armFp', g='armF', x=24, y=27, rows=outline(ARMF_PUSH), only='atk1|atk2'),
+        dict(n='tail', g='tail', x=3, y=34, rows=outline(TAIL)),
+        dict(n='armB', g='armB', x=36, y=32, rows=outline(dk(ARMB))),
+        dict(n='legB', g='legB', x=13, y=47, rows=outline(dk(LEG_B))),
+        dict(n='body', g='body', x=18, y=36, rows=outline(BODY)),
+        dict(n='sash', g='body', x=19, y=48, rows=outline(SASH)),
+        dict(n='legA', g='legA', x=25, y=47, rows=outline(LEG_F)),
+        dict(n='head', g='head', x=29, y=20, rows=outline(HEAD)),
+        dict(n='mane', g='head', x=19, y=21, rows=mane_joined()),
+        dict(n='face', g='head', x=29, y=20, rows=FACE, alt=FACE_ALT),
+        dict(n='eye3', g='head', x=40, y=21, rows=EYE3, alt=EYE3_ALT),
+        dict(n='armF', g='armF', x=24, y=39, rows=outline(ARMF), not_='atk1|atk2'),
+        dict(n='armFp', g='armF', x=24, y=39, rows=outline(ARMF_PUSH), only='atk1|atk2'),
     ]
 def knocked():
     g = [['.'] * 80 for _ in range(70)]
@@ -255,7 +240,7 @@ def knocked():
 def layers():
     ko = knocked()
     return beads() + [dict(l, not_=(l.get('not_', '') + '|ko').strip('|')) for l in base()] + [
-        dict(n='wave', g='root', x=60, y=24, rows=WAVE, only='atk1'),
+        dict(n='wave', g='root', x=60, y=34, rows=WAVE, only='atk1'),
         dict(n='ko', g='root', x=4, y=61 - len(ko), rows=ko, only='ko'),
     ]
 

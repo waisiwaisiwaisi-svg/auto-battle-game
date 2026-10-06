@@ -1,4 +1,4 @@
-# キババーバー（ノーマル・みず × ビーバー）手打ち GBA風
+# キババーバー（ノーマル・みず × ビーバー）手打ち GBA風・デフォルメ（2〜3頭身：頭と のみの 歯は そのまま、胴を 小さく 短く）
 META = dict(id='kibabeaver', name='キババーバー', types=['normal', 'water'], base='ビーバー', size='M')
 PAL = {
     'k': '#101018', 'l': '#42201c',
@@ -45,11 +45,13 @@ def run(g, x, y, dx, dy):
     n = 0
     while 0 <= y < len(g) and 0 <= x < len(g[0]) and g[y][x] != '.': n += 1; x += dx; y += dy
     return n
+SX, SY = .78, .8   # デフォルメ：胴の はばと 高さを ちぢめる
+def X(x): return round(x * SX)
 def body():
-    W, H = 34, 30; g = grid(W, H)
-    poly(g, [(0, 16), (2, 9), (7, 5), (13, 3), (19, 0), (25, 1), (30, 6), (33, 13), (32, 22), (28, 28), (20, 26), (14, 29), (4, 29), (0, 23)], '#')
+    W, H = 27, 25; g = grid(W, H)
+    poly(g, [(x * SX, y * SY) for x, y in [(0, 16), (2, 9), (7, 5), (13, 3), (19, 0), (25, 1), (30, 6), (33, 13), (33, 22), (30, 28), (20, 26), (14, 29), (4, 29), (0, 23)]], '#')
     # 背中の ぬれた 毛の たば（後ろへ とがる）
-    for (x, y) in ((5, 6), (6, 5), (10, 3), (11, 2), (16, 1), (17, 0)):
+    for (x, y) in ((4, 6), (5, 5), (8, 3), (9, 2), (12, 1), (13, 0)):
         if 0 <= y < H: g[y][x] = '#'
     out = grid(W, H)
     for y in range(H):
@@ -60,24 +62,24 @@ def body():
             if dn <= 4 or rt <= 2: c = 'H'
             elif dn == 5 and (x + y) % 2: c = 'H'
             if up <= 2 or (lf <= 2 and dn > 4): c = 'F'
-            if x >= 27 and y >= 16 and c == 'G' and (x + y) % 2: c = 'H'      # 頭の 下の 影（ディザ）
+            if x >= 21 and y >= 13 and c == 'G' and (x + y) % 2: c = 'H'      # 頭の 下の 影（ディザ）
             out[y][x] = c
     # 毛の すじ（後ろ下へ ながれる）
-    for (x, y) in ((8, 7), (9, 8), (13, 5), (14, 6), (19, 3), (20, 4), (24, 4), (25, 5), (5, 11), (6, 12), (11, 10), (12, 11), (17, 8), (18, 9)):
+    for (x, y) in ((6, 6), (7, 7), (10, 4), (11, 5), (15, 2), (16, 3), (19, 3), (20, 4), (4, 9), (5, 10), (9, 8), (10, 9), (14, 6), (15, 7)):
         if out[y][x] == 'G': out[y][x] = 'H'
         if out[y][x - 1] == 'G': out[y][x - 1] = 'F'
     # ももの 筋肉（大きな 弧）
-    for (x, y) in ((10, 13), (9, 14), (8, 15), (8, 16), (8, 17), (8, 18), (9, 19), (10, 20), (11, 21), (12, 22), (13, 23)):
+    for (x, y) in ((8, 11), (7, 12), (6, 13), (6, 14), (6, 15), (7, 16), (8, 17), (9, 18), (10, 19)):
         out[y][x] = 'l'
         if out[y][x + 1] == 'G': out[y][x + 1] = 'F'
     # 肩の きずあと（3本の 爪あと）
     for i in range(3):
         for j in range(5):
-            x, y = 19 + i * 2 + j // 2, 6 + j + i
+            x, y = 15 + i * 2 + j // 2, 5 + j + i
             out[y][x] = 'l'
             if out[y][x - 1] in 'GH': out[y][x - 1] = 'N'
     # 水てき
-    for (x, y) in ((9, 5), (15, 2), (4, 10), (26, 4)):
+    for (x, y) in ((7, 4), (12, 2), (3, 8), (20, 3)):
         out[y][x] = 'C'; out[y + 1][x] = 'A'
     return outline(rows_of(out))
 
@@ -105,8 +107,10 @@ HEAD = [
     '..........kkkkkkk......',
 ]
 TEETH_GLINT = ['w', 'w', 'w']
-EYE = ['CCAkAk', '.kkkkk']
-EYE_ALT = {'blink': ['kkkkkk', '.GGGGk'], 'atk0|atk1|atk2': ['wCCkCk', '.kkkkk'], 'hit': ['kkAkkk', '.kkkkk'], 'ko': ['AkAkAk', '.kAkGk']}
+# 目：太い まゆの 下の つり目（白い 光＋水色 2段＋たての ひとみ、下まぶた）
+EYE = ['wCAkAk', 'kABkBk', '.kkkkk']
+EYE_ALT = {'blink': ['kkkkkk', 'GGGGGk', '.lNGGG'], 'atk0|atk1|atk2': ['wwCkCk', 'kCCkCk', '.kkkkk'],
+           'hit': ['kkGGGk', 'GGkkkk', '.lNGGG'], 'ko': ['kGGkGk', 'GkkGGk', '.kGGkG']}
 # 丸太の しっぽ：木の 皮の すじ と 切り口の 年輪
 TAIL = [
     '..kkkkkkkkkkkkkk..',
@@ -130,6 +134,8 @@ FLEG = [
     '.kFGGGGHHk',
     '.kFGGGGHk.',
     '.kFGGGHHk.',
+    '.kFGGGHHk.',
+    '.kFGGGGHk.',
     '.kGGGGHHk.',
     '.kFGGGGHHk',
     'kFGGGGGHHk',
@@ -138,16 +144,20 @@ FLEG = [
     'kwkkwkkwk.',
 ]
 HLEG = [
-    '..kkkkkk.....',
     '.kGGGGGHk....',
-    'kGGGGGGHHk...',
+    'kFGGGGGHHk...',
+    'kFGGGGGHHk...',
+    '.kFGGGGHHk...',
+    '.kFGGGHHHk...',
+    '..kFGGHHk....',
+    '..kFGGHHk....',
     'kGGGGHHHHkk..',
     'kHHHHHHHHHHk.',
     'kHAAkHAAkHBBk',
     'kkkkkkkkkkkkk',
 ]
-PUDDLE = ['..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..', '.kAACCAAAAAACCAAAAAAAACCAAAAAAAACAABk.', '..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..']
-PUDDLE2 = ['..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..', '.kAAAACCAAAAAAAACCAAAAAAACCAAAAAAAABk.', '..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..']
+PUDDLE = ['..kkkkkkkkkkkkkkkkkkkkkkkkkkkkk..', '.kAACCAAAAAACCAAAAAACCAAAAAACAABk.', '..kkkkkkkkkkkkkkkkkkkkkkkkkkkkk..']
+PUDDLE2 = ['..kkkkkkkkkkkkkkkkkkkkkkkkkkkkk..', '.kAAAACCAAAAAAACCAAAAAACCAAAAAABk.', '..kkkkkkkkkkkkkkkkkkkkkkkkkkkkk..']
 # 攻撃：しっぽで たたいて 前へ 走る 大波
 WAVE = [
     '.....kkkk.....',
@@ -178,22 +188,25 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 
 BODY = body()
 def layers():
-    return [
-        dict(n='puddle', g='root', x=1, y=58, rows=PUDDLE, alt={'idle1|idle3|walk1|walk3': PUDDLE2}, not_='ko'),
-        dict(n='tail', g='tail', x=0, y=40, rows=TAIL, not_='atk0'),
-        dict(n='tailup', g='tail', x=3, y=21, rows=TAIL_UP, only='atk0'),
-        dict(n='drip', g='tail', x=3, y=49, rows=DRIP, alt={'idle1|idle3|walk1|walk3': DRIP2}, not_='atk0|atk1|atk2|ko'),
-        dict(n='splash', g='root', x=0, y=36, rows=SPLASH, only='atk1'),
-        dict(n='legHF', g='legB', x=17, y=53, rows=dark(HLEG)),
-        dict(n='legFF', g='legA', x=40, y=47, rows=dark(FLEG)),
-        dict(n='body', g='body', x=9, y=26, rows=BODY),
-        dict(n='legH', g='legA', x=9, y=53, rows=HLEG),
-        dict(n='legF', g='legB', x=33, y=47, rows=FLEG),
-        dict(n='head', g='head', x=34, y=33, rows=HEAD),
-        dict(n='eye', g='head', x=44, y=39, rows=EYE, alt=EYE_ALT),
-        dict(n='glint', g='head', x=45, y=47, rows=TEETH_GLINT, only='atk0|atk1'),
-        dict(n='wave', g='fx', x=50, y=50, rows=WAVE, alt={'atk2': WAVE2}, only='atk1|atk2'),
+    L = [
+        dict(n='puddle', g='root', x=2, y=58, rows=PUDDLE, alt={'idle1|idle3|walk1|walk3': PUDDLE2}, not_='ko'),
+        dict(n='tail', g='tail', x=1, y=42, rows=TAIL, not_='atk0'),
+        dict(n='tailup', g='tail', x=6, y=24, rows=TAIL_UP, only='atk0'),
+        dict(n='drip', g='tail', x=4, y=51, rows=DRIP, alt={'idle1|idle3|walk1|walk3': DRIP2}, not_='atk0|atk1|atk2|ko'),
+        dict(n='splash', g='root', x=1, y=36, rows=SPLASH, only='atk1'),
+        dict(n='legHF', g='legB', x=19, y=47, rows=dark(HLEG)),
+        dict(n='legFF', g='legA', x=35, y=45, rows=dark(FLEG)),
+        dict(n='body', g='body', x=11, y=30, rows=BODY),
+        dict(n='legH', g='legA', x=12, y=47, rows=HLEG),
+        dict(n='legF', g='legB', x=29, y=45, rows=FLEG),
+        dict(n='head', g='head', x=31, y=27, rows=HEAD),
+        dict(n='eye', g='head', x=41, y=33, rows=EYE, alt=EYE_ALT),
+        dict(n='glint', g='head', x=42, y=41, rows=TEETH_GLINT, only='atk0|atk1'),
+        dict(n='wave', g='fx', x=46, y=50, rows=WAVE, alt={'atk2': WAVE2}, only='atk1|atk2'),
     ]
+    for l in L:
+        if l['n'] not in ('puddle', 'wave') and not l['n'].startswith('leg'): l['y'] -= 3   # 足を 長く 見せる ぶん 体を 上げる
+    return L
 
 FRAMES = {
     'idle0': {},

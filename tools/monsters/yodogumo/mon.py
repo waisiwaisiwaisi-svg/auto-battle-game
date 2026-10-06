@@ -5,11 +5,11 @@ PAL = {
     'k': '#101018', 'l': '#2c1640',
     'A': '#9a7ac4', 'B': '#563e7e', 'C': '#2e2048',      # 体（よどんだ 紫）
     'G': '#e2ff70', 'H': '#82d43c', 'I': '#2e7a40',      # 毒の ふくろ
-    'R': '#ff4648', 'F': '#f2e8c8', 'Q': '#a89070',      # 目（赤）・牙（骨色）
+    'R': '#ff4648', 'r': '#a8183a', 'F': '#f2e8c8', 'Q': '#a89070',      # 目（赤 2色）・牙（骨色）
     'w': '#ffffff',
 }
 LIGHT = set('AGFw')
-KEEP_BLACK = set('wRG')
+KEEP_BLACK = set('wRrG')
 
 def shade(mask, lt, md, dk, t=2, lf=1, r=2, b=2):
     g = pix.grid_of(mask); H, W = len(g), len(g[0])
@@ -44,15 +44,18 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 # ---- 足：関節の 位置を 手で 決め、線で あたり → 2段の 陰影＋ひざの つや ----
 def leg(pts, far=False):
     g = pix.grid(72, 64)
-    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):   # デフォルメ：足は 2ドットの 太さ
         pix.line(g, x0, y0, x1, y1, 'B')
+        if abs(x1 - x0) > abs(y1 - y0): pix.line(g, x0, y0 + 1, x1, y1 + 1, 'B')
+        else: pix.line(g, x0 + 1, y0, x1 + 1, y1, 'B')
     for (x, y) in pts[1:-1]:                       # ひざ：ふくらみと つや
         g[y][x] = 'A'; g[y - 1][x] = 'A'; g[y][x + 1] = 'C'; g[y - 1][x + 1] = 'B'
     for (x0, y0), (x1, y1) in zip(pts[1:], pts[2:]):   # すねの 下半分は 影
         n = max(abs(x1 - x0), abs(y1 - y0))
         for t in range(n // 2, n + 1):
             x, y = x0 + round((x1 - x0) * t / n), y0 + round((y1 - y0) * t / n)
-            if g[y][x] == 'B': g[y][x] = 'C'
+            for (xx, yy) in ((x, y), (x + 1, y), (x, y + 1)):
+                if g[yy][xx] == 'B' and (xx > x or yy > y): g[yy][xx] = 'C'
     rows = pix.outline(pix.rows_of(g))[1:]
     rows = [r[1:] for r in rows]
     gg = pix.grid_of(rows)
@@ -62,22 +65,23 @@ def leg(pts, far=False):
     rows = pix.rows_of(gg)
     return dark(rows) if far else rows
 
-L1 = [(41, 41), (51, 29), (58, 37), (61, 58)]
-L1_UP = [(41, 40), (49, 22), (56, 17), (61, 21)]
-L2 = [(39, 42), (45, 22), (49, 39), (53, 58)]
-L3 = [(35, 42), (28, 23), (22, 39), (17, 58)]
-L4 = [(34, 43), (17, 27), (10, 41), (5, 58)]
-F1 = [(41, 40), (47, 25), (53, 40), (56, 57)]
-F2 = [(38, 40), (40, 33), (44, 44), (47, 57)]
-F3 = [(35, 40), (23, 30), (18, 43), (11, 57)]
-F4 = [(33, 41), (13, 33), (7, 45), (4, 51)]
+# デフォルメ：ひざを 低く、足を 短く（付け根は 頭胸部の 下に かくれる）
+# デフォルメ：足は 短く 太く。ひざは 体の りんかくの 外に 出して 見せる（付け根は 頭胸部の 下に かくれる）
+L1 = [(44, 45), (55, 34), (59, 43), (61, 58)]
+L1_UP = [(44, 44), (53, 30), (59, 26), (63, 29)]
+L2 = [(42, 46), (49, 32), (52, 44), (53, 58)]
+L3 = [(37, 46), (29, 32), (24, 45), (21, 58)]
+L4 = [(35, 47), (18, 35), (11, 46), (7, 58)]
+F1 = [(44, 44), (52, 33), (56, 45), (57, 57)]
+F3 = [(37, 44), (32, 34), (28, 46), (25, 57)]
+F4 = [(35, 45), (13, 38), (6, 48), (3, 54)]
 
 # ---- 腹：毒の ふくろが すけて 光る ----
 def abdomen(hot=False):
-    g = pix.grid(28, 24); pix.ellipse(g, 14, 12, 14, 12, '#')
-    rows = shade(pix.rows_of(g), 'A', 'B', 'C', t=3, lf=2, r=3, b=4)
+    g = pix.grid(23, 18); pix.ellipse(g, 11.5, 9, 11.5, 9, '#')
+    rows = shade(pix.rows_of(g), 'A', 'B', 'C', t=2, lf=2, r=3, b=3)
     g = pix.grid_of(rows)
-    sacs = [(9, 6, 3), (17, 7, 3), (12, 13, 3), (20, 14, 2), (5, 12, 2)]
+    sacs = [(8, 5, 3), (15, 5, 2), (11, 11, 3), (17, 11, 2), (4, 9, 2)]
     for (cx, cy, r) in sacs:
         for y in range(cy - r, cy + r + 1):
             for x in range(cx - r, cx + r + 1):
@@ -88,10 +92,10 @@ def abdomen(hot=False):
                 elif (x - cx) + (y - cy) > r * .6: g[y][x] = 'I'
                 else: g[y][x] = 'H'
     # 毛（ひかえめな 点）と つや
-    for (x, y) in ((4, 5), (6, 3), (14, 3), (22, 8), (24, 13), (8, 19), (16, 20), (3, 8)):
+    for (x, y) in ((4, 4), (6, 2), (12, 2), (19, 7), (20, 10), (7, 15), (14, 15), (3, 7)):
         if g[y][x] in 'ABC': g[y][x] = 'A' if y < 10 else 'l'
     # 糸いぼ
-    g[16][0] = 'C'; g[17][0] = 'C'
+    g[11][0] = 'C'; g[12][0] = 'C'
     return pix.outline(pix.rows_of(g))
 
 CEPH = [
@@ -110,8 +114,9 @@ CEPH = [
     '....kkkkkkkkkkkkk...',
 ]
 # 目：大きな 赤い つり目（後ろへ 上がる）＋ 小さな 目が 6つ
-EYE = ['RRRwkRRw', 'kRRkkkRR']
-EYE_ALT = {'blink': ['kkkkkkkk', 'BBkkkkkk'], 'atk0|atk1|atk2': ['RRRRkRRw', 'kRRRRkRR'],
+# 大きな 目 2つ：ハイライト w ＋ 虹彩 2色（R 明・r 暗）＋ たての ひとみ k
+EYE = ['wRkRRkwR', 'rrkrrkrr']
+EYE_ALT = {'blink': ['kkkkkkkk', 'BBkkkkkk'], 'atk0|atk1|atk2': ['wwkRRkwR', 'RrkrRkRr'],
            'hit': ['kRkkkRkk', 'kkRRkkRk'], 'ko': ['RkRkRkRk', 'kRkkkRkk']}
 FANG = [
     '.kkkk...',
@@ -162,18 +167,18 @@ def layers():
         dict(n='f3', g='legA', x=0, y=0, rows=leg(F3, True)),
 
         dict(n='f1', g='legA', x=0, y=0, rows=leg(F1, True)),
-        dict(n='abd', g='body', x=4, y=19, rows=abdomen(), alt={'idle1|idle3|walk1|walk3|' + A: abdomen(True)}),
+        dict(n='abd', g='body', x=11, y=26, rows=abdomen(), alt={'idle1|idle3|walk1|walk3|' + A: abdomen(True)}),
         dict(n='l4', g='legA', x=0, y=0, rows=leg(L4)),
         dict(n='l3', g='legB', x=0, y=0, rows=leg(L3)),
         dict(n='l2', g='legA', x=0, y=0, rows=leg(L2)),
         dict(n='l1', g='legF', x=0, y=0, rows=leg(L1), alt={'atk0': leg(L1_UP)}),
-        dict(n='fangF', g='head', x=45, y=40, rows=dark(FANG), alt={'atk0': dark(FANG_OPEN)}),
-        dict(n='ceph', g='head', x=27, y=31, rows=CEPH),
-        dict(n='eye', g='head', x=39, y=35, rows=EYE, alt=EYE_ALT),
-        dict(n='fang', g='head', x=42, y=41, rows=FANG, alt={'atk0': FANG_OPEN}),
-        dict(n='drop', g='head', x=43, y=50, rows=DROP['idle0|walk0|walk2'], alt=DROP, not_=A + '|hit|ko'),
-        dict(n='glob', g='head', x=52, y=40, rows=GLOB, only='atk1'),
-        dict(n='splat', g='head', x=60, y=40, rows=SPLAT, only='atk2'),
+        dict(n='fangF', g='head', x=48, y=44, rows=dark(FANG), alt={'atk0': dark(FANG_OPEN)}),
+        dict(n='ceph', g='head', x=30, y=35, rows=CEPH),
+        dict(n='eye', g='head', x=42, y=39, rows=EYE, alt=EYE_ALT),
+        dict(n='fang', g='head', x=45, y=45, rows=FANG, alt={'atk0': FANG_OPEN}),
+        dict(n='drop', g='head', x=46, y=54, rows=DROP['idle0|walk0|walk2'], alt=DROP, not_=A + '|hit|ko'),
+        dict(n='glob', g='head', x=55, y=44, rows=GLOB, only='atk1'),
+        dict(n='splat', g='head', x=63, y=44, rows=SPLAT, only='atk2'),
     ]
 
 FRAMES = {

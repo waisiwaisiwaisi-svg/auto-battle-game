@@ -1,4 +1,4 @@
-# チョウリュウ（フェアリー・ドラゴン × 蝶の 竜）手打ち GBA風
+# チョウリュウ（フェアリー・ドラゴン × 蝶の 竜）手打ち GBA風・デフォルメ（2〜3頭身：頭を 大きく、胴は 短く 太く、翅は 大きい まま）
 import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, poly, line, stamp, outline
@@ -9,11 +9,11 @@ PAL = {
     'A': '#e278b4', 'B': '#a03c80', 'D': '#5a1c52',      # うろこ（こい 赤むらさき）
     'E': '#f2d6dc', 'F': '#b88ca4',                      # 腹の 板（うすい 骨色）
     'X': '#a6ecff', 'W': '#3c8ee6', 'Z': '#1c3784',      # 蝶の 翅（青の ステンドグラス）
-    'Y': '#ffd23a', 'r': '#e8304a',                      # 目・翅の 目玉もよう
+    'Y': '#ffd23a', 'y': '#c87818', 'r': '#e8304a',                      # 目・翅の 目玉もよう
     'w': '#ffffff', 'U': '#efe4d2', 'V': '#a49280',      # 牙・つの（骨）
 }
 LIGHT = set('AEXYwU')
-KEEP_BLACK = set('Yr')
+KEEP_BLACK = set('Yyr')
 
 # ---------- 下書きの 道具 ----------
 def G(): return grid(64, 64)
@@ -111,80 +111,103 @@ def shift(rows, dx, dy):
             if c != '.' and 0 <= x + dx < 64 and 0 <= y + dy < 64: g[y + dy][x + dx] = c
     return rows_of(g)
 
-# ---------- 体：S字に くねる ヘビの ような 竜。腹は 細い 骨色の 板 ----------
-PATH = [(47, 19), (45, 25), (42, 31), (37, 37), (30, 41), (22, 43), (15, 45), (10, 50), (9, 55), (13, 58)]
-RAD = [3.8, 4.3, 5.0, 5.3, 5.0, 4.4, 3.5, 2.6, 1.8, 1.0]
+# ---------- 体：S字に くねる ヘビの ような 竜（デフォルメ：短く 太く）。腹は 骨色の 板 ----------
+PATH = [(47, 27), (45, 32), (41, 37), (35, 41), (28, 43), (21, 45), (15, 48), (12, 52), (12, 56), (16, 59)]
+RAD = [5.2, 5.6, 6.0, 5.8, 5.2, 4.4, 3.5, 2.6, 1.8, 1.0]
+def along(t):
+    """道すじの 長さ t（0〜1）の 点と 向き"""
+    segs = [(PATH[i], PATH[i + 1]) for i in range(len(PATH) - 1)]
+    Ls = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in segs]; d = t * sum(Ls)
+    for (a, b), L in zip(segs, Ls):
+        if d <= L or (a, b) == segs[-1]:
+            u = min(1, d / L); return (a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u), ((b[0] - a[0]) / L, (b[1] - a[1]) / L)
+        d -= L
 def body():
     p = G(); tube(p, PATH, RAD, belly=.45)
     s = shade(p, {'1': 'ABD', '2': 'EEF'}, r=2)
-    # 腹の 板の 区切り（手で）
-    for (x, y) in [(46, 24), (44, 29), (41, 34), (37, 39), (32, 43), (27, 45), (21, 46), (16, 48)]:
-        for dy in range(-2, 3):
-            for dx in range(-1, 2):
-                if s[y + dy][x + dx] == 'E' and (dx + dy) == 0: s[y + dy][x + dx] = 'F'
-    # 背の うろこの 光と 暗い うろこ（山形）
-    dots(s, 'A', [(34, 36), (27, 39), (20, 41), (14, 43)])
-    dots(s, 'D', [(31, 39), (24, 41), (17, 43), (38, 34), (12, 47)])
+    # 腹の 板の 区切り（ななめの 線を 手で）
+    for t in (.08, .17, .26, .35, .44, .53, .62):
+        (cx, cy), (dx, dy) = along(t)
+        for k in range(1, 7):
+            x, y = round(cx + dy * k * .9), round(cy - dx * k * .9)
+            if 0 <= y < 64 and 0 <= x < 64 and s[y][x] == 'E': s[y][x] = 'F'
+    # 背の うろこ（山形の 光と 影）
+    for t in (.2, .3, .4, .5, .6, .7):
+        (cx, cy), (dx, dy) = along(t); r = 2
+        x, y = round(cx - dy * r), round(cy + dx * r)
+        if s[y][x] in 'AB': s[y][x] = 'D'
+        if s[y - 1][x - 1] in 'AB': s[y - 1][x - 1] = 'A'
     g = G(); ink(g, s)
-    # 背の とげ（骨色、後ろへ 向く）
-    for (x, y) in [(41, 27), (36, 32), (30, 36), (23, 38), (16, 40)]:
-        stamp(g, ['kk..', 'kUkk', '.kVk', '..k.'], x - 2, y - 2)
+    # 背の とげ（骨色、後ろへ 向く）：根もとは うろこに 食いこむ
+    for t in (.14, .26, .38, .5, .62):
+        (cx, cy), (dx, dy) = along(t); r = RAD[min(len(RAD) - 1, int(t * (len(RAD) - 1)))]
+        x, y = round(cx - dy * (r - .5)), round(cy + dx * (r - .5))
+        stamp(g, ['kk..', 'kUkk', '.kUVk', '..kVk'], x - 2, y - 2)
     # 尾の 先：花びらの 刃（ひれ）
-    stamp(g, ['..kk.....', '.kXXkk...', 'kXXWWZkk.', '.kXWWZZZk', '..kWZZkk.', '...kkk...'], 12, 55)
+    stamp(g, ['..kk......', '.kXXkk....', 'kXXWWZkk..', '.kXWWZZZkk', '..kWZZkk..', '...kkk....'], 14, 56)
     return g
 
-# ---------- 頭（手打ち）：長い 鼻づら、骨の つの、牙 ----------
-HEAD = [
-    '.....kkkkk..........',
-    '...kkAAAAAkkk.......',
-    '..kAABBBBBAAAkkk....',
-    '.kABBBBBBBBBBBAAkk..',
-    'kABBBBBBBBBBBBBBBAk.',
-    'kBBBBBBBBBBBBBBBBBBk',
-    'kBBBBBBBBBBBBBBBBkBk',
-    'kDBBBBBBBBBkkkkkkkkk',
-    'kDDBBBBBkwkwkkkwkk..',
-    '.kDDBBBEEEEEEEEEk...',
-    '..kDDDEFFFFFFFkk....',
-    '...kkkkkkkkkkkk.....',
-]
-HEAD_OPEN = [
-    '.....kkkkk..........',
-    '...kkAAAAAkkk.......',
-    '..kAABBBBBAAAkkk....',
-    '.kABBBBBBBBBBBAAkk..',
-    'kABBBBBBBBBBBBBBBAk.',
-    'kBBBBBBBBBBBBBBBBBBk',
-    'kBBBBBBBBBBBBBBBBkBk',
-    'kDBBBBBBkkkkkkkkkkkk',
-    'kDDBBBkrrwrrrwrrwk..',
-    'kDDBBkrrrrrrrrrrk...',
-    '.kDDBkrrrrrrrrrrrk..',
-    '.kDDBkkkwkkkwkkwkk..',
-    '..kDDEEEEEEEEEEk....',
-    '...kkFFFFFFFFkk.....',
-    '.....kkkkkkkkk......',
-]
-HORN = [   # 骨の つの：額から 後ろへ 大きく そる
-    'kk.........',
-    'kUkk.......',
-    '.kUUkk.....',
-    '..kUUVkk...',
-    '...kUUVVkk.',
-    '....kkUVVVk',
-    '......kkkk.',
-]
-HORN2 = ['kk.....', 'kVkk...', '.kVVkk.', '..kkVVk', '....kk.']
-ANTENNA = ['..kk', '.kYk', '.kk.', 'k...', 'k...', '.k..']
-# 目：黒い まゆの 下で 金に 光る つり目、赤い たての ひとみ
-EYE = ['kkkkk..', '.kkkkkk', '.kYYrk.', '..kkk..']
+# ---------- 頭（デフォルメで 大きく）：くさび形の 竜の 頭、骨の つの、牙 ----------
+class Part:
+    def __init__(s, pts, fill=None):
+        p = G(); poly(p, pts, '1')
+        if fill: fill(p)
+        s.g = shade(p, {'1': 'ABD', '2': 'EEF'}, r=2)
+    def P(s, pts, ch, only=None):
+        for x, y in pts:
+            if 0 <= y < 64 and 0 <= x < 64 and (only is None or s.g[y][x] in only): s.g[y][x] = ch
+    def S(s, x0, y0, rows):
+        for j, r in enumerate(rows):
+            for i, c in enumerate(r):
+                if c != '.': s.P([(x0 + i, y0 + j)], c)
+    def rows(s): o = G(); ink(o, s.g); return rows_of(o)
+EYE = ['kwYYkYk', 'kYyykyk', '.kkyykk']
 EYE_ALT = {
-    'blink': ['kkkkk..', '.kkkkkk', '.kkkkk.', '.......'],
-    'atk0|atk1|atk2': ['kkkkk..', '.kkkkkk', '.kYYYk.', '..kkk..'],
-    'hit': ['.......', '.kk.kk.', '...k...', '.kk.kk.'],
-    'ko': ['.......', '..k.k..', '...k...', '..k.k..'],
+    'blink': ['BBBBBBB', 'kkkkkkk', '.BBBBBB'],
+    'atk0|atk1|atk2': ['kwwYkYk', 'kYYYkYk', '.kkYYkk'],
+    'hit': ['BkkBBBB', 'BBBkkkk', 'BkkBBBB'],
+    'ko': ['BkBBkBB', 'BBkkBBB', 'BkBBkBB'],
 }
-CLAW = ['.kkk.', 'kBBDk', 'kBDDk', '.kUkU', '..k.k']
+def jaw(p, open_):
+    """下あご：骨色の 板。開くと 赤い 口の 中と 牙"""
+    if open_:
+        poly(p, [(50, 27), (63, 24), (62.5, 32), (52, 33), (46, 31)], '2')
+        poly(p, [(51, 27.5), (62.5, 25), (62, 30), (52, 30)], 'r')
+    else:
+        poly(p, [(45, 28), (61, 26.5), (60, 28.5), (52, 30), (46, 30.5)], '2')
+def head(open_=False, eye=None):
+    h = Part([(38, 23), (41, 18), (45, 15), (50, 14), (54, 16), (58, 18), (62, 20), (63.5, 23), (63, 26), (60, 27.5), (52, 28), (47, 30), (42, 30), (38, 27)], lambda p: jaw(p, open_))
+    # まゆの ひさし（黒い 線）と その 上の 光
+    h.P([(43, 17), (44, 17), (45, 18), (46, 18), (47, 19), (48, 19), (49, 19), (50, 19), (51, 19), (52, 20), (53, 20), (54, 21)], 'k')
+    h.P([(44, 16), (45, 16), (46, 17), (47, 17), (48, 18), (49, 18), (50, 18), (51, 18), (52, 19)], 'A')
+    h.P([(55, 18), (56, 18), (57, 19), (58, 19), (59, 20), (60, 20)], 'A')               # 鼻すじの 光
+    h.S(46, 20, eye or EYE)
+    h.P([(41, 22), (40, 23), (40, 24), (41, 26), (42, 27)], 'D', 'B')                 # ほおの すじ
+    h.P([(61, 22), (60, 22)], 'k')                                  # 鼻の あな
+    if open_:
+        h.P([(53, 28), (56, 27), (59, 26), (62, 25)], 'w'); h.P([(55, 30), (58, 30), (61, 29)], 'w')
+        h.P([(52, 27), (53, 27), (54, 27), (55, 26), (56, 26), (57, 26), (58, 25), (59, 25), (60, 25), (61, 24), (62, 24)], 'k', 'Br')
+    else:
+        h.P([(45, 28), (46, 28), (47, 28), (48, 28), (49, 27), (50, 27), (51, 27), (52, 27), (53, 27), (54, 27), (55, 27), (56, 27), (57, 26), (58, 26), (59, 26), (60, 26), (61, 26)], 'k')
+        h.P([(58, 27), (55, 28), (51, 28)], 'w')
+    return h.rows()
+HEAD = head(); HEAD_OPEN = head(True)
+HEAD_EYES = {k: head(eye=v) for k, v in EYE_ALT.items() if 'atk' not in k}
+HEAD_EYES['atk0'] = head(eye=EYE_ALT['atk0|atk1|atk2']); HEAD_EYES['atk1|atk2'] = head(True, EYE_ALT['atk0|atk1|atk2'])
+HORN = [   # 骨の つの：額から 後ろへ 大きく そる（根もとは 頭に 食いこむ）
+    'kk............',
+    'kUkk..........',
+    '.kUUkk........',
+    '..kUUUkk......',
+    '...kUUUVkk....',
+    '....kkUUVVkk..',
+    '......kkUVVVVk',
+    '........kVVVVV',
+    '.........kVVVV',
+]
+HORN2 = ['kk.......', 'kVkk.....', '.kVVkk...', '..kkVVkk.', '....kVVVV', '.....kVVV']
+# 小さな 前足（胸から 生える。付け根は 胴に もぐる）
+CLAW = ['kBBBk.', 'kABBDk', 'kABDDk', '.kBDDk', '.kUkUk', '..k.k.']
 
 # ---------- 鱗粉の ブレス（攻撃）と きらめき ----------
 BREATH = [
@@ -213,21 +236,21 @@ BREATH2 = [
 SPARK_A = ['.X...', 'XwX..', '.X..w']
 SPARK_B = ['w..X.', '..XwX', '...X.']
 
+WDX, WDY = 2, 3
 def layers():
-    W = {p: wing(p) for p in FORE}; WF = {p: shift(wing(p, True), 5, -2) for p in FORE}
+    W = {p: shift(wing(p), WDX, WDY) for p in FORE}; WF = {p: shift(wing(p, True), 5 + WDX, -2 + WDY) for p in FORE}
     BODY = rows_of(body())
     return [
         dict(n='wingB', g='wingB', x=0, y=0, rows=WF['up'], alt={'idle1|idle3|walk1|walk3|atk2|atk1': WF['mid'], 'walk2': WF['down']}),
         dict(n='wingF', g='wingF', x=0, y=0, rows=W['up'], alt={'idle1|idle3|walk1|walk3|atk2': W['mid'], 'walk2': W['down']}),
         dict(n='body', g='body', x=0, y=0, rows=BODY),
-        dict(n='claw', g='body', x=40, y=37, rows=CLAW),
-        dict(n='horn2', g='head', x=41, y=10, rows=HORN2),
-        dict(n='head', g='head', x=44, y=10, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='horn', g='head', x=38, y=5, rows=HORN),
-        dict(n='eye', g='head', x=49, y=12, rows=EYE, alt=EYE_ALT),
+        dict(n='horn2', g='head', x=36, y=11, rows=HORN2),
+        dict(n='claw', g='body', x=44, y=38, rows=CLAW),
+        dict(n='head', g='head', x=0, y=0, rows=HEAD, alt=HEAD_EYES),
+        dict(n='horn', g='head', x=31, y=8, rows=HORN),
         dict(n='spark', g='root', x=4, y=6, rows=outline(SPARK_A), alt={'idle1|idle3|walk1|walk3': outline(SPARK_B)}, not_='atk0|atk1|atk2|hit|ko'),
-        dict(n='breath', g='root', x=63, y=14, rows=outline(BREATH), only='atk1'),
-        dict(n='breath2', g='root', x=65, y=12, rows=outline(BREATH2), only='atk2'),
+        dict(n='breath', g='root', x=61, y=19, rows=outline(BREATH), only='atk1'),
+        dict(n='breath2', g='root', x=63, y=19, rows=outline(BREATH2), only='atk2'),
     ]
 
 FRAMES = {

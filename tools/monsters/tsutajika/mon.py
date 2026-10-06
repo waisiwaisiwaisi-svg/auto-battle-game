@@ -1,4 +1,4 @@
-# ツタジカ（くさ・フェアリー × シカ）手打ち GBA風
+# ツタジカ（くさ・フェアリー × シカ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭と 枝角、胴は 小さく 丸く、足は 短く 太く）
 import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, poly, line, stamp, outline, ellipse
@@ -13,6 +13,7 @@ PAL = {
     'w': '#ffffff',
 }
 LIGHT = set('AGPRw')
+KEEP_BLACK = set('wPQ')
 
 # ---------- 下書きの 道具 ----------
 def G(): return grid(64, 64)
@@ -62,11 +63,11 @@ def part(build, ramps=FUR, r=2, far=False, hi=.32, lo=-.28):
 
 # ---------- 足：太く たくましい。ひづめは 刃の ように とがる ----------
 def hind(p):
-    ellipse(p, 17, 38, 6.5, 7, '1')                                  # 太い もも
-    tube(p, [(19, 42), (13, 50), (14, 57)], [3, 2.1, 1.8])         # かかとは 後ろへ 折れる
+    ellipse(p, 14, 46, 5.5, 6, '1')                                  # 太い もも
+    tube(p, [(15, 49), (12, 54), (13, 57)], [3, 2.4, 2.1])         # かかとは 後ろへ 折れる
 def fore(p):
-    ellipse(p, 40, 38, 5, 6.5, '1')                                  # 肩の 筋肉
-    tube(p, [(40, 42), (41, 50), (40, 57)], [2.7, 2.1, 1.8])
+    ellipse(p, 33, 46, 4.5, 5.5, '1')                                # 肩の 筋肉
+    tube(p, [(33, 49), (34, 54), (33, 57)], [2.8, 2.3, 2.1])
 HOOF = ['.kkkkk..', 'kSSSTTk.', 'kSTTTTTk', 'kkkkkkkk']
 def leg(build, hx, far=False, shift=0):
     def b(p):
@@ -76,7 +77,7 @@ def leg(build, hx, far=False, shift=0):
                 if q[y][x] != '.' and 0 <= x + shift < 64: p[y][x + shift] = q[y][x]
     g = part(b, far=far)
     # ひざの つた（手で 巻く）
-    for (x, y, c) in ((hx - 1, 52, 'G'), (hx, 53, 'H'), (hx + 1, 54, 'H'), (hx - 1, 55, 'G')):
+    for (x, y, c) in ((hx - 1, 53, 'G'), (hx, 54, 'H'), (hx + 1, 55, 'H')):
         if g[y][x + shift] not in '.k': g[y][x + shift] = DARK.get(c, c) if far else c
     h = HOOF if not far else [r.replace('S', 'T') for r in HOOF]
     stamp(g, h, hx - 3 + shift, 57)
@@ -85,28 +86,24 @@ def leg(build, hx, far=False, shift=0):
 # ---------- 胴：厚い 胸と 盛り上がった 肩。背に 白い 斑 ----------
 def body():
     def b(p):
-        ellipse(p, 16, 36, 8, 7.5, '1')     # しり
-        ellipse(p, 27, 36.5, 13, 7.2, '1')  # どう
-        ellipse(p, 38, 36, 8.5, 8.8, '1')   # 厚い 胸
+        ellipse(p, 14, 45, 7, 6.5, '1')     # しり
+        ellipse(p, 23, 45.5, 10, 6, '1')    # どう
+        ellipse(p, 31, 44, 7, 7, '1')       # 厚い 胸
     g = part(b, r=3)
-    # 筋肉の すじ（肩・もも・あばら）を 手で
-    dots(g, 'C', [(35, 33), (34, 34), (34, 35), (34, 36), (35, 38), (22, 35), (23, 36), (23, 37), (23, 38), (27, 41), (29, 42), (31, 42)])
-    dots(g, 'A', [(36, 32), (35, 33), (24, 34), (24, 35), (28, 40), (30, 41)])
+    # 筋肉の すじ（肩・もも）を 手で
+    dots(g, 'C', [(28, 42), (27, 43), (27, 44), (28, 46), (18, 44), (19, 45), (19, 46), (22, 49), (24, 50)])
+    dots(g, 'A', [(29, 41), (28, 42), (20, 43), (20, 44)])
     # 白い 斑（フェアリーの しるし）
-    dots(g, 'w', [(14, 32), (19, 31), (25, 32), (30, 31), (17, 34), (22, 33), (28, 34)])
+    dots(g, 'w', [(11, 41), (16, 40), (22, 41), (13, 43), (19, 42), (25, 42)])
     return g
 
 # ---------- 首：太く 前へ のびる。いばらの つたが 巻く ----------
 def neck():
     def b(p):
-        poly(p, [(35, 32), (39, 25), (43, 20), (49, 17), (53, 19), (52, 25), (49, 31), (47, 38), (42, 40), (37, 38)], '1')
+        poly(p, [(28, 41), (31, 36), (35, 32), (40, 31), (44, 34), (42, 41), (38, 46), (31, 47)], '1')
     g = part(b, r=2)
-    # 首の 下の 毛（明るい えりまき）
-    for (x, y) in ((50, 27), (49, 29), (48, 31), (47, 33), (46, 35), (51, 25), (49, 28), (48, 30), (47, 32)):
-        if g[y][x] in 'BC': g[y][x] = 'A' if (x + y) % 2 else 'B'
-    # つたの 帯（ななめに 2本）
-    for (x0, y0) in ((38, 31), (41, 24)):
-        for i in range(10):
+    for (x0, y0) in ((31, 38),):                                     # つたの 帯
+        for i in range(9):
             x, y = x0 + i, y0 + 3 - round(i * .45)
             if g[y][x] not in '.k': g[y][x] = 'H' if i % 3 else 'G'
             if g[y + 1][x] not in '.k': g[y + 1][x] = 'I'
@@ -115,39 +112,57 @@ def neck():
 LEAF = ['.kk..', 'kGGk.', 'kGHHk', '.kHIk', '..kk.']
 LEAF_S = ['.kk.', 'kGHk', 'kHIk', '.kk.']
 
-# ---------- 頭（手打ち）：大きな くさび形、深い まゆの ひさし ----------
-HEAD = [
-    '....kkkkkkk...........',
-    '..kkAAAAAAAkkk........',
-    '.kAABBBBBBBAAAkkk.....',
-    'kAABBBBBBBBBBBBAAkkk..',
-    'kABBBBBBBBBBBBBBBBAAk.',
-    'kBBBBBBBBBBBBBBBBBBBBk',
-    'kBBBBBBBBBBBBBBBBBBkkk',
-    'kCBBBBBBBBBBBBBBBBBBk.',
-    'kCBBBCBBBBBBBBBBBBBk..',
-    'kCCBBBCBBBBBkkkkkkkk..',
-    '.kCCBBBBBCCBBBBBBBk...',
-    '..kCCBBBCCCCCCCCkk....',
-    '...kkCCCCCCCkkkk......',
-    '.....kkkkkkk..........',
+# ---------- 頭（大きく）：丸い 頭と 短い 鼻づら、深い まゆの ひさし ----------
+HEAD_M = [
+    "....########..............",
+    "..############............",
+    ".###############..........",
+    "##################........",
+    "#####################.....",
+    "#######################...",
+    "########################..",
+    "#########################.",
+    "#########################.",
+    "########################..",
+    "#######################...",
+    "######################....",
+    ".###################......",
+    "..################........",
+    "....###########...........",
 ]
-HEAD_ATK = HEAD[:8] + [
-    'kCBBBCBBBBBBkkkkkkkkk.',
-    'kCCBBBCBBBkwkwkwkk....',
-    '.kCCBBBBBkkkkkkkkk....',
-    '..kCCBBBCCCCCCCCCk....',
-    '...kkCCCCCCCCkkkk.....',
-    '.....kkkkkkkk.........',
-]
-# するどい 目：重い まゆの ひさしの 下で 桃色に 光る（たての ひとみ）
-EYE = ['kkkk.....', '.CCkkkkk.', '..kPwPQkk', '...kkkkk.']
-EYE_ALT = {
-    'blink': ['kkkk.....', '.CCkkkkk.', '..kkkkkkk', '.........'],
-    'atk0|atk1|atk2': ['kkkk.....', '.CCkkkkk.', '..kwwwPkk', '...kkkkk.'],
-    'hit': ['kkkk.....', '.C.k...k.', '....kkk..', '...k...k.'],
-    'ko': ['.........', '...k...k.', '....kkk..', '...k...k.'],
+EYES = {
+    'open':  ['kk.......', '.kkkkkkk.', '..kwPPkPk', '.kQQQQkQk', '..kkkkkk.'],
+    'blink': ['kk.......', '.kkkkkkk.', '..kBBBBBk', '.kkkkkkkk', '..CCCCCC.'],
+    'glow':  ['kk.......', '.kkkkkkk.', '..kwwPPPk', '.kPPPPkPk', '..kQQkQk.'],
+    'hit':   ['kk.......', '.kkkkkkk.', '..kPkkPkk', '.kkQkkQkk', '..kkkkkk.'],
+    'ko':    ['.........', '..kPQQPk.', '..kQkkQk.', '..kkQQkk.', '..kQkkQk.'],
 }
+def head(eye='open', mouth=False):
+    g = [list(r) for r in HEAD_M]
+    H, W = len(g), len(g[0]); src = [r[:] for r in g]
+    def f(y, x): return 0 <= y < H and 0 <= x < W and src[y][x] == '#'
+    for y in range(H):
+        for x in range(W):
+            if src[y][x] != '#': continue
+            dr = min(next((i for i in range(1, 9) if not f(y + i, x)), 9), next((i for i in range(1, 9) if not f(y, x + i)), 9))
+            ul = min(next((i for i in range(1, 9) if not f(y - i, x)), 9), next((i for i in range(1, 9) if not f(y, x - i)), 9))
+            g[y][x] = 'C' if dr <= 2 else 'A' if ul <= 1 else 'B'
+    for (x, y) in ((22, 6), (23, 6), (23, 7), (24, 7), (24, 8), (23, 8)): g[y][x] = 'k'      # 鼻
+    g[6][21] = 'l'
+    for (x, y) in ((5, 2), (6, 2), (4, 3), (12, 2), (13, 3)): g[y][x] = 'A'                 # 頭の つや
+    for (x, y) in ((3, 8), (3, 9), (4, 10), (16, 9), (17, 10), (18, 9)): g[y][x] = 'C'      # ほおの すじ
+    for j, r in enumerate(EYES[eye]):
+        for i, c in enumerate(r):
+            if c != '.': g[3 + j][9 + i] = c
+    if mouth:
+        for x in range(11, 24): g[10][x] = 'k'
+        for x in range(12, 22): g[11][x] = 'w' if x % 2 else 'l'
+        for x in range(12, 21): g[12][x] = 'k'
+    else:
+        for x in range(13, 24): g[10][x] = 'k'
+        g[11][12] = 'k'
+    for (x, y) in ((8, 12), (9, 13), (11, 13), (12, 12)): g[y][x] = 'A'                     # あごの 白い 毛
+    return outline([''.join(r) for r in g])
 EAR = ['kk........', 'kGkk......', '.kGGHkk...', '.kGGHHHk..', '..kGHHIIk.', '...kkHIk..', '.....kk...']
 
 # ---------- いばらの 角：太い 白木の 枝角に つたが 巻き、とげと 光る 花 ----------
@@ -155,7 +170,10 @@ NEAR = [((46, 14), (41, 9), (34, 5), (27, 3)), ((41, 9), (42, 4), (41, 1)), ((34
 FARA = [((50, 13), (54, 8), (58, 5), (61, 4)), ((54, 8), (53, 2)), ((58, 5), (59, 0))]
 TIPS_N = [(27, 3), (41, 1), (32, 0), (53, 9)]
 TIPS_F = [(61, 4), (53, 2), (59, 0)]
+HX, HY = -4, 13         # 角を 頭の 位置へ ずらす
+def mv(b): return tuple((x + HX, y + HY) for x, y in b)
 def antler(beams, tips, far=False, glow=False):
+    beams = [mv(b) for b in beams]; tips = [(x + HX, y + HY) for x, y in tips]
     p = G()
     for b in beams:
         n = len(b); tube(p, list(b), [2.3 - 1.2 * i / max(1, n - 1) for i in range(n)])
@@ -172,6 +190,7 @@ def antler(beams, tips, far=False, glow=False):
     g = G(); ink(g, s)
     # とげ（つたの 外へ 1ドット）
     for (x, y) in ((38, 5), (30, 2), (44, 6), (45, 10), (57, 3), (51, 6), (37, 9), (29, 6)):
+        x += HX; y += HY
         if g[y][x] == 'k' or g[y][x] == '.':
             g[y][x] = 'S' if not far else 'T'
     # 光る 花
@@ -216,25 +235,25 @@ def layers():
     FA = rows_of(antler(FARA, TIPS_F, far=True)); FAG = rows_of(antler(FARA, TIPS_F, far=True, glow=True))
     GLOW = 'atk0|atk1|atk2|idle2|idle3'
     mane = []
-    for i, (x, y) in enumerate(((41, 19), (38, 23), (35, 27), (44, 16))):
+    for i, (x, y) in enumerate(((31, 33), (28, 37), (34, 30))):
         mane.append(dict(n=f'mane{i}', g='neck', x=x, y=y, rows=LEAF if i % 2 == 0 else LEAF_S))
+    H = head()
     return [
         dict(n='farA', g='ant', x=0, y=0, rows=FA, alt={GLOW: FAG}),
-        dict(n='hlegF', g='legB', x=0, y=0, rows=rows_of(leg(hind, 14, far=True, shift=6)), not_='ko'),
-        dict(n='flegF', g='legB', x=0, y=0, rows=rows_of(leg(fore, 40, far=True, shift=-5)), not_='ko'),
-        dict(n='tail', g='body', x=5, y=30, rows=TAIL),
+        dict(n='hlegF', g='legB', x=0, y=0, rows=rows_of(leg(hind, 13, far=True, shift=5)), not_='ko'),
+        dict(n='flegF', g='legB', x=0, y=0, rows=rows_of(leg(fore, 33, far=True, shift=-4)), not_='ko'),
+        dict(n='tail', g='body', x=3, y=37, rows=TAIL),
         dict(n='body', g='body', x=0, y=0, rows=rows_of(body())),
-        dict(n='vine', g='body', x=9, y=25, rows=VINE),
-        dict(n='hleg', g='legA', x=0, y=0, rows=rows_of(leg(hind, 14)), not_='ko'),
-        dict(n='fleg', g='legA', x=0, y=0, rows=rows_of(leg(fore, 40)), not_='ko'),
+        dict(n='vine', g='body', x=7, y=34, rows=VINE[:5] + ['....kkkkkkkkkkkkkkkkk.kkkkkkkk...'], ),
+        dict(n='hleg', g='legA', x=0, y=0, rows=rows_of(leg(hind, 13)), not_='ko'),
+        dict(n='fleg', g='legA', x=0, y=0, rows=rows_of(leg(fore, 33)), not_='ko'),
         dict(n='neck', g='neck', x=0, y=0, rows=rows_of(neck())),
     ] + mane + [
-        dict(n='ear', g='head', x=35, y=12, rows=EAR),
-        dict(n='head', g='head', x=42, y=12, rows=HEAD, alt={'atk1|atk2': HEAD_ATK}),
-        dict(n='eye', g='head', x=44, y=15, rows=EYE, alt=EYE_ALT),
+        dict(n='ear', g='head', x=27, y=25, rows=EAR),
+        dict(n='head', g='head', x=34, y=25, rows=H, alt={'blink': head('blink'), 'hit': head('hit'), 'atk0': head('glow'), 'atk1|atk2': head('glow', True), 'ko': head('ko')}),
         dict(n='nearA', g='ant', x=0, y=0, rows=NA, alt={GLOW: NAG}),
-        dict(n='whip', g='ant', x=56, y=12, rows=whip(), only='atk1'),
-        dict(n='petals', g='ant', x=50, y=4, rows=PETALS, only='atk2'),
+        dict(n='whip', g='ant', x=52, y=24, rows=whip(), only='atk1'),
+        dict(n='petals', g='ant', x=46, y=14, rows=PETALS, only='atk2'),
     ]
 
 FRAMES = {
@@ -251,6 +270,6 @@ FRAMES = {
     'atk1': {'root': (4, 0), 'neck': (1, 3), 'head': (1, 1)},
     'atk2': {'root': (5, 0), 'neck': (1, 2)},
     'hit': {'root': (-3, 0), 'neck': (-1, -1), 'head': (-2, -1)},
-    'ko': {'body': (-2, 12), 'neck': (0, 4), 'head': (2, 2)},
+    'ko': {'body': (-2, 8), 'neck': (0, 2), 'head': (2, 4), 'ant': (0, 0)},
 }
 PARENT = {'ant': 'head', 'head': 'neck', 'neck': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

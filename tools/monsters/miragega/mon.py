@@ -173,55 +173,55 @@ def hindwing(pose, far=False):
     if far: g = recolor(g, DARK)
     return rows_of(g)
 
-# ---------- 胴（ふさふさの 胸、しま模様の 腹）----------
+# ---------- 胴（デフォルメ：ふさふさの 胸、短く 丸い しま模様の 腹）----------
 def body():
     g = G()
-    # 腹（後ろ下へ のびる、節の しま）
-    p = G(); ellipse(p, 31, 38, 9, 5, '2'); poly(p, [(24, 36), (18, 42), (23, 41)], '2'); ink(g, p)
+    # 腹（短く 丸く、節の しま）
+    p = G(); ellipse(p, 33, 39, 7, 4.8, '2'); poly(p, [(28, 37), (23, 42), (28, 42)], '2'); ink(g, p)
     g = shade(g)
-    for x in (26, 30, 34):
-        for y in range(30, 46):
+    for x in (29, 33, 37):
+        for y in range(32, 46):
             if g[y][x] in 'FGH' and g[y][x - 1] != 'k': g[y][x] = 'P' if g[y - 1][x] != 'k' else 'k'
-    for x in (25, 29, 33):
-        for y in range(30, 46):
+    for x in (28, 32, 36):
+        for y in range(32, 46):
             if g[y][x] in 'FGH' and g[y][x + 1] == 'P': g[y][x] = 'H'
-    # 胸の 毛（もこもこの ふち）
-    p = G(); ellipse(p, 40, 31, 6.5, 6.5, '2')
-    for (x, y) in ((34, 27), (35, 35), (39, 38), (43, 37), (45, 33), (33, 31)): ellipse(p, x, y, 2, 2, '2')
+    # 胸の 毛（もこもこの ふち）：頭の 下へ もぐりこむ
+    p = G(); ellipse(p, 41, 34, 6, 5.5, '2')
+    for (x, y) in ((36, 36), (40, 39), (44, 38), (36, 31)): ellipse(p, x, y, 2, 2, '2')
     ink(g, p)
     g = shade(g)
-    dots(g, 'H', [(38, 33), (41, 35), (37, 30), (42, 30)])
-    dots(g, 'w', [(37, 27), (36, 28)])
+    dots(g, 'H', [(39, 35), (42, 36), (38, 33)])
     return rows_of(g)
 
-# ---------- 頭（大きな 複眼、羽毛の 触角、うず巻きの 針の 口）----------
+# ---------- 頭（デフォルメ：大きく、ふさふさの 毛、羽毛の 触角、うず巻きの 針の 口）----------
 def head():
     g = G()
-    for i, (bx, by, tx, ty) in enumerate([(49, 21, 40, 8), (46, 22, 32, 14)]):
+    for i, (bx, by, tx, ty) in enumerate([(50, 21, 42, 6), (46, 21, 33, 11)]):
         p = G(); stroke(p, bx, by, tx, ty, 1.8, .7, '5')
         n = max(abs(tx - bx), abs(ty - by))
         for j in range(2, n, 2):   # くしの 歯（下がわに 切れこみ）
             x, y = round(bx + (tx - bx) * j / n), round(by + (ty - by) * j / n)
-            if p[y + 1][x] == '5': p[y + 1][x] = '.'
-            p[y + 2][x] = '.'
+            if j > 4 and p[y + 1][x] == '5': p[y + 1][x] = '.'
+            if j > 4: p[y + 2][x] = '.'
         ink(g, p)
     g = shade(g, {'5': 'GHH'})
-    if True:
-        pass
-    p = G(); ellipse(p, 49, 26, 6, 5.5, '2')
-    for (x, y) in ((44, 23), (44, 29), (47, 31)): ellipse(p, x, y, 1.8, 1.8, '2')
+    p = G(); ellipse(p, 48.5, 26, 8.5, 8, '2'); ellipse(p, 54, 29, 3, 3.5, '2')
+    for (x, y) in ((41, 22), (41, 28), (44, 33), (49, 34)): ellipse(p, x, y, 2.2, 2.2, '2')
     ink(g, p)
     g = shade(g, {'2': 'FGH'})
-    dots(g, 'H', [(45, 26), (46, 29), (44, 24)])
-    put(g, 50, 30, ['.kkk..', 'kYOOk.', 'kOkYOk', '.kkYOk', '...kk.'])
+    dots(g, 'H', [(43, 25), (44, 29), (42, 23), (47, 31)])
+    dots(g, 'w', [(46, 19), (45, 20)])
+    # 口：うず巻きの 針（頭の 下に 食いこむ）
+    put(g, 52, 31, ['.kkk..', 'kYOOk.', 'kOkYOk', '.kkYOk', '...kk.'])
     return rows_of(g)
 
-EYE = ['kkkkkk..', '.kkkkkkk', '.knnmmwk', '.knmmmmk', '..knnnk.', '...kkk..']       # まゆの 板で つり上がった 複眼
+# 複眼：まゆの 板で つり上がり、白い 光＋ 2色の 虹彩（m/n）＋ たての ひとみ
+EYE = ['kkkk......', '.kkkkkkkk.', '..kwwmmkmk', '..kmmnnknk', '...knnnkk.', '....kkkk..']
 EYE_ALT = {
-    'blink': ['kkkkkk..', '.kkkkkkk', '.kkkkkkk', '.kGGGGk.', '..kkkk..'],
-    'atk0|atk1|atk2': ['kkkkkk..', '.kkkkkkk', '.kmwwwwk', '.kmwwwmk', '..kmmmk.', '...kkk..'],
-    'hit': ['.......', '.kk.kk.', '..kkk..', '.kk.kk.', '.......'],
-    'ko': ['.......', '.k...k.', '..k.k..', '...k...', '..k.k..'],
+    'blink': ['kkkk......', '.kkkkkkkk.', '...kkkkkk.', '..........', '..........', '..........'],
+    'atk0|atk1|atk2': ['kkkk......', '.kkkkkkkk.', '..kwwwwkwk', '..kmmmmkmk', '...kmmnkk.', '....kkkk..'],
+    'hit': ['kkk.......', '..kk..kk..', '....kk....', '..kk..kk..'],
+    'ko': ['..........', '..k...k...', '...k.k....', '....k.....', '...k.k....', '..k...k...'],
 }
 PROBO = ['kkkkkkkk..', 'kYYYYOOOkk', '.kkkkkkkOk', '........kk']   # 攻撃：針を のばす
 
@@ -285,15 +285,15 @@ def layers():
     return [
         dict(n='hindB', g='wingB', x=3, y=-3, rows=HF['rest'], alt={'walk2': HF['down']}),
         dict(n='wingB', g='wingB', x=3, y=-3, rows=WF['up'], alt={'walk1|walk3|atk1|atk2': WF['mid'], 'walk0|atk0|hit': WF['up'], 'walk2': WF['down']}),
-        dict(n='legB', g='legs', x=33, y=40, rows=OL(LEGS_BACK) if False else LEGS_BACK),
         dict(n='hindF', g='wingF', x=0, y=0, rows=H['rest'], alt={'walk2': H['down']}),
         dict(n='wingFd', g='wingF', x=0, y=0, rows=W['down'], only='walk2'),
         dict(n='body', g='body', x=0, y=0, rows=body()),
-        dict(n='legs', g='legs', x=39, y=34, rows=LEGS),
-        dict(n='head', g='head', x=0, y=0, rows=head()),
-        dict(n='probo', g='head', x=51, y=29, rows=PROBO, only='atk1|atk2'),
-        dict(n='eye', g='head', x=46, y=22, rows=EYE, alt=EYE_ALT),
+        dict(n='legB', g='legs', x=35, y=40, rows=LEGS_BACK),
         dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'walk0|atk0|hit': W['up'], 'walk1|walk3|atk2': W['mid'], 'atk1': WG}, not_='walk2'),
+        dict(n='legs', g='legs', x=40, y=35, rows=LEGS),
+        dict(n='head', g='head', x=0, y=0, rows=head()),
+        dict(n='probo', g='head', x=54, y=32, rows=PROBO, only='atk1|atk2'),
+        dict(n='eye', g='head', x=46, y=21, rows=EYE, alt=EYE_ALT),
         dict(n='dust', g='root', x=8, y=46, rows=OL(DUST_A), alt={'idle1|idle3|walk1|walk3': OL(DUST_B)}, not_='atk0|atk1|atk2|hit|ko'),
         dict(n='ring1', g='root', x=55, y=20, rows=OL(RING1), only='atk1'),
         dict(n='ring2', g='root', x=58, y=17, rows=OL(RING2), only='atk2'),

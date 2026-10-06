@@ -1,13 +1,15 @@
-# ヒトクイソウ（くさ・どく × 食虫植物）手打ち GBA風
+# ヒトクイソウ（くさ・どく × 食虫植物）手打ち GBA風・デフォルメ（2〜3頭身：大きな さやの 頭、くきは 短く 太く、毒の ふくろは 小さく 丸く）
 META = dict(id='hitokuisou', name='ヒトクイソウ', types=['grass', 'poison'], base='食虫植物', size='M')
 PAL = {
     'k': '#101018', 'l': '#1c3020',
     'F': '#a6e050', 'G': '#4e9c34', 'H': '#22562a',
     'P': '#cc84ea', 'Q': '#7c3ca2', 'Z': '#3c1a56',
-    'E': '#eeff5c', 'R': '#c41e3e', 'w': '#ffffff',
+    'E': '#eeff5c', 'D': '#c09a1c', 'R': '#c41e3e', 'w': '#ffffff',   # 目：明・暗の 虹彩
     'S': '#8e6c4a', 'T': '#4c3828',
 }
+from pix import outline
 LIGHT = set('FPESw')
+KEEP_BLACK = set('wEDR')
 
 def _ol(g):
     H, W = len(g), len(g[0]); out = [r[:] for r in g]
@@ -35,7 +37,7 @@ def bulb():
     return [''.join(r) for r in _ol(g)]
 
 # ---- くき：中心の 道すじ（ポーズごとに 手で）→ 太い 管＋とげ ----
-def stem(path, r=2.4):
+def stem(path, r=3.2):
     W = H = 64; g = [['.'] * W for _ in range(H)]
     for y in range(10, 50):
         for x in range(10, 60):
@@ -60,40 +62,52 @@ def stem(path, r=2.4):
             X, Y = int(ax + nx * k), int(ay + ny * k)
             if g[Y][X] == '.': g[Y][X] = 'F'
     return [''.join(r) for r in _ol(g)]
-P_IDLE = [(24, 46), (25, 40), (27, 35), (31, 31), (36, 28)]
-P_BACK = [(24, 46), (23, 40), (23, 35), (25, 31), (29, 27)]
-P_LUNGE = [(24, 46), (27, 41), (33, 37), (40, 34), (46, 32)]
-P_KO = [(24, 46), (27, 40), (32, 38), (37, 41), (41, 49)]
+P_IDLE = [(23, 46), (24, 40), (26, 35), (29, 31)]
+P_BACK = [(23, 46), (22, 40), (21, 35), (23, 30)]
+P_LUNGE = [(23, 46), (26, 41), (31, 37), (37, 34)]
+P_KO = [(23, 46), (27, 40), (33, 41), (38, 49)]
 STEM, STEM_B, STEM_L, STEM_K = stem(P_IDLE), stem(P_BACK), stem(P_LUNGE), stem(P_KO)
 
-# 頭：横に さける 種の さや。上の さやに つり目、口には とげの 歯
-HEAD = [
-    '.....kkkkkkk..........',
-    '...kkFFFFFFGkkk.......',
-    '..kFFFGGGGGGGGGkk.....',
-    '.kFFGGkkkkGGGGGGGkk...',
-    '.kFGGkGGGkkGGGGGGGGk..',
-    'kFGGGGkkkGGHGGGGHGHHk.',
-    'kFGGHGGGGGHGGGGHGGHHHk',
-    'kGGGHGGGGHHHHHHHHHkkkk',
-    'kGGGGGGkkkkkkkkkkkwkw.',
-    'kHGGGGkwkwkRRRRRRRk...',
-    '.kHGGGGkkwkwkwkwkk....',
-    '.kHHGGGGGGGGHHHk......',
-    '..kHHHHHHHHHHk........',
-    '...kkkkkkkkkk.........',
+# 頭（大きく）：横に さける 種の さや。上の さやに つり目、ふちに とげの まつげ、口には とげの 歯
+POD = [
+    ".......FFFFF................",
+    "....FFFGGGGGFFF.............",
+    "..FFGGGGGGGGGGGGFF..........",
+    ".FGGGGGGGGGGGGGGGGGF........",
+    "FGGGGGGGGGGGGGGGGGGGGH......",
+    "FGGGGGGGGGGGGGGGGGGGGGHH....",
+    "FGGGGGGGGGGGGGGGGGGGGGGGH...",
+    "GGGGGGGGGGGGGGGGGGGGGGGGHH..",
+    "GGGGGGGGGGGGGGGGGGGGGGGGGHHH",
+    "GGGGGHHHHHHHHHHHHHHHHHHHHHHH",
+    "GGGGkwRRRwRRRwRRRwRRRwRRRk..",
+    "GGGGkRRwRRRwRRRwRRRwRRRk....",
+    "HGGGGGGGGGGGGGGGGGGGGGGHH...",
+    ".HGGGGGGGGGGGGGGGGGGGHHH....",
+    "..HHGGGGGGGGGGGGGGHHHH......",
+    "....HHHHHHHHHHHHHHH.........",
 ]
-HEAD_OPEN = HEAD[:8] + [
-    'kGGGGGGkkkkkkkkkkkkkk.',
-    'kHGGGGkwRwRRwRRwRRwk..',
-    '.kHGGkRRRRRRRRRRRRk...',
-    '.kHGGkRRRRRRRRRRRk....',
-    '.kHGGGkwRRwRRwRRwk....',
-    '..kHGGGkkkkkkkkkk.....',
-    '..kHHHHHHHHHHk........',
-    '...kkkkkkkkkk.........',
-]
-EYE = ['EEk', 'kE.']
+EYES = {
+    'open':  ['kk.......', '.kkkkkkk.', '..kwEEkEk', '.kEEEEkEk', '.kDDDDkDk', '..kkkkkk.'],
+    'blink': ['kk.......', '.kkkkkkk.', '..kGGGGGk', '.kGGGGGGk', '.kkkkkkkk', '..HHHHHH.'],
+    'hit':   ['kk.......', '.kkkkkkk.', '..kEkkEkk', '.kkDkkDkk', '.kDkDkDkk', '..kkkkkk.'],
+    'glow':  ['kk.......', '.kkkkkkk.', '..kwwEEEk', '.kEwEEkEk', '.kEEEEkEk', '..kDDkDk.'],
+    'ko':    ['.........', '..kEDDEk.', '..kDkkDk.', '..kkDDkk.', '..kDkkDk.'],
+}
+def head(gape=0, eye='open'):
+    """gape：口の ひらき（0＝とじ、3＝大口）"""
+    rows = POD[:11] + ['GGGGkRRRRRRRRRRRRRRRRRRRk...' if i % 2 else 'GGGHkRRRRRRRRRRRRRRRRRRRRk..' for i in range(gape)] + POD[11:]
+    g = [list(r) for r in rows]
+    for (x, y) in ((5, 4), (9, 3), (14, 1), (7, 7), (6, 9), (20, 8), (22, 7)):    # 葉脈の すじ
+        g[y][x] = 'H'
+    for j, r in enumerate(EYES[eye]):
+        for i, c in enumerate(r):
+            if c != '.': g[j + 2][11 + i] = c
+    g = outline([''.join(r) for r in g])
+    g = [list(r) for r in g]
+    for (x, y) in ((28, 7), (29, 7), (29, 8), (29, 9)):                    # 上の さやの 先の とげ
+        if g[y][x] == '.': g[y][x] = 'k'
+    return [''.join(r) for r in g]
 # 頭の 後ろの がく（とがった 葉が 扇の ように 開く。先は 毒の 紫）
 SEP_UL = ['kk.....', 'kQk....', '.kFGk..', '.kFGGk.', '..kGGHk', '...kHHk', '....kk.']
 SEP_L = ['...kkkk...', '.kkFFGGkk.', 'kQFGGGGHHk', '.kkHHHHkk.', '...kkkk...']
@@ -147,10 +161,10 @@ SPIT2 = [
 ]
 
 BULB = bulb()
-def head_layers(x, y, head, eye, eyealt, only=None, not_=None, halt=None):
-    ls = [dict(n='sepU', g='stem', x=x - 5, y=y - 3, rows=SEP_UL), dict(n='sepL', g='stem', x=x - 8, y=y + 4, rows=SEP_L),
-          dict(n='sepD', g='stem', x=x - 4, y=y + 8, rows=SEP_DL),
-          dict(n='head', g='stem', x=x, y=y, rows=head, alt=halt or {}), dict(n='eye', g='stem', x=x + 6, y=y + 4, rows=eye, **eyealt)]
+def head_layers(x, y, head, only=None, not_=None, halt=None):
+    ls = [dict(n='sepU', g='stem', x=x - 3, y=y - 2, rows=SEP_UL), dict(n='sepL', g='stem', x=x - 7, y=y + 5, rows=SEP_L),
+          dict(n='sepD', g='stem', x=x - 2, y=y + 10, rows=SEP_DL),
+          dict(n='head', g='stem', x=x, y=y, rows=head, alt=halt or {})]
     for l in ls:
         if only: l['only'] = only
         if not_: l['not_'] = not_
@@ -164,12 +178,12 @@ def layers():
         dict(n='soil', g='root', x=7, y=55, rows=SOIL),
         dict(n='rootL', g='leaf', x=4, y=56, rows=ROOT_L),
         dict(n='rootR', g='leaf2', x=37, y=56, rows=ROOT_R),
-        *head_layers(34, 18, HEAD, EYE, dict(alt={'blink': ['kkk', 'GG.'], 'hit': EYE_ALT['hit'], 'ko': EYE_ALT['ko']}), not_='atk0|atk1|atk2|ko'),
-        dict(n='drop', g='stem', x=46, y=31, rows=DROP, alt={'idle1|idle3|walk1|walk3': DROP2}, not_='atk0|atk1|atk2|ko'),
-        *head_layers(40, 46, HEAD, ['kFk', 'FkF'], {}, only='ko'),
-        *head_layers(27, 17, HEAD, EYE_ALT['atk0|atk1|atk2'], {}, only='atk0'),
-        *head_layers(44, 21, HEAD_OPEN, EYE_ALT['atk0|atk1|atk2'], {}, only='atk1|atk2', halt={'atk2': HEAD}),
-        dict(n='spit', g='fx', x=64, y=26, rows=SPIT, alt={'atk2': SPIT2}, only='atk1|atk2'),
+        *head_layers(26, 17, head(), not_='atk0|atk1|atk2|ko', halt={'blink': head(0, 'blink'), 'hit': head(1, 'hit')}),
+        dict(n='drop', g='stem', x=51, y=32, rows=DROP, alt={'idle1|idle3|walk1|walk3': DROP2}, not_='atk0|atk1|atk2|ko'),
+        *head_layers(36, 42, head(0, 'ko'), only='ko'),
+        *head_layers(20, 16, head(0, 'glow'), only='atk0'),
+        *head_layers(34, 20, head(3, 'glow'), only='atk1|atk2', halt={'atk2': head(1, 'glow')}),
+        dict(n='spit', g='fx', x=66, y=26, rows=SPIT, alt={'atk2': SPIT2}, only='atk1|atk2'),
     ]
 
 FRAMES = {

@@ -1,4 +1,4 @@
-# ヒムカデ（むし・ほのお × ムカデ）手打ち GBA風
+# ヒムカデ（むし・ほのお × ムカデ）手打ち GBA風・デフォルメ（大きな 頭、短い 体を 前で 持ち上げる）
 META = dict(id='himukade', name='ヒムカデ', types=['bug', 'fire'], base='ムカデ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2c1014',
@@ -9,101 +9,96 @@ PAL = {
 }
 LIGHT = set('AEYw')
 KEEP_BLACK = set('wYO')
+from pix import grid, rows_of
 
-# 体：黒赤の 甲の 節。節の すき間から 溶けた 火が のぞく
-BODY = [
-    '......................................kk.....',
-    '....................................kkAAkk...',
-    '...................................kAAABBBk..',
-    '.................................kkAAABBBBDk.',
-    '................................kAOAABBBBDDk.',
-    '..............................kkAAAOABBBDDDEk',
-    '.............................kAAAABOFADDDEEEk',
-    '............................kAOAABBBFDDDEEEk.',
-    '...kk....................kkkAAAOABBBDFDEEEEk.',
-    '..kOOkkkkkkkkkkkkkkkkkkkkAAOAABOFADDDEeeEEk..',
-    '.kOOOAAAAOAAAAOAAAAOAAAAAAAOABBBFDDDEEEeek...',
-    'kFFFFABBBOAAAAOAAAAOAAAAAABBOBBBDFDEEEEek....',
-    'keeFFDBBBOABBBOABBBOBBBBABBBFABDDDeeEEkk.....',
-    '.keeeDDDBFBBBBFABBBOBBBBABBBFFDDDEEeek.......',
-    '..keeEEDFDDDDDFBBBBFBBBBABDDDFDEEEEek........',
-    '...kkEEEeDDDDFDDDDDFDDDDFDDDDeeeEEEk.........',
-    '.....kEeeeEEEeeDDDDeDDDDeDEEEeeeeEk..........',
-    '......kkeeEEEeeEEEEeEEEEeeEEEEeekk...........',
-    '........kkkEEeEEEEEeEEEEeeeEEkkk.............',
-    '...........kkkkEEEEeEEEEeekkk................',
-    '...............kkkkkkkkkkk...................',
-]
-def cut(rows, x0, x1): return [r[x0:x1] for r in rows]
-# 足：一本ずつ 先が 熾火（おきび）
-LEG = [
-    'kk...',
-    'kDkk.',
-    '.kDDk',
-    '..kFk',
-    '..kOk',
-    '.kOk.',
-    '.kYk.',
-    '..k..',
-]
-LEG2 = [
-    '...kk',
-    '.kkDk',
-    'kDDk.',
-    'kFk..',
-    'kOk..',
-    '.kOk.',
-    '.kYk.',
-    '..k..',
-]
-LEGF = [  # 浮いた 前足（ぶら下がる）
-    'kDk..',
-    '.kFk.',
-    '..kOk',
-    '..kYk',
-    '...k.',
-]
-# 頭：光る 目の むれ、甲の かぶと
+# ---- 体：甲の 節を しっぽ → 前へ 重ねる。節の さかい目から 溶けた 火が のぞく ----
+SEGS = [(9, 52, 4.6, 4.4), (15, 51, 5.2, 5), (21, 50, 5.6, 5.4), (27, 48, 5.6, 5.4), (32, 44, 5.4, 5.4), (35, 39, 5, 5)]
+def segs(idx, hot=False):
+    g = grid(64, 64)
+    for n, i in enumerate(idx):
+        cx, cy, rx, ry = SEGS[i]
+        m = [[((x + .5 - cx) / rx) ** 2 + ((y + .5 - cy) / ry) ** 2 <= 1 for x in range(64)] for y in range(64)]
+        prev = [r[:] for r in g]
+        for y in range(64):
+            for x in range(64):
+                if m[y][x]: continue
+                if any(0 <= y + dy < 64 and 0 <= x + dx < 64 and m[y + dy][x + dx] for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0))):
+                    # 前の 節に かかる さかい目は 溶けた 火（ところどころ）
+                    if prev[y][x] not in '.k' and x < cx and (y + (1 if hot else 0)) % 2 == 0 and y < cy + ry * .5: g[y][x] = 'O' if y < cy else 'F'
+                    else: g[y][x] = 'k'
+        for y in range(64):
+            for x in range(64):
+                if not m[y][x]: continue
+                nx, ny = (x + .5 - cx) / rx, (y + .5 - cy) / ry
+                lt = -nx * .6 - ny * .8
+                c = 'B'
+                if ny > .42: c = 'e' if nx > .25 or ny > .8 else 'E'
+                elif lt > .5: c = 'A'
+                elif lt < -.25: c = 'D'
+                g[y][x] = c
+        # 背の 甲の 光るみぞ（1本）
+        x = round(cx - 1); 
+        for y in range(round(cy - ry) + 1, round(cy + ry * .3)):
+            if g[y][x] in 'ABD': g[y][x] = 'F' if y > cy - 2 else 'O'
+    return rows_of(g)
+REAR = segs([0, 1, 2, 3]); REAR_H = segs([0, 1, 2, 3], True)
+FRONT = segs([4, 5]); FRONT_H = segs([4, 5], True)
+
+# 足：短く 太く、先が 熾火（おきび）。付け根は 体の 下へ もぐる
+LEG = ['.kk..', '.kDk.', '..kDk', '..kDk', '..kFk', '..kOk', '.kOk.', '.kYk.', '..k..']
+LEG2 = ['..kk.', '.kDk.', 'kDk..', 'kDk..', 'kFk..', 'kOk..', '.kOk.', '.kYk.', '..k..']
+LEGF = ['kk...', 'kDk..', '.kDk.', '.kFk.', '..kOk', '..kYk', '...k.']
+# 頭：大きな 甲の かぶと。重い まゆの 下に 光る つり目
 HEAD = [
-    '...kkkkkkkk.....',
-    '.kkAAAAAAAAkkk..',
-    'kAABBBBBBBBBAAk.',
-    'kABkkkkBBBBBBBAk',
-    'kBBBkYYkkBBBBBBk',
-    'kBBkYYkBBBBBBBDk',
-    'kDBBkkBBBBBBBDDk',
-    '.kDDBBBBBBBDDkk.',
-    '..kkkkkkkkkkk...',
+    '.....kkkkkkkkk......',
+    '...kkAAAAAAAAAkkk...',
+    '..kAAAAAAABBBBBAAk..',
+    '.kAAABBBBBBBBBBBBAk.',
+    'kABBBBBBBBBBBBBBBBAk',
+    'kABBBBBBkkkkkkkBBBBk',
+    'kABBBBBBBkkkkkkkkkBk',
+    'kABBBBBBk.......kBBk',
+    'kABBDBBBk.......kBDk',
+    'kDBBBDBBBk......kBDk',
+    'kDBBBBBBBBkkkkkkkDDk',
+    'kDDBBBBBBBBBBBBBDDk.',
+    '.kDDDBBBBBBBBBBDDk..',
+    '..kkDDDDDDDDDDDkk...',
+    '....kkkkkkkkkkk.....',
 ]
-def _eye(a, b):
-    h = list(HEAD); h[4] = h[4][:4] + a + h[4][4 + len(a):]; h[5] = h[5][:3] + b + h[5][3 + len(b):]; return h
-HEAD_ATK = _eye('kYYYk', 'kYYYk')
-HEAD_BLINK = _eye('kBBkk', 'kkkBB')
-HEAD_HIT = _eye('kYkYk', 'kkYkB')
-HEAD_KO = _eye('kBkBk', 'BkBkB')
-# 毒あご（顎肢）：前へ 曲がった 二本の 牙
+assert all(len(r) == 20 for r in HEAD)
+# 目：白い 光＋ 黄と だいだいの 虹彩＋ たての ひとみ
+EYE = ['wYYYkYk', 'YOOOkOk', '.OOOkkk']
+EYE_ALT = {'blink': ['kkkkkkk', 'BBBBBBB', '.BBBBBB'], 'atk0|atk1|atk2': ['wwYYkYk', 'YYYYkYk', '.OOOkkk'],
+           'hit': ['BkBBBBB', 'BBkkkkk', '.kBBBBB'], 'ko': ['BBkBkBB', 'BBBkBBB', '.BkBkBB']}
+# 毒あご（顎肢）：頭の 下から 前へ 大きく 曲がる 二本の 牙（見せ所）。先は 熾火色
 FANG = [
-    '.kkkkkkk......',
-    'kDBBBBBAkkk...',
-    '.kkkkDBBBBAk..',
-    '.....kkkDBAk..',
-    '........kDAk..',
-    '.......kOYk...',
-    '......kYk.....',
-    '.......k......',
+    'kkkkk.......',
+    'kEEEEkkk....',
+    'keEEEEEEkk..',
+    '.kkeeeEEEEk.',
+    '...kkkeeEEk.',
+    '......keEEk.',
+    '......keEk..',
+    '.....kOFek..',
+    '....kYOk....',
+    '....kYk.....',
+    '.....k......',
 ]
 FANG_OPEN = [
-    '.kkkkkkkk......',
-    'kDBBBBBBAkkk...',
-    '.kkkkkDBBBBAk..',
-    '......kkkDBBAk.',
-    '.........kDBAk.',
-    '..........kDAk.',
-    '.........kOYk..',
-    '.........kYk...',
-    '..........k....',
+    'kkkkk.........',
+    'kEEEEkkkk.....',
+    'keEEEEEEEkk...',
+    '.kkeeeeEEEEkk.',
+    '...kkkkeeeEEk.',
+    '.......kkkeEk.',
+    '.........kOYk.',
+    '.........kYk..',
+    '..........k...',
 ]
-FANG_FAR = [r.replace('B', 'D').replace('A', 'B').replace('Y', 'O').replace('O', 'F') for r in FANG]
+DK = {'A': 'B', 'B': 'D', 'E': 'e', 'e': 'D', 'Y': 'O', 'O': 'F'}
+FANG_FAR = [''.join(DK.get(c, c) for c in r) for r in FANG]
+FANG_FAR_OPEN = [''.join(DK.get(c, c) for c in r) for r in FANG_OPEN]
 # 触角：うしろへ のびて 先が 炎
 ANT = [
     '.........kk.',
@@ -170,30 +165,53 @@ FIRE2 = [
 ]
 EMBER = [['.O...Y', '......', '..Y...'], ['..Y...', '.O..O.', '......']]
 
+# 攻撃：牙から ふき出す 炎
+FIRE = [
+    '.......kk.....',
+    '....kkkOOkk...',
+    '..kkFOOYYOOk..',
+    'kkFOYYYwwYYOk.',
+    'kOYYwwwwwwYYOk',
+    'kkFOYYYwwYYOk.',
+    '..kkFOOYYOOk..',
+    '....kkkOOkk...',
+    '.......kk.....',
+]
+FIRE2 = [
+    '....kkk...',
+    '..kkOOOk..',
+    'kkFOYYYOk.',
+    'kOYYwwYYOk',
+    'kkFOYYYOk.',
+    '..kkOOOk..',
+    '....kkk...',
+]
+EMBER = [['.O...Y', '......', '..Y...'], ['..Y...', '.O..O.', '......']]
+
+HX, HY = 36, 24
 def layers():
     L = [
-        dict(n='tail', g='body', x=0, y=37, rows=TAIL),
-        dict(n='antf', g='head', x=42, y=21, rows=ANT_FAR),
+        dict(n='tail', g='body', x=1, y=47, rows=TAIL),
+        dict(n='antf', g='head', x=HX + 4, y=HY - 9, rows=ANT_FAR),
+        dict(n='fangfar', g='head', x=HX + 10, y=HY + 10, rows=FANG_FAR, alt={'atk0': FANG_FAR_OPEN}),
     ]
-    # 奥の 足（体の うしろ）
-    for i, x in enumerate((8, 13, 18, 23, 28)):
-        L.append(dict(n=f'bl{i}', g='legB' if i % 2 else 'legA', x=x, y=50, rows=LEG2 if i % 2 else LEG))
+    for i, x in enumerate((12, 18, 24)):        # 奥の 足
+        L.append(dict(n=f'bl{i}', g='legB' if i % 2 else 'legA', x=x, y=52, rows=LEG2 if i % 2 else LEG))
     L += [
-        dict(n='fangfar', g='head', x=44, y=36, rows=FANG_FAR, alt={'atk0': FANG_OPEN}),
-        dict(n='body', g='body', x=0, y=32, rows=cut(BODY, 0, 28)),
-        dict(n='front', g='front', x=24, y=32, rows=cut(BODY, 24, 51)),
+        dict(n='body', g='body', x=0, y=0, rows=REAR, alt={'idle2|idle3|walk2|walk3': REAR_H}),
+        dict(n='front', g='front', x=0, y=0, rows=FRONT, alt={'idle2|idle3|walk2|walk3': FRONT_H}),
     ]
-    # 手前の 足
-    for i, x in enumerate((4, 9, 14, 19, 24)):
+    for i, x in enumerate((8, 14, 20, 26)):     # 手前の 足
         L.append(dict(n=f'fl{i}', g='legA' if i % 2 else 'legB', x=x, y=52, rows=LEG if i % 2 else LEG2))
     L += [
-        dict(n='ff1', g='front', x=31, y=48, rows=LEGF),
-        dict(n='head', g='head', x=36, y=31, rows=HEAD, alt={'atk0|atk1|atk2': HEAD_ATK, 'blink': HEAD_BLINK, 'hit': HEAD_HIT, 'ko': HEAD_KO}),
-        dict(n='ant', g='head', x=44, y=23, rows=ANT, alt={'idle1|idle3|walk1|walk3': ANT2}),
-        dict(n='fang', g='head', x=41, y=37, rows=FANG, alt={'atk0': FANG_OPEN}),
-        dict(n='ember', g='body', x=12, y=36, rows=EMBER[0], alt={'idle2|idle3|walk2|walk3': EMBER[1]}, not_='atk0|atk1|atk2|hit|ko'),
-        dict(n='fire', g='head', x=54, y=34, rows=FIRE, only='atk1'),
-        dict(n='fire2', g='head', x=55, y=36, rows=FIRE2, only='atk2'),
+        dict(n='ff1', g='front', x=31, y=47, rows=LEGF),
+        dict(n='ant', g='head', x=HX + 6, y=HY - 8, rows=ANT, alt={'idle1|idle3|walk1|walk3': ANT2}),
+        dict(n='head', g='head', x=HX, y=HY, rows=HEAD),
+        dict(n='eye', g='head', x=HX + 9, y=HY + 7, rows=EYE, alt=EYE_ALT),
+        dict(n='fang', g='head', x=HX + 7, y=HY + 11, rows=FANG, alt={'atk0': FANG_OPEN}),
+        dict(n='ember', g='body', x=14, y=38, rows=EMBER[0], alt={'idle2|idle3|walk2|walk3': EMBER[1]}, not_='atk0|atk1|atk2|hit|ko'),
+        dict(n='fire', g='head', x=HX + 19, y=HY + 13, rows=FIRE, only='atk1'),
+        dict(n='fire2', g='head', x=HX + 20, y=HY + 15, rows=FIRE2, only='atk2'),
     ]
     return L
 FRAMES = {
