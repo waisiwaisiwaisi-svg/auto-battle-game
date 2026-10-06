@@ -234,44 +234,51 @@ FROST = ['..k.....k..', '.kWk...kIk.', 'kWEWk.kIWIk', '.kWk...kIk.', '..k.....k.
 # 目（手打ち）：外側が 高く、くちばし側へ 下がる つり目。黒い ふちで 光を きわだたせる
 EYE = ['kkkk.....', 'kWEEkkk..', 'kEEEEEEkk', 'kEEkEEEEk', '.kEkEEEk.', '..kkkkk..']
 EYE_ALT = {'blink': ['kkkk.....', 'kMMMkkk..', 'kMMMMMMkk', 'kkkkkkkkk', '.WWWWWW..', '.........'],
-           'atk0|atk1|atk2': ['kkkk.....', 'kWWWkkk..', 'kWWWWWWkk', 'kWWkWWWWk', '.kWkWWWk.', '..kkkkk..'],
+           'atk0|atk1|atk2': ['kkkk.....', 'kEWEkkk..', 'kWWWWWEkk', 'kEWkWWWEk', '.kEkEWEk.', '..kkkkk..'],
            'hit': ['kkkk.....', 'kMMMkkk..', 'kkkkkkkkk', 'kEkkkkEkk', '.kkEEkk..', '..kkkkk..']}
 EYEF = ['...kk', '.kkEk', 'kEEEk', 'kEkEk', '.kkk.']
 EYEF_ALT = {'blink': ['...kk', '.kkMk', 'kMMMk', 'kkkkk', '.....'], 'atk0|atk1|atk2': ['...kk', '.kkWk', 'kWWWk', 'kWkWk', '.kkk.'], 'hit': ['...kk', '.kkMk', 'kkkkk', 'kEkEk', '.kkk.']}
 
-# ---------- ダウン：あおむけ ではなく 横だおし。翼は 地面に 広がり、目は × ----------
+# ---------- ダウン：あおむけに たおれる。頭は 横に ころがり（羽角が 右、顔が 上）、目は ×、爪は 上を 向く ----------
+EYE_KO = ['kEkkkEk', 'kkEkEkk', 'kkkEkkk', 'kkEkEkk', 'kEkkkEk']
+EYEF_KO = ['EkE', 'kEk', 'EkE']
+def crop(g):
+    ys = [y for y in range(len(g)) if any(c != '.' for c in g[y])]; xs = [x for x in range(len(g[0])) if any(g[y][x] != '.' for y in ys)]
+    return [r[xs[0]:xs[-1] + 1] for r in g[ys[0]:ys[-1] + 1]]
+def anti_t(g):
+    """右上〜左下の 対角線で 折り返す（上 → 右、右 → 上）。90度 回転＋左右反転に あたる"""
+    H, W = len(g), len(g[0])
+    return [[g[H - 1 - x][W - 1 - y] for x in range(H)] for y in range(W)]
+def ko_head():
+    g = canvas()
+    pix.ellipse(g, 38.5, 20.5, 12.5, 10.5, 'N')
+    pix.stamp(g, FACE, 29, 14)
+    pix.stamp(g, EYE_KO, 29, 17); pix.stamp(g, EYEF_KO, 42, 18)
+    pix.stamp(g, recolor_dim(CRYSTAL_B), 22, 2); pix.stamp(g, recolor_dim(CRYSTAL_F), 42, 2)
+    g = anti_t(crop(g))
+    g = shade(g, 'N', 'n', 'N', 'M', 2)   # 光は 回したあとで つけ直す（左上から）
+    return pix.grid_of(pix.outline(pix.rows_of(g)))
+def recolor_dim(rows): return pix.recolor(rows, {'W': 'I', 'I': 'J', 'J': 'K'})   # 結晶の 光が 消える
 def ko_pose():
     g = canvas()
     # 地面に 広がった 翼（刃が 左へ ねる）
     for i in range(5):
-        bx, by = 26 - i * 2, 47 + i
-        blade(g, (bx, by), (bx + 3, by + 4), (4 + i * 3, 56 + i), .55)
-    b = canvas(); pix.ellipse(b, 33, 52, 13, 7.5, 'N')
+        bx, by = 26 - i * 2, 49 + i
+        blade(g, (bx, by), (bx + 3, by + 4), (3 + i * 3, 58 + i // 2), .45)
+    b = canvas(); pix.ellipse(b, 28, 52.5, 13, 7, 'N')
     b = shade(b, 'N', 'n', 'N', 'M', 1)
-    c = canvas(); pix.ellipse(c, 36, 56, 9, 4, 'W')   # 白い 胸が 下に 見える
+    c = canvas(); pix.ellipse(c, 30, 49, 9, 4, 'W')   # 白い 胸が 上を 向く
     for y in range(S):
         for x in range(S):
-            if c[y][x] == 'W' and b[y][x] != '.': b[y][x] = 'I' if y >= 57 else 'W'
+            if c[y][x] == 'W' and b[y][x] != '.': b[y][x] = 'W' if x < 33 else 'I'
+    for x in range(22, 38, 3):
+        if b[50][x] == 'W': b[50][x] = 'J'
+        if b[50][x + 1] == 'W': b[51][x + 1] = 'J'
     b = ol(b)
     g = merge(g, b)
-    # 頭：地面に 横たわる（羽角は ななめに たおれる）
-    h = canvas()
-    pix.ellipse(h, 49, 51, 9.5, 8.5, 'N')
-    h = shade(h, 'N', 'n', 'N', 'M', 2)
-    f = canvas(); pix.ellipse(f, 51.5, 54, 6.5, 5.5, 'I')
-    for y in range(S):
-        for x in range(S):
-            if f[y][x] == 'I' and h[y][x] != '.': h[y][x] = 'W' if y < 55 else 'I'
-    pix.stamp(h, ['MMM......', 'NMMMM..MM', '.lMMMMMMl', '...llMll.'], 42, 46)
-    put(h, [(45, 50, 'E'), (47, 50, 'E'), (46, 51, 'E'), (45, 52, 'E'), (47, 52, 'E'),
-            (46, 50, 'k'), (45, 51, 'k'), (47, 51, 'k'), (46, 52, 'k'), (48, 51, 'k'), (44, 51, 'k'),
-            (53, 51, 'k'), (54, 51, 'E'), (53, 52, 'E'), (54, 52, 'k')])
-    pix.stamp(h, BEAK, 50, 53)
-    h = ol(h)
-    pix.stamp(h, pix.rot90(CRYSTAL_B)[::-1], 37, 37)
-    g = merge(g, h)
-    # 爪：力なく 上を 向く
-    pix.stamp(g, pix.flip_v(TALON), 24, 40)
+    pix.stamp(g, pix.flip_v(TALON), 18, 40)   # 爪は 上を 向いて 丸まる
+    h = ko_head(); hh, hw = len(h), len(h[0])
+    pix.stamp(g, pix.rows_of(h), 64 - hw - 1, 61 - hh)
     return g
 
 UP_WING = {0: wing_raised(), 1: wing_raised(1), 2: wing_raised(2)}
@@ -291,7 +298,7 @@ def layers():
         dict(n='frost', g='head', x=22, y=2, rows=FROST, only='atk0'),
         dict(n='volley1', g='fx', x=50, y=24, rows=VOLLEY1, only='atk1'),
         dict(n='volley2', g='fx', x=46, y=24, rows=VOLLEY2, only='atk2'),
-        dict(n='ko', g='root', x=0, y=0, rows=rows(ko_pose()), only='ko'),
+        dict(n='ko', g='root', x=-4, y=0, rows=rows(ko_pose()), only='ko'),
     ]
 
 FRAMES = {
