@@ -113,6 +113,19 @@ def eye(g, x, y, mode='idle', A='Y', B='O', big=False):
             if c == '.': continue
             put(g, x + i, y + j, {'A': A, 'B': B}.get(c, c))
     return g
+# 目（L：隈取り）：凧絵の 赤い 隈。目の 上を 赤い 線が 走り、後ろの 目じりから 上へ はね上がる。目は クリーム色の 白目に 黄緑の 虹彩（明・暗）＋黒い 瞳＋白い 光、下にも 赤い 隈が 後ろへ 流れる
+def kuma(mid, under=True):
+    top = ['r...........', '.RR.........', '..RRRRRRRr..', '...R' + mid[0][4:]]
+    rows = top + mid[1:]
+    if under: rows = rows + ['....rRRRR...', '...r........']
+    return rows
+KUMA_EYE = {
+    'idle':  kuma(['....kkkkkkkk', '....kFwGkGFk', '.....kFHkHkk', '......kkkkk.']),
+    'atk':   kuma(['....kkkkkkkk', '....kwwGkGGk', '.....kGGkHkk', '......kkkkk.']),
+    'blink': kuma(['....kkkkkkkk', '............', '.....kkkkkkk', '............']),
+    'hit':   kuma(['....kkkkkkkk', '.....kk..kk.', '.......kk...', '.....kk..kk.']),
+    'ko':    kuma(['....kkkkkkkk', '.....F...F..', '......F.F...', '.......F....', '......F.F...'], under=False),
+}
 EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit': 'hit', 'ko': 'ko'}
 # ===END KIT===
 
@@ -126,9 +139,10 @@ PAL = {
     'Y': '#ffe25a', 'O': '#e8861c',                      # 目
     'C': '#c4f2ff',                                      # 風
     'w': '#ffffff', 'p': '#c83c5a',                      # 光／口の 中
+    'G': '#b4f040', 'H': '#3e7c16',                      # 目（黄緑の 虹彩）
 }
 LIGHT = set('AFYCw')
-KEEP_BLACK = set('wF')
+KEEP_BLACK = set('wFGH')
 SKIN = {'1': 'ABD'}
 SKIN_BACK = {'1': 'BDD'}
 
@@ -195,7 +209,9 @@ def head(mode='idle'):
     for y in range(64):          # あごの 下は 腹の 色
         for x in range(64):
             if at(g, x, y) in 'BD' and y >= 29 and x >= 41 and at(g, x, y + 1) in 'k.': put(g, x, y, 'F')
-    eye(g, 39, 20, {'idle': 'idle'}.get(mode, mode), 'Y', 'O', big=True)
+    for j, r in enumerate(KUMA_EYE[mode]):
+        for i, c in enumerate(r):
+            if c != '.': put(g, 36 + i, 17 + j, c)
     if mode == 'atk':
         cut(g, (45, 29, 56, 32))
         stamp(g, ['kkkkkkkkkkkk', 'kwkwkpppkwkk', 'kppppppppk..', 'kwkwkppkk...', '.kkkkkk.....'], 44, 28)
@@ -245,4 +261,5 @@ FRAMES = {
     'hit': {'root': (-3, -1), 'head': (-1, -1)},
     'ko': {'_flip': True},
 }
+EYE_BOX = (36, 17, 12, 10)
 PARENT = {'head': 'body', 'wing': 'body', 'wingB': 'body', 'tail': 'body', 'leg': 'body', 'arm': 'body', 'body': 'root', 'fx': 'root'}

@@ -76,12 +76,12 @@ HEAD = P(M(23, 20, ('e', '1', 11.5, 9, 11.5, 9), ('r', '1', 3, 9, 20, 15), ('e',
 CREST = ['kk......', 'kFkk....', '.kFGkk..', '..kFGGk.', '...kGGHk', '....kkk.']
 # 目（D 複眼）：黒い だ円の ドーム。あみ目の 点（Z）と 左上から ななめに 走る 光の 帯（Y・w）。ひとみは ない。
 # 上を かぶとの ひさし（まゆ）が 前へ 下がって 切る
-EYE = ['.kkkkkk.', 'kwYXZXZk', 'kYXZXZXk', 'kXYXZXZk', 'kZXYXZXk', '.kZXZXk.']
+EYE = ['.kkkkkk.', 'kXwXXZXk', 'kZXwXXXk', 'kXXZYXZk', 'kXZXXYXk', '.kXXZXk.']
 EYE_ALT = {
-    'blink': ['.kkkkkk.', 'kEEEEEEk', 'kkkkkkkk', 'kXZXZXZk', 'kZXZXZXk', '.kZXZXk.'],     # まゆ（ひさし）が 下がる
-    'hit': ['.kkkkkk.', 'kwYXZXk.', 'kYX.kXZk', 'kX.YXkZk', 'kZXk.XZk', '.kZXZXk.'],        # 光の 帯が 割れる
-    'atk0|atk1|atk2': ['.kkkkkk.', 'kwwYYXZk', 'kwYYXZXk', 'kYYXZXZk', 'kZYXZXYk', '.kZXZYk.'],
-    'ko': ['.kkkkkk.', 'kXZXZXZk', 'kYkXZkXk', 'kXZkkXZk', 'kZkXZkXk', '.kZXZXk.'],
+    'blink': ['.kkkkkk.', 'kEEEEEEk', 'kkkkkkkk', 'kXXZYXZk', 'kXZXXYXk', '.kXXZXk.'],     # まゆ（ひさし）が 下がる
+    'hit': ['.kkkkkk.', 'kXwXkZXk', 'kZXkXXXk', 'kXkZXkZk', 'kXZXkYXk', '.kXXZXk.'],        # 光の 帯が 割れる
+    'atk0|atk1|atk2': ['.kkkkkk.', 'kwwYXZXk', 'kYwwYXXk', 'kXYwwYZk', 'kXZYwwYk', '.kXXYwk.'],
+    'ko': ['.kkkkkk.', 'kXXXXZXk', 'kZkXXkXk', 'kXXkkXZk', 'kXkXXkXk', '.kXXZXk.'],
 }
 BROW = ['kkkkkkkkk', '.EEEEEEEk']                           # かぶとの ひさし（つり上がった まゆ）
 
