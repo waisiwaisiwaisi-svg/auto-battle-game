@@ -1,4 +1,4 @@
-# デンコウチュウ（でんき・むし × カブトムシ）手打ち GBA風
+# デンコウチュウ（でんき・むし × カブトムシ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭と 角、羽の ドームは 小さく 丸く、足は 短く）
 import pix
 META = dict(id='denkouchu', name='デンコウチュウ', types=['elec', 'bug'], base='カブトムシ', size='M')
 PAL = {
@@ -6,10 +6,11 @@ PAL = {
     'A': '#6c8ce8', 'B': '#30409a', 'C': '#18204e',      # 甲羅（つやの ある 紺）
     'Y': '#fff47a', 'G': '#f0b828', 'E': '#a8f4ff',      # 電気
     'H': '#f4e2b0', 'I': '#b88e44', 'J': '#5c3e22',      # 真ちゅうの 角
+    'D': '#3a8ad0',                                      # 目の 暗い 虹彩
     'w': '#ffffff',
 }
 LIGHT = set('AYEHw')
-KEEP_BLACK = set('wYE')
+KEEP_BLACK = set('wYED')
 
 def shade(mask, lt, md, dk, t=2, lf=1, r=2, b=2):
     g = pix.grid_of(mask); H, W = len(g), len(g[0])
@@ -44,21 +45,21 @@ def dark(rows): return [''.join(DARK.get(c, c) for c in r) for r in rows]
 # ---- 前ばね（ドームは 楕円で あたり → 陰影 → つやと いなずまの すじは 手で）----
 ZZ = [5, 4, 3, 2, 1, 3, 2, 1, 0, -1, 1, 0, -1, -2]
 def elytra(n=3):
-    g = pix.grid(34, 22); pix.ellipse(g, 17, 13, 17.2, 13, '#')
-    rows = shade(pix.rows_of(g), 'A', 'B', 'C', t=3, lf=2, r=3, b=4)
+    g = pix.grid(29, 19); pix.ellipse(g, 14.5, 11.5, 14.7, 11.3, '#')
+    rows = shade(pix.rows_of(g), 'A', 'B', 'C', t=3, lf=2, r=3, b=3)
     g = pix.grid_of(rows)
-    for (x, y) in ((7, 3), (8, 3), (9, 2), (10, 2), (11, 2), (12, 2), (5, 5), (6, 4), (4, 7), (3, 9)):
-        g[y][x] = 'w' if (x, y) in ((9, 2), (10, 2)) else 'A'
+    for (x, y) in ((6, 3), (7, 2), (8, 2), (9, 2), (10, 2), (5, 4), (4, 5), (3, 7), (3, 8)):
+        g[y][x] = 'w' if (x, y) in ((8, 2), (9, 2)) else 'A'
     # いなずま形の すじ 3本。n 本 光る（光らない すじは 暗い みぞ）
-    for i, bx in enumerate((7, 15, 23)):
+    for i, bx in enumerate((6, 13, 20)):
         lit = i < n
-        for y, o in zip(range(4, 18), ZZ):
+        for y, o in zip(range(3, 16), ZZ):
             x = bx + o
             if g[y][x] == '.' or g[y][x + 1] == '.': continue
-            g[y][x] = ('Y' if 6 <= y <= 14 else 'G') if lit else 'l'
+            g[y][x] = ('Y' if 5 <= y <= 12 else 'G') if lit else 'l'
             if g[y][x + 1] in 'ABC': g[y][x + 1] = 'G' if lit else 'C'
-    for x in range(4, 30):
-        if g[19][x] != '.' and g[19][x] not in 'YG': g[19][x] = 'l'
+    for x in range(3, 26):
+        if g[16][x] != '.' and g[16][x] not in 'YG': g[16][x] = 'l'
     return pix.outline(pix.rows_of(g))
 
 PRO = [
@@ -77,23 +78,42 @@ PRO = [
     '.kCCCCCCCCCCkk....',
     '..kkkkkkkkkk......',
 ]
-HEAD = [
-    '..kkkkkk......',
-    '.kBBBBBBkkk...',
-    'kBBBBBBBBBBkk.',
-    'kBBkkkkkkkkBBk',
-    'kBk......kkkBk',
-    'kBBkk....kBBBk',
-    'kCBBBkkkkBBBBk',
-    'kCCBBBBBBBBBk.',
-    '.kCCBBBBBBkk..',
-    '..kkkwkwkwk...',
-    '....k.k.k.....',
+# 頭（大きく）：丸い かぶと、まゆの ひさしの 下に 電光色の つり目（2段の 虹彩＋たての ひとみ）、白い 大あご
+HEAD_M = [
+    "....##########.........",
+    "..###############......",
+    ".##################....",
+    "#####################..",
+    "######################.",
+    "#######################",
+    "#######################",
+    "#######################",
+    "#######################",
+    "#######################",
+    "######################.",
+    "#####################..",
+    ".##################....",
+    "..###############......",
+    "....###########........",
 ]
-# 目：まゆの 下で 電光色に 光る つり目（下の ふちが 後ろへ 上がる）
-EYE = ['EEEEEEk', 'kkEEEkk']
-EYE_ALT = {'blink': ['kkkkkkk', 'BBkkkkk'], 'atk0|atk1|atk2': ['YYYYYYk', 'kkYYYYk'],
-           'hit': ['kEkkkEk', 'kkEEEkk'], 'ko': ['EkEkEkk', 'kEkkkEk']}
+EYES = {
+    'open':  ['kk........', '.kkkkkkkk.', '..kwEEEkEk', '.kDDDDDkDk', '..kkkkkkk.'],
+    'glow':  ['kk........', '.kkkkkkkk.', '..kwwYYYYk', '.kYYYYYkYk', '..kGGGkGk.'],
+    'blink': ['kk........', '.kkkkkkkk.', '..kBBBBBBk', '.kkkkkkkkk', '..CCCCCC..'],
+    'hit':   ['kk........', '.kkkkkkkk.', '..kEkkkEkk', '.kkkDkkkDk', '..kkkkkkk.'],
+    'ko':    ['..........', '..kEDDEk..', '..kDkkDk..', '..kkDDkk..', '..kDkkDk..'],
+}
+def head(eye='open'):
+    rows = shade(HEAD_M, 'A', 'B', 'C', t=2, lf=1, r=2, b=2)
+    g = pix.grid_of(rows)
+    for j, r in enumerate(EYES[eye]):
+        for i, c in enumerate(r):
+            if c != '.': g[3 + j][8 + i] = c
+    for x in range(9, 22): g[11][x] = 'k'                  # 口
+    for x in range(10, 21): g[12][x] = 'w' if x % 2 else 'k'  # 白い 大あご
+    for (x, y) in ((5, 1), (6, 1), (2, 3), (1, 4)): g[y][x] = 'w' if (x, y) == (5, 1) else 'A'
+    for (x, y) in ((3, 9), (4, 10), (5, 11), (17, 9), (18, 9)): g[y][x] = 'C'
+    return pix.outline(pix.rows_of(g))
 # 角：避雷針。太い 銅の 角に 光る コイル、先は ふたまた
 HORN = [
     '......kk..........',
@@ -147,59 +167,40 @@ BOLT = [
 FLASH = ['...Y...', '.E.Y.E.', '..YYY..', 'YYYwYYY', '..YYY..', '.E.Y.E.', '...Y...']
 AURA = ['E.......', '.Y....E.', '........', 'Y.....Y.', '.E......']
 LEG = [
-    '....kkk.',
-    '...kABBk',
-    '..kABCk.',
-    '.kABCk..',
-    '.kBCk...',
-    'kBCk....',
-    'kBCkk...',
-    '.kBCk...',
-    'kkBCk...',
-    '..kBCk..',
-    '..kBCk..',
-    '.kkBCk..',
-    '...kCk..',
-    '..kCCk..',
-    '.kkkk...',
+    '...kkk.',
+    '..kABBk',
+    '.kABCk.',
+    'kABCk..',
+    'kBCk...',
+    'kBCkk..',
+    '.kBCk..',
+    '.kBCk..',
+    'kkCCk..',
+    '.kkkk..',
 ]
 LEGF = pix.flip_h(LEG)
-LEGM = [
-    '.kkk..',
-    'kABBk.',
-    'kBBCk.',
-    '.kBCk.',
-    '.kBCkk',
-    'kkBCk.',
-    '.kBCk.',
-    '.kBCkk',
-    '..kBCk',
-    '..kCCk',
-    '.kCCkk',
-    '.kkk..',
-]
+LEGM = ['.kkk..', 'kABBk.', 'kBBCk.', '.kBCk.', '..kBCk', '..kBCk', '.kCCkk', '.kkk..']
 
 def layers():
     A = 'atk1|atk2'
     return [
-        dict(n='legF1', g='legB', x=9, y=45, rows=dark(LEG)),
-        dict(n='legF2', g='legA', x=25, y=46, rows=dark(LEGM)),
-        dict(n='legF3', g='legB', x=40, y=45, rows=dark(LEGF)),
-        dict(n='ely', g='body', x=3, y=24, rows=elytra(1),
+        dict(n='legF1', g='legB', x=9, y=50, rows=dark(LEG)),
+        dict(n='legF2', g='legA', x=23, y=51, rows=dark(LEGM)),
+        dict(n='legF3', g='legB', x=41, y=49, rows=dark(LEGF)),
+        dict(n='ely', g='body', x=3, y=32, rows=elytra(1),
              alt={'idle1|walk1|walk3': elytra(2), 'idle2|idle3|blink|atk0|atk1|atk2': elytra(3), 'hit|ko': elytra(0)}),
-        dict(n='leg1', g='legA', x=5, y=46, rows=LEG),
-        dict(n='leg2', g='legB', x=21, y=47, rows=LEGM),
-        dict(n='pro', g='body', x=29, y=26, rows=PRO),
-        dict(n='horn', g='horn', x=48, y=17, rows=HORN),
-        dict(n='phorn', g='body', x=40, y=23, rows=PHORN),
-        dict(n='head', g='head', x=40, y=34, rows=HEAD),
-        dict(n='eye', g='head', x=42, y=38, rows=EYE, alt=EYE_ALT),
-        dict(n='leg3', g='legA', x=39, y=46, rows=LEGF),
-        dict(n='spark', g='horn', x=50, y=13, rows=SPARK['idle0|walk0|walk2'], alt=SPARK, not_='hit|ko|atk0|' + A),
-        dict(n='aura', g='body', x=8, y=16, rows=AURA, only='atk0'),
-        dict(n='aura2', g='horn', x=48, y=13, rows=pix.flip_h(AURA), only='atk0'),
-        dict(n='bolt', g='horn', x=54, y=14, rows=BOLT, only=A),
-        dict(n='flash', g='horn', x=67, y=20, rows=FLASH, only='atk2'),
+        dict(n='leg1', g='legA', x=5, y=50, rows=LEG),
+        dict(n='leg2', g='legB', x=19, y=52, rows=LEGM),
+        dict(n='pro', g='body', x=22, y=34, rows=PRO),
+        dict(n='phorn', g='body', x=27, y=30, rows=PHORN),
+        dict(n='horn', g='horn', x=42, y=17, rows=HORN),
+        dict(n='head', g='head', x=31, y=34, rows=head(), alt={'blink': head('blink'), 'hit': head('hit'), 'atk0|atk1|atk2': head('glow'), 'ko': head('ko')}),
+        dict(n='leg3', g='legA', x=36, y=49, rows=LEGF),
+        dict(n='spark', g='horn', x=44, y=14, rows=SPARK['idle0|walk0|walk2'], alt=SPARK, not_='hit|ko|atk0|' + A),
+        dict(n='aura', g='body', x=8, y=24, rows=AURA, only='atk0'),
+        dict(n='aura2', g='horn', x=42, y=14, rows=pix.flip_h(AURA), only='atk0'),
+        dict(n='bolt', g='horn', x=55, y=16, rows=BOLT, only=A),
+        dict(n='flash', g='horn', x=67, y=22, rows=FLASH, only='atk2'),
     ]
 
 FRAMES = {
