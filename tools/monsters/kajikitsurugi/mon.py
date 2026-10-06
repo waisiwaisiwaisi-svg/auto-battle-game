@@ -95,7 +95,7 @@ def head_g(atk=False):
     g = G()
     # ほお当て：鋼の 板
     p = G(); poly(p, [(38, 39), (46, 40), (49, 43), (49, 48), (45, 51), (40, 52), (37, 48)], '2')
-    s = shade(p, {'2': 'STU'}, r=1, hi=.3, lo=-.3); ink(g, s)
+    s = shade(p, {'2': 'TUV'}, r=1, hi=.3, lo=-.3); ink(g, s)
     # かぶと：ひさしが 目の 上に 張り出し、後ろへ 角が のびる
     p = G(); poly(p, [(35, 37), (40, 35), (46, 36), (50, 39), (51, 42), (47, 41), (42, 41), (37, 42), (32, 41), (27, 39)], '2')
     s = shade(p, {'2': 'STU'}, r=1, hi=.25, lo=-.25); ink(g, s)
@@ -119,16 +119,14 @@ def head_g(atk=False):
 
 # ---------- 剣の くちばし（刀）と つば：上の ふちが 光る 刃、下は 刃文 ----------
 BILL = [
-    '...............kk',
-    '...........kkkkSk',
-    '.......kkkkSSSSkk',
-    'kkkkkkkSSSSTTUkk.',
-    'SSSSSSSTTTTUkk...',
-    'TTTTcTTTUUkk.....',
-    'UUUUUUUVkk.......',
-    'kkkkkkkkk........',
+    '.........kkkkkkk.',
+    'kkkkkkkkkSSSSSSSk',
+    'SSSSSSSSSTTTTTkk.',
+    'TTTTcTTTTUUUkk...',
+    'UUUUUUUUVkkk.....',
+    'kkkkkkkkkk.......',
 ]
-BILL_ATK = [r.replace('T', 'S', 3) for r in BILL]
+BILL_ATK = [BILL[0], BILL[1], 'SSSSSSSSSSSSSSkk.', 'TTTTcTTTTTTTkk...'] + BILL[4:]
 TSUBA = ['kkk', 'YOk', 'YVk', 'OVk', 'YOk', 'OOk', 'kkk']
 
 # ---------- 帆の 背びれ：鋼の 骨が 刃の ように つき出る ----------
@@ -218,19 +216,17 @@ def layers():
     SAIL = rows_of(sail()); SAIL_UP = rows_of(sail(1)); T0 = rows_of(tail()); T1 = rows_of(tail(1))
     return [
         dict(n='sail', g='sail', x=0, y=0, rows=SAIL, alt={'atk0|atk1|atk2': SAIL_UP}),
-        dict(n='pecB', g='fin', x=37, y=53, rows=PEC_B),
         dict(n='tail', g='tail', x=0, y=0, rows=T0, alt={'idle1|idle2|walk1|walk3|atk1': T1}),
         dict(n='anal', g='body', x=22, y=53, rows=ANAL),
         dict(n='body', g='body', x=0, y=0, rows=BODY),
         dict(n='head', g='head', x=0, y=0, rows=HEAD, alt={'atk1|atk2': HEAD_ATK}),
-        dict(n='bill', g='head', x=47, y=37, rows=BILL, alt={'atk0|atk1': BILL_ATK}),
+        dict(n='bill', g='head', x=47, y=40, rows=BILL, alt={'atk0|atk1': BILL_ATK}),
         dict(n='tsuba', g='head', x=47, y=40, rows=TSUBA),
-        dict(n='eye', g='head', x=41, y=41, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=40, y=41, rows=EYE, alt=EYE_ALT),
         dict(n='pec', g='fin', x=31, y=48, rows=PEC),
-        dict(n='glint', g='head', x=58, y=34, rows=GLINT, only='atk0'),
+        dict(n='glint', g='head', x=59, y=37, rows=GLINT, only='atk0'),
         dict(n='speed', g='root', x=-8, y=38, rows=SPEED, only='atk1|atk2'),
-        dict(n='splash', g='head', x=65, y=34, rows=SPLASH, only='atk1'),
-        dict(n='wake', g='root', x=56, y=56, rows=WAKE_A, only='idle1|idle3|walk1|walk3'),
+        dict(n='splash', g='head', x=65, y=37, rows=SPLASH, only='atk1'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'root': (0, -1)}, 'idle2': {'root': (0, -1), 'tail': (0, 1)}, 'idle3': {'tail': (0, 1)},

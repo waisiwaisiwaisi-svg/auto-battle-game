@@ -15,19 +15,20 @@ def dk(rows): return [''.join(DK.get(c, c) for c in r) for r in rows]
 
 # ---- 三角の 頭（後ろが 広く、口先は 右下）----
 HEAD = [
-    ".....AAAAAAA......",
-    "...AABBBBBBBAAA...",
-    "..ABBBBBBBBBBBBA..",
-    ".ABBBBBBBBBBBBBBA.",
-    "ABBBBBBBBBBBBBBBBA",
-    "ABBBBBBBBBBBBBBBBB",
-    "ABBBBBBBBBBBBBBBBC",
-    ".BBBBBBBBBBBBBBBC.",
-    "..CBBBBBBBBBBBBBC.",
-    "...CCBBBBBBBBBBC..",
-    ".....CCBBBBBBBC...",
-    ".......CBBBBBC....",
-    "........CBBBC.....",
+    "......AAAAAAA.......",
+    "...AAABBBBBBBAAA....",
+    "..ABBBBBBBBBBBBBA...",
+    ".ABBBBBBBBBBBBBBBA..",
+    "ABBBBBBBBBBBBBBBBBA.",
+    "ABBBBBBBBBBBBBBBBBB.",
+    "ABBBBBBBBBBBBBBBBBC.",
+    "ABBBBBBBBBBBBBBBBBC.",
+    ".CBBBBBBBBBBBBBBBC..",
+    "..CBBBBBBBBBBBBBBC..",
+    "...CCBBBBBBBBBBBC...",
+    ".....CCBBBBBBBBC....",
+    ".......CBBBBBBC.....",
+    "........CCBBBC......",
 ]
 # 光る 複眼：まゆの ひさし（前へ 下がる）＋ たての ひとみ
 EYE = [
@@ -61,97 +62,106 @@ MAND_OPEN = [
 ]
 ANT = ['..........kk', '.......kkk..', '.....kk.....', '...kk.......', 'kkk.........']
 # 葉の とさか（頭の 後ろ）
-CREST = ['GG.......', 'GHHG.....', '.JHHG....', '..JHHHG..', '...JJHHG.']
+CREST = [
+    "GG.......",
+    "GHHG.....",
+    ".GHHHG...",
+    ".JHHHHHG.",
+    "..JJHHHHG",
+    "....JJJHH",
+]
 
 # ---- よろいの 胸（前胸＝首 は 太い 板の かさね）----
 NECK = [
-    "......AAAAA",
-    ".....ABBBBC",
-    "....ABBBBBC",
-    "....ACCCBCC",
-    "...ABBBBBC.",
-    "...ABBBBBC.",
-    "..ABCCCBCC.",
-    "..ABBBBBBC.",
-    ".ABBBBBBBC.",
-    ".ABCCCCBCC.",
-    "ABBBBBBBC..",
-    "ABBBBBBBC..",
+    ".......AAAAA",
+    "......ABBBBC",
+    ".....ABBBBBC",
+    ".....ABBBBBC",
+    "....ABBBBBC.",
+    "....ABBBBBC.",
+    "...ABBBBBBC.",
+    "...ABBBBBBC.",
+    "..ABBBBBBBC.",
+    "..ABBBBBBBC.",
+    ".ABBBBBBBC..",
+    "ABBBBBBBBC..",
+    "ABBBBBBBBC..",
 ]
 BODY = [
-    "......AAAAAAAAA...",
-    "....AABBBBBBBBBA..",
-    "...ABBBBBBBBBBBBC.",
-    "..ABBBACCCCBBBBBC.",
-    "..ABBBBBBBBCBBBBCC",
-    ".ABBBBBBBBBBCBBBBC",
-    ".ABBBACCCCCBBCBBBC",
-    "ABBBBBBBBBBBBCBBCC",
-    "ABBBBBBBBBBBBCBBC.",
-    "ABBBBACCCCCCBBCBC.",
-    "ABBBBBBBBBBBBBCCC.",
+    "........AAAAAA....",
+    ".....AAABBBBBBA...",
+    "...AABBBBBBBBBBA..",
+    "..ABBBBBBBBBBBBBC.",
+    ".ABBBBBBBBBBBBBBC.",
+    ".ABBBBBBBBBBBBBBBC",
+    "ABBBBBBBBBBBBBBBBC",
+    "ABBBBBBBBBBBBBBBCC",
+    "ABBBBBBBBBBBBBBBC.",
     ".CBBBBBBBBBBBBBCC.",
-    "..CCBBBBBBBBBBCC..",
+    "..CCBBBBBBBBBCCC..",
     "....CCCCCCCCCC....",
 ]
-# 背の とげ
-THORN = ['A..', 'AB.', '.ABk']
+# よろいの 板の さかい目（左上が 光る 弧）を 手で 置く
+def plates(rows):
+    g = [list(r) for r in rows]
+    for c, ys in ((5, (2, 9)), (9, (1, 10)), (13, (2, 9))):
+        for y in range(ys[0], ys[1] + 1):
+            off = 1 if y in (ys[0], ys[1]) else 0
+            x = c + off
+            if g[y][x] == 'B': g[y][x] = 'C'
+            if g[y][x + 1] == 'B': g[y][x + 1] = 'A' if y < 6 else 'B'
+    for (x, y) in ((3, 4), (7, 3), (11, 3), (2, 6)):
+        if g[y][x] == 'B': g[y][x] = 'A'
+    return [''.join(r) for r in g]
+BODY = plates(BODY)
+NECK = [r[:-4] + r[-4:].replace('B', 'C', 1) if i % 3 == 2 else r for i, r in enumerate(NECK)]
+# 背の とげ（後ろへ 反る）
+THORN = ['k....', 'Akk..', 'kABk.', '.kABk']
 
 # ---- 葉の 腹（大きな 一枚葉。葉脈は 手で）----
 ABD = [
-    "...................GGGGGG.",
-    "..............GGGGGHHHHHHH",
-    "..........GGGGHHHHHHHHHHHH",
-    ".......GGGHHHHHHGHHHHHHHHH",
-    ".....GGHHHHGHHHGHHHHHHHHHJ",
-    "...GGHHHHHHHGHGHHHHHHHHHHJ",
-    ".GGHHHHGGGGGGGGGGGGGGGHHJJ",
-    "GHHHHHHHHHHHJHJHHHHHHHHJJJ",
-    ".JHHHHHHHHHJHHHJHHHHHHJJJ.",
-    "..JJHHHHHHJHHHHHJHHHHJJJ..",
-    "....JJHHHHHHHHHHHHHJJJJ...",
-    "......JJJJHHHHHHJJJJJ.....",
-    "..........JJJJJJJ.........",
+    "...............GGGGGG.",
+    "...........GGGGHHHHHHH",
+    "........GGGHHHHHHHHHHH",
+    ".....GGGHHHHHGHHHHHHHH",
+    "...GGHHHHGHHGHHHHHHHHJ",
+    ".GGHHHHGGGGGGGGGGGGHHJ",
+    "GHHHHHHHHJHJHHHHHHHHJJ",
+    ".JHHHHHHJHHHJHHHHHHJJJ",
+    "..JJHHHJHHHHHJHHHHJJJ.",
+    "....JJHHHHHHHHHHJJJJ..",
+    "......JJJJHHHHJJJJ....",
+    "..........JJJJJ.......",
 ]
 
 # ---- 葉の 鎌（のこぎり歯は 内がわ＝下と 左に 白で）----
 BLADE = [
-    "AAAGGGG.........",
-    "BBBHHHHGGG......",
-    "CCCJHHHHHHGG....",
-    "...wJJHHGHHHHG..",
-    "......wJJHGHHHG.",
-    ".........JHHGHHG",
-    "........wJHHGHHG",
-    ".........JHHHGHG",
-    "........wJHHHGHG",
-    ".........JHHHGG.",
-    "........wJHHHGG.",
-    ".........JHHGG..",
-    "........wJHHG...",
-    ".........JHG....",
-    ".........JG.....",
-    "..........G.....",
+    "AAGGGGG....",
+    "BBHHHHHGG..",
+    "CCJHHHHHHG.",
+    "..wJGHHHHHJ",
+    "..wwJGHHHHJ",
+    "...wJHGHHHJ",
+    "....JHGHHHJ",
+    "...wJHGHHHJ",
+    "..wwJHGHHHJ",
+    "...wJHGHHJ.",
+    "....JHGHHJ.",
+    "...wJHGHHJ.",
+    "..wwJHGHJ..",
+    "...wJGHHJ..",
+    "....JGHJ...",
+    "...wJGHJ...",
+    "..wwJGJ....",
+    "...wGJ.....",
+    "...GJ......",
+    "..GJ.......",
 ]
 # 鎌を ふりあげた 形（攻撃の ため）
-BLADE_UP = [
-    "..........G.....",
-    ".........JG.....",
-    ".........JHG....",
-    "........wJHHG...",
-    ".........JHHGG..",
-    "........wJHHHGG.",
-    ".........JHHHGG.",
-    "........wJHHHGHG",
-    ".........JHHHGHG",
-    "........wJHHGHHG",
-    ".........JHHGHHG",
-    "......wJJHGHHHG.",
-    "...wJJHHGHHHHG..",
-    "CCCJHHHHHHGG....",
-    "BBBHHHHGGG......",
-    "AAAGGGG.........",
-]
+def _up(rows):
+    r = flip_v(rows)
+    return [x.replace('A', '@').replace('C', 'A').replace('@', 'C') for x in r]
+BLADE_UP = _up(BLADE)
 # 鎌を 前へ ふりぬいた 形（よこ）
 BLADE_SWING = [
     "AAAGGGGGGGGGGG....",
@@ -173,42 +183,40 @@ UPPER = [
 ]
 # 太い 足：もも は 上へ、すね は 下へ
 LEG_F = [
-    "..AAAA....",
-    ".ABBBBA...",
-    "ABBBBBBA..",
-    "ABBCCBBB..",
-    ".CC..CBBB.",
-    "......ABBC",
-    "......ABBC",
-    "......ABBC",
-    ".....ABBC.",
-    ".....ABBC.",
-    ".....ABBC.",
-    ".....ABBC.",
-    "....ABBC..",
-    "....ABBC..",
-    "....ABBC..",
-    "...ABBBBBw",
-    "...CCCCCC.",
+    ".....AAA..",
+    "..AAABBBA.",
+    "ABBBBBBBBA",
+    "BBBBCCCBBB",
+    "CCC....ABBC",
+    "......ABBBC",
+    "......ABBC.",
+    "......ABBC.",
+    ".....ABBBC.",
+    ".....ABBC..",
+    ".....ABBC..",
+    ".....ABBC..",
+    "....ABBBC..",
+    "....ABBC...",
+    "....ABBBBBw",
+    "....CCCCCC.",
 ]
 LEG_B = [
-    "....AAAA..",
-    "...ABBBBA.",
-    "..ABBBBBBA",
-    "..BBBCCBBC",
-    ".ABBC..CC.",
-    "ABBC......",
-    "ABBC......",
-    "ABBC......",
-    ".ABBC.....",
-    ".ABBC.....",
-    ".ABBC.....",
-    "..ABBC....",
-    "..ABBC....",
-    "..ABBC....",
-    "..ABBC....",
-    "wABBBBB...",
-    ".CCCCCC...",
+    "...AAA.....",
+    "..ABBBAAA..",
+    ".ABBBBBBBBA",
+    ".BBBCCCBBBB",
+    "ABBC....CCC",
+    "ABBC.......",
+    "ABBC.......",
+    ".ABBC......",
+    ".ABBC......",
+    ".ABBC......",
+    "..ABBC.....",
+    "..ABBC.....",
+    "..ABBC.....",
+    "..ABBC.....",
+    "wABBBBB....",
+    ".CCCCCC....",
 ]
 # 葉の 斬撃（三日月）と 舞う 葉
 SLASH = [
@@ -232,22 +240,22 @@ ATK_UP = 'atk0'
 ATK_SW = 'atk1|atk2'
 def base():
     return [
-        dict(n='legB', g='legB', x=10, y=42, rows=outline(dk(LEG_B))),
-        dict(n='abd', g='tail', x=1, y=29, rows=outline(ABD)),
-        dict(n='armB_u', g='armB', x=40, y=18, rows=outline(dk(UPPER))),
-        dict(n='armB', g='armB', x=43, y=18, rows=outline(dk(BLADE)), alt={ATK_UP: outline(dk(BLADE_UP)), ATK_SW: outline(dk(BLADE_SWING))}),
-        dict(n='body', g='body', x=19, y=30, rows=outline(BODY)),
-        dict(n='thorn1', g='body', x=22, y=27, rows=THORN),
-        dict(n='thorn2', g='body', x=27, y=26, rows=THORN),
-        dict(n='neck', g='body', x=29, y=17, rows=outline(NECK)),
-        dict(n='legA', g='legA', x=30, y=42, rows=outline(LEG_F)),
-        dict(n='crest', g='head', x=25, y=2, rows=outline(CREST)),
-        dict(n='ant', g='head', x=44, y=0, rows=ANT),
-        dict(n='head', g='head', x=30, y=4, rows=outline(HEAD)),
-        dict(n='mand', g='head', x=39, y=16, rows=outline(MAND), alt={'atk0|atk1|atk2': outline(MAND_OPEN)}),
-        dict(n='eye', g='head', x=39, y=5, rows=EYE, alt=EYE_ALT),
-        dict(n='armF_u', g='armF', x=36, y=28, rows=outline(UPPER)),
-        dict(n='armF', g='armF', x=39, y=28, rows=outline(BLADE), alt={ATK_UP: outline(BLADE_UP), ATK_SW: outline(BLADE_SWING)}),
+        dict(n='legB', g='legB', x=12, y=43, rows=outline(dk(LEG_B))),
+        dict(n='abd', g='tail', x=3, y=29, rows=outline(ABD)),
+        dict(n='armB_u', g='armB', x=40, y=24, rows=outline(dk(UPPER))),
+        dict(n='armB', g='armB', x=43, y=6, rows=outline(dk(BLADE_UP)), alt={ATK_UP: outline(dk(BLADE_UP)), ATK_SW: outline(dk(BLADE_SWING))}),
+        dict(n='body', g='body', x=19, y=31, rows=outline(BODY)),
+        dict(n='thorn1', g='body', x=21, y=28, rows=THORN),
+        dict(n='thorn2', g='body', x=26, y=27, rows=THORN),
+        dict(n='neck', g='body', x=27, y=19, rows=outline(NECK)),
+        dict(n='legA', g='legA', x=29, y=44, rows=outline(LEG_F)),
+        dict(n='crest', g='head', x=21, y=4, rows=outline(CREST)),
+        dict(n='ant', g='head', x=43, y=2, rows=ANT),
+        dict(n='head', g='head', x=28, y=7, rows=outline(HEAD)),
+        dict(n='mand', g='head', x=38, y=21, rows=outline(MAND), alt={'atk0|atk1|atk2': outline(MAND_OPEN)}),
+        dict(n='eye', g='head', x=37, y=9, rows=EYE, alt=EYE_ALT),
+        dict(n='armF_u', g='armF', x=35, y=29, rows=outline(UPPER)),
+        dict(n='armF', g='armF', x=39, y=29, rows=outline(BLADE), alt={ATK_UP: outline(BLADE_UP), ATK_SW: outline(BLADE_SWING)}),
     ]
 def fx():
     return [
@@ -278,7 +286,7 @@ FRAMES = {
     'blink': {},
     'walk0': {'legA': (2, -1), 'legB': (-1, 0)}, 'walk1': {'body': (0, -1)},
     'walk2': {'legA': (-1, 0), 'legB': (2, -1)}, 'walk3': {'body': (0, -1)},
-    'atk0': {'body': (-2, 1), 'head': (-1, 0), 'armF': (-3, -12), 'armB': (-2, -10)},
+    'atk0': {'body': (-2, 1), 'head': (-1, 0), 'armF': (-2, -16), 'armB': (-3, -1)},
     'atk1': {'root': (5, 0), 'body': (1, 1), 'armF': (2, 4), 'armB': (3, 2)},
     'atk2': {'root': (6, 0), 'body': (1, 2), 'armF': (2, 10), 'armB': (3, 8)},
     'hit': {'root': (-3, 0), 'head': (-2, 1), 'armF': (-2, 1), 'armB': (-1, 1)},

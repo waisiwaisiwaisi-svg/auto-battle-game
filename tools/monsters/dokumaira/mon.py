@@ -55,13 +55,13 @@ def torso():
 
 # ---- 竜の 翼（骨の あたりは 線、膜の 陰影は 骨からの 距離で）----
 def wing(spread=False):
-    W, H = 34, 34; g = grid(W, H)
+    W, H = 30, 30; g = grid(W, H)
     if not spread:
-        wrist, tips, scal = (24, 4), [(3, 4), (1, 14), (6, 24)], [(10, 11), (9, 20), (16, 26)]
+        wrist, tips, scal = (20, 3), [(3, 3), (1, 12), (6, 20)], [(9, 9), (8, 16), (14, 22)]
     else:
-        wrist, tips, scal = (21, 0), [(0, 0), (0, 9), (2, 19)], [(9, 6), (7, 15), (12, 22)]
-    root = (29, 32)
-    pts = [root, (30, 20), wrist, tips[0], scal[0], tips[1], scal[1], tips[2], scal[2], (24, 32)]
+        wrist, tips, scal = (18, 0), [(0, 0), (0, 8), (2, 17)], [(8, 6), (6, 13), (11, 20)]
+    root = (25, 28)
+    pts = [root, (26, 17), wrist, tips[0], scal[0], tips[1], scal[1], tips[2], scal[2], (21, 28)]
     poly(g, pts, 'T')
     out = [r[:] for r in g]
     bones = grid(W, H)
@@ -84,69 +84,83 @@ def wing(spread=False):
 
 # ---- たてがみ：竜の うろこが とげ状に 逆立つ（とげの あたりは 三角、先は 毒）----
 def mane():
-    W, H = 22, 38; g = grid(W, H)
-    ellipse(g, 13, 19, 8, 15.5, '#')
-    spikes = [((9, 6), (14, 5), (8, 0)), ((14, 5), (18, 6), (16, 0)), ((6, 9), (9, 6), (2, 3)), ((5, 12), (6, 8), (0, 9)),
-              ((5, 17), (5, 12), (0, 15)), ((5, 22), (5, 17), (1, 21)), ((6, 27), (5, 22), (1, 28)), ((8, 31), (6, 26), (3, 34)),
-              ((12, 33), (8, 30), (8, 37)), ((17, 32), (12, 33), (15, 37))]
-    for a, b, t in spikes: poly(g, [a, b, t], '#')
-    out = grid(W, H)
-    for y in range(H):
-        for x in range(W):
-            if g[y][x] == '.': continue
-            lf, rt, up = run(g, x, y, -1, 0), run(g, x, y, 1, 0), run(g, x, y, 0, -1)
-            c = 'N'
-            if lf <= 2 or up <= 1: c = 'M'
-            if rt <= 4: c = 'O'
-            out[y][x] = c
+    W, H = 24, 40; canvas = grid(W, H)
+    spikes = [((10, 8), (16, 7), (9, 0)), ((14, 7), (20, 8), (18, 1)), ((7, 10), (11, 7), (2, 3)), ((6, 14), (7, 9), (0, 9)),
+              ((6, 19), (6, 13), (0, 16)), ((6, 24), (6, 18), (1, 23)), ((7, 29), (6, 23), (1, 30)), ((9, 32), (7, 27), (4, 37)),
+              ((14, 34), (9, 31), (10, 39)), ((19, 33), (13, 34), (17, 39))]
+    def shade(g):
+        out = [r[:] for r in g]
+        for y in range(len(g)):
+            for x in range(len(g[0])):
+                if g[y][x] == '.': continue
+                lf, rt, up = run(g, x, y, -1, 0), run(g, x, y, 1, 0), run(g, x, y, 0, -1)
+                c = 'N'
+                if lf <= 1 or up <= 1: c = 'M'
+                if rt <= 2 and lf > 1: c = 'O'
+                out[y][x] = c
+        return out
     for a, b, t in spikes:
-        out[t[1]][t[0]] = 'V'
-        mx, my = (t[0] * 2 + a[0] + b[0]) // 4, (t[1] * 2 + a[1] + b[1]) // 4
-        if out[my][mx] != '.': out[my][mx] = 'U'
-    # うろこの すじ（手で）
-    for (x, y) in ((10, 10), (11, 11), (9, 15), (10, 16), (9, 21), (10, 22), (10, 27), (11, 28), (13, 12), (13, 24)):
-        if out[y][x] in 'NM': out[y][x] = 'O'
-    return outline(rows_of(out))
+        g = grid(W - 2, H - 2); poly(g, [(a[0] - 1, a[1] - 1), (b[0] - 1, b[1] - 1), (t[0] - .5, t[1] - .5)], '#')
+        g = shade(g)
+        o = [list(r) for r in outline(rows_of(g))]
+        # 先っぽは 毒
+        ty = min(y for y in range(len(o)) for x in range(len(o[0])) if o[y][x] in 'MNO') if t[1] < a[1] else max(y for y in range(len(o)) for x in range(len(o[0])) if o[y][x] in 'MNO')
+        for x in range(len(o[0])):
+            if o[ty][x] in 'MNO': o[ty][x] = 'V'
+        for y in range(len(o)):
+            for x in range(len(o[0])):
+                if o[y][x] != '.': canvas[y][x] = o[y][x]
+    core = grid(W - 2, H - 2); ellipse(core, 12.5, 20, 7.5, 14.5, '#'); core = shade(core)
+    for (x, y) in ((8, 11), (9, 12), (8, 16), (9, 17), (8, 22), (9, 23), (9, 28), (10, 29), (12, 13), (12, 25), (11, 19)):
+        if core[y][x] in 'NM': core[y][x] = 'O'
+    for (x, y) in ((8, 12), (8, 17), (8, 23), (9, 29)):
+        if core[y][x] == 'N': core[y][x] = 'M'
+    o = outline(rows_of(core))
+    for y, r in enumerate(o):
+        for x, c in enumerate(r):
+            if c != '.': canvas[y][x] = c
+    return rows_of(canvas)
 
 # ---- 獅子の 顔（横顔）：重い まゆの ひさし・つり上がった たての ひとみ・むき出しの きば ----
 HEAD = [
-    '.......kkkkkk...........',
-    '.....kkFFFFFFkk.........',
-    '....kFFFFGGGGFFkk.......',
-    '...kFFGGGGGGGGGFFk......',
-    '..kFGGGGGGGGGGGGGFkk....',
-    '..kFGGGGGGGGkkkGGGGFkk..',
-    '.kFGGGGGGGkkHHHkkkGGGFk.',
-    '.kGGGGGGGkHHHHHHHHkkFGFk',
-    '.kGGGGGGkkkkkkkHHHHkFGGk',
-    '.kGGGGGGGGGGGGGkkkkGGGkk',
-    '.kGGGGGGGHGGGGGGGGGGGkkk',
-    '.kHGGGGGGGHGGGHGGHGGGHkk',
-    '.kHGGGGGGHGGGHGGHGGGGGHk',
-    '.kHHGGGGGkkkkkkkkkkkkkkk',
-    '.kHHGGGGkwddddddwddddwk.',
-    '.kHHGGGGkwwddrrrrrrdwk..',
-    '..kHHGGGGkdrrrrrrrwwk...',
-    '..kHHGGGGGkwkkkwkkkk....',
-    '...kHHGGGGGGGGGGGHk.....',
-    '....kkHHHHHHHHHHHk......',
-    '......kkkkkkkkkkk.......',
+    '......kkkkkk............',
+    '....kkFFFFFFkkk.........',
+    '...kFFFFFFGGGGFkkk......',
+    '..kFFGGGGGGGGGGGGFkk....',
+    '..kFGGGGGGGGGGGGGGGGkk..',
+    '.kFGGGGGGGGGkkkGGGGGGFk.',
+    '.kFGGGGGGGkkHHHkkkGGGGFk',
+    '.kGGGGGGGkHHHHHHHHkkkGGk',
+    '.kGGGGGGGGkkGGGGGGHHkFGk',
+    '.kGGGGGGGGGGkkkkkkHHkFGGk',
+    '.kGGGGGGHGGGGGGGGGkkFGGkk',
+    '.kHGGGGGGHGGGHGGHGGGGGkkk',
+    '.kHGGGGGGGHGGGHGGHGGGGkkk',
+    '.kHGGGGGGGGGGkkkkkkkkkkk.',
+    '.kHHGGGGGGkkkrrrrrrrrrk..',
+    '.kHHGGGGGkdwwddddddwwk...',
+    '..kHHGGGGkddwdddwddwk....',
+    '..kHHGGGGGkkkkkwwkkk.....',
+    '...kHHGGGGGGGGGGGHk......',
+    '....kkHHHHHHHHHHHk.......',
+    '......kkkkkkkkkkk........',
 ]
 HEAD_OPEN = HEAD[:13] + [
-    '.kHHGGGGkkkkkkkkkkkkkkkk',
-    '.kHHGGGkwddddddwddddwk..',
-    '.kHHGGGkwddrrrrrrrrdk...',
-    '..kHHGGkdrrrrrrrrrrrk...',
-    '..kHHGGkdrrrrrrrrrrk....',
-    '..kHHGGGkwddrrrrrwwk....',
-    '...kHHGGGkwkkkkwkkk.....',
-    '....kHHGGGGGGGGGHk......',
-    '.....kkHHHHHHHHHk.......',
-    '.......kkkkkkkkk........',
+    '.kHGGGGGGGGGkkkkkkkkkkkk.',
+    '.kHHGGGGGkkrrrrrrrrrrrk..',
+    '.kHHGGGGkdwwddddddwwk....',
+    '..kHHGGGkddwdddddddwk....',
+    '..kHHGGkddddddddddddk....',
+    '..kHHGGkdddrrrrrrrrk.....',
+    '..kHHGGGkddddddwddwk.....',
+    '...kHHGGGkkkkkwwkkkk.....',
+    '....kHHGGGGGGGGGGHk......',
+    '.....kkHHHHHHHHHHk.......',
+    '.......kkkkkkkkkk........',
 ]
 # 目：ひさしの 下で 光る つり目（たての ひとみ）
-EYE = ['kVVkVk']
-EYE_ALT = {'blink': ['kHHHHk'], 'hit': ['kkVkkk'], 'atk0|atk1|atk2': ['wVVkVV'], 'ko': ['kVkVkk']}
+EYE = ['kVVkV']
+EYE_ALT = {'blink': ['kkkkk'], 'hit': ['kVkkV'], 'atk0|atk1|atk2': ['wVVkw'], 'ko': ['kGkGk']}
 HORN = ['kk......', 'kMkk....', '.kMNkk..', '.kMNNNkk', '..kMNNOk', '...kkkk.']
 # 毒蛇の しっぽ（S字に 立ち上がり、前を にらむ）
 SNAKE = [
@@ -243,15 +257,15 @@ TORSO = torso(); MANE = mane()
 
 def layers():
     return [
-        dict(n='wingF', g='wingF', x=18, y=-2, rows=dark(wing()), alt={'atk0|atk1|atk2': dark(wing(True))}),
+        dict(n='wingF', g='wingF', x=16, y=-2, rows=dark(wing(True)), only='atk0|atk1|atk2'),
         dict(n='snake', g='tail', x=0, y=16, rows=SNAKE, alt={'atk0|atk1|atk2': SNAKE_OPEN}),
         dict(n='legFF', g='legB', x=43, y=45, rows=dark(LEG_F)),
         dict(n='legHF', g='legA', x=13, y=46, rows=dark(LEG_H)),
         dict(n='torso', g='body', x=4, y=26, rows=TORSO),
         dict(n='legH', g='legB', x=6, y=46, rows=LEG_H),
         dict(n='legF', g='legA', x=35, y=44, rows=LEG_F),
-        dict(n='wing', g='wing', x=8, y=-1, rows=wing(), alt={'atk0|atk1|atk2': wing(True)}),
-        dict(n='mane', g='head', x=31, y=5, rows=MANE),
+        dict(n='wing', g='wing', x=8, y=2, rows=wing(), alt={'atk0|atk1|atk2': wing(True)}),
+        dict(n='mane', g='head', x=31, y=4, rows=MANE),
         dict(n='horn', g='head', x=42, y=8, rows=HORN),
         dict(n='head', g='head', x=40, y=11, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
         dict(n='eye', g='head', x=50, y=19, rows=EYE, alt=EYE_ALT),
