@@ -1,4 +1,4 @@
-# マグマジロ（ほのお・じめん × アルマジロ）手打ち GBA風
+# マグマジロ（ほのお・じめん × アルマジロ）手打ち GBA風・デフォルメ（2〜3頭身：頭は そのまま、胴を 小さく 丸く、足は 短く 見せる）
 META = dict(id='magmajiro', name='マグマジロ', types=['fire', 'ground'], base='アルマジロ', size='M')
 PAL = {
     'k': '#101018', 'l': '#4a2230',
@@ -8,6 +8,8 @@ PAL = {
     'w': '#ffffff', 'n': '#f08aa0',
 }
 LIGHT = set('RFYw')
+from pix import grid, rows_of, outline, ellipse
+
 
 # ---- 甲羅（ドームの はばは 行ごとに 手で 指定、板の すき間＝溶岩の みぞ）----
 def shell(hot=False):
@@ -135,50 +137,74 @@ def rot90(rows):
     h, w = len(rows), max(len(r) for r in rows); rows = [r.ljust(w, '.') for r in rows]
     return [''.join(rows[h - 1 - y][x] for y in range(h)) for x in range(w)]
 
-SHELL = shell(); SHELL_HOT = shell(True)
-NOT_BALL = 'atk1|atk2'
-def layers():
-    def outline_shell(rows):
-        H, W = len(rows), len(rows[0]); g = [list('.' + r + '.') for r in rows]; g = [['.'] * (W + 2)] + g + [['.'] * (W + 2)]
-        out = [r[:] for r in g]
-        for y in range(len(g)):
-            for x in range(len(g[0])):
-                if g[y][x] != '.': continue
-                if any(0 <= y + dy < len(g) and 0 <= x + dx < len(g[0]) and g[y + dy][x + dx] != '.' for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0))): out[y][x] = 'k'
-        return [''.join(r) for r in out]
-    return [
-        dict(n='legFF', g='legB', x=37, y=41, rows=dark(LEG), not_=NOT_BALL),
-        dict(n='legFH', g='legA', x=21, y=41, rows=dark(LEG), not_=NOT_BALL),
-        dict(n='tail', g='tail', x=0, y=31, rows=TAIL, not_=NOT_BALL),
-        dict(n='belly', g='body', x=12, y=39, rows=BELLY, not_=NOT_BALL),
-        dict(n='legH', g='legB', x=14, y=42, rows=LEG, not_=NOT_BALL),
-        dict(n='legF', g='legA', x=40, y=42, rows=LEG, not_=NOT_BALL),
-        dict(n='shell', g='body', x=8, y=16, rows=outline_shell(SHELL), alt={'idle1|idle3|walk1|walk3': outline_shell(SHELL_HOT)}, not_=NOT_BALL),
-        dict(n='sp1', g='body', x=10, y=15, rows=SPIKE, not_=NOT_BALL),
-        dict(n='sp2', g='body', x=16, y=11, rows=SPIKE, not_=NOT_BALL),
-        dict(n='sp3', g='body', x=23, y=9, rows=SPIKE, not_=NOT_BALL),
-        dict(n='sp4', g='body', x=30, y=11, rows=SPIKE, not_=NOT_BALL),
-                dict(n='head', g='head', x=40, y=28, rows=HEAD, not_=NOT_BALL),
-        dict(n='ear', g='ear', x=36, y=23, rows=EAR, not_=NOT_BALL),
-        dict(n='nhorn', g='head', x=59, y=30, rows=NHORN, not_=NOT_BALL),
-        dict(n='eye', g='head', x=51, y=36, rows=EYE, alt=EYE_ALT, not_=NOT_BALL),
-        dict(n='ball', g='root', x=14, y=20, rows=ball(), alt={'atk2': ball(True, .28)}, only=NOT_BALL),
-    ]
 
+# ---- デフォルメ用の 甲羅（小さく 丸く）と しっぽ ----
+def shade(g, ramp, lw=2, dw=3, only=None):
+    """塗った 形に 左上の 光：上・左の ふち lw ドットは 明、下・右の ふち dw ドットは 暗"""
+    L, M, D = ramp; H, W = len(g), len(g[0])
+    src = [r[:] for r in g]
+    def fill(y, x): return 0 <= y < H and 0 <= x < W and src[y][x] == M
+    for y in range(H):
+        for x in range(W):
+            if src[y][x] != M: continue
+            dr = min(next((i for i in range(1, 9) if not fill(y + i, x)), 9), next((i for i in range(1, 9) if not fill(y, x + i)), 9) + 1)
+            ul = min(next((i for i in range(1, 9) if not fill(y - i, x)), 9), next((i for i in range(1, 9) if not fill(y, x - i)), 9))
+            if dr <= dw: g[y][x] = D
+            elif ul <= lw: g[y][x] = L
+    return g
+
+def put(g, pts, ch):
+    for x, y in pts:
+        if 0 <= y < len(g) and 0 <= x < len(g[0]): g[y][x] = ch
+
+# ---- 甲羅（丸く 短く）：溶岩の みぞ 2本 ----
+def shell2(hot=False):
+    W, H = 28, 21; g = grid(W, H); ellipse(g, 14, 17, 14, 17, 'Q')
+    for y in range(18, H):
+        for x in range(W): g[y][x] = '.' if g[y][x] == '.' else 'Q'
+    shade(g, 'RQP', 2, 3)
+    for cx in (8, 19):
+        for y in range(2, 18):
+            x = cx + (0 if 4 < y < 14 else (1 if cx > 15 else -1))
+            if g[y][x] == '.': continue
+            g[y][x] = 'Y' if (hot or 5 <= y <= 12) else 'O'
+            if g[y][x - 1] != '.': g[y][x - 1] = 'O'
+            if x + 1 < W and g[y][x + 1] != '.': g[y][x + 1] = 'l' if y < 4 else 'O'
+    for y in range(17, H):                                   # すその うろこ
+        for x in range(W):
+            if g[y][x] != '.': g[y][x] = 'l' if (y == 17 or x % 4 == 3) else ('Q' if y == 18 else 'P')
+    for (x, y) in ((4, 8), (13, 4), (13, 10), (24, 8), (5, 12)):
+        if g[y][x] in 'QP': g[y][x] = 'R'
+    return outline(rows_of(g))
+TAIL2 = ['......kk', '....kkQPk', '..kkRQPPk', '.kRQlQPk', 'kOYOkkk', 'kOYYOk', '.kOOk', '..kk']
+NB = 'atk1|atk2'
+# 頭・目・つの・耳は お手本（承認ずみ）の 手打ちを そのまま 使い、目だけ 2段に 大きく
+OH = list(HEAD)
+OH[9] = OH[9][:11] + 'OOOkO' + OH[9][16:]          # 目の 下半分（溶岩色）
+OH[10] = OH[10][:10] + 'kkkkkk' + OH[10][16:]       # 下まぶた
+EYE_ALT = {'blink': ['kkkkk', 'HHHHH'], 'hit': ['kOkOk', 'OkOkO'], 'atk0|atk1|atk2': ['wwYkY', 'YYOkO'], 'ko': ['kHHHk', 'HkHkH']}
+def layers():
+    return [
+        dict(n='legFF', g='legB', x=30, y=52, rows=dark(LEG), not_=NB),
+        dict(n='legFH', g='legA', x=14, y=52, rows=dark(LEG), not_=NB),
+        dict(n='tail', g='tail', x=0, y=42, rows=TAIL2, not_=NB),
+        dict(n='shell', g='body', x=5, y=32, rows=shell2(), alt={'idle1|idle3|walk1|walk3': shell2(True)}, not_=NB),
+        dict(n='sp1', g='body', x=8, y=29, rows=SPIKE, not_=NB),
+        dict(n='sp2', g='body', x=15, y=26, rows=SPIKE, not_=NB),
+        dict(n='sp3', g='body', x=22, y=28, rows=SPIKE, not_=NB),
+        dict(n='legH', g='legB', x=8, y=53, rows=LEG, not_=NB),
+        dict(n='legF', g='legA', x=33, y=53, rows=LEG, not_=NB),
+        dict(n='head', g='head', x=30, y=27, rows=OH, not_=NB),
+        dict(n='ear', g='ear', x=31, y=22, rows=EAR, not_=NB),
+        dict(n='nhorn', g='head', x=49, y=29, rows=NHORN, not_=NB),
+        dict(n='eye', g='head', x=41, y=35, rows=['wYYkY', 'OOOkO'], alt=EYE_ALT, not_=NB),
+        dict(n='ball', g='root', x=10, y=30, rows=ball(), alt={'atk2': ball(True, .28)}, only=NB),
+    ]
 FRAMES = {
-    'idle0': {},
-    'idle1': {'body': (0, 0), 'ear': (0, -1)},
-    'idle2': {'body': (0, 1), 'head': (0, 0)},
-    'idle3': {'body': (0, 1)},
-    'blink': {},
-    'walk0': {'legA': (1, -1), 'legB': (-1, 0)},
-    'walk1': {'body': (0, -1)},
-    'walk2': {'legA': (-1, 0), 'legB': (1, -1)},
-    'walk3': {'body': (0, -1)},
-    'atk0': {'body': (-1, 2), 'head': (-2, 1), 'ear': (-1, 1), 'tail': (1, 1)},
-    'atk1': {'root': (6, 0)},
-    'atk2': {'root': (12, 0)},
-    'hit': {'root': (-3, 0), 'head': (-3, 2), 'ear': (0, 2)},
-    'ko': {'_flip': True},
+    'idle0': {}, 'idle1': {'ear': (0, -1)}, 'idle2': {'body': (0, 1), 'head': (0, 1)}, 'idle3': {'body': (0, 1)}, 'blink': {},
+    'walk0': {'legA': (1, -1), 'legB': (-1, 0), 'head': (0, -1)}, 'walk1': {'body': (0, -1), 'head': (0, -1)},
+    'walk2': {'legA': (-1, 0), 'legB': (1, -1), 'head': (0, -1)}, 'walk3': {'body': (0, -1)},
+    'atk0': {'body': (-1, 2), 'head': (-2, 1), 'ear': (-1, 1), 'tail': (1, 1)}, 'atk1': {'root': (6, 0)}, 'atk2': {'root': (12, 0)},
+    'hit': {'root': (-3, 0), 'head': (-2, 1)}, 'ko': {'_flip': True},
 }
-PARENT = {'head': 'body', 'ear': 'head', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}
+PARENT = {'ear': 'head', 'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}
