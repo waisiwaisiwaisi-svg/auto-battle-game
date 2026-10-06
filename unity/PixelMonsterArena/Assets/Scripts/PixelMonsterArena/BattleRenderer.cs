@@ -53,7 +53,7 @@ namespace PixelMonsterArena
 
             Fighter a = B.Active(0), e = B.Active(1);
             foreach (var f in new[] { a, e }) if (f != null && f.State == "wind" && f.Cur != null) DrawTele(B, f);
-            foreach (var fx in B.Fxs) if (fx.Type == "ghost" && fx.Sid != null) { var ms = PixelArt.Mon(fx.Sid); P.Sprite(ms.White, fx.X, fx.Y + 3, 2 * fx.Face, 2, A(Color.white, .3f * fx.Life / fx.Max), O_GHOST); }
+            foreach (var fx in B.Fxs) if (fx.Type == "ghost" && fx.Sid != null) { var ms = PixelArt.Mon(fx.Sid); P.Sprite(ms.Frame("walk1", true), fx.X, fx.Y + 3, MS * fx.Face, MS, A(Color.white, .3f * fx.Life / fx.Max), O_GHOST); }
 
             foreach (var sd in B.Sides) if (sd.Trainer != null) DrawTrainer(B, sd);
             foreach (var f in new[] { a, e }) if (f != null) DrawFighter(B, f);
@@ -153,11 +153,33 @@ namespace PixelMonsterArena
             float jump = t.Shout > 0 ? Mathf.Round(Mathf.Abs(Mathf.Sin(t.Shout * 12)) * 5) : 0;
             int o = Ord(t.Y);
             P.Ellipse(t.X, t.Y, 14, 5.6f, new Color(10 / 255f, 8 / 255f, 18 / 255f, .35f), o - 5);
-            P.Sprite(t.Spr, t.X, t.Y - jump, sd == B.Sides[0] ? 2 : -2, 2, Color.white, o);
+            string tf = t.Shout > .3f ? "atk1" : t.Shout > 0 ? "atk2" : B.Result == (sd == B.Sides[0] ? "lose" : "win") ? "ko" : "idle" + (Mathf.FloorToInt(B.T * 4) % 4);
+            P.Sprite(t.Spr.Frame(tf, false), t.X, t.Y - jump, sd == B.Sides[0] ? MS : -MS, MS, Color.white, o);
             if (t.Shout > .2f) WorldTexts.Add((new Vector2(t.X + (sd == B.Sides[0] ? 22 : -22), t.Y - 56), "!", Color.white, 16));
         }
 
         static readonly Dictionary<string, string> StCol = new Dictionary<string, string> { { "brn", "#ff8a3d" }, { "par", "#ffd84a" }, { "psn", "#b86ad8" }, { "tox", "#8a3ab0" }, { "slp", "#9fb0ff" }, { "frz", "#9fe8ff" } };
+
+        /// <summary>モンスターの 表示倍率（48px の スプライトを 1.6 倍）</summary>
+        const float MS = 1.6f;
+
+        /// <summary>状態から アニメの フレームを 選ぶ（index.html の monFrame と同じ）</summary>
+        static string MonFrame(Battle B, Fighter f)
+        {
+            switch (f.State)
+            {
+                case "faint": return "ko";
+                case "stun": return "hit";
+                case "wind": return f.Cur != null && f.Cur.M.Cat == "stat" ? "idle" + (Mathf.FloorToInt(B.T * 8) % 4) : "atk0";
+                case "dash": return "atk1";
+                case "act": return B.T - f.FireT < .12f ? "atk1" : "atk2";
+                case "dodge": return "walk1";
+                case "lag": return "idle" + (Mathf.FloorToInt(B.T * 3) % 4);
+            }
+            if (f.Moving) return "walk" + (Mathf.FloorToInt(f.Walk * 9) % 4);
+            if ((B.T + f.Side * 1.7f) % 3.6f < .14f) return "blink";
+            return "idle" + (Mathf.FloorToInt(B.T * 5 + f.Side * 2) % 4);
+        }
 
         void DrawFighter(Battle B, Fighter f)
         {
@@ -165,18 +187,15 @@ namespace PixelMonsterArena
             float alpha = 1, sy = 1, sx = 1, oy = 0;
             if (f.State == "faint") { alpha = Mathf.Clamp01(f.StT / 1.2f); sy = .4f + .6f * alpha; }
             if (f.State == "enter" || f.State == "return") sx = sy = Mathf.Max(.05f, f.Scale);
-            if (f.State == "wind" && f.Cur != null && f.Cur.M.K != "melee") sy = 1 - .1f * Mathf.Clamp01(f.Cur.T / f.Cur.Wind);
-            if (f.State == "stun") { sx = 1.08f; sy = .92f; }
-            if (f.State == "lag") { sy = 1 + Mathf.Sin(B.T * 14) * .04f; sx = 2 - sy; }
+            if (f.State == "lag") { sy = 1 + Mathf.Sin(B.T * 14) * .03f; sx = 2 - sy; }
             if (f.State == "dodge") alpha = .75f;
-            float bob = f.Moving ? (Mathf.FloorToInt(f.Walk * 9) % 2) * 2 : 0;
-            if (f.Sp.Flying) oy = -8 - Mathf.Round(Mathf.Sin(B.T * 4 + f.Side) * 3);
+            if (f.Sp.Flying) oy = -6 - Mathf.Round(Mathf.Sin(B.T * 4 + f.Side) * 2);
             var ms = PixelArt.Mon(f.Mon.sid);
             int o = Ord(f.Y);
-            P.Ellipse(f.X, f.Y, ms.W * .62f, ms.W * .25f, new Color(10 / 255f, 8 / 255f, 18 / 255f, .35f), o - 5);
-            var spr = (f.Flash > 0 || f.State == "enter" || f.State == "return") ? ms.White : ms.Normal;
-            P.Sprite(spr, f.X, f.Y + 3 + oy - bob, 2 * sx * f.Face, 2 * sy, A(Color.white, alpha), o);
-            float top = Mathf.Round(f.Y + oy - ms.H * 2 - 6);
+            P.Ellipse(f.X, f.Y, ms.W * MS * .31f, ms.W * MS * .125f, new Color(10 / 255f, 8 / 255f, 18 / 255f, .35f), o - 5);
+            bool white = f.Flash > 0 || f.State == "enter" || f.State == "return";
+            P.Sprite(ms.Frame(MonFrame(B, f), white), f.X, f.Y + 3 + oy, MS * sx * f.Face, MS * sy, A(Color.white, alpha), o);
+            float top = Mathf.Round(f.Y + oy - ms.H * MS - 4);
             if (f.State != "faint" && f.State != "enter" && f.State != "return")
             {
                 // 頭上のHPバー
@@ -193,7 +212,7 @@ namespace PixelMonsterArena
 
         void DrawConditions(Battle B, Fighter f, float top, float oy, PixelArt.MonSprites ms, int o)
         {
-            float h = ms.H * 2, cx = f.X, cy = f.Y - h / 2 + oy;
+            float h = ms.H * MS, cx = f.X, cy = f.Y - h / 2 + oy;
             if (f.State == "lag")
             { // 交代直後の スキ：のこり時間バー
                 float w = 46, x = Mathf.Round(cx - w / 2), k = Mathf.Clamp01(f.StT / (f.LagMax > 0 ? f.LagMax : Battle.SwapLag));
@@ -204,7 +223,7 @@ namespace PixelMonsterArena
             if (f.Status != "")
             {
                 WorldTexts.Add((new Vector2(cx, top - 10), Battle.StatusNames[f.Status], C(StCol[f.Status]), 10));
-                if (f.Status == "frz") P.Rect(cx - ms.W, cy - h / 2, ms.W * 2, h, new Color(160 / 255f, 230 / 255f, 1, .45f), o + 2);
+                if (f.Status == "frz") P.Rect(cx - ms.W * MS / 2, cy - h / 2, ms.W * MS, h, new Color(160 / 255f, 230 / 255f, 1, .45f), o + 2);
                 if (f.Status == "slp" && Mathf.FloorToInt(B.T * 2) % 2 == 1) WorldTexts.Add((new Vector2(cx + 22, top - 18 - (B.T * 10 % 10)), "Z", Color.white, 14));
             }
             if (f.V.Protect > 0) { P.Ellipse(cx, cy, ms.W * 1.25f, h * .7f, new Color(160 / 255f, 240 / 255f, 1, .18f), o + 2); P.RingE(cx, cy, ms.W * 1.25f, h * .7f, new Color(160 / 255f, 240 / 255f, 1, .7f), o + 2); }

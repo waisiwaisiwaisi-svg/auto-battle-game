@@ -88,7 +88,15 @@ namespace PixelMonsterArena
             Sprite.Create(t, new Rect(0, 0, t.width, t.height), pivot, 1f, 0, SpriteMeshType.FullRect);
 
         // ---------- モンスター／トレーナー ----------
-        public class MonSprites { public Sprite Normal, White; public int W, H; }
+        /// <summary>アニメのフレーム名（index.html の SpriteGen.FRAMES と同じ）</summary>
+        public static readonly string[] Frames = { "idle0", "idle1", "idle2", "idle3", "blink", "walk0", "walk1", "walk2", "walk3", "atk0", "atk1", "atk2", "hit", "ko" };
+        /// <summary>フレームごとの 通常／白シルエット。全フレームが 同じ 大きさ（足元が そろう）。</summary>
+        public class MonSprites
+        {
+            public Sprite Normal, White; public int W, H;
+            public readonly Dictionary<string, Sprite> N = new Dictionary<string, Sprite>(), Wt = new Dictionary<string, Sprite>();
+            public Sprite Frame(string name, bool white) => (white ? Wt : N).TryGetValue(name, out var sp) ? sp : (white ? White : Normal);
+        }
         static readonly Dictionary<string, MonSprites> MonCache = new Dictionary<string, MonSprites>();
         /// <summary>
         /// Resources/Sprites の PNG（index.html の SpriteGen から tools/export-sprites.js で書き出したもの）を読む。
@@ -110,33 +118,44 @@ namespace PixelMonsterArena
             return MakeTex(src.width, src.height, px);
         }
 
-        public static MonSprites Mon(string sid)
+        static MonSprites Load(string name, Texture2D fallback)
         {
-            if (MonCache.TryGetValue(sid, out var s)) return s;
-            var n = LoadPng(sid);
-            if (n == null)
-            { // 画像が ないときは 文字マップから 作る（予備）
-                var sp = Data.Species[sid]; var hi = Scale2x(sp.Rows);
-                n = Bake(hi, sp.Pal, null, true);
+            var n = LoadPng(name) ?? fallback;
+            var s = new MonSprites { Normal = ToSprite(n, new Vector2(.5f, 0)), White = ToSprite(WhiteOf(n), new Vector2(.5f, 0)), W = n.width, H = n.height };
+            foreach (var f in Frames)
+            {
+                var t = LoadPng(name + "_" + f);
+                if (t == null) continue;
+                s.N[f] = ToSprite(t, new Vector2(.5f, 0));
+                s.Wt[f] = ToSprite(WhiteOf(t), new Vector2(.5f, 0));
             }
-            var wt = WhiteOf(n);
-            s = new MonSprites { Normal = ToSprite(n, new Vector2(.5f, 0)), White = ToSprite(wt, new Vector2(.5f, 0)), W = n.width, H = n.height };
-            MonCache[sid] = s;
             return s;
         }
 
-        static readonly Dictionary<string, Sprite> TrainerCache = new Dictionary<string, Sprite>();
-        public static Sprite Trainer(string hat, string coat)
+        public static MonSprites Mon(string sid)
+        {
+            if (MonCache.TryGetValue(sid, out var s)) return s;
+            Texture2D fb = null;
+            if (Resources.Load<TextAsset>("Sprites/" + sid + ".png") == null)
+            { // 画像が ないときは 文字マップから 作る（予備）
+                var sp = Data.Species[sid];
+                fb = Bake(Scale2x(sp.Rows), sp.Pal, null, true);
+            }
+            return MonCache[sid] = Load(sid, fb);
+        }
+
+        static readonly Dictionary<string, MonSprites> TrainerCache = new Dictionary<string, MonSprites>();
+        public static MonSprites Trainer(string hat, string coat)
         {
             string key = $"trainer_{hat.Substring(1)}_{coat.Substring(1)}";
             if (TrainerCache.TryGetValue(key, out var spr)) return spr;
-            var t = LoadPng(key);
-            if (t == null)
+            Texture2D fb = null;
+            if (Resources.Load<TextAsset>("Sprites/" + key + ".png") == null)
             {
                 var pal = new Dictionary<char, string> { { 'h', hat }, { 'H', hat }, { 's', "#f2c79b" }, { 'k', "#1a1626" }, { 'c', coat }, { 'p', "#3a3350" }, { 'b', "#2a1e1e" } };
-                t = Bake(Scale2x(Data.TrainerRows), pal, null, true);
+                fb = Bake(Scale2x(Data.TrainerRows), pal, null, true);
             }
-            return TrainerCache[key] = ToSprite(t, new Vector2(.5f, 0));
+            return TrainerCache[key] = Load(key, fb);
         }
 
         // ---------- 図形スプライト（白で作り、色は SpriteRenderer.color で付ける） ----------

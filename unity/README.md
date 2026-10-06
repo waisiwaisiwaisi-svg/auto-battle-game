@@ -38,7 +38,7 @@ IMGUI の標準フォントは OS のフォントで日本語を表示します�
 ブラウザ版（`index.html`）のモンスターやわざを変えたら、リポジトリ直下で次を実行して C# 側を作りなおします。
 
 ```sh
-node tools/export-sprites.js index.html unity/PixelMonsterArena/Assets/Resources/Sprites   # ドット絵
+node tools/export-sprites.js index.html unity/PixelMonsterArena/Assets/Resources/Sprites   # ドット絵（アニメ 14コマ × モンスター／トレーナー）
 node unity/gen-data.js index.html unity/PixelMonsterArena/Assets/Scripts/PixelMonsterArena/Data.Generated.cs
 ```
 
@@ -49,7 +49,7 @@ node unity/gen-data.js index.html unity/PixelMonsterArena/Assets/Scripts/PixelMo
 | `Game.cs` | 起動・画面（タイトル／最初の1匹／ハブ／へんせい／バトル）・UI・入力 |
 | `Battle.cs` | リアルタイムバトルの中身（わざ・状態異常・AI・捕獲・経験値） |
 | `BattleRenderer.cs` / `Painter.cs` | バトル画面の描画（SpriteRenderer を使い回して描く） |
-| `Stage.cs` / `PixelArt.cs` | スタジアムとくさむらの背景、ドット絵の読みこみ（`Resources/Sprites` の PNG） |
+| `Stage.cs` / `PixelArt.cs` | スタジアムとくさむらの背景、ドット絵の読みこみ（`Resources/Sprites` の `{名前}_{コマ}.png`。コマ選びは `BattleRenderer.MonFrame`） |
 | `Data.cs` / `Data.Generated.cs` | 型定義と、`index.html` から生成したデータ |
 | `SaveData.cs` | セーブ（PlayerPrefs） |
 | `InputAdapter.cs` | タッチ・マウス・キーボード（旧 Input Manager／新 Input System 両対応） |

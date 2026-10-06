@@ -45,6 +45,8 @@ namespace PixelMonsterArena
         public List<Shot> Shots = new List<Shot>();
         public int PendingOut = -1;
         public float SwapLag, LagMax, SwapT = 3;
+        /// <summary>技を 出した 時刻（攻撃アニメの フレーム選び用）</summary>
+        public float FireT = -9;
         public float CdOf(string id) => Cd.TryGetValue(id, out var v) ? v : 0;
         public bool HasType(string t) => Sp.Type == t || Sp.Type2 == t;
         public static Dictionary<string, int> NewStages() => new Dictionary<string, int> { { "atk", 0 }, { "def", 0 }, { "spa", 0 }, { "spd", 0 }, { "spe", 0 } };
@@ -56,7 +58,7 @@ namespace PixelMonsterArena
     /// <summary>Big: 0=ふつう 1=大きい 2=マンガ文字（BONK! など）</summary>
     public class FText { public float X, Y, Life, Max; public string Txt; public Color Col; public int Big; }
     public class Decal { public float X, Y, R; public string Kind; public int Seed; }
-    public class TrainerInfo { public string Name; public Sprite Spr; public float X, Y, Shout; }
+    public class TrainerInfo { public string Name; public PixelArt.MonSprites Spr; public float X, Y, Shout; }
     public class Hazards { public int Rocks, Spikes, TSpikes; }
     public class Side { public List<Fighter> Fs; public int Act; public TrainerInfo Trainer; public Hazards Hz = new Hazards(); public float Tail, SwapCd; }
     public class CatchO { public string Phase; public float T, Sx, Sy, Tx, Ty, X, Y, P; public int Shakes; }
@@ -295,6 +297,7 @@ namespace PixelMonsterArena
         void FireMove(Fighter f)
         {
             var cur = f.Cur; var m = cur.M; var o = Opp(f);
+            f.FireT = T;
             var col = TC(m.T);
             if (o != null && m.Aim == "lock" && (m.K == "proj" || m.K == "melee")) cur.Ang = Mathf.Atan2(o.Y - f.Y, o.X - f.X);
             if (m.Fakeout && f.EnterT > 2.3f) { FailMove(f, "でも うまく きまらなかった！"); return; }
