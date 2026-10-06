@@ -640,7 +640,7 @@ namespace PixelMonsterArena
             { "hinokon", new Species {
                 Id = "hinokon", N = "サラマン", Type = "fire", Type2 = "", Hp = 40, Atk = 54, Def = 44, Spd = 66,
                 Style = "mid", Catch = 0.45f, Rare = false,
-                Desc = "つばさと つのを もつ こどもの 火竜。しっぽの ほのおで まりょくを ためて ひのたまを はく。",
+                Desc = "せなかに ほのおの たてがみを ともす 火トカゲ。きんいろの もようが あつくなると ひのたまを はく。",
                 Pal = new Dictionary<char, string> { { 'o', "#ff8a3d" }, { 'O', "#ffc27a" }, { 'w', "#fff3e0" }, { 'k', "#1a1626" }, { 'n', "#3a1a1a" }, { 'r', "#ff4a3d" }, { 'y', "#ffe066" } },
                 Learn = new[] { new LearnEntry(1, "ember"), new LearnEntry(1, "flame"), new LearnEntry(1, "quick-attack"), new LearnEntry(3, "will-o-wisp"), new LearnEntry(6, "flame-charge"), new LearnEntry(9, "u-turn"), new LearnEntry(12, "flamethrower"), new LearnEntry(15, "swords-dance"), new LearnEntry(18, "nasty-plot"), new LearnEntry(21, "fire-blast"), new LearnEntry(24, "overheat"), new LearnEntry(27, "flare-blitz"), new LearnEntry(30, "baton-pass"), new LearnEntry(33, "dragon-pulse"), new LearnEntry(36, "draco-meteor") },
                 Rows = new[] {

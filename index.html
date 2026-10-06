@@ -428,7 +428,7 @@ const MOVES = {
 const SPECIES = {
   hinokon: {
     n: 'サラマン', type: 'fire', base: { hp: 40, atk: 54, def: 44, spd: 66 }, moves: ['ember', 'flame'], style: 'mid', catch: .45, rare: 0,
-    desc: 'つばさと つのを もつ こどもの 火竜。しっぽの ほのおで まりょくを ためて ひのたまを はく。',
+    desc: 'せなかに ほのおの たてがみを ともす 火トカゲ。きんいろの もようが あつくなると ひのたまを はく。',
     pal: { o: '#ff8a3d', O: '#ffc27a', w: '#fff3e0', k: '#1a1626', n: '#3a1a1a', r: '#ff4a3d', y: '#ffe066' },
     rows: [
       '........o..o..',
@@ -1077,6 +1077,1021 @@ const SpriteGen = (() => {
   return { render, frames, poseFor, FRAMES, MON, TRAINER, W: 48, H: 48, TW: 40, TH: 48 };
 })();
 // ====== ここまで SPRITEGEN ======
+// ====== ここから HANDPIX ======
+// 手打ちドット絵。パーツ（文字マップ）を 重ねて 描き、アニメは パーツを 1ドット単位で ずらす＋差しかえ絵 で 作る（回転しないので ドットが くずれない）
+const HandPix = (() => {
+  // 描く 範囲は 48×48。動きで はみ出さないよう 余白（PAD）つきの キャンバスに 置く
+  const PAD = 5, W = 48 + PAD * 2, H = 48 + PAD;
+  const FRAMES = ['idle0', 'idle1', 'idle2', 'idle3', 'blink', 'walk0', 'walk1', 'walk2', 'walk3', 'atk0', 'atk1', 'atk2', 'hit', 'ko'];
+  // グループの 親子（親が 動くと 子も 動く）。root は 全体
+  const PARENT = { body: 'root', head: 'body', top: 'head', wing: 'body', wing2: 'body', tail: 'body', flame: 'tail', crest: 'body', arm: 'body', arm2: 'body', legA: 'root', legB: 'root', fx: 'root' };
+  const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  // 標準の 動き [dx, dy]（右向き。y は 下が +）
+  function motion(f) {
+    const m = {}, s = (g, dx, dy) => { m[g] = [(m[g] ? m[g][0] : 0) + dx, (m[g] ? m[g][1] : 0) + dy]; };
+    const i = +f.slice(-1);
+    if (f.startsWith('idle') || f === 'blink') {
+      const k = f === 'blink' ? 0 : i;
+      s('body', 0, [0, 0, 1, 1][k]); s('head', 0, [0, 0, 0, 1][k]); s('top', 0, [0, 1, 0, 0][k]);
+      s('wing', 0, [0, -1, -1, 0][k]); s('wing2', 0, [0, -1, -1, 0][k]); s('tail', [0, 0, -1, -1][k], 0);
+      s('crest', 0, [0, -1, -1, 0][k]);
+    } else if (f.startsWith('walk')) {
+      s('body', 0, [0, -1, 0, -1][i]); s('legA', [1, 0, -1, 0][i], [-1, 0, 0, 0][i]); s('legB', [-1, 0, 1, 0][i], [0, 0, -1, 0][i]);
+      s('wing', 0, [-1, 1, -1, 1][i]); s('wing2', 0, [1, -1, 1, -1][i]); s('tail', [0, -1, 0, 1][i], 0);
+      s('arm', [-1, 0, 1, 0][i], 0); s('arm2', [1, 0, -1, 0][i], 0); s('crest', [0, -1, 0, -1][i], 0);
+    } else if (f === 'atk0') {
+      s('root', -2, 0); s('head', -1, 1); s('crest', 0, -1); s('wing', 0, -2); s('wing2', 0, -2); s('tail', -1, 0); s('arm', -2, -1); s('arm2', -1, -1);
+    } else if (f === 'atk1') {
+      s('root', 3, 0); s('head', 1, 0); s('wing', 0, 1); s('wing2', 0, 1); s('arm', 3, 0); s('arm2', 2, 0); s('tail', 1, 0);
+    } else if (f === 'atk2') {
+      s('root', 2, 0); s('head', 1, 0); s('arm', 2, 1); s('arm2', 1, 0);
+    } else if (f === 'hit') {
+      s('root', -3, 0); s('head', -1, -1); s('crest', 1, -1); s('wing', 0, -2); s('wing2', 0, -2); s('arm', -1, -2); s('arm2', -1, -1); s('tail', -1, -1);
+    } else if (f === 'ko') {
+      s('body', 0, 3); s('head', 1, 2); s('wing', 0, 2); s('wing2', 0, 2); s('tail', 0, 1); s('legA', 1, 0); s('legB', -1, 0); s('arm', 1, 2); s('arm2', -1, 2);
+    }
+    return m;
+  }
+  function offsetOf(g, m) {
+    let x = 0, y = 0;
+    for (let k = g; k; k = PARENT[k]) { const o = m[k]; if (o) { x += o[0]; y += o[1]; } if (k === 'root') break; }
+    if (!PARENT[g] && m.root) { x += m.root[0]; y += m.root[1]; }
+    return [x, y];
+  }
+  const altFor = (l, f) => { if (!l.alt) return l.rows; for (const k in l.alt) if (k.split('|').includes(f)) return l.alt[k]; return l.rows; };
+  function render(def, f) {
+    const px = new Uint8ClampedArray(W * H * 4), pal = {};
+    for (const c in def.pal) pal[c] = hex(def.pal[c]);
+    const mot = def.motion ? def.motion(f) : motion(f);
+    if (def.mot) { const extra = def.mot(f); for (const g in extra) { const o = mot[g] || [0, 0]; mot[g] = [o[0] + extra[g][0], o[1] + extra[g][1]]; } }
+    const put = (x, y, c) => { if (x < 0 || y < 0 || x >= W || y >= H) return; const i = (y * W + x) * 4; px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255; };
+    for (const l of def.layers) {
+      if (l.only && !l.only.split('|').includes(f)) continue;
+      if (l.not && l.not.split('|').includes(f)) continue;
+      const rows = altFor(l, f); if (!rows) continue;
+      const [ox, oy] = offsetOf(l.g || 'body', mot), X = l.x + ox + PAD, Y = l.y + oy + PAD;
+      const filled = (x, y) => y >= 0 && y < rows.length && x >= 0 && x < rows[y].length && rows[y][x] !== '.' && rows[y][x] !== ' ';
+      if (l.ol !== 0) {
+        const oc = hex(l.ol || def.pal.k);
+        for (let y = -1; y <= rows.length; y++) for (let x = -1; x <= 64; x++) {
+          if (filled(x, y)) continue;
+          if (filled(x - 1, y) || filled(x + 1, y) || filled(x, y - 1) || filled(x, y + 1)) put(X + x, Y + y, oc);
+        }
+      }
+      for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) {
+        const ch = rows[y][x]; if (ch === '.' || ch === ' ') continue;
+        const c = pal[ch]; if (!c) throw new Error(`色が ない: ${ch} (${l.n || ''})`);
+        put(X + x, Y + y, c);
+      }
+    }
+    return px;
+  }
+  function frames(def) { const o = {}; for (const f of FRAMES) o[f] = render(def, f); return o; }
+  // 体を つぶす／のばす（まん中の 行を けずる／ふやす。ドットは くずれない）。つぶすと 上に 空き行が 入り、足元は そのまま
+  const mid = rows => Math.floor(rows.length * .55);
+  const squash = (rows, n) => { const m = mid(rows), w = rows[0].length; return [...Array(n).fill('.'.repeat(w)), ...rows.slice(0, m), ...rows.slice(m + n)]; };
+  const stretch = (rows, n) => { const m = mid(rows); return [...rows.slice(0, m), ...Array(n).fill(rows[m]), ...rows.slice(m)]; };
+  const MON = {};
+  return { render, frames, squash, stretch, FRAMES, MON, W, H, PAD };
+})();
+// サラマン：背中に 炎の たてがみを ともす 火トカゲ（四つ足・金の 斑点・やもりの 足）
+HandPix.MON.hinokon = () => {
+  const F1 = ['..1...', '..21..', '.122..', '.2332.', '12342.', '23443.', '234432', '.2342.', '..22..', '..22..'];
+  const F2 = ['...1..', '..12..', '..221.', '.2332.', '.24321', '.34432', '234432', '.2432.', '..22..', '..22..'];
+  const f1 = ['.1..', '.21.', '1232', '2342', '.22.'];
+  const f2 = ['..1.', '.12.', '2321', '2432', '.22.'];
+  const FL = { 'idle1|idle3|walk1|walk3|atk1|hit': F2 }, FR = { 'idle0|idle2|blink|walk0|walk2|atk0|atk2': F2 };
+  const LEG = [
+    '.BBBB...',
+    'BAABBC..',
+    'BABBCC..',
+    '.BBCCD..',
+    '.BBCCD..',
+    '.BBCCDD.',
+    'BBBCCCDD',
+    'AB.BC.CD',
+  ];
+  const LEGD = LEG.map(r => r.replace(/[ABCD]/g, ch => ({ A: 'C', B: 'C', C: 'D', D: 'E' })[ch]));
+  return {
+    pal: {
+      k: '#2a1020',
+      A: '#ffb27a', B: '#f2683a', C: '#d2412e', D: '#9a2333', E: '#5e1730',
+      b: '#f7c98a', c: '#d99560',
+      S: '#ffd23f', T: '#fff3a0',
+      W: '#ff8a9a',
+      1: '#c8341a', 2: '#ff8a1f', 3: '#ffd23f', 4: '#fff8d0',
+      e: '#ffffff', y: '#ffc83a', p: '#2a1020', m: '#6a1a2a', n: '#ff7a8a',
+    },
+    layers: [
+      { n: 'legFarH', g: 'legA', x: 16, y: 36, rows: LEGD },
+      { n: 'legFarF', g: 'legB', x: 35, y: 36, rows: LEGD },
+      { n: 'tail', g: 'tail', x: 0, y: 22, rows: [
+        '..BBB......',
+        '.BAABC.....',
+        'BABCCD.....',
+        'BBC.DD.....',
+        'BC.........',
+        'BC.........',
+        'BBC........',
+        'CBBC.......',
+        'CBBBC......',
+        '.CBBBC.....',
+        '.DCBBBCC...',
+        '..DCCBBBCCC',
+        '...DDCCCCCC',
+        '....DDDDDDD',
+      ] },
+      { n: 'crest1', g: 'crest', x: 10, y: 21, ol: '#5a1418', rows: F1, alt: FL },
+      { n: 'crest2', g: 'crest', x: 17, y: 18, ol: '#5a1418', rows: F1, alt: FR },
+      { n: 'crest3', g: 'crest', x: 24, y: 19, ol: '#5a1418', rows: F1, alt: FL },
+      { n: 'body', g: 'body', x: 8, y: 27, rows: [
+        '..........BBBBBBBBBBBB........',
+        '.......BBBAAAABBBBBBBBBBC.....',
+        '.....BBAAAABBBBBBBBBBBBBCC....',
+        '....BAABBBBBBBBBBBBBBBBBBCC...',
+        '...BABBBBBBBBBBBBBBBBBBBBBCC..',
+        '..BBBBBBBBBBBBBBBBBBBBBBBBBCC.',
+        '.BBBBBBBBBBBBBBBBBBBBBBBBBBBC.',
+        'BBBBBBBBBBBBBBBBBBBBBBBBBBBBCC',
+        'CBBBBBBBBBBBBBBBBBBBBBBBBBBCCC',
+        'CCCBBBBBBBBBBBBBBBBBBBBBBCCCCD',
+        'DCCCCCCBBBBBBBBBBBBBBCCCCCCCD.',
+        '.DDCCCCCCCbbbbbbbbbbbCCCCCDD..',
+        '..DDDDCCCcbbbbbbbbbbcCCDDD....',
+        '....DDDDDDccccccccccDDDD......',
+      ] },
+      { n: 'spots', g: 'body', x: 8, y: 27, ol: 0, rows: [
+        '..............................',
+        '..............................',
+        '...........SS.................',
+        '..........STS.......SS........',
+        '...........S.......STS........',
+        '.....SS.............S.....S...',
+        '....STS.....SS...........ST...',
+        '.....S.....STS................',
+        '............S.........SS......',
+      ] },
+      { n: 'legNearH', g: 'legB', x: 12, y: 37, rows: LEG },
+      { n: 'legNearF', g: 'legA', x: 31, y: 37, rows: LEG },
+      { n: 'hf1', g: 'top', x: 29, y: 12, ol: '#5a1418', rows: f1, alt: { 'idle1|idle3|walk1|walk3|atk1|hit': f2 } },
+      { n: 'hf2', g: 'top', x: 33, y: 11, ol: '#5a1418', rows: f2, alt: { 'idle1|idle3|walk1|walk3|atk1|hit': f1 } },
+      { n: 'head', g: 'head', x: 29, y: 17, rows: [
+        '.....BBBBBBBB......',
+        '...BBAAAABBBBBC....',
+        '..BAAAABBBBBBBBCC..',
+        '.BAABBBBBBBBBBBBCC.',
+        '.BABBBBBBBBBBBBBBBC',
+        'BBBBBBBBBBBBBBBBBBC',
+        'BBBBBBBBBBBBBBBBBBC',
+        'BBBBBBBBBBBBBBBBBBC',
+        'CBBBBBBBBBBBBBBBBCC',
+        'CCBBBBBBBBBBBBBBCCD',
+        'CCCCBBBBBBBBBCCCCD.',
+        'DCCCCCCbbbbbbbbbc..',
+        'DDCCCCbbbbbbbbbbc..',
+        '.DDCCCbbbbbbbbcc...',
+        '..DDDDbbbcccccc....',
+        '....DDDDccc........',
+      ] },
+      { n: 'hspots', g: 'head', x: 29, y: 17, ol: 0, rows: [
+        '...................',
+        '...................',
+        '......SS...........',
+        '.....STS...........',
+        '......S............',
+        '..S................',
+        '.ST................',
+      ] },
+      { n: 'blush', g: 'head', x: 37, y: 25, ol: 0, rows: ['WW'] },
+      { n: 'eye', g: 'head', x: 40, y: 20, ol: 0, rows: [
+        '.kkk',
+        'keyk',
+        'kypk',
+        'kypk',
+        '.kkk',
+      ], alt: { blink: ['....', '....', '....', 'kkkk', '....'],
+        'hit|atk0': ['k...', '.kk.', '...k', '.kk.', 'k...'],
+        ko: ['k..k', '.kk.', '.kk.', 'k..k', '....'] } },
+      { n: 'nose', g: 'head', x: 46, y: 22, ol: 0, rows: ['k'] },
+      { n: 'mouth', g: 'head', x: 34, y: 26, ol: 0, rows: [
+        '............k',
+        '.kkkkkkkkkkk.',
+      ], alt: { 'atk1|atk2': [
+        'kkkkkkkkkkkkk',
+        'kmmmmmmmmmmmk',
+        '.kmnnnnnnnmk.',
+        '..kkkkkkkkk..',
+      ], hit: ['.............', '....kkkkkk...', '...k......k..'] } },
+    ],
+  };
+};
+// ルリスライム：るり色の ほうせきを 体に やどす スライム。ちいさな 王冠を のせている
+HandPix.MON.mizupuku = () => {
+  const BODY = [
+    '.............BBBBBBBB.............',
+    '..........BBBAAABBBBBBC...........',
+    '........BBAAwwABBBBBBBBCC.........',
+    '.......BAAwwAABBBBBBBBBBCC........',
+    '......BAAwAABBBBBBBBBBBBBCC.......',
+    '.....BAAAABBBBBBBBBBBBBBBBCC......',
+    '....BAAABBBBBBBBBBBBBBBBBBBCC.....',
+    '....BAABBBBBBBBBBBBBBBBBBBBBC.....',
+    '...BAABBBBBBBBBBBBBBBBBBBBBBCC....',
+    '...BABBBBBBBBBBBBBBBBBBBBBBBBC....',
+    '..BBABBBBBBBBBBBBBBBBBBBBBBBBCC...',
+    '..BBBBBBBBBBBBBBBBBBBBBBBBBBBBC...',
+    '..CBBBBBBBBBBBBBBBBBBBBBBBBBBBC...',
+    '.CCBBBBBBBBBBBBBBBBBBBBBBBBBBBCC..',
+    '.CCBBBBBBBBBBBBBBBBBBBBBBBBBBCCC..',
+    '.CCCBBBBBBBBBBBBBBBBBBBBBBBBCCCD..',
+    'CCCCBBBBBBBBBBBBBBBBBBBBBBBCCCCDD.',
+    'CCCCCBBBBBBBBBBBBBBBBBBBBBCCCCCDD.',
+    'DCCCCCCBBBBBBBBBBBBBBBBBCCCCCCDDD.',
+    'DDCCCCCCCCBBBBBBBBBBBCCCCCCCCDDDD.',
+    'DDDCCCCCCCCCCCCCCCCCCCCCCCCCDDDDDD',
+    '.DDDDCCCCCCCCCCCCCCCCCCCCCDDDDDDE.',
+    '..EDDDDDDDDDCCCCCCCCDDDDDDDDDDEE..',
+    '....EEEEDDDDDDDDDDDDDDDDDDEEEE....',
+  ];
+  const sq1 = HandPix.squash(BODY, 1), sq2 = HandPix.squash(BODY, 2), st2 = HandPix.stretch(BODY, 2);
+  return {
+    pal: {
+      k: '#12204a',
+      w: '#ffffff', A: '#c8eeff', B: '#6ec0ff', C: '#3a86ec', D: '#2a5cc4', E: '#1c3a88',
+      F: '#94d6ff',
+      G: '#1a3a8a', 1: '#f0fbff', 2: '#7ae0ff', 3: '#2a9ae8', 4: '#1a58b0',
+      S: '#ffd23f', T: '#fff3a0', U: '#c88a1a', r: '#ff4a6a',
+      e: '#ffffff', p: '#12204a', W: '#ff9ab8',
+    },
+    // スライムは 足が ないので つぶれて はねる
+    motion(f) {
+      const m = { body: [0, 0], head: [0, 0], root: [0, 0], top: [0, 0] };
+      const set = (g, dx, dy) => { m[g] = [m[g][0] + dx, m[g][1] + dy]; };
+      if (f === 'idle1' || f === 'idle2') set('head', 0, 1);
+      if (f === 'walk0') set('head', 0, 2);
+      if (f === 'walk1') { set('body', 0, -2); set('root', 0, -2); }
+      if (f === 'walk2') set('root', 0, -4);
+      if (f === 'walk3') set('head', 0, 1);
+      if (f === 'atk0') { set('root', -2, 0); set('head', 0, 2); }
+      if (f === 'atk1') { set('root', 4, -2); set('body', 0, -2); }
+      if (f === 'atk2') { set('root', 2, 0); set('head', 0, 1); }
+      if (f === 'hit') { set('root', -3, 0); set('head', -1, 0); set('top', -1, -2); }
+      if (f === 'ko') { set('head', 0, 2); set('top', 6, 6); }
+      return m;
+    },
+    layers: [
+      { n: 'body', g: 'body', x: 7, y: 22, rows: BODY,
+        alt: { 'idle1|idle2|walk3|atk2': sq1, 'walk0|atk0|ko': sq2, 'walk1|atk1': st2 } },
+      { n: 'glow', g: 'root', x: 18, y: 37, ol: 0, rows: [
+        '..FFFFFFFF..',
+        '.FFFFFFFFFF.',
+        'FFFFFFFFFFFF',
+        'FFFFFFFFFFFF',
+        '.FFFFFFFFFF.',
+        '..FFFFFFFF..',
+      ] },
+      { n: 'gem', g: 'root', x: 21, y: 37, ol: '#1a3a8a', rows: [
+        '...1...',
+        '..112..',
+        '.11233.',
+        '1122334',
+        '.22334.',
+        '..334..',
+        '...4...',
+      ] },
+      { n: 'bub', g: 'root', x: 11, y: 36, ol: 0, rows: [
+        '.A..........................',
+        'A.A.........................',
+        '.A........................A.',
+        '.........................A.A',
+        '..........................A.',
+      ] },
+      { n: 'crown', g: 'top', x: 22, y: 16, ol: '#5a3a10', rows: [
+        'S...S...S',
+        'SS.STS.SS',
+        'STSSrSSTS',
+        'SSSSSSSSU',
+        'UUUUUUUUU',
+      ] },
+      { n: 'eyeL', g: 'head', x: 22, y: 27, ol: 0, rows: ['ek', 'kk', 'kk', 'kk'],
+        alt: { blink: ['..', '..', 'kk', '..'], 'hit|atk0': ['k.', '.k', 'k.', '..'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'eyeR', g: 'head', x: 31, y: 27, ol: 0, rows: ['ek', 'kk', 'kk', 'kk'],
+        alt: { blink: ['..', '..', 'kk', '..'], 'hit|atk0': ['.k', 'k.', '.k', '..'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'blush', g: 'head', x: 20, y: 31, ol: 0, rows: ['WW.........WW'] },
+      { n: 'mouth', g: 'head', x: 26, y: 31, ol: 0, rows: ['k..k', '.kk.'],
+        alt: { 'atk1|atk2': ['kkkk', 'kWWk', '.kk.'], hit: ['.kk.', 'k..k'], ko: ['.kk.', 'k..k'] } },
+    ],
+  };
+};
+// マンドラ：はっぱの かんむりを もつ 根っこの まもの。いつも さけんでいる
+HandPix.MON.happamogu = () => {
+  const LEG = ['BCC..', 'BCC..', 'BCC..', '.BCD.', '.BCD.', '.BCD.', 'BBCDD', 'ABCDD'];
+  const dark = r => r.replace(/[ABCD]/g, ch => ({ A: 'C', B: 'C', C: 'D', D: 'E' })[ch]);
+  return {
+    pal: {
+      k: '#2a1a12',
+      A: '#f8e2b4', B: '#e2b47a', C: '#b8844e', D: '#8a5a34', E: '#5a3420',
+      1: '#d4f58a', 2: '#7cd04a', 3: '#3e9a3a', 4: '#22603a',
+      e: '#ffffff', p: '#2a1a12', m: '#5a1a1a', n: '#e0606a', W: '#ff9a8a',
+    },
+    layers: [
+      { n: 'arm2', g: 'arm2', x: 9, y: 27, rows: ['...CDDD', '.CDDD..', 'DDD....', 'D.D....'].map(dark) },
+      { n: 'legB', g: 'legB', x: 27, y: 36, rows: LEG.map(dark) },
+      { n: 'leaves', g: 'top', x: 15, y: 6, ol: '#16341e', rows: [
+        '.........12.........',
+        '........1223........',
+        '.11.....1223......3.',
+        '1223....1233....233.',
+        '12233...1233...2234.',
+        '.12233..1233..2234..',
+        '..12233.1234.2234...',
+        '...12233123422344...',
+        '....122331234234....',
+        '.....1223123344.....',
+        '......12332344......',
+        '.......123344.......',
+        '........3344........',
+      ] },
+      { n: 'body', g: 'body', x: 14, y: 18, rows: [
+        '.......BBBBBBBB.......',
+        '.....BBAAABBBBBBC.....',
+        '....BAAAABBBBBBBBC....',
+        '...BAAABBBBBBBBBBCC...',
+        '..BAABBBCCBBBBBBBBCC..',
+        '..BABBBBBBBBBBBBBBCC..',
+        '.BABBBBBBBBBBBBBBBBCC.',
+        '.BBBCCBBBBBBBBBBBBBCC.',
+        'BBBBBBBBBBBBBBBBBBBBCC',
+        'BBBBBBBBBBBBBBBBBBBBCC',
+        'BBBBBBBBBBBBBBBBBBBCCD',
+        'CBBBBBBBBBBBBCCCBBBCCD',
+        'CBBBBBBBBBBBBBBBBBCCCD',
+        'CCBBBBBBBBBBBBBBBCCCDD',
+        '.CCBBBBBBBBBBBBBCCCDD.',
+        '.CCCBBCCCBBBBBBCCCDD..',
+        '..DCCCBBBBBBCCCCDDD...',
+        '...DDCCCCCCCCCDDD.....',
+        '....DDDDCCCCDDDD......',
+        '......DDDDDDDD........',
+      ] },
+      { n: 'hair', g: 'body', x: 11, y: 30, ol: 0, rows: [
+        'D..........................',
+        '.D.........................',
+        '.........................D.',
+        '........................D..',
+      ] },
+      { n: 'legA', g: 'legA', x: 21, y: 36, rows: LEG },
+      { n: 'arm', g: 'arm', x: 34, y: 27, rows: ['BBBC...', '.CCCCD.', '...CDDD', '....D.D'] },
+      { n: 'eyeL', g: 'body', x: 24, y: 24, ol: 0, rows: ['ekk', 'kkk', 'kkk', '.k.'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['k..', '.kk', 'k..', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'eyeR', g: 'body', x: 30, y: 24, ol: 0, rows: ['ekk', 'kkk', 'kkk', '.k.'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['..k', 'kk.', '..k', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'blush', g: 'body', x: 22, y: 28, ol: 0, rows: ['WW.......WW'] },
+      { n: 'mouth', g: 'body', x: 26, y: 29, ol: 0, rows: ['.kk.', 'kmmk', '.kk.'],
+        alt: { 'atk1|atk2|hit': ['.kk.', 'kmmk', 'kmmk', 'knnk', '.kk.'], ko: ['....', 'kkkk', '....'] } },
+    ],
+  };
+};
+// ボルトウィスプ：あらしの よるに うまれる かみなりの せいれい。ぎざぎざの 火の玉の すがた
+HandPix.MON.birikurage = () => {
+  const BODY = [
+    '...............B..........',
+    '..............BC..........',
+    '.........B...BBC..........',
+    '.........BC..BBC.....B....',
+    '.........BBCBBBC....BC....',
+    '........BBBBBBBCC..BBC....',
+    '........BABBBBBBCCBBCC....',
+    '.......BAABBBBBBBCBBCC....',
+    '......BBAABBBBBBBBBBCCC...',
+    '.....BBAABBBBBBBBBBBBCC...',
+    '....BBAAABBBBBBBBBBBBCCC..',
+    '...BBAAABBBBBBBBBBBBBBCC..',
+    '...BAAABBBBBBBBBBBBBBBCCC.',
+    '..BAAABBBBBBBBBBBBBBBBBCC.',
+    '..BAABBBBBBBBBBBBBBBBBBCCC',
+    '.BAABBBBBBBBBBBBBBBBBBBCCC',
+    '.BABBBBBBBBBBBBBBBBBBBBCCC',
+    'BBABBBBBBBBBBBBBBBBBBBCCCD',
+    'BBBBBBBBBBBBBBBBBBBBBBCCCD',
+    'BBBBBBBBBBBBBBBBBBBBBCCCCD',
+    'CBBBBBBBBBBBBBBBBBBBBCCCDD',
+    'CBBBBBBBBBBBBBBBBBBBCCCCDD',
+    'CCBBBBBBBBBBBBBBBBBCCCCDD.',
+    '.CCBBBBBBBBBBBBBBCCCCCDDD.',
+    '.CCCCBBBBBBBBBBCCCCCCDDD..',
+    '..DCCCCCCCCCCCCCCCCDDDD...',
+    '...DDDCCCCCCCCCCCDDDDD....',
+    '.....DDDDDDDDDDDDDDD......',
+  ];
+  const TOP2 = [
+    '..............B...........',
+    '.............BBC..........',
+    '..........B..BBC..........',
+    '.........BBC.BBC......B...',
+    '.........BBCBBBC.....BC...',
+  ];
+  const B2 = [...TOP2, ...BODY.slice(5)];
+  const SP = ['...s', '..s.', '.sst', 'tss.', '.s..', 's...'], SP2 = ['s...', '.s..', 'tss.', '.sst', '..s.', '...s'];
+  return {
+    pal: {
+      k: '#3a2410',
+      w: '#ffffff', A: '#fffbe0', B: '#ffe45a', C: '#ffbe1a', D: '#e08a1a', E: '#a0581a',
+      s: '#8af0ff', t: '#ffffff',
+      e: '#ffffff', p: '#3a2410', m: '#8a3a10', W: '#ffa07a',
+    },
+    layers: [
+      { n: 'tail', g: 'tail', x: 4, y: 31, rows: [
+        '........BBBC',
+        '......BBBCC.',
+        '....BBBCC...',
+        '...BBBBBBBC.',
+        '.......BBC..',
+        '.....BBCC...',
+        '...BBCC.....',
+        '..BBBBBBC...',
+        '.....BCC....',
+        '...BCC......',
+        '.BC.........',
+      ] },
+      { n: 'body', g: 'body', x: 11, y: 10, rows: BODY, alt: { 'idle1|idle3|walk1|walk3|atk1|hit': B2 } },
+      { n: 'core', g: 'body', x: 18, y: 23, ol: 0, rows: [
+        '...AAAAAA...',
+        '.AAAAAAAAAA.',
+        'AAAAAwwAAAAA',
+        'AAAAwwwwAAAA',
+        'AAAAAwwAAAAA',
+        '.AAAAAAAAAA.',
+        '...AAAAAA...',
+      ] },
+      { n: 'mark', g: 'body', x: 24, y: 14, ol: 0, rows: ['..DD', '.DD.', 'DDDD', '.DD.', 'DD..', 'D...'] },
+      { n: 'eyeL', g: 'body', x: 23, y: 23, ol: 0, rows: ['ekk', 'kkk', 'kkk', '.k.'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['k..', '.kk', 'k..', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'eyeR', g: 'body', x: 29, y: 23, ol: 0, rows: ['ekk', 'kkk', 'kkk', '.k.'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['..k', 'kk.', '..k', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'blush', g: 'body', x: 21, y: 27, ol: 0, rows: ['WW.......WW'] },
+      { n: 'mouth', g: 'body', x: 26, y: 28, ol: 0, rows: ['k..k', '.kk.'],
+        alt: { 'atk1|atk2': ['kkkk', 'kmmk', '.kk.'], hit: ['.kk.', 'k..k'], ko: ['....', 'kkkk'] } },
+      { n: 'spark1', g: 'fx', x: 4, y: 14, ol: '#1a4a6a', rows: SP, only: 'idle0|idle1|walk0|walk1|atk0|atk1|hit' },
+      { n: 'spark2', g: 'fx', x: 40, y: 22, ol: '#1a4a6a', rows: SP2, only: 'idle2|idle3|blink|walk2|walk3|atk1|atk2|hit' },
+      { n: 'spark3', g: 'fx', x: 38, y: 8, ol: '#1a4a6a', rows: SP, only: 'idle0|idle3|walk1|walk3|atk1|atk2' },
+    ],
+  };
+};
+// ルーンゴーレム：ルーンが ひかる 石の きょじん。かたに こけが はえている
+HandPix.MON.gorotan = () => {
+  const dark = r => r.replace(/[ABCD]/g, ch => ({ A: 'C', B: 'C', C: 'D', D: 'E' })[ch]);
+  const ARM = [
+    '..BBBBB...',
+    '.BAABBBC..',
+    'BAABBBBCC.',
+    'BABBBBBCCD',
+    'BBBBBBBCCD',
+    'CBBBBBCCCD',
+    '.CBBBCCCD.',
+    '..CCCCCD..',
+    '..BBBBBC..',
+    '.BAABBBCC.',
+    'BAABBBBBCC',
+    'BABBBBBBCD',
+    'BBBBBBBCCD',
+    'CBBBBBBCCD',
+    'CCBBBBCCDD',
+    '.CCCCCCDD.',
+    '..DDDDDD..',
+  ];
+  const LEG = ['.BBBBBC.', 'BAABBBCC', 'BABBBCCD', 'BBBBBCCD', 'CBBBCCCD', 'CCCCCCDD', '.DDDDDD.'];
+  return {
+    pal: {
+      k: '#1a1626',
+      A: '#dcd6e6', B: '#aaa4be', C: '#7e7a98', D: '#585472', E: '#36324c',
+      1: '#a6e070', 2: '#62a844', 3: '#2e6a34',
+      r: '#5ae8ff', R: '#e6ffff',
+    },
+    layers: [
+      { n: 'arm2', g: 'arm2', x: 4, y: 17, rows: ARM.map(dark) },
+      { n: 'legB', g: 'legB', x: 13, y: 35, rows: LEG.map(dark) },
+      { n: 'legA', g: 'legA', x: 26, y: 35, rows: LEG },
+      { n: 'torso', g: 'body', x: 10, y: 18, rows: [
+        '....BBBBBBBBBBBBBBBBBC....',
+        '..BBAAAABBBBBBBBBBBBBCC...',
+        '.BAAAABBBBBBBBBBBBBBBCCC..',
+        'BAAABBBBBBBBBBBBBBBBBBCCC.',
+        'BAABBBBBBBBBBBBBBBBBBBCCCD',
+        'BABBBBBBBBBBBBBBBBBBBCCCCD',
+        'BBBBBBBBBBBBBBBBBBBBBCCCCD',
+        'BBBBBBBBBBBBBBBBBBBBCCCCCD',
+        'CBBBBBBBBBBBBBBBBBBBCCCCDD',
+        'CBBBBBBBBBBBBBBBBBBCCCCCDD',
+        'CCBBBBBBBBBBBBBBBBBCCCCCDD',
+        'CCCBBBBBBBBBBBBBBBCCCCCDDD',
+        'CCCCBBBBBBBBBBBBBCCCCCDDDD',
+        'DCCCCCBBBBBBBBBCCCCCCDDDDE',
+        'DDCCCCCCCCCCCCCCCCCCDDDDE.',
+        '.DDDCCCCCCCCCCCCCCCDDDDEE.',
+        '..DDDDDDCCCCCCCCDDDDDEEE..',
+        '...EEDDDDDDDDDDDDDDDEEE...',
+        '.....EEEEEEEEEEEEEEEE.....',
+      ] },
+      { n: 'cracks', g: 'body', x: 10, y: 18, ol: 0, rows: [
+        '..........................',
+        '..........................',
+        '.........D................',
+        '........D.................',
+        '........D.................',
+        '.......D..................',
+        '.....DD...................',
+        '....D.....................',
+        '..........................',
+        '..........................',
+        '......................E...',
+        '.....................E....',
+        '....................E.....',
+        '...................EE.....',
+        '...DD.....................',
+        '.....D....................',
+      ] },
+      { n: 'rune', g: 'body', x: 19, y: 22, ol: 0, rows: [
+        '..rrr..',
+        '.r...r.',
+        'r..R..r',
+        'r.RRR.r',
+        'r..R..r',
+        '.r...r.',
+        '..rrr..',
+      ], alt: { 'atk1|atk2': [
+        '..RRR..',
+        '.RrrrR.',
+        'RrrRrrR',
+        'RrRRRrR',
+        'RrrRrrR',
+        '.RrrrR.',
+        '..RRR..',
+      ] } },
+      { n: 'moss1', g: 'body', x: 10, y: 16, ol: '#16341e', rows: [
+        '..1.1....',
+        '.112211..',
+        '12232221.',
+        '.223..32.',
+        '..3....3.',
+      ] },
+      { n: 'head', g: 'head', x: 19, y: 8, rows: [
+        '...BBBBBBBB...',
+        '.BBAAABBBBBBC.',
+        'BAAABBBBBBBBCC',
+        'BAABBBBBBBBBCC',
+        'BABBBBBBBBBBCD',
+        'BBBBBBBBBBBBCD',
+        'CBBBBBBBBBBCCD',
+        'CBBBBBBBBBBCDD',
+        'CCBBBBBBBBCCDD',
+        '.DCCCCCCCCCDD.',
+        '..DDDDDDDDDD..',
+      ] },
+      { n: 'moss2', g: 'head', x: 20, y: 6, ol: '#16341e', rows: ['..1.1...', '.122211.', '12333221'] },
+      { n: 'eyes', g: 'head', x: 21, y: 12, ol: 0, rows: ['kkkkkkkkk', 'krRkkkrRk', 'kkkkkkkkk'],
+        alt: { blink: ['kkkkkkkkk', 'kkkkkkkkk', 'kkkkkkkkk'], 'hit|atk0': ['kkkkkkkkk', 'kRkkkkkRk', 'kkkkkkkkk'], ko: ['kkkkkkkkk', 'kkkkkkkkk', 'kkkkkkkkk'], 'atk1|atk2': ['kkkkkkkkk', 'kRRkkkRRk', 'kkkkkkkkk'] } },
+      { n: 'arm', g: 'arm', x: 32, y: 17, rows: ARM },
+      { n: 'armRune', g: 'arm', x: 36, y: 27, ol: 0, rows: ['r', 'r', '.', 'r'] },
+    ],
+  };
+};
+// グリフィ：わしの あたまと ししの からだを もつ グリフォンの ひな
+HandPix.MON.soyodori = () => {
+  const dark = r => r.replace(/[ABCDFGHwxyY]/g, ch => ({ A: 'C', B: 'C', C: 'D', D: 'E', F: 'G', G: 'H', H: 'I', w: 'x', x: 'z', y: 'Y', Y: 'Q' })[ch]);
+  const TALON = ['wwxx.', '.wxz.', '.yyY.', '.yyY.', '.yyY.', 'yyyYY', 'k.k.k'];
+  const PAW = ['BBBC.', 'BABCC', 'BBBCC', '.BBCC', '.BBCD', 'BBBCD', 'ABCCD'];
+  const WING = [
+    'I.............',
+    'HI............',
+    'HHI..I........',
+    '.HHGHHI.......',
+    '.HGGGHHI..I...',
+    '..HGFGGHHHHI..',
+    '..HGFFGGGHHHI.',
+    '...HGFFFGGGHHI',
+    '...HGFFFFFGGGH',
+    '....HGFFFFFFGG',
+    '....HGGFFFFFFG',
+    '.....HGGGFFFFG',
+    '......HHGGGGG.',
+    '........HHHH..',
+  ];
+  return {
+    pal: {
+      k: '#2a1a10',
+      A: '#fbe2b0', B: '#e6b878', C: '#c08a4e', D: '#8a5e34', E: '#5a3a22',
+      v: '#ffffff', w: '#f2ece0', x: '#cfc3ae', z: '#968a74',
+      F: '#ecc994', G: '#b47c4a', H: '#7c4e2e', I: '#4e3020',
+      y: '#ffd23f', Y: '#e0901a', Q: '#a85e10',
+      e: '#ffffff', p: '#2a1a10', m: '#7a2a2a',
+    },
+    layers: [
+      { n: 'wing2', g: 'wing2', x: 17, y: 9, rows: WING.map(dark) },
+      { n: 'legFarF', g: 'legB', x: 38, y: 34, rows: TALON.map(dark) },
+      { n: 'legFarH', g: 'legA', x: 19, y: 34, rows: PAW.map(dark) },
+      { n: 'tail', g: 'tail', x: 4, y: 22, rows: [
+        '.CDC....',
+        'CDDDC...',
+        '.CDD....',
+        '..C.....',
+        '..BC....',
+        '..BC....',
+        '...BC...',
+        '...BBC..',
+        '....BBC.',
+        '.....BBC',
+        '......BB',
+      ] },
+      { n: 'body', g: 'body', x: 13, y: 26, rows: [
+        '.....BBBBBBBBBBBBB......',
+        '...BBAAAABBBBBBBBBCC....',
+        '..BAAABBBBBBBBBBBBBCC...',
+        '.BAABBBBBBBBBBBBBBBBCC..',
+        'BAABBBBBBBBBBBBBBBBBBCC.',
+        'BABBBBBBBBBBBBBBBBBBBCCC',
+        'BBBBBBBBBBBBBBBBBBBBCCCC',
+        'CBBBBBBBBBBBBBBBBBBCCCCD',
+        'CCBBBBBBBBBBBBBBBBCCCCDD',
+        'DCCCCBBBBBBBBBBCCCCCCDD.',
+        '.DDCCCCCCCCCCCCCCCDDDD..',
+        '...DDDDDDDDDDDDDDDDD....',
+      ] },
+      { n: 'legNearH', g: 'legB', x: 15, y: 35, rows: PAW },
+      { n: 'legNearF', g: 'legA', x: 34, y: 35, rows: TALON },
+      { n: 'wing', g: 'wing', x: 13, y: 12, rows: WING },
+      { n: 'crest', g: 'top', x: 28, y: 7, rows: ['...w...w', '..wx..wx', '.wwx.wwx', 'wwxxwwx.'] },
+      { n: 'head', g: 'head', x: 28, y: 11, rows: [
+        '.....wwwwww....',
+        '...wwvvvwwwwx..',
+        '..wvvvwwwwwwxx.',
+        '.wvvwwwwwwwwwxx',
+        '.wvwwwwwwwwwwxx',
+        'wwwwwwwwwwwwwxx',
+        'wwwwwwwwwwwwxxx',
+        'xwwwwwwwwwwwxxz',
+        'xwwwwwwwwwwxxxz',
+        'xxwwwwwwwwxxxz.',
+        'xxxwwwwwwxxxzz.',
+        'zxxxwwwwxxxzz..',
+        'zzxxxxxxxxxz...',
+        '.zxzxxxxxzxz...',
+        '..z.zxxxz.z....',
+        '.....zxz.......',
+      ] },
+      { n: 'beak', g: 'head', x: 42, y: 18, rows: ['yyy...', 'yyyyy.', 'yyyyyY', '.YYyyY', '..YYY.', '...Y..'],
+        alt: { 'atk1|atk2': ['yyy...', 'yyyyyY', '.kkkYY', '.mmm..', '.YYY..', '..Y...'] } },
+      { n: 'brow', g: 'head', x: 36, y: 14, ol: 0, rows: ['zzz.'] },
+      { n: 'eye', g: 'head', x: 37, y: 15, ol: 0, rows: ['ekk', 'kkk', 'kkk', '.k.'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['k..', '.kk', 'k..', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+    ],
+  };
+};
+// マジタケ：とんがり ぼうしの かさを もつ キノコの まどうし。どくの ほうしを まく
+HandPix.MON.dokukino = () => {
+  const staff = ['.oo..', 'ooOO.', 'oOOO.', '.OO..', ...Array.from({ length: 25 }, (_, i) => i % 5 === 4 ? '..WW.' : '..wW.')];
+  return {
+    pal: {
+      k: '#2a1430',
+      L: '#e6b4ff', M: '#b46ae4', N: '#7c3ab4', Z: '#4a2072',
+      g: '#b4f064', G: '#5ec040',
+      A: '#fff6e6', B: '#f2dcbc', C: '#d2ac8a', D: '#a07a5a', E: '#6a4a36',
+      w: '#c08a4e', W: '#7a5030', o: '#d4ff8a', O: '#64d044',
+      e: '#ffffff', p: '#2a1430', m: '#5a1a3a',
+      r: '#ff9ab8',
+    },
+    layers: [
+      { n: 'arm2', g: 'arm2', x: 13, y: 27, rows: ['.DE', 'EE.'] },
+      { n: 'legB', g: 'legB', x: 19, y: 33, rows: ['CCD.', 'CCDD', '.DDE'] },
+      { n: 'body', g: 'body', x: 16, y: 21, rows: [
+        '..BBBBBBBBBBBB..',
+        '.BAAABBBBBBBBBC.',
+        'BAAABBBBBBBBBBCC',
+        'BAABBBBBBBBBBBCC',
+        'BABBBBBBBBBBBBCC',
+        'BBBBBBBBBBBBBBCC',
+        'BBBBBBBBBBBBBCCD',
+        'CBBBBBBBBBBBBCCD',
+        'CBBBBBBBBBBBCCCD',
+        'CCBBBBBBBBBCCCDD',
+        '.CCBBBBBBBCCCDD.',
+        '.CCCCCCCCCCCDDD.',
+        '..DDDDDDDDDDDD..',
+      ] },
+      { n: 'legA', g: 'legA', x: 26, y: 33, rows: ['BBC.', 'BBCC', '.CCD'] },
+      { n: 'eyeL', g: 'body', x: 22, y: 26, ol: 0, rows: ['ekk', 'kkk', 'kkk', '.k.'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['k..', '.kk', 'k..', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'eyeR', g: 'body', x: 27, y: 26, ol: 0, rows: ['ekk', 'kkk', 'kkk', '.k.'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['..k', 'kk.', '..k', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'blush', g: 'body', x: 20, y: 30, ol: 0, rows: ['rr........rr'] },
+      { n: 'mouth', g: 'body', x: 25, y: 30, ol: 0, rows: ['k.k', '.k.'],
+        alt: { 'atk1|atk2': ['kkk', 'kmk', '.k.'], hit: ['.k.', 'k.k'], ko: ['...', 'kkk'] } },
+      { n: 'cap', g: 'head', x: 11, y: 4, rows: [
+        '.........ZN...............',
+        '..........NN..............',
+        '..........MNN.............',
+        '..........LMN.............',
+        '.........LMMNN............',
+        '.........LMMMN............',
+        '........LLMMMNN...........',
+        '........LMMMMMN...........',
+        '.......LLMMMMMNN..........',
+        '......LLMMMMMMMNN.........',
+        '.....LLMMMMMMMMMNN........',
+        '....LLMMMMMMMMMMMNN.......',
+        '...LLMMMMMMMMMMMMMNNN.....',
+        '..LLMMMMMMMMMMMMMMMMNNN...',
+        '.LMMMMMMMMMMMMMMMMMMMMNNN.',
+        'LMMMMMMMMMMMMMMMMMMMMMMNNN',
+        'NNMMMMMMMMMMMMMMMMMMMMNNNZ',
+        '.ZNNNNNNNNNNNNNNNNNNNNNZZ.',
+        '...ZZZZZZZZZZZZZZZZZZZZZ..',
+      ] },
+      { n: 'spots', g: 'head', x: 11, y: 4, ol: 0, rows: [
+        '..........................',
+        '..........................',
+        '..........................',
+        '..........................',
+        '..........................',
+        '..........................',
+        '..........................',
+        '...........gg.............',
+        '...........gG.............',
+        '..........................',
+        '..........................',
+        '..............ggg.........',
+        '.......gg.....gGG.........',
+        '.......gG.................',
+        '...................gg.....',
+        '...g........gg.....GG.....',
+        '..........................',
+        '..........................',
+        '..........................',
+      ] },
+      { n: 'staff', g: 'arm', x: 34, y: 12, rows: staff },
+      { n: 'arm', g: 'arm', x: 31, y: 28, rows: ['BBCC', '.CCC'] },
+      { n: 'spore', g: 'fx', x: 4, y: 18, ol: 0, rows: ['g......', '.......', '....g..', '.......', '.g.....'], only: 'idle0|idle1|walk0|walk2|atk1|atk2' },
+      { n: 'spore2', g: 'fx', x: 3, y: 20, ol: 0, rows: ['...g...', '.......', 'g......', '.......', '...g...'], only: 'idle2|idle3|blink|walk1|walk3|atk1|atk2' },
+    ],
+  };
+};
+// ガーゴイ：とうの うえで よるを みはる ちいさな いしの ガーゴイル。しゃがんで つばさを ひろげる
+HandPix.MON.yorukoumo = () => {
+  const dark = r => r.replace(/[ABCDWXY]/g, ch => ({ A: 'C', B: 'C', C: 'D', D: 'E', W: 'X', X: 'Y', Y: 'E' })[ch]);
+  const WING = [
+    '...C................',
+    '...CC...............',
+    '..CBC.......C.......',
+    '..CBBC.....CC.......',
+    '.CBWXC....CBC.......',
+    '.CBWWXC..CBBC.......',
+    'CBWWWXXCCBWXC.......',
+    'CBWWWWXXCBWWXC......',
+    'CBWWWWWXCBWWWXC.....',
+    'CBWWWWWXXBWWWWXC....',
+    'CBWWWWWWXBWWWWXXC...',
+    'CBXWWWWWWXBWWWWXXC..',
+    '.CBXWWWWWXBWWWWWXXC.',
+    '.CBXXWWWWWXBWWWWWXXC',
+    '..CBXXWWWWXBWWWWWWXC',
+    '..CBYXXWWWXBXWWWWXXC',
+    '...CYYXXWWXBXXWWWXCC',
+    '...Y..YYXXXBXXXWXXC.',
+    '.........YYYBYXXXCC.',
+    '.........Y..YCYYCC..',
+    '..............YCC...',
+    '...............C....',
+  ];
+  const HAUNCH = [
+    '...BBBB...',
+    '.BBAABBC..',
+    'BAABBBBCC.',
+    'BABBBBBCC.',
+    'BBBBBBCCD.',
+    'CBBBBCCCD.',
+    '.CCCCCDD..',
+    '..BCCDD...',
+    '.BBCCDD...',
+    'hBhChDh...',
+  ];
+  const ARM = ['.BBB..', 'BAABC.', 'BABCC.', '.BBCC.', '.BBCD.', '.BBCD.', '.BBCD.', 'BBBCDD', 'hBhChD'];
+  return {
+    pal: {
+      k: '#16122a',
+      A: '#bcb4d4', B: '#8e86ae', C: '#66628c', D: '#46426c', E: '#2a2848',
+      W: '#8070b0', X: '#5a4c90', Y: '#3a2e6a',
+      h: '#e8dcc0', i: '#b8a688', j: '#7e6e58',
+      r: '#ff3a4a', R: '#ffd0d0', f: '#ffffff', m: '#4a1020',
+    },
+    layers: [
+      { n: 'wing', g: 'wing', x: 0, y: 5, rows: WING },
+      { n: 'tail', g: 'tail', x: 5, y: 31, rows: ['DD......', 'DDD.....', '.DC.....', '..CC....', '...CC...', '....CCC.', '.....CCC', '.......C'] },
+      { n: 'legB', g: 'legB', x: 18, y: 33, rows: HAUNCH.map(dark) },
+      { n: 'arm2', g: 'arm2', x: 32, y: 32, rows: ARM.map(dark) },
+      { n: 'body', g: 'body', x: 14, y: 24, rows: [
+        '.....BBBBBBB......',
+        '...BBAAABBBBBC....',
+        '..BAAABBBBBBBCC...',
+        '.BAABBBBBBBBBBCC..',
+        '.BABBBBBDBBBBBCC..',
+        'BABBBBBBDBBBBBBCC.',
+        'BBBBBBBBBDBBBBBCC.',
+        'BBBBBBBBBBBBBBCCCD',
+        'CBBBBBBBBBBBBBCCCD',
+        'CBBBBBBBBBBBBCCCCD',
+        'CCBBBBBBBBBBCCCCDD',
+        'CCCBBBBBBBCCCCCDD.',
+        'DCCCCCCCCCCCCCDDD.',
+        '.DDCCCCCCCCCCDDD..',
+        '..DDDDDDDDDDDDD...',
+        '....DDDDDDDDD.....',
+      ] },
+      { n: 'legA', g: 'legA', x: 13, y: 32, rows: HAUNCH },
+      { n: 'arm', g: 'arm', x: 28, y: 32, rows: ARM },
+      { n: 'ear', g: 'head', x: 21, y: 12, rows: ['C.....', 'BC....', 'BBC...', 'ABBC..', '.BBBC.'] },
+      { n: 'horn1', g: 'top', x: 26, y: 9, rows: ['h....', 'ih...', '.ih..', '.iih.', '..iij'] },
+      { n: 'horn2', g: 'top', x: 32, y: 8, rows: ['i....', 'ji...', '.ji..', '.jji.', '..jjj'] },
+      { n: 'head', g: 'head', x: 24, y: 14, rows: [
+        '....BBBBBBB.....',
+        '..BBAAABBBBBC...',
+        '.BAAABBBBBBBCC..',
+        'BAABBBBBBBBBBCC.',
+        'BABBBBBBBBBBBBCC',
+        'BBBBBBBBBBBBBBCC',
+        'BBBBBBBBBBBBBBCC',
+        'CBBBBBBBBBBBBBCD',
+        'CBBBBBBBBBBBBCCD',
+        'CCBBBBBBBBBBCCDD',
+        '.CCBBBBBBBBCCCD.',
+        '.DCCCCCCCCCCDD..',
+        '..DDDDDDDDDDD...',
+      ] },
+      { n: 'brow', g: 'head', x: 29, y: 18, ol: 0, rows: ['DD....DD.', '..D..D...'] },
+      { n: 'eyes', g: 'head', x: 30, y: 20, ol: 0, rows: ['Rr..Rr', 'rr..rr'],
+        alt: { blink: ['......', 'kk..kk'], 'hit|atk0': ['k....k', '.k..k.'], ko: ['k.kk.k', '.k..k.'], 'atk1|atk2': ['RR..RR', 'rr..rr'] } },
+      { n: 'mouth', g: 'head', x: 29, y: 23, ol: 0, rows: ['kkkkkkk', '.f...f.'],
+        alt: { 'atk1|atk2': ['kkkkkkk', 'kfmmmfk', '.kkkkk.'], hit: ['.kkkkk.', 'k.....k'], ko: ['.......', 'kkkkkkk'] } },
+    ],
+  };
+};
+// ミノタウ：もえる おのを ふりまわす めいきゅうの まもの（牛の あたまの 戦士）
+HandPix.MON.gouen = () => {
+  const dark = r => r.replace(/[ABCDhi]/g, ch => ({ A: 'C', B: 'C', C: 'D', D: 'E', h: 'i', i: 'j' })[ch]);
+  const LEG = ['BBBBBC.', 'BAABBCC', 'BABBBCC', 'BBBBBCD', '.BBBCCD', '.BBBCCD', '.BBBCDD', '..BBCD.', '..CCCD.', '.CCCCDD', '.EEEEE.', 'EEEEEEE'];
+  const F1 = ['..1...', '..21..', '.122..', '.2332.', '12342.', '23443.', '234432', '.2342.', '..22..'];
+  const F2 = ['...1..', '..12..', '..221.', '.2332.', '.24321', '.34432', '234432', '.2432.', '..22..'];
+  return {
+    pal: {
+      k: '#24120c',
+      A: '#dc9e6c', B: '#b26c40', C: '#8a4a2a', D: '#5e301c', E: '#3a1c12',
+      m: '#f2caa2', M: '#c89a78',
+      h: '#fff0d8', i: '#d8c0a0', j: '#9a8268',
+      L: '#6a4a2a', l: '#4a3020', y: '#ffd23f', Y: '#c88a1a',
+      r: '#c83a3a', R: '#e8604a',
+      s: '#eef2fa', t: '#aab6ca', u: '#6a7690', w: '#a06a3a', W: '#6a4020',
+      1: '#c8341a', 2: '#ff8a1f', 3: '#ffd23f', 4: '#fff8d0',
+      e: '#ffffff', p: '#24120c',
+    },
+    layers: [
+      { n: 'horn2', g: 'top', x: 19, y: 2, rows: ['hh........', 'ihh.......', '.ihh......', '..ihh.....', '...ihiiiii', '....iiiiij', '......jjj.'].map(dark) },
+      { n: 'arm2', g: 'arm2', x: 10, y: 21, rows: ['.BCC', 'BBCD', 'BCCD', 'CCD.', 'CCD.', 'CCDD', 'DDDD', '.DD.'].map(dark) },
+      { n: 'legB', g: 'legB', x: 16, y: 33, rows: LEG.map(dark) },
+      { n: 'legA', g: 'legA', x: 25, y: 33, rows: LEG },
+      { n: 'torso', g: 'body', x: 13, y: 19, rows: [
+        '....BBBBBBBBBBBC....',
+        '..BBAAABBBBBBBBCC...',
+        '.BAAAABBBBBBBBBBCC..',
+        'BAAABBBBBBBBBBBBBCC.',
+        'BAABBBBBBBBBBBBBBCCD',
+        'BABBBBBCBBBBBCBBBCCD',
+        'BBBBBBBBCCBCCBBBCCCD',
+        'CBBBBBBBBBBBBBBBCCCD',
+        'CBBBBBBBBCBBBBBCCCDD',
+        'CCBBBBBBBCBBBBCCCCDD',
+        '.CCBBBBBBCBBBCCCCDD.',
+        '.CCCBBBBBBBBCCCCDDD.',
+        '.LLLLLLLLLLLLLLLLLL.',
+        '.lLLLLLLyyLLLLLLLll.',
+        '..CCCCCCYYCCCCCCDD..',
+        '...DDDDDDDDDDDDDD...',
+      ] },
+      { n: 'cloth', g: 'body', x: 19, y: 34, rows: ['rRRRRr', 'rRRRr.', '.rRr..', '..r...'] },
+      { n: 'handle', g: 'arm', x: 39, y: 6, rows: Array.from({ length: 36 }, (_, i) => i % 6 === 5 ? 'WW' : 'wW') },
+      { n: 'fire', g: 'arm', x: 42, y: 1, ol: '#5a1418', rows: F1, alt: { 'idle1|idle3|walk1|walk3|atk1|hit': F2 } },
+      { n: 'blade', g: 'arm', x: 41, y: 7, rows: ['tt.....', 'tss....', 'tsss...', 'tssss..', 'ttsssu.', 'ttssssu', 'ttsssu.', 'tssss..', 'tsss...', 'tss....', 'tt.....'] },
+      { n: 'arm', g: 'arm', x: 32, y: 21, rows: ['BBBC....', 'BAABCC..', 'BABBCCC.', '.BBBCCCD', '..BCCCDD', '...CCDD.', '....DD..'] },
+      { n: 'fist', g: 'arm', x: 37, y: 27, rows: ['BBC.', 'ABCC', 'BCCD', '.CD.'] },
+      { n: 'ear', g: 'head', x: 22, y: 12, rows: ['BBBC', '.CCD'] },
+      { n: 'head', g: 'head', x: 25, y: 7, rows: [
+        '...BBBBBBBB....',
+        '.BBAAABBBBBBC..',
+        'BAAABBBBBBBBCC.',
+        'BAABBBBBBBBBBCC',
+        'BABBBBBBBBBBBCC',
+        'BBBBBBBBBBBBBCC',
+        'CBBBBBBBBmmmmmm',
+        'CBBBBBBBmmmmmmM',
+        'CCBBBBBmmmmmmMM',
+        '.CCBBBBmmmmmMMM',
+        '.DCCCCCmmmMMMM.',
+        '..DDDDDCMMMMM..',
+        '....DDDDDDD....',
+      ] },
+      { n: 'horn1', g: 'top', x: 27, y: 1, rows: ['........hh', '.......hhi', '......hhi.', '.....hhi..', 'iiiihhi...', 'jiiiii....', '.jjj......'] },
+      { n: 'eye', g: 'head', x: 30, y: 10, ol: 0, rows: ['kkk.', '.ekk', '.kk.'],
+        alt: { blink: ['kkk.', '....', '.kk.'], 'hit|atk0': ['k...', '.kk.', 'k...'], ko: ['k.k.', '.k..', 'k.k.'] } },
+      { n: 'nose', g: 'head', x: 38, y: 14, ol: 0, rows: ['k.k'] },
+      { n: 'ring', g: 'head', x: 37, y: 16, ol: 0, rows: ['.yy.', 'y..Y', '.YY.'] },
+      { n: 'mouth', g: 'head', x: 33, y: 17, ol: 0, rows: ['kkkk'], only: 'atk1|atk2|hit' },
+    ],
+  };
+};
+// ユキピクシー：こおりの はねを もつ ゆきの ようせい
+HandPix.MON.tsuraran = () => {
+  const WING = [
+    'w.............',
+    'Ww............',
+    'VWw...........',
+    'VWWw..........',
+    '.VWWw.........',
+    '.VWWWw....w...',
+    '..VWWWw..Ww...',
+    '..VWWWWwVWw...',
+    '...VWWWWWWw...',
+    '...VVWWWWWWw..',
+    '....VVWWWWWWw.',
+    '.....VVWWWWWWw',
+    '......VVVWWWW.',
+    '.....VWWWVVV..',
+    '....VWWWw.....',
+    '...VWWw.......',
+    '..VWw.........',
+    '..V...........',
+  ];
+  const flip = r => r.split('').reverse().join('');
+  const FLAKE = ['.c.', 'cWc', '.c.'];
+  return {
+    pal: {
+      k: '#1a2a4a',
+      A: '#fff2ea', B: '#ffd8c8', C: '#e8b0a0',
+      H: '#eefaff', I: '#b0dcf8', J: '#6aa8e0',
+      d: '#d4f0ff', D: '#86c6f2', Q: '#4a88d0', R: '#2a5aa0',
+      w: '#f2fdff', W: '#b0e8ff', V: '#6ac0f0',
+      c: '#ffffff', C2: '#000',
+      e: '#ffffff', b: '#3a7ad0', p: '#1a2a4a', r: '#ffa0b0', m: '#c84a6a',
+    },
+    layers: [
+      { n: 'wing2', g: 'wing2', x: 4, y: 10, ol: '#2a5a8a', rows: WING },
+      { n: 'wing', g: 'wing', x: 30, y: 10, ol: '#2a5a8a', rows: WING.map(flip) },
+      { n: 'legB', g: 'legB', x: 21, y: 37, rows: ['BC', 'BC', 'CC', 'QR', 'RR'] },
+      { n: 'legA', g: 'legA', x: 25, y: 37, rows: ['AB', 'AB', 'BC', 'DQ', 'QR'] },
+      { n: 'arm2', g: 'arm2', x: 14, y: 28, rows: ['..BA', '.BB.', 'BC..', 'CC..'] },
+      { n: 'dress', g: 'body', x: 17, y: 26, rows: [
+        '....DDDDDD....',
+        '...DddDDDDQ...',
+        '...DdDDDDDQ...',
+        '..DdDDDDDDQQ..',
+        '..DdDDDDDDDQ..',
+        '.DddDDDDDDDQQ.',
+        '.DdDDDDDDDDQQ.',
+        'DddDDDDDDDDDQQ',
+        'DdDDDDDDDDDQQR',
+        'dddddddddddddR',
+        'DdDdDdDdDdDdDR',
+        '.R.R.R.R.R.R..',
+      ] },
+      { n: 'arm', g: 'arm', x: 30, y: 28, rows: ['AB..', '.BB.', '..BC', '..CC'] },
+      { n: 'head', g: 'head', x: 16, y: 11, rows: [
+        '....HHHHHHHH....',
+        '..HHHHHHHHHHII..',
+        '.HHHHHHHHHHHHII.',
+        'HHHHHHHHHHHHHHII',
+        'HHHHIIHHHHIIHHII',
+        'HHHIAAIHHIAAIHII',
+        'HHIAAAAIIAAAAIII',
+        'HIAAAAAAAAAAAAIJ',
+        'HIAAAAAAAAAAAAIJ',
+        'HIAAAAAAAAAAABIJ',
+        'HIBAAAAAAAAAABIJ',
+        'IJBBAAAAAAAABBJJ',
+        '.JJBBBBBBBBBBJJ.',
+        '.JJJ.CCCCCC.JJJ.',
+        '..JJ........JJ..',
+      ] },
+      { n: 'crown', g: 'top', x: 19, y: 6, ol: '#2a5a8a', rows: ['....c.....', '.c..c..c..', '.cc.cW.cc.', 'cWcccWccWc', 'WWWWWWWWWW'] },
+      { n: 'eyeL', g: 'head', x: 19, y: 18, ol: 0, rows: ['kkk', 'keb', 'kbb', '.kk'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['k..', '.kk', 'k..', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'eyeR', g: 'head', x: 26, y: 18, ol: 0, rows: ['kkk', 'keb', 'kbb', '.kk'],
+        alt: { blink: ['...', '...', 'kkk', '...'], 'hit|atk0': ['..k', 'kk.', '..k', '...'], ko: ['k.k', '.k.', 'k.k', '...'] } },
+      { n: 'blush', g: 'head', x: 18, y: 22, ol: 0, rows: ['rr.......rr'] },
+      { n: 'mouth', g: 'head', x: 23, y: 22, ol: 0, rows: ['kk'],
+        alt: { 'atk1|atk2': ['.k.', 'kmk', '.k.'], hit: ['k.', '.k'], ko: ['kk'] } },
+      { n: 'flake1', g: 'fx', x: 6, y: 32, ol: '#2a5a8a', rows: FLAKE, only: 'idle0|idle1|walk0|walk1|atk1|atk2' },
+      { n: 'flake2', g: 'fx', x: 40, y: 30, ol: '#2a5a8a', rows: FLAKE, only: 'idle2|idle3|blink|walk2|walk3|atk1|atk2' },
+    ],
+  };
+};
+// ====== ここまで HANDPIX ======
 
 // RGBA → キャンバス（すきまを 切りおとして 足もとを 下端に そろえる）。white=true で 白シルエット
 // アニメの 全コマを 同じ わくで 切りだす（コマごとに 足もとが ずれないように）
@@ -1097,15 +2112,19 @@ function rgbaCanvas(px, W, H, white, box) {
   g.putImageData(img, 0, 0);
   return c;
 }
-function bakeFrames(def, W, H) {
-  const fr = SpriteGen.frames(def, W, H), box = frameBox(fr, W, H), o = {};
+function bakeFrames(fr, W, H) {
+  const box = frameBox(fr, W, H), o = {};
   for (const k in fr) o[k] = { n: rgbaCanvas(fr[k], W, H, false, box), w: rgbaCanvas(fr[k], W, H, true, box) };
   return o;
 }
 const MS = 1.6; // モンスターを 描く 倍率（48px の 絵 → 約77 ワールドpx）
 const SPR = {};
-for (const id in SPECIES) { const fr = bakeFrames(SpriteGen.MON[id](), SpriteGen.W, SpriteGen.H); SPR[id] = { fr, n: fr.idle0.n, w: fr.idle0.w }; }
-const trainerSpr = (hat, coat) => bakeFrames(SpriteGen.TRAINER(hat, coat), SpriteGen.TW, SpriteGen.TH);
+// モンスターは 手打ちドット絵（HandPix）。ないときは 図形から 自動生成（SpriteGen）
+for (const id in SPECIES) {
+  const fr = HandPix.MON[id] ? bakeFrames(HandPix.frames(HandPix.MON[id]()), HandPix.W, HandPix.H) : bakeFrames(SpriteGen.frames(SpriteGen.MON[id](), SpriteGen.W, SpriteGen.H), SpriteGen.W, SpriteGen.H);
+  SPR[id] = { fr, n: fr.idle0.n, w: fr.idle0.w };
+}
+const trainerSpr = (hat, coat) => bakeFrames(SpriteGen.frames(SpriteGen.TRAINER(hat, coat), SpriteGen.TW, SpriteGen.TH), SpriteGen.TW, SpriteGen.TH);
 const TR_PLAYER = trainerSpr('#e84a5f', '#3a6ee8');
 
 function spriteCanvas(sid, size) {
