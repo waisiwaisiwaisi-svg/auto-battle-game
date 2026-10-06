@@ -1,4 +1,5 @@
 # マグマジロ（ほのお・じめん × アルマジロ）手打ち GBA風
+META = dict(id='magmajiro', name='マグマジロ', types=['fire', 'ground'], base='アルマジロ', size='M')
 PAL = {
     'k': '#101018', 'l': '#4a2230',
     'R': '#a898b4', 'Q': '#62527a', 'P': '#382c48',
