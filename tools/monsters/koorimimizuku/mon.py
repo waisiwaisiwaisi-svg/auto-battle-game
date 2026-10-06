@@ -2,6 +2,7 @@
 # 直立して にらむ 夜の 狩人。大きな 頭・氷の 結晶の 羽角・つららの 刃の 翼
 import pix
 META = dict(id='koorimimizuku', name='コオリミミズク', types=['ice', 'wind'], base='ミミズク', size='M')
+EYE_BOX = (28, 20, 19, 8)   # 猛禽の 目 2つ（idle0）
 PAL = {
     'k': '#101018', 'l': '#1e2a4c',
     'W': '#f4f8ff', 'I': '#b4e2f8', 'J': '#6aa8d8', 'K': '#3a64a0',
@@ -233,17 +234,18 @@ VOLLEY1 = volley([(0, 1), (9, 8), (1, 15)])
 VOLLEY2 = volley([(10, 0), (20, 8), (12, 15)])
 FROST = ['..k.....k..', '.kWk...kIk.', 'kWEWk.kIWIk', '.kWk...kIk.', '..k.....k..']
 
-# 目（手打ち）：外側が 高く、くちばし側へ 下がる つり目。黒い ふちで 光を きわだたせる
-# 目：ハイライト W ＋ 虹彩 2色（E 明・e 暗）＋ たての ひとみ k
-EYE = ['kkkk.....', 'kWWEkkk..', 'kWEEkEEkk', 'keEEkEEek', '.keekeek.', '..kkkkk..']
-EYE_ALT = {'blink': ['kkkk.....', 'kMMMkkk..', 'kMMMMMMkk', 'kkkkkkkkk', '.WWWWWW..', '.........'],
-           'atk0|atk1|atk2': ['kkkk.....', 'kWWWkkk..', 'kWWEkWEkk', 'kEWEkWEEk', '.keekeek.', '..kkkkk..'],
-           'hit': ['kkkk.....', 'kMMMkkk..', 'kkkkkkkkk', 'kEkkkkEkk', '.kkEEkk..', '..kkkkk..']}
-EYEF = ['...kk', '.kWEk', 'kEkEk', 'kekek', '.kkk.']
-EYEF_ALT = {'blink': ['...kk', '.kkMk', 'kMMMk', 'kkkkk', '.....'], 'atk0|atk1|atk2': ['...kk', '.kWWk', 'kWkEk', 'kekek', '.kkk.'], 'hit': ['...kk', '.kkMk', 'kkkkk', 'kEkEk', '.kkk.']}
+# 目：猛禽の 目（B）。白目なし。大きく 丸い 目の 上半分を 紺の 太い まゆの ひさし（M）が 平らに 切る。
+#   中は 大きな 丸い 黒ひとみ（k）を 氷の 水色の 輪（E 明・e 暗）が かこむ。ひとみに 小さな 光（W）1点
+EYE = ['MMMMMMM..', 'kkkkkkkkk', 'kEEEEEkkk', 'kEEWkkEek', 'kEEkkkeek', 'keEkkkeek', '.keeeeek.', '..kkkkk..']
+EYE_ALT = {'blink': ['MMMMMMM..', 'MMMMMMMMk', 'MMMMMMMMk', 'NMMMMMMMk', 'kkkkkkkkk', 'keEEEeeek', '.keeeeek.', '..kkkkk..'],
+           'atk0|atk1|atk2': ['MMMMMMM..', 'kkkkkkkkk', 'kWWWWWkkk', 'kWEkkEEek', 'kEEkkEeek', 'keEEEEeek', '.keeeeek.', '..kkkkk..'],
+           'hit': ['MMMMMMM..', 'MMMMMMMMk', 'kkkkkkkkk', 'kkEEEEEkk', 'kEEEkEEek', 'keEEEEeek', '.keeeeek.', '..kkkkk..']}
+EYEF = ['MMkkk.', 'kkkkkk', 'kEEkkk', 'kEkkek', '.keek.', '..kk..']
+EYEF_ALT = {'blink': ['MMkkk.', 'MMMMMk', 'MMMMMk', 'kkkkkk', '.keek.', '..kk..'], 'atk0|atk1|atk2': ['MMkkk.', 'kkkkkk', 'kWWkkk', 'kEWkEk', '.keek.', '..kk..'],
+            'hit': ['MMkkk.', 'MMMMMk', 'kkkkkk', 'kEEkek', '.keek.', '..kk..']}
 
 # ---------- ダウン：あおむけに たおれる。頭は 横に ころがり（羽角が 右、顔が 上）、目は ×、爪は 上を 向く ----------
-EYE_KO = ['kEkkkEk', 'kkEkEkk', 'kkkEkkk', 'kkEkEkk', 'kEkkkEk']
+EYE_KO = ['kEkkkEk', 'kkEkEkk', 'kkkEkkk', 'kkEkEkk', 'kEkkkEk']   # ×（輪の 色で）
 EYEF_KO = ['EkE', 'kEk', 'EkE']
 def crop(g):
     ys = [y for y in range(len(g)) if any(c != '.' for c in g[y])]; xs = [x for x in range(len(g[0])) if any(g[y][x] != '.' for y in ys)]
@@ -296,8 +298,8 @@ def layers():
         dict(n='talon', g='talon', x=32, y=52, rows=TALON, not_='ko'),
         dict(n='wingF', g='wingF', x=0, y=0, rows=rows(wing_folded()), alt={'atk0': rows(wing_folded(3)), 'atk1|atk2': rows(wing_strike())}, not_='ko'),
         dict(n='head', g='head', x=0, y=4, rows=rows(head()), not_='ko'),
-        dict(n='eye', g='head', x=28, y=21, rows=EYE, alt=EYE_ALT, not_='ko'),
-        dict(n='eyeF', g='head', x=41, y=21, rows=EYEF, alt=EYEF_ALT, not_='ko'),
+        dict(n='eye', g='head', x=28, y=20, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='eyeF', g='head', x=41, y=20, rows=EYEF, alt=EYEF_ALT, not_='ko'),
         dict(n='frost', g='head', x=22, y=2, rows=FROST, only='atk0'),
         dict(n='volley1', g='fx', x=50, y=24, rows=VOLLEY1, only='atk1'),
         dict(n='volley2', g='fx', x=46, y=24, rows=VOLLEY2, only='atk2'),

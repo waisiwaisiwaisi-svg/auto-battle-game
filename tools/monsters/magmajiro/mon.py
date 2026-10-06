@@ -1,5 +1,6 @@
 # マグマジロ（ほのお・じめん × アルマジロ）手打ち GBA風・デフォルメ（2〜3頭身：頭は そのまま、胴を 小さく 丸く、足は 短く 見せる）
 META = dict(id='magmajiro', name='マグマジロ', types=['fire', 'ground'], base='アルマジロ', size='M')
+EYE_BOX = (40, 34, 7, 5)
 PAL = {
     'k': '#101018', 'l': '#4a2230',
     'R': '#a898b4', 'Q': '#62527a', 'P': '#382c48',
@@ -182,7 +183,12 @@ NB = 'atk1|atk2'
 OH = list(HEAD)
 OH[9] = OH[9][:11] + 'OOOkO' + OH[9][16:]          # 目の 下半分（溶岩色）
 OH[10] = OH[10][:10] + 'kkkkkk' + OH[10][16:]       # 下まぶた
-EYE_ALT = {'blink': ['kkkkk', 'HHHHH'], 'hit': ['kOkOk', 'OkOkO'], 'atk0|atk1|atk2': ['wwYkY', 'YYOkO'], 'ko': ['kHHHk', 'HkHkH']}
+# 目（M 重い まぶた）：岩の ひさしの 下に 厚い まぶたが 虹彩の 上半分を おおう。のぞくのは 溶岩の 黄〜橙の 下半分だけ（見下す 目つき）
+EYE_M = ['HFFFGGH', 'kkkkkkk', 'kYYOOkk', 'HkkkkkH']
+EYE_ALT = {'blink': ['HFFFGGH', 'HFFGGGH', 'kkkkkkk', 'H.....H'],
+           'atk0|atk1|atk2': ['Hkkkkkk', 'kwYYOkk', 'kYYOkkk', 'HkkkkkH'],        # ため：まぶたが 上がって 全開で 光る
+           'hit': ['HFFFGGH', 'HkkGkkH', 'kOkkkOk', 'HkkkkkH'],
+           'ko': ['HFFFGGH', 'kHkHkHk', 'HHHkHHH', 'HHkHkHH']}
 def layers():
     return [
         dict(n='legFF', g='legB', x=30, y=52, rows=dark(LEG), not_=NB),
@@ -197,7 +203,7 @@ def layers():
         dict(n='head', g='head', x=30, y=27, rows=OH, not_=NB),
         dict(n='ear', g='ear', x=31, y=22, rows=EAR, not_=NB),
         dict(n='nhorn', g='head', x=49, y=29, rows=NHORN, not_=NB),
-        dict(n='eye', g='head', x=41, y=35, rows=['wYYkY', 'OOOkO'], alt=EYE_ALT, not_=NB),
+        dict(n='eye', g='head', x=40, y=35, rows=EYE_M, alt=EYE_ALT, not_=NB),
         dict(n='ball', g='root', x=10, y=30, rows=ball(), alt={'atk2': ball(True, .28)}, only=NB),
     ]
 FRAMES = {

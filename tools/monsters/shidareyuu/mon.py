@@ -47,17 +47,18 @@ def mirror(rows): return pix.flip_h(rows)
 
 
 META = dict(id='shidareyuu', name='シダレユウ', types=['ghost', 'grass'], base='柳', size='M')
+EYE_BOX = (38, 23, 9, 6)
 PAL = {
     'k': '#101018', 'l': '#1a3028',
     'E': '#b6eea0', 'F': '#5cb46c', 'D': '#2a664a',      # 柳の 葉（垂れ髪）
     'V': '#dfe8f4', 'U': '#8a9cc0',                      # 幽霊の 顔（青白い）
     'H': '#a88462', 'G': '#6c4c38', 'J': '#3e2a24',      # 幹・根
     'Y': '#f6ff8a', 'O': '#34d07a',                      # 光る 目（黄みどり）
-    'r': '#8a1c2a',
+    'r': '#8a1c2a', 'X': '#0c0a14',                      # 黒い 強膜
     'w': '#ffffff',
 }
 LIGHT = set('EVHYw')
-KEEP_BLACK = set('wYOr')
+KEEP_BLACK = set('wYOrX')
 
 # ---- 頭：柳の かんむり（丸い ドーム）から 背中へ 垂れる 髪の 束を 1つの かたまりで 描く。前がみの 葉先が 顔に かかる ----
 def hairmass(ph=0):
@@ -95,12 +96,17 @@ def lock(ph=0):   # 顔の 左に かかる 前がみの 束
 
 FRONT = lock(); FRONT2 = lock(1)
 
-# するどい 目：まゆの 線＋白い 光＋黄と みどりの 虹彩＋たての ひとみ＋下まぶた
-EYE = ['kk.....', 'UkkkkkU', 'kwYkYkk', 'kYOkOOk', '.kkkkk.']
-EYE_ALT = {'blink': ['kk.....', 'UkkkkkU', 'VVVVVVV', 'kkkkkkk', '.UUUUU.'],
-           'hit': ['kk.....', 'UkkVVkk', 'VVkkkVV', 'UkkVVkk', '.UUUUU.'],
-           'atk0|atk1|atk2': ['kkk....', 'UkwkkkU', 'kwYYkYk', 'kYOOkOk', '.kkkkk.'],
-           'ko': ['.......', 'UkVVVkU', 'VVkVkVV', 'VVVkVVV', 'VVkVkVV']}
+# 黒い 強膜（F）：白目の かわりに 真っ黒な 目。中に 白い 光点 1つと みどりの にじみ。下まぶたは 赤く ただれる
+EYE = ['kk.......',
+       'UkkkkU...',
+       'kXXXXkkk.',
+       'kXXwOXXXk',
+       '.kXOXXXk.',
+       '..rkkkr..']
+EYE_ALT = {'blink': ['kk.......', 'UkkkkU...', 'VVVVVkkk.', 'kkkkkkkkk', '.UrrrrrU.'],
+           'hit': ['kk.......', 'UkkkU....', 'VkXXkkk..', 'VVkXwXXk.', 'VkXXkkk..', '.UkkU....'],       # ぎゅっと しぼむ、光点が ぶれる
+           'atk0|atk1|atk2': ['kkk......', 'UkkkkkU..', 'kXXOXXkkk', 'kXOwwOXXk', '.kXOYXXk.', '..rkkkr..'],   # 光点が ふくらむ
+           'ko': ['.........', '.kU..Uk..', '..kUUk...', '...kk....', '..kUUk...', '.kU..Uk..']}
 
 # ---- 胴：短い ねじれた 幹（樹皮の すじ）----
 TRUNK = outline(over(shade(mask(16, 20, [('e', 8, 9, 7.5, 9, '#'), ('r', 2, 12, 14, 20, '#')]), {'#': 'HGJ'}, 2, 2, 3), [
@@ -157,7 +163,7 @@ def layers():
         dict(n='trunk', g='body', x=23, y=33, rows=TRUNK),
         dict(n='root', g='legA', x=21, y=52, rows=ROOT),
         dict(n='face', g='head', x=31, y=18, rows=face(), alt={NB: face('atk')}),
-        dict(n='eye', g='head', x=39, y=24, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=38, y=23, rows=EYE, alt=EYE_ALT),
         dict(n='front', g='hair', x=29, y=17, rows=FRONT, alt={'idle1|idle3|walk1|walk3|hit': FRONT2}),
         dict(n='bang', g='hair', x=3, y=5, rows=BANG, alt={'idle1|idle3|walk1|walk3|hit': BANG2}),
         dict(n='arm', g='arm', x=33, y=36, rows=ARM, not_=NB),

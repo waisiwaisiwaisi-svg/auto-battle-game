@@ -1,15 +1,17 @@
 # ヒョウリュウ（ドラゴン・こおり × 竜）手打ち GBA風・デフォルメ（頭を 大きく、胴を 短く、足を 短く。結晶の 柱は 大きい まま）
 from pix import grid, rows_of, ellipse, poly, line, outline, recolor
 META = dict(id='hyoryu', name='ヒョウリュウ', types=['dragon', 'ice'], base='竜', size='L')
+EYE_BOX = (40, 36, 7, 4)   # 目（idle0 の 64x64 座標）
 PAL = {
     'k': '#101018', 'l': '#221c50',
     'D': '#96a6e8', 'E': '#5a5eb0', 'F': '#2e2c6c',      # うろこ（明・中・暗）
     'B': '#eaeeff', 'C': '#a6b0de',                      # 腹（霜）
     'I': '#f2ffff', 'J': '#8ae8f6', 'K': '#3a9ccc',      # 氷の 結晶（明・中・暗）
-    'r': '#ff3a5a', 'q': '#a01836', 'm': '#4a1a52', 'w': '#ffffff',
+    'm': '#4a1a52', 'w': '#ffffff',
+    'x': '#07060e',                                      # 目の 黒い 強膜
 }
 LIGHT = set('DBIw')
-KEEP_BLACK = set('wrqIJ')
+KEEP_BLACK = set('wIJx')
 
 def run(g, x, y, dx, dy):
     n = 0
@@ -87,9 +89,11 @@ HEAD_OPEN = HEAD[:11] + [
     '.kFFFFFFFFkkkkkk........',
     '..kkkkkkkkk.............',
 ]
-# 目：白い 光＋赤と 暗い 赤の 2色＋たての ひとみ。前へ さがる まゆで つり目
-EYE = ['wrrkrrq', 'qqkqqk']
-EYE_ALT = {'blink': ['kkkkkkk', 'EEEEEE'], 'hit': ['kkrkkkk', 'krkkrk'], 'atk0|atk1|atk2': ['wwrkrrr', 'rqkqqk'], 'ko': ['kEkEkEk', 'EkEkEk']}
+# 目（F：黒い 強膜）：白目の かわりに 真っ黒。その 中に 氷の 青の 細い たて瞳（芯は 白っぽい 青）が 光る。下ぶちは 暗い 紫
+EYE = ['xxxKIxx', 'mxxKJxk']
+EYE_ALT = {'blink': ['kkkkkkk', 'kEEEEEk'], 'hit': ['kkxxxkk', 'kxJxxxk'],
+           'atk0|atk1|atk2': ['xxKIwKx', 'mxKJIKk'],
+           'ko': ['kxKxKxk', 'kxxKxxk', 'kxKxKxk']}
 LEG_F = ['.kkkkkk..', 'kDEEEEFk.', 'kDEEEEFk.', '.kDEEEFFk', 'kDEEEEFFk', 'kFFFFFFFk', 'kIkIkIkk.']
 LEG_H = ['.kkkkkkk.', 'kDEEEEEFk', 'kDEEEEFFk', '.kEEEEFFk', '.kDEEEFFk', 'kFFFFFFFk', 'kIkIkIkk.']
 TAILTIP = ['.kk...', 'kIJk..', 'kIJKkk', '.kIJJK', '..kkkk']

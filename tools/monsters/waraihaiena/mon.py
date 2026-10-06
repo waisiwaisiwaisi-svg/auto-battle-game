@@ -54,6 +54,7 @@ def mirror(rows): return pix.flip_h(rows)
 
 
 META = dict(id='waraihaiena', name='ワライハイエナ', types=['dark', 'normal'], base='ハイエナ', size='M')
+EYE_BOX = (45, 15, 12, 6)
 PAL = {
     'k': '#101018', 'l': '#2a1a2a',
     'F': '#d8b47e', 'G': '#9a7650', 'H': '#56402e',      # 毛皮（はい茶）
@@ -124,12 +125,18 @@ def head(mode=''):
             else: G2[b - 1][x] = 'w'
     return outline(rows_of(G2))
 HEAD = head(); HEAD_ATK = head('atk')
-# するどい 目：仮面の 目あなの ふち＋白い 光＋金と 赤の 虹彩＋たての ひとみ（笑っているのに 目は 笑わない）
-EYE = ['kk......', 'TkkkkkT.', 'kwYkYkkk', 'kYOkOOk.', '.kkkkk..']
-EYE_ALT = {'blink': ['kk......', 'TkkkkkT.', 'SSSSSSSS', 'kkkkkkk.', '.TTTTT..'],
-           'hit': ['kk......', 'TkkSSkk.', 'SSkkkSS.', 'TkkSSkk.', '.TTTTT..'],
-           'atk0|atk1|atk2': ['kkk.....', 'TkwkkkkT', 'kwYYkYkk', 'kYOOkOk.', '.kkkkk..'],
-           'ko': ['........', 'TkSSSkT.', 'SSkSkSS.', 'SSSkSSS.', 'SSkSkSS.']}
+# 隈取りの 目（L）：仮面の 目あなの まわりに 赤い 隈取り（後ろへ はね上がる 筋と 下へ たれる 筋）。目は つり目、金の 虹彩に 黒い 瞳（笑っているのに 目は 笑わない）
+EYE = ['...rkkkkkk..',
+       'OOrrkwYYYkkk',
+       '.rrkYOOkOYk.',
+       '..rOkkkkkk..',
+       '..OrO.......',
+       '...rO.......',
+       '....O.......']
+EYE_ALT = {'blink': ['...rkkkkkk..', 'OOrrTSSSSSkk', '.rrkkkkkkkk.', '..rOTTTTT...', '..OrO.......', '...rO.......', '....O.......'],
+           'hit': ['...rkk......', 'OOrrSkYkkk..', '.rrkSSkOYkk.', '..rOSkk.....', '..OrO.......', '...rO.......', '....O.......'],     # 目が ゆがんで つぶれる
+           'atk0|atk1|atk2': ['..rrkkkkkkk.', 'OOOrkwYYYYkk', 'OrrkYOOOkOYk', '..rOkkkkkkk.', '..OrO.......', '..OrO.......', '...OO.......'],
+           'ko': ['...r........', 'OOrr.kS.Sk..', '.rr...kSk...', '..rO..SkS...', '..OrOkS.Sk..', '...rO.......', '....O.......']}
 
 # ---- たてがみ：首から 背の 坂に そって さか立つ むらさきの とげ毛 ----
 def mane(ph=0):
@@ -179,7 +186,7 @@ def layers():
         dict(n='hleg', g='legA', x=12, y=46, rows=HLEG),
         dict(n='fleg', g='legB', x=36, y=43, rows=FLEG),
         dict(n='head', g='head', x=34, y=5, rows=HEAD, alt={NB: HEAD_ATK}),
-        dict(n='eye', g='head', x=47, y=15, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=45, y=15, rows=EYE, alt=EYE_ALT),
         dict(n='slash', g='head', x=61, y=19, rows=SLASH, alt={'atk2': SLASH2}, only=NB),
     ]
 FRAMES = {

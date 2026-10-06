@@ -9,9 +9,10 @@ PAL = {
     'R': '#8e78b4', 'Q': '#4e3c76', 'P': '#2c2048',      # 毛と マントの 外がわ
     'C': '#e84a6c', 'D': '#9c2246', 'E': '#581634',      # マントの 内がわ（深紅）
     'g': '#c4fff2', 'G': '#44dac6', 'h': '#1e8a96',      # 霊火
-    'w': '#ffffff',
+    'w': '#ffffff', 's': '#c2b8d6',                      # 白目と その 影
 }
 LIGHT = set('RCgw')
+EYE_BOX = (37, 12, 9, 6)   # 目（idle0 の 64x64 座標）
 RAMP = {'1': 'RQP', '2': 'CDE', '3': 'gGh', '6': 'QPP'}
 
 # ---------- 下書き用の 小道具 ----------
@@ -181,11 +182,11 @@ def head():
             if g[y][x] in 'RQP': g[y][x] = 'D' if i < n - 1 else 'C'
     put(g, 30, 9, HEAD)
     return rows_of(g)
-# 太い まゆの 下で 霊火が 燃える つり目：光 w＋虹彩（g／G／h）＋たての ひとみ＋下まぶた
-EYE = ['kkkk.....', '.kkkkkkk.', '.kwwgGkGk', '.kwGGGkGk', '..khhhkhk', '...kkkkk.']
+# 目（C：三白眼）：太い まゆの 下、白目（w／影 s）が 大きく、小さな 赤い 瞳（C／D／芯 E）が 上の 前に 寄って にらむ。下まぶたの 線は 太く 濃い
+EYE = ['kkkk.....', '.kkkkkkk.', '.kwwwwCDk', '.kswwwDEk', '..kkkkkkk', '...PPPPP.']
 EYE_ALT = {
     'blink': ['kkkk.....', '.kkkkkkk.', '.kQQQQQQk', '.kkkkkkkk', '..PPPPPP.', '.........'],
-    'atk0|atk1|atk2': ['kkkk.....', '.kkkkkkk.', '.kwwwwkwk', '.kwggggwk', '..kGGGkGk', '...kkkkk.'],
+    'atk0|atk1|atk2': ['kkkk.....', '.kkkkkkkk', '.kwwwwCDk', '.kwwwwDEk', '.kswwwwwk', '..kkkkkkk'],
     'hit': ['.........', 'kkkkkkkk.', '.Rkk.kkR.', '..RkkkR..', '.kkR.Rkk.', '.........'],
     'ko': ['.........', '.kR..kR..', '..kRkR...', '...kR....', '..kRkR...', '.kR..kR..'],
 }

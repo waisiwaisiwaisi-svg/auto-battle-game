@@ -48,13 +48,14 @@ def mirror(rows): return pix.flip_h(rows)
 
 import math
 META = dict(id='tatsunobi', name='タツノビ', types=['dragon', 'fire'], base='タツノオトシゴ', size='M')
+EYE_BOX = (30, 10, 9, 6)
 PAL = {
     'k': '#101018', 'l': '#4a1420',
     'F': '#ff9c5a', 'G': '#d8442c', 'H': '#7c1c30',      # うろこ
     'Y': '#ffe27a', 'O': '#d88c34',                      # 腹の 節
     'Q': '#ff9a1a', 'y': '#fff8c8',                      # 炎（＋Y／G）
     'S': '#f2e8d2', 'T': '#a89478',                      # 竜の 角
-    'C': '#8affd8', 'B': '#16a08a',                      # 目
+    'C': '#b6f45a', 'B': '#2e9a3a',                      # 目（みどり）
     'w': '#ffffff',
 }
 LIGHT = set('FYySw')
@@ -110,12 +111,17 @@ HEAD = head(); HEAD_ATK = head('atk')
 # 竜の 角（後ろへ 反る 2本）
 HORN = ['kk..........', 'kSkk........', 'kSSSkk......', '.kTSSSkk....', '..kTTSSSkkk.', '...kkTTTSSSk', '.....kkTTTTk', '.......kkkk.']
 HORN2 = ['.kk.........', '.kSkk.......', '.kSSSkk.....', '..kTSSSkk...', '..kTTSSSkk..', '...kkTTTSSk.', '.....kkTTTk.', '.......kkk..']
-# するどい 目：まゆ＋白い 光＋みどりの 虹彩 2色＋たての ひとみ＋下まぶた
-EYE = ['kkk.....', 'HkkkkkH.', 'kwCkCkkk', 'kCBkBBk.', '.kkkkk..']
-EYE_ALT = {'blink': ['kkk.....', 'HkkkkkH.', 'GGGGGGGG', 'kkkkkkk.', '.HHHHH..'],
-           'hit': ['kkk.....', 'HkkGGkk.', 'GGkkkGG.', 'HkkGGkk.', '.HHHHH..'],
-           'atk0|atk1|atk2': ['kkkk....', 'HkwkkkkH', 'kwCCkCkk', 'kCBBkBk.', '.kkkkk..'],
-           'ko': ['........', 'HkGGGkH.', 'GGkGkGG.', 'GGGkGGG.', 'GGkGkGG.']}
+# 爬虫類の つり目（A）：白目なし。みどりの 虹彩（明・暗）に 細い たての スリット。上まぶたは 太い 黒、下まぶたは 細い 赤茶
+EYE = ['kkk......',
+       'HkkkkkkkH',
+       'kCwCkCCBk',
+       '.BCCkCBH.',
+       '..HBkBH..',
+       '...HHH...']
+EYE_ALT = {'blink': ['kkk......', 'HkkkkkkkH', 'GGGGGGGGk', '.GGGGGHH.', '..HHHH...', '.........'],
+           'hit': ['kkk......', 'HkkkkkH..', 'GkCkBkkk.', '.GHBkH...', '..GHH....', '.........'],      # 細めて ゆがむ
+           'atk0|atk1|atk2': ['kkkk.....', 'HkkkkkkkH', 'kCwCkCCBk', 'kCCCkCCBk', '.BCCkCBH.', '..HHHHH..'],   # 見開き、スリットが のびる
+           'ko': ['.........', 'HkGGGkH..', 'GGkGkGG..', 'GGGkGGG..', 'GGkGkGG..', '.........']}
 
 # ---- 胴：小さく 丸い 腹（節の ある 腹板）----
 def body():
@@ -182,7 +188,7 @@ def layers():
         dict(n='body', g='body', x=17, y=25, rows=BODY),
         dict(n='head', g='head', x=20, y=5, rows=HEAD, alt={NB: HEAD_ATK}),
         dict(n='horn', g='head', x=14, y=5, rows=HORN, alt={'idle1|idle3|walk1|walk3': HORN2}),
-        dict(n='eye', g='head', x=31, y=11, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=30, y=10, rows=EYE, alt=EYE_ALT),
         dict(n='arm', g='arm', x=35, y=35, rows=ARM),
         dict(n='breath', g='head', x=50, y=14, rows=BREATH, alt={'atk2': BREATH2}, only=NB),
     ]

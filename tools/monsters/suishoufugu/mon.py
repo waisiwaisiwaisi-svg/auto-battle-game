@@ -1,15 +1,16 @@
 # スイショウフグ（エスパー・いわ × ハリセンボン）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：ふくらむと のびる 水晶の とげ（ハリセンボンの とげ ⇔ 水晶の 柱）
 META = dict(id='suishoufugu', name='スイショウフグ', types=['psychic', 'rock'], base='ハリセンボン', size='S')
+EYE_BOX = (31, 26, 9, 8)
 PAL = {
     'k': '#101018', 'l': '#26193c',
     'F': '#ecdcb4', 'G': '#b0946a', 'H': '#665240',      # 岩の 皮
     'V': '#f6e0ff', 'P': '#c27cff', 'p': '#6a30aa',      # 水晶
-    'C': '#7af0e4', 'c': '#22948e',                      # 目（念力の 光）
-    'w': '#ffffff', 'r': '#a01c34',
+    'C': '#e49cff', 'c': '#8a2ad0',                      # 目（魚の 目の 細い 虹彩の 輪・むらさき）
+    'w': '#ffffff', 'r': '#a01c34', 'K': '#060608',     # K＝魚の 目の 平たい ひとみ
 }
 LIGHT = set('FVCw')
-KEEP_BLACK = set('wC')
+KEEP_BLACK = set('wCc')
 # ---------- 下書きの 道具（あたり → 左上光の 3段 → 輪郭。目・牙・模様・線は 手で 打つ）----------
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
@@ -105,13 +106,23 @@ def tail_p(g): Ln(g, 18, 37, 11, 30, 'V'); Ln(g, 18, 38, 11, 43, 'p')
 TAIL = part(tail_d, {'2': 'VPp'}, post=tail_p); TAIL2 = part(lambda g: tail_d(g, 2), {'2': 'VPp'}, post=tail_p)
 def fin_d(g, dn=0): P(g, [(30, 40), (25, 45 + dn), (28, 48 + dn), (33, 44)], '2')
 FIN = part(fin_d, {'2': 'VPp'}); FIN2 = part(lambda g: fin_d(g, 1), {'2': 'VPp'})
-# ---- 目：大きい。白い 光＋念力の 水色の 虹彩（明 C・暗 c）＋ひとみ。岩の まゆ ----
-EYE = ['kkkk.....', '.kkkkkkk.', '.kwCCkCkk', '.kwCckckk', '..kcckck.', '...kkkk..']
+# ---- 目（K 魚の 目）：まぶたの ない 丸い 目。平たく 大きい 黒い ひとみ＋むらさきの 細い 輪（明 C・暗 c）。岩の 骨の ふちが まわりを かこむ ----
+EYE = ['.HHHH....',
+       'HFFkkkHH.',
+       'FHkCCCkH.',
+       'HkCwKKckH',
+       'HkCKKKckH',
+       '.kcKKKck.',
+       '.Hkcccc..',
+       '..HkkkH..']
 EYE_ALT = {
-    'blink': ['kkkk.....', '.kkkkkkk.', '..kkkkkkk', '...GGGG..'],
-    'atk0|atk1|atk2': ['kkkkk....', '.kkkkkkkk', '.kwwCkCkk', '.kwCCkCkk', '..kcckk..', '...kkk...'],
-    'hit': ['kkk......', '..kkk....', '....kkkk.', '..kkk....', 'kkk......'],
-    'ko': ['k....k', '.k..k.', '..kk..', '..kk..', '.k..k.', 'k....k'],
+    # まぶたが ないので 灰色の 膜（瞬膜）が 下から かぶさる
+    'blink': ['.HHHH....', 'HFFkkkHH.', 'FHkCCCkH.', 'HkCwKKckH', 'HkkkkkkkH', '.kFFFFGk.', '.HkGGGk..', '..HkkkH..'],
+    # ため・攻撃：ひとみが 点に しぼり、むらさきの 輪が ひろがって 光る
+    'atk0|atk1|atk2': ['.HHHH....', 'HFFkkkHH.', 'FHkCCCkH.', 'HkCwCCckH', 'HkCCKcckH', '.kccccck.', '.Hkcccc..', '..HkkkH..'],
+    # 被弾：ひとみが ちぢんで 上へ ずれる
+    'hit': ['.HHHH....', 'HFFkkkHH.', 'FHkCKCkH.', 'HkCCCCckH', 'HkCCCcckH', '.kcccccK.', '.HkcccK..', '..HkkkH..'],
+    'ko': ['.HHHH....', 'HFFkkkHH.', 'FHKCCCKH.', 'HkcKCKckH', 'HkCcKcckH', '.kcKcKck.', '.HKcccK..', '..HkkkH..'],
 }
 # ---- 攻撃：水晶の かけらを 四方に 飛ばす（はなれた エフェクト＝意図的）----
 SHARD = ['..k...', '.kVk..', 'kVPpk.', '.kPpk.', '..kpk.', '...k..']
@@ -123,7 +134,7 @@ def layers():
         L('cry', 'body', CRY, alt={'atk1': CRY_BIG, 'atk2|hit': CRY_MID}),
         L('body', 'body', BODY, alt={'atk1|atk2': BODY_OPEN}),
         L('fin', 'body', FIN, alt={'idle2|idle3|walk0|walk2': FIN2}),
-        H('eye', 'body', 31, 28, EYE, alt=EYE_ALT),
+        H('eye', 'body', 31, 26, EYE, alt=EYE_ALT),
         H('sh1', 'root', 55, 20, SHARD, only='atk1'), H('sh2', 'root', 56, 46, SHARD, only='atk1'),
         H('sh3', 'root', 57, 28, SHARD2, only='atk2'), H('sh4', 'root', 58, 42, SHARD2, only='atk2'),
     ]

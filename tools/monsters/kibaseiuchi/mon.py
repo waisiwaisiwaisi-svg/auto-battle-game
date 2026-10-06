@@ -84,11 +84,12 @@ HEAD_OPEN = HEAD[:19] + [
     '....kCCCCCkkkkkkkkkk.......',
     '.....kkkkk.................',
 ]
-# するどい 目：まゆの ひさしの 下で 氷色に 光る、たての ひとみ
-# 目：ハイライト w ＋ 虹彩 2色（e 明・r 暗）＋ たての ひとみ k、下まぶたで かこむ
-EYE = ['kkkkkk', 'kweekk', '.krrkk', '..kkk.']
-EYE_ALT = {'blink': ['kkkkkk', 'BkkkkB', '.BBBBB', '..BBB.'], 'hit': ['kkB.Bk', 'BBkBkB', '.BBkBB', '..BBB.'],
-           'atk0|atk1|atk2': ['kkkkkk', 'kwwekk', '.kerkk', '..kkk.'], 'ko': ['kBBBkB', 'BkBkBB', '.BkBBB', '.kBkB.']}
+# 目：重い まぶた（M）。皮の 厚い 上まぶたが 平らに おりて 虹彩の 上半分を かくす。下半分に 血走った 白目（w に 赤い すじ e）と 赤い 虹彩（e 明・r 暗）、半月の ひとみ k。冷たく 見下す
+EYE = ['.BAAAAB..', 'kkkkkkkkk', 'kwewrkkrk', '.kwwekekk', '..kkkkkk.']
+EYE_ALT = {'blink': ['.BAAAAB..', 'kABBBBBBk', 'kBBBBBBCk', '.kkkkkkkk', '..CCCCC..'],
+           'hit': ['.BAAAAB..', 'kkkABBkkk', '.kkkkkkk.', '..kwkekk.', '...kkkk..'],
+           'atk0|atk1|atk2': ['.BAAAAB..', 'kkkkkkkkk', 'kwewwkkwk', '.kwwwewek', '..kkkkkk.'],
+           'ko': ['.BAAAAB..', 'kkBBBBBkB', 'BBkBBkBBB', 'B.BkkBBB.', '..kBBkB..']}
 
 # つららの きば（左＝光、右＝影、先が とがる）
 TUSK = [
@@ -175,7 +176,7 @@ def layers():
         dict(n='shD', g='body', **on_back(26, SHARD_A)),
         dict(n='ftusk', g='head', x=HX + 15, y=HY + 19, rows=FTUSK),
         dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='eye', g='head', x=HX + 14, y=HY + 10, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 13, y=HY + 9, rows=EYE, alt=EYE_ALT),
         dict(n='tusk', g='head', x=HX + 9, y=HY + 19, rows=TUSK),
         dict(n='flipF', g='legA', x=29, y=51, rows=FLIP_F),
         dict(n='frost', g='fx', x=HX + 22, y=HY + 9, rows=FROST, only='idle1|idle2|atk0'),

@@ -2,6 +2,7 @@
 # 体は 小さく すわった 獅子＝立てた 胸・前足 2本・うしろに たたんだ 小さな もも。翼は 見せ所で 大きく 上へ）
 import math
 from pix import grid, rows_of, ellipse, poly, line, outline
+EYE_BOX = (46, 6, 9, 13)
 META = dict(id='nazojishi', name='ナゾジシ', types=['psychic', 'rock'], base='スフィンクス', size='L')
 PAL = {
     'k': '#101018', 'l': '#40283c',
@@ -130,26 +131,20 @@ HEAD_ROAR = HEAD[:11] + [
     '..kUUUUUUUUUUk....',
     '...kkkkkkkkkk.....',
 ]
-# 目：白い 光＋ 虹彩 2色（P/Q）＋ たての ひとみ。上は まゆの ひさし、下は まぶたの 線
-EYE = ['wPPkQ', 'QQRkR']
-EYE_ALT = {'blink': ['kkkkk', 'TTTTT'], 'hit': ['kQTQk', 'TkQkT'], 'atk0|atk1|atk2': ['wwPkP', 'PQQkQ'],
-           'ko': ['TkTkT', 'TTkTT']}
-# 額の 第三の 目（見せ所）：青石の 台座に はまった たて長の 大きな 目。頭の 上に 少し はみ出す
-EYE3 = [
-    '..kkkkk..',
-    '.kAkkkBk.',
-    'kAkwPQkCk',
-    'kAkPPkQkCk'[:9],
-    'kBkQkkRkC'[:9],
-    'kBkQRRkkC'[:9],
-    '.kCkkkkCk',
-    '..kkkkk..',
-]
-EYE3 = ['..kkkkk..', '.kAkkkkBk', 'kAkwPQRkC', 'kAkPPkQkC', 'kBkPQkRkC', 'kBkQRRRkC', '.kCkkkkCk', '..kkkkk..']
+# 目（M 重い まぶた）：石の ひさしの 下、平らな 上まぶたが 虹彩の 上半分を かくす。見下す 半目（ピンクの 虹彩・横長の ひとみ）
+EYE = ['UUUUUU', 'kkkkkk', 'PQkkRk', 'kkkkk.']
+EYE_ALT = {'blink': ['UUUUUU', 'TTTTTT', 'kkkkkk', 'TTTTT.'],
+           'hit': ['UUUUUU', 'kkTTkk', 'TTkkTT', 'kkTTk.'],
+           'atk0|atk1|atk2': ['UUUUUU', 'kkkkkk', 'wPkkQk', 'kkkkk.'],
+           'ko': ['UkUkUU', 'TTkTTT', 'TkTkTT', 'TTTTT.']}
+# 額の 第三の 目（P 星・十字の 瞳・見せ所）：青石の 台座に はまった 丸い 目。虹彩は 桃→紫→濃紫の グラデーション、
+# まん中に 白く 光る 十字の ひとみ
+EYE3 = ['..kkkkk..', '.kkPPPkk.', 'kAPQkQPkC', 'kAQkwkQkC', 'kBRQkQRkC', '.kkRRRkk.', '..kkkkk..']
 EYE3_ALT = {
-    'blink|hit': ['..kkkkk..', '.kAkkkkBk', 'kAkTTTTkC', 'kAkkkkkkC', 'kBkTTTTkC', 'kBkUUUUkC', '.kCkkkkCk', '..kkkkk..'],
-    'ko': ['..kkkkk..', '.kAkkkkBk', 'kAkTkTkkC', 'kAkTTkTkC', 'kBkTkTkkC', 'kBkUUUUkC', '.kCkkkkCk', '..kkkkk..'],
-    'atk0|atk1|atk2|idle1|idle2': ['..kkkkk..', '.kAkkkkBk', 'kAkwwPQkC', 'kAkwPkPkC', 'kBkPPkQkC', 'kBkPQQQkC', '.kCkkkkCk', '..kkkkk..'],
+    'blink': ['..kkkkk..', '.kkTTTkk.', 'kATTTTTkC', 'kAkkkkkkC', 'kBUUUUUkC', '.kkUUUkk.', '..kkkkk..'],
+    'hit': ['..kkkkk..', '.kkTTTkk.', 'kATkTTTkC', 'kAkTkkkkC', 'kBUUUkUkC', '.kkUUUkk.', '..kkkkk..'],
+    'ko': ['..kkkkk..', '.kkTTTkk.', 'kATkTkTkC', 'kATTkTTkC', 'kBTkTkTkC', '.kkUUUkk.', '..kkkkk..'],
+    'atk0|atk1|atk2|idle1|idle2': ['..kkkkk..', '.kkwwwkk.', 'kAwPkPwkC', 'kAPkwkPkC', 'kBQPkPQkC', '.kkQQQkk.', '..kkkkk..'],
 }
 # 前足（太い 柱＋ 指 3本と 爪。上の 3行は 胸に 食いこむ）
 LEG_F = [

@@ -156,12 +156,14 @@ def head(gape=0):
     # ほおの 金の うずまき
     dots(g, 'Y', [(31, 26), (32, 25), (33, 26), (32, 27)]); dots(g, 'O', [(31, 27), (33, 25)])
     return g
-# 目：ぎょろりと 大きく（白い 光＋金 2色＋たての ひとみ）、上に 黒い まゆ（毛の 束）
-EYE = ['..kkkkkk...', 'kkJJJJJJkk.', '.kkkkkkkkJk', '.kOwwYYkOk.', 'kOYwYYYkOOk', 'kOYYYYkOOOk', '.kOOOOkOOk.', '..kkkkkkk..']
-EYE_ALT = {'blink': ['..kkkkkk...', 'kkJJJJJJkk.', '.kkkkkkkkJk', '.kRRRRRRRk.', 'kkkkkkkkkkk', 'kSSSSSSSSSk', '.kSSSSSSSk.', '..kkkkkkk..'],
-           'hit': ['..kkkkkk...', 'kkJJJJJJkk.', '.kkkkkkkkJk', '.kOkOOOkOk.', 'kOOOkOkOOOk', 'kOOOOkOOOOk', '.kOOkOkOOk.', '..kkkkkkk..'],
-           'atk0|atk1|atk2': ['..kkkkkk...', 'kkJJJJJJkk.', '.kkkkkkkkJk', '.kwwwYYkYk.', 'kYwYYYYkYOk', 'kOYYYYkOYOk', '.kOOOOkOOk.', '..kkkkkkk..']}
-EYE_KO = ['.kkkkkkk.', 'kOkOOOkOk', 'kOOkOkOOk', 'kOOOkOOOk', 'kOOkOkOOk', 'kOkOOOkOk', '.kkkkkkk.']
+# 目（T：出目）：頭の 上へ 飛び出た 大きな 金の 目玉。まわりを 朱〜こげ赤の まぶたの 輪が かこみ、瞳は 前へ 寄った 小さな たての 切れ目
+EYE_TOP = ['....kkkkk....', '..kkRRRRSkk..']
+EYE_BOT = ['.kTTkkkkkTTk.', '..kkTTTTTkk..', '....kkkkk....']
+EYE = EYE_TOP + ['.kRRkkkkkSSk.', '.kRkwwYYYkSk.', 'kRkwYYYYkYkTk', 'kSkYYYYYkOkTk', 'kSkYYYYOkOkTk', '.kTkOYOOOkTk.'] + EYE_BOT
+EYE_ALT = {'blink': EYE_TOP + ['.kRRRRRRRSSk.', '.kRRRRRRSSSk.', 'kRRRSSSSSSSTk', 'kSSSSSSSSSSTk', 'kkkkkkkkkkkkk', '.kTTTTTTTTTk.'] + EYE_BOT,
+           'hit': EYE_TOP + ['.kRRRRRRRSSk.', '.kRRSSSSSSSk.', 'kRkkkkkkkkkTk', 'kSkYYYYkYOkTk', 'kSkOYYYOOOkTk', '.kTkOOOOOkTk.'] + EYE_BOT,
+           'atk0|atk1|atk2': EYE_TOP + ['.kRRkkkkkSSk.', '.kRkwwwwYkSk.', 'kRkwwYYYkwkTk', 'kSkwYYYYkYkTk', 'kSkYYYYYkYkTk', '.kTkOYYYOkTk.'] + EYE_BOT,
+           'ko': EYE_TOP + ['.kRRkkkkkSSk.', '.kRkkYYYkkSk.', 'kRkYYkYkYYkTk', 'kSkYYYkYYOkTk', 'kSkYYkOkOOkTk', '.kTkkOOOkkTk.'] + EYE_BOT}
 # 火の 粉（攻撃）
 def fire(ph):
     g = G(80, 64)
@@ -180,8 +182,7 @@ def layers():
         dict(n='legF', g='legB', x=37, y=51, rows=LEG_N),
         L('cloth', 'mane', cloth(), alt={'idle1|idle3|walk1|walk3|atk1': cloth(1)}),
         L('head', 'head', head(), alt={'atk0': head(1), NB: head(5)}),
-        dict(n='eye', g='head', x=34, y=15, rows=EYE, alt=EYE_ALT, not_='ko'),
-        dict(n='eyeko', g='head', x=34, y=17, rows=EYE_KO, only='ko'),
+        dict(n='eye', g='head', x=32, y=9, rows=EYE, alt=EYE_ALT),
         L('fire', 'fx', fire(0), alt={'atk2': fire(1)}, only=NB),
     ]
 FRAMES = {
@@ -191,4 +192,5 @@ FRAMES = {
     'atk0': {'head': (-2, -1), 'mane': (-1, 0), 'body': (-1, 1)}, 'atk1': {'root': (4, 0), 'head': (2, -2)}, 'atk2': {'root': (6, 0), 'head': (2, 0), 'fx': (1, 0)},
     'hit': {'root': (-3, 0), 'head': (-2, -1)}, 'ko': {'_flip': True},
 }
+EYE_BOX = (32, 9, 13, 11)
 PARENT = {'head': 'root', 'mane': 'root', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

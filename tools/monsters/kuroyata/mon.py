@@ -11,10 +11,12 @@ PAL = {
     'r': '#ff2a3c', 'Y': '#ffd862',                      # 赤い 目
     'v': '#b070f0', 'm': '#5c2c90',                      # 影の もや
     'c': '#dce6ff',                                      # 風
-    'w': '#ffffff', 'd': '#9a1430',                      # 目の 光・虹彩の 暗
+    'w': '#ffffff', 'd': '#9a1430',                      # 目の 光・瞳の 暗
+    'x': '#040408',                                      # 目の 黒い 強膜
 }
 LIGHT = set('RSYvcw')
-KEEP_BLACK = set('Sw')
+KEEP_BLACK = set('Swx')
+EYE_BOX = (42, 17, 9, 6)   # 目（idle0 の 64x64 座標）
 RAMP = {'1': 'RQP', '4': 'STU', '5': 'vmm', '6': 'QPP'}
 
 # ---------- 下書き用の 小道具 ----------
@@ -148,13 +150,13 @@ def head():
     ])
     return rows_of(g)
 
-# 目：ひくい まゆの ひさし＋光 w＋虹彩 2色（r／d）＋たての ひとみ。光が 後ろへ 尾を 引く
-EYE = ['kkkkkkk...', '.kkkkkkkk.', 'rkwwrrkrk.', '.kwrrrkrk.', '..kdddkdk.', '...kkkkk..']
+# 目（F：黒い 強膜）：白目の かわりに 真っ黒（x）。その 中に 赤い 細い たて瞳（r＋にじむ 暗赤 d）。下ぶちに むらさきの もや（v／m）で 黒い 羽から うかせる
+EYE = ['kkkkkkk...', '.kkkkkkkk.', '.kQxxrxxk.', '.kxxdrdxk.', '..kxxdxk..', '...vmmv...']
 EYE_ALT = {
-    'blink': ['kkkkkkk...', '.kkkkkkkk.', '..kkkkkkk.', '..........', '..........', '..........'],
-    'atk0|atk1|atk2': ['kkkkkkk...', '.kkkkkkkk.', 'YkwwYYkYk.', 'rkwYYYkYk.', '..krrrkrk.', '...kkkkk..'],
-    'hit': ['..........', 'kkkkkkkkk.', '.kkk..kkk.', '....kk....', '.kkk..kkk.', '..........'],
-    'ko': ['..........', '..T...T...', '...T.T....', '....T.....', '...T.T....', '..T...T...'],
+    'blink': ['kkkkkkk...', '.kkkkkkkk.', '..kkkkkkk.', '..kvmmvk..', '..........', '..........'],
+    'atk0|atk1|atk2': ['kkkkkkk...', '.kkkkkkkk.', '.kQxrYrxk.', '.kxxrYrxk.', '..kxdrdk..', '...vmmv...'],
+    'hit': ['..........', 'kkkkkkkkk.', '.kkxxxkkk.', '..kxdxk...', '...kmk....', '..........'],
+    'ko': ['kkkkkkk...', '.kxrxxrxk.', '.kxxrrxxk.', '.kxrxxrxk.', '..kvmmvk..', '..........'],
 }
 LEG = outline([   # 鉄の すねと 白い かぎ爪（ふちは 自動）
     'TU....',

@@ -54,6 +54,7 @@ def mirror(rows): return pix.flip_h(rows)
 
 
 META = dict(id='fubukiookami', name='フブキオオカミ', types=['ice', 'ghost'], base='オオカミ', size='M')
+EYE_BOX = (42, 20, 9, 6)
 PAL = {
     'k': '#101018', 'l': '#1c2650',
     'W': '#f2f8ff', 'V': '#a8c4e8', 'U': '#5a72a8', 'N': '#34407a',   # 毛皮（白〜青）
@@ -127,12 +128,17 @@ HEAD = head(); HEAD_ATK = head('atk')
 # 氷の 牙（見せ所）：上あごから 下へ 大きく はみ出す 2本の 結晶
 FANG = ['kkkkkk.kkkk', 'kccCBk.kcBk', 'kcCCBk.kcBk', '.kcCBk.kCBk', '.kcCBk..kk.', '..kCBk.....', '..kCk......', '...k.......']
 FANG_ATK = ['kkkkk..kkkk', 'kcCBk..kcBk', '.kcBk..kCBk', '.kCk....kk.', '..k........']
-# するどい 目：まゆ＋白い 光＋氷色の 虹彩 2色＋たての ひとみ＋下まぶた
-EYE = ['kkk.....', 'UkkkkkU.', 'kwCkCkkk', 'kCBkBBk.', '.kkkkk..']
-EYE_ALT = {'blink': ['kkk.....', 'UkkkkkU.', 'VVVVVVVV', 'kkkkkkk.', '.UUUUU..'],
-           'hit': ['kkk.....', 'UkkVVkk.', 'VVkkkVV.', 'UkkVVkk.', '.UUUUU..'],
-           'atk0|atk1|atk2': ['kkkk....', 'UkwkkkkU', 'kwccCkCk', 'kCCBkBk.', '.kkkkk..'],
-           'ko': ['........', 'UkVVVkU.', 'VVkVkVV.', 'VVVkVVV.', 'VVkVkVV.']}
+# 三白眼（C）：白目が 多く、小さな 氷色の 瞳が 前上に 寄って にらむ。下まぶたの 線が 太く 濃い
+EYE = ['kkk......',
+       'UkkkkkkkU',
+       'kwwwCCwwk',
+       'kwwwBkwk.',
+       '.kwwwwk..',
+       '.Nkkkkk..']
+EYE_ALT = {'blink': ['kkk......', 'UkkkkkkkU', 'VVVVVVVVk', 'kkkkkkkk.', '.UNNNNk..', '.........'],
+           'hit': ['kkk......', 'Ukkkk....', 'VVkwkkk..', 'VVVkwwBk.', 'VVkwkkk..', '.Ukkk....'],   # 白目が つぶれ、瞳が 下に はずれる
+           'atk0|atk1|atk2': ['kkkk.....', 'UkkkkkkkU', 'kwwwwCBwk', 'kwwwwBkwk', '.kwwwwwk.', '.Nkkkkk..'],   # 見開いて 瞳が さらに 小さく 前へ
+           'ko': ['.........', 'UkVVVkU..', 'VVkVkVV..', 'VVVkVVV..', 'VVkVkVV..', '.........']}
 
 # ---- 胴＋しっぽ（ひとつながり）：胸は 深く 前が 高い、腹は 引きしまり、腰から 先は 細く なって 吹雪の しっぽに ほどける ----
 def body(ph=0):
@@ -199,7 +205,7 @@ def layers():
         dict(n='hleg', g='legA', x=15, y=44, rows=HLEG),
         dict(n='fleg', g='legB', x=33, y=46, rows=LEG),
         dict(n='head', g='head', x=31, y=13, rows=HEAD, alt={NB: HEAD_ATK}),
-        dict(n='eye', g='head', x=43, y=21, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=42, y=20, rows=EYE, alt=EYE_ALT),
         dict(n='fang', g='head', x=47, y=28, rows=FANG, alt={NB: FANG_ATK}),
         dict(n='bite', g='head', x=58, y=30, rows=BITE, alt={'atk2': BITE2}, only=NB),
     ]

@@ -1,4 +1,5 @@
 # ドブマスク（あく・どく × ドブネズミ）手打ち GBA風・デフォルメ（2〜3頭身）
+EYE_BOX = (32, 22, 9, 7)
 META = dict(id='dobumasuku', name='ドブマスク', types=['dark', 'poison'], base='ドブネズミ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2e1a36',
@@ -122,8 +123,21 @@ def tail():
     for x, y in ((12, 17), (7, 16), (3, 12), (2, 8), (4, 4)): g[y][x] = 'Q' if g[y][x] != '.' else '.'
     return done(g)
 
+# バイザー／レンズ（J）：仮面に はめた 丸い 赤い レンズ。真ちゅうの 枠（H）と 黒い ふち、斜めの 白い 反射線。瞳なし
+LENS = ['..kkkkk..',
+        '.kHHHHHkk',
+        'kHRwRRDHk',
+        'kHwRRDDHk',
+        'kHRRDDlHk',
+        '.kHHHHHk.',
+        '..kkkkk..']
+EYE_BLINK = ['..kkkkk..', '.kHHHHHkk', 'kHDDDDlHk', 'kHDlDllHk', 'kHlllllHk', '.kHHHHHk.', '..kkkkk..']   # 光が 消える
+EYE_HIT = ['..kkkkk..', '.kHHHHHkk', 'kHRkRRDHk', 'kHwRkkDHk', 'kHRkDDkHk', '.kHHHHHk.', '..kkkkk..']     # レンズに ひび
+EYE_ATK = ['..kkkkk..', '.kHHHHHkk', 'kHwwRRRHk', 'kHwRRRRHk', 'kHRRRRDHk', '.kHHHHHk.', '..kkkkk..']     # 赤く 光る
+LENS_KO = ['..kkkkk..', '.kHHHHHkk', 'kHkllDkHk', 'kHlDkDlHk', 'kHkDlDkHk', '.kHHHHHk.', '..kkkkk..']    # ×の ひび
+
 # ---- 頭：ネズミの 頭に くちばしの 仮面（見せ所）----
-def head(gas=0, ko=False):
+def head(gas=0, ko=False, eye=None):
     g = G(41, 27)
     ell(g, 14, 4.5, 3.5, 4.5, 'q'); ell(g, 14.5, 5, 1.5, 2.5, 'r')    # 奥の 耳
     ell(g, 10.5, 15, 11, 9.5, 'f')                                 # 頭（大きく 丸い）
@@ -138,16 +152,10 @@ def head(gas=0, ko=False):
     at(g, 32, 18, 'kX'); at(g, 35, 19, 'kV')                       # 毒の 霧が もれる 穴
     line(g, 3, 13, 11, 10, 'l'); line(g, 3, 14, 11, 11, 'C')        # 仮面を とめる 革の ベルト
     at(g, 7, 11, 'G')
-    at(g, 12, 9, '.HHHHHH', 'H......H', 'H......H', 'H......H', '.HHHHHH')   # レンズの 枠
-    if ko: at(g, 13, 10, 'k...k', '.k.k.', '..k..', '.k.k.')
-    else: at(g, 13, 9, 'kk', '..kkkk', 'kwRRkDk', 'kRDDkDk', '.kkkkk')       # 目
+    at(g, 12, 7, *(eye or (LENS_KO if ko else LENS)))                # 目＝赤い レンズ（J）
     at(g, 16, 23, 'kwwk', 'kwGk', '.kk')                           # 出っ歯
     if gas: at(g, 36, 20, 'XX', '.V')
     return done(g)
-EYE_BLINK = ['......', '..kkkk', 'kkkkkkk', '.BBBBB', '......']
-EYE_HIT = ['k.....', '.kk...', 'kRRkkk', 'kkkkRk', '......']
-EYE_ATK = ['kk....', '..kkkk', 'kwwRkVk', 'kRRRkRk', '.kkkkk']
-
 # ---- 毒の 霧（エフェクト：はなれて いるのは 意図的）----
 def cloud(big=False):
     w, h = (18, 14) if big else (13, 10)
@@ -161,9 +169,7 @@ def cloud(big=False):
 NB = 'atk1|atk2'
 def eye_head(e):
     """頭に 目の 差しかえを 置く"""
-    g = [list(r) for r in head(gas=1)]
-    at(g, 14, 10, *e)
-    return rows_of(g)
+    return head(gas=1, eye=e)
 H0, H1, HKO = head(), head(gas=1), head(ko=True)
 def layers():
     return [

@@ -46,13 +46,14 @@ def opentop(rows, n=1):
 def mirror(rows): return pix.flip_h(rows)
 
 
+EYE_BOX = (43, 12, 11, 7)
 META = dict(id='kubinashiba', name='クビナシバ', types=['ghost', 'dark'], base='馬', size='L')
 PAL = {
     'k': '#101018', 'l': '#2a1a3c',
     'R': '#7a6e9a', 'Q': '#463a60', 'P': '#261e36',      # 胴（夜の 黒馬）
     'S': '#c4b2e2', 'T': '#7e5eaa',                      # 黒煙の たてがみ（暗＝P）
     'C': '#dafff6', 'B': '#5ee0d2', 'A': '#2a8aa0',      # 霊火の 頭
-    'Y': '#ffe45a', 'O': '#ff4a30',                      # 目
+    'Y': '#a6f0ff', 'D': '#1e3aa8', 'O': '#ff4a30',      # 目（光る 水色＋青い にじみ）・口
     'H': '#d0c094', 'G': '#7c6a4c',                      # ひづめ
     'w': '#ffffff',
 }
@@ -178,12 +179,18 @@ def head(mode=''):
         ])
     return outline(m)
 HEAD = head(); HEAD_ATK = head('atk')
-# するどい 目：まゆの ひさし（黒）＋白い 光＋黄と 赤の 虹彩＋たての ひとみ＋下まぶた
-EYE = ['kk......', 'AkkkkkB.', 'AkwYkYkk', 'AkYOkOOk', '.Akkkkk.']
-EYE_ALT = {'blink': ['kk......', 'AkkkkkB.', 'ABBBBBBB', 'Akkkkkkk', '.ABBBBB.'],
-           'hit': ['kk......', 'AkkBBkkB', 'ABkkkkBB', 'AkkBBkkB', '.ABBBBB.'],
-           'atk0|atk1|atk2': ['kkk.....', 'AkwkkkkB', 'AkwYYkYk', 'AkYOOkOk', '.Akkkkk.'],
-           'ko': ['........', 'AkBBBkB.', 'ABkBkBB.', 'ABBkBBB.', 'ABkBkBB.']}
+# 光る目（E）：瞳なし。白い 芯＋水色の 光＋1ドットの 青い にじみ（輪郭線の かわりに 光の ふち）。前へ 下がる 切れ長で 怒り顔
+EYE = ['DD.........',
+       'DDDD.......',
+       'DYwDDDD....',
+       'DYwwwYYDDD.',
+       '.DYYwwwYYYD',
+       '..DDDYYYDD.',
+       '.....DDD...']
+EYE_ALT = {'blink': ['DD.........', 'DDDD.......', '.DDDDDD....', '...DYYYDDD.', '.....DDDDDD'],
+           'hit': ['DD.........', 'D.D.D......', 'DY.D.YD....', '.Dw.Y..D.D.', '..Y.wY.YD.D', '..D.D.YD...', '.....D.....'],   # 光が 割れる
+           'atk0|atk1|atk2': ['DDw........', 'DDDDw......', 'DYwwDDD....', 'DwwwwwYDDDw', '.DYwwwwwYYD', '..DDYYYYDD.', '.....DDD...'],
+           'ko': ['.D...D.....', '..D.D......', '...Y.......', '..D.D......', '.D...D.....']}
 
 # ---- 足（短く 太い、ひざが 少し くびれ、白っぽい ひづめ）----
 LEG_M = ['#######', '#######', '.######', '.#####.', '.####..', '.#####.', 'hhhhhh.', 'hhhhhh.', 'hhhhhh.']
@@ -247,7 +254,7 @@ def layers():
         dict(n='legH', g='legA', x=11, y=51, rows=LEG),
         dict(n='legF', g='legB', x=30, y=51, rows=LEG),
         dict(n='head', g='head', x=33, y=4, rows=HEAD, alt={'atk1|atk2': HEAD_ATK}),
-        dict(n='eye', g='head', x=44, y=13, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=43, y=12, rows=EYE, alt=EYE_ALT),
         dict(n='breath', g='head', x=63, y=23, rows=BREATH, alt={'atk2': BREATH2}, only=NB),
     ]
 FRAMES = {

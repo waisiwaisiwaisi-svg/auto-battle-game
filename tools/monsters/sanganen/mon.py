@@ -1,6 +1,7 @@
 # サンガンエン（エスパー・かくとう × 三つ目の 猿）手打ち GBA風
 from pix import outline
 import math
+EYE_BOX = (39, 20, 7, 12)
 META = dict(id='sanganen', name='サンガンエン', types=['psychic', 'fighting'], base='三つ目の 猿', size='M')
 PAL = {
     'k': '#101018', 'l': '#2a1c48',
@@ -9,9 +10,10 @@ PAL = {
     'S': '#f0b834', 'T': '#a8661e',                      # 帯（こがね）
     'P': '#ff74dc', 'Q': '#b42c9e',                      # 念力の 光
     'Y': '#ffe84a', 'w': '#ffffff', 'M': '#5a1430',      # 目・きば・口の 中
+    'V': '#8e3cf0',                                      # 虹彩の むらさき
 }
 LIGHT = set('ADSPYw')
-KEEP_BLACK = set('wYPM')
+KEEP_BLACK = set('wYPMV')
 DK = {'A': 'B', 'B': 'C', 'D': 'E', 'S': 'T'}
 def dk(rows): return [''.join(DK.get(c, c) for c in r) for r in rows]
 
@@ -42,18 +44,20 @@ _MOUTH = [".............kkkkkkkkk", "............kwkMMMMwkw", "............kMMMM
 _ROAR = ["............kkkkkkkkkk", "............kwkwkkwkwk", "............kMMMMMMMMk", "............kMMMMMMMk.", ".............kwkkkkwk."]
 def _face(e1, e2, mouth=_MOUTH, under="............kkkk......"):
     return [_B] * 6 + _BROW + [e1, e2, under] + mouth
-FACE = _face("..........kwYYkYkCC...", "...........kSTkTk...kk")
+# P 十字の 瞳：重い まゆの 下の つり目。虹彩は 金（Y）→ こがね（S）→ むらさき（V）の グラデーション、まん中に 黒い 十字の ひとみ
+FACE = _face("..........kwYkYSkCC...", "..........kYkkkVk...kk", under="...........kSkVk......")
 FACE_ALT = {
-    'blink': _face("..........kkkkkkkCC...", "...........DDDDDD...kk", under=_B),
-    'atk0|atk1|atk2': _face("..........kwwYkYkCC...", "...........kYYkYk...kk", _ROAR[:1] + _ROAR[1:], under=_B),
-    'hit': _face("..........kYkYkkkCC...", "...........kkYkYk...kk"),
-    'ko': _face("..........k.k...kCC...", "...........k.k.....kk", [_B, ".............kkkkkkkkk", "............kwkMMMMwk.", ".............kkkkkkk.."], under=".........k.k.........."),
+    'blink': _face("..........kkkkkkkCC...", "..........DDDDDDD...kk", under=_B),
+    'atk0|atk1|atk2': _face("..........kwwkwYkCC...", "..........kYkkkYk...kk", _ROAR[:1] + _ROAR[1:], under="...........kYkSk......"),
+    'hit': _face("..........kkkkkkkCC...", "..........kSkkkVk...kk", under="...........kkkkk......"),
+    'ko': _face("..........DkDkDDDCC...", "..........DDkDDDD...kk", [_B, ".............kkkkkkkkk", "............kwkMMMMwk.", ".............kkkkkkk.."], under="..........DkDkD......."),
 }
-# 額の 第三の 目（たての まぶた、光る）
-EYE3 = ['.kk.', 'kwPk', 'PPkQ', 'PQkQ', 'kQQk', '.kk.']
-EYE3_ALT = {'blink': ['....', '.kk.', 'kQQk', 'kkkk', '.kk.', '....'],
-            'atk0|atk1|atk2': ['.PP.', 'PwwP', 'wwkP', 'wPkP', 'PPQP', '.PP.'],
-            'ko': ['....', '.kk.', 'kkkk', 'kQQk', '.kk.', '....']}
+# 額の 第三の 目（P）：むらさきの 虹彩に 金の 十字の ひとみ（ふつうの 目と 色を 逆に）。まん中は 白く 光る
+EYE3 = ['.kkk.', 'kVQVk', 'kVYVk', 'kYwYk', 'kVYVk', 'kQVQk', '.kkk.']
+EYE3_ALT = {'blink': ['.kkk.', 'kBBBk', 'kBBBk', 'kkkkk', 'kBBBk', 'kCCCk', '.kkk.'],
+            'hit': ['.kkk.', 'kBBBk', 'kQkQk', 'kkQkk', 'kQkQk', 'kBBBk', '.kkk.'],
+            'atk0|atk1|atk2': ['.kPk.', 'kPwPk', 'kwYwk', 'kYwYk', 'kwYwk', 'kPwPk', '.kPk.'],
+            'ko': ['.kkk.', 'kBBBk', 'kQBQk', 'kBQBk', 'kQBQk', 'kBBBk', '.kkk.']}
 # 逆立つ たてがみ（後ろへ なびく とげ）
 MANE = [
     "AA..........",
@@ -219,7 +223,7 @@ def base():
         dict(n='head', g='head', x=29, y=20, rows=outline(HEAD)),
         dict(n='mane', g='head', x=19, y=21, rows=mane_joined()),
         dict(n='face', g='head', x=29, y=20, rows=FACE, alt=FACE_ALT),
-        dict(n='eye3', g='head', x=40, y=21, rows=EYE3, alt=EYE3_ALT),
+        dict(n='eye3', g='head', x=40, y=20, rows=EYE3, alt=EYE3_ALT),
         dict(n='armF', g='armF', x=24, y=39, rows=outline(ARMF), not_='atk1|atk2'),
         dict(n='armFp', g='armF', x=24, y=39, rows=outline(ARMF_PUSH), only='atk1|atk2'),
     ]

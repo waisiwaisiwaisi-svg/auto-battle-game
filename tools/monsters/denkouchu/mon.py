@@ -1,16 +1,17 @@
 # デンコウチュウ（でんき・むし × カブトムシ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭と 角、羽の ドームは 小さく 丸く、足は 短く）
 import pix
 META = dict(id='denkouchu', name='デンコウチュウ', types=['elec', 'bug'], base='カブトムシ', size='M')
+EYE_BOX = (39, 35, 10, 8)   # 複眼（idle0）
 PAL = {
     'k': '#101018', 'l': '#1c1a40',
     'A': '#6c8ce8', 'B': '#30409a', 'C': '#18204e',      # 甲羅（つやの ある 紺）
     'Y': '#fff47a', 'G': '#f0b828', 'E': '#a8f4ff',      # 電気
     'H': '#f4e2b0', 'I': '#b88e44', 'J': '#5c3e22',      # 真ちゅうの 角
-    'D': '#3a8ad0',                                      # 目の 暗い 虹彩
+    'D': '#3a8ad0', 'F': '#123a7a',                      # 複眼の あみ目（明・暗）
     'w': '#ffffff',
 }
 LIGHT = set('AYEHw')
-KEEP_BLACK = set('wYED')
+KEEP_BLACK = set('wYEDF')
 
 def shade(mask, lt, md, dk, t=2, lf=1, r=2, b=2):
     g = pix.grid_of(mask); H, W = len(g), len(g[0])
@@ -96,19 +97,20 @@ HEAD_M = [
     "..###############......",
     "....###########........",
 ]
+# 目：複眼（D）。大きな ドームに 六角の 点の あみ目（D/F の 市松）、左上に 反射の 帯（E・w）と 火花の 黄の 光（Y）。瞳なし。太い まゆの 線が 前へ 下がって 怒りを 出す
 EYES = {
-    'open':  ['kk........', '.kkkkkkkk.', '..kwEEEkEk', '.kDDDDDkDk', '..kkkkkkk.'],
-    'glow':  ['kk........', '.kkkkkkkk.', '..kwwYYYYk', '.kYYYYYkYk', '..kGGGkGk.'],
-    'blink': ['kk........', '.kkkkkkkk.', '..kBBBBBBk', '.kkkkkkkkk', '..CCCCCC..'],
-    'hit':   ['kk........', '.kkkkkkkk.', '..kEkkkEkk', '.kkkDkkkDk', '..kkkkkkk.'],
-    'ko':    ['..........', '..kEDDEk..', '..kDkkDk..', '..kkDDkk..', '..kDkkDk..'],
+    'open':  ['kkk.......', '.kkkkk....', '.kEEkkkkk.', 'kEwwDEFDkk', 'kYEDDFDFDk', 'kEDDFDFDFk', '.kDFDFDFk.', '..kkkkkk..'],
+    'glow':  ['kkk.......', '.kkkkk....', '.kwwkkkkk.', 'kwwwYEYGkk', 'kwYEYGYGYk', 'kYEYGYGYGk', '.kYGYGYGk.', '..kkkkkk..'],
+    'blink': ['..........', 'kkk.......', '.kkkkkkk..', 'kkkkkkkkkk', 'kYEDDFDFDk', 'kEDDFDFDFk', '.kDFDFDFk.', '..kkkkkk..'],
+    'hit':   ['.......kk.', '....kkkk..', '.kkkkkkkk.', 'kDFDkFDFkk', 'kFDFDkDFDk', 'kDFDkFDFDk', '.kFDFkFDk.', '..kkkkkk..'],
+    'ko':    ['..........', '..........', '.kkkkkkkk.', 'kDkEDEkDEk', 'kEDkDkDEDk', 'kDEDkDEDFk', '.kEkDkFDk.', '..kkkkkk..'],
 }
 def head(eye='open'):
     rows = shade(HEAD_M, 'A', 'B', 'C', t=2, lf=1, r=2, b=2)
     g = pix.grid_of(rows)
     for j, r in enumerate(EYES[eye]):
         for i, c in enumerate(r):
-            if c != '.': g[3 + j][8 + i] = c
+            if c != '.': g[2 + j][7 + i] = c
     for x in range(9, 22): g[11][x] = 'k'                  # 口
     for x in range(10, 21): g[12][x] = 'w' if x % 2 else 'k'  # 白い 大あご
     for (x, y) in ((5, 1), (6, 1), (2, 3), (1, 4)): g[y][x] = 'w' if (x, y) == (5, 1) else 'A'

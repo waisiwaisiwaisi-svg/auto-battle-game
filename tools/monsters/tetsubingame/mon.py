@@ -1,4 +1,5 @@
 # テツビンガメ（はがね・ほのお × カメ）手打ち GBA風・デフォルメ（2〜3頭身）
+EYE_BOX = (43, 26, 8, 8)
 META = dict(id='tetsubingame', name='テツビンガメ', types=['steel', 'fire'], base='カメ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2c1c1e',
@@ -120,13 +121,21 @@ def head(eye=None, mouth=0, ko=False):
         at(g, 10, 13, 'w'); at(g, 14, 13, 'w')
     else:
         at(g, 6, 12, 'kkkkkkkkkkkk'); at(g, 11, 13, 'w')
-    if ko: e = ['k...k', '.k.k.', '..k..', '.k.k.', 'k...k']
-    else: e = eye or ['kkk.....', '.kkkkkk.', 'kwYYOkk.', 'kYOOkRk.', '.kkkkk..']
-    at(g, 6, 3, *e)
+    at(g, 5, 2, *(EYE_KO if ko else (eye or EYE)))
     return done(g)
-EYE_BLINK = ['kkk.....', '.kkkkkk.', 'kGGGGGk.', 'kkkkkkk.', '.HHHHH..']
-EYE_HIT = ['k.......', '.kkk....', 'kOOkkkk.', '.kkkkOk.', '........']
-EYE_ATK = ['kkk.....', '.kkkkkk.', 'kwwYYkk.', 'kYYOkOk.', '.kkkkk..']
+# ビーズ目＋太い 眉（S）：小さく 黒い つぶらな 目に 白い 光 1点、その上に 鉄の 太い 眉（明・中・暗）が 前へ 下がって にらむ
+EYE = ['kkk.....',
+       'kIIkk...',
+       '.kJJIkk.',
+       '..kkJJIk',
+       '....kkKk',
+       '...kwk..',
+       '...kkK..',
+       '....k...']
+EYE_BLINK = ['kkk.....', 'kIIkk...', '.kJJIkk.', '..kkJJIk', '....kkKk', '...KKK..', '........', '........']
+EYE_HIT = ['........', 'kkk.....', 'kIIkkk..', '.kJJJIkk', '..kkkKKk', '..kw.k..', '...kk...', '........']   # 眉が はね上がり、目が ずれる
+EYE_ATK = ['........', 'kkkk....', 'kIIIkkk.', '.kJJJJIk', '..kkkKKk', '...kwkR.', '...kkkR.', '....RR..']   # 眉が さらに 下がり、赤く 熱を おびる
+EYE_KO = ['kkk.....', 'kIIkk...', '.kJJIkk.', '..kkJJIk', '..k.kkKk', '...k.k..', '....k...', '...k.k..']
 
 # ---- 足：短く 太い 四つ足、白い つめ ----
 LEG_M = ['.ffffff.', 'ffffffff', 'ffffffff', 'ffffffff', 'ffffffff', '.fffffff', '.fffffff', '.ffffffff', 'fffffffff']

@@ -67,6 +67,7 @@ def over(*rowsets):
     g = G()
     for rs in rowsets: stamp(g, rs, 0, 0)
     return rows_of(g)
+EYE_BOX = (35, 27, 13, 9)
 META = dict(id='yukinosugumo', name='ユキノスグモ', types=['ice', 'bug'], base='クモ', size='M')
 import math
 PAL = {
@@ -119,8 +120,7 @@ def head(open_=False):
         ellipse(p, 37, 36, 10.5, 9.5, '1')
         poly(p, [(30, 28), (36, 24), (42, 25), (35, 30)], '1')               # 頭の 氷の とさか（つけ根）
     def post(s):
-        # 小さい 目（2つ）と 甲の みぞ
-        for (x, y) in ((39, 28), (42, 29)): s[y][x] = 'k'; s[y][x + 1] = 'R'
+        # 甲の みぞ
         line(s, 30, 33, 33, 41, 'C')
         # 口：きば（鋏角）
         if open_:
@@ -137,14 +137,26 @@ def crest():
     def d(p): poly(p, [(31, 29), (32, 20), (35, 17), (37, 22), (40, 18), (41, 27)], '3')
     def post(s): line(s, 33, 21, 33, 28, 'c'); line(s, 39, 20, 39, 26, 'j')
     return make(d, RAMP, r=1, hi=.1, lo=-.2, post=post)
-# 目：甲の まゆ＋白い 光＋赤い 虹彩（明 R・暗 r）＋たての ひとみ
-EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwRRkRRk', '.kwRRrkrRk', '.kRrrrkrrk', '..krrkkrk.', '...kkkkk..']
-EYE_ALT = {
-    'blink': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAAAAAAAk', '.kkkkkkkkk', '.kBBBBBBBk', '..kBBBBBk.', '...kkkkk..'],
-    'hit':   ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kkkAAAAkk', '.kAAkkkkAk', '.kBBBBBkkk', '..kkkBBBk.', '...kkkkk..'],
-    'atk0|atk1|atk2': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwwRkRwk', '.kwRRRkRRk', '.kRRRRkRRk', '..krrkkrk.', '...kkkkk..'],
-    'ko':    ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAkAAAkAk', '.kAAkAkAAk', '.kBkBBBkBk', '..kBBBBBk.', '...kkkkk..'],
-}
+# 目：多眼（N）。赤い つやの ある 丸い 目が 6つ（大 1・中 3・小 2）。白目なし、左上に 白い 光 1点。前の 大きな 目ほど 低く 前へ
+BIG = ['.kkk.', 'kRwRk', 'kRRrk', 'krrrk', '.kkk.']
+MED = ['.kk.', 'kwRk', 'kRrk', '.kk.']
+SML = ['kkk', 'kRk', 'kkk']
+EYES6 = [(SML, 0, 3), (SML, 3, 0), (MED, 6, 0), (MED, 1, 5), (MED, 9, 2), (BIG, 5, 4)]
+def eyes(mode=''):
+    g = grid(14, 9)
+    for n, (r, x, y) in enumerate(EYES6):
+        if mode == 'blink': r = [q.replace('R', 'C').replace('r', 'C').replace('w', 'B') for q in r]
+        elif mode == 'hit': r = [q.replace('w', 'r').replace('R', 'r') for q in r]
+        elif mode == 'atk': r = [q.replace('r', 'R').replace('R', 'w') if n == 5 and q.count('R') == 1 else q.replace('r', 'R') for q in r]
+        elif mode == 'ko': r = [q.replace('R', 'C').replace('r', 'C').replace('w', 'C') for q in r]
+        stamp(g, r, x, y)
+    if mode == 'ko':
+        for i in range(4): g[4 + i][5 + i] = 'k'; g[4 + i][8 - i] = 'k'
+    if mode == 'blink':
+        for (r, x, y) in EYES6: g[y + len(r) // 2][x + 1] = 'k'
+    return rows_of(g)
+EYE = eyes()
+EYE_ALT = {'blink': eyes('blink'), 'hit': eyes('hit'), 'atk0|atk1|atk2': eyes('atk'), 'ko': eyes('ko')}
 # 氷の 糸・つぶて（はなれているのは 意図的：エフェクト）
 ICE = ['c...i....', '.i.c..i..', '..cwc....', 'i.wwwci.c', '..cwc....', '.i.c..i..', 'c...i....']
 SNOW = ['.i.', 'iwi', '.i.']
@@ -158,7 +170,7 @@ def layers():
     lay += [
         dict(n='crest', g='head', x=0, y=0, rows=crest()),
         dict(n='head', g='head', x=0, y=0, rows=head(), alt={'atk1|atk2': head(True)}),
-        dict(n='eye', g='head', x=36, y=30, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=35, y=27, rows=EYE, alt=EYE_ALT),
         dict(n='ice', g='fx', x=54, y=36, rows=ICE, only='atk1'),
         dict(n='ice2', g='fx', x=58, y=34, rows=SNOW, only='atk0|atk2'),
         dict(n='snow', g='fx', x=8, y=10, rows=SNOW, only='idle1|idle2'),

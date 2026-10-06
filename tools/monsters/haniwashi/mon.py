@@ -67,6 +67,7 @@ def over(*rowsets):
     g = G()
     for rs in rowsets: stamp(g, rs, 0, 0)
     return rows_of(g)
+EYE_BOX = (34, 18, 12, 8)
 META = dict(id='haniwashi', name='ハニワシ', types=['ground', 'ghost'], base='ワシ', size='M')
 PAL = {
     'k': '#101018', 'l': '#3e1e1c',
@@ -155,13 +156,19 @@ def beak(open_=False):
             dots(g, 'G', [(50, 27), (51, 28)])
         dots(g, 'k', [(51, 23)])                     # 鼻の あな
     return make(d, RAMP, r=1, post=post, post2=post2)
-# 目：はにわの 穴の ふち（P）＋白い 光＋霊の 虹彩（明 G・暗 V）＋ひとみ（k）。まゆの 線で かこむ
-EYE = ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPwcGGkGGPk', 'kPGGVVkVVPk', 'kPPVVVkVPPk', '.kPPPPPPPk.', '..kkkkkkk..']
+# 目：うつろな 穴の目（I）。前へ 下がる ななめの くりぬき穴。奥は 2段の 影（上 P＝深い 闇、下の 奥 C＝土の 底）、
+#     その 奥に 霊の 光が 小さく 2ドット（白い 芯 c ＋ みどり G）。ふちには 土の ひび
+HOLE = ['.kkkk.......', 'kPPPPkkk....', 'kPPPPPPPkk..', '.kPPPPPPPPkk', '.kPPPPPPPPCk', '..kPPPPPPCCk', '...kkPPCCCk.', '.....kkkkk..']
+def hole(lights):
+    g = [list(r) for r in HOLE]
+    for x, y, c in lights: g[y][x] = c
+    return [''.join(r) for r in g]
+EYE = hole([(7, 4, 'c'), (8, 4, 'G'), (7, 5, 'V')])
 EYE_ALT = {
-    'blink': ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPPPPPPPPPk', 'kkkkkkkkkkk', 'kPPPPPPPPPk', '.kPPPPPPPk.', '..kkkkkkk..'],
-    'hit':   ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPGPPPPPGPk', 'kPPGGPGGPPk', 'kPPPPGPPPPk', '.kPPPPPPPk.', '..kkkkkkk..'],
-    'atk0|atk1|atk2': ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPwcccwccPk', 'kPGGGGkGGPk', 'kPPGGGkGPPk', '.kPPVVVPPk.', '..kkkkkkk..'],
-    'ko':    ['kk.........', 'kkkk.......', '.kkkkkkkk..', '.kPPPPPPPk.', 'kPPVPPPVPPk', 'kPPPPVPPPPk', 'kPPVPPPVPPk', '.kPPPPPPPk.', '..kkkkkkk..'],
+    'blink': hole([(7, 5, 'V')]),
+    'hit':   hole([(6, 4, 'V'), (9, 3, 'G'), (8, 5, 'V')]),
+    'atk0|atk1|atk2': hole([(7, 3, 'G'), (6, 4, 'G'), (7, 4, 'c'), (8, 4, 'c'), (9, 4, 'G'), (7, 5, 'G'), (8, 5, 'V')]),
+    'ko':    hole([(6, 3, 'V'), (8, 3, 'V'), (7, 4, 'G'), (6, 5, 'V'), (8, 5, 'V')]),
 }
 # 霊の 光（はなれているのは 意図的：霊火の つぶ と 攻撃の 波）
 WISP = ['.c.', 'cGc', '.V.']
@@ -176,7 +183,7 @@ def layers():
         dict(n='leg', g='legA', x=0, y=0, rows=leg(28)),
         dict(n='head', g='head', x=0, y=0, rows=head()),
         dict(n='beak', g='head', x=0, y=0, rows=beak(), alt={'atk1|atk2': beak(True)}),
-        dict(n='eye', g='head', x=35, y=17, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=34, y=18, rows=EYE, alt=EYE_ALT),
         dict(n='wisp', g='fx', x=46, y=8, rows=WISP, only='idle1|idle3|walk1|walk3'),
         dict(n='wave', g='fx', x=56, y=25, rows=WAVE, only='atk1|atk2'),
     ]

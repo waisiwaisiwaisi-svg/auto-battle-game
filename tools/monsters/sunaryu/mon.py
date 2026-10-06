@@ -47,6 +47,7 @@ def mirror(rows): return pix.flip_h(rows)
 
 
 META = dict(id='sunaryu', name='スナリュウ', types=['dragon', 'ground'], base='オオトカゲ', size='L')
+EYE_BOX = (40, 20, 10, 5)
 PAL = {
     'k': '#101018', 'l': '#3a2418',
     'F': '#c89a62', 'G': '#8a6240', 'H': '#4e3424',      # うろこ（こげ茶）
@@ -112,12 +113,16 @@ def head(mode=''):
     m = rows_of(g)
     return outline(m)
 HEAD = head(); HEAD_ATK = head('atk')
-# するどい 目：重い まゆの ひさし＋白い 光＋金と 赤の 虹彩＋たての ひとみ＋下まぶた
-EYE = ['kkkk.....', 'HkkkkkkH.', 'kwYkYYkkk', 'kYOkOOk..', '.kkkkkk..']
-EYE_ALT = {'blink': ['kkkk.....', 'HkkkkkkH.', 'GGGGGGGGG', 'kkkkkkk..', '.HHHHHH..'],
-           'hit': ['kkkk.....', 'HkkGGGkk.', 'GGkkkkGG.', 'HkkGGGkk.', '.HHHHHH..'],
-           'atk0|atk1|atk2': ['kkkkk....', 'HkwkkkkkH', 'kwYYkYYkk', 'kYOOkOk..', '.kkkkkk..'],
-           'ko': ['.........', 'HkGGGGkH.', 'GGkGGkGG.', 'GGGkkGGG.', 'GGkGGkGG.']}
+# 爬虫類の つり目（A）：ワニの ように 平たく 横長。黄色の 虹彩（明・暗）に 細い たての スリット。上まぶたは 2段の 太い 黒、下まぶたは 細い こげ茶
+EYE = ['.kkkkk....',
+       'kkkkkkkkk.',
+       'kYwYkYYOkk',
+       '.HOYkYOOH.',
+       '..HHkHHH..']
+EYE_ALT = {'blink': ['.kkkkk....', 'kkkkkkkkk.', 'GGGGGGGGkk', '.HHHHHHHH.', '..........'],
+           'hit': ['.kkkkk....', 'kkkkkkk...', 'GHYkYOkkk.', '.GHHkHH...', '..........'],     # ぎゅっと 細める
+           'atk0|atk1|atk2': ['.kkkkk....', 'kkkkkkkkk.', 'kYwYkYYYkk', 'kYYOkYOOk.', '.HOOkOOH..'],   # 見開き、スリットが のびる
+           'ko': ['..........', '.HkGGkH...', '..GkkG....', '..GkkG....', '.HkGGkH...']}
 
 # ---- 胴（小さく 丸い）＋ 背の 砂丘（なだらかな 山の 列、風もんの すじ）----
 BODY = outline(over(shade(mask(30, 18, [('e', 15, 10, 14.5, 7.5, '#')]), {'#': 'FGH'}, 2, 2, 3), [
@@ -166,7 +171,7 @@ def layers():
         dict(n='hleg', g='legA', x=16, y=50, rows=LEG),
         dict(n='fleg', g='legB', x=35, y=50, rows=LEG),
         dict(n='head', g='head', x=34, y=19, rows=HEAD, alt={NB: HEAD_ATK}),
-        dict(n='eye', g='head', x=40, y=21, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=40, y=20, rows=EYE, alt=EYE_ALT),
         dict(n='sand', g='head', x=52, y=46, rows=SAND, alt={'atk2': SAND2}, only=NB),
     ]
 FRAMES = {

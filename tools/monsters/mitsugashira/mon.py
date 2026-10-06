@@ -9,6 +9,7 @@ PAL = {
     'M': '#9c1838', 'w': '#ffffff',
 }
 LIGHT = set('FSYPw')
+EYE_BOX = (40, 13, 15, 30)   # 3つの 頭の 目（idle0 の 64x64 座標）
 
 def _ol(g):
     H, W = len(g), len(g[0]); out = [r[:] for r in g]
@@ -102,13 +103,13 @@ def hshade(rows):
         if o[y][x] == 'G': o[y][x] = 'H'
     return [''.join(r) for r in o]
 HEAD = hshade(HEAD); HEAD_OPEN = hshade(HEAD_OPEN)
-# 目：黒い まゆ＋光 w＋虹彩 2色（Y／R）＋たての ひとみ＋下まぶた
-EYE = ['kkkkkkk.', '.kwYRkRk', '.kRMMkMk', '..kkkkk.']
+# 目（E：光る目・瞳なし）：黒い まゆの 下で 赤い 光（R）が 細く 燃え、芯は 白〜うす桃（w／Y）。ふちは 黒線の かわりに 暗い 赤の にじみ（M）、光は 後ろへ 尾を 引く
+EYE = ['kkkkkkk.', 'MRYwYRM.', '.MMRRRRk', '....MM..']
 EYE_ALT = {
-    'blink': ['kkkkkkk.', '.kkkkkkk', '..GGGGG.', '........'],
-    'atk0|atk1|atk2': ['kkkkkkk.', '.kwYYkYk', '.kYYYkYk', '..kkkkk.'],
-    'hit': ['kkkkkkk.', '..RkkkR.', '...RkR..', '..kkkkk.'],
-    'ko': ['........', '.kR..kR.', '..kRkR..', '.kR..kR.'],
+    'blink': ['kkkkkkk.', '.kkkkkkk', '..MMMMM.', '........'],
+    'atk0|atk1|atk2': ['kkkkkkkY', 'MRYwwYRR', 'MMRYYRRR', '..MMMRM.'],
+    'hit': ['kkkkkkk.', '.R.Y.Rk.', '..M.R.M.', '.M......'],
+    'ko': ['........', '.MR..MR.', '..MRMR..', '.MR..MR.'],
 }
 COLLAR = [
     '.......',

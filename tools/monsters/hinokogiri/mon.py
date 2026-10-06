@@ -67,6 +67,7 @@ def over(*rowsets):
     g = G()
     for rs in rowsets: stamp(g, rs, 0, 0)
     return rows_of(g)
+EYE_BOX = (36, 18, 10, 10)
 META = dict(id='hinokogiri', name='ヒノコギリ', types=['fire', 'steel'], base='ノコギリザメ', size='M')
 PAL = {
     'k': '#101018', 'l': '#262a40',
@@ -134,14 +135,35 @@ def head(open_=False):
             put(s, ['...kkkkkkkkk', 'kkkkwFkwFFwk', '.FwFFFwFFFk.'], 36, 34)
     return make(d, RAMP, lo=-.34, post=post)
 
-# 目：鋼の まゆの ひさし＋白い 光＋赤熱の 虹彩（明 Y・暗 O）＋たての ひとみ
-EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwYYkYYk', '.kwYYOkOYk', '.kYOOOkOOk', '..kOOkkOk.', '...kkkkk..']
-EYE_ALT = {
-    'blink': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kSSSSSSSk', '.kkkkkkkkk', '.kTTTTTTTk', '..kTTTTTk.', '...kkkkk..'],
-    'hit':   ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kkkTTTTkk', '.kTTkkkkTk', '.kTTTTTkkk', '..kkkTTTk.', '...kkkkk..'],
-    'atk0|atk1|atk2': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwwYkYwk', '.kwYYYkYYk', '.kYYYYkYYk', '..kOOkkOk.', '...kkkkk..'],
-    'ko':    ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kTkTTTkTk', '.kTTkTkTTk', '.kTkTTTkTk', '..kTTTTTk.', '...kkkkk..'],
-}
+# 目：魚の 目（K）。まぶたの ない 丸い 目。鋼の 骨の ふち（S/T/U）→ 赤熱の 細い 輪（Y/O/R）→ 平たい 大きな 黒い 瞳
+def fish_eye(mode=''):
+    cx = cy = 4.5; g = [['.'] * 10 for _ in range(10)]
+    for y in range(10):
+        for x in range(10):
+            dx, dy = x + .5 - cx, y + .5 - cy; d = (dx * dx + dy * dy) ** .5; t = dx + dy   # t<0 は 左上（光）
+            if d > 4.9: continue
+            if d > 4.0: c = 'k'
+            elif d > 3.1: c = 'P' if t < -1.5 else 'N'
+            elif d > 2.2:
+                c = 'Y' if t < -1 else 'R' if t > 1.5 else 'O'
+                if mode == 'blink': c = 'F'
+                if mode == 'atk' and t < 0: c = 'Y'
+            else:
+                c = {'blink': 'E', 'atk': 'k', 'hit': 'R'}.get(mode, 'k')
+                if mode == 'hit' and d < 1.1: c = 'k'
+                if mode == 'blink' and t > 0: c = 'F'
+                if mode == 'atk' and d > 1.5: c = 'O'
+            g[y][x] = c
+    if mode in ('', 'atk'): g[3][3] = 'w'
+    for x, y in ((1, 3), (3, 1), (8, 6), (6, 8)): g[y][x] = 'S' if x + y < 6 else 'T'   # 骨の いぼ
+    if mode == 'atk': g[3][4] = 'w'
+    if mode == 'blink':
+        for x in range(2, 8): g[5][x] = 'k' if g[5][x] in 'EF' else g[5][x]
+    if mode == 'ko':
+        for i in range(2, 8): g[i][i] = 'k'; g[i][9 - i] = 'k'
+    return [''.join(r) for r in g]
+EYE = fish_eye()
+EYE_ALT = {'blink': fish_eye('blink'), 'hit': fish_eye('hit'), 'atk0|atk1|atk2': fish_eye('atk'), 'ko': fish_eye('ko')}
 
 # ---------- のこぎりの 吻（見せ所）：黒鉄の 刃と 赤熱した 大きな 歯の 列 ----------
 def saw(hot=0):

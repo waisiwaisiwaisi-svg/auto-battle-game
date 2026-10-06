@@ -1,12 +1,13 @@
 # エンジャク（ほのお・ひこう(風) × 炎の 猛禽）手打ち GBA風
 import pix
+EYE_BOX = (45, 15, 8, 5)
 META = dict(id='enjaku', name='エンジャク', types=['fire', 'wind'], base='不死鳥', size='L')
 PAL = {
     'k': '#101018', 'l': '#3c1620',
     'A': '#86728a', 'B': '#4c3e56', 'C': '#2a2234',
     'Y': '#fff2a0', 'O': '#ffb030', 'R': '#f05020', 'r': '#a01e24',
     'W': '#f2e2c4', 'V': '#b49a7c',
-    'w': '#ffffff',
+    'w': '#ffffff', 'K': '#08060c',                     # K：猛禽の 黒い 瞳
 }
 LIGHT = set('AYOWw')
 
@@ -163,9 +164,12 @@ WING_DN = fan(26, 30, [(17, 1), (24, 0), (25, 5), (22, 10), (13, 11), (12, 7)],
                [(11, 7), (17, 9), (9, 29), (6, 28)], [(8, 6), (13, 9), (3, 28), (1, 26)]])
 for (x, y, c) in ((18, 3, 'O'), (19, 3, 'R'), (21, 6, 'R'), (15, 7, 'O')):   # 雨覆いの 残り火（手打ち）
     WING_DN[y] = WING_DN[y][:x] + c + WING_DN[y][x + 1:]
-# 目：骨の まゆの 下、白い 光＋金と だいだいの 虹彩＋たての ひとみ
-EYE = ['wYYkYO', 'YOOkOO']
-EYE_ALT = {'blink': ['BBBBBB', 'kkkkkk'], 'atk0|atk1|atk2': ['wwYkYY', 'YYOkOO'], 'hit': ['kkBBkk', 'BBkkBB'], 'ko': ['BkBkBB', 'BBkBBB']}
+# 目（B 猛禽）：白目なし。だいだいの 丸い 虹彩の 輪に 大きな 丸い 黒瞳、太い 骨の ひさしが 上の 前半分を 切る
+EYE = ['Akkkkkkk', 'kOOOkkkk', 'kYOKwKRk', 'kYOKKORk', 'AkROORkl']
+EYE_ALT = {'blink': ['Akkkkkkk', 'kBBBkkkk', 'kABBBBBk', 'kkkkkkkk', 'Akkkkkkl'],
+           'atk0|atk1|atk2': ['Akkkkkkk', 'kOOKKOkk', 'kYKwKKRk', 'kYOKKORk', 'AkROORkl'],   # ひさしが 上がり 瞳が 開く
+           'hit': ['Akkkkkkk', 'kBBkkkkk', 'kkkOkkBk', 'kBOkkkBk', 'Akkkkkkl'],
+           'ko': ['Akkkkkkk', 'kBkBkBBk', 'kBBkBBBk', 'kBkBkBBk', 'Akkkkkkl']}
 def dark(rows): return pix.recolor(rows, {'A': 'B', 'B': 'C', 'Y': 'O', 'O': 'R', 'R': 'r'})
 
 GUST = [  # 攻撃：炎の つむじ風
@@ -257,7 +261,7 @@ def base_layers():
         dict(n='body', g='body', x=19, y=24, rows=BODY),
         dict(n='talon', g='talon', x=30, y=40, rows=TALON),
         dict(n='head', g='head', x=39, y=10, rows=HEAD),
-        dict(n='eye', g='head', x=46, y=17, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=45, y=15, rows=EYE, alt=EYE_ALT),
         dict(n='wingF_up', g='wingF', x=10, y=5, rows=WING_UP, only=UP),
         dict(n='wingF_mid', g='wingF', x=1, y=13, rows=WING_MID, only=MID),
         dict(n='wingF_dn', g='wingF', x=10, y=31, rows=WING_DN, only=DN),

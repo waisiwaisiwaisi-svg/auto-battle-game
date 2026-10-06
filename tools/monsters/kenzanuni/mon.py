@@ -1,4 +1,5 @@
 # ケンザンウニ（はがね・みず × ウニ）手打ち GBA風・デフォルメ（まるい 体＝頭）
+EYE_BOX = (30, 33, 15, 6)
 META = dict(id='kenzanuni', name='ケンザンウニ', types=['steel', 'water'], base='ウニ', size='S')
 PAL = {
     'k': '#101018', 'l': '#221a36',
@@ -103,12 +104,12 @@ def body(scale=1.0, short=False, eye='open', mouth=0):
     for x in range(CX - 10, CX + 11, 4): at(g, x, 35, 'S')   # 台の 鋲（びょう）
     # とげの 付け根の いぼ（ウニの 殻の もよう・手打ち）
     for x, y in ((11, 23), (14, 26), (17, 22), (10, 29), (15, 30), (20, 25), (13, 20)): at(g, x, y, 'P'); at(g, x + 1, y + 1, 'R')
-    # 目：2つ 光る（白い 光＋水色 2段の 虹彩＋ひとみ）、まゆの 線
-    if eye == 'open': e1, e2 = ['kkk....', '.kkkkkk', 'kwCCkEk', 'kCCEkEk', 'kEEEkEk', '.kkkkk.'], ['kk...', '.kkkk', 'kwCkk', 'kCEkk', 'kEEkk', '.kkk.']
-    elif eye == 'atk': e1, e2 = ['kkk....', '.kkkkkk', 'kwwCkCk', 'kwCCkEk', 'kCCEkEk', '.kkkkk.'], ['kk...', '.kkkk', 'kwwkk', 'kwCkk', 'kCCkk', '.kkk.']
-    elif eye == 'blink': e1, e2 = ['kkk....', '.kkkkkk', 'kQQQQQk', 'kkkkkkk', '.RRRRR.', '.......'], ['kk...', '.kkkk', 'kQQQk', 'kkkkk', '.RRR.', '.....']
-    elif eye == 'hit': e1, e2 = ['k......', '.kkk...', 'kQQkkkk', 'kkkkQQk', '.......', '.......'], ['k....', '.kk..', 'kQkkk', 'kkkQk', '.....', '.....']
-    else: e1, e2 = ['k...k..', '.k.k...', '..k....', '.k.k...', 'k...k..', '.......'], ['k..k.', '.kk..', '.kk..', 'k..k.', '.....', '.....']
+    # 目（E 光る目）：瞳なし。白い 芯＋水色の 光＋青い にじみの 丸い 光の 玉が 2つ。内がわの 上を 黒い 斜めの 影が 切って 怒り顔
+    if eye == 'open': e1, e2 = ['kE.....', '.kkEE..', 'ECwkkkE', 'ECwwCCE', '.ECCCE.', '..EEE..'], ['....k', '.EEkk', 'kkkCE', 'ECwCE', '.ECE.', '..E..']
+    elif eye == 'atk': e1, e2 = ['kEw....', '.kkCEE.', 'ECwkkCE', 'CwwwwCE', 'ECwwCE.', '.EECEE.'], ['..w.k', '.ECkk', 'kkwCE', 'CwwCE', 'ECwE.', '.EEE.']   # 光が ふくらむ
+    elif eye == 'blink': e1, e2 = ['kE.....', '.kkEE..', '..EkkkE', '.ECCCE.', '..EEE..', '.......'], ['....k', '.EEkk', 'kkkE.', '.ECE.', '..E..', '.....']   # 細い 光の すじ
+    elif eye == 'hit': e1, e2 = ['kE.....', '.k.E...', 'E.w.k.E', '.C.wC..', 'E.C.E..', '..E....'], ['....k', '.E.k.', 'k.C.E', '.w.C.', 'E.E..', '.....']   # 光が 割れて 散る
+    else: e1, e2 = ['E...E..', '.C.C...', '..E....', '.C.C...', 'E...E..', '.......'], ['E..E.', '.CC..', '.CC..', 'E..E.', '.....', '.....']
     at(g, 21, 18, *e1); at(g, 31, 18, *e2)
     # 口：ちょうちん形の 牙（ウニの 口の 5本の 歯）
     if mouth: at(g, 25, 25, 'kkkkkkkkk', 'kwkwkwkwk', 'kRRRRRRRk', 'kRRRRRRRk', '.kwkwkwk.', '..kkkkk..')

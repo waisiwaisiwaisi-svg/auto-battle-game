@@ -1,5 +1,6 @@
 # ヒサソリ（ほのお・どく × サソリ）手打ち GBA風
 import pix
+EYE_BOX = (33, 37, 12, 6)
 META = dict(id='hisasori', name='ヒサソリ', types=['fire', 'poison'], base='サソリ', size='M')
 PAL = {
     'k': '#101018', 'l': '#4a1424',
@@ -7,9 +8,10 @@ PAL = {
     'Y': '#fff27a', 'O': '#ff8a1e',                      # 熱（熾火）
     'V': '#e6a0ff', 'U': '#9a48d0', 'X': '#4e1c72',      # 毒
     'w': '#fff6e8',
+    'E': '#ff2a34',                                      # 目の 赤
 }
 LIGHT = set('AYVw')
-KEEP_BLACK = set('wY')
+KEEP_BLACK = set('wYE')
 
 # ---- 胴（下書きの シルエットは 手で、3段の 陰影は ふちからの きょりで、継ぎ目は 手で）----
 def shade(mask, lt, md, dk, t=2, lf=1, r=2, b=2):
@@ -91,12 +93,31 @@ HEAD = [
     '..kkCCCCCCCCCCkk......',
     '....kkkkkkkkkk........',
 ]
-# 目：熾火色の 虹彩（黄・だいだい）＋白い 光＋たての ひとみ。まゆの ひさしが 前へ 下がる つり目
-EYE = ['wYYkYOk', 'YOOkOOk']
-EYE_ALT = {'blink': ['BBBBBkk', 'kkkkkkk'],
-           'atk0|atk1|atk2': ['wwYkYkk', 'YYOkOOk'],
-           'hit': ['kkBBBkk', 'BBkkkBk'],
-           'ko': ['OkBkOkk', 'BOkOBBk']}
+# 目（N 多眼）：頭の 横に 大・中・小・豆の 4つの 赤い 目。どれも 黒い ふちの つやつやの 玉（瞳なし）、大きさを 変えて 前へ 並べる
+def _eyes(st='open'):
+    g = [list(r) for r in ['BBBBBBBBBBBB', 'BBBBBBBBBBBB', 'BBBBBBBBBBBB', 'BBBBBBBBBBBB',
+                           'BBBBBBBBBBCB', 'BBBBBBBBBCCB', 'BBBBBBBBBCCC']]
+    E = {'open': 'EwC', 'atk': 'YwO', 'blink': 'CCC', 'hit': 'CCC', 'ko': 'CCC'}[st]
+    def eye(x0, y0, w, h, hl=True):
+        for y in range(y0 - 1, y0 + h + 1):
+            for x in range(x0 - 1, x0 + w + 1):
+                if (y in (y0 - 1, y0 + h)) != (x in (x0 - 1, x0 + w)): g[y][x] = 'k'
+        for y in range(y0, y0 + h):
+            for x in range(x0, x0 + w): g[y][x] = E[2] if (y == y0 + h - 1 and x == x0 + w - 1 and h > 1) else E[0]
+        if w * h >= 4: g[y0][x0] = E[1]
+        if st in ('blink', 'hit'):
+            for x in range(x0, x0 + w): g[y0 + h - 1][x] = 'k'
+    eye(1, 3, 4, 2); eye(6, 2, 2, 2); eye(9, 5, 2, 1); eye(10, 1, 1, 1)
+    if st == 'hit':
+        for x in range(1, 5): g[3][x] = 'k'; g[4][x] = 'C'
+        g[4][2] = g[3][3] = 'k'
+    if st == 'ko':
+        for (x, y) in ((1, 3), (4, 3), (2, 4), (3, 4)): g[y][x] = 'k'
+        g[3][2] = g[3][3] = 'C'; g[4][1] = g[4][4] = 'C'
+        g[2][6] = g[3][7] = 'k'
+    return [''.join(r) for r in g]
+EYE = _eyes()
+EYE_ALT = {'blink': _eyes('blink'), 'atk0|atk1|atk2': _eyes('atk'), 'hit': _eyes('hit'), 'ko': _eyes('ko')}
 
 # はさみ（腕＋大きな はさみ。すき間から 火花）
 CLAW = [
@@ -232,7 +253,7 @@ def layers():
         *[dict(n='hs%d' % i, g='head', x=x, y=y, rows=HSPINE, alt={'idle1|idle3|atk0|atk1|atk2': HSPINE_H})
           for i, (x, y) in enumerate(((30, 32), (35, 31)))],
         dict(n='head', g='head', x=27, y=34, rows=HEAD),
-        dict(n='eye', g='head', x=35, y=40, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=33, y=37, rows=EYE, alt=EYE_ALT),
         dict(n='arm', g='claw', x=44, y=46, rows=ARM),
         dict(n='claw', g='claw', x=47, y=40, rows=CLAW),
         dict(n='spark', g='claw', x=56, y=45, rows=SPARK['idle0|walk0|walk2'],

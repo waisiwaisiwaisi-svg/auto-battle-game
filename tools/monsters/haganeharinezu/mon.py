@@ -4,9 +4,12 @@ PAL = {
     'k': '#101018', 'l': '#3a1a2c',
     'S': '#f4f6fa', 'T': '#a9b1c0', 'U': '#5a6070', 'C': '#9ef0ff',
     'F': '#c48a8a', 'G': '#8a4a5c', 'H': '#4e2438',
-    'R': '#ff2e3e', 'Y': '#ffe04a', 'w': '#ffffff',
+    'R': '#ff2e3e', 'w': '#ffffff',
+    'x': '#060608',                                   # ビーズ目の 黒
 }
-LIGHT = set('SCFYw')
+LIGHT = set('SCFw')
+KEEP_BLACK = set('wx')
+EYE_BOX = (37, 38, 10, 8)   # 目と まゆ（idle0 の 64x64 座標）
 import math
 from pix import grid, rows_of, outline, ellipse
 
@@ -107,13 +110,14 @@ HEAD = [
     '...kkHHHHHkk...........',
     '.....kkkkk.............',
 ]
-# 目：まゆ（k）の ひさし＋ハイライト w＋虹彩 2色（Y／R）＋たての ひとみ（k）＋下まぶた
-EYE = ['kkkk.....', '.kkkkkkk.', '.kwwYYkYk', '.kYYRRkRk', '..kRRRkRk', '...kkkkk.']
+# 目（S：ビーズ目＋太い まゆ）：小さく 真っ黒な ビーズ目（x）に 強い 白の ハイライト 1点。その 上に 鉄色（S／T／U）の 太い まゆが 前へ ななめに さがって 怖く にらむ
+BROW = ['kkk.......', 'kSTTkkk...', '.kUTTTTkkk', '..kkUUUTTk', '....kkkkkk']
+EYE = BROW + ['....kwxk..', '....kxxk..', '.....kk...']
 EYE_ALT = {
-    'blink': ['kkkk.....', '.kkkkkkk.', '.kFFFFFFk', '.kkkkkkkk', '..FFFFFF.', '.........'],
-    'atk0|atk1|atk2': ['kkkk.....', '.kkkkkkk.', '.kwwYYkYk', '.kwYYYkYk', '..kYYYkYk', '...kkkkk.'],
-    'hit': ['.........', 'kkkk.....', '.kkkkkkkk', '.kRkkkRkk', '..kkkkkk.', '.........'],
-    'ko': ['.........', '.FkFFFkF.', '.FFkFkFF.', '.FFFkFFF.', '.FFkFkFF.', '.FkFFFkF.'],
+    'blink': BROW + ['..........', '....kkkk..', '..........'],
+    'atk0|atk1|atk2': ['..........', 'kkk.......', 'kSTTkkkk..', '.kUTTTTTkk', '..kkkUUUUk', '....kCxk..', '....kxRk..', '.....kk...'],
+    'hit': ['kkk.......', 'kSTTkkk...', '.kUTTTkkk.', '..kkkkk...', '....kk....', '......kk..', '....kk....', '..........'],
+    'ko': BROW + ['....x.x...', '.....x....', '....x.x...'],
 }
 LEG = ['.kkkkk.', 'kFGGGHk', 'kGGGGHk', 'kGGGHHk', 'kGHHHHk', 'kHHHHHk', 'kSkSkSk']
 DARK = {'F': 'G', 'G': 'H', 'H': 'l', 'S': 'T'}
@@ -131,7 +135,7 @@ def layers():
         dict(n='legB', g='legA', x=15, y=54, rows=LEG),
         dict(n='legF', g='legB', x=34, y=54, rows=LEG),
         dict(n='head', g='head', x=31, y=37, rows=HEAD),
-        dict(n='eye', g='head', x=38, y=39, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=37, y=38, rows=EYE, alt=EYE_ALT),
         dict(n='shot1', g='fx', x=52, y=30, rows=SHOT, only='atk1|atk2'),
         dict(n='shot2', g='fx2', x=55, y=36, rows=SHOT, only='atk1|atk2'),
         dict(n='streak1', g='fx', x=45, y=31, rows=STREAK, only='atk1'),

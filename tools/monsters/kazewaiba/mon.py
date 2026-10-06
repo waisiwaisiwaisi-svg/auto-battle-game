@@ -3,6 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, grid_of, poly, ellipse, stamp, outline
 
+EYE_BOX = (44, 21, 9, 5)
 META = dict(id='kazewaiba', name='カゼワイバ', types=['wind', 'dragon'], base='ワイバーン', size='L')
 PAL = {
     'k': '#101018', 'l': '#183436',
@@ -10,7 +11,7 @@ PAL = {
     'F': '#f4eec4', 'G': '#c2b27a',                      # 腹
     'm': '#dcf8f6', 'n': '#8ccad8', 'o': '#4a7e9c',      # 翼の 膜（風の 空色）
     'S': '#f6f9fc', 'T': '#a2aec4', 'U': '#5a6482',      # 刃（尾・角・爪）
-    'Y': '#ffe23a', 'O': '#d0821c', 'r': '#e23c3c',      # 目（虹彩 2色）・口
+    'Y': '#ffe23a', 'O': '#5aa61e', 'r': '#e23c3c',      # 目（金の 虹彩・緑の 輪）・口
 }
 LIGHT = set('RFmSY')
 KEEP_BLACK = set('SYO')
@@ -191,13 +192,13 @@ def head():
     put(g, HX - 2, HY + 8, ['kkk.', 'kSTk', '.kTk', '..k.'])   # ほおの 刃
     return rows_of(g)
 
-# まゆの 刃で おおわれた つり目：ハイライト（S）＋虹彩 2色（Y・O）＋たての ひとみ
-EYE = ['kkk.....', '.Rkkkkk.', '.kSYkOk.', '..kOkk..']
+# A 爬虫類の つり目：白目なし。金の 虹彩を 緑の 輪が かこむ、たての 細い スリット。上まぶたは 太く 2段、下は 細い 線
+EYE = ['kkkk.....', '.kkkkkkkk', '..OYYkYYk', '..kOYkYOk', '...PkkkP.']
 EYE_ALT = {
-    'blink': ['kkk.....', '.Rkkkkk.', '.kkkkkk.', '..QQQ...'],
-    'atk0|atk1|atk2': ['kkk.....', '.Rkkkkk.', '.kSSkYk.', '..kYkk..'],
-    'hit': ['........', '.kkQkk..', '.QQkQQ..', '.kkQkk..'],
-    'ko': ['........', '.kQQQk..', '.QkQkQ..', '.QQkQQ..'],
+    'blink': ['kkkk.....', '.kkkkkkkk', '..QkkkkkQ', '..QQQQQQQ', '...QQQQQ.'],
+    'atk0|atk1|atk2': ['kkkk.....', '.kkkkkkkk', '..YSSkSSk', '..kYSkSYk', '...PkkkP.'],
+    'hit': ['kk.......', '.kkkk..kk', '..QQkkkkQ', '..QkQQQQQ', '...QQQQQ.'],
+    'ko': ['.........', '..kQQQk..', '..QkQkQQQ', '..QQkQQQQ', '..QkQkQ..'],
 }
 MOUTH_OPEN = [   # 攻撃：口を 開く
     'kkkkkkkkkkk.',
@@ -266,7 +267,7 @@ def layers():
         dict(n='leg', g='body', x=26, y=38, rows=LEG),
         dict(n='head', g='head', x=0, y=0, rows=head()),
         dict(n='mouth', g='head', x=HX + 6, y=HY + 8, rows=MOUTH_OPEN, only='atk1|atk2|hit'),
-        dict(n='eye', g='head', x=HX + 5, y=HY + 3, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 4, y=HY + 2, rows=EYE, alt=EYE_ALT),
         dict(n='wingF', g='wingF', x=-4, y=2 - WOY, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|hit|atk0': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
         dict(n='gust', g='root', x=26, y=56, rows=OL(GUST), only='walk2'),
         dict(n='slash', g='root', x=50, y=12, rows=OL(SLASH), only='atk1'),

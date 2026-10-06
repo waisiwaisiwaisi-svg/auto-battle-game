@@ -1,6 +1,7 @@
 # ナグリルー（かくとう × カンガルー）手打ち GBA風
 from pix import outline
 META = dict(id='nagurirun', name='ナグリルー', types=['fighting'], base='カンガルー', size='M')
+EYE_BOX = (36, 24, 8, 7)   # 傷の目（idle0）
 PAL = {
     'k': '#101018', 'l': '#40201a',
     'A': '#f2ac62', 'B': '#c46a32', 'C': '#7c3820',      # 毛（赤茶）
@@ -8,9 +9,10 @@ PAL = {
     'R': '#f44a44', 'S': '#a4243a',                      # 拳闘の グローブ
     'G': '#c4c4d4', 'H': '#6c6c80',                      # 鉄の びょう・石
     'Y': '#ffe23a', 'y': '#d0821e', 'w': '#ffffff',
+    'U': '#5a2a0e',                                      # 目の 茶（暗）
 }
 LIGHT = set('AERGYw')
-KEEP_BLACK = set('wYy')
+KEEP_BLACK = set('wYyU')
 DK = {'A': 'B', 'B': 'C', 'E': 'F', 'R': 'S', 'G': 'H'}
 def dk(rows): return [''.join(DK.get(c, c) for c in r) for r in rows]
 def place(parts, W=40, H=30):
@@ -53,10 +55,13 @@ HEAD_YELL = [
     "...CCBBBFFFkkkC.....",
     ".....CCCCCCC........",
 ]
-# 目：ハイライト w ＋ 虹彩 2色（Y 明・y 暗）＋ たての ひとみ k。上を 古傷（E）が ななめに 走る
-EYE = ['kkE....', 'kkkEkk.', 'kwYkYk.', '.kykyk.', '..kkE..']
-EYE_ALT = {'blink': ['kkE....', 'kkkEkk.', 'BkkkkkB', '.BBBBB.', '..BBE..'], 'hit': ['..E....', '.kkEk..', 'kkBBkk.', '.BkkB..', '..BBE..'],
-           'atk0|atk1|atk2': ['kkE....', 'kkkEkk.', 'kwwkYk.', '.kYkyk.', '..kkE..'], 'ko': ['..E....', 'k...k..', '.k.k...', '..k....', '.k.k...']}
+# 目：傷の目（O）。古傷（E の 線＋C の 影）が 眉から ほおまで たてに 走り、太い 上まぶたを 切って いる。
+#   目は 白目（w）＋ 茶の 虹彩（y 明・U 暗）＋ 丸い ひとみ k。傷の ところで 虹彩が 白く 切れる
+EYE = ['........', '.kk..E..', '.kkkkEkk', 'kwykyEUk', '.kUkUEkk', '..kkkEk.', '.....EC.', '.....E..']
+EYE_ALT = {'blink': ['........', '.kk..E..', '.kkkkEkk', 'kBBBBEBk', '.kkkkEkk', '..CCCEC.', '.....EC.', '.....E..'],
+           'hit': ['........', '..k..E..', '...kkEk.', '.kkkkEkk', '.kykyEk.', '..kkkEk.', '.....EC.', '.....E..'],
+           'atk0|atk1|atk2': ['........', '.kk..E..', '.kkkkEkk', 'kwYkYEyk', '.kykyEkk', '..kkkEk.', '.....EC.', '.....E..'],
+           'ko': ['........', '.....E..', '.k...Ek.', '..k.kE..', '...k.E..', '..k.kE..', '.k...EC.', '.....E..']}
 EAR = [
     "A.......",
     "AA......",
@@ -168,7 +173,7 @@ def base():
         dict(n='tuft', g='head', x=HX + 3, y=HY - 2, rows=outline(TUFT)),
         dict(n='ear', g='head', x=HX - 2, y=HY - 5, rows=outline(EAR)),
         dict(n='head', g='head', x=HX, y=HY, rows=outline(HEAD), alt={'atk1|atk2|hit': outline(HEAD_YELL)}),
-        dict(n='eye', g='head', x=HX + 9, y=HY + 2, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 8, y=HY + 1, rows=EYE, alt=EYE_ALT),
         dict(n='armF', g='armF', x=30, y=33, rows=ARMS['base'], alt={'atk1': ARMS['punch']}),
     ]
 def fx():

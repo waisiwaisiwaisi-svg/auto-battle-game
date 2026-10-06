@@ -166,10 +166,26 @@ def head():
     hline(g, 'k', 43, 51, 29); dots(g, 'k', [(42, 28)])
     dots(g, 'w', [(46, 30), (49, 30), (49, 31)]); dots(g, 'k', [(45, 30), (47, 30), (48, 30), (50, 30), (50, 31), (46, 31), (48, 31), (49, 32)])
     return g
-# 目：白い 光＋金と だいだいの 虹彩＋たての ひとみ（くまどりの 中）。上に 太い まゆ
-EYE = ['kkkk....', '.kkkkkkk', '.kwYYkYk', '.kYOOkOk', '..kkkkk.']
-EYE_ALT = {'blink': ['kkkk....', '.kkkkkkk', '.DDDDDDD', '.kkkkkkk', '........'], 'hit': ['........', '.FF...FF', '..FF.FF.', '.FF...FF', '........'],
-           'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkYk', '.kYYOkOk', '..kkkkk.'], 'ko': ['........', '.F..F...', '..FF....', '..FF....', '.F..F...']}
+# 目（L：隈取り）：タヌキの 黒い 隈が 目から ほおへ 垂れ、上を クリーム色の まゆの 斑が ふちどる。目は 後ろが 上がった つり目で 琥珀の 虹彩に 丸い 黒瞳
+MASK = ['.....FCCCCCF.....', '...FCkkCCCCCCF...', '..DDDDDkkkkkkkkD.', '.DDDDDDkwYYYkkOk.', '.DDDDDDkYYYOkkOk.', '..DDDDDDkOOOOOkC.', '...DDDDDDkkkkkCC.', '....DDDDDD.......', '......DDD........']
+def eyerows(st=''):
+    g = [list(r) for r in MASK]
+    def put(y, x, s):
+        for i, c in enumerate(s):
+            if c != ' ': g[y][x + i] = c
+    if st in ('blink', 'hit', 'ko'):
+        put(2, 7, 'DDDDDDDD'); put(3, 7, 'DDDDDDDDD'); put(4, 7, 'DDDDDDDDD'); put(5, 8, 'DDDDDDD'); put(6, 9, 'DDDDD')
+    if st == 'blink':   # 閉じた まぶたは 茶の すじ（後ろが 上がる）
+        put(2, 6, 'GG'); put(3, 8, 'GGGGGGGG'); put(4, 9, 'HHHHHH')
+    elif st == 'hit':   # くの字
+        put(2, 9, 'FF'); put(3, 11, 'FF'); put(4, 13, 'FF'); put(5, 11, 'FF'); put(6, 9, 'FF')
+    elif st == 'ko':
+        put(2, 9, 'F   F'); put(3, 10, 'F F'); put(4, 11, 'F'); put(5, 10, 'F F'); put(6, 9, 'F   F')
+    elif st == 'atk':   # 目が 光る
+        put(3, 7, 'kwwwYkkYk'); put(4, 7, 'kYYYYkkOk')
+    return [''.join(r) for r in g]
+EYE = eyerows()
+EYE_ALT = {'blink': eyerows('blink'), 'hit': eyerows('hit'), 'atk0|atk1|atk2': eyerows('atk'), 'ko': eyerows('ko')}
 # 湯気の 一撃
 def steam(ph):
     g = G(80, 64)
@@ -188,7 +204,7 @@ def layers():
         L('belly', 'body', body(), alt={'atk0': body(1), NB: body(2)}),
         dict(n='legA', g='legA', x=24, y=52, rows=LEG_N),
         L('head', 'head', head()),
-        dict(n='eye', g='head', x=37, y=19, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=31, y=19, rows=EYE, alt=EYE_ALT),
         dict(n='arm', g='arm', x=40, y=35, rows=ARM, alt={NB: ARM_UP}),
         L('steam', 'fx', steam(0), alt={'atk2': steam(1)}, only=NB),
     ]
@@ -199,4 +215,5 @@ FRAMES = {
     'atk0': {'body': (-1, 1), 'head': (0, 1), 'arm': (-1, 0)}, 'atk1': {'root': (3, 0), 'arm': (1, -2)}, 'atk2': {'root': (4, 0), 'arm': (1, -2), 'fx': (1, 0)},
     'hit': {'root': (-3, 0), 'head': (-1, -1)}, 'ko': {'_flip': True},
 }
+EYE_BOX = (32, 19, 16, 9)
 PARENT = {'head': 'body', 'tail': 'body', 'arm': 'body', 'armB': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

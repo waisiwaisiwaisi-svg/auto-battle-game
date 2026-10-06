@@ -3,6 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, grid_of, poly, ellipse, stamp, outline
 
+EYE_BOX = (46, 21, 9, 8)
 META = dict(id='miragega', name='ミラージュガ', types=['psychic', 'bug'], base='ガ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2e1a40',
@@ -11,6 +12,7 @@ PAL = {
     'Y': '#ffd850', 'O': '#e07a30',                      # 目玉もようの 金
     'm': '#ff52b8', 'n': '#a01c78',                      # 念力の 光
     'w': '#ffffff', 'c': '#a8f0ff',                      # 鱗粉
+    'p': '#ffb2e2',                                      # 複眼の 反射（うす桃）
 }
 LIGHT = set('RFYmwc')
 RAMP = {'1': 'RQP', '2': 'FGH', '3': 'QPP', '4': 'mmn', '5': 'GHH'}
@@ -215,13 +217,14 @@ def head():
     put(g, 52, 31, ['.kkk..', 'kYOOk.', 'kOkYOk', '.kkYOk', '...kk.'])
     return rows_of(g)
 
-# 複眼：まゆの 板で つり上がり、白い 光＋ 2色の 虹彩（m/n）＋ たての ひとみ
-EYE = ['kkkk......', '.kkkkkkkk.', '..kwwmmkmk', '..kmmnnknk', '...knnnkk.', '....kkkk..']
+# D 複眼：大きな ドーム。桃色の 地に 濃い 点の あみ目（六角の 並び）、左上に 白〜うす桃の 反射の 帯。ひとみは なし。
+# 前へ 下がる まゆの 線で 怒り顔
+EYE = ['kkk......', '.kkkkkkk.', '.kwpmnkkk', 'kpwnmnmnk', 'kpmmnmnmk', 'knmnmnmnk', '.knnnnnk.', '..kkkkk..']
 EYE_ALT = {
-    'blink': ['kkkk......', '.kkkkkkkk.', '...kkkkkk.', '..........', '..........', '..........'],
-    'atk0|atk1|atk2': ['kkkk......', '.kkkkkkkk.', '..kwwwwkwk', '..kmmmmkmk', '...kmmnkk.', '....kkkk..'],
-    'hit': ['kkk.......', '..kk..kk..', '....kk....', '..kk..kk..'],
-    'ko': ['..........', '..k...k...', '...k.k....', '....k.....', '...k.k....', '..k...k...'],
+    'blink': ['kkk......', '.kkkkkkk.', '.kkkkkkkk', 'kkkkkkkkk', 'kpmmnmnmk', 'knmnmnmnk', '.knnnnnk.', '..kkkkk..'],
+    'atk0|atk1|atk2': ['kkk......', '.kkkkkkk.', '.kwwpmkkk', 'kwwmpmpmk', 'kwppmpmpk', 'kmpmpmpmk', '.kmmmmmk.', '..kkkkk..'],
+    'hit': ['......kk.', '...kkkk..', '.kkmnmnkk', 'knmnmnmnk', 'knnmnmnnk', 'knmnmnmnk', '.knnnnnk.', '..kkkkk..'],
+    'ko': ['.........', '.kkkkkk..', '.kknnnkk.', 'knnknknnk', 'knnnknnnk', 'knnknknnk', '.kknnnkk.', '..kkkkk..'],
 }
 PROBO = ['kkkkkkkk..', 'kYYYYOOOkk', '.kkkkkkkOk', '........kk']   # 攻撃：針を のばす
 

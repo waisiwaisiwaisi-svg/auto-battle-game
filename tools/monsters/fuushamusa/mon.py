@@ -1,4 +1,5 @@
 # フウシャムサ（かぜ・ノーマル × ムササビ）手打ち GBA風・デフォルメ（2〜3頭身：右向き 3/4 で 滑空。大きな 頭に 房の 耳と 前歯、前足と 後ろ足の あいだの 飛膜が 風車の 帆）
+EYE_BOX = (43, 19, 9, 7)
 META = dict(id='fuushamusa', name='フウシャムサ', types=['wind', 'normal'], base='ムササビ', size='M')
 PAL = {
     'k': '#101018', 'l': '#3e2a26',
@@ -112,7 +113,14 @@ HEAD = P(M(23, 21, ('e', '1', 11, 10.5, 11, 9.5), ('e', '1', 17.5, 13, 5, 5.5)),
 ], lw=2, dw=3)
 EAR = ['k..k.......', 'kk.kk......', '.kkAkk.....', '.kAAAkk....', '..kBAAAkk..', '..kBBAAAk..', '...kCBBBAk.', '...kCCBBk..', '....kkkk...']   # 先に 房毛
 EAR_F = dark(EAR, DK)
-EYE, EYE_ALT = eye('m', 'T')
+# 目：三白眼（C）。白目が 広く、小さな 青緑の 虹彩が 上まぶたの 前に 寄る。下まぶたの 線は 濃く 2重（にらむ 目）
+EYE = ['kkkk.....', '.kkkkkkkk', '.kwwwmkTk', 'kwwwwwTTk', 'kDwwwwwwk', '.kkkkkkkk', '..CCCCC..']
+EYE_ALT = {
+    'blink': ['kkkk.....', '.kkkkkkkk', '.kBBBBBBk', 'kBBBBBBBk', 'kkkkkkkkk', '..CCCCC..'],
+    'hit':   ['kkkk.....', '.kkkkkkkk', '..kkkkk..', '.....kkk.', '..kkkkk..', '.kkkkkk..', '..CCCCC..'],
+    'atk0|atk1|atk2': ['kkkk.....', '.kkkkkkkk', '.kwwwcmkk', 'kwwwwwcmk', 'kDwwwwwwk', '.kkkkkkkk', '..CCCCC..'],
+    'ko':    ['kkkk.....', '.kkkkkkkk', '..k...k..', '...k.k...', '....k....', '...k.k...', '..k...k..'],
+}
 NOSE = ['kk', 'kk']
 TEETH = ['kkkk', 'kwwk', 'kwwk', '.kk.']
 MOUTH_OPEN = ['kkkkk', 'kRRRk', 'kwwRk', 'kwwk.', '.kk..']

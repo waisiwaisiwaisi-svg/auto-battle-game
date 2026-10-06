@@ -9,6 +9,7 @@ PAL = {
     'Y': '#d8ff3a', 'G': '#6f9a10', 'R': '#a8184c', 'w': '#ffffff',
 }
 LIGHT = set('APYw')
+EYE_BOX = (45, 31, 9, 6)   # 目（idle0 の 64x64 座標）
 
 def shade(rows, ramps, low=99):
     g = pix.grid_of(rows); H, W = len(g), len(g[0]); o = [r[:] for r in g]
@@ -154,13 +155,13 @@ def head(open_=False):
         for x in (11, 14, 17): at(x, 12, 'w')
     return pix.outline(pix.rows_of(g))
 HEAD = head(); HEAD_OPEN = head(True)
-# 目：まゆの ひさし＋光 w＋虹彩 2色（Y／G）＋たての ひとみ＋下まぶた
-EYE = ['kkkk.....', '.kkkkkkk.', '.kwwYYkYk', '.kwYYYkYk', '..kGGGkGk', '...kkkkk.']
+# 目（E：光る目・瞳なし）：毒々しい 黄緑の 光（Y）に 白い 芯（w）、まわりは 黒線の かわりに 暗い 緑の にじみ（G）。上は 低い まゆの 線
+EYE = ['kkkk.....', '.kkkkkkk.', '.GYYYYYYG', '..GYwwwYG', '...GYYYG.', '....GGG..']
 EYE_ALT = {
-    'blink': ['kkkk.....', '.kkkkkkk.', '.kBBBBBBk', '.kkkkkkkk', '..BBBBBB.', '.........'],
-    'hit': ['.........', 'kkkkkkkk.', '.Akk.kkA.', '..AkkkA..', '.kkA.Akk.', '.........'],
-    'atk0|atk1|atk2': ['kkkk.....', '.kkkkkkk.', '.kwwYYkYk', '.kwYYYkYk', '..kYYYkYk', '...kkkkk.'],
-    'ko': ['.........', '.kA..kA..', '..kAkA...', '...kA....', '..kAkA...', '.kA..kA..'],
+    'blink': ['kkkk.....', '.kkkkkkk.', '.kkkkkkkk', '..GGGGGG.', '.........', '.........'],
+    'hit': ['.........', 'kkkkkkkk.', '.GY.GY.G.', '..G.Yw.G.', '.GY..G...', '...G..G..'],
+    'atk0|atk1|atk2': ['kkkk....G', '.kkkkkkGY', 'GYYYYYYYG', '.GYwwwwwY', '..GYwwYYG', '...GGGGG.'],
+    'ko': ['.........', '.G...G...', '..GYG....', '...Y.....', '..GYG....', '.G...G...'],
 }
 
 # ---- しっぽ：後ろへ たれて、先が くるりと 上へ（根もとは 胴に 食いこむ）----

@@ -1,5 +1,6 @@
 # カマイタチ（かぜ・はがね × イタチの 妖怪）手打ち GBA風
 import pix
+EYE_BOX = (35, 33, 13, 6)
 META = dict(id='kamaitachi', name='カマイタチ', types=['wind', 'steel'], base='イタチ（妖怪）', size='M')
 PAL = {
     'k': '#101018', 'l': '#4a2418',
@@ -8,6 +9,7 @@ PAL = {
     'S': '#f6faff', 'T': '#a6b2ca', 'U': '#566080',
     'V': '#c4fff2', 'X': '#3ebcb4',
     'E': '#ff2848', 'e': '#9a1030',
+    'M': '#1a1220',                                  # 黒い 仮面（隈取り）・ひとみ
 }
 LIGHT = set('AWSV')
 
@@ -122,10 +124,15 @@ HEAD_OPEN = [
     '...kkWWWWWWWkk.......',
     '.....kkkkkkk.........',
 ]
-# 目：くまどりの 中、ハイライト（S）＋虹彩 2色（E・e）＋たての ひとみ
-EYE = ['.kkkkkk', 'kSEkEek', '.kekeek']
-EYE_ALT = {'blink': ['.......', 'kkkkkkk', '.CCCCC.'], 'hit': ['BkBkB..', 'BBkBB..', 'BkBkB..'],
-           'atk0|atk1|atk2': ['.kkkkkk', 'kSSkEEk', '.kEkEek'], 'ko': ['AkAkA..', 'AAkAA..', 'AkAkA..']}
+# L 隈取りの 目：黒い 仮面（M）が 目を つつみ、後ろへ はね上がる。白目の つり目に 赤い 虹彩（E・e）、ほおに 赤い すじ
+# （頭の 古い くまどり 帯は この 層で 上書きする。頭 2列目〜14列目・4段目〜9段目）
+EYE = ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMSSEEeMMMB', 'BBMMMSEMeMMMM', 'BBBMMMMMMMMMB', 'BBBBBBBMEeBBB']
+EYE_ALT = {
+    'blink': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMMMMMMMMMB', 'BBMMMeeeeMMMM', 'BBBMMMMMMMMMB', 'BBBBBBBMEeBBB'],
+    'atk0|atk1|atk2': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMSSSEEMMMB', 'BBMMMSEMEMMMM', 'BBBMMMMMMMMMB', 'BBBBBBBMEeBBB'],
+    'hit': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMMeMMMMMMB', 'BBMMMMeeeMMMM', 'BBBMMeMMMMMMB', 'BBBBBBBMEeBBB'],
+    'ko': ['MMM..........', 'BMMMMMMMMMBBB', 'BBMMEMMEMMMMB', 'BBMMMMEMMMMMM', 'BBBMMEMMEMMMB', 'BBBBBBBMEeBBB'],
+}
 
 # ---- 鎌の 腕：毛の 前腕から 三日月の 刃（上が 刃、下が みね）----
 ARM = [
@@ -251,7 +258,7 @@ def layers():
         dict(n='neck', g='head', x=HX - 4, y=HY + 9, rows=NECK),
         dict(n='ear', g='head', x=HX + 2, y=HY - 4, rows=EAR),
         dict(n='head', g='head', x=HX, y=HY, rows=HEAD, alt={NB: HEAD_OPEN}),
-        dict(n='eye', g='head', x=HX + 3, y=HY + 6, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 2, y=HY + 4, rows=EYE, alt=EYE_ALT),
         dict(n='arm', g='arm', x=31, y=40, rows=ARM, alt={NB: ARM_SWING}, not_='ko'),
         dict(n='slash', g='arm', x=49, y=31, rows=SLASH, alt={'atk2': SLASH2}, only=NB),
     ]

@@ -1,6 +1,7 @@
 # ライエリマキ（でんき・ドラゴン × エリマキトカゲ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭と えりまき、胴は 小さく、足は 短く 太く）
 from pix import outline
 META = dict(id='raierimaki', name='ライエリマキ', types=['elec', 'dragon'], base='エリマキトカゲ', size='M')
+EYE_BOX = (43, 20, 10, 7)   # つり目（idle0）
 PAL = {
     'k': '#101018', 'l': '#1c1c48',
     'A': '#82b4f4', 'B': '#4a72cc', 'C': '#283c84',      # うろこ（こん）
@@ -49,12 +50,13 @@ HEAD_GAPE = [
     "..CCFFFFFFFFFFFCC.......",
     "....CCCCCCCCCCC.........",
 ]
+# 目：爬虫類の つり目（A）。白目なし、黄（明）・だいだい（暗）の 虹彩いっぱいに 細い たての スリット。上まぶたは 太い 黒、下まぶたは 細い 紺の 線。うしろへ つり上がる
 EYES = {
-    'open':  ['kk........', '.kkkkkkkk.', '..kwYYYkYk', '.kOOOOOkOk', '..kkkkkkk.'],
-    'glow':  ['kk........', '.kkkkkkkk.', '..kwwwYYYk', '.kYYwYYkYk', '..kOOOkOk.'],
-    'blink': ['kk........', '.kkkkkkkk.', '..kBBBBBBk', '.kkkkkkkkk', '..CCCCCC..'],
-    'hit':   ['kk........', '.kkkkkkkk.', '..kYkkkYkk', '.kkkOkkkOk', '..kkkkkkk.'],
-    'ko':    ['..........', '..kYOOYk..', '..kOkkOk..', '..kkOOkk..', '..kOkkOk..'],
+    'open':  ['kk........', '.kkkkkk...', '..kkYkYkk.', '..kYYkYYkk', '..kYOkOYk.', '...kOkOk..', '....CCC...'],
+    'glow':  ['kk........', '.kkkkkk...', '..kkwkwkk.', '..kwYkYwkk', '..kYYkYYk.', '...kOkOk..', '....CCC...'],
+    'blink': ['kk........', '.kkkkkk...', '..kkBBBkk.', '..kABBBBkk', '..kkkkkkk.', '...CCCCC..', '..........'],
+    'hit':   ['kk........', '.kkkkkk...', '..kkkkkkk.', '..kkkkkkkk', '..kOYkYOk.', '...kkkkk..', '....CCC...'],
+    'ko':    ['..........', '..........', '..k...k...', '...k.k....', '....k.....', '...k.k....', '..k...k...'],
 }
 def head(eye='open', gape=False):
     g = [list(r) for r in HEAD_T + (HEAD_GAPE if gape else HEAD_SHUT)]

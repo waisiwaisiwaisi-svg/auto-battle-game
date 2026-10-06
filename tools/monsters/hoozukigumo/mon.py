@@ -6,10 +6,11 @@ PAL = {
     'A': '#ffd47a', 'B': '#f48a2a', 'C': '#a8401c',          # ホオズキの 袋
     'S': '#c8fcff', 'T': '#46c4e6',                          # 霊火（目も 同じ 色）
     'M': '#f06aa4',                                          # フェアリーの もよう
+    'Y': '#ffe23a', 'O': '#b07a10',                          # 目（黄）
     'w': '#ffffff',
 }
 LIGHT = set('DASw')
-KEEP_BLACK = set('wST')
+KEEP_BLACK = set('wSTYO')
 # ---------- 下書きの 道具（あたり → 光の 向きで 3段階 → 仕上げは 手打ち）----------
 import pix
 def G(w, h): return pix.grid(w, h)
@@ -144,13 +145,33 @@ def head(gape=0):
     for ox in (0, 4):
         stamp(g, FANG_O if gape else FANG, 45 + ox + gape, 41)
     return g
-# 目：白い 光＋霊火色の 虹彩 2色＋たての ひとみ。まゆの ひさしは 前へ 下がる。上に 小さな 副眼 2つ
-EYE = ['kkkk.....', '.kkkkkk..', '..kwSSkSk', '..kTTTkTk', '...kkkkk.']
-EYE_ALT = {'blink': ['kkkk.....', '.kkkkkk..', '.........', '..kkkkkkk', '.........'],
-           'hit': ['.........', '..kk...k.', '...kk.kk.', '..kk...kk', '.........'],
-           'atk0|atk1|atk2': ['kkkk.....', '.kkkkkk..', '..kwwSkSk', '..kSSTkTk', '...kkkkk.'],
-           'ko': ['.........', '..D..D...', '...DD....', '...DD....', '..D..D...']}
-SUB = ['kSk.kSk', '.k...k.']
+# 目（N：多眼）：大小 ちがう 黄色の 目が 4つ。前の 大きな 主眼（黒い 瞳＋黄の 輪）、上うしろに 中眼、点の 小眼 2つ。主眼の 上に 前へ 下がる まゆ
+YEL = 'YOw'   # 明・暗・光
+def eyes(st=''):
+    g = G(14, 9)
+    def put(x, y, rows):
+        for j, r in enumerate(rows):
+            for i, c in enumerate(r):
+                if c != '.': g[y + j][x + i] = c
+    if st == 'blink':   # 閉じても 黄の すじが 1本 のぞく
+        put(5, 2, ['kkk...', '.kkkkk', 'kOOOOk', '.kkkk.']); put(1, 3, ['kkkk', 'kOOk', '.kk.']); put(12, 4, ['kk']); put(4, 1, ['kOk'])
+    elif st == 'hit':   # 主眼は くの字に つぶれ、ほかは 暗く
+        put(5, 2, ['kk....', '.kOk..', '..kOkk', '.kOk..', 'kk....']); put(1, 3, ['k..k', 'kOOk', '.kk.']); put(12, 4, ['kO', 'kk']); put(4, 1, ['kOk'])
+    elif st == 'ko':
+        put(6, 3, ['O...O', '.O.O.', '..O..', '.O.O.', 'O...O']); put(1, 3, ['O..O', '.OO.', 'O..O']); put(12, 4, ['O'])
+    else:
+        hot = st == 'atk'
+        put(5, 2, ['kkk...', '.kkkkk',                    # まゆ（前へ 下がる）＋ 主眼の 上ぶち
+                   'kwYYOk' if not hot else 'kwwYYk',
+                   'kYYkOk' if not hot else 'kYwkYk',
+                   'kOkkOk' if not hot else 'kYkkYk',
+                   '.kOOk.' if not hot else '.kYYk.',
+                   '..kk..'])
+        put(1, 2, ['.kk.', 'kwYk' if not hot else 'kwwk', 'kYOk' if not hot else 'kYYk', '.kk.'])   # 中眼
+        put(12, 3, ['kk', 'Yk' if not hot else 'wk', 'kk'])                                        # 前の 小眼
+        put(4, 0, ['.k.', 'kYk', '.k.'])                                                            # 上の 小眼
+    return R(g)
+EYE_ALT = {'blink': eyes('blink'), 'hit': eyes('hit'), 'atk0|atk1|atk2': eyes('atk'), 'ko': eyes('ko')}
 WISP = [['..k..', '.kSk.', '.kSSk', 'kSwSk', 'kSwSk', '.kkk.'], ['.k...', '.kSk.', 'kSSk.', 'kSwSk', 'kSwSk', '.kkk.']]
 BITE = [['....kk', '..kkSk', '.kSSk.', 'kSwk..', 'kSk...', '.k....'], ['..k...', '.kSk..', 'kSwSkk', '.kSSSk', '..kkk.']]
 def pedicel():
@@ -163,8 +184,7 @@ def layers():
         L('ped', 'abd', pedicel(), x=0, y=3),
         L('n4', 'legA', LG['n4']), L('n3', 'legB', LG['n3']), L('n2', 'legA', LG['n2']), L('n1', 'legB', LG['n1']),
         L('head', 'head', head(), alt={NB: head(1)}, x=-1, y=4),
-        dict(n='eye', g='head', x=40, y=34, rows=EYE, alt=EYE_ALT),
-        dict(n='sub', g='head', x=40, y=32, rows=SUB, not_='blink|ko|hit'),
+        dict(n='eye', g='head', x=37, y=32, rows=eyes(), alt=EYE_ALT),
         dict(n='wisp', g='fx', x=14, y=15, rows=WISP[0], alt={'idle1|idle3|walk1|walk3': WISP[1]}, not_='ko'),
         dict(n='bite', g='fx2', x=52, y=41, rows=BITE[0], alt={'atk2': BITE[1]}, only=NB),
     ]
@@ -175,4 +195,5 @@ FRAMES = {
     'atk0': {'body': (-2, 1), 'legA': (-1, 0), 'legB': (-1, 0)}, 'atk1': {'root': (5, 0), 'head': (1, 1)}, 'atk2': {'root': (7, 0), 'head': (1, 1), 'fx2': (2, 0)},
     'hit': {'root': (-3, 0), 'head': (-1, -1)}, 'ko': {'_flip': True},
 }
+EYE_BOX = (38, 32, 14, 8)
 PARENT = {'head': 'body', 'abd': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'abd', 'fx2': 'root'}

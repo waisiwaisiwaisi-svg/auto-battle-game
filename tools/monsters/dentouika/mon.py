@@ -67,6 +67,7 @@ def over(*rowsets):
     g = G()
     for rs in rowsets: stamp(g, rs, 0, 0)
     return rows_of(g)
+EYE_BOX = (32, 23, 11, 9)
 META = dict(id='dentouika', name='デントウイカ', types=['elec', 'water'], base='イカ', size='M')
 PAL = {
     'k': '#101018', 'l': '#1c2448',
@@ -136,13 +137,14 @@ def cable(path, end, far=False, hot=False):
 C1 = ([(41, 40), (49, 46), (56, 48), (61, 43)], (61, 39))
 C1A = ([(41, 40), (48, 40), (55, 37), (59, 32)], (60, 28))
 C2 = ([(29, 40), (22, 49), (16, 53), (11, 50)], (9, 46))
-# 目：まゆの 線＋白い 光＋電気の 虹彩（明 Y・暗 O）＋たての ひとみ
-EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwYYkYYk', '.kwYYOkOYk', '.kYOOOkOOk', '..kOOkkOk.', '...kkkkk..']
+# 目：よこ瞳（G）。イカの W形の 黒い 瞳。広い 電気の 虹彩（明 Y・暗 O）、ななめの まゆ線
+B2 = ['kk.........', '.kkkkk.....', '..kkkkkkkk.']
+EYE = B2 + ['.kwYYYYYYYk', 'kYkkYYYkkYk', 'kYkkkYkkkYk', 'kOOkkkkkOOk', '.kOOOkOOOk.', '..kkkkkkk..']
 EYE_ALT = {
-    'blink': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAAAAAAAk', '.kkkkkkkkk', '.kBBBBBBBk', '..kBBBBBk.', '...kkkkk..'],
-    'hit':   ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kkkAAAAkk', '.kAAkkkkAk', '.kBBBBBkkk', '..kkkBBBk.', '...kkkkk..'],
-    'atk0|atk1|atk2': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwwYkYwk', '.kwYYYkYYk', '.kYYYYkYYk', '..kOOkkOk.', '...kkkkk..'],
-    'ko':    ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAkAAAkAk', '.kAAkAkAAk', '.kBkBBBkBk', '..kBBBBBk.', '...kkkkk..'],
+    'blink': B2 + ['.kAAAAAAAAk', 'kAAAAAAAAAk', 'kkkkkkkkkkk', 'kBBBBBBBBBk', '.kBBBBBBBk.', '..kkkkkkk..'],
+    'hit':   B2 + ['.kAAAAAAAAk', 'kkkkkkkkkkk', 'kYYkYYYkYYk', 'kOOOkkkOOOk', '.kkOOOOOkk.', '..kkkkkkk..'],
+    'atk0|atk1|atk2': B2 + ['.kwwwYYYYYk', 'kwYYYYYYYYk', 'kYkYYYYYkYk', 'kYkkYkYkkYk', '.kOOkkkOOk.', '..kkkkkkk..'],
+    'ko':    B2 + ['.kAkAAAAkAk', 'kAAAkAAkAAk', 'kAAAAkkAAAk', 'kBBBkBBkBBk', '.kBkBBBBkk.', '..kkkkkkk..'],
 }
 # 放電（はなれているのは 意図的：電気の エフェクト）
 ZAP = ['..Y...', '.YO..Y', 'Y..YO.', '..Y..O', '.O..Y.']
@@ -157,7 +159,7 @@ def layers():
         dict(n='mantle', g='body', x=0, y=0, rows=mantle()),
         *[dict(n='arm%d' % i, g='legA', x=0, y=0, rows=arm(p)) for i, (p, f) in enumerate(ARMS) if not f],
         dict(n='head', g='head', x=0, y=0, rows=H, alt={'atk1|atk2': HO}),
-        dict(n='eye', g='head', x=33, y=24, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=32, y=23, rows=EYE, alt=EYE_ALT),
         dict(n='c1', g='cable', x=0, y=0, rows=cable(*C1), alt={'atk1|atk2': cable(*C1A, hot=True), 'atk0': cable(*C1, hot=True)}),
         dict(n='zap', g='cable', x=58, y=31, rows=ZAP, only='idle1|idle3|walk1|walk3'),
         dict(n='zap2', g='cable', x=57, y=24, rows=ZAP2, only='atk1'),

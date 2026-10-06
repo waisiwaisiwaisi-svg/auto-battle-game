@@ -67,6 +67,7 @@ def over(*rowsets):
     g = G()
     for rs in rowsets: stamp(g, rs, 0, 0)
     return rows_of(g)
+EYE_BOX = (36, 20, 10, 9)
 META = dict(id='rousokudako', name='ロウソクダコ', types=['ghost', 'fire'], base='タコ', size='M')
 PAL = {
     'k': '#101018', 'l': '#3a2440',
@@ -127,13 +128,13 @@ FL = [
 ]
 FL_BIG = ['..V...V...V..', '.VbV.VbV.VbV.', '.VbbVbbbVbbV.', 'VbccbbccbbcbV', 'VbcccccccccbV', 'VbcccwwwcccbV', 'VbccwwwwwccbV', 'VbcccwwwcccbV', '.VbccOOOccbV.', '.VbcOOOOOcbV.', '..VbcOOOcbV..', '...VbOOObV...', '....VbbbV....']
 FL_KO = ['..C.', '.C..', '..C.', '.C..']
-# 目：ろうの まゆ＋白い 光＋霊火の 虹彩（明 b・暗 V）＋たての ひとみ
-EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwbbkbbk', '.kwbbVkVbk', '.kbVVVkVVk', '..kVVkkVk.', '...kkkkk..']
+# 目：よこ瞳（G）。ろうの 太い まゆ（つり）＋ 広い 霊火の 虹彩（c/b/V）＋ よこ長の 四角い 黒い 瞳（タコの 目）
+EYE = ['kkkk......', '.kPPkkkk..', '..kkPPPPkk', '.kwckkkkkk', 'kccbbbbbbk', 'kbbkkkkkbk', 'kVbkkkkkVk', '.kVVbbbVk.', '..kkkkkk..']
 EYE_ALT = {
-    'blink': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAAAAAAAk', '.kkkkkkkkk', '.kBBBBBBBk', '..kBBBBBk.', '...kkkkk..'],
-    'hit':   ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kkkAAAAkk', '.kAAkkkkAk', '.kBBBBBkkk', '..kkkBBBk.', '...kkkkk..'],
-    'atk0|atk1|atk2': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwwckcwk', '.kwcccbccbk', '.kbbbbkbbk', '..kVVkkVk.', '...kkkkk..'],
-    'ko':    ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAkAAAkAk', '.kAAkAkAAk', '.kBkBBBkBk', '..kBBBBBk.', '...kkkkk..'],
+    'blink': ['kkkk......', '.kPPkkkk..', '..kkPPPPkk', '.kkkkkkkkk', 'kAAAAAAAAk', 'kAAAAAAAAk', 'kkkkkkkkkk', '.kBBBBBBk.', '..kkkkkk..'],
+    'hit':   ['kkkk......', '.kPPkkkk..', '..kkPPPPkk', '.kkkkkkkkk', 'kAAAAAAAAk', 'kkkkkkkkkk', 'kbbbkkbbVk', '.kVVVVVVk.', '..kkkkkk..'],
+    'atk0|atk1|atk2': ['kkkk......', '.kPPkkkk..', '..kkPPPPkk', '.kwwkkkkkk', 'kwcccccccc', 'kckkkkkkck', 'kbbbbbbbbk', '.kVbbbbVk.', '..kkkkkk..'],
+    'ko':    ['kkkk......', '.kPPkkkk..', '..kkPPPPkk', '.kkkkkkkkk', 'kAkAAAAkAk', 'kAAkAAkAAk', 'kBBBkkBBBk', '.kBkBBkBk.', '..kkkkkk..'],
 }
 
 # ---------- ろうの 足（見せ所）：太く たれさがり、先が 丸まる。ろうの しずく ----------

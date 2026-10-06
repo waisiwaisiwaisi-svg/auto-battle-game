@@ -48,6 +48,7 @@ def mirror(rows): return pix.flip_h(rows)
 
 import math
 META = dict(id='kikanryu', name='キカンリュウ', types=['dragon', 'steel'], base='竜', size='L')
+EYE_BOX = (41, 13, 10, 5)
 PAL = {
     'k': '#101018', 'l': '#2a2438',
     'S': '#e2e8f2', 'T': '#8e9ab4', 'U': '#4c5470',      # 鋼（頭・首・車輪）
@@ -114,12 +115,16 @@ def head(mode=''):
 HEAD = head(); HEAD_ATK = head('atk')
 # 汽笛の 角（真ちゅう）
 HORN = ['kk.........', 'kYkk.......', 'kYYOkk.....', '.kYYOOkk...', '.kkYYOOOkk.', '..kYYYOOOk.', '..kkYYOOOOk', '...kkkkkkkk']
-# するどい 目：まゆの ひさし＋白い 光＋水色の 虹彩 2色＋たての ひとみ＋下まぶた
-EYE = ['kkkk.....', 'UkkkkkkU.', 'kwCkCCkkk', 'kCBkBBk..', '.kkkkkk..']
-EYE_ALT = {'blink': ['kkkk.....', 'UkkkkkkU.', 'TTTTTTTTT', 'kkkkkkk..', '.UUUUUU..'],
-           'hit': ['kkkk.....', 'UkkTTTkk.', 'TTkkkkTT.', 'UkkTTTkk.', '.UUUUUU..'],
-           'atk0|atk1|atk2': ['kkkkk....', 'UkwkkkkkU', 'kwCCkCCkk', 'kCBBkBk..', '.kkkkkk..'],
-           'ko': ['.........', 'UkTTTTkU.', 'TTkTTkTT.', 'TTTkkTTT.', 'TTkTTkTT.']}
+# バイザー（J）：機関車の 前照灯。鋼の ひさしの 下に 横長の 光る レンズ（黄・薄黄・真ちゅう）と 斜めの 反射線。瞳なし
+EYE = ['kkkkkkkkk.',
+       'kyywyYYYOk',
+       'kYwyYYYOOk',
+       '.kkkkkkkkk',
+       '..UUUUUU..']
+EYE_ALT = {'blink': ['kkkkkkkkk.', 'kOOUOOOOUk', 'kUUUUUUUUk', '.kkkkkkkkk', '..UUUUUU..'],     # 灯が 落ちる
+           'hit': ['kkkkkkkkk.', 'kyOkYUYkOk', 'kOkYkOkOUk', '.kkkkkkkkk', '..UUUUUU..'],      # レンズに ひび、ちらつく
+           'atk0|atk1|atk2': ['kkkkkkkkk.', 'kywwyyyyyky', 'kwwyyyyyYkyy', '.kkkkkkkkky', '..UUUUUU..'],   # 全開で 照らす
+           'ko': ['kkkkkkkkk.', 'kUkUUUkUUk', 'kUUkUkUUUk', '.kkkkkkkkk', '..UUUUUU..']}
 
 # ---- 首（煙突の ような 太い 筒。真ちゅうの 輪）----
 NECK = outline(over(shade(mask(14, 16, [('p', [(0, 16), (3, 0), (13, 0), (13, 16)], '#')]), {'#': 'STU'}, 2, 2, 2), [
@@ -183,7 +188,7 @@ def layers():
         dict(n='rod', g='rod', x=17, y=53, rows=ROD),
         dict(n='horn', g='head', x=31, y=4, rows=HORN),
         dict(n='head', g='head', x=32, y=7, rows=HEAD, alt={NB: HEAD_ATK}),
-        dict(n='eye', g='head', x=42, y=13, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=41, y=13, rows=EYE, alt=EYE_ALT),
         dict(n='breath', g='head', x=64, y=20, rows=BREATH, alt={'atk2': BREATH2}, only=NB),
     ]
 FRAMES = {

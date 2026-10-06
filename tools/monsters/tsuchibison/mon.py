@@ -6,10 +6,11 @@ PAL = {
     'A': '#d2c29e', 'B': '#8e7c60', 'C': '#4c4034',                    # 岩の 大槌
     'P': '#f4ecd6', 'Q': '#ae9e80',                                    # 角・ひづめ
     'Y': '#ffd648', 'O': '#d8601c',                                    # 目
+    'R': '#c42c34', 'X': '#5c0c1a',                                    # 目（黒っぽい 赤）
     'w': '#ffffff',
 }
 LIGHT = set('FAPYw')
-KEEP_BLACK = set('wYO')
+KEEP_BLACK = set('wYORX')
 # ---------- 下書きの 道具（あたり → 光の 向きで 3段階 → 仕上げは 手打ち）----------
 import pix
 def G(w, h): return pix.grid(w, h)
@@ -144,10 +145,13 @@ def head():
     h = G(64, 64); tube(h, [(49, 32), (55, 29), (59, 24), (58, 19)], [2.8, 2.3, 1.7, .9], HORN); h = ol(h)
     stamp(g, R(h), 0, 0)
     return g
-# 目：白い 光＋金と だいだいの 虹彩＋たての ひとみ、太い まゆの ひさし
-EYE = ['kkkk....', '.kkkkkkk', '.kwYYkYk', '.kYOOkOk', '..kkkkk.']
-EYE_ALT = {'blink': ['kkkk....', '.kkkkkkk', '.GGGGGGG', '.kkkkkkk', '........'], 'hit': ['........', '.kk...kk', '..kk.kk.', '.kk...kk', '........'],
-           'atk0|atk1|atk2': ['kkkk....', '.kkkkkkk', '.kwwYkYk', '.kYYOkOk', '..kkkkk.'], 'ko': ['........', '.k..k...', '..kk....', '..kk....', '.k..k...']}
+# 目（M：重い まぶた）：毛の 色の 厚い 上まぶたが 虹彩の 上半分を おおい、太い まぶたの 線の 下に 黒っぽい 赤の 虹彩と 半分 かくれた 黒瞳。冷たく 見下す
+LID = ['..kkkkkk..', '.kFFFFGHk.', 'kHkkkkkkkk']
+EYE = LID + ['.kwRkkRRk.', '.kRXRRXXk.', '..kkkkkk..']
+EYE_ALT = {'blink': ['..kkkkkk..', '.kFFFFGHk.', '.kGGGGGHHk', '.kGGGGHHk.', '..kkkkkk..'],
+           'hit': ['..kkkkkk..', '.kFFFFGHk.', 'kHkkkkkkkk', '..kkHHkk..', '.kk....kk.'],
+           'atk0|atk1|atk2': LID + ['.kwwRkkRk.', '.kRRRXXRk.', '..kkkkkk..'],
+           'ko': ['..kkkkkk..', '.kFFFFGHk.', '.kkGGGkkk.', '..kkGkk...', '..kkGkk...', '.kk...kk..']}
 # 地割れの 岩くず（攻撃）
 def rocks(ph):
     g = G(80, 64)
@@ -166,7 +170,7 @@ def layers():
         dict(n='legH', g='legA', x=16, y=51, rows=LEG_N),
         dict(n='legF', g='legB', x=40, y=51, rows=LEG_N),
         L('head', 'head', head()),
-        dict(n='eye', g='head', x=46, y=33, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=45, y=33, rows=EYE, alt=EYE_ALT),
         L('rocks', 'fx', rocks(0), alt={'atk2': rocks(1)}, only=NB),
     ]
 FRAMES = {
@@ -176,4 +180,5 @@ FRAMES = {
     'atk0': {'body': (-2, 0), 'head': (-1, -2), 'hump': (0, -1)}, 'atk1': {'root': (4, 0), 'head': (1, 2), 'hump': (1, 1)}, 'atk2': {'root': (6, 0), 'head': (1, 2), 'hump': (1, 1)},
     'hit': {'root': (-3, 0), 'head': (-1, -2)}, 'ko': {'_flip': True},
 }
+EYE_BOX = (45, 33, 10, 6)
 PARENT = {'head': 'body', 'hump': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'root'}

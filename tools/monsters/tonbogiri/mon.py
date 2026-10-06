@@ -1,5 +1,6 @@
 # トンボギリ（かくとう・むし × トンボ）手打ち GBA風・デフォルメ（2〜3頭身：頭は ほぼ 大きな 複眼、胸は 小さく 太く、4枚の はね、長い 腹の 先が 薙刀の 刃）
 META = dict(id='tonbogiri', name='トンボギリ', types=['fighting', 'bug'], base='トンボ', size='M')
+EYE_BOX = (40, 17, 18, 15)
 PAL = {
     'k': '#101018', 'l': '#3e1418',
     'A': '#ff7c5c', 'B': '#c63a30', 'D': '#6a1a22',      # 赤い 体
@@ -104,13 +105,28 @@ WING_N = merge(*WN0); WING_N1 = merge(*WN1); WING_F = dark(merge(*WF0), DK); WIN
 
 # ---- 頭（大きい）：ほとんどが 複眼の ドーム。複眼の 中に 白い 光＋たての ひとみ＋まゆの ひさし。下に 白い 大あご ----
 HEAD = P(M(19, 18, ('e', '1', 9.5, 9, 9.5, 9)), RED, [(['AAA', 'A'], 4, 12)], lw=2, dw=3)
-DOME = P(M(16, 13, ('e', '1', 8.5, 7, 8, 6.5)), EYEC, [], lw=2, dw=3)
-EYE = ['kkkkkkk..', '..kwwgkk.', '..kwgGkGk', '...kGEkEk', '....kkkk.']
+# 複眼（D）：大きな 緑の ドーム。六角の あみ目（点の 並び）と 左上の 反射の 帯。ひとみは ない。上に 怒りの まゆの 線
+def dome(mode='open'):
+    g = M(16, 13, ('e', '1', 8.5, 7, 8, 6.5)); shade(g, EYEC, 2, 3)
+    for y in range(13):
+        for x in range(16):
+            c = g[y][x]
+            if c == '.': continue
+            if x % 4 == (1 if y % 2 else 3):   # あみ目の 点
+                g[y][x] = {'g': 'G', 'G': 'E', 'E': 'G'}[c] if mode != 'atk' else {'g': 'w', 'G': 'g', 'E': 'G'}[c]
+            d = ((x + .5 - 8.5) / 8) ** 2 + ((y + .5 - 7) / 6.5) ** 2
+            if .42 <= d <= .66 and x + .5 < 8.5 and y + .5 < 7.5 and x + y > 3:                                       # 反射の 帯（左上の 弧）
+                if mode == 'hit' and (x + y) % 3 == 0: continue                                                         # 被弾：帯が 割れる
+                g[y][x] = 'w' if (mode == 'atk' or (x + y) % 2) else 'g'
+    return pix.outline(pix.rows_of(g))
+DOME = dome(); DOME_ATK = dome('atk'); DOME_HIT = dome('hit')
+# まゆの 線（ドームの 上を 前へ 下がる 太い 線）。まばたき＝まゆが 下がって ドームの 上を おおう
+EYE = ['kk.........', 'kkkkk......', '..kkkkkk...', '.....kkkkk.', '.......kkkk', '.........kk']
 EYE_ALT = {
-    'blink': ['kkkkkkk..', '...kkkkkk', '.........', '.........', '.........'],
-    'hit': ['kkkk.....', '...kkkk..', '......kk.', '...kkkk..', '.........'],
-    'atk0|atk1|atk2': ['kkkkkkk..', '..kwwwkk.', '..kwgggwk', '...kgGkGk', '....kkkk.'],
-    'ko': ['..k...k..', '...k.k...', '....k....', '...k.k...', '..k...k..'],
+    'blink': ['kk.........', 'kkkkk......', 'EEkkkkkk...', 'EEEEEkkkkk.', 'EEEEEEEkkkk', '..EEEEEEEkk', '.........kk'],
+    'hit': ['...kkk.....', 'kkkk.kk....', '.......kk..', '.........kk', '...........', '...........'],
+    'atk0|atk1|atk2': ['k..........', 'kkk........', '.kkkkkk....', '....kkkkk..', '.......kkkk', '.........kk', '..........k'],
+    'ko': ['...........', '...kk...kk.', '....kk.kk..', '.....kkk...', '....kk.kk..', '...kk...kk.'],
 }
 JAW = ['kkkk.', '.kwwk', '..kwk', '...k.']
 JAW_OPEN = ['kkkk.', '.kwwk', '..kwk', '.....', '..kwk', '.kwwk', 'kkkk.']
@@ -163,8 +179,8 @@ def layers():
         dict(n='thorax', g='body', x=26, y=26, rows=THORAX),
         dict(n='leg', g='body', x=34, y=40, rows=LEG),
         dict(n='head', g='head', x=37, y=19, rows=HEAD),
-        dict(n='dome', g='head', x=40, y=17, rows=DOME),
-        dict(n='eye', g='head', x=45, y=21, rows=EYE, alt=EYE_ALT),
+        dict(n='dome', g='head', x=40, y=17, rows=DOME, alt={'atk0|atk1|atk2': DOME_ATK, 'hit': DOME_HIT}),
+        dict(n='eye', g='head', x=45, y=20, rows=EYE, alt=EYE_ALT),
         dict(n='jaw', g='head', x=52, y=33, rows=JAW, alt={NB: JAW_OPEN}),
         dict(n='wingN', g='wing', x=0, y=0, rows=WING_N, alt={'idle1|idle3|walk1|walk3|atk0|hit': WING_N1}),
         dict(n='slash', g='tail', x=55, y=40, rows=SLASH, only='atk1'),

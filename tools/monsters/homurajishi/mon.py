@@ -1,5 +1,6 @@
 # ホムラジシ（ほのお・かくとう × ライオン）手打ち GBA風
 import pix
+EYE_BOX = (41, 18, 9, 8)
 META = dict(id='homurajishi', name='ホムラジシ', types=['fire', 'fighting'], base='ライオン', size='L')
 PAL = {
     'k': '#101018', 'l': '#4a1c1c',
@@ -159,10 +160,22 @@ TUFT2 = [
     '...kkYYYOk....',
     '.....kkkk.....',
 ]
-# するどい 目：まゆの ひさしの 下、白い 光＋金と だいだいの 虹彩＋たての ひとみ、下まぶた
-EYE = ['kwYYkOk', 'kYOOkOk', '.kkkkkk']
-EYE_ALT = {'blink': ['kGGGGGk', 'kkkkkkk', '.HHHHH.'], 'hit': ['kkGGGkk', 'GGkkkGG', '.k...k.'],
-           'atk0|atk1|atk2': ['kwwYkYk', 'kYYOkOk', '.kkkkkk'], 'ko': ['kGkGkGG', 'GGkGGGG', 'GkGkGGG']}
+# 目（L 隈取り）：つり上がった 琥珀の 目の まわりに 炎の 隈（赤い 筋が 目じりから 後ろ上へ、目の 下を 後ろへ）
+def _kuma(eye, hot=False):
+    t = 'O' if hot else 'R'; m = 'Y' if hot else 'D'
+    return ['....' + m + t + t + ('Y' if hot else 'O'),       # 目じりから ひたいへ はね上がる 炎の 隈
+            '..' + t + t + m,
+            '.' + t + m,
+            t + m + eye[0],
+            '.' + eye[1],
+            '.' + t + eye[2],
+            '..' + t + eye[3],
+            '...' + t + t + t + t + m]                       # 目の 下から ほおへ 流れる 隈
+EYE = _kuma(['kkkkkkk', 'kwYYkkOk', 'kOOkkk', 'kkk'])
+EYE_ALT = {'blink': _kuma(['GGGGGGG', 'GGGGGGGG', 'kkkkkk', 'GGG']),
+           'hit': _kuma(['kkGGGkk', 'GkkGkkGG', 'kGGkkG', 'GGG']),
+           'atk0|atk1|atk2': _kuma(['kkkkkkk', 'kwwYkkYk', 'kYOkkk', 'kkk'], True),
+           'ko': _kuma(['GkGkGGG', 'GGkGGGGG', 'GkGkGG', 'GGG'])}
 
 # ---- 燃える たてがみ：舌の 形の 炎を 奥から 重ねる（外側＝赤、内＝黄）----
 TONGUES = [(26, 12, 26, 1, 8), (21, 11, 13, 1, 9), (16, 14, 4, 5, 9), (13, 19, 1, 14, 9), (12, 24, 1, 24, 9),
@@ -278,7 +291,7 @@ def layers():
         dict(n='fleg', g='legA', x=39, y=46, rows=FLEG, not_=NB + '|ko'),
         dict(n='head', g='head', x=39, y=17, rows=HEAD, alt={'atk1|atk2': HEAD_ATK}),
         dict(n='tuft', g='head', x=36, y=10, rows=TUFT, alt={'idle1|idle3|walk1|walk3|atk2': TUFT2}),
-        dict(n='eye', g='head', x=42, y=22, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=41, y=18, rows=EYE, alt=EYE_ALT),
         dict(n='punch', g='punch', x=36, y=40, rows=PUNCH, only=NB + '|ko'),
         dict(n='burst', g='punch', x=59, y=38, rows=BURST, alt={'atk2': BURST2}, only=NB),
     ]

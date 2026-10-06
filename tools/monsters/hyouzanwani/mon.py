@@ -67,6 +67,7 @@ def over(*rowsets):
     g = G()
     for rs in rowsets: stamp(g, rs, 0, 0)
     return rows_of(g)
+EYE_BOX = (38, 21, 9, 7)
 META = dict(id='hyouzanwani', name='ヒョウザンワニ', types=['ice', 'water'], base='ワニ', size='L')
 PAL = {
     'k': '#101018', 'l': '#14303e',
@@ -74,7 +75,7 @@ PAL = {
     'E': '#eaf2dc', 'F': '#a4b89c',                      # 腹・あご下
     'c': '#f2ffff', 'i': '#a6e2ff', 'j': '#5aa2de',      # 氷（白・水色・青）
     'R': '#b0304a',                                      # 口の 中
-    'Y': '#ffe466', 'O': '#e2862a',                      # 目の 虹彩（明・暗）
+    'Y': '#d2fcff', 'O': '#2c6ee4',                      # 目の 虹彩（氷の 水色：明・暗）
     'w': '#ffffff',
 }
 LIGHT = set('AEciYw')
@@ -166,13 +167,14 @@ def head_open():
             g[y][x] = 'w'; g[y + 1][x] = 'w'; g[y + 2][x] = 'k'
     return make(d, dict(RAMP, **{'4': 'RRR'}), lo=-.32, post=post, post2=post2)
 
-# 目：ぶあつい まゆの こぶ＋白い 光＋金の 虹彩（明 Y・暗 O）＋たての ひとみ
-EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwYYkYYk', '.kwYYOkOYk', '.kYOOOkOOk', '..kOOkkOk.', '...kkkkk..']
+# 目：爬虫類の つり目（A）。目の こぶの 上に 細長い アーモンド形。2段の 太い 上まぶた、細い 下まぶた、
+#     氷の 水色の 虹彩（明 Y・暗 O）を 細い たての スリットが 割る。白目なし（光は 氷の 白 c の 1点）
+EYE = ['.........', '.kkkkkk..', '.kkYkkkkk', 'kcYYkYYYk', 'kYYOkOOOk', '.kOOkOOk.', '..kkkkk..']
 EYE_ALT = {
-    'blink': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAAAAAAAk', '.kkkkkkkkk', '.kBBBBBBBk', '..kBBBBBk.', '...kkkkk..'],
-    'hit':   ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kkkAAAAkk', '.kAAkkkkAk', '.kBBBBBkkk', '..kkkBBBk.', '...kkkkk..'],
-    'atk0|atk1|atk2': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwwYkYwk', '.kwYYYkYYk', '.kYYYYkYYk', '..kOOkkOk.', '...kkkkk..'],
-    'ko':    ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kAkAAAkAk', '.kAAkAkAAk', '.kAkAAAkAk', '..kBBBBBk.', '...kkkkk..'],
+    'blink': ['.........', '.kkkkkk..', '.kkkkkkkk', 'kAAAAAAAk', 'kkkkkkkkk', '.kBBBBBk.', '..kkkkk..'],
+    'hit':   ['.........', '.kkkkkk..', '..kkkkkk.', '.kAkkkkAk', 'kkkkBBBkk', '..kkkkk..', '.........'],
+    'atk0|atk1|atk2': ['.........', '.kkkkkk..', '.kcYkYYkk', 'kcYYkYYYk', 'kYYYkYYOk', '.kOOkOOk.', '..kkkkk..'],
+    'ko':    ['.........', '.kkkkkk..', '.kkkkkkkk', 'kAkAAAkAk', 'kAAkAkAAk', '.kAkkAkk.', '..kkkkk..'],
 }
 # 目の こぶ（頭の 上に もりあがる）
 def brow(): return make(lambda p: ellipse(p, 43, 25, 6.5, 4.5, '1'), RAMP, r=1)
@@ -193,7 +195,7 @@ def layers():
         dict(n='head', g='head', x=0, y=2, rows=head(), alt={'atk1': head_open()}),
         dict(n='brow2', g='head', x=0, y=0, rows=brow(), only='atk1'),
         dict(n='jawO', g='jaw', x=0, y=2, rows=jaw(True), only='atk1'),
-        dict(n='eye', g='head', x=38, y=20, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=38, y=21, rows=EYE, alt=EYE_ALT),
         dict(n='legFF', g='legA', x=0, y=0, rows=leg(30)),
         dict(n='frost', g='head', x=54, y=38, rows=FROST, only='atk2'),
         dict(n='frost0', g='head', x=56, y=26, rows=FROST2, only='atk0'),

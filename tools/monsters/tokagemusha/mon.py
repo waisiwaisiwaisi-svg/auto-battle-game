@@ -10,6 +10,7 @@ PAL = {
     'w': '#ffffff',
 }
 LIGHT = set('GBASYRw')
+EYE_BOX = (35, 23, 9, 9)   # 目（idle0 の 64x64 座標）
 
 HEAD = [
     '.......kkkkk................',
@@ -150,13 +151,24 @@ DORSAL = [
     'kRrrk.........',
     'kkkkk.........',
 ]
-# 目：まゆの 骨の ひさし＋光 w＋虹彩 2色（Y／A）＋たての ひとみ＋下まぶた
-EYE = ['kkkkkk...', '.kkkkkkkk', '.kwwYYkYk', '.kYAAAkAk', '..kkkkkk.']
+# 目（O：傷の 目）：たてに 走る 古い 刀傷（クリーム B＋影 b）が まゆと 上下の まぶたを 切って いる。目は 黄の 虹彩に 丸い 小さな 黒瞳
+EYE = [
+    '.......B.',
+    '......Bb.',
+    'kkkkk.Bbk',
+    '.kkkkkBkk',
+    '.kwYkkYYk',
+    '.kYAkkAAk',
+    '..kkkkBk.',
+    '.....Bb..',
+    '.....B...',
+]
+_T, _B = EYE[:4], EYE[6:]
 EYE_ALT = {
-    'blink': ['kkkkkk...', '.kkkkkkkk', '.kHHHHHHk', '.kkkkkkkk', '..HHHHHH.'],
-    'atk0|atk1|atk2': ['kkkkkk...', '.kkkkkkkk', '.kwwYYkYk', '.kwYYYkYk', '..kkkkkk.'],
-    'hit': ['.........', 'kkkkkkkkk', '.kkk.kkk.', '...kkk...', '.........'],
-    'ko': ['.........', '.kH..kH..', '..kHkH...', '..kHkH...', '.kH..kH..'],
+    'blink': _T + ['.kHHHHBHk', '.kkkkkBkk'] + ['..HHHHBH.'] + _B[1:],
+    'atk0|atk1|atk2': _T + ['.kwwkkYwk', '.kYYkkYAk'] + _B,
+    'hit': ['.......B.', '......Bb.', '......Bb.', 'kkkkkkBkk', '.kkk..Bk.', '...kkkB..', '......B..', '.....Bb..', '.....B...'],
+    'ko': ['.......B.', '......Bb.', '......Bb.', '.r...rB..', '..r.r.B..', '...r.....', '..r.r.B..', '.r...rBb.', '.....B...'],
 }
 # 攻撃：曲刀を 前へ ふりぬく
 SCIM_F = [
@@ -233,7 +245,7 @@ def layers():
         dict(n='fin', g='head', x=26, y=25, rows=FIN, not_='ko'),
         dict(n='horn', g='head', x=24, y=18, rows=HORN, not_='ko'),
         dict(n='head', g='head', x=30, y=21, rows=HEAD, not_='ko'),
-        dict(n='eye', g='head', x=35, y=25, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='eye', g='head', x=35, y=23, rows=EYE, alt=EYE_ALT, not_='ko'),
         dict(n='armF', g='armF', x=34, y=40, rows=ARM_F, not_='ko'),
         dict(n='koTail', g='ko', x=0, y=47, rows=TAIL, only='ko'),
         dict(n='koLeg', g='ko', x=12, y=47, rows=KO_LEG, only='ko'),
@@ -241,7 +253,7 @@ def layers():
         dict(n='koFin', g='ko', x=24, y=44, rows=FIN, only='ko'),
         dict(n='koHorn', g='ko', x=25, y=39, rows=HORN, only='ko'),
         dict(n='koHead', g='ko', x=30, y=42, rows=HEAD, only='ko'),
-        dict(n='koEye', g='ko', x=35, y=46, rows=EYE, alt=EYE_ALT, only='ko'),
+        dict(n='koEye', g='ko', x=35, y=44, rows=EYE, alt=EYE_ALT, only='ko'),
         dict(n='koScim', g='ko', x=40, y=57, rows=KO_SCIM, only='ko'),
         dict(n='scimF', g='armF', x=37, y=41, rows=SCIM_F, only='atk1'),
         dict(n='scimD', g='armF', x=39, y=42, rows=SCIM_D, only='atk2'),

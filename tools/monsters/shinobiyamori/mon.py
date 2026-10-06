@@ -1,4 +1,5 @@
 # シノビヤモリ（あく・かくとう × ヤモリ）手打ち GBA風・デフォルメ（2〜3頭身）
+EYE_BOX = (41, 19, 9, 7)
 META = dict(id='shinobiyamori', name='シノビヤモリ', types=['dark', 'fighting'], base='ヤモリ', size='M')
 PAL = {
     'k': '#101018', 'l': '#33221a',
@@ -6,7 +7,7 @@ PAL = {
     'N': '#6e6490', 'M': '#423a5e', 'O': '#221d36',
     'R': '#f05050', 'D': '#8e2028',
     'S': '#eef2fa', 'T': '#8a92b0',
-    'Y': '#86f4e4', 'E': '#2a9a9c',
+    'Y': '#fff04a', 'E': '#d8820e',          # 目（黄・山吹）
     'w': '#ffffff',
 }
 LIGHT = set('ANRSYw')
@@ -131,15 +132,20 @@ def head(ko=False, eye=None, mouth=0):
     else:
         at(g, 13, 14, 'kkkkkkkkkkkkkkkk', '.kwk.....kwk')
         at(g, 13, 13, 'k')
-    # 目：白い 光＋黄と 金の 虹彩＋たての ひとみ、まゆの 線
-    if ko: e = ['.k...k.', '..k.k..', '...k...', '..k.k..']
-    else: e = eye or ['kkkk....', 'kwYYYkYk', 'kYEEEkEk', '.kkkkkk.']
-    at(g, 15, 4, *e)
-    at(g, 14, 3, 'kkkk')                                              # まゆの ひさし
+    # 目（M 重い まぶた）：頭巾の 影の 色の 厚い 上まぶたが 虹彩の 上半分を おおい、黄色の 目で 冷たく 見下す
+    at(g, 14, 3, *(EYE_KO if ko else (eye or EYE)))
     return done(g)
-EYE_BLINK = ['kkkk....', 'kBBBBBBk', 'kkkkkkkk', '.BBBBBB.']
-EYE_HIT = ['k.......', '.kkkk...', 'kEEEkkkk', '.kkkkEk.']
-EYE_ATK = ['kkkk....', 'kwwYYkYk', 'kYYEEkEk', '.kkkkkk.']
+EYE = ['.kkkk....',
+       'kMMMMkk..',
+       'kOMMMMMk.',
+       'kkkkkkkkk',
+       'kwYYkYYEk',
+       '.kEYkEEk.',
+       '..kkkkk..']
+EYE_BLINK = ['.kkkk....', 'kMMMMkk..', 'kOMMMMMk.', 'kOMMMMMMk', 'kOOMMMMMk', '.kkkkkkk.', '.........']   # まぶたが 下まで
+EYE_HIT = ['.kkkk....', 'kMMMMkk..', 'kOMMMMMk.', 'kOOMMMMMk', 'kkkkkkkkk', '.kEYkkkk.', '.........']     # ぎゅっと 細める
+EYE_ATK = ['.kkkk....', 'kMMMMkk..', 'kkkkkkkk.', 'kwYYYkYYk', 'kYYYYkYEk', '.kEEkEEk.', '..kkkkk..']     # まぶたが 上がり、黄色が 光る
+EYE_KO = ['.kkkk....', 'kMMMMkk..', 'kOkMMkMk.', 'kOMkkMMMk', 'kOkMMkMMk', '.kkkkkkk.', '.........']
 
 # ---- ずきんの 布（赤い 結び布）：後ろへ なびく ----
 def scarf(ph=0):

@@ -5,17 +5,18 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_kit.py'), e
 from functools import lru_cache
 
 META = dict(id='rikishinamazu', name='リキシナマズ', types=['fighting', 'water'], base='ナマズ', size='L')
+EYE_BOX = (40, 15, 10, 8)
 PAL = {
     'k': '#101018', 'l': '#1c2c40',
     'A': '#86aebe', 'B': '#4c7088', 'D': '#2a4058',      # ぬめる 皮
     'E': '#f2e8cc', 'F': '#c6b48e',                      # 腹・あご
     'm': '#ec6c5c', 'M': '#b8303c', 'N': '#661626',      # まわし・口の 中
-    'Y': '#ffe14a', 'O': '#d0721a',                      # 目（明・暗）
+    'O': '#06060a', 'Y': '#4c5a70',                      # 目（ビーズの 黒・つやの 灰青）・太い まゆ
     'c': '#c4eeff', 'C': '#4aa6e8',                      # 水しぶき
     'w': '#ffffff',
 }
-LIGHT = set('AEmYcw')
-KEEP_BLACK = set('wYM')
+LIGHT = set('AEmcw')
+KEEP_BLACK = set('wYMO')
 RAMP = {'1': 'ABD', '2': 'EFB', '4': 'mMN'}
 FAR = {'A': 'B', 'B': 'D', 'E': 'F', 'F': 'B', 'm': 'M', 'M': 'N'}
 
@@ -84,12 +85,14 @@ def arm(mode='rest'):
     return part(d, RAMP, p, open=[(33, 35, 40, 44)], r=2, tilt=.5)
 
 # ---------- 頭：平たく 横に はばの ある ナマズ頭。目は 上に、口は 前 はば いっぱい ----------
+# 目（S ビーズ目＋太い まゆ）：小さな 黒い ビーズの 目に 白い 光 1点・下に 灰青の つや。
+# その上に 前へ ぐっと 下がる 太い 黒の まゆ毛（3段）で こわく にらむ
 EYES = {
-    'open': ['kkk.....', '..kkkkk.', '.kwYkOk.', '.kYOkOk.', '..kkkk..'],
-    'atk':  ['kkk.....', '..kkkkk.', '.kwwYYk.', '.kYwYOk.', '..kkkk..'],
-    'blink': ['kkk.....', '..kkkkk.', '........', '.kkkkkk.', '........'],
-    'hit':  ['........', '.kk..kk.', '...kk...', '.kk..kk.', '........'],
-    'ko':   ['........', '.k...k..', '..k.k...', '...k....', '..k.k...'],
+    'open': ['OO........', 'OOOO......', '.OOOOOO...', '...OOOOOO.', '..kkk.OOOO', '.kwOOk..O.', '.kOOYk....', '..kkk.....'],
+    'atk':  ['O.........', 'OOOO......', '.OOOOOO...', '..kkOOOOO.', '.kwwOk.OOO', '.kwOOk..O.', '.kOOYk....', '..kkk.....'],
+    'blink': ['OO........', 'OOOO......', '.OOOOOO...', '...OOOOOO.', '.....OOOO.', '.kkkkk..O.', '..OOO.....', '..........'],
+    'hit':  ['....OO....', '..OOOOOO..', 'OOOO..OOO.', 'OO......O.', '..k.k.....', '...k......', '..k.k.....', '..........'],
+    'ko':   ['OO........', 'OOOO......', '.OOOOOO...', '...OOOOOO.', '.k...kOOOO', '..k.k...O.', '...k......', '..k.k.....', '.k...k....'],
 }
 @lru_cache(None)
 def head(eye='open', mouth='shut'):
@@ -125,7 +128,7 @@ def head(eye='open', mouth='shut'):
             dots(g, 'k', [(35, 31), (34, 32), (35, 32)])                               # 口の はし（への字）
         dots(g, 'D', [(33, 18), (36, 16), (31, 22), (29, 26), (38, 18)])             # ぬめりの 斑
         dots(g, 'B', [(34, 18), (37, 16), (30, 22)])
-        stamp(g, 41, 16, EYES[eye])
+        stamp(g, 40, 15, EYES[eye])
         dots(g, 'k', [(58, 22), (57, 22)])                                             # 鼻の 穴
     return part(d, RAMP, p, open=[(25, 30, 44, 37)], r=3, hi=.2, tilt=.8)
 

@@ -5,13 +5,14 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_kit.py'), e
 from functools import lru_cache
 
 META = dict(id='dokutsubo', name='ドクツボ', types=['poison', 'water'], base='ウツボ', size='M')
+EYE_BOX = (39, 17, 8, 7)
 PAL = {
     'k': '#101018', 'l': '#2c1a36',
     'A': '#dce672', 'B': '#96aa3a', 'D': '#4e5e22',      # ウツボの 皮（黄緑）
     'P': '#d070ec', 'Q': '#6e2c96',                      # 毒（斑・しずく）
     'E': '#86ccdc', 'F': '#3a7ca0', 'H': '#1e3c5e',      # 壺の 青い 釉（うわぐすり）
     'r': '#e8506a', 'R': '#8c1838',                      # 口の 中
-    'Y': '#ffe14a', 'O': '#e07018',                      # 目（明・暗）
+    'Y': '#f6f2cc', 'O': '#b4a03c',                      # 目（白く にごった 黄 明・暗）
     'w': '#ffffff',
 }
 LIGHT = set('AEPYw')
@@ -66,12 +67,14 @@ def neck(mode='rest'):
     return part(d, RAMP, p, open=[(14, 33, 34, 42)], r=2, tilt=.5)
 
 # ---------- 頭：大きく、口は 壺の 口の ように まるく ひらく ----------
+# 目（K 魚の 目）：まぶたの ない 丸い 目。白く にごった 黄の 細い 輪＋平たい 大きな ひとみ（上に にごりの 膜の 点）。
+# まわりは 濃い うろこの ふち
 EYES = {
-    'open': ['kkk.....', '..kkkkk.', '.kwYkOk.', '.kYOkOk.', '..kkkk..'],
-    'atk':  ['kkk.....', '..kkkkk.', '.kwwYYk.', '.kYwYOk.', '..kkkk..'],
-    'blink': ['kkk.....', '..kkkkk.', '........', '.kkkkkk.', '........'],
-    'hit':  ['........', '.kk..kk.', '...kk...', '.kk..kk.', '........'],
-    'ko':   ['........', '.k...k..', '..k.k...', '...k....', '..k.k...'],
+    'open': ['..DDDD..', '.DkkkkD.', 'DkwYYYkD', 'kYkYkYOk', 'kYkkkkOk', 'DkOOOOkD', '.DkkkkD.'],
+    'atk':  ['..DDDD..', '.DkkkkD.', 'DkwYYYkD', 'kYYYYYOk', 'kYYkkYOk', 'DkOOOOkD', '.DkkkkD.'],
+    'blink': ['..DDDD..', '.DkkkkD.', 'DkYYYYkD', 'kkkkkkkk', 'kOOOOOOk', 'DkOOOOkD', '.DkkkkD.'],
+    'hit':  ['..DDDD..', '.DkkkkD.', 'DkYYkYkD', 'kYYkkYOk', 'kYYYYOOk', 'DkOOOOkD', '.DkkkkD.'],
+    'ko':   ['..DDDD..', '.DkkkkD.', 'DkYYYYkD', 'kYkYYkOk', 'kYYkkOOk', 'kYkOOkOk', '.DkkkkD.'],
 }
 @lru_cache(None)
 def head(eye='open', gape=1):
@@ -96,7 +99,7 @@ def head(eye='open', gape=1):
         recol(g, {'1': 'B'}, None)
         for x, y in ((38, 18), (36, 22), (40, 30), (46, 16), (35, 27), (44, 33)):   # 毒の 斑
             if at(g, x, y) in 'ABD': put(g, x, y, 'Q'); put(g, x + 1, y, 'P')
-        stamp(g, 40, 18, EYES[eye])
+        stamp(g, 39, 17, EYES[eye])
         dots(g, 'k', [(57, 19), (56, 19)])                                      # 鼻の 管
     return part(d, RAMP, p, open=[(30, 22, 37, 34)], r=2, tilt=.6)
 

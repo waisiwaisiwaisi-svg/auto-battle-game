@@ -67,6 +67,7 @@ def over(*rowsets):
     g = G()
     for rs in rowsets: stamp(g, rs, 0, 0)
     return rows_of(g)
+EYE_BOX = (28, 13, 18, 9)
 META = dict(id='yadokazan', name='ヤドカザン', types=['fire', 'rock'], base='ヤドカリ', size='M')
 PAL = {
     'k': '#101018', 'l': '#3c1e22',
@@ -146,20 +147,20 @@ def head(open_=False):
         if open_:
             for y in range(34, 41): g[y][51] = 'k'
     return make(d, RAMP, lo=-.4, post=post, post2=post2)
-# 目の こぶ（短い 柄を 頭に うめこんだ 形）
+# 目：柄の 先の 目（R）。頭から のびる 細い 柄の 先に 丸い 目玉。黄色い 目玉に よこ長の 黒い 瞳、怒った 上まぶた
 def stalk(far=False):
-    if far: return make(lambda p: (ellipse(p, 35, 26, 3.6, 3.4, '2'), tube(p, [(35, 27), (35, 30)], [2.4, 2.4], '2')), RAMP, r=1, dk=DARK)
-    return make(lambda p: (ellipse(p, 45, 23.5, 5.5, 4.5, '2'), tube(p, [(44, 27), (43, 30)], [3, 3], '2')), RAMP, r=1)
-# 目：まゆの とげ＋白い 光＋溶岩色の 虹彩（明 Y・暗 O）＋たての ひとみ（下まぶたで かこむ）
-EYE = ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwYYkYYk', '.kwYYOkOYk', '.kYOOOkOOk', '..kOOkkOk.', '...kkkkk..']
+    if far: return make(lambda p: tube(p, [(35, 29), (34, 22)], [1.4, 1.2], '2'), RAMP, r=1, dk=DARK)
+    return make(lambda p: tube(p, [(45, 30), (45, 21)], [2, 1.7], '2'), RAMP, r=1)
+EYE = ['..kkkkk..', '.kHFFFHkk', 'kwkkkkkkk', 'kwYYYYYYk', 'kYkkkkkYk', 'kOkkkkkOk', 'kROOYOORk', '.kRROORk.', '..kkkkk..']
 EYE_ALT = {
-    'blink': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kEEEEEEEk', '.kkkkkkkkk', '.kFFFFFFFk', '..kFFFFFk.', '...kkkkk..'],
-    'hit':   ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kkkEEEEkk', '.kEEkkkkEk', '.kFFFFFkkk', '..kkkFFFk.', '...kkkkk..'],
-    'atk0|atk1|atk2': ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kwwwYkYwk', '.kwYYYkYYk', '.kYYYYkYYk', '..kOOkkOk.', '...kkkkk..'],
-    'ko':    ['k.........', 'kkk.......', '.kkkkk....', '..kkkkkkk.', '.kEkEEEkEk', '.kEEkEkEEk', '.kFkFFFkFk', '..kFFFFFk.', '...kkkkk..'],
+    'blink': ['..kkkkk..', '.kHFFFHkk', 'kEFFFFFFk', 'kFFFFFFFk', 'kFFFFFFFk', 'kkkkkkkkk', 'kHFFFFFHk', '.kHHHHHk.', '..kkkkk..'],
+    'hit':   ['..kkkkk..', '.kHFFFHkk', 'kFFFFFFFk', 'kFFFFFFFk', 'kkkkkkkkk', 'kYYYkkYYk', 'kROOOOORk', '.kRROORk.', '..kkkkk..'],
+    'atk0|atk1|atk2': ['..kkkkk..', '.kHFFkkkk', 'kwkkkkkYk', 'kwwYYYYYk', 'kYYYYYYYk', 'kYkkkkkYk', 'kOYYYYYOk', '.kOOOORk.', '..kkkkk..'],
+    'ko':    ['..kkkkk..', '.kHFFFHkk', 'kkkkkkkkk', 'kYkYYYkYk', 'kYYkYkYYk', 'kOOOkOOOk', 'kROkOkORk', '.kkROOkk.', '..kkkkk..'],
 }
-EYEF = ['kkk...', '.kkkk.', '.kYkOk', '..kkk.']
-EYEF_ALT = {'blink|ko': ['kkk...', '.kkkk.', '.kkkkk', '..kkk.'], 'hit': ['kkk...', '.kkkk.', '.kOkkk', '..kkk.']}
+EYEF = ['.kkkk.', 'kHFFkk', 'kYkkYk', 'kOkkOk', '.kRRk.', '..kk..']
+EYEF_ALT = {'blink|ko': ['.kkkk.', 'kHFFkk', 'kHHHHk', 'kkkkkk', '.kHHk.', '..kk..'], 'hit': ['.kkkk.', 'kHFFkk', 'kHHHHk', 'kYkkOk', '.kRRk.', '..kk..'],
+            'atk0|atk1|atk2': ['.kkkk.', 'kHFFkk', 'kYYYYk', 'kOkkOk', '.kRRk.', '..kk..']}
 
 def leg(path, far=False):
     def post2(g): x, y = path[1]; g[y][x] = 'k'
@@ -208,13 +209,13 @@ def layers():
         dict(n='shell', g='shell', x=-1, y=0, rows=V, alt={'idle1|idle3|walk1|walk3|atk1|atk2': VE}),
         dict(n='sclaw', g='body', x=-3, y=0, rows=small_claw()),
         dict(n='stalkF', g='head', x=-3, y=0, rows=stalk(True)),
-        dict(n='eyeF', g='head', x=30, y=24, rows=EYEF, alt=EYEF_ALT),
+        dict(n='eyeF', g='head', x=28, y=16, rows=EYEF, alt=EYEF_ALT),
         dict(n='body', g='body', x=-3, y=0, rows=body()),
         dict(n='legA1', g='legA', x=-3, y=0, rows=leg([(36, 51), (34, 56), (33, 60)])),
         dict(n='legB1', g='legB', x=-3, y=0, rows=leg([(41, 52), (44, 56), (45, 60)])),
         dict(n='stalk', g='head', x=-3, y=0, rows=stalk()),
         dict(n='head', g='head', x=-3, y=0, rows=H, alt={'atk1': HO}),
-        dict(n='eye', g='head', x=37, y=18, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=37, y=13, rows=EYE, alt=EYE_ALT),
         dict(n='claw', g='claw', x=-1, y=0, rows=CL, alt={'atk1': CO}),
         dict(n='spark', g='claw', x=54, y=42, rows=SPARK1, only='atk2'),
         dict(n='spark0', g='claw', x=56, y=44, rows=SPARK2, only='atk0'),

@@ -1,5 +1,6 @@
 # エンロウ（ほのお・あく × オオカミ）手打ち GBA風
 import pix
+EYE_BOX = (36, 26, 10, 4)
 META = dict(id='enrou', name='エンロウ', types=['fire', 'dark'], base='オオカミ', size='M')
 PAL = {
     'k': '#101018', 'l': '#5a1e1a',
@@ -128,9 +129,12 @@ HEAD_OPEN = HEAD[:10] + [
     '..k.kkCCCCCCCCCCCCCk......',
     '......kkkkkkkkkkkkk.......',
 ]
-# 目：まゆの ひさしの 下、白い 光＋熾火の 虹彩（黄・だいだい）＋たての ひとみ
-EYE = ['wYYkOkk', 'YOOkOOk']
-EYE_ALT = {'blink': ['BBBBBkk', 'kkkkkkk'], 'hit': ['kkBBBkk', 'BBkkkBk'], 'atk0|atk1|atk2': ['wwYkYkk', 'YYOkOOk'], 'ko': ['OkBkOkk', 'BOkOBBk']}
+# 目（E 光る目）：瞳なし。白い 芯→黄→熾火の 橙、ふちは 黒線の かわりに 暗い 赤の にじみ（1ドット）。まゆの ひさしだけ 黒
+EYE = ['BBkkkkkkkk', 'BROYwwYOOR', 'BBROYYOORB', 'BBBRRRRRBB']
+EYE_ALT = {'blink': ['BBkkkkkkkk', 'BBBBBBBBBB', 'BRRRRRRRRB', 'BBBBBBBBBB'],
+           'hit': ['BBkkkkkkkk', 'BBROkYOkRB', 'BBBRYkRBBB', 'BBBBRRBBBB'],              # 光が 割れる
+           'atk0|atk1|atk2': ['BBkkkkkkkk', 'OYwwwwYYOO', 'BOYwwYYOOR', 'BBRRRRRRRB'],    # 燃え あがる
+           'ko': ['BBkkkkkkkk', 'BBRBRBBBBB', 'BBBRBBBBBB', 'BBRBRBBBBB']}
 EAR = [
     'k........',
     'kk.......',
@@ -259,7 +263,7 @@ def layers():
         dict(n='ruff', g='head', x=28, y=27, rows=RUFF),
         dict(n='ear', g='ear', x=33, y=14, rows=EAR, alt={'atk0|atk1|atk2|hit|ko': EAR_BACK}),
         dict(n='head', g='head', x=31, y=21, rows=HEAD, alt={NB: HEAD_OPEN}),
-        dict(n='eye', g='head', x=38, y=27, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=36, y=26, rows=EYE, alt=EYE_ALT),
         dict(n='breath', g='head', x=53, y=29, rows=BREATH, alt={'atk2': BREATH2}, only=NB),
     ]
 

@@ -5,13 +5,14 @@ exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_kit.py'), e
 from functools import lru_cache
 
 META = dict(id='bakumu', name='バクム', types=['psychic', 'dark'], base='バク', size='M')
+EYE_BOX = (34, 26, 9, 7)
 PAL = {
     'k': '#100c18', 'l': '#2c1c40',
     'A': '#6c6290', 'B': '#3e365e', 'D': '#221c38',      # 黒い 皮
     'E': '#ece4f4', 'F': '#b6a8d0', 'H': '#7a6c9e',      # 白い 鞍
     'U': '#ffe596', 'V': '#d39a36', 'W': '#83521c',      # 煙管の 真鍮
     'P': '#ffb4ee', 'Q': '#b45ad8',                      # 夢の 煙
-    'R': '#ff5ca0', 'S': '#a01850', 'w': '#ffffff',      # 目（明・暗）・きば
+    'R': '#f070d8', 'S': '#8c1c78', 'w': '#ffffff',      # 目（夢色の 赤紫 明・暗）・きば
 }
 LIGHT = set('AEUPw')
 KEEP_BLACK = set('wRSPU')
@@ -42,12 +43,14 @@ def leg(x0, far=False, lift=0):
     return part(d, RAMP, p, open=[(x0 - 2, 48, x0 + 8, 52)], r=1, tilt=.6)
 
 # ---------- 頭：大きな くさび形、小さな とがり耳 ----------
+# 目（M 重い まぶた）：ぶあつい 上まぶた（皮の 明るい ふくらみ＋太い ふち）が 虹彩の 上半分を かくし、
+# 下半分だけ 見える 赤紫の 虹彩で 冷たく 見下ろす
 EYES = {
-    'open': ['kk......', '.kkkkk..', '..kwRkSk', '..kRSkSk', '...kkkk.'],
-    'atk':  ['kk......', '.kkkkk..', '..kwwwRk', '..kRwRSk', '...kkkk.'],
-    'blink': ['kk......', '.kkkkk..', '........', '..kkkkkk', '........'],
-    'hit':  ['kk......', '.kkkkk..', '..RR....', '....RRR.', '..RR....'],
-    'ko':   ['........', '..R...R.', '...R.R..', '....R...', '...R.R..', '..R...R.'],
+    'open': ['.HHHHH...', 'HAAAAAHH.', 'kkkkkkkkk', 'kRRkkkRwk', '.kSRkRSk.', '..kkkkk..', '.........'],
+    'atk':  ['.HHHHH...', 'kkkkkkkk.', 'kRRRRRRwk', 'kRRkkkRRk', '.kSRkRSk.', '..kkkkk..', '.........'],
+    'blink': ['.HHHHH...', 'HAAAAAHH.', 'HAAAAAAH.', 'kkkkkkkkk', '.........', '.........', '.........'],
+    'hit':  ['.HHHHH...', 'HAAAAAHH.', 'kkkkkkkk.', '.HAAAkkkk', 'kkkk.....', '.........', '.........'],
+    'ko':   ['.HHHHH...', 'HAAAAAHH.', 'kkkkkkkkk', '.R...R...', '..R.R....', '...R.....', '..R.R....', '.R...R...'],
 }
 @lru_cache(None)
 def head(eye='open'):
@@ -60,7 +63,7 @@ def head(eye='open'):
         dots(g, 'Q', [(32, 24), (33, 25), (32, 25)])                 # 耳の 中
         stamp(g, 41, 22, ['P', 'Q'])                                  # 額に 夢の 宝玉
         dots(g, 'D', [(33, 39), (34, 40), (36, 41)])
-        stamp(g, 35, 27, EYES[eye])
+        stamp(g, 34, 26, EYES[eye])
         # 口：ななめに さけて 下向きの きば
         dots(g, 'k', [(39, 40), (40, 40), (41, 39), (42, 39), (43, 39), (44, 38), (45, 38), (46, 37)])
         stamp(g, 41, 40, ['wk', 'w.'] if eye != 'ko' else ['w'])
