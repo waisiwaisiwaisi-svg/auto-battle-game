@@ -119,14 +119,14 @@ def head_g(atk=False):
 
 # ---------- 剣の くちばし（刀）と つば：上の ふちが 光る 刃、下は 刃文 ----------
 BILL = [
-    '.........kkkkkkk.',
-    'kkkkkkkkkSSSSSSSk',
-    'SSSSSSSSSTTTTTkk.',
-    'TTTTcTTTTUUUkk...',
-    'UUUUUUUUVkkk.....',
-    'kkkkkkkkkk.......',
+    '..........kkkkkkkkk.',
+    'kkkkkkkkkkSSSSSSSSSk',
+    'SSSSSSSSSSSTTTTTTkk.',
+    'TTTTcTTTTTTUUUkkk...',
+    'UUUUUUUUUVkkkk......',
+    'kkkkkkkkkkk.........',
 ]
-BILL_ATK = [BILL[0], BILL[1], 'SSSSSSSSSSSSSSkk.', 'TTTTcTTTTTTTkk...'] + BILL[4:]
+BILL_ATK = [BILL[0], BILL[1], 'SSSSSSSSSSSSSSSSSkk.', 'TTTTcTTTTTTTTTkkk...'] + BILL[4:]
 TSUBA = ['kkk', 'YOk', 'YVk', 'OVk', 'YOk', 'OOk', 'kkk']
 
 # ---------- 帆の 背びれ：鋼の 骨が 刃の ように つき出る ----------
@@ -162,8 +162,8 @@ def sail(up=0):
 # ---------- 尾びれ（三日月の 刃）----------
 def tail(f=0):
     p = G()
-    poly(p, [(15, 42), (11, 38), (7, 33), (4, 30 + f), (6, 35 + f), (9, 41), (11, 45)], '1')
-    poly(p, [(11, 45), (9, 50), (6, 54), (4, 58 - f), (9, 55 - f), (12, 51), (15, 48)], '2')
+    poly(p, [(15, 42), (12, 38), (9, 33), (6, 30 + f), (8, 35 + f), (10, 41), (11, 45)], '1')
+    poly(p, [(11, 45), (10, 50), (8, 54), (6, 58 - f), (10, 55 - f), (13, 51), (15, 48)], '2')
     poly(p, [(10, 43), (15, 42), (15, 49), (10, 48)], '1')
     s = shade(p, {'1': 'ABD', '2': 'STU'}, r=1, hi=.3, lo=-.3)
     # 後ろの ふちは 刃（光る 線）
@@ -224,9 +224,9 @@ def layers():
         dict(n='tsuba', g='head', x=47, y=40, rows=TSUBA),
         dict(n='eye', g='head', x=40, y=41, rows=EYE, alt=EYE_ALT),
         dict(n='pec', g='fin', x=31, y=48, rows=PEC),
-        dict(n='glint', g='head', x=59, y=37, rows=GLINT, only='atk0'),
+        dict(n='glint', g='head', x=62, y=37, rows=GLINT, only='atk0'),
         dict(n='speed', g='root', x=-8, y=38, rows=SPEED, only='atk1|atk2'),
-        dict(n='splash', g='head', x=65, y=37, rows=SPLASH, only='atk1'),
+        dict(n='splash', g='head', x=68, y=37, rows=SPLASH, only='atk1'),
     ]
 FRAMES = {
     'idle0': {}, 'idle1': {'root': (0, -1)}, 'idle2': {'root': (0, -1), 'tail': (0, 1)}, 'idle3': {'tail': (0, 1)},
