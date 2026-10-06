@@ -1,6 +1,6 @@
 # カガミカブト（エスパー・はがね × カブトガニ）手打ち GBA風・デフォルメ（2〜3頭身）
 # 見せ所：銅鏡の 甲羅（丸く 平らな 板）。鏡の まん中の 鈕（つまみ）が 第三の 目
-EYE_BOX = (20, 25, 29, 15)
+EYE_BOX = (20, 25, 30, 15)
 META = dict(id='kagamikabuto', name='カガミカブト', types=['psychic', 'steel'], base='カブトガニ', size='M')
 PAL = {
     'k': '#101018', 'l': '#2a1c22',
@@ -158,12 +158,13 @@ def big_eye(mode=''):
 EYE3 = big_eye()
 EYE3_ALT = {'blink': big_eye('blink'), 'atk0|atk1|atk2': big_eye('atk'), 'hit': big_eye('hit'), 'ko': big_eye('ko')}
 # 顔の 目（K：魚の 目、小さく）。まぶたの ない 丸い 目、むらさきの 細い 輪に 平たい 大きな 黒い 瞳
-EYE = ['.kkkk.', 'kVwVVk', 'kVkkvk', 'kvkkvk', '.kkkk.']
+FB = ['kkk....', '.kkkkk.']                      # 銅の まゆの すじ（前へ 下がる）
+EYE = FB + ['.kkkk..', 'kVwVVk.', 'kVkkvk.', 'kvkkvk.', '.kkkk..']
 EYE_ALT = {
-    'blink': ['.kkkk.', 'kYOOOk', 'kkkkkk', 'koooOk', '.kkkk.'],
-    'atk0|atk1|atk2': ['.kkkk.', 'kwwVVk', 'kVkkVk', 'kVVVvk', '.kkkk.'],
-    'hit': ['.kkkk.', 'kVVVVk', 'kVVkvk', 'kvvvvk', '.kkkk.'],
-    'ko': ['.kkkk.', 'kkVVkk', 'kVkkvk', 'kkvvkk', '.kkkk.'],
+    'blink': FB + ['.kkkk..', 'kYOOOk.', 'kkkkkk.', 'koooOk.', '.kkkk..'],
+    'atk0|atk1|atk2': ['.......', 'kkk....', '.kkkkkk', 'kwwVVk.', 'kVkkVk.', 'kVVVvk.', '.kkkk..'],
+    'hit': FB + ['.kkkk..', 'kVVVVk.', 'kVVkvk.', 'kvvvvk.', '.kkkk..'],
+    'ko': FB + ['.kkkk..', 'kkVVkk.', 'kVkkvk.', 'kkvvkk.', '.kkkk..'],
 }
 # ---- 念力の 光線（鏡から 前へ。はなれた エフェクト＝意図的）----
 BEAM = [
@@ -194,7 +195,7 @@ def _layers():
         H('eye3', 'body', 20, 25, EYE3, alt=EYE3_ALT),
         H('spk', 'body', 17, 23, SPARK, only='idle1|idle2|walk1'),
         L('head', 'head', HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        H('eye', 'head', 43, 35, EYE, alt=EYE_ALT),
+        H('eye', 'head', 43, 33, EYE, alt=EYE_ALT),
         L('legA', 'legA', LEG_A),
         H('beam', 'body', 38, 28, BEAM, only='atk1'),
         H('ring', 'body', 56, 29, RING, only='atk2'),

@@ -3,6 +3,7 @@ import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, poly, line, stamp, outline, ellipse
 
+EYE_BOX = (44, 29, 9, 7)
 META = dict(id='tsutajika', name='ツタジカ', types=['grass', 'fairy'], base='シカ', size='L')
 PAL = {
     'k': '#101018', 'l': '#36264c',
@@ -130,12 +131,13 @@ HEAD_M = [
     "..################........",
     "....###########...........",
 ]
+# 目（M 重い まぶた）：毛皮の 厚い まぶた（明 A・中 B）が 太い 線で 虹彩の 上半分を おおう。のぞく 下半分は 桃・こい桃に 丸い 黒瞳（冷たく 見下す）
 EYES = {
-    'open':  ['kk.......', '.kkkkkkk.', '..kwPPkPk', '.kQQQQkQk', '..kkkkkk.'],
-    'blink': ['kk.......', '.kkkkkkk.', '..kBBBBBk', '.kkkkkkkk', '..CCCCCC.'],
-    'glow':  ['kk.......', '.kkkkkkk.', '..kwwPPPk', '.kPPPPkPk', '..kQQkQk.'],
-    'hit':   ['kk.......', '.kkkkkkk.', '..kPkkPkk', '.kkQkkQkk', '..kkkkkk.'],
-    'ko':    ['.........', '..kPQQPk.', '..kQkkQk.', '..kkQQkk.', '..kQkkQk.'],
+    'open':  ['kk.......', '.kAAAAAk.', '.kBBBBBBk', 'kkkkkkkkk', '.kwPkkPQk', '.kQQQQQQk', '..kkkkkk.'],
+    'blink': ['kk.......', '.kAAAAAk.', '.kBBBBBBk', 'kBBBBBBBk', '.kBBBBBBk', 'kkkkkkkkk', '..CCCCCC.'],
+    'glow':  ['kk.......', '.kAAAAAk.', 'kkkkkkkkk', '.kwwPkkPk', '.kPPkkPQk', '.kQQQQQQk', '..kkkkkk.'],
+    'hit':   ['kk.......', '.kAAAAAk.', '.kBBBBBBk', 'kkkkkkkkk', '.kQkkkQkk', '.kkQQQkk.', '..kkkkkk.'],
+    'ko':    ['kk.......', '.kAAAAAk.', '.kBBBBBBk', 'kkkkkkkkk', '..BkBkB..', '..BBkBB..', '..BkBkB..'],
 }
 def head(eye='open', mouth=False):
     g = [list(r) for r in HEAD_M]

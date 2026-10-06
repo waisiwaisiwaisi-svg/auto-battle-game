@@ -1,15 +1,16 @@
 # サバクコガネ（じめん・むし × スカラベ）手打ち GBA風
 import pix
 META = dict(id='sabakukogane', name='サバクコガネ', types=['ground', 'bug'], base='スカラベ', size='M')
+EYE_BOX = (33, 40, 9, 7)   # 複眼（idle0）
 PAL = {
     'k': '#101018', 'l': '#4a2a16',
     'A': '#f6dc94', 'B': '#c8964a', 'C': '#80522a',      # 砂金の 甲羅
     'Y': '#fff6b0', 'O': '#ff9c2e', 'R': '#c4461e',      # 太陽の 円盤
-    'T': '#6ee0cc', 'U': '#1e7c7a',                      # トルコ石
+    'T': '#6ee0cc', 'U': '#1e7c7a', 'V': '#4cc2b2',      # トルコ石（V は 複眼の 中）
     'w': '#ffffff',
 }
 LIGHT = set('AYTw')
-KEEP_BLACK = set('wT')
+KEEP_BLACK = set('wTV')
 
 def shade(mask, lt, md, dk, t=2, lf=1, r=2, b=2):
     g = pix.grid_of(mask); H, W = len(g), len(g[0])
@@ -96,10 +97,13 @@ HEAD = [
     '..kCCCkwkwkwkCCCk..',
     '...kkkk.k.k.kkkk...',
 ]
-# 目：まゆの 線＋ハイライト＋トルコ石 2色＋たての ひとみ（前へ むかって 下がる つり目）
-EYE = ['kkkkkkk..', 'kwTTTkTkk', 'kTTUUkUk.', '.kkkkkk..']
-EYE_ALT = {'blink': ['.........', 'kkkkkkkkk', '.CCCCCC..', '.........'], 'atk0|atk1|atk2': ['kkkkkkk..', 'kwYYYkYkk', 'kYYOOkOk.', '.kkkkkk..'],
-           'hit': ['kkkkk...', 'BkBBBkB.', 'BBkBkBB.', '.kBBBk..'], 'ko': ['........', 'BkBkB...', 'BBkBB...', 'BkBkB...']}
+# 目：複眼（D）。トルコ石色の 横長の ドーム（T 明・V 中・U 暗）。中に まばらな 六角の 点（U）が ならび、
+#   後ろがわに たての 白い 反射の 帯（w）。瞳なし。前へ 下がる 太い まゆの 線が ドームの 前上を 切って 怒りを 出す
+EYE = ['kk.......', '.kkkkkk..', 'kTwTTkkkk', 'kTwUTTUTk', 'kTUTTUTVk', '.kVVUVVk.', '..kkkkk..']
+EYE_ALT = {'blink': ['.........', 'kk.......', '.kkkkkkk.', 'kkkkkkkkk', 'kTUVVUVVk', '.kVUVVUk.', '..kkkkk..'],
+           'atk0|atk1|atk2': ['kk.......', '.kkkkkk..', 'kwwwwkkkk', 'kwwTVTTVk', 'kTVTTVTTk', '.kTVTTVk.', '..kkkkk..'],
+           'hit': ['.....kk..', '..kkkk...', 'kkkkkkkk.', 'kUVVkVUVk', 'kVUkVUkVk', '.kVkUVVk.', '..kkkkk..'],
+           'ko': ['.........', '.........', '.kkkkkkk.', 'kVkVUVkVk', 'kUVkVkUVk', '.kVUkVUk.', '..kkkkk..']}
 # ---- 太陽の 円盤を 三日月の 角が かかえる（あたりは 円、光の 向きで 3段、光線と 角先は 手で）----
 def disc(hot=False, turn=0):
     W, H = 25, 24; cx, cy = 12, 10; g = pix.grid(W, H)
@@ -195,7 +199,7 @@ def layers():
         dict(n='ely', g='body', x=5, y=35, rows=elytra()),
         dict(n='pro', g='body', x=HX - 5, y=HY - 3, rows=PRO),
         dict(n='head', g='head', x=HX, y=HY, rows=HEAD),
-        dict(n='eye', g='head', x=HX + 4, y=HY + 5, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=HX + 4, y=HY + 4, rows=EYE, alt=EYE_ALT),
         dict(n='leg1', g='legA', x=7, y=52, rows=LEG),
         dict(n='leg2', g='legB', x=17, y=52, rows=LEGR),
         dict(n='rake', g='legA', x=HX - 2, y=HY + 15, rows=RAKE),

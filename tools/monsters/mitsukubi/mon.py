@@ -1,5 +1,6 @@
 # ミツクビ（ドラゴン・どく × ヒドラ）手打ち GBA風・デフォルメ（頭を 大きく、首を 短く、胴を 小さく 丸く、足を 短く）
 from pix import grid, rows_of, ellipse, poly, line, outline, recolor
+EYE_BOX = (42, 20, 12, 28)
 META = dict(id='mitsukubi', name='ミツクビ', types=['dragon', 'poison'], base='ヒドラ', size='L')
 PAL = {
     'k': '#101018', 'l': '#3c0e24',
@@ -8,9 +9,10 @@ PAL = {
     'V': '#e8ff5c', 'U': '#8ed028', 'T': '#3e7a24',      # 毒（明・中・暗）
     'P': '#a874e6', 'Q': '#5c2c8e',                      # 背の とげ
     'w': '#ffffff',
+    'Y': '#ffe04a', 'O': '#c8780e', 'R': '#ff5a2a',      # 首ごとの 目（黄・こがね・赤）
 }
 LIGHT = set('HBVPw')
-KEEP_BLACK = set('wVU')
+KEEP_BLACK = set('wVUYOR')
 
 def run(g, x, y, dx, dy):
     n = 0
@@ -99,10 +101,15 @@ HEAD_OPEN = HEAD[:9] + [
     '.kJJJJJJJJkwBBwBk...',
     '..kkkkkkkkkkkkkk....',
 ]
-# 目：白い 光＋黄緑と 緑の 2色＋たての ひとみ
-# 目：前へ さがる まゆで つり目。白い 光＋黄緑と 緑の 2色＋たての ひとみ
-EYE = ['wVkV', 'kUkUUTT']
-EYE_ALT = {'blink': ['IIII', 'kkkkkkk'], 'hit': ['kkVk', 'kVkkVkk'], 'atk0|atk1|atk2': ['wVkV', 'kVkVVUU'], 'ko': ['kIkI', 'IkIkIkI']}
+# A 爬虫類の つり目：白目なし。上は 明るい 虹彩、下は 暗い 虹彩、まん中を 2段の 細い たての スリット。上まぶたは 太い まゆ、
+# 下は 細い 線。首ごとに 虹彩の 色を 変える（上の 首＝緑 V/U、まん中＝黄 Y/O、下の 首＝赤 R/J）
+EYE = ['VVkV', 'kUkVUUk']
+EYE_ALT = {'blink': ['IIII', 'kkkkkkk'], 'hit': ['kkVk', 'kVkkVkk'], 'atk0|atk1|atk2': ['wVkV', 'kVkwVVk'], 'ko': ['kIkI', 'IkIkIkI']}
+def eye_of(col, dark=False):
+    m = {'g': {}, 'y': {'V': 'Y', 'U': 'O'}, 'r': {'V': 'R', 'U': 'J'}}[col]
+    if dark: m = dict(m, I='J')
+    f = lambda rows: [''.join(m.get(c, c) for c in r) for r in rows]
+    return f(EYE), {k: f(v) for k, v in EYE_ALT.items()}
 DKH = {'H': 'I', 'I': 'J', 'J': 'l'}
 def dk(rows): return [''.join(DKH.get(c, c) for c in r) for r in rows]
 SPINE = ['.kk', 'kPk', 'kPQk', 'kQQk']
@@ -125,15 +132,15 @@ def layers():
         *[dict(n='sp%d' % i, g='body', x=x, y=y, rows=SPINE) for i, (x, y) in enumerate(((9, 36), (14, 34), (19, 34), (24, 35)))],
         neck_layer('neck1', 'n1', P1, True, {'atk0': (-4, 0), 'atk1|atk2': (3, 1), 'hit': (-3, -1)}),
         dict(n='head1', g='h1', x=38, y=13, rows=dk(HEAD), alt={'atk1|atk2': dk(HEAD_OPEN)}),
-        dict(n='eye1', g='h1', x=42, y=20, rows=EYE, alt=EYE_ALT),
+        dict(n='eye1', g='h1', x=42, y=20, rows=eye_of('g', True)[0], alt=eye_of('g', True)[1]),
         dict(n='body', g='body', x=4, y=37, rows=BODY),
         dict(n='legH', g='legB', x=6, y=54, rows=LEG),
         neck_layer('neck3', 'n3', P3, False, {'atk0': (-3, 0), 'atk1|atk2': (3, 0), 'hit': (-2, -1)}),
         dict(n='head3', g='h3', x=40, y=39, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='eye3', g='h3', x=44, y=46, rows=EYE, alt=EYE_ALT),
+        dict(n='eye3', g='h3', x=44, y=46, rows=eye_of('r')[0], alt=eye_of('r')[1]),
         neck_layer('neck2', 'n2', P2, False, {'atk0': (-4, 0), 'atk1|atk2': (3, 0), 'hit': (-3, -2)}),
         dict(n='head2', g='h2', x=43, y=26, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN}),
-        dict(n='eye2', g='h2', x=47, y=33, rows=EYE, alt=EYE_ALT),
+        dict(n='eye2', g='h2', x=47, y=33, rows=eye_of('y')[0], alt=eye_of('y')[1]),
         dict(n='legF', g='legA', x=24, y=54, rows=LEG),
         dict(n='drip2', g='h2', x=57, y=38, rows=DRIP, only='idle1|idle2|walk1'),
         dict(n='drip3', g='h3', x=54, y=51, rows=DRIP, only='idle2|idle3|walk3'),

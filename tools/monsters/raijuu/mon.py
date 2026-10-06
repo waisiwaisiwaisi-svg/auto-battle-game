@@ -115,11 +115,11 @@ def eye(g, x, y, mode='idle', A='Y', B='O', big=False):
     return g
 # 目（L）の 差しかえ：とじ・被弾・ダウンは 黒い 仮面の 上でも 見える 明るい 毛の 色で かく
 RAI_EYE = {
-    'idle':  ['kk........', '.kkkkk....', '..kwYYkkk.', '..kYYOkYOk', '...kkOOkk.', '.....kk...'],
-    'atk':   ['kk........', '.kkkkk....', '..kwwYkkk.', '..kwYYkYYk', '...kkYOkk.', '.....kk...'],
-    'blink': ['kk........', '.kkkkk....', '...BBBBB..', '....BBBBB.', '..........', '..........'],
-    'hit':   ['..........', '..AA......', '....AA....', '......AA..', '....AA....', '..AA......'],
-    'ko':    ['..........', '..A...A...', '...A.A....', '....A.....', '...A.A....', '..A...A...'],
+    'idle':  ['kk.........', '.kkkkkkkk..', '..kwYYYkOk.', '..kYYOOkOk.', '...kkkkkk..'],
+    'atk':   ['kk.........', '.kkkkkkkk..', '..kwwYYkYk.', '..kwYYOkOk.', '...kkkkkk..'],
+    'blink': ['kk.........', '.kkkkkkkk..', '...BBBBBB..', '...........', '...........'],
+    'hit':   ['...........', '...AA......', '.....AA....', '.......AA..', '.....AA....', '...AA......'],
+    'ko':    ['...........', '...A...A...', '....A.A....', '.....A.....', '....A.A....', '...A...A...'],
 }
 def put_rows(g, x, y, rows):
     for j, r in enumerate(rows):
@@ -203,7 +203,7 @@ def head(mode='idle'):
         if at(g, x, y) in 'ABD': put(g, x, y, 'A')
     # 目（L：隈取り）：ハクビシンの 黒い 仮面。後ろから 前へ 下がる 帯で 目を つつみ、下に 明るい 毛の ふち。中に 後ろが 上がった 細い つり目（黄）
     for x in range(35, 50):
-        t = 28.5 + (x - 35) * .22; bt = 35.5 + (x - 35) * .1 - max(0, x - 46) * .9
+        t = 29.6 + (x - 35) * .12 + max(0, 38 - x) * .7; bt = 34.4 + (x - 35) * .05 - max(0, x - 46) * .9
         for y in range(28, 39):
             if t <= y <= bt and at(g, x, y) in 'ABD': put(g, x, y, 'M')
         yb = int(bt) + 1
@@ -268,5 +268,5 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'tail': (1, 1)},
     'ko': {'body': (0, 6), 'head': (3, 7), 'tail': (-2, 2)},
 }
-EYE_BOX = (35, 30, 15, 10)
+EYE_BOX = (35, 31, 15, 7)
 PARENT = {'head': 'body', 'tail': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

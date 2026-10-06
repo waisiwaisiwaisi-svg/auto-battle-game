@@ -1,5 +1,6 @@
 # スナミミズ（じめん × 巨大ミミズ）手打ち GBA風
 META = dict(id='sunamimizu', name='スナミミズ', types=['ground'], base='巨大ミミズ', size='L')
+EYE_BOX = (39, 8, 6, 18)   # 多眼 5つ（idle0）
 PAL = {
     'k': '#101018', 'l': '#3c2418',
     'U': '#f2d496', 'V': '#c8984c', 'X': '#875a2c',
@@ -182,11 +183,20 @@ SAND = [
 ]
 # こぼれ落ちる 砂
 FALL = [['S.....', '......', '.s..S.', '......', 's.....', '...s..'], ['......', 'S...s.', '......', '.S....', '......', 's..S..']]
-# 口の ふちの 目（三つの 光る 細目）
-# 目：まぶたの 線＋ハイライト＋虹彩 2色（黄・だいだい）＋たての ひとみ
-EYE = ['kkkkk.', 'kwYkOk', 'kYOkOk', '.kkkk.']
-EYE_ALT = {'blink': ['kkkkk.', 'kVVVVk', 'kkkkkk', '......'], 'atk0|atk1|atk2': ['kkkkk.', 'kwwkYk', 'kYYkOk', '.kkkk.'],
-           'hit': ['.kkk..', 'kOkOk.', 'kkOkk.', '.kkk..'], 'ko': ['......', 'kVVVk.', 'VkVkV.', 'kVVVk.']}
+# 目：多眼（N）。口の ふちの よろいに 砂色の だいだいの 目が 5つ、大きさを 変えて ならぶ（大 1・中 2・小 2）。
+#   どれも まぶたの ない つやの ある 玉：白い 光（w）＋ 黄（Y 明）＋ だいだい（O 中）＋ こげ茶（X 暗）、黒い ふち。たての ひとみは なし
+EYES = {
+    'L': {'idle': ['.kkk.', 'kwYOk', 'kYOOk', 'kOOXk', '.kkk.'], 'blink': ['.kkk.', 'kVVVk', 'kkkkk', 'kOOXk', '.kkk.'],
+          'atk': ['.kkk.', 'kwwYk', 'kwYYk', 'kYYOk', '.kkk.'], 'hit': ['.kkk.', 'kOkOk', 'kkOkk', 'kOkXk', '.kkk.'],
+          'ko': ['.kkk.', 'kVkVk', 'kkVkk', 'kVkVk', '.kkk.']},
+    'M': {'idle': ['.kk.', 'kwOk', 'kOXk', '.kk.'], 'blink': ['.kk.', 'kVVk', 'kkkk', '.kk.'],
+          'atk': ['.kk.', 'kwYk', 'kYOk', '.kk.'], 'hit': ['.kk.', 'kOkk', 'kkXk', '.kk.'], 'ko': ['.kk.', 'kkVk', 'kVkk', '.kk.']},
+    'S': {'idle': ['.k.', 'kYk', '.k.'], 'blink': ['...', 'kkk', '...'], 'atk': ['.k.', 'kwk', '.k.'],
+          'hit': ['.k.', 'kXk', '.k.'], 'ko': ['...', '.k.', '...']},
+}
+def eye(sz):
+    e = EYES[sz]
+    return dict(rows=e['idle'], alt={'blink': e['blink'], 'atk0|atk1|atk2': e['atk'], 'hit': e['hit'], 'ko': e['ko']})
 # 口の まわりの 岩の とげ
 SPK_U = ['kk...', 'kUkk.', '.kUVk', '..kk.']
 SPK_L = ['kkk..', 'kUVkk', '.kkVk']
@@ -208,9 +218,11 @@ def layers():
         dict(n='spk1', g='head', x=41, y=5, rows=SPK_U),
         dict(n='spk2', g='head', x=36, y=12, rows=SPK_L),
         dict(n='maw', g='head', x=38, y=7, rows=MAW, alt={'atk1|atk2': MAW_OPEN}),
-        dict(n='e1', g='head', x=41, y=9, rows=EYE, alt=EYE_ALT),
-        dict(n='e2', g='head', x=39, y=14, rows=EYE, alt=EYE_ALT),
-        dict(n='e3', g='head', x=39, y=19, rows=EYE, alt=EYE_ALT),
+        dict(n='e1', g='head', x=42, y=8, **eye('S')),
+        dict(n='e2', g='head', x=40, y=10, **eye('M')),
+        dict(n='e3', g='head', x=39, y=14, **eye('L')),
+        dict(n='e4', g='head', x=40, y=19, **eye('M')),
+        dict(n='e5', g='head', x=40, y=23, **eye('S')),
         dict(n='sand', g='root', x=2, y=50, rows=SAND),
         dict(n='burst', g='root', x=6, y=45, rows=BURST, only='atk1'),
     ]

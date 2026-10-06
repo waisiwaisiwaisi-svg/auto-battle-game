@@ -169,7 +169,7 @@ def head_open():
 
 # 目：爬虫類の つり目（A）。目の こぶの 上に 細長い アーモンド形。2段の 太い 上まぶた、細い 下まぶた、
 #     氷の 水色の 虹彩（明 Y・暗 O）を 細い たての スリットが 割る。白目なし（光は 氷の 白 c の 1点）
-EYE = ['.........', '.kkkkkk..', '.kkYkkkkk', 'kcYYkYYYk', 'kYYOkOOOk', '.kOOkOOk.', '..kkkkk..']
+EYE = ['.........', '.kkkkkk..', '.kkYYkkkk', 'kcYYYkYYk', 'kYYOOkOOk', '.kOOOkOk.', '..kkkkk..']
 EYE_ALT = {
     'blink': ['.........', '.kkkkkk..', '.kkkkkkkk', 'kAAAAAAAk', 'kkkkkkkkk', '.kBBBBBk.', '..kkkkk..'],
     'hit':   ['.........', '.kkkkkk..', '..kkkkkk.', '.kAkkkkAk', 'kkkkBBBkk', '..kkkkk..', '.........'],

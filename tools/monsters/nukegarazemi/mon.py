@@ -1,11 +1,11 @@
 # ヌケガラゼミ（むし・ゴースト × セミ）手打ち GBA風・デフォルメ（2〜3頭身：横に 広い 頭の 両はしに 目、こはく色の すけた 殻、節の ある 腹、かぎの 前足、割れた 背から 霊火）
 META = dict(id='nukegarazemi', name='ヌケガラゼミ', types=['bug', 'ghost'], base='セミ', size='M')
+EYE_BOX = (27, 13, 32, 8)
 PAL = {
     'k': '#101018', 'l': '#3e2414',
     'A': '#fff2c8', 'F': '#f6ca78', 'G': '#c47e36', 'H': '#6c3c1c',      # 抜け殻（すけた こはく色：つや・明・中・暗）
     'P': '#d4f6ff', 'Q': '#7cc6f4', 'U': '#5a58d0',      # 霊火（明・中・ふち）
     'E': '#24122e',                                      # 殻の 中の からっぽの 闇
-    'R': '#ff6a7a', 'S': '#a81a48',                      # 目（明・暗）
     'w': '#ffffff',
 }
 LIGHT = set('AFPw')
@@ -65,7 +65,7 @@ def eye(A, B, glow='w'):
     }
     return base, alt
 AMBER = {'1': 'FGH'}
-DK = {'A': 'F', 'F': 'G', 'G': 'H', 'H': 'l', 'w': 'G', 'R': 'S'}
+DK = {'A': 'F', 'F': 'G', 'G': 'H', 'H': 'l', 'w': 'G'}
 def flame(W, H, polys):
     """霊火：舌の 形を 重ね、ふち U → Q → 芯 P"""
     g = pix.grid(W, H)
@@ -129,14 +129,16 @@ HEAD = P(M(28, 19, ('e', '1', 14, 9.5, 14, 9.5), ('r', '1', 2, 5, 26, 14)), AMBE
 def dome(w, h):
     return P(M(w, h, ('e', '1', w / 2, h / 2, w / 2, h / 2)), AMBER, [(['AA', 'A'], 1, 1)], lw=1, dw=1)
 DOME = dome(13, 12); DOME_F = dark(dome(11, 10), DK)
-EYE = ['kkkkkk...', 'kwwRRRkk.', 'kwRRSSkRk', 'kRSSSSkRk', '.kSSSSkSk', '..kkkkkk.']
+# 目（I うつろな 穴の目）：抜け殻の 目は からっぽの 穴。外は 濃い こはくの 影（H）、中は 殻の 中の 闇（E）の 2段。
+# 奥に 霊火の 青い 小さな 光（P＋Q）が 1点 ともる。穴の ふちから ひびが 走る。穴の 上ふちは 前へ 下がる
+EYE = ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEkkkEEH', 'HEkPQkEEH', '.HEkkEEH.', '..HHHHH.H', '.......H.']
 EYE_ALT = {
-    'blink': ['kkkkkk...', '.kkkkkkkk', '.........', '.........', '.........', '.........'],
-    'hit': ['kkkk.....', '...kkkk..', '......kk.', '...kkkk..', 'kkkk.....', '.........'],
-    'atk0|atk1|atk2': ['kkkkkk...', 'kwwwwRkk.', 'kwwRRRkwk', 'kRRRRRkRk', '.kRRRRkRk', '..kkkkkk.'],
-    'ko': ['.k....k..', '..k..k...', '...kk....', '..k..k...', '.k....k..', '.........'],
+    'blink': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEEEEEEH', 'HEEEEEEEH', '.HEEEEEH.', '..HHHHH.H', '.......H.'],          # 光が 消える
+    'hit': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEEkEkEEH', 'HEQEEEQEH', '.HEEkEEH.', '..HHHHH.H', '.......H.'],            # 光が 割れて 散る
+    'atk0|atk1|atk2': ['HH.......', '.HHHHH...', '.HEEQQHH.', 'HEQPPQEEH', 'HEQPPQEEH', '.HEQQEEH.', '..HHHHH.H', '.......H.'],   # 奥の 霊火が 大きく 燃える
+    'ko': ['HH.......', '.HHHHH...', '.HEEEEHH.', 'HEkEEkEEH', 'HEEkkEEEH', '.HkEEkEH.', '..HHHHH.H', '.......H.'],
 }
-EYE_F = ['kkkkk.', 'kwRRRk', 'kRSSkk', '.kkkk.']; EYE_F_ALT = {'blink|hit|ko': ['......', 'kkkkkk', '......', '......']}
+EYE_F = ['.HHHH.', 'HEEEEH', 'HEkQEH', '.HEEH.']; EYE_F_ALT = {'blink|ko': ['.HHHH.', 'HEEEEH', 'HEEEEH', '.HEEH.'], 'atk0|atk1|atk2': ['.HHHH.', 'HEQQEH', 'HEQPEH', '.HEEH.']}
 MOUTH = ['kk..', 'kGk.', '.kGk', '..kk']                        # 口の 針（ストロー）
 
 # ---- 腹（節の 輪が 4つ、後ろが すぼまって とがる）----
@@ -193,7 +195,7 @@ def layers():
         dict(n='eyeF', g='head', x=27, y=16, rows=EYE_F, alt=EYE_F_ALT),
         dict(n='head', g='head', x=29, y=15, rows=HEAD),
         dict(n='dome', g='head', x=49, y=11, rows=DOME),
-        dict(n='eye', g='head', x=51, y=14, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=50, y=13, rows=EYE, alt=EYE_ALT),
         dict(n='mouth', g='head', x=45, y=34, rows=MOUTH),
         dict(n='clawN', g='clawN', x=33, y=40, rows=CLAW_N, alt={'atk0': CLAW_UP}),
         dict(n='slash', g='clawN', x=49, y=29, rows=SLASH, only=NB),

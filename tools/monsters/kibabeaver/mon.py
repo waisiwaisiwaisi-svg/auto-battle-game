@@ -6,9 +6,11 @@ PAL = {
     'Y': '#ffd47a', 'T': '#f08a22',
     'N': '#b49a72', 'L': '#6e5a42', 'M': '#3e3226',
     'C': '#e6fbff', 'A': '#5cc6f0', 'B': '#2470c0',
-    'w': '#ffffff',
+    'w': '#ffffff', 'x': '#060608',                      # x＝ビーズ目の 黒
 }
 LIGHT = set('FYNCw')
+KEEP_BLACK = set('wx')
+EYE_BOX = (40, 27, 9, 7)   # 目・まゆ・白い 傷（idle0 の 64x64 座標）
 
 def _ol(g):
     H, W = len(g), len(g[0]); out = [r[:] for r in g]
@@ -107,10 +109,14 @@ HEAD = [
     '..........kkkkkkk......',
 ]
 TEETH_GLINT = ['w', 'w', 'w']
-# 目：太い まゆの 下の つり目（白い 光＋水色 2段＋たての ひとみ、下まぶた）
-EYE = ['wCAkAk', 'kABkBk', '.kkkkk']
-EYE_ALT = {'blink': ['kkkkkk', 'GGGGGk', '.lNGGG'], 'atk0|atk1|atk2': ['wwCkCk', 'kCCkCk', '.kkkkk'],
-           'hit': ['kkGGGk', 'GGkkkk', '.lNGGG'], 'ko': ['kGGkGk', 'GkkGGk', '.kGGkG']}
+# 目（S：ビーズ目＋太い まゆ）：小さく 真っ黒な ビーズ目（x）に 白の ハイライト 1点。上に 太く 前へ さがる まゆ（黒線＋こげ茶 H）。白い 古傷（C）が まゆを 切って ほおへ ななめに 走る
+#   （頭の 目の 穴を うめるため、この 層は まゆと 傷の まわりも 描く）
+_E0 = ['C........', 'Ckkkkkk..', 'lCHHHHHkk']
+EYE = _E0 + ['HHCNkwxkH', 'GGlCkxxkG', '....Ckk..', '.....C...']
+EYE_ALT = {'blink': _E0 + ['HHCNHHHkH', 'GGlCkkkkG', '....CGG..', '.....C...'],
+           'atk0|atk1|atk2': _E0 + ['HHCNHHHHk', 'GGlCkwxkG', '....Ckk..', '.....C...'],
+           'hit': _E0 + ['HHCNkkGkH', 'GGlCGkkGG', '....CGG..', '.....C...'],
+           'ko': _E0 + ['HHCNGxGxH', 'GGlCGGxGG', '....CxGx.', '.....C...']}
 # 丸太の しっぽ：木の 皮の すじ と 切り口の 年輪
 TAIL = [
     '..kkkkkkkkkkkkkk..',
@@ -200,7 +206,7 @@ def layers():
         dict(n='legH', g='legA', x=12, y=47, rows=HLEG),
         dict(n='legF', g='legB', x=29, y=45, rows=FLEG),
         dict(n='head', g='head', x=31, y=27, rows=HEAD),
-        dict(n='eye', g='head', x=41, y=33, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=40, y=30, rows=EYE, alt=EYE_ALT),
         dict(n='glint', g='head', x=42, y=41, rows=TEETH_GLINT, only='atk0|atk1'),
         dict(n='wave', g='fx', x=46, y=50, rows=WAVE, alt={'atk2': WAVE2}, only='atk1|atk2'),
     ]

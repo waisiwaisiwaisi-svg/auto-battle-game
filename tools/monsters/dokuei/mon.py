@@ -14,6 +14,7 @@ PAL = {
 }
 LIGHT = set('AEPwYc')
 KEEP_BLACK = set('wYyPp')
+EYE_BOX = (41, 33, 12, 7)   # 両目（idle0 の 64x64 座標）
 
 def _run(g, x, y, dx, dy, ch):
     n = 0
@@ -126,12 +127,12 @@ BARB_HOT = [r.replace('w', 'P').replace('n', 'p') for r in BARB]
 # 毒の ふくろ（つばさに 光る）
 GL = ['Pp', 'pq']
 GL_HOT = ['PP', 'Pp']
-# 目：まゆの ひさしの 下の 金の つり目（白い 光＋金 2段＋たての ひとみ、下まぶた）。手前は 大きく、奥は 小さく
-EYE = ['kwYYkYk', 'kYyykyk', '.kkkkk.']
-EYE_ALT = {'blink': ['kkkkkkk', 'BBBBBBB', '.BBBBB.'], 'atk0|atk1|atk2': ['kwwYkYk', 'kYYYkYk', '.kkkkk.'],
-           'hit': ['kkBBkkB', 'BBkkBBB', '.BBBBB.'], 'ko': ['BkBBkBB', 'BBkkBBB', 'BkBBkBB']}
-EYE2 = ['kwYk', 'kyyk']
-EYE2_ALT = {'blink': ['kkkk', 'AAAA'], 'atk0|atk1|atk2': ['kwwk', 'kYYk'], 'hit': ['kkAA', 'AAkk'], 'ko': ['kAkA', 'AkAk']}
+# 目（M：重い まぶた・半目）：厚い まぶた（A／B）が 金の 虹彩の 上半分を おおい、黒い まぶたの 線が 瞳を 横に 切る。下に 残る 金（Y／y）と 黒瞳で 冷たく 見下す。手前は 大きく、奥は 小さく
+EYE = ['kAAAAAk', 'kkkkkkk', 'kYYkkYk', '.kyyyk.']
+EYE_ALT = {'blink': ['kAAAAAk', 'kBBBBBk', 'kkkkkkk', '.BBBBB.'], 'atk0|atk1|atk2': ['kkkkkkk', 'kYYkkYk', 'kYYkkyk', '.kyyyk.'],
+           'hit': ['kAAAAAk', 'kkBBkkB', 'BBkkBBB', '.BBBBB.'], 'ko': ['kAAAAAk', 'BkBBkBB', 'BBkkBBB', 'BkBBkBB']}
+EYE2 = ['kkkk', 'kYkk', '.kyk']
+EYE2_ALT = {'blink': ['kkkk', 'AAAA', '.AA.'], 'atk0|atk1|atk2': ['kYkk', 'kYkk', '.kyk'], 'hit': ['kkAA', 'AAkk', '.AA.'], 'ko': ['kAkA', 'AkAk', '.AA.']}
 # 毒しぶき
 SPRAY = [
     '.P...p..',

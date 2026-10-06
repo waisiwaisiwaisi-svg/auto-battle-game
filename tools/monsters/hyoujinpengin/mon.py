@@ -113,6 +113,14 @@ def eye(g, x, y, mode='idle', A='Y', B='O', big=False):
             if c == '.': continue
             put(g, x + i, y + j, {'A': A, 'B': B}.get(c, c))
     return g
+# 目（O：傷の目）：赤い つり目（白い 光＋だいだい・赤・さび色の 虹彩＋黒い 瞳）を 古傷（うすい 青白の 線）が たてに 切りさき、上下の まぶたの 線が 切れて いる
+SCAR_EYE = {
+    'idle':  ['..........', '.....V....', 'kkk..Vk...', '.kkkkVkkk.', '.kwOOkOpk.', '..kOpkpRk.', '...kkVkk..', '.....V....', '....V.....', '....V.....'],
+    'atk':   ['..........', '.....V....', 'kkk..Vk...', '.kkkkVkkk.', '.kwwwkwOk.', '..kOOkOpk.', '...kkVkk..', '.....V....', '....V.....', '....V.....'],
+    'blink': ['..........', '.....V....', 'kkk..V....', '.kkkkVkkk.', '..........', '.....V....', '.....V....', '.....V....', '....V.....', '....V.....'],
+    'hit':   ['..........', '.....V....', '.....V....', '.kk..V.kk.', '...kkVk...', '.kk..V.kk.', '.....V....', '.....V....', '....V.....', '....V.....'],
+    'ko':    ['..........', '.....V....', '.....V....', '..W..V.W..', '...W.VW...', '....WW....', '...W.VW...', '..W..V.W..', '....V.....', '....V.....'],
+}
 EYEMODE = {'blink': 'blink', 'atk0': 'atk', 'atk1': 'atk', 'atk2': 'atk', 'hit': 'hit', 'ko': 'ko'}
 # ===END KIT===
 
@@ -166,7 +174,9 @@ def head(mode='idle'):
     else:
         stamp(g, ['kkkkkkk.......', 'STTTTTTkkkk...', 'TTTTTTTTTUUkk.', 'UUUUUUUUUUUUk.', 'kwkwkwkwkUUk..', 'TTTTTTTUkkk...', 'UUUUUkkk......', 'kkkkk.........'], 40, 29)
     dots(g, 'S', [(41, 29), (42, 29)])
-    eye(g, 32, 24, {'idle': 'idle'}.get(mode, mode), 'I', 'J', big=True)
+    for j, r in enumerate(SCAR_EYE[mode]):
+        for i, c in enumerate(r):
+            if c != '.': put(g, 31 + i, 22 + j, c)
     return g
 # 頭の 上の 氷の 結晶の とさか（3本）：付け根は 頭に 3ドット 食いこむ
 CREST = [
@@ -242,4 +252,5 @@ FRAMES = {
     'hit': {'root': (-3, 0), 'head': (-1, -1), 'fin': (-1, 1)},
     'ko': {},
 }
+EYE_BOX = (31, 23, 10, 9)
 PARENT = {'head': 'body', 'fin': 'body', 'finB': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root'}

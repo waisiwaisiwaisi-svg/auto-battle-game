@@ -1,5 +1,6 @@
 # オニビギツネ（ゴースト・ほのお × キツネ）手打ち GBA風・デフォルメ（2〜3頭身：頭を 大きく、胴を 小さく 丸く、足を 短く。しっぽは 大きい まま）
 import pix
+EYE_BOX = (34, 32, 13, 6)
 META = dict(id='onibigitsune', name='オニビギツネ', types=['ghost', 'fire'], base='キツネ', size='M')
 PAL = {
     'k': '#101018', 'l': '#30295c',
@@ -120,9 +121,13 @@ HEAD_OPEN = HEAD[:9] + [
     '..kAkkkkkkkkk............',
     '...k.....................',
 ]
-# 目：白い 光＋金と こがね色の 2色＋たての ひとみ。うしろの 目じりが 上がる つり目
-EYE = ['wYYYkYy', '.yyyky']
-EYE_ALT = {'blink': ['kkkkkkk', '.BBBBB'], 'hit': ['kkYkkkk', '.kykYk'], 'atk0|atk1|atk2': ['wwYYkYY', '.YyykY'], 'ko': ['BkBBkBk', '.BkkBB']}
+# L 狐の 隈取り：耳の 方から 目じりを まわって 目の 下へ 流れる 赤い 炎の すじ（R）と、目がしらの 赤い 点。
+# 目は 前へ 下がる つり目、金（Y）と こがね（y）の 虹彩に 白い 光、黒い 丸い ひとみ（頭 2列目〜14列目・3段目〜8段目を 上書き）
+EYE = ['RRBBBBBBBBBBB', 'BRRBBBBBBBBBB', 'BBRRkkkkkkBBB', 'BBBRkwYYkYkkB', 'BBBBRkyykykRB', 'BBBBBRRkkkkBB']
+EYE_ALT = {'blink': ['RRBBBBBBBBBBB', 'BRRBBBBBBBBBB', 'BBRRBBBBBBBBB', 'BBBRkkkkkkkkB', 'BBBBRBBBBBBRB', 'BBBBBRRBBBBBB'],
+           'hit': ['RRBBBBBBBBBBB', 'BRRBBBBBBBBBB', 'BBRRkkBBBBBBB', 'BBBRBBkkkkBBB', 'BBBBRkkBBBkRB', 'BBBBBRRBBBBBB'],
+           'atk0|atk1|atk2': ['RRBBBBBBBBBBB', 'BRRBBBBBBBBBB', 'BBRRkkkkkkBBB', 'BBBRkwwYkYkkB', 'BBBBRkYYkYkRB', 'BBBBBRRkkkkBB'],
+           'ko': ['RRBBBBBBBBBBB', 'BRRBBBBBBBBBB', 'BBRRBBBBBBBBB', 'BBBRBkBkBBBBB', 'BBBBRBkBBBBRB', 'BBBBBkRkBBBBB']}
 EAR = [
     '.....k.',
     '....kk.',
@@ -233,7 +238,7 @@ def layers():
         dict(n='chest', g='body', x=35, y=43, rows=CHEST),
         dict(n='head', g='head', x=32, y=29, rows=HEAD, alt={NB: HEAD_OPEN}),
         dict(n='ear', g='head', x=40, y=21, rows=EAR),
-        dict(n='eye', g='head', x=38, y=35, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=34, y=32, rows=EYE, alt=EYE_ALT),
         dict(n='orb', g='fx', x=56, y=47, rows=ORB, not_=NB + '|ko'),
         dict(n='fireball', g='fx', x=57, y=30, rows=FIREBALL, only='atk1'),
         dict(n='wisps', g='fx', x=56, y=28, rows=WISPS, only='atk2'),

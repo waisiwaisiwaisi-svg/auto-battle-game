@@ -1,14 +1,16 @@
 # イカリタガメ（むし・みず × タガメ）手打ち GBA風・デフォルメ（2〜3頭身：大きめの くさび形の 頭、平たい だ円の 背、胸から 生えた 前脚の ひざが 錨の 輪 → 錨の かぎ）
 META = dict(id='ikaritagame', name='イカリタガメ', types=['bug', 'water'], base='タガメ', size='M')
+EYE_BOX = (37, 21, 9, 8)
 PAL = {
     'k': '#101018', 'l': '#2c2618',
     'B': '#dcc47c', 'C': '#96793e', 'D': '#4e3a1e',      # 体（どろ色）
     'I': '#d4dce8', 'J': '#828ca0', 'K': '#40465c',      # 鉄の 錨
     'A': '#a8eaff', 'W': '#3e94d4',                      # 水
-    'Y': '#ffe24c', 'O': '#c4741a',                      # 目
+    'Y': '#ffd25a', 'O': '#d08420', 'Q': '#7a3a12',     # 目（琥珀の 複眼 明・中・暗）
     'w': '#ffffff',
 }
 LIGHT = set('BIAYw')
+KEEP_BLACK = set('wYOQ')
 import pix
 # ---- 下書き用の 小道具（あたりの マスク → 左上 光の 3段階 → 手打ちの 仕上げ → 輪郭）----
 def M(W, H, *sh):
@@ -83,7 +85,17 @@ SIPHON = ['kkkkkk.', 'kCCCDDk', '.kkkkkk']
 HEAD = P(M(19, 16, ('p', '1', [(0, 6), (7, 0), (14, 1), (19, 7), (15, 12), (5, 16), (0, 12)])), BUG, [
     (['..BBB', '.B', 'B'], 2, 3),
 ], lw=2, dw=3)
-EYE, EYE_ALT = eye('Y', 'O')
+# 目（D 複眼）：琥珀の 丸い ドーム。ななめの あみ目の すじ（暗い 色の 線）と たての 白い 反射の 帯。ひとみは ない。
+# 上に 前へ 下がる 太い まゆの 線
+def ceye(mode=''):
+    rows = ['kk.......', '.kkkkk...', '.kwYYOkkk', 'kYwYOYOQk', 'kOwOYOQOk', 'kQOQOQOQk', '.kQOQOQk.', '..kkkkk..']
+    if mode == 'atk': rows = ['k........', 'kkkkk....', '.kwwYYkkk', 'kYwwYYYOk', 'kYwYwYOYk', 'kOYOYOYOk', '.kOQOQOk.', '..kkkkk..']
+    if mode == 'hit': rows = ['.........', '..kkkk...', 'kk.kwYk..', 'kYwYkOOk.', 'kOkOYkQOk', 'kQOkOQkQk', '.kQOQkQk.', '..kkkkk..']
+    if mode == 'blink': rows = ['kk.......', '.kkkkk...', '.kDDDDkkk', 'kkkkkkkkk', 'kOQOQOQOk', 'kQOQOQOQk', '.kQOQOQk.', '..kkkkk..']
+    if mode == 'ko': rows = ['kk.......', '.kkkkk...', '.kQOQOkkk', 'kQkQOkOQk', 'kOQkkOQOk', 'kQkOQkOQk', '.kQOQOkk.', '..kkkkk..']
+    return rows
+EYE = ceye()
+EYE_ALT = {'blink': ceye('blink'), 'hit': ceye('hit'), 'atk0|atk1|atk2': ceye('atk'), 'ko': ceye('ko')}
 BEAK = ['kkk...', 'kCCkk.', '.kCDDk', '..kDwk', '...kwk', '....kk']
 
 # ---- 前脚（見せ所）：胸から 生えた 太い もも → ひざ ＝ 錨の 輪 → 錨の 柄（すね）→ 2本の かぎ爪 ----
@@ -144,7 +156,7 @@ def layers():
         dict(n='body', g='body', x=3, y=30, rows=BODY),
         dict(n='legN', g='legA', x=20, y=48, rows=LEG),
         dict(n='head', g='head', x=31, y=19, rows=HEAD),
-        dict(n='eye', g='head', x=38, y=22, rows=EYE, alt=EYE_ALT),
+        dict(n='eye', g='head', x=37, y=21, rows=EYE, alt=EYE_ALT),
         dict(n='beak', g='head', x=46, y=30, rows=BEAK),
         dict(n='femur', g='arm', x=32, y=29, rows=FEMUR, alt={NB: FEMUR_FWD}),
         dict(n='joint', g='body', x=33, y=37, rows=JOINT),

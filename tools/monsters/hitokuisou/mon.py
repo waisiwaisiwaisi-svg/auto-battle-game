@@ -1,4 +1,5 @@
 # ヒトクイソウ（くさ・どく × 食虫植物）手打ち GBA風・デフォルメ（2〜3頭身：大きな さやの 頭、くきは 短く 太く、毒の ふくろは 小さく 丸く）
+EYE_BOX = (38, 20, 9, 7)
 META = dict(id='hitokuisou', name='ヒトクイソウ', types=['grass', 'poison'], base='食虫植物', size='M')
 PAL = {
     'k': '#101018', 'l': '#1c3020',
@@ -6,10 +7,11 @@ PAL = {
     'P': '#cc84ea', 'Q': '#7c3ca2', 'Z': '#3c1a56',
     'E': '#eeff5c', 'D': '#c09a1c', 'R': '#c41e3e', 'w': '#ffffff',   # 目：明・暗の 虹彩
     'S': '#8e6c4a', 'T': '#4c3828',
+    'V': '#8aff9a', 'K': '#050806',                      # 目の 穴の 奥の 緑の 光点・穴の 闇
 }
 from pix import outline
 LIGHT = set('FPESw')
-KEEP_BLACK = set('wEDR')
+KEEP_BLACK = set('wEDRV')
 
 def _ol(g):
     H, W = len(g), len(g[0]); out = [r[:] for r in g]
@@ -87,12 +89,13 @@ POD = [
     "..HHGGGGGGGGGGGGGGHHHH......",
     "....HHHHHHHHHHHHHHH.........",
 ]
+# 目（I うつろな 穴）：つり上がった ふちの 中は 2段の 影（こい緑 H → 黒）の 穴。その 奥に 緑の 光点（V）が 1つ ともる。ふちから ひびの すじ
 EYES = {
-    'open':  ['kk.......', '.kkkkkkk.', '..kwEEkEk', '.kEEEEkEk', '.kDDDDkDk', '..kkkkkk.'],
-    'blink': ['kk.......', '.kkkkkkk.', '..kGGGGGk', '.kGGGGGGk', '.kkkkkkkk', '..HHHHHH.'],
-    'hit':   ['kk.......', '.kkkkkkk.', '..kEkkEkk', '.kkDkkDkk', '.kDkDkDkk', '..kkkkkk.'],
-    'glow':  ['kk.......', '.kkkkkkk.', '..kwwEEEk', '.kEwEEkEk', '.kEEEEkEk', '..kDDkDk.'],
-    'ko':    ['.........', '..kEDDEk.', '..kDkkDk.', '..kkDDkk.', '..kDkkDk.'],
+    'open':  ['kk.......', '.kkkkkkk.', '..kHHHHHk', '.kHKKFVKk', '.kHKKKKHk', 'H.kkkkkk.', '.H......H'],
+    'blink': ['kk.......', '.kkkkkkk.', '..kHHHHHk', '.kHKKKKKk', '.kHKKKKHk', 'H.kkkkkk.', '.H......H'],
+    'hit':   ['kk.......', '.kkkkkkk.', '..kHHHHHk', '.kHFKKKFk', '.kHKKFKHk', 'H.kkkkkk.', '.H......H'],
+    'glow':  ['kk.......', '.kkkkkkk.', '..kHHFFHk', '.kHKFVVFk', '.kHKKFFHk', 'H.kkkkkk.', '.H......H'],
+    'ko':    ['.........', '..kkkkkk.', '..kFKKFk.', '..kKFFKk.', '..kFKKFk.', '..kkkkkk.'],
 }
 def head(gape=0, eye='open'):
     """gape：口の ひらき（0＝とじ、3＝大口）"""
