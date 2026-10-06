@@ -72,7 +72,7 @@ def rell(g, cx, cy, a, b, ang, ch):
 
 # ---------- 腹（こはくと はがねの しま、先に 光る 毒ぶくろ と 槍の 針）----------
 AB = {   # 腰の つけね → 先の 向き、中心、針の 先
-    'rest': dict(c=(23, 38), d=(-1, .55), a=10.5, b=6.5, sting=(7, 48)),
+    'rest': dict(c=(23, 38), d=(-1, .55), a=10.5, b=6.5, sting=(8, 47)),
     'curl': dict(c=(30, 42), d=(-.15, 1), a=10.5, b=6.5, sting=(36, 59)),
     'stab': dict(c=(37, 41), d=(.75, .66), a=10.5, b=6.5, sting=(60, 52)),
 }
@@ -217,7 +217,7 @@ def layers():
         dict(n='head', g='head', x=0, y=0, rows=head()),
         dict(n='eye', g='head', x=47, y=20, rows=EYE, alt=EYE_ALT),
         dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'idle1|idle3': W['hi'], 'walk0|atk0|hit': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
-        dict(n='drip', g='abd', x=7, y=50, rows=OL(DRIP), only='idle1|idle2|walk1|walk3'),
+        dict(n='drip', g='abd', x=8, y=49, rows=OL(DRIP), only='idle1|idle2|walk1|walk3'),
         dict(n='splash', g='root', x=58, y=47, rows=OL(SPLASH), only='atk1'),
     ]
 

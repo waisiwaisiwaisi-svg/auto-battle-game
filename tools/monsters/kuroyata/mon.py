@@ -80,7 +80,7 @@ WP = {
 }
 def wing(pose, far=False):
     g = G(); sx, sy = 39, 27
-    S_ = .86
+    S_ = .81
     sc = lambda q: (round(sx + (q[0] - sx) * S_), round(sy + (q[1] - sy) * S_))
     P = {k: (sc(v) if k == 'w' else [sc(q) for q in v]) for k, v in WP[pose].items()}; wx, wy = P['w']
     bases = [(round(sx + (wx - sx) * t), round(sy + (wy - sy) * t)) for t in (.85, .65, .45, .25)]

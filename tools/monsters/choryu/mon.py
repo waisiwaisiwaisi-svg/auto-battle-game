@@ -66,13 +66,13 @@ DARK = {'R': 'Q', 'Q': 'P', 'P': 'l', 'A': 'B', 'B': 'C', 'C': 'l', 'Y': 'O', 'O
 # ---------- 蝶の 翅（金の 翅脈で 区切られた ステンドグラス、外の ふちは 紺に 白い 点）----------
 FW = {
     'up':   [(37, 28), (36, 14), (31, 3), (24, 0), (19, 5), (22, 18), (31, 30)],
-    'mid':  [(37, 28), (29, 14), (19, 6), (9, 7), (5, 15), (11, 25), (29, 32)],
-    'down': [(37, 30), (26, 31), (15, 34), (8, 41), (11, 48), (22, 46), (33, 37)],
+    'mid':  [(37, 28), (29, 14), (19, 6), (11, 7), (8, 15), (13, 25), (29, 32)],
+    'down': [(37, 30), (28, 37), (19, 45), (14, 53), (22, 55), (31, 48), (36, 38)],
 }
 HW = {   # 後翅：長い 燕尾の 先
-    'up':   [(35, 31), (25, 26), (16, 26), (12, 31), (14, 37), (7, 44), (19, 40), (31, 36)],
-    'mid':  [(35, 31), (24, 31), (15, 34), (12, 40), (14, 45), (8, 53), (20, 46), (31, 38)],
-    'down': [(35, 33), (28, 39), (24, 46), (25, 51), (21, 57), (30, 50), (34, 41)],
+    'up':   [(35, 31), (25, 26), (16, 26), (12, 31), (14, 37), (9, 44), (19, 40), (31, 36)],
+    'mid':  [(35, 31), (24, 31), (15, 34), (12, 40), (15, 44), (11, 51), (21, 46), (31, 38)],
+    'down': [(35, 33), (27, 39), (18, 43), (13, 48), (9, 54), (19, 51), (30, 45)],
 }
 def wingpart(pts, nv):
     g = G(); p = G(); poly(p, pts, '2'); ink(g, p)
@@ -98,7 +98,7 @@ def wingpart(pts, nv):
         if .54 < d < .6 and g[y][x] in 'ABC': g[y][x] = 'O'
     return g
 def wing(pose, far=False):
-    g = wingpart(HW[pose], 4); f = wingpart(FW[pose], 4)
+    g = wingpart(HW[pose], 3); f = wingpart(FW[pose], 3)
     for y in range(64):
         for x in range(64):
             if f[y][x] != '.': g[y][x] = f[y][x]
@@ -106,8 +106,8 @@ def wing(pose, far=False):
     return rows_of(g)
 
 # ---------- 体（S字の ヘビの ような 竜。腹は 金の 板）----------
-PATH = [(47, 21), (44, 28), (40, 34), (33, 39), (25, 41), (18, 38), (14, 31), (15, 24)]
-R_ = [3.6, 4.2, 4.8, 4.6, 4.0, 3.2, 2.4, 1.6]
+PATH = [(47, 21), (45, 28), (41, 34), (34, 38), (27, 40), (21, 40), (17, 37), (14, 33)]
+R_ = [3.6, 4.2, 4.8, 4.6, 4.0, 3.2, 2.3, 1.4]
 def body():
     g = G(); p = G()
     for i in range(len(PATH) - 1):
@@ -116,17 +116,17 @@ def body():
     # 腹の 板（体の 内がわ＝下がわに そって）
     for i in range(len(PATH) - 1):
         (x0, y0), (x1, y1) = PATH[i], PATH[i + 1]
-        stroke(p, x0 + 1, y0 + round(R_[i] * .6), x1 + 1, y1 + round(R_[i + 1] * .6), R_[i] * .45, R_[i + 1] * .45, '3')
+        stroke(p, x0 + 1, y0 + round(R_[i] * .75), x1 + 1, y1 + round(R_[i + 1] * .75), R_[i] * .3, R_[i + 1] * .3, '3')
     ink(g, p)
     g = shade(g)
     # 腹の 板の 区切り（手で）
-    for (x, y) in [(46, 27), (43, 32), (39, 37), (34, 41), (29, 43), (24, 43), (19, 41)]:
+    for (x, y) in [(46, 28), (43, 33), (39, 38), (34, 41), (29, 43), (24, 43), (19, 43)]:
         for dy in range(-2, 3):
             if 0 <= y + dy < 64 and g[y + dy][x] in 'YO': g[y + dy][x] = 'O'
     # 背の うろこの 光
-    dots(g, 'R', [(36, 34), (30, 37), (22, 36), (17, 33)])
+    dots(g, 'R', [(36, 34), (30, 37), (22, 37), (15, 36)])
     # 尾の 先の 花びらの ひれ
-    put(g, 11, 17, ['..kkk.', '.kAAAk', 'kABBCk', 'kBBCk.', '.kCk..', '..k...'])
+    put(g, 8, 26, ['kkk.....', 'kAAkk...', '.kABBkk.', '.kABBCCk', '..kBCCk.', '...kkk..'])   # 尾の 先の 花びらの ひれ（後ろへ）
     return rows_of(g)
 
 ARM = outline(['QP..', 'QQP.', '.QPP', 'w.w.'])
@@ -181,25 +181,28 @@ MOUTH = [
 ]
 
 # ---------- 鱗粉の ブレス（攻撃）と きらめき ----------
-BREATH = [
-    '...........v...w..',
-    '.......w......vAv.',
-    '...v.....vAv...v..',
-    '.wvAv...wAwAw.....',
-    'vAwYwAvvAwYwAv..w.',
-    '.wvAv...wAwAw.....',
-    '...v.....vAv...v..',
-    '.......w......vAv.',
-    '...........v...w..',
+BREATH = [   # きらめく 鱗粉の 息（円すい形に ひろがる）
+    '.............v....',
+    '........v.......vA',
+    '....w.......w....v',
+    '..v....vAv.....v..',
+    'vvAv..vAwAv...vAwA',
+    'AwYwAvvAwYwAvvAwYw',
+    'vvAv..vAwAv...vAwA',
+    '..v....vAv.....v..',
+    '....w.......w....v',
+    '........v.......vA',
+    '.............v....',
 ]
 BREATH2 = [
-    '....v.....w..',
-    '..w...vAv....',
-    '.....vAwAv..v',
-    'v.w...vAv....',
-    '...v......w..',
-    '.vAv..v......',
-    '..v.....w....',
+    '.....v......w..',
+    '..w.....vAv....',
+    '......vAwAv...v',
+    'v..w...vAv.....',
+    '..vAv.......w..',
+    '...v...v.......',
+    '.w.......vAv...',
+    '..........v....',
 ]
 SPARK_A = ['.v...', 'vwv..', '.v..w']
 SPARK_B = ['w..v.', '..vwv', '...v.']
@@ -207,16 +210,16 @@ SPARK_B = ['w..v.', '..vwv', '...v.']
 def layers():
     W = {p: wing(p) for p in FW}; WF = {p: wing(p, True) for p in FW}
     return [
-        dict(n='wingB', g='wingB', x=4, y=-3, rows=WF['up'], alt={'idle1|idle3|walk1|walk3|atk2': WF['mid'], 'walk2|atk1': WF['down']}),
+        dict(n='wingB', g='wingB', x=4, y=-1, rows=WF['up'], alt={'idle1|idle3|walk1|walk3|atk2|atk1': WF['mid'], 'walk2': WF['down']}),
+        dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'idle1|idle3': W['up'], 'walk0|atk0|hit|atk1': W['up'], 'walk2': W['down'], 'walk1|walk3|atk2': W['mid']}),
         dict(n='body', g='body', x=0, y=0, rows=body()),
         dict(n='arm', g='head', x=43, y=29, rows=ARM),
-        dict(n='wingF', g='wingF', x=0, y=0, rows=W['mid'], alt={'idle1|idle3': W['up'], 'walk0|atk0|hit': W['up'], 'walk2|atk1': W['down'], 'walk1|walk3|atk2': W['mid']}),
         dict(n='head', g='head', x=0, y=0, rows=head()),
         dict(n='mouth', g='head', x=51, y=17, rows=MOUTH, only='atk1|atk2|hit'),
         dict(n='eye', g='head', x=50, y=12, rows=EYE, alt=EYE_ALT),
-        dict(n='spark', g='root', x=4, y=4, rows=outline(SPARK_A), alt={'idle1|idle3|walk1|walk3': outline(SPARK_B)}, not_='atk0|atk1|atk2|hit|ko'),
-        dict(n='breath', g='root', x=56, y=12, rows=outline(BREATH), only='atk1'),
-        dict(n='breath2', g='root', x=60, y=10, rows=outline(BREATH2), only='atk2'),
+        dict(n='spark', g='root', x=10, y=5, rows=outline(SPARK_A), alt={'idle1|idle3|walk1|walk3': outline(SPARK_B)}, not_='atk0|atk1|atk2|hit|ko'),
+        dict(n='breath', g='root', x=58, y=11, rows=outline(BREATH), only='atk1'),
+        dict(n='breath2', g='root', x=60, y=9, rows=outline(BREATH2), only='atk2'),
     ]
 
 FRAMES = {
