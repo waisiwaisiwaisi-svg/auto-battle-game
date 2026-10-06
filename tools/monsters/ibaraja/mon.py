@@ -1,239 +1,243 @@
-# イバラジャ（フェアリー・どく × ヘビ）手打ち GBA風
-import os, sys, math
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
-from pix import grid, rows_of, poly, line, stamp, outline, recolor
-
-# ---------- 下書きの 道具（あたりを とり、陰影は 光の 向きで 決めて から 手で 直す）----------
-W = H = 64
-def G(): return grid(W, H)
-def at(g, x, y): return g[y][x] if 0 <= y < H and 0 <= x < W else '.'
-def dots(g, ch, pts):
-    for x, y in pts:
-        if 0 <= y < H and 0 <= x < W: g[y][x] = ch
-def ell(p, cx, cy, rx, ry, ch, only=None):
-    for y in range(H):
-        for x in range(W):
-            if ((x + .5 - cx) / rx) ** 2 + ((y + .5 - cy) / ry) ** 2 <= 1 and (only is None or p[y][x] in only): p[y][x] = ch
-def tube(p, path, rad, ch):
-    for i in range(len(path) - 1):
-        (x0, y0), (x1, y1) = path[i], path[i + 1]; r0, r1 = rad[i], rad[i + 1]
-        n = int(max(abs(x1 - x0), abs(y1 - y0)) * 3) + 1
-        for j in range(n + 1):
-            t = j / n; cx, cy, r = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, r0 + (r1 - r0) * t
-            for y in range(int(cy - r - 1), int(cy + r + 2)):
-                for x in range(int(cx - r - 1), int(cx + r + 2)):
-                    if 0 <= x < W and 0 <= y < H and (x + .5 - cx) ** 2 + (y + .5 - cy) ** 2 <= r * r: p[y][x] = ch
-def light_map(p, r=2):
-    m = [[1 if p[y][x] != '.' else 0 for x in range(W)] for y in range(H)]
-    def B(x, y):
-        s = n = 0
-        for yy in range(y - r, y + r + 1):
-            for xx in range(x - r, x + r + 1):
-                n += 1; s += m[yy][xx] if 0 <= yy < H and 0 <= xx < W else 0
-        return s / n
-    return {(x, y): (B(x + 1, y) - B(x - 1, y)) * 1.6 + (B(x, y + 1) - B(x, y - 1)) * 2.5 for y in range(H) for x in range(W) if m[y][x]}
-def shade(p, ramps, r=2, hi=.35, lo=-.3):
-    """左上から 光：ramps = {下書きの 文字: '明中暗'}"""
-    L = light_map(p, r); out = [row[:] for row in p]
-    for (x, y), v in L.items():
-        c = p[y][x]
-        if c in ramps:
-            h, m, d = ramps[c]; out[y][x] = h if v > hi else d if v < lo else m
-    return out
-def ink(p, ch='k'):
-    """1ドットの 黒い 輪郭で かこむ"""
-    g = G()
-    for y in range(H):
-        for x in range(W):
-            if p[y][x] == '.' and any(at(p, x + dx, y + dy) != '.' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): g[y][x] = ch
-            elif p[y][x] != '.': g[y][x] = p[y][x]
-    return g
-def put(g, rows, x0, y0): stamp(g, rows, x0, y0); return g
-def swap(g, mp, box=None):
-    x0, y0, x1, y1 = box or (0, 0, W, H)
-    for y in range(max(0, y0), min(H, y1)):
-        for x in range(max(0, x0), min(W, x1)):
-            if g[y][x] in mp: g[y][x] = mp[g[y][x]]
-    return g
-def shift(rows, dx, dy):
-    g = G()
-    for y, r in enumerate(rows):
-        for x, c in enumerate(r):
-            if c != '.' and 0 <= x + dx < W and 0 <= y + dy < H: g[y + dy][x + dx] = c
-    return rows_of(g)
-
+# イバラジャ（フェアリー・どく × ヘビ）手打ち GBA風・デフォルメ（2〜3頭身：大きな バラの 頭、胴は 短く まるく とぐろ）
 META = dict(id='ibaraja', name='イバラジャ', types=['fairy', 'poison'], base='ヘビ', size='M')
 PAL = {
-    'k': '#101018', 'l': '#3c1432',
-    'A': '#a8d858', 'B': '#4f8e30', 'C': '#245030',      # いばらの 茎＝うろこ（緑）
-    'P': '#ff9ad2', 'Q': '#e0428e', 'R': '#8c1a58',      # バラの 花びら
-    'T': '#f0e0b0',                                      # とげの 先（白っぽい 骨色）
-    'V': '#d88cff', 'U': '#7a30b0',                      # 毒（むらさき）
-    'Y': '#ffe040', 'w': '#ffffff', 'r': '#5a0c28',
+    'k': '#101018', 'l': '#2c1630',
+    'F': '#b6e25e', 'G': '#5ea23e', 'H': '#2a5c30',          # いばらの 茎（胴）
+    'P': '#ffa6cf', 'Q': '#e2457f', 'R': '#8e1c4e',          # バラの 花びら
+    'V': '#d48af4', 'U': '#7a34a8',                          # 毒
+    'Y': '#fff27a', 'O': '#e88a1c',                          # 目（虹彩 明・暗）
+    'w': '#ffffff',
 }
-LIGHT = set('APTVYw')
-KEEP_BLACK = set('wYVr')
-
-RAMP = {'1': 'ABC', '5': 'PQR'}
-# ---------- 胴：S字に 立ちあがる いばらの 茎 ----------
-LOW_PATH = [(7, 55.5), (10, 57), (18, 57.6), (28, 56.4), (36, 53.2), (40, 47.5), (37, 42), (29, 38.6), (22, 35)]
-LOW_RAD = [1.2, 2.4, 3.3, 3.9, 4.3, 4.4, 4.3, 4.1, 4]
-NECK_PATH = [(24, 36.5), (20.5, 32), (21.5, 27), (26, 24.5), (31, 23)]
-NECK_RAD = [4, 3.9, 3.8, 3.6, 3.4]
-def thorns(p, path, rad, every, side):
-    """茎の 外がわに とげ（根もとは 濃い赤、先は 白）"""
-    pts = []
-    for i in range(len(path) - 1):
-        (x0, y0), (x1, y1) = path[i], path[i + 1]
-        n = max(1, int(math.hypot(x1 - x0, y1 - y0) / every))
-        for j in range(n):
-            t = (j + .5) / n; cx, cy = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t; r = rad[i] + (rad[i + 1] - rad[i]) * t
-            dx, dy = x1 - x0, y1 - y0; L = math.hypot(dx, dy); nx, ny = -dy / L * side, dx / L * side
-            pts.append((cx, cy, r, nx, ny))
-    for cx, cy, r, nx, ny in pts:
-        bx, by = cx + nx * (r - .5), cy + ny * (r - .5)
-        # 後ろへ 少し そった 三角の とげ
-        tx, ty = bx + nx * 3.2 - (ny * .0), by + ny * 3.2
-        for k in range(4):
-            x, y = int(bx + (tx - bx) * k / 3), int(by + (ty - by) * k / 3)
-            if 0 <= x < W and 0 <= y < H: p[y][x] = '9' if k < 3 else 'T'
-        x, y = int(bx + nx * 1 + ny), int(by + ny * 1 - nx)
-        if 0 <= x < W and 0 <= y < H and p[y][x] == '.': p[y][x] = '9'
-KO_PATH = [(3, 57), (10, 58), (18, 56.6), (26, 57.8), (34, 57), (40, 56)]
-KO_RAD = [1.4, 2.6, 3.4, 3.8, 3.9, 3.8]
-def stem(path, rad, side, every=7):
-    p = G(); tube(p, path, rad, '1'); s = shade(p, RAMP, r=2)
-    # うろこの ななめ帯（茎の ねじれ）
+LIGHT = set('FPVYw')
+KEEP_BLACK = set('wYO')
+# ---------- 下書きの 道具（あたり → 光の 向きで 3段階 → 仕上げは 手打ち）----------
+import pix
+def G(w, h): return pix.grid(w, h)
+def R(g): return pix.rows_of(g)
+def dots(g, ch, pts):
+    for x, y in pts:
+        if 0 <= y < len(g) and 0 <= x < len(g[0]): g[y][x] = ch
+def hline(g, ch, x0, x1, y): dots(g, ch, [(x, y) for x in range(x0, x1 + 1)])
+def ball(g, cx, cy, rx, ry, ramp, only=None, hi=.45, lo=-.35):
+    """だ円を 左上の 光で 3段階に ぬる"""
+    L, M, D = ramp
+    for y in range(len(g)):
+        for x in range(len(g[0])):
+            nx, ny = (x + .5 - cx) / rx, (y + .5 - cy) / ry
+            if nx * nx + ny * ny > 1 or (only and g[y][x] not in only): continue
+            l = -nx * .6 - ny * .8
+            g[y][x] = L if l > hi else (D if l < lo else M)
+def tube(g, path, rad, ramp):
+    """太さの ある 線（ヘビの 胴・首・しっぽ）。光は 左上"""
+    L, M, D = ramp; H, W = len(g), len(g[0])
     for y in range(H):
         for x in range(W):
-            if s[y][x] == 'B' and (x - y) % 6 == 0 and at(s, x - 1, y + 1) in 'BC': s[y][x] = 'C'
-    thorns(s, path, rad, every, side)
-    s = swap(s, {'9': 'R'})
-    return ink(s)
-def coil(): return rows_of(stem(LOW_PATH, LOW_RAD, -1))
-def neck(): return rows_of(stem(NECK_PATH, NECK_RAD, -1, 6))
+            best = None
+            for i in range(len(path) - 1):
+                (ax, ay), (bx, by) = path[i], path[i + 1]; dx, dy = bx - ax, by - ay; L2 = dx * dx + dy * dy or 1
+                t = max(0, min(1, ((x + .5 - ax) * dx + (y + .5 - ay) * dy) / L2))
+                r = rad[i] + (rad[i + 1] - rad[i]) * t
+                px, py = x + .5 - (ax + t * dx), y + .5 - (ay + t * dy); d = (px * px + py * py) ** .5
+                if d <= r and (best is None or d / r < best[0]): best = (d / r, px / r, py / r)
+            if best:
+                l = -best[1] * .6 - best[2] * .8
+                g[y][x] = L if l > .4 else (D if l < -.3 else M)
+def poly(g, pts, ch): pix.poly(g, pts, ch)
+def edge(g, ramps, up=1, left=1, down=1, right=1):
+    """ぬった 面の ふちに 光（上・左）と 影（下・右）"""
+    H, W = len(g), len(g[0]); src = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            m = src[y][x]
+            if m not in ramps: continue
+            Lc, Mc, Dc = ramps[m]
+            def run(dx, dy, n):
+                for i in range(1, n + 1):
+                    yy, xx = y + dy * i, x + dx * i
+                    if not (0 <= yy < H and 0 <= xx < W) or src[yy][xx] != m: return True
+                return False
+            if run(0, 1, down) or run(1, 0, right): g[y][x] = Dc
+            elif run(0, -1, up) or run(-1, 0, left): g[y][x] = Lc
+            else: g[y][x] = Mc
+def ol(g, ch='k'):
+    """同じ 大きさの まま まわりに 輪郭（余白が いる）"""
+    H, W = len(g), len(g[0]); o = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] == '.' and any(0 <= y + dy < H and 0 <= x + dx < W and g[y + dy][x + dx] != '.' for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0))): o[y][x] = ch
+    return o
+def inner(g, ch, a, b):
+    """面 a と 面 b の さかい目に 線（a 側）"""
+    H, W = len(g), len(g[0]); src = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            if src[y][x] in a and any(0 <= y + dy < H and 0 <= x + dx < W and src[y + dy][x + dx] in b for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0))): g[y][x] = ch
+def stamp(g, rows, x, y): pix.stamp(g, rows, x, y)
+def crop(g):
+    """余白を けずって (rows, x0, y0)"""
+    ys = [y for y in range(len(g)) if any(c != '.' for c in g[y])]; xs = [x for x in range(len(g[0])) if any(g[y][x] != '.' for y in range(len(g)))]
+    return [''.join(g[y][xs[0]:xs[-1] + 1]) for y in range(ys[0], ys[-1] + 1)], xs[0], ys[0]
+def part(fn, n, g, **kw):
+    """64x64 の 下書き → 層（余白を けずり、位置を おぼえる）"""
+    rows, x0, y0 = crop(g); d = dict(n=n, g=fn, x=x0, y=y0, rows=rows); d.update(kw); return d
+def L(n, g, grid, **kw): d = dict(n=n, g=g, x=0, y=0, rows=R(grid)); d.update(kw); return d
 
-# ---------- バラの 頭（花びらが 頭の うしろを つつむ）----------
-BC = (33.5, 16.5)
-# 手打ちの バラ（3/4 前から。外の 花びらが 杯形に つつみ、中心は 巻いた うず）
-ROSE = [
-    '.......kkkk..kkkk.......',
-    '.....kkPPPPkkPPPPkkk....',
-    '....kPPQQQQPPkQQQQPPk...',
-    '...kPQQQRRRRQPkRRQQQPk..',
-    '..kPQQRRkkkkkRRPkRQQQQk.',
-    '..kPQRkPPPPPPkkRPkRQQQk.',
-    '.kPQRkPQQQQQQPPkRkRQQRk.',
-    'kkPQRkPQRRRRRQQPkRkQQRk.',
-    'kPQQRkPQRkPPkRQQkRkQQRRk',
-    'kPQQRkPQRkPQRkQQkRkQQRRk',
-    'kPQQRRkPQRRRkQQRkRQQRRRk',
-    'kPQQQRkPQQQQQQRkRQQQRRRk',
-    'kPQQQRRkkQQQQRkRRQQQRRRk',
-    '.kPQQQRRRkkkkkRRQQQRRRk.',
-    '.kPPQQQRRRRRRRQQQQRRRRk.',
-    'kPPPQQQQQQQQQQQQQRRRRk..',
-    'kRPPPQQQQQQQQQQQRRRRRk..',
-    '.kRRPPPQQQQQQQRRRRRkk...',
-    '..kkRRRRRRRRRRRRRRk.....',
-    '....kkkkkkkkkkkkkk......',
-]
-def bloom(open_=0, wilt=False):
-    g = G(); rows = ROSE
-    if open_:      # 怒ると 外の 花びらが ひらく：ふちを 1ドット ふくらませる
-        rows = outline(recolor(ROSE, {'k': 'R'}), 'k')
-        rows = [r.replace('R', 'Q', 1) if i < 6 else r for i, r in enumerate(rows)]
-    if wilt: rows = recolor(rows, {'P': 'Q', 'Q': 'R'})
-    put(g, rows, int(BC[0]) - 12 - (1 if open_ else 0), int(BC[1]) - 10 - (1 if open_ else 0))
-    return rows_of(g)
-def sepals(wilt=False):
-    """花の うしろから つき出る とがった がく（緑）"""
-    p = G(); cx, cy = BC
-    for ang, L in ((186, 20), (214, 18), (152, 19)):
-        a = math.radians(ang); tx, ty = cx + math.cos(a) * L, cy + math.sin(a) * L + (5 if wilt else 0)
-        nx, ny = -math.sin(a) * 3.2, math.cos(a) * 3.2
-        poly(p, [(cx + nx, cy + ny), (tx, ty), (cx - nx, cy - ny)], '1')
-    s = shade(p, RAMP, r=1)
-    return rows_of(ink(s))
+STEM = 'FGH'; PET = 'PQR'
+# ---- とぐろ（胴）：小さく まるく 2段。外がわに いばらの とげ ----
+def coil(dy=0, dx=0):
+    g = G(64, 64)
+    ball(g, 30 + dx, 53 + dy, 17, 7, STEM)                 # 下の 段
+    ball(g, 31 + dx, 45 + dy, 12, 5.5, STEM)               # 上の 段
+    # 段の かさなり：上の 段の 下に 影の 線
+    for x in range(20 + dx, 43 + dx):
+        y = int(45 + dy + 5.5 * (1 - ((x + .5 - 31 - dx) / 12) ** 2) ** .5) if abs(x + .5 - 31 - dx) < 12 else None
+        if y and g[y][x] != '.': g[y][x] = 'H'
+        if y and g[y + 1][x] != '.': g[y + 1][x] = 'l'
+    # 茎の ふし（たての すじ）
+    for x, y in ((16, 52), (24, 55), (36, 56), (44, 52), (24, 45), (37, 46)):
+        x += dx; y += dy
+        if g[y][x] != '.': g[y][x] = 'H'; g[y + 1][x] = 'H'
+    g = ol(g)
+    # とげ（赤むらさきの 三角）を 外へ
+    for (x, y, d) in ((13, 49, 'l'), (18, 46, 'u'), (24, 40, 'u'), (38, 40, 'u'), (44, 45, 'u'), (47, 50, 'r'), (11, 55, 'l')):
+        x += dx; y += dy
+        if d == 'u': dots(g, 'k', [(x - 2, y), (x + 2, y), (x - 2, y - 1), (x + 2, y - 1), (x - 1, y - 2), (x + 1, y - 2), (x - 1, y - 3), (x + 1, y - 3), (x, y - 4)]); dots(g, 'R', [(x - 1, y), (x - 1, y - 1), (x, y), (x + 1, y), (x + 1, y - 1)]); dots(g, 'Q', [(x, y - 1), (x, y - 2)]); dots(g, 'P', [(x, y - 3)])
+        if d == 'l': dots(g, 'k', [(x, y - 1), (x, y + 1), (x - 1, y - 1), (x - 1, y + 1), (x - 3, y), (x - 2, y - 1), (x - 2, y + 1)]); dots(g, 'Q', [(x, y), (x - 1, y)]); dots(g, 'P', [(x - 2, y)])
+        if d == 'r': dots(g, 'k', [(x, y - 1), (x, y + 1), (x + 1, y - 1), (x + 1, y + 1), (x + 3, y), (x + 2, y - 1), (x + 2, y + 1)]); dots(g, 'R', [(x, y), (x + 1, y)]); dots(g, 'Q', [(x + 2, y)])
+    return g
 
-# 頭（へびの 口先）：花から 前へ つき出す。まゆの ひさし＋たての ひとみ
+# ---- しっぽ：後ろへ はね上がり、先に バラの つぼみ ----
+def tail(sw=0):
+    g = G(64, 64)
+    tube(g, [(16, 54), (9, 52), (6 + sw, 46), (8 + sw, 41)], [3.2, 2.6, 2, 1.6], STEM)
+    ball(g, 8.5 + sw, 38, 3, 3.6, PET)
+    dots(g, 'R', [(8 + sw, 37), (9 + sw, 38)]); dots(g, 'P', [(7 + sw, 36)])
+    dots(g, 'F', [(5 + sw, 41), (11 + sw, 41)])       # がく
+    return ol(g)
+
+# ---- 首：とぐろから 頭へ（ポーズごとに 道すじを かえる）----
+def neck(hx=0, hy=0):
+    g = G(64, 64)
+    tube(g, [(31, 46), (32, 40), (34 + hx * .5, 34 + hy * .5), (37 + hx, 29 + hy)], [4.6, 4.2, 4, 4], STEM)
+    for (x, y) in ((33, 42), (33, 38)): g[y][x] = 'H'
+    g = ol(g)
+    # 首の うしろの とげ
+    for (x, y) in ((27, 40), (28 + int(hx * .3), 35 + int(hy * .3))):
+        dots(g, 'k', [(x, y - 1), (x, y + 1), (x - 1, y - 1), (x - 1, y + 1), (x - 3, y), (x - 2, y - 1), (x - 2, y + 1)]); dots(g, 'Q', [(x, y), (x - 1, y)]); dots(g, 'P', [(x - 2, y)])
+    return g
+
+# ---- バラの 頭巾（見せ所）：まるい 花の 形に、花びらの ふち（濃い 線＋反った 明るい ふち）を 弧で 重ねる ----
+import math
+ARCS = [(.86, 195, 300), (.86, 315, 400), (.86, 60, 170), (.62, 150, 260), (.62, 280, 380), (.62, 20, 120),
+        (.40, 230, 340), (.40, 0, 150), (.22, 120, 300)]
+def bloom(open_=0, cx=27, cy=20, sx=1, sy=1, ramp=PET):
+    g = G(64, 64); rx, ry = (12 + open_) * sx, (11 + open_) * sy
+    L_, M_, D_ = ramp
+    for i in range(7):                                   # 外の 花びらの こぶ（花の 形）
+        t = math.radians(-90 + i * 360 / 7)
+        ball(g, cx + math.cos(t) * rx * .82, cy + math.sin(t) * ry * .82, 5 * sx, 5 * sy, ramp, hi=.5, lo=-.2)
+    ball(g, cx, cy, rx * .86, ry * .86, ramp, only=None, hi=.55, lo=-.25)
+    for (r, a0, a1) in ARCS:
+        for a in range(a0, a1, 2):
+            t = math.radians(a); x, y = int(cx + .5 + math.cos(t) * rx * r), int(cy + .5 + math.sin(t) * ry * r)
+            if g[y][x] == '.': continue
+            g[y][x] = D_
+            ox, oy = int(cx + .5 + math.cos(t) * (rx * r + 1.2)), int(cy + .5 + math.sin(t) * (ry * r + 1.2))
+            if g[oy][ox] == M_ and math.sin(t) + math.cos(t) < .6: g[oy][ox] = L_
+    dots(g, D_, [(cx, cy), (cx + 1, cy), (cx, cy - 1)]); dots(g, 'l', [(cx + 1, cy + 1)])
+    return ol(g)
+
+# ---- がく（首の まわりの 葉の えり）----
+def sepal():
+    g = G(64, 64)
+    for pts in (((26, 29), (31, 28), (24, 36)), ((31, 29), (36, 28), (38, 36)), ((20, 26), (27, 29), (16, 33))):
+        poly(g, pts, 'G')
+    edge(g, {'G': STEM}, 1, 1, 1, 1)
+    return ol(g)
+
+# ---- ヘビの 頭（横向き、つり目、毒牙）----
 HEAD = [
-    '....kkkkkk...........',
-    '..kkAAAAAAkkkkk......',
-    '.kAABBBBBBAAAAAkkk...',
-    'kABBBkkkBBBBBBBBAAk..',
-    'kBBBBYYkkkBBBBBBBBBk.',
-    'kBBBBYkYYkBBBBBBBBkBk',
-    'kBBBBBkkkBBBBBBBBBBBk',
-    'kCBBBBBBBBBBBBBBBBBBk',
-    'kCCBBBBkkkkkkkkkkkkkk',
-    'kCCCBBkwCCCCwCCCCCk..',
-    '.kCCCCkwCCCCCCCCCk...',
-    '..kkCCCCCCCCCCCkk....',
-    '....kkkkkkkkkkk......',
+    '.........kkkk.............',
+    '......kkkFFFFkkk..........',
+    '....kkFFFGGGGGGGkkkk......',
+    '...kFFGGGGGGGGGGGGGGkkk...',
+    '..kFGGGGGGGGGGGGGGGGGGGkk.',
+    '.kFGGGGGGGGGGGGGGGGGGGGGGk',
+    'kFGGGGGGGGGGGGGGGGGGGGkGGk',
+    'kGGGGGGGGGGGGGGGGGGGGGGGHk',
+    'kGGGGGGGGGGGGGGGGGGGGGGHHk',
+    'kGGGGGGGGGGkkkkkkkkkkkkkkk',
+    'kHGGGGGGGkkwkkkkkkkkkwk.k.',
+    'kHGGGGGGkFFwFFFFFFFFFwk...',
+    '.kHGGGGGGkFFFFFFFFFFFk....',
+    '..kHHGGGGGkkHHHHHHHkk.....',
+    '...kkkHHHHHHkkkkkkk.......',
+    '......kkkkkk..............',
 ]
-HEAD_OPEN = [
-    '....kkkkkk...........',
-    '..kkAAAAAAkkkkk......',
-    '.kAABBBBBBAAAAAkkk...',
-    'kABBBkkkBBBBBBBBAAk..',
-    'kBBBBYYYkkBBBBBBBBBk.',
-    'kBBBBYYkYkBBBBBBBBkBk',
-    'kBBBBBkkkBBBBBBBBBBBk',
-    'kCBBBkkkkkkkkkkkkkkkk',
-    'kCCBkrwrrrrwrrrrrwk..',
-    'kCCBkrwrrrrrrrrrrk...',
-    'kCCCkrrrrrrrrrrrk....',
-    'kCCCkrrrrrrrrrrrrk...',
-    '.kCCkrrrwrrrrwrrrrk..',
-    '.kCCkkkwkkkkwkkkkwkk.',
-    '..kCCCCCCCCCCCCCCCk..',
-    '...kkkkkkkkkkkkkkk...',
+HEAD_OPEN = HEAD[:8] + [
+    'kGGGGGGGGGGGGGGGGGGGGGGHHk',
+    'kGGGGGGGGGkkkkkkkkkkkkkkkk',
+    'kHGGGGGGkkwkkkkkkkkkwkkkk.',
+    'kHGGGGGkRRwRRRRRRRRRwRk...',
+    'kHGGGGGkRRUURRRRRRRRRk....',
+    '.kHGGGGGkRRRRRRRRRRRk.....',
+    '.kHHGGGGkwkkkkkkkwkk......',
+    '..kkHHHGGFFFFFFFFFk.......',
+    '....kkkkHHHHHHHHHkk.......',
+    '........kkkkkkkkk.........',
 ]
-def _eye(h, a, b, c):
-    h = list(h)
-    for i, t in zip((4, 5, 6), (a, b, c)): h[i] = h[i][:5] + t + h[i][5 + len(t):]
-    return h
-HEAD_BLINK = _eye(HEAD, 'BBBkk', 'BkkkB', 'BBBBB')
-HEAD_HIT = _eye(HEAD, 'kBBBk', 'BkBkB', 'kBBBk')
-HEAD_KO = _eye(HEAD, 'kBkBB', 'BkBBB', 'kBkBB')
-HEAD_ATK0 = _eye(HEAD, 'YYYkk', 'YYkYk', 'BkkkB')
-DRIP = ['V', 'U']
-DRIP2 = ['.', 'V', 'U']
-SPRAY = [
-    '..........V...V.....',
-    '...VV...VVU.......V.',
-    'VVVUVVVVVUVV.VV..VU.',
-    'UVVVUUVVVVUVVUVV.V..',
-    '..UU..VUV..U..U.....',
-    '.......U......U.....',
-]
-SPRAY2 = ['......V...V...', '..V.VUV..V..U.', 'VUVV.U..U.....', '.U.....U......']
-# 怒って ひらく 外がわの 花びら（とげの ついた がく）
-SEPAL = ['kk....', 'kAkk..', '.kBBkk', '..kkBk', '....kk']
+# うろこの すじ（手打ち）
+def head(open_=False):
+    rows = [list(r) for r in (HEAD_OPEN if open_ else HEAD)]
+    for (x, y) in ((5, 6), (8, 4), (4, 9), (7, 8), (11, 7), (6, 11)):
+        if rows[y][x] == 'G': rows[y][x] = 'H'
+    return [''.join(r) for r in rows]
+# 頭の 上の いばらの つの（後ろへ 反る）
+HORN = ['kk.....', 'kQkk...', '.kQQkk.', '..kRQQk', '...kRRk', '....kk.']
+# 目：白い 光＋金と だいだいの 虹彩＋たての ひとみ。まゆは 前へ 下がる（怒り）
+EYE = ['kkk.....', '.kkkkkkk', '.kwYYkOk', '..kOOkkk']
+EYE_ALT = {'blink': ['kkk.....', '.kkkkkkk', '.GGGGGGk', '..kkkkk.'], 'hit': ['..kk..k.', '.kGGkkG.', '.GkkGGkG', '..GGGGG.'],
+           'atk0|atk1|atk2': ['kkk.....', '.kkkkkkk', '.kwwYkYk', '..kYOkOk']}
+# 毒の しずく・毒の 霧（攻撃）
+DRIP = ['kVk', 'kUk', '.k.']
+def spray(ph):
+    g = G(80, 64)
+    pts = [(58, 25), (61, 23), (63, 26), (60, 28), (66, 24), (65, 29)] if ph == 0 else [(62, 22), (67, 26), (64, 30), (70, 23), (69, 29), (72, 26)]
+    for (x, y) in pts:
+        dots(g, 'V', [(x, y), (x + 1, y), (x, y + 1)]); dots(g, 'U', [(x + 1, y + 1)])
+    return ol(g)
+SPARK = ['.P.', 'PwP', '.P.']
 
+NB = 'atk1|atk2'
 def layers():
-    CO = coil(); NE = neck(); BL = bloom(); BL_O = bloom(1); BL_W = bloom(0, True)
+    hx, hy = 0, 0
     return [
-        dict(n='coil', g='coil', x=0, y=0, rows=CO, not_='ko'),
-        dict(n='neck', g='neck', x=0, y=0, rows=NE, not_='ko'),
-        dict(n='sepal', g='bloom', x=0, y=0, rows=sepals(), not_='ko'),
-        dict(n='bloom', g='bloom', x=0, y=0, rows=BL, alt={'atk0|atk1|atk2': BL_O}, not_='ko'),
-        dict(n='head', g='head', x=40, y=10, rows=HEAD, alt={'atk1|atk2': HEAD_OPEN, 'atk0': HEAD_ATK0, 'blink': HEAD_BLINK, 'hit': HEAD_HIT}, not_='ko'),
-        dict(n='drip', g='head', x=47, y=21, rows=DRIP, alt={'idle2|idle3|walk1|walk3': DRIP2}, not_='atk1|atk2|ko'),
-        dict(n='spray', g='head', x=60, y=18, rows=SPRAY, only='atk1'),
-        dict(n='spray2', g='head', x=61, y=19, rows=SPRAY2, only='atk2'),
-        # ダウン：花が しおれて 頭が 地面に 落ちる
-        dict(n='bodyko', g='root', x=0, y=0, rows=rows_of(stem(KO_PATH, KO_RAD, -1)), only='ko'),
-        dict(n='sepalko', g='root', x=4, y=31, rows=sepals(True), only='ko'),
-        dict(n='bloomko', g='root', x=4, y=32, rows=BL_W, only='ko'),
-        dict(n='headko', g='root', x=40, y=48, rows=HEAD_KO, only='ko'),
+        L('tail', 'tail', tail(), alt={'idle1|idle3|walk1|walk3': tail(1)}),
+        L('coil', 'body', coil()),
+        L('neck', 'neck', neck(), alt={'atk0': neck(-3, 1), NB: neck(6, 2), 'hit': neck(-3, -1)}, not_='ko'),
+        L('bloom', 'head', bloom(), alt={'atk0|atk1|atk2': bloom(1)}, not_='ko'),
+        L('sepal', 'head', sepal(), not_='ko'),
+        dict(n='horn', g='head', x=30, y=10, rows=HORN, not_='ko'),
+        dict(n='head', g='head', x=33, y=13, rows=head(), alt={NB: head(True)}, not_='ko'),
+        dict(n='eye', g='head', x=41, y=15, rows=EYE, alt=EYE_ALT, not_='ko'),
+        dict(n='drip', g='head', x=53, y=26, rows=DRIP, only='idle0|idle1|idle2|idle3|blink|walk0|walk1|walk2|walk3'),
+        L('spray', 'fx', spray(0), alt={'atk2': spray(1)}, only=NB),
+        dict(n='sp1', g='fx', x=14, y=7, rows=SPARK, only='idle1|idle3|walk1'),
+        dict(n='sp2', g='fx', x=40, y=4, rows=SPARK, only='idle0|idle2|walk3'),
+        # ダウン：花が しおれて 地面に 落ちた 頭
+        L('koneck', 'body', neck_ko(), only='ko'),
+        L('kobloom', 'body', bloom_ko(), only='ko'),
+        dict(n='kohead', g='body', x=36, y=45, rows=head(), only='ko'),
+        dict(n='koeye', g='body', x=46, y=49, rows=['kGk', 'GkG', 'kGk'], only='ko'),
     ]
+def neck_ko():
+    g = G(64, 64); tube(g, [(31, 46), (34, 48), (38, 52)], [4.6, 4.2, 4], STEM); return ol(g)
+def bloom_ko(): return bloom(0, 33, 51, 1, .62, 'QQR')
 FRAMES = {
-    'idle0': {}, 'idle1': {'neck': (0, 1)}, 'idle2': {'neck': (0, 1)}, 'idle3': {'neck': (0, 0), 'bloom': (0, -1)},
-    'blink': {},
-    'walk0': {'neck': (-1, 0)}, 'walk1': {'neck': (0, 1), 'coil': (1, 0)}, 'walk2': {'neck': (1, 0)}, 'walk3': {'neck': (0, 1), 'coil': (-1, 0)},
-    'atk0': {'neck': (-2, 1), 'head': (-1, 0)}, 'atk1': {'neck': (3, -1), 'head': (2, 0)}, 'atk2': {'neck': (3, 0), 'head': (1, 0)},
-    'hit': {'neck': (-2, 1), 'head': (-2, 1), 'bloom': (0, 0)}, 'ko': {},
+    'idle0': {}, 'idle1': {'head': (0, 1), 'neck': (0, 0)}, 'idle2': {'head': (0, 1), 'body': (0, 0)}, 'idle3': {'head': (0, 0)}, 'blink': {},
+    'walk0': {'body': (1, 0), 'head': (0, -1)}, 'walk1': {'head': (0, 0), 'tail': (-1, 0)},
+    'walk2': {'body': (-1, 0), 'head': (0, -1)}, 'walk3': {'tail': (1, 0)},
+    'atk0': {'head': (-3, 1)}, 'atk1': {'head': (6, 2), 'fx': (0, 0)}, 'atk2': {'head': (6, 2), 'fx': (2, 0)},
+    'hit': {'head': (-3, -1), 'root': (-2, 0)}, 'ko': {},
 }
-PARENT = {'head': 'neck', 'bloom': 'neck', 'neck': 'root', 'coil': 'root'}
+PARENT = {'head': 'root', 'neck': 'body', 'tail': 'body', 'body': 'root', 'fx': 'root'}

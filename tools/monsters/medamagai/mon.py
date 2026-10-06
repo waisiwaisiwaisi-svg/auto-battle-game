@@ -80,7 +80,7 @@ PAL = {
 LIGHT = set('ATYMwZ')
 KEEP_BLACK = set('wYM')
 
-SC = (21, 28); SR = 17.5          # 殻の 中心と 半径
+SC = (22, 30); SR = 15.5          # 殻の 中心と 半径
 EC = (41, 30)                     # 目玉（殻口）の 中心
 
 # ---------- 殻：うず巻き＋ 後ろ半分に 念の しま ----------
@@ -136,8 +136,8 @@ EYE = [
     'kYYNMMwwMkMMMMMNYBk',
     'kYYNMwwMkkkMMMMNYBk',
     'kYNMMwMMkkkMMMMMNBk',
-    'kYNMMMMMkkkMMMMMNBk',
-    'kYNMMMMMkkkMMMMMNBk',
+    'kYNMwwMMkkkMMMMMNBk',
+    'kYNMwMMMkkkMMMMMNBk',
     'kYNMMMMMkkkMMMMNNBk',
     'kYYNMMMMkkkMMMMNBBk',
     'kYYNNMMMMkMMMMNNBBk',
@@ -285,6 +285,9 @@ def wave(radii, core):
         for x in range(W):
             if g[y][x] == '.' and any(0 <= y + b < H and 0 <= x + a < W and g[y + b][x + a] != '.' for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1))): out[y][x] = 'N'
     return [''.join(r) for r in out]
+# 触手の 根もとの くちばし（かぎ形・するどい）
+BEAK = ['.kkkk..', 'kTTTUkk', 'kUUUUwk', '.kkUwk.', '...kk..']
+BEAK_OPEN = ['.kkkk..', 'kTTTUkk', 'kUUUwwk', 'kkkkkk.', 'kUUwk..', '.kkk...']
 def layers():
     SH = shell(); LIP = lip()
     return [
@@ -293,8 +296,9 @@ def layers():
         L('lip', 'body', LIP),
         dict(n='eye', g='eye', x=EC[0] - 9, y=EC[1] - 10, rows=EYE,
              alt={'atk0': eye_var('glow'), 'atk1|atk2': eye_var('wide'), 'blink': eye_shut('blink'), 'hit': eye_shut('hit'), 'ko': eye_shut('ko')}),
-        L('hood', 'hood', hood(), alt={'atk0': rows_of(hood(1)), 'hit': rows_of(hood(-1))}),
+        L('hood', 'hood', hood(3), alt={'atk0|atk1|atk2': rows_of(hood(4)), 'hit': rows_of(hood(1))}),
         L('tent', 'tent', tentacles(TENT_A), alt={'idle2|idle3|walk1|walk3|atk1|atk2': rows_of(tentacles(TENT_B)), 'ko': rows_of(tentacles(TENT_LIMP))}),
+        dict(n='beak', g='tent', x=EC[0] + 4, y=EC[1] + 9, rows=BEAK, alt={'atk1|atk2': BEAK_OPEN}),
         dict(n='bub', g='fx', x=8, y=4, rows=BUB_A, alt={'idle2|idle3|walk2|walk3': BUB_B}, not_='atk0|atk1|atk2|hit|ko'),
         dict(n='ring0', g='eye', x=EC[0] - 5, y=EC[1] - 14, rows=RING0, only='atk0'),
         dict(n='ring0b', g='eye', x=EC[0] - 5, y=EC[1] + 12, rows=RING0[::-1], only='atk0'),
@@ -307,6 +311,6 @@ FRAMES = {
     'walk0': {'root': (1, 0)}, 'walk1': {'root': (1, -1), 'tent': (-1, 0)}, 'walk2': {'root': (0, -2)}, 'walk3': {'root': (0, -1), 'tent': (-1, 0)},
     'atk0': {'root': (-2, 1), 'tent': (-1, 0)}, 'atk1': {'root': (3, -1)}, 'atk2': {'root': (2, 0)},
     'hit': {'root': (-3, 1), 'eye': (-1, 0), 'tent': (-1, -1)},
-    'ko': {'_flip': True},
+    'ko': {'root': (0, 6), 'hood': (0, 2)},
 }
 PARENT = {'body': 'root', 'eye': 'body', 'hood': 'body', 'tent': 'body', 'fx': 'root'}

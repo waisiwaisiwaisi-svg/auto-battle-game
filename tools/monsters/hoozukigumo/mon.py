@@ -1,191 +1,178 @@
-# ホオズキグモ（フェアリー・ゴースト × クモ）手打ち GBA風
-import os, sys, math
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
-from pix import grid, rows_of, poly, line, stamp, outline, recolor
-
-# ---------- 下書きの 道具（あたりを とり、陰影は 光の 向きで 決めて から 手で 直す）----------
-W = H = 64
-def G(): return grid(W, H)
-def at(g, x, y): return g[y][x] if 0 <= y < H and 0 <= x < W else '.'
-def dots(g, ch, pts):
-    for x, y in pts:
-        if 0 <= y < H and 0 <= x < W: g[y][x] = ch
-def ell(p, cx, cy, rx, ry, ch, only=None):
-    for y in range(H):
-        for x in range(W):
-            if ((x + .5 - cx) / rx) ** 2 + ((y + .5 - cy) / ry) ** 2 <= 1 and (only is None or p[y][x] in only): p[y][x] = ch
-def tube(p, path, rad, ch):
-    for i in range(len(path) - 1):
-        (x0, y0), (x1, y1) = path[i], path[i + 1]; r0, r1 = rad[i], rad[i + 1]
-        n = int(max(abs(x1 - x0), abs(y1 - y0)) * 3) + 1
-        for j in range(n + 1):
-            t = j / n; cx, cy, r = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, r0 + (r1 - r0) * t
-            for y in range(int(cy - r - 1), int(cy + r + 2)):
-                for x in range(int(cx - r - 1), int(cx + r + 2)):
-                    if 0 <= x < W and 0 <= y < H and (x + .5 - cx) ** 2 + (y + .5 - cy) ** 2 <= r * r: p[y][x] = ch
-def light_map(p, r=2):
-    m = [[1 if p[y][x] != '.' else 0 for x in range(W)] for y in range(H)]
-    def B(x, y):
-        s = n = 0
-        for yy in range(y - r, y + r + 1):
-            for xx in range(x - r, x + r + 1):
-                n += 1; s += m[yy][xx] if 0 <= yy < H and 0 <= xx < W else 0
-        return s / n
-    return {(x, y): (B(x + 1, y) - B(x - 1, y)) * 1.6 + (B(x, y + 1) - B(x, y - 1)) * 2.5 for y in range(H) for x in range(W) if m[y][x]}
-def shade(p, ramps, r=2, hi=.35, lo=-.3):
-    """左上から 光：ramps = {下書きの 文字: '明中暗'}"""
-    L = light_map(p, r); out = [row[:] for row in p]
-    for (x, y), v in L.items():
-        c = p[y][x]
-        if c in ramps:
-            h, m, d = ramps[c]; out[y][x] = h if v > hi else d if v < lo else m
-    return out
-def ink(p, ch='k'):
-    """1ドットの 黒い 輪郭で かこむ"""
-    g = G()
-    for y in range(H):
-        for x in range(W):
-            if p[y][x] == '.' and any(at(p, x + dx, y + dy) != '.' for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))): g[y][x] = ch
-            elif p[y][x] != '.': g[y][x] = p[y][x]
-    return g
-def put(g, rows, x0, y0): stamp(g, rows, x0, y0); return g
-def swap(g, mp, box=None):
-    x0, y0, x1, y1 = box or (0, 0, W, H)
-    for y in range(max(0, y0), min(H, y1)):
-        for x in range(max(0, x0), min(W, x1)):
-            if g[y][x] in mp: g[y][x] = mp[g[y][x]]
-    return g
-def shift(rows, dx, dy):
-    g = G()
-    for y, r in enumerate(rows):
-        for x, c in enumerate(r):
-            if c != '.' and 0 <= x + dx < W and 0 <= y + dy < H: g[y + dy][x + dx] = c
-    return rows_of(g)
-
-
+# ホオズキグモ（フェアリー・ゴースト × クモ）手打ち GBA風・デフォルメ（2〜3頭身：大きな 頭胸部、足は 短く 太く、ホオズキの 腹は 大きく）
 META = dict(id='hoozukigumo', name='ホオズキグモ', types=['fairy', 'ghost'], base='クモ', size='S')
 PAL = {
-    'k': '#101018', 'l': '#3a1a24',
-    'A': '#ffc060', 'B': '#ec6c24', 'C': '#9a3018',      # ホオズキの 袋（紙の ような だいだい）
-    'D': '#8a78a8', 'E': '#4c3e6a', 'F': '#261e3a',      # クモの 体（黒むらさき）
-    'w': '#ffffff', 'c': '#9af0ff', 'b': '#3486c8',      # 霊火
-    'r': '#ff2848', 'y': '#ffe070',                      # 目の 光
+    'k': '#101018', 'l': '#2a1838',
+    'D': '#9a82c8', 'E': '#5c4888', 'F': '#33264e',          # 甲（むらさき）
+    'A': '#ffd47a', 'B': '#f48a2a', 'C': '#a8401c',          # ホオズキの 袋
+    'S': '#c8fcff', 'T': '#46c4e6',                          # 霊火（目も 同じ 色）
+    'M': '#f06aa4',                                          # フェアリーの もよう
+    'w': '#ffffff',
 }
-LIGHT = set('ADwcy')
-KEEP_BLACK = set('wcbry')
-RAMP = {'3': 'ABC', '1': 'DEF'}
+LIGHT = set('DASw')
+KEEP_BLACK = set('wST')
+# ---------- 下書きの 道具（あたり → 光の 向きで 3段階 → 仕上げは 手打ち）----------
+import pix
+def G(w, h): return pix.grid(w, h)
+def R(g): return pix.rows_of(g)
+def dots(g, ch, pts):
+    for x, y in pts:
+        if 0 <= y < len(g) and 0 <= x < len(g[0]): g[y][x] = ch
+def hline(g, ch, x0, x1, y): dots(g, ch, [(x, y) for x in range(x0, x1 + 1)])
+def ball(g, cx, cy, rx, ry, ramp, only=None, hi=.45, lo=-.35):
+    """だ円を 左上の 光で 3段階に ぬる"""
+    L, M, D = ramp
+    for y in range(len(g)):
+        for x in range(len(g[0])):
+            nx, ny = (x + .5 - cx) / rx, (y + .5 - cy) / ry
+            if nx * nx + ny * ny > 1 or (only and g[y][x] not in only): continue
+            l = -nx * .6 - ny * .8
+            g[y][x] = L if l > hi else (D if l < lo else M)
+def tube(g, path, rad, ramp):
+    """太さの ある 線（ヘビの 胴・首・しっぽ）。光は 左上"""
+    L, M, D = ramp; H, W = len(g), len(g[0])
+    for y in range(H):
+        for x in range(W):
+            best = None
+            for i in range(len(path) - 1):
+                (ax, ay), (bx, by) = path[i], path[i + 1]; dx, dy = bx - ax, by - ay; L2 = dx * dx + dy * dy or 1
+                t = max(0, min(1, ((x + .5 - ax) * dx + (y + .5 - ay) * dy) / L2))
+                r = rad[i] + (rad[i + 1] - rad[i]) * t
+                px, py = x + .5 - (ax + t * dx), y + .5 - (ay + t * dy); d = (px * px + py * py) ** .5
+                if d <= r and (best is None or d / r < best[0]): best = (d / r, px / r, py / r)
+            if best:
+                l = -best[1] * .6 - best[2] * .8
+                g[y][x] = L if l > .4 else (D if l < -.3 else M)
+def poly(g, pts, ch): pix.poly(g, pts, ch)
+def edge(g, ramps, up=1, left=1, down=1, right=1):
+    """ぬった 面の ふちに 光（上・左）と 影（下・右）"""
+    H, W = len(g), len(g[0]); src = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            m = src[y][x]
+            if m not in ramps: continue
+            Lc, Mc, Dc = ramps[m]
+            def run(dx, dy, n):
+                for i in range(1, n + 1):
+                    yy, xx = y + dy * i, x + dx * i
+                    if not (0 <= yy < H and 0 <= xx < W) or src[yy][xx] != m: return True
+                return False
+            if run(0, 1, down) or run(1, 0, right): g[y][x] = Dc
+            elif run(0, -1, up) or run(-1, 0, left): g[y][x] = Lc
+            else: g[y][x] = Mc
+def ol(g, ch='k'):
+    """同じ 大きさの まま まわりに 輪郭（余白が いる）"""
+    H, W = len(g), len(g[0]); o = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            if g[y][x] == '.' and any(0 <= y + dy < H and 0 <= x + dx < W and g[y + dy][x + dx] != '.' for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0))): o[y][x] = ch
+    return o
+def inner(g, ch, a, b):
+    """面 a と 面 b の さかい目に 線（a 側）"""
+    H, W = len(g), len(g[0]); src = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            if src[y][x] in a and any(0 <= y + dy < H and 0 <= x + dx < W and src[y + dy][x + dx] in b for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0))): g[y][x] = ch
+def stamp(g, rows, x, y): pix.stamp(g, rows, x, y)
+def crop(g):
+    """余白を けずって (rows, x0, y0)"""
+    ys = [y for y in range(len(g)) if any(c != '.' for c in g[y])]; xs = [x for x in range(len(g[0])) if any(g[y][x] != '.' for y in range(len(g)))]
+    return [''.join(g[y][xs[0]:xs[-1] + 1]) for y in range(ys[0], ys[-1] + 1)], xs[0], ys[0]
+def part(fn, n, g, **kw):
+    """64x64 の 下書き → 層（余白を けずり、位置を おぼえる）"""
+    rows, x0, y0 = crop(g); d = dict(n=n, g=fn, x=x0, y=y0, rows=rows); d.update(kw); return d
+import math
+def L(n, g, grid, **kw): d = dict(n=n, g=g, x=0, y=0, rows=R(grid)); d.update(kw); return d
+CARA = 'DEF'; FAR = 'EFl'
 
-# ---------- 腹：ホオズキの 袋（ちょうちん形）。すじが 先へ あつまり、網目の 窓から 霊火 ----------
-TOP, TIP = (29, 21), (6, 41)
-def lantern(glow=1):
-    p = G()
-    ell(p, 18, 28, 12, 11, '3')
-    poly(p, [(10, 32), (5, 42), (15, 38)], '3')
-    s = shade(p, RAMP, r=3, hi=.25, lo=-.22)
-    # 袋の すじ（つけ根から 先へ 弧を えがく）
-    for k in (-13, -6, 1, 8):
-        mx, my = (TOP[0] + TIP[0]) / 2 - k * .55, (TOP[1] + TIP[1]) / 2 - k * .8
-        for i in range(41):
-            t = i / 40; x = (1 - t) ** 2 * TOP[0] + 2 * (1 - t) * t * mx + t * t * TIP[0]; y = (1 - t) ** 2 * TOP[1] + 2 * (1 - t) * t * my + t * t * TIP[1]
+# ---- 足（短く 太く、ひざが 上に 出る）：付け根は 頭胸部の 中へ 3ドット ----
+def leg(path, ramp=CARA):
+    g = G(64, 64)
+    tube(g, path[:2], [2.4, 1.9], ramp); tube(g, path[1:], [1.9, 1.2], ramp)
+    kx, ky = path[1]; ball(g, kx, ky, 2.3, 2.3, ramp)              # ひざの 関節
+    dots(g, 'D', [(int(kx) - 1, int(ky) - 1)]); dots(g, 'M', [(int(kx), int(ky) + 2)])   # ひざの 光・フェアリーの 輪
+    fx, fy = path[2]; dots(g, 'l', [(int(fx), int(fy) - 1)])
+    g = ol(g)
+    return g
+LEGS = {
+    'n1': [(44, 45), (53, 38), (55, 59)], 'n2': [(42, 48), (48, 48), (49, 59)],
+    'n3': [(36, 48), (30, 48), (29, 59)], 'n4': [(34, 45), (24, 40), (19, 59)],
+}
+
+# ---- ホオズキの 腹（見せ所）：つけ根が 広く、先が 後ろ上へ とがる ちょうちん形。すじの 間の やぶれ目から 霊火 ----
+TIP = (8, 19); STEM = (33, 36)
+def lantern(glow=0):
+    g = G(64, 64)
+    m = G(64, 64); pix.ellipse(m, 21, 31, 12, 11, '#'); poly(m, [(12, 25), (TIP[0], TIP[1]), (10, 19), (18, 21)], '#')
+    for y in range(64):
+        for x in range(64):
+            if m[y][x] == '#':
+                nx, ny = (x + .5 - 21) / 12, (y + .5 - 31) / 11; l = -nx * .6 - ny * .8
+                g[y][x] = 'A' if l > .45 else ('C' if l < -.4 else 'B')
+    # すじ（つけ根 → 先へ）：濃い 線＋上がわに 明るい ふち
+    for (cx, cy) in ((16, 14), (24, 30), (20, 44), (34, 22)):
+        for i in range(70):
+            t = i / 69; x = (1 - t) ** 2 * STEM[0] + 2 * (1 - t) * t * cx + t * t * TIP[0]; y = (1 - t) ** 2 * STEM[1] + 2 * (1 - t) * t * cy + t * t * TIP[1]
             X, Y = int(x), int(y)
-            if s[Y][X] != '.':
-                s[Y][X] = 'C'
-                if s[Y][X - 1] in 'B' and k < 5: s[Y][X - 1] = 'A'
-    # 網目の 窓（ホオズキの すけた 葉脈）＋ 中で 燃える 霊火
-    WIN = [
-        '...kkkkk...',
-        '..kbbcbbkk.',
-        '.kbccwcbbbk',
-        'kbcwwwwcbbk',
-        'kbcwwwwcbCk',
-        'kbbcwwcbbCk',
-        '.kbbccbbCk.',
-        '..kCbbbCk..',
-        '...kkkkk...',
-    ]
-    if glow == 2: WIN = [r.replace('b', 'c') for r in WIN]
-    if glow == 0: WIN = [r.replace('w', 'c').replace('c', 'b') for r in WIN]
-    put(s, WIN, 13, 27)
-    for y in range(27, 36):           # 網の すじ
-        for x in range(13, 24):
-            if s[y][x] in 'bcw' and ((x + y) % 4 == 0 or (x - y) % 4 == 0): s[y][x] = 'C' if s[y][x] == 'b' else 'B' if s[y][x] == 'c' else s[y][x]
-    return rows_of(ink(s))
-# ---------- 脚：上へ 折れて から 地面へ（ひざが 高い）----------
-def leg(pts, rad, dark=False):
-    p = G(); tube(p, pts, rad, '1'); s = shade(p, RAMP, r=1, hi=.2, lo=-.2)
-    if dark: s = swap(s, {'D': 'E', 'E': 'F'})
-    # 先は するどい 爪
-    x, y = int(pts[-1][0]), int(pts[-1][1]); s[y][x] = 'F'
-    # ひざの ふし
-    kx, ky = int(pts[1][0]), int(pts[1][1])
-    if s[ky][kx] != '.': s[ky][kx] = 'C'
-    return rows_of(ink(s))
-LEGS = {   # 名前: (点, 太さ, 奥か, グループ)
-    'f1': ([(36, 36), (42, 27), (47, 47)], [1.6, 1.4, .6], True, 'legB'),
-    'f2': ([(32, 37), (34, 28), (37, 48)], [1.6, 1.4, .6], True, 'legA'),
-    'n4': ([(29, 40), (21, 39), (14, 50)], [1.9, 1.6, .7], False, 'legB'),
-    'n3': ([(31, 40), (27, 33), (25, 51)], [1.9, 1.6, .7], False, 'legA'),
-    'n2': ([(34, 40), (39, 31), (42, 51)], [1.9, 1.6, .7], False, 'legB'),
-    'n1': ([(37, 39), (46, 30), (52, 50)], [1.9, 1.7, .7], False, 'legA'),
-}
-RAISE = {'n1': [(37, 38), (45, 26), (53, 31)], 'n2': [(34, 39), (40, 28), (46, 36)]}
-def thorax():
-    p = G(); ell(p, 35, 37, 7, 5.5, '1'); ell(p, 41, 35, 4.5, 4, '1')
-    s = shade(p, RAMP, r=2)
-    return ink(s)
-def head(eyes='norm'):
-    g = thorax()
-    # 4つの 赤い 目：まゆの ひさしの 下で つり上がる
-    put(g, ['kkk....', '.Fkkk..', '.rrFkk.', '..rrrk.', '....F..'], 38, 31)
-    if eyes == 'blink': put(g, ['kkk....', '.Fkkk..', '.kkFkk.', '..kkkk.', '....F..'], 38, 31)
-    if eyes == 'glow': put(g, ['kkk....', '.ykkk..', '.yyrkk.', '..ryyk.', '....F..'], 38, 31)
-    if eyes == 'hit': put(g, ['.......', '.kFkF..', '.FkFkF.', '..kFkF.', '....F..'], 38, 31)
-    if eyes == 'ko': put(g, ['.......', '.kEk.k.', '.EkEEkE', '.kEk.kE', '.......'], 38, 31)
-    # 牙（白い 大あご）
-    put(g, ['kkk..', 'kwwk.', '.kwwk', '..kwk', '...k.'], 42, 38) if eyes != 'ko' else None
-    return rows_of(g)
-FANG_OPEN = ['kkk...', 'kwwkk.', '.kwwwk', '..kkwk', '..kwk.', '..kk..']
-STEM = ['.kk..', 'kCBk.', 'kBDEk', '.kEEk', '..kk.']
-WISP = ['..c.', '.cc.', 'cwc.', 'cwwc', '.cc.']
-WISP2 = ['.c..', '.cc.', '.cwc', 'cwwc', '.cc.']
-BALL = [
-    '......cc....',
-    '..c.ccwc....',
-    '.cccwwwwcc..',
-    'ccwwwwwwwcc.',
-    '.cbwwwwwwwcc',
-    'cbcwwwwwwcc.',
-    '.bbccwwccb..',
-    '..b.bccb....',
-]
-BALL2 = ['....c.c.....', '.c.ccwcc.c..', 'ccwwwwwwccc.', '.cbcwwwcbc..', '..b.bccb.b..']
+            if g[Y][X] != '.': g[Y][X] = 'C'
+            if g[Y - 1][X] == 'B': g[Y - 1][X] = 'A'
+    # やぶれ目（網の すけた 窓）と 霊火
+    for y in range(64):
+        for x in range(64):
+            d = ((x + .5 - 21) / (6 + glow)) ** 2 + ((y + .5 - 32) / (5.5 + glow)) ** 2
+            if d <= 1 and g[y][x] != '.':
+                g[y][x] = 'C' if d > .7 else 'T'
+    fl = ['..S...', '.SS.S.', '.SwSS.', 'SSwwS.', '.SwwS.', '..SS..'] if not glow else ['.S..S..', '.SS.SS.', 'SSwSSS.', 'SwwwwS.', 'SwwwwSS', '.SwwS..', '..SS...']
+    stamp(g, fl, 18 - glow, 29 - glow)
+    for (x, y) in ((16, 31), (17, 32), (24, 30), (25, 31), (20, 35), (21, 36)):   # 網の すじ
+        if g[y][x] in 'T': g[y][x] = 'B'
+    return ol(g)
 
+# ---- 頭胸部（大きく）：甲の 上に フェアリーの もよう ----
+def head(gape=0):
+    g = G(64, 64)
+    ball(g, 42, 37, 9, 8.5, CARA, hi=.5, lo=-.35)
+    for (x, y) in ((38, 30), (39, 31), (40, 32), (41, 31), (42, 30)): g[y][x] = 'M'     # V字の もよう
+    dots(g, 'l', [(35, 34), (35, 35), (36, 37), (36, 38), (37, 40)]); dots(g, 'D', [(36, 34), (36, 35), (37, 37)])   # 甲の ふち
+    for y in range(36, 47):                                                         # 顔の 面（目の 下は 一段 暗い）
+        for x in range(42, 52):
+            if g[y][x] == 'D' and y > 38: g[y][x] = 'E'
+            if g[y][x] == 'E' and y > 41 and x > 45: g[y][x] = 'F'
+    g = ol(g)
+    # 上あご（2本）：太い 根もと＋白く 内へ 曲がる きば
+    FANG = ['kkkk.', 'kDEk.', 'kEFk.', 'kwwk.', '.kwwk', '.kwk.', '..k..']
+    FANG_O = ['kkkk.', 'kDEk.', 'kEFk.', 'kwwk.', 'kwk..', 'kwk..', '.k...']
+    for ox in (0, 4):
+        stamp(g, FANG_O if gape else FANG, 45 + ox + gape, 41)
+    return g
+# 目：白い 光＋霊火色の 虹彩 2色＋たての ひとみ。まゆの ひさしは 前へ 下がる。上に 小さな 副眼 2つ
+EYE = ['kkkk.....', '.kkkkkk..', '..kwSSkSk', '..kTTTkTk', '...kkkkk.']
+EYE_ALT = {'blink': ['kkkk.....', '.kkkkkk..', '.........', '..kkkkkkk', '.........'],
+           'hit': ['.........', '..kk...k.', '...kk.kk.', '..kk...kk', '.........'],
+           'atk0|atk1|atk2': ['kkkk.....', '.kkkkkk..', '..kwwSkSk', '..kSSTkTk', '...kkkkk.'],
+           'ko': ['.........', '..k..k...', '...kk....', '...kk....', '..k..k...']}
+SUB = ['kSk.kSk', '.k...k.']
+WISP = [['..k..', '.kSk.', '.kSSk', 'kSwSk', 'kSwSk', '.kkk.'], ['.k...', '.kSk.', 'kSSk.', 'kSwSk', 'kSwSk', '.kkk.']]
+BITE = [['....kk', '..kkSk', '.kSSk.', 'kSwk..', 'kSk...', '.k....'], ['..k...', '.kSk..', 'kSwSkk', '.kSSSk', '..kkk.']]
+def pedicel():
+    g = G(64, 64); tube(g, [(31, 36), (36, 37)], [3, 3], CARA); return ol(g)
+NB = 'atk1|atk2'
 def layers():
-    L = []
-    for n in ('f1', 'f2'):
-        pts, rad, dark, gg = LEGS[n]; L.append(dict(n=n, g=gg, x=0, y=0, rows=leg(pts, rad, True)))
-    L += [
-        dict(n='wisp', g='wisp', x=6, y=12, rows=WISP, alt={'idle1|idle3|walk1|walk3': WISP2}, not_='ko'),
-        dict(n='lantern', g='abd', x=0, y=0, rows=lantern(), alt={'idle1|idle3|atk0|atk1': lantern(2), 'ko': lantern(0)}),
-        dict(n='stem', g='abd', x=27, y=18, rows=STEM),
+    LG = {k: leg(v) for k, v in LEGS.items() if k[0] == 'n'}
+    return [
+        L('lantern', 'abd', lantern(), alt={'atk0|atk1|idle1|idle3': lantern(1)}, x=-1, y=3),
+        L('ped', 'abd', pedicel(), x=-1, y=3),
+        L('n4', 'legA', LG['n4']), L('n3', 'legB', LG['n3']), L('n2', 'legA', LG['n2']), L('n1', 'legB', LG['n1']),
+        L('head', 'head', head(), alt={NB: head(1)}, x=-1, y=4),
+        dict(n='eye', g='head', x=40, y=34, rows=EYE, alt=EYE_ALT),
+        dict(n='sub', g='head', x=40, y=32, rows=SUB, not_='blink|ko|hit'),
+        dict(n='wisp', g='fx', x=13, y=13, rows=WISP[0], alt={'idle1|idle3|walk1|walk3': WISP[1]}, not_='ko'),
+        dict(n='bite', g='fx2', x=52, y=41, rows=BITE[0], alt={'atk2': BITE[1]}, only=NB),
     ]
-    for n in ('n4', 'n3'):
-        pts, rad, dark, gg = LEGS[n]; L.append(dict(n=n, g=gg, x=0, y=0, rows=leg(pts, rad)))
-    L.append(dict(n='head', g='body', x=0, y=0, rows=head(), alt={'blink': head('blink'), 'atk0|atk1|atk2': head('glow'), 'hit': head('hit'), 'ko': head('ko')}))
-    for n in ('n2', 'n1'):
-        pts, rad, dark, gg = LEGS[n]
-        L.append(dict(n=n, g=gg, x=0, y=0, rows=leg(pts, rad), alt={'atk0|atk1': leg(RAISE[n], rad)}))
-    L += [
-        dict(n='fang', g='body', x=42, y=38, rows=FANG_OPEN, only='atk1|atk2'),
-        dict(n='ball', g='root', x=50, y=28, rows=BALL, only='atk1'),
-        dict(n='ball2', g='root', x=56, y=30, rows=BALL2, only='atk2'),
-    ]
-    return L
 FRAMES = {
-    'idle0': {}, 'idle1': {'body': (0, 1), 'abd': (0, 1)}, 'idle2': {'body': (0, 1), 'abd': (0, 2), 'wisp': (0, -1)}, 'idle3': {'body': (0, 0), 'abd': (0, 1), 'wisp': (0, -1)},
-    'blink': {},
-    'walk0': {'legA': (1, -1), 'body': (0, -1)}, 'walk1': {'abd': (0, 1)}, 'walk2': {'legB': (1, -1), 'body': (0, -1)}, 'walk3': {'abd': (0, 1)},
-    'atk0': {'body': (-2, -2), 'abd': (-1, -1), 'legA': (-1, 0), 'legB': (-1, 0)}, 'atk1': {'root': (3, 0), 'body': (1, 0)}, 'atk2': {'root': (2, 0)},
-    'hit': {'root': (-3, 0), 'body': (-1, 1), 'abd': (-1, -1)}, 'ko': {'_flip': True},
+    'idle0': {}, 'idle1': {'head': (0, 1), 'fx': (0, -1)}, 'idle2': {'head': (0, 1), 'abd': (0, 1)}, 'idle3': {'abd': (0, 1), 'fx': (0, -1)}, 'blink': {},
+    'walk0': {'legA': (1, -1), 'legB': (-1, 0), 'body': (0, -1)}, 'walk1': {'body': (0, -1), 'fx': (0, -1)},
+    'walk2': {'legA': (-1, 0), 'legB': (1, -1), 'body': (0, -1)}, 'walk3': {'body': (0, 0), 'fx': (0, -1)},
+    'atk0': {'body': (-2, 1), 'legA': (-1, 0), 'legB': (-1, 0)}, 'atk1': {'root': (5, 0), 'head': (1, 1)}, 'atk2': {'root': (7, 0), 'head': (1, 1), 'fx2': (2, 0)},
+    'hit': {'root': (-3, 0), 'head': (-1, -1)}, 'ko': {'_flip': True},
 }
-PARENT = {'abd': 'root', 'wisp': 'abd', 'body': 'root', 'legA': 'root', 'legB': 'root'}
+PARENT = {'head': 'body', 'abd': 'body', 'body': 'root', 'legA': 'root', 'legB': 'root', 'fx': 'abd', 'fx2': 'root'}
