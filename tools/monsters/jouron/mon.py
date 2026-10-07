@@ -1,5 +1,5 @@
 # ジョウロン（くさ・ノーマル × じょうろ）手打ち GBA風：無機物＋かわいい ライン
-import os, sys
+import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_lib'))
 from pix import grid, rows_of, outline, ellipse, line, rot90
 META = dict(id='jouron', name='ジョウロン', types=['grass', 'normal'], base='じょうろ', size='S')
@@ -70,10 +70,11 @@ def handle():
     return outline(rows_of(g))
 
 # ---- 注ぎ口（＝鼻）：顔の まん中から 右上へ 細くなる 管。先に はす口 ----
-def spout():
+def spout(short=False):
     W, H = 27, 14; g = grid(W, H); y0 = 9.6
     yc = lambda i: y0 - max(0, i - 8) * .62
-    for i in range(2, 21):
+    if short: yc = lambda i: y0 - max(0, i - 5) * .3
+    for i in range(2, 11 if short else 21):
         ht = 1.9 - i * .03
         for y in range(H):
             d = y + .5 - yc(i)
@@ -84,12 +85,12 @@ def spout():
             dx, dy = (x + .5 - 3) / 3, (y + .5 - y0) / 3.1
             if dx * dx + dy * dy <= 1: g[y][x] = 'A' if dx + dy < -.55 else 'B' if dx + dy < .45 else 'C'
     # はす口：右上へ 開いた ラッパ形
-    hx, hy = 22.4, 2.8
+    hx, hy = (12.4, 8.4) if short else (22.4, 2.8)
     for y in range(H):
-        for x in range(18, W):
-            if ((x + .5 - hx) / 3.2) ** 2 + ((y + .5 - hy) / 2.8) ** 2 <= 1 and x - 18.5 >= abs(y + .5 - hy) * .7 - .6:
-                g[y][x] = 'A' if x < 22 else 'B' if x < 24 else 'C'
-    put(g, [(24, 1), (24, 3), (23, 2)], 'v')
+        for x in range(int(hx) - 4, W):
+            if ((x + .5 - hx) / 3.2) ** 2 + ((y + .5 - hy) / 2.8) ** 2 <= 1 and x - hx + 3.9 >= abs(y + .5 - hy) * .7 - .6:
+                g[y][x] = 'A' if x < hx - .4 else 'B' if x < hx + 1.6 else 'C'
+    X = int(hx); put(g, [(X + 2, 1), (X + 2, 3), (X + 1, 2)], 'v')
     despeckle(g)
     return outline(rows_of(g))
 # ---- 芽：口から 出た 双葉。phase で ゆれる ----
@@ -100,8 +101,8 @@ def sprout(phase=0, droop=False):
         put(g, [(7, y) for y in range(9, 15)], 'g')
         return outline(rows_of(g))
     s = phase - 1
-    put(g, [(7, y) for y in range(6, 15)], 'g')
-    put(g, [(8, y) for y in range(7, 15)], 'd')
+    put(g, [(7, y) for y in range(6, 13)], 'g')
+    put(g, [(8, y) for y in range(7, 13)], 'd')
     stamp(g, ['..GGG.', '.GGgg.', 'GGggd.', '.ggdd.', '...dd.'], 2 + s, 2 + (1 if s < 0 else 0))   # 左の 葉
     stamp(g, ['.GGg..', 'Gggdd.', 'gggdd.', '.gdd..'], 8 + s, 3 + (1 if s > 0 else 0))        # 右の 葉
     put(g, [(7, 5)], 'G')
@@ -126,44 +127,63 @@ def face(kind):
 
 FOOT = ['kkkkk', 'kBBCk', 'kCCCk', '.kkk.']
 # ---- 水しぶき（攻撃）と 水たまり（ダウン）----
-SPRAY1 = ['......u.......', '..u.....v.....', '.....v....u...', 'u..v...u...v..', '..u...v..u...v', '.v..u....v....', '....v..u....u.', '.......v......']
-SPRAY2 = ['.........u.....', '....u......v...', '.u....v.......u', '...v....u..v...', '......v....u...', '..u.......v....', '.....v.u.....v.', '...........u...', '........v......']
+OLD1 = ['......u.......', '..u.....v.....', '.....v....u...', 'u..v...u...v..', '..u...v..u...v', '.v..u....v....', '....v..u....u.', '.......v......']
+OLD2 = ['.........u.....', '....u......v...', '.u....v.......u', '...v....u..v...', '......v....u...', '..u.......v....', '.....v.u.....v.', '...........u...', '........v......']
+def spray(n, dmax, seed):
+    # はす口から 右下へ ひろがる 水の つぶ（2ドットの しずく）＋ まん中の 水の すじ
+    import random; R = random.Random(seed); g = grid(dmax + 4, 22)
+    for k in range(dmax - 2):
+        y = 6 + int(k * .28); g[y][k] = 'v'; g[y + 1][k] = 'v'; g[y - 1][k] = 'u'
+    for _ in range(n):
+        a = math.radians(R.uniform(-28, 42)); d = R.uniform(3, dmax)
+        x, y = int(d * math.cos(a)), int(6 + d * math.sin(a))
+        if 1 <= y < 21 and 0 <= x < dmax + 3: g[y - 1][x] = 'u'; g[y][x] = 'v'
+    return rows_of(g)
 LEAF = ['.kk.', 'kGgk', 'kgdk', '.kk.']
 BUD = ['.k.k.', 'kGkgk', '.kgk.', '..k..']
 DROP = ['.k.', 'kuk', 'kvk', '.k.']
-PUDDLE = ['.kkkkkkkk.', 'kuuvvvvvvk', '.kkkkkkkk.']
+PUDDLE = ['..kkkkkkkkkk.', '.kuuuvvuuvvvk', 'kuvvvvvvvvvvk', '.kkkkkkkkkkk.']
 
 NA = 'ko'
 def layers():
+    KO = ko_body()
     return [
         dict(n='handle', g='body', x=5, y=32, rows=handle(), not_=NA),
-        dict(n='footB', g='legB', x=31, y=55, rows=FOOT, not_=NA),
-        dict(n='footA', g='legA', x=17, y=55, rows=FOOT, not_=NA),
+        dict(n='footB', g='legB', x=31, y=56, rows=FOOT, not_=NA),
+        dict(n='footA', g='legA', x=17, y=56, rows=FOOT, not_=NA),
         dict(n='can', g='body', x=13, y=33, rows=can_body(), not_=NA),
-        dict(n='sprout', g='top', x=13, y=25, rows=sprout(1), alt={'idle1|idle2|walk1|walk3': sprout(2), 'atk0|hit': sprout(0), 'atk1|atk2': sprout(2)}, not_=NA),
+        dict(n='sprout', g='top', x=19, y=25, rows=sprout(1), alt={'idle1|idle2|walk1|walk3': sprout(2), 'atk0|hit': sprout(0), 'atk1|atk2': sprout(2)}, not_=NA),
         dict(n='face', g='face', x=21, y=39, rows=face('open'), alt={'blink': face('blink'), 'atk0': face('fight'), 'atk1|atk2': face('shout'), 'hit': face('pain')}, not_=NA),
         dict(n='spout', g='nose', x=22, y=38, rows=spout(), not_=NA),
         # 攻撃：はす口から 水を まき、種が 芽を 出す（はなれているのは 意図的な エフェクト）
-        dict(n='spray1', g='root', x=52, y=35, rows=SPRAY1, only='atk1'),
-        dict(n='leaf1', g='root', x=58, y=31, rows=LEAF, only='atk1'),
-        dict(n='spray2', g='root', x=53, y=39, rows=SPRAY2, only='atk2'),
+        dict(n='spray1', g='root', x=51, y=35, rows=spray(26, 13, 1), only='atk1'),
+        dict(n='leaf1', g='root', x=60, y=36, rows=LEAF, only='atk1'),
+        dict(n='spray2', g='root', x=50, y=36, rows=spray(36, 18, 2), only='atk2'),
         dict(n='bud1', g='root', x=60, y=54, rows=BUD, only='atk2'),
         dict(n='bud2', g='root', x=66, y=55, rows=BUD, only='atk2'),
         dict(n='drop', g='root', x=10, y=27, rows=DROP, only='hit'),
         dict(n='drop2', g='root', x=31, y=24, rows=DROP, only='hit'),
         # たおれ：あおむけに ころがり、水が こぼれる
-        dict(n='puddle', g='root', x=10, y=57, rows=PUDDLE, only='ko'),
-        dict(n='ko', g='root', x=18, y=15, rows=ko_body(), only='ko'),
+        dict(n='ko', g='root', x=14, y=60 - len(KO), rows=KO, only='ko'),
+        dict(n='puddle', g='root', x=11, y=57, rows=PUDDLE, only='ko'),
     ]
 
 def ko_body():
-    # 立ち姿を 組んで 左へ 90度（反時計回り）回す：あおむけ、注ぎ口が 上を 向く
-    W, H = 52, 40; g = grid(W, H); ox, oy = 5, 23
-    for rows, x, y in ((handle(), 5, 32), (sprout(droop=True), 13, 25), (FOOT, 31, 55), (FOOT, 17, 55), (can_body(), 13, 33), (face('ko'), 21, 39), (spout(), 22, 38)):
-        stamp(g, rows, x - ox, y - oy)
+    # 胴と 芽を 左へ 90度（反時計回り）回して よこだおし。口が 左に 来て 水が こぼれる
+    W, H = 46, 40; g = grid(W, H)
+    stamp(g, sprout(droop=True), 19 - 10, 25 - 20); stamp(g, can_body(), 13 - 10, 33 - 20)
     rows = rot90(rot90(rot90(rows_of(g))))
     ys = [y for y, r in enumerate(rows) if r.strip('.')]; xs = [x for x in range(len(rows[0])) if any(r[x] != '.' for r in rows)]
-    return [r[xs[0]:xs[-1] + 1] for r in rows[ys[0]:ys[-1] + 1]]
+    body = [list(r[xs[0]:xs[-1] + 1]) for r in rows[ys[0]:ys[-1] + 1]]
+    h, w = len(body), len(body[0]); out = grid(w + 6, h)
+    for j in range(h):
+        for i in range(w): out[j][i] = body[j][i]
+    # 顔は 起こした まま（よこだおしでも 読める ように）、鼻の 注ぎ口は 短く
+    fx, fy = w - 23, h - 19
+    stamp(out, spout(short=True), fx + 1, fy - 1); stamp(out, face('ko'), fx, fy)
+    # 宙に 浮いた 足（右）
+    for y0 in (h - 22, h - 10): stamp(out, ['kkk.', 'kBBk', 'kBCk', 'kCCk', 'kkk.'], w - 1, y0)
+    return rows_of(out)
 
 FRAMES = {
     'idle0': {}, 'idle1': {'top': (0, -1)}, 'idle2': {'body': (0, 1), 'face': (0, 0)}, 'idle3': {}, 'blink': {},
