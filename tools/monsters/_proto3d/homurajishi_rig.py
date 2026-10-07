@@ -37,12 +37,12 @@ def lion(P):
     # たてがみ（炎）：ゆらぎで 長さが 変わる
     HX, HY = X + 13 + hx, Y - 14 + hy
     fl = P.get('flame', 0)
-    for i in range(13):
+    for i in (range(13) if not P.get('vec') else []):
         a = math.radians(50 + 215 * i / 12)
         Lm = (16 + 3.5 * (i % 2)) * P.get('mane', 1) + 1.5 * math.sin(fl * 2.1 + i * 1.7)
         tip = (HX - 3 + math.cos(a) * Lm, HY - math.sin(a) * Lm, -8)
         m.add('mane%d' % i, cone((HX - 3, HY, -5), tip, 7), fire, 'mane', 2)
-    for i, (dx, dy, Lr) in enumerate(((.9, .55, 9), (.55, .9, 10), (.15, 1, 9), (-.3, .95, 8))):
+    for i, (dx, dy, Lr) in enumerate(((.9, .55, 9), (.55, .9, 10), (.15, 1, 9), (-.3, .95, 8)) if not P.get('vec') else []):
         Lr *= P.get('mane', 1)
         m.add('ruff%d' % i, cone((HX + 1, HY + 5, 1), (HX + 1 + dx * Lr, HY + 5 + dy * Lr, 2.5), 4.5), fire, 'mane', 2)
     # 頭

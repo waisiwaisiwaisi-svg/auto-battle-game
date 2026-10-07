@@ -59,9 +59,11 @@ class Model:
     def add(self, name, sdf, mat, group=None, k=1.5):
         self.parts.append(dict(name=name, f=sdf, mat=mat, group=group or name, k=k))
 
-    def render(self, W, H, ss=3, thresholds=(.2, .5, .8, .95)):
+    def render(self, W, H, ss=3, thresholds=(.2, .5, .8, .95), overlays=(), extras=None, scale=1.0):
+        """overlays: [(RGBA 画像（W*ss × H*ss）, 'back'|'front')]。ベクターで 描いた 炎・顔などを 立体の うしろ／まえに 重ねる。
+        重ねる 絵の 色は 素材の ランプ・輪郭色（#120e18 付近）・extras（{文字: 色}）の どれかに 近い 色へ そろえる"""
         """W×H の 文字グリッドと パレットを 返す（足もとは y=H-1 付近、座標は ピクセル単位）"""
-        xs = (np.arange(W * ss) + .5) / ss; ys = (np.arange(H * ss) + .5) / ss
+        xs = (np.arange(W * ss) + .5) / ss / scale; ys = (np.arange(H * ss) + .5) / ss / scale
         X, Y = np.meshgrid(xs, ys)
         cy, sy = math.cos(self.yaw), math.sin(self.yaw)
         def world(p):   # 画面の 点 → 模型の 点（たてじくで 回す）
@@ -108,6 +110,18 @@ class Model:
             nt = len(self.mats[nm]['colors']); sel = (mid == mi) & spec & self.mats[nm].get('shiny', True)
             tone[sel] = nt - 1
         code = np.where(hit, mid * 8 + tone, -1); depth = np.where(hit, Z, -99); grp = np.where(hit, grp_of_part[part], -1)
+        self._extras = dict(extras or {})
+        if overlays:
+            cands = [(mi * 8 + t, c) for mi, nm in enumerate(names) for t, c in enumerate(self.mats[nm]['colors'])]
+            cands += [(1000, '#120e18')] + [(1001 + i, c) for i, c in enumerate(self._extras.values())]
+            cc = np.array([_rgb(c) for _, c in cands]) * 255; ids = np.array([k for k, _ in cands])
+            for img, where in overlays:
+                a = np.asarray(img.convert('RGBA'), float)
+                op = a[..., 3] > 128
+                d = ((a[..., None, :3] - cc[None, None]) ** 2).sum(-1); near = ids[np.argmin(d, -1)]
+                sel = op & (~hit if where == 'back' else np.ones_like(hit))
+                code = np.where(sel, near, code); depth = np.where(sel, 50 if where == 'front' else -60, depth)
+                grp = np.where(sel, 900 if where == 'front' else 901, grp)
         # 3倍 → 1倍（覆い 5/9 以上で 塗る、色は 多数決）
         out = np.full((H, W), -1, int); dep = np.full((H, W), -99.0); gout = np.full((H, W), -1, int)
         for y in range(H):
@@ -120,7 +134,7 @@ class Model:
                     out[y, x] = c if c >= 0 and cnt[list(vals).index(c)] * 3 >= len(cov) else vals[np.argmax(cnt)]
                     dep[y, x] = depth[y * ss:(y + 1) * ss, x * ss:(x + 1) * ss].max()
                     g = grp[y * ss:(y + 1) * ss, x * ss:(x + 1) * ss].ravel(); g = g[g >= 0]
-                    gout[y, x] = np.bincount(g).argmax()
+                    gv, gc = np.unique(g, return_counts=True); gout[y, x] = gv[np.argmax(gc)]
         self._names = names
         return self._to_rows(out, dep, gout)
 
@@ -131,6 +145,8 @@ class Model:
         for mi, nm in enumerate(names):
             for t, col in enumerate(self.mats[nm]['colors']):
                 ch = AL[ai]; ai += 1; char[mi * 8 + t] = ch; pal[ch] = col
+        char[1000] = 'k'
+        for i, (ch, col) in enumerate(self._extras.items()): char[1001 + i] = ch; pal[ch] = col
         g = [['.'] * W for _ in range(H)]
         for y in range(H):
             for x in range(W):
@@ -146,7 +162,7 @@ class Model:
                         line[y][x] = True
         for y in range(H):
             for x in range(W):
-                if line[y][x]: g[y][x] = char[(out[y, x] // 8) * 8]   # 段0
+                if line[y][x] and out[y, x] < 1000: g[y][x] = char[(out[y, x] // 8) * 8]   # 段0
         # 外側の 輪郭：光の 側（上・左が 体）は 体の いちばん 暗い 色、それ以外は 黒
         o = [r[:] for r in g]
         for y in range(H):
@@ -155,7 +171,7 @@ class Model:
                 nb = [(y + dy, x + dx) for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)) if 0 <= y + dy < H and 0 <= x + dx < W and out[y + dy, x + dx] >= 0]
                 if not nb: continue
                 below_right = [(yy, xx) for yy, xx in nb if yy > y or xx > x]   # 体が 下か 右 → この 点は 体の 上か 左（光の 側）
-                lit = below_right and all(out[yy, xx] % 8 >= 1 for yy, xx in below_right)
+                lit = below_right and all(out[yy, xx] < 1000 and out[yy, xx] % 8 >= 1 for yy, xx in below_right)
                 o[y][x] = char[(out[below_right[0]] // 8) * 8] if lit else 'k'
         return [''.join(r) for r in o], pal
 
