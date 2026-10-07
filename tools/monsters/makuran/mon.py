@@ -5,7 +5,7 @@ from pix import grid, rows_of, outline, stamp
 META = dict(id='makuran', name='マクラン', types=['normal', 'psychic'], base='まくら', size='M')
 EYE_BOX = (25, 35, 22, 5)
 PAL = {'k': '#1a1630', 'l': '#6c5698',
-       'W': '#fffaf0', 'M': '#e6dcf2', 'D': '#ac9ad6',          # 綿の 布（影は 青紫へ）
+       'W': '#fffaf0', 'M': '#e2d4f4', 'D': '#a48ed6',          # 綿の 布（影は 青紫へ）
        'b': '#9ccaff', 'B': '#5a7fd2',                          # まくらカバーの ふち（パイピング）
        'V': '#dc9cff', 'U': '#8a46d4',                          # ねむけの 念波・ひとみ
        'c': '#261a40', 'w': '#ffffff', 'p': '#ffa6c6'}          # 目の 黒・光・ほっぺ
@@ -119,8 +119,8 @@ def layers():
 FRAMES = {
     'idle0': {}, 'idle1': {'body': (0, 1), 'fx': (0, -1)}, 'idle2': {'body': (0, 1), 'fx': (1, -2), 'fx2': (0, -1)}, 'idle3': {'fx': (1, -1), 'fx2': (1, -2)},
     'blink': {},
-    'walk0': {'body': (0, -1), 'legA': (0, -1)}, 'walk1': {'body': (0, -2), 'legA': (1, -2), 'fx': (0, -1)},
-    'walk2': {'body': (0, -1), 'legB': (0, -1)}, 'walk3': {'body': (0, -2), 'legB': (1, -2), 'fx': (0, -1)},
+    'walk0': {'body': (0, -1), 'legA': (1, -1)}, 'walk1': {'body': (0, 0), 'fx': (0, -1)},
+    'walk2': {'body': (0, -1), 'legB': (1, -1)}, 'walk3': {'body': (0, 0), 'fx': (0, -1)},
     'atk0': {'root': (-3, 0), 'body': (-2, 4)}, 'atk1': {'root': (3, 0), 'body': (1, -2)}, 'atk2': {'root': (2, 0), 'body': (0, -1)},
     'hit': {'root': (-3, 0), 'body': (2, 0)}, 'ko': {},
 }
