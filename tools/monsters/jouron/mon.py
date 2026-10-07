@@ -15,6 +15,18 @@ KEEP_BLACK = set('wgdre')
 def put(g, pts, ch):
     for x, y in pts:
         if 0 <= y < len(g) and 0 <= x < len(g[0]): g[y][x] = ch
+def despeckle(g, keep='wv'):
+    # はぐれドットを まわりで いちばん 多い 色に（手で 消す かわり）
+    H, W = len(g), len(g[0]); src = [r[:] for r in g]
+    for y in range(H):
+        for x in range(W):
+            c = src[y][x]
+            if c in '.' + keep: continue
+            nb = [src[y + dy][x + dx] for dy in (-1, 0, 1) for dx in (-1, 0, 1) if (dy or dx) and 0 <= y + dy < H and 0 <= x + dx < W]
+            if c not in nb:
+                cs = [n for n in nb if n != '.']
+                if cs: g[y][x] = max(set(cs), key=cs.count)
+    return g
 def stamp(g, rows, x0, y0):
     for j, r in enumerate(rows):
         for i, c in enumerate(r):
@@ -44,7 +56,7 @@ def can_body():
         if g[BH - 3][x] != '.': g[BH - 3][x] = 'C' if x > 4 else 'B'
     for y in range(7, BH - 6):                                      # 金属の つや（縦の 白い すじ）
         put(g, [(2, y)], 'w')
-    put(g, [(3, 8), (3, 9)], 'w')
+    put(g, [(3, 9), (3, 10)], 'w')
     return outline(rows_of(g))
 
 # ---- 取っ手：うしろの 弓なりの 輪 ----
@@ -53,11 +65,8 @@ def handle():
     for y in range(20):
         for x in range(12):
             d = ((x - 11.5) / 11) ** 2 + ((y - 10) / 9.6) ** 2
-            if .6 <= d <= 1.0: g[y][x] = 'B'
-    for y in range(20):
-        for x in range(12):
-            if g[y][x] == 'B' and (x == 0 or g[y][x - 1] == '.' or y == 0 or g[y - 1][x] == '.'): g[y][x] = 'A'
-            elif g[y][x] == 'B' and (y < 19 and g[y + 1][x] == '.'): g[y][x] = 'C'
+            if .6 <= d <= 1.0: g[y][x] = 'A' if (d > .82 and y < 12) else 'C' if (d < .75 and y > 9) or (y > 16) else 'B'
+    despeckle(g)
     return outline(rows_of(g))
 
 # ---- 注ぎ口（＝鼻）：顔の まん中から 右上へ 細くなる 管。先に はす口 ----
@@ -81,6 +90,7 @@ def spout():
             if ((x + .5 - hx) / 3.2) ** 2 + ((y + .5 - hy) / 2.8) ** 2 <= 1 and x - 18.5 >= abs(y + .5 - hy) * .7 - .6:
                 g[y][x] = 'A' if x < 22 else 'B' if x < 24 else 'C'
     put(g, [(24, 1), (24, 3), (23, 2)], 'v')
+    despeckle(g)
     return outline(rows_of(g))
 # ---- 芽：口から 出た 双葉。phase で ゆれる ----
 def sprout(phase=0, droop=False):
@@ -130,7 +140,7 @@ def layers():
         dict(n='footB', g='legB', x=31, y=55, rows=FOOT, not_=NA),
         dict(n='footA', g='legA', x=17, y=55, rows=FOOT, not_=NA),
         dict(n='can', g='body', x=13, y=33, rows=can_body(), not_=NA),
-        dict(n='sprout', g='top', x=13, y=23, rows=sprout(1), alt={'idle1|idle2|walk1|walk3': sprout(2), 'atk0|hit': sprout(0), 'atk1|atk2': sprout(2)}, not_=NA),
+        dict(n='sprout', g='top', x=13, y=25, rows=sprout(1), alt={'idle1|idle2|walk1|walk3': sprout(2), 'atk0|hit': sprout(0), 'atk1|atk2': sprout(2)}, not_=NA),
         dict(n='face', g='face', x=21, y=39, rows=face('open'), alt={'blink': face('blink'), 'atk0': face('fight'), 'atk1|atk2': face('shout'), 'hit': face('pain')}, not_=NA),
         dict(n='spout', g='nose', x=22, y=38, rows=spout(), not_=NA),
         # 攻撃：はす口から 水を まき、種が 芽を 出す（はなれているのは 意図的な エフェクト）
@@ -149,7 +159,7 @@ def layers():
 def ko_body():
     # 立ち姿を 組んで 左へ 90度（反時計回り）回す：あおむけ、注ぎ口が 上を 向く
     W, H = 52, 40; g = grid(W, H); ox, oy = 5, 23
-    for rows, x, y in ((handle(), 5, 32), (sprout(droop=True), 13, 23), (FOOT, 31, 55), (FOOT, 17, 55), (can_body(), 13, 33), (face('ko'), 21, 39), (spout(), 22, 38)):
+    for rows, x, y in ((handle(), 5, 32), (sprout(droop=True), 13, 25), (FOOT, 31, 55), (FOOT, 17, 55), (can_body(), 13, 33), (face('ko'), 21, 39), (spout(), 22, 38)):
         stamp(g, rows, x - ox, y - oy)
     rows = rot90(rot90(rot90(rows_of(g))))
     ys = [y for y, r in enumerate(rows) if r.strip('.')]; xs = [x for x in range(len(rows[0])) if any(r[x] != '.' for r in rows)]
