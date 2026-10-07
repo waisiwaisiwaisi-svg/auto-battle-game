@@ -93,3 +93,7 @@ python3 -m http.server 8000
 ## 前作
 
 `duel.html` は 前のバージョン（スタンスだけを切り替える オート対戦「Pixel Stance Duel」）です。
+
+## 手打ちモンスター（tools/monsters）
+- `tools/monsters/<id>/mon.py` が 1体ずつの 手打ちドット絵（14コマ）。`python3 tools/monsters/build.py` で 絵を 作り、`python3 tools/monsters/catalog.py` で 図鑑ページ（採用／不採用の 判定つき）を 作る
+- 図鑑で 採用した モンスターは `tools/monsters/ADOPTED.json` に 入れて `python3 tools/monsters/export_game.py` を 実行すると、index.html の 「HANDMON」区間に 絵・種族値・タイプ・おぼえる わざ が 書きこまれ、くさむらや たいかいに 出てくる
