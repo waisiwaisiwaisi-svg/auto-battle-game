@@ -232,7 +232,7 @@ if __name__ == '__main__':
         sz = round(.72 + .72 * u, 3)
         meta[gid] = {'name': name, 'types': [t1] + ([t2] if t2 != '-' else []), 'base': base, 'body': body, 'size': size, 'note': note, 'rare': rare, 'src': k,
                      'h': L['h'], 'wt': L['wt'], 'home': L['home'], 'trait': L['trait'], 'evo': KEEP.get(L['evo'], L['evo']) if L['evo'] else None, 'sz': sz}
-        v = allv[k]; spr[gid] = {'w': v['w'], 'h': v['h'], 'pal': v['pal'], 'd': v['d'], 'ms': round(76 * sz / max(v['w'], v['h']), 3)}
+        v = allv[k]; spr[gid] = {'w': v['w'], 'h': v['h'], 'pal': v['pal'], 'd': v['d'], 'ms': round(88 * sz / max(v['w'], v['h']), 3)}
     for gid, m in meta.items():   # しんか先が 外した モンスターなら 消す
         if m['evo'] and m['evo'] not in meta: m['evo'] = None
     json.dump(meta, open('meta.json', 'w'), ensure_ascii=False, indent=0)
