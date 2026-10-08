@@ -2365,13 +2365,14 @@ function renderStarter() {
 /* =====================================================================
    たからばこ（クラッシュ・ロワイヤル式：勝つと もらえる／4スロット／1つずつ 時間で あく／ジェムで すぐ あく）
    ===================================================================== */
+const CHEST_T = 1 / 12;   /* テスト用に 解錠時間を 1/12 に（木5びょう〜でんせつ2ふん30びょう）。本番は 1 */
 const CHESTS = {
-  wood:   { n: '木の たからばこ',     c: '#b07a40', d: '#6a4420', sec: 60,   cr: [1, 2],  tm: 1, gem: [0, 1], rar: [80, 18, 2] },
-  silver: { n: '銀の たからばこ',     c: '#c8d0e0', d: '#6a7488', sec: 180,  cr: [2, 3],  tm: 2, gem: [0, 2], rar: [70, 25, 5] },
-  gold:   { n: '金の たからばこ',     c: '#ffd166', d: '#a87a10', sec: 480,  cr: [3, 5],  tm: 3, gem: [2, 4], rar: [55, 35, 10] },
-  giant:  { n: 'ジャイアントばこ',     c: '#ff9a5a', d: '#a04a20', sec: 720,  cr: [8, 12], tm: 4, gem: [3, 6], rar: [60, 30, 10] },
-  magic:  { n: 'マジックばこ',         c: '#c08aff', d: '#5a3a9a', sec: 720,  cr: [4, 6],  tm: 5, gem: [4, 8], rar: [30, 45, 25] },
-  legend: { n: 'でんせつの たからばこ', c: '#7af0ff', d: '#2a7a9a', sec: 1800, cr: [6, 10], tm: 4, gem: [10, 15], rar: [0, 40, 60] },
+  wood:   { n: '木の たからばこ',     c: '#b07a40', d: '#6a4420', sec: 60 * CHEST_T, cr: [1, 2],  tm: 1, gem: [0, 1], rar: [80, 18, 2] },
+  silver: { n: '銀の たからばこ',     c: '#c8d0e0', d: '#6a7488', sec: 180 * CHEST_T, cr: [2, 3],  tm: 2, gem: [0, 2], rar: [70, 25, 5] },
+  gold:   { n: '金の たからばこ',     c: '#ffd166', d: '#a87a10', sec: 480 * CHEST_T, cr: [3, 5],  tm: 3, gem: [2, 4], rar: [55, 35, 10] },
+  giant:  { n: 'ジャイアントばこ',     c: '#ff9a5a', d: '#a04a20', sec: 720 * CHEST_T, cr: [8, 12], tm: 4, gem: [3, 6], rar: [60, 30, 10] },
+  magic:  { n: 'マジックばこ',         c: '#c08aff', d: '#5a3a9a', sec: 720 * CHEST_T, cr: [4, 6],  tm: 5, gem: [4, 8], rar: [30, 45, 25] },
+  legend: { n: 'でんせつの たからばこ', c: '#7af0ff', d: '#2a7a9a', sec: 1800 * CHEST_T, cr: [6, 10], tm: 4, gem: [10, 15], rar: [0, 40, 60] },
 };
 // もらえる じゅんばん（くりかえし）
 const CHEST_CYCLE = ['silver', 'silver', 'wood', 'gold', 'silver', 'silver', 'wood', 'silver', 'gold', 'magic', 'silver', 'silver', 'wood', 'gold', 'silver', 'giant',
@@ -2946,11 +2947,18 @@ function sendOut(side, idx, pass, lag, at) {
 // まきびし系：出てきたときにダメージ／どく
 function applyHazards(f) {
   const hz = B.sides[f.side].hz;
-  if (hz.rocks) { const d = Math.max(1, Math.round(f.maxHp / 8 * effVs('rock', f.sp))); f.hp = Math.max(1, f.hp - d); popText(f.x, f.y - 66, `-${d}`, '#c49a6c'); burst(f.x, f.y - BODY, '#c49a6c', 8, 80, .4); }
-  if (hz.spikes && !hasType(f, 'wind')) { const d = Math.max(1, Math.round(f.maxHp * [0, 1 / 8, 1 / 6, 1 / 4][hz.spikes])); f.hp = Math.max(1, f.hp - d); popText(f.x + 10, f.y - 56, `-${d}`, '#d8b060'); }
+  if (hz.rocks) {
+    const d = Math.max(1, Math.round(f.maxHp / 8 * effVs('rock', f.sp))); f.hp = Math.max(1, f.hp - d); popText(f.x, f.y - 66, `-${d}`, '#c49a6c');
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; fxp({ type: 'rockIn', x0: f.x + Math.cos(a) * 70, y0: f.y - BODY + Math.sin(a) * 40 - 20, x1: f.x, y1: f.y - BODY, rot: a, life: .3 + i * .03 }); }
+    impactFx(f.x, f.y - BODY, 'rock', .8); B.shake = Math.max(B.shake, 6); say(`${f.sp.n}に とがった いしが くいこんだ！`);
+  }
+  if (hz.spikes && !flies(f) && !hasType(f, 'wind')) {
+    const d = Math.max(1, Math.round(f.maxHp * [0, 1 / 8, 1 / 6, 1 / 4][hz.spikes])); f.hp = Math.max(1, f.hp - d); popText(f.x + 10, f.y - 56, `-${d}`, '#d8b060');
+    impactFx(f.x, f.y - 4, 'ground', .5); typeFx(f.x, f.y, 'ground', 14, 120, .5, { ang: -Math.PI / 2, spread: 1 });
+  }
   if (hz.tspikes && !hasType(f, 'wind')) {
     if (hasType(f, 'poison')) { hz.tspikes = 0; say(`${f.sp.n}が どくのトゲを かたづけた！`); }
-    else setStatus(f, hz.tspikes >= 2 ? 'tox' : 'psn', null);
+    else { typeFx(f.x, f.y, 'poison', 16, 100, .7, { ang: -Math.PI / 2, spread: .9 }); setStatus(f, hz.tspikes >= 2 ? 'tox' : 'psn', null); }
   }
 }
 
@@ -2995,6 +3003,29 @@ function impactFx(x, y, t, k) {
   if (k > .5) B.fx.push({ type: 'shock', x, y, rad: 50 + 50 * k, col: '#ffffff', life: .42, max: .42 });
   typeFx(x, y, t, Math.round(10 + 16 * k), 110 + 90 * k, .55);
   if (k > .6) B.scrFlash = Math.max(B.scrFlash || 0, .12 * k);
+}
+// ---- ほじょわざの エフェクト ----
+const fxp = (o) => B.fx.push(Object.assign({ max: o.life }, o));
+function pillarFx(f, col, life = .7) { fxp({ type: 'pillar', x: f.x, y: f.y, col, w: 22 + f.r * .6, life }); fxp({ type: 'shock', x: f.x, y: f.y, rad: 40, col, life: .4 }); }
+function statFx(f, up) {
+  const col = up ? '#ff9a5a' : '#6aa8ff';
+  fxp({ type: 'arrows', x: f.x, y: f.y, up, col, hi: up ? '#fff0b0' : '#d8ecff', seed: Math.random() * 99, life: .9 });
+  pillarFx(f, up ? '#ffd166' : '#7fb2ff', .6);
+  for (let i = 0; i < 14; i++) B.parts.push({ x: f.x + rand(-18, 18), y: f.y - rand(0, 40), vx: 0, vy: up ? -rand(60, 120) : rand(30, 80), life: .6, max: .6, col: choice(up ? ['#ffd166', '#ff9a5a', '#ffffff'] : ['#7fb2ff', '#3a6ad8', '#ffffff']), size: 3, g: 0, shape: 'star', glow: i % 2 === 0 });
+}
+function healFx(f) {
+  pillarFx(f, '#7bd88f', .9);
+  fxp({ type: 'ring', x: f.x, y: f.y, rad: 46, col: '#b8ffc0', life: .7 });
+  for (let i = 0; i < 22; i++) B.parts.push({ x: f.x + rand(-22, 22), y: f.y - rand(-4, 30), vx: rand(-8, 8), vy: -rand(40, 110), life: rand(.6, 1), max: 1, col: choice(['#ffffff', '#b8ffc0', '#7bd88f']), size: rand(4, 7), g: 0, shape: 'plus', glow: true });
+}
+function statusFx(f, s) {
+  const x = f.x, y = f.y - BODY, t = { brn: 'fire', par: 'elec', psn: 'poison', tox: 'poison', slp: 'psychic', frz: 'ice' }[s];
+  impactFx(x, y, t, .7);
+  if (s === 'par') fxp({ type: 'bolt', x, y: f.y, rad: 30, col: '#ffd84a', life: .35 });
+  if (s === 'frz') { fxp({ type: 'flash', x, y, rad: 50, col: '#d8f8ff', life: .3 }); typeFx(x, y, 'ice', 24, 160, .7); }
+  if (s === 'brn') typeFx(x, f.y, 'fire', 28, 120, .8, { ang: -Math.PI / 2, spread: .7 });
+  if (s === 'psn' || s === 'tox') typeFx(x, y, 'poison', s === 'tox' ? 30 : 18, 90, .9);
+  if (s === 'slp') for (let i = 0; i < 3; i++) popText(x + 14 + i * 9, y - 30 - i * 12, 'Z', '#cfd8ff');
 }
 function popText(x, y, txt, col, big) { B.texts.push({ x, y, txt, col, life: .9, max: .9, big: big === 'comic' ? 'comic' : !!big }); }
 let sayTimer = 0;
@@ -3174,45 +3205,48 @@ function afterMoveUsed(f) {
 function useStatusMove(f, o, m) {
   const sd = B.sides[f.side], osd = B.sides[1 - f.side], e = m.e || {};
   switch (m.k) {
-    case 'self': changeStages(f, e.self, true); aura(f, '#ffd166'); break;
+    case 'self': changeStages(f, e.self, true); typeFx(f.x, f.y - BODY, m.t, 14, 90, .6); break;
     case 'heal':
       if (f.v.healBlock > 0) { failMove(f, 'かいふくが ふうじられている！'); return; }
-      healHp(f, f.maxHp * (e.heal || 50) / 100); aura(f, '#7bd88f'); break;
+      healHp(f, f.maxHp * (e.heal || 50) / 100); healFx(f); break;
     case 'protect':
       if (B.t - f.lastProtect < 3 && Math.random() < .5) { failMove(f, 'れんぞくでは うまく まもれなかった！'); f.lastProtect = -9; return; }
-      f.v.protect = 1.0; f.lastProtect = B.t; break;
+      f.v.protect = 1.0; f.lastProtect = B.t; fxp({ type: 'shieldUp', x: f.x, y: f.y - BODY, rad: 44, col: '#9ff0ff', life: .5 }); typeFx(f.x, f.y - BODY, 'ice', 12, 110, .45); break;
     case 'sub':
       if (f.v.sub > 0) { failMove(f, 'デコイは もう でている！'); return; }
       if (f.hp <= f.maxHp / 4) { failMove(f, 'たいりょくが たりない！'); return; }
-      f.hp -= Math.floor(f.maxHp / 4); f.v.sub = Math.floor(f.maxHp / 4); burst(f.x, f.y - BODY, '#ffffff', 12, 80, .4); break;
-    case 'dbond': f.v.dbond = 2.5; say(`${prefix(f)}${f.sp.n}は あいてを みちづれに しようとしている！`); break;
-    case 'counter': f.v.counter = { ctr: m.ctr, mult: m.mult, t: 1.2 }; break;
+      f.hp -= Math.floor(f.maxHp / 4); f.v.sub = Math.floor(f.maxHp / 4); burst(f.x, f.y - BODY, '#ffffff', 12, 80, .4); fxp({ type: 'smoke', x: f.x + f.face * -26, y: f.y, life: .8, seed: Math.random() * 99 }); break;
+    case 'dbond': f.v.dbond = 2.5; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 60, col: '#5a2a7a', life: .9 }); typeFx(f.x, f.y - BODY, 'ghost', 24, 120, .9); say(`${prefix(f)}${f.sp.n}は あいてを みちづれに しようとしている！`); break;
+    case 'counter': f.v.counter = { ctr: m.ctr, mult: m.mult, t: 1.2 }; fxp({ type: 'glint', x: f.x + f.face * 10, y: f.y - BODY - 10, col: m.ctr === 'spec' ? '#ff7ab0' : '#ffd0a0', life: .5 }); fxp({ type: 'shieldUp', x: f.x, y: f.y - BODY, rad: 36, col: m.ctr === 'spec' ? '#ff7ab0' : '#ffffff', life: .35 }); break;
     case 'curse':
-      if (hasType(f, 'ghost')) { if (o && targetable(o)) { f.hp = Math.max(1, f.hp - Math.floor(f.maxHp / 2)); o.v.curse = 1; say(`${o.sp.n}に のろいを かけた！`); } }
+      if (hasType(f, 'ghost')) { if (o && targetable(o)) { f.hp = Math.max(1, f.hp - Math.floor(f.maxHp / 2)); o.v.curse = 1; fxp({ type: 'curseFx', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, life: .8 }); fxp({ type: 'vortex', x: o.x, y: o.y - BODY, rad: 40, col: '#8a78c8', life: .8 }); say(`${o.sp.n}に のろいを かけた！`); } }
       else changeStages(f, { atk: 1, def: 1, spe: -1 }, true);
-      aura(f, '#8a78c8'); break;
+      aura(f, '#8a78c8'); typeFx(f.x, f.y - BODY, 'ghost', 16, 90, .7); break;
     case 'field':
-      if (m.fld === 'trickroom') { B.trickRoom = B.trickRoom > 0 ? 0 : 9; say(B.trickRoom ? 'じくうが ねじれて おそいものが はやくなった！' : 'ねじれた じくうが もとに もどった！'); }
-      else { sd.tail = 9; say(`${f.side === 0 ? 'みかた' : 'あいて'}の せなかに おいかぜが ふきはじめた！`); }
+      if (m.fld === 'trickroom') { B.trickRoom = B.trickRoom > 0 ? 0 : 9; fxp({ type: 'room', life: 1.4 }); B.scrFlash = .12; say(B.trickRoom ? 'じくうが ねじれて おそいものが はやくなった！' : 'ねじれた じくうが もとに もどった！'); }
+      else { sd.tail = 9; fxp({ type: 'gust', dir: f.side === 0 ? 1 : -1, seed: Math.random() * 99, life: 1.2 }); say(`${f.side === 0 ? 'みかた' : 'あいて'}の せなかに おいかぜが ふきはじめた！`); }
       B.cheer = Math.min(1, B.cheer + .4); break;
     case 'hazard': {
       const hz = osd.hz, max = { rocks: 1, spikes: 3, tspikes: 2 }[m.hz];
       if (hz[m.hz] >= max) { failMove(f, 'でも もう しかけられない！'); return; }
       hz[m.hz]++;
       const tx = f.side === 0 ? B.st.fx1 - 120 : B.st.fx0 + 120;
-      B.fx.push({ type: 'toss', x0: f.x, y0: f.y - BODY, x1: tx, y1: (B.st.fy0 + B.st.fy1) / 2, col: TYPES[m.t].c, life: .5, max: .5 });
+      fxp({ type: 'toss', x0: f.x, y0: f.y - BODY, x1: tx, y1: (B.st.fy0 + B.st.fy1) / 2, col: TYPES[m.t].c, hz: m.hz, life: .55 });
+      osd.hzAt = osd.hzAt || {}; osd.hzAt[m.hz] = B.t + .5;   // とどいた しゅんかんから 地面に あらわれる
+      B.shake = Math.max(B.shake, 3);
       say(m.hz === 'rocks' ? 'あいての まわりに いしが うかんだ！' : m.hz === 'spikes' ? 'あいての あしもとに トゲが ちらばった！' : 'あいての あしもとに どくのトゲが ちらばった！');
       break;
     }
     case 'baton': {
       const idx = benchIdx(f.side);
       if (B.kind === 'wild' || idx < 0) { failMove(f, 'でも かわりが いない！'); return; }
+      pillarFx(f, '#ffd166', .8); typeFx(f.x, f.y - BODY, 'normal', 20, 120, .7);
       doSwitch(f, idx, { st: Object.assign({}, f.st), sub: f.v.sub || 0 });
       break;
     }
     case 'ray': {
       if (!o || !targetable(o)) return;
-      B.fx.push({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: TYPES[m.t].c, life: .25, max: .25 });
+      fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: TYPES[m.t].c, life: .45 });
       if (o.v.protect > 0) { popText(o.x, o.y - 66, 'ガード！', '#9ff0ff'); return; }
       if (o.inv > 0) { popText(o.x, o.y - 66, 'かわした！', '#7fd8ff'); return; }
       rayEffect(f, o, m);
@@ -3222,15 +3256,16 @@ function useStatusMove(f, o, m) {
 }
 function rayEffect(f, o, m) {
   switch (m.sp) {
-    case 'taunt': o.v.taunt = 6; say(`${o.sp.n}は ちょうはつに のってしまった！ ほじょわざが だせない！`); break;
+    case 'taunt': o.v.taunt = 6; popText(o.x, o.y - 96, 'ムカッ！', '#ff6b5b', 'comic'); impactFx(o.x, o.y - BODY, 'fighting', .5); say(`${o.sp.n}は ちょうはつに のってしまった！ ほじょわざが だせない！`); break;
     case 'encore':
       if (!o.lastMove || o.lastMove === 'tackle') { say('でも うまく きまらなかった！'); return; }
-      o.v.encore = { id: o.lastMove, t: 5 }; o.queued = null; say(`${o.sp.n}は ${MOVES[o.lastMove].n}しか だせなくなった！`); break;
+      o.v.encore = { id: o.lastMove, t: 5 }; o.queued = null; popText(o.x, o.y - 96, 'アンコール！', '#ffd166', 'comic'); typeFx(o.x, o.y - BODY - 20, 'normal', 20, 120, .8); say(`${o.sp.n}は ${MOVES[o.lastMove].n}しか だせなくなった！`); break;
     case 'yawn':
       if (o.status || o.v.yawn || o.v.sub > 0) { say('でも うまく きまらなかった！'); return; }
-      o.v.yawn = 2.5; say(`${o.sp.n}は ねむけを さそわれた！`); break;
-    case 'trick': { const t = f.st; f.st = o.st; o.st = t; say('おたがいの のうりょく変化を いれかえた！'); break; }
+      o.v.yawn = 2.5; popText(o.x, o.y - 96, 'ふぁ〜', '#cfd8ff', 'comic'); typeFx(o.x, o.y - BODY, 'psychic', 14, 60, 1); say(`${o.sp.n}は ねむけを さそわれた！`); break;
+    case 'trick': { const t = f.st; f.st = o.st; o.st = t; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 40, col: '#ff7ab0', life: .7 }); fxp({ type: 'vortex', x: o.x, y: o.y - BODY, rad: 40, col: '#ff7ab0', life: .7 }); say('おたがいの のうりょく変化を いれかえた！'); break; }
     case 'roar':
+      for (let i = 0; i < 4; i++) fxp({ type: 'shock', x: f.x, y: f.y - BODY, rad: 80 + i * 50, col: '#ffffff', life: .3 + i * .12 }); B.shake = Math.max(B.shake, 6);
       if (B.kind === 'wild') { say(`${o.sp.n}は おどろいて にげだした！`); endBattle(o.side === 1 ? 'run' : 'lose'); return; }
       { const idx = benchIdx(o.side, true); if (idx < 0) { say('でも かわりが いない！'); return; } doSwitch(o, idx, null, true); }
       break;
@@ -3251,7 +3286,7 @@ function doSwitch(f, idx, pass, forced) {
   say(forced ? `${f.sp.n}は ひきずりだされた！` : `${prefix(f)}${f.sp.n}は もどっていった！`);
 }
 function aura(f, col) { B.fx.push({ type: 'ring', x: f.x, y: f.y, rad: 34, col, life: .45, max: .45 }); burst(f.x, f.y - BODY, col, 12, 60, .5); }
-function healHp(f, amt) { const a = Math.min(f.maxHp - f.hp, Math.round(amt)); if (a <= 0) return; f.hp += a; popText(f.x, f.y - 66, `+${a}`, '#7bd88f'); }
+function healHp(f, amt) { const a = Math.min(f.maxHp - f.hp, Math.round(amt)); if (a <= 0) return; f.hp += a; popText(f.x, f.y - 66, `+${a}`, '#7bd88f'); for (let i = 0; i < 8; i++) B.parts.push({ x: f.x + rand(-16, 16), y: f.y - rand(0, 30), vx: 0, vy: -rand(40, 80), life: .6, max: .6, col: choice(['#ffffff', '#7bd88f']), size: 5, g: 0, shape: 'plus', glow: true }); }
 function changeStages(f, ch, self) {
   if (!ch) return;
   const parts = [];
@@ -3259,13 +3294,13 @@ function changeStages(f, ch, self) {
     const before = f.st[k]; f.st[k] = clamp(f.st[k] + ch[k], -6, 6);
     if (f.st[k] !== before) parts.push(`${STAGE_NAMES[k]}${ch[k] > 0 ? '↑'.repeat(Math.min(2, ch[k])) : '↓'.repeat(Math.min(2, -ch[k]))}`);
   }
-  if (parts.length) popText(f.x, f.y - 80, parts.join(' '), Object.values(ch)[0] > 0 ? '#ffd166' : '#7fb2ff');
+  if (parts.length) { const up = Object.values(ch)[0] > 0; popText(f.x, f.y - 80, parts.join(' '), up ? '#ffd166' : '#7fb2ff'); statFx(f, up); }
 }
 function setStatus(f, s, by) {
   if (f.status || f.hp <= 0) return false;
   if (by && f.v.sub > 0) return false;
   if ((s === 'brn' && hasType(f, 'fire')) || (s === 'par' && hasType(f, 'elec')) || ((s === 'psn' || s === 'tox') && (hasType(f, 'poison') || hasType(f, 'steel'))) || (s === 'frz' && hasType(f, 'ice'))) return false;
-  f.status = s; f.toxN = 1; f.tickT = TICK;
+  f.status = s; f.toxN = 1; f.tickT = TICK; statusFx(f, s);
   if (s === 'slp') { f.statusT = 3; f.cur = null; f.queued = null; if (f.state === 'wind' || f.state === 'dash') f.state = 'free'; }
   if (s === 'frz') { f.statusT = 2.5; f.cur = null; f.queued = null; if (f.state === 'wind' || f.state === 'dash') f.state = 'free'; }
   say(`${prefix(f)}${f.sp.n}は ${{ brn: 'やけどを おった', par: 'まひして うごきにくくなった', psn: 'どくを あびた', tox: 'もうどくを あびた', slp: 'ねむってしまった', frz: 'こおりついた' }[s]}！`);
@@ -4185,6 +4220,7 @@ function drawPart(q) {
     case 'leaf': ctx.save(); ctx.translate(x, y); ctx.rotate(q.rot + q.life * q.vr); ctx.beginPath(); ctx.ellipse(0, 0, z * 1.2, z * .55, 0, 0, 7); ctx.fill(); ctx.restore(); break;
     case 'bubble': ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, z * .9, 0, 7); ctx.stroke(); ctx.fillRect(x - 1, y - 1, 1, 1); break;
     case 'ring': ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, z * (1.8 - a), 0, 7); ctx.stroke(); break;
+    case 'plus': { const w = Math.max(2, z * .45 | 0); ctx.fillRect(x - z, y - w / 2, z * 2, w); ctx.fillRect(x - w / 2, y - z, w, z * 2); break; }
     case 'star': ctx.fillRect(x - z, y, z * 2 + 1, 1); ctx.fillRect(x, y - z, 1, z * 2 + 1); ctx.fillRect(x - 1, y - 1, 3, 3); break;
     case 'drop': ctx.beginPath(); ctx.ellipse(x, y, z * .6, z, Math.atan2(q.vy, q.vx) + 1.57, 0, 7); ctx.fill(); break;
     case 'wisp': ctx.globalAlpha = a * .8; ctx.beginPath(); ctx.arc(x, y, z * (1.3 - a * .4), 0, 7); ctx.fill(); break;
@@ -4224,18 +4260,48 @@ function drawStar(x, y, r, col) {
 const FLYING = ['birikurage', 'soyodori', 'yorukoumo', 'tsuraran'];
 // 飛ぶ モンスター：浮いて 見え、障害物の 上を 飛びこえる（弾も 上から うつので 障害物に 止められない）
 const flies = (f) => !!(f && f.sp && (f.sp.fly || FLYING.includes(f.mon.sid)));
-// まきびし系：しかけられた側の じんちに うかぶ／ちらばる
+function drawRock(x, y, r, a, col) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+  const P = [[0, -1.2], [.9, -.5], [1, .6], [.2, 1.1], [-.8, .8], [-1, -.4]];
+  ctx.fillStyle = '#120e1c'; ctx.beginPath(); P.forEach(([u, v]) => ctx.lineTo(u * (r + 1.5), v * (r + 1.5))); ctx.fill();
+  ctx.fillStyle = col; ctx.beginPath(); P.forEach(([u, v]) => ctx.lineTo(u * r, v * r)); ctx.fill();
+  ctx.fillStyle = '#f0d8b0'; ctx.beginPath(); ctx.moveTo(0, -1.2 * r); ctx.lineTo(.9 * r, -.5 * r); ctx.lineTo(0, 0); ctx.lineTo(-r, -.4 * r); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.moveTo(1 * r, .6 * r); ctx.lineTo(.2 * r, 1.1 * r); ctx.lineTo(-.8 * r, .8 * r); ctx.lineTo(0, 0); ctx.fill();
+  ctx.restore();
+}
+function drawSpike(x, y, r, col) {
+  ctx.fillStyle = '#120e1c'; ctx.beginPath(); ctx.moveTo(x - r - 1, y + r * .6 + 1); ctx.lineTo(x, y - r * 1.3 - 1); ctx.lineTo(x + r + 1, y + r * .6 + 1); ctx.fill();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x - r, y + r * .6); ctx.lineTo(x, y - r * 1.3); ctx.lineTo(x + r, y + r * .6); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.moveTo(x - r * .2, y + r * .4); ctx.lineTo(x, y - r * 1.1); ctx.lineTo(x - r * .6, y + r * .5); ctx.fill();
+}
+function drawArrow(x, y, up, col, hi) {
+  const s = up ? -1 : 1;
+  ctx.fillStyle = '#120e1c'; ctx.beginPath(); ctx.moveTo(x, y + s * 12); ctx.lineTo(x + 9, y + s * 2); ctx.lineTo(x + 4, y + s * 2); ctx.lineTo(x + 4, y - s * 10); ctx.lineTo(x - 4, y - s * 10); ctx.lineTo(x - 4, y + s * 2); ctx.lineTo(x - 9, y + s * 2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, y + s * 10); ctx.lineTo(x + 7, y + s * 3); ctx.lineTo(x + 3, y + s * 3); ctx.lineTo(x + 3, y - s * 9); ctx.lineTo(x - 3, y - s * 9); ctx.lineTo(x - 3, y + s * 3); ctx.lineTo(x - 7, y + s * 3); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = hi; ctx.fillRect(x - 2, y - s * 8 - (up ? 0 : 4), 2, 4);
+}
+function hexPath(x, y, r) { ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + Math.PI / 6; ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r * .85); } ctx.closePath(); }
+// まきびし系：しかけられた側の じんちに うかぶ／ちらばる（しかけた しゅんかんは 地面から せりあがる）
 function drawHazards() {
   const st = B.st, cy = (st.fy0 + st.fy1) / 2;
   for (let side = 0; side < 2; side++) {
-    const hz = B.sides[side].hz, x0 = side ? st.fx1 - 150 : st.fx0 + 40;
-    const r = srng(77 + side);
-    if (hz.rocks) for (let i = 0; i < 6; i++) { const x = x0 + r() * 110, y = cy - 120 + r() * 240 + Math.sin(B.t * 2 + i) * 4; ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 6, y - 6, 12, 12); ctx.fillStyle = '#c49a6c'; ctx.fillRect(x - 5, y - 5, 10, 10); ctx.fillStyle = '#f0d8b0'; ctx.fillRect(x - 3, y - 4, 3, 3); }
-    for (let i = 0; i < hz.spikes * 5; i++) { const x = x0 + r() * 110, y = cy - 140 + r() * 280; ctx.fillStyle = '#5a4a3a'; ctx.beginPath(); ctx.moveTo(x - 5, y + 3); ctx.lineTo(x, y - 6); ctx.lineTo(x + 5, y + 3); ctx.fill(); }
-    for (let i = 0; i < hz.tspikes * 5; i++) { const x = x0 + r() * 110, y = cy - 140 + r() * 280; ctx.fillStyle = '#b86ad8'; ctx.beginPath(); ctx.moveTo(x - 5, y + 3); ctx.lineTo(x, y - 6); ctx.lineTo(x + 5, y + 3); ctx.fill(); }
+    const sd = B.sides[side], hz = sd.hz, x0 = side ? st.fx1 - 150 : st.fx0 + 40, at = sd.hzAt || {};
+    const r = srng(77 + side), grow = (k) => clamp((B.t - (at[k] || -9)) / .35, 0, 1);
+    if (hz.rocks) {
+      const g = grow('rocks');
+      for (let i = 0; i < 8; i++) {
+        const x = x0 + r() * 110, by = cy - 120 + r() * 240, ph = r() * 6, h = (10 + Math.sin(B.t * 2 + ph) * 4) * g, y = by - h;
+        if (!g) continue;
+        ctx.fillStyle = 'rgba(10,8,18,.3)'; ctx.beginPath(); ctx.ellipse(x, by + 8, 10 * g, 3.5 * g, 0, 0, 7); ctx.fill();
+        glowDot(x, y, 20, '#ffd8a0', .25 + Math.sin(B.t * 3 + ph) * .1);
+        drawRock(x, y, 10 * (.4 + .6 * g), Math.sin(B.t * 1.3 + ph) * .5, '#c49a6c');
+        if (g < 1 && Math.random() < .5) B.parts.push({ x, y: by, vx: rand(-30, 30), vy: -rand(20, 60), life: .4, max: .4, col: '#d8b060', size: 3, g: 300 });
+      }
+    }
+    if (hz.spikes) { const g = grow('spikes'); for (let i = 0; i < hz.spikes * 5; i++) { const x = x0 + r() * 110, y = cy - 140 + r() * 280; drawSpike(x, y, 8 * (.3 + .7 * g), '#8a7a6a'); if (Math.sin(B.t * 2 + i * 1.7) > .97) glowDot(x, y - 5, 6, '#ffffff', .8); } }
+    if (hz.tspikes) { const g = grow('tspikes'); for (let i = 0; i < hz.tspikes * 5; i++) { const x = x0 + r() * 110, y = cy - 140 + r() * 280; drawSpike(x, y, 8 * (.3 + .7 * g), '#b86ad8'); if (Math.random() < .006) B.parts.push({ x, y: y - 4, vx: 0, vy: -16, life: .8, max: .8, col: '#d8a0f0', size: 3, g: 0, shape: 'bubble' }); } }
   }
 }
-
 const ST_COL = { brn: '#ff8a3d', par: '#ffd84a', psn: '#b86ad8', tox: '#8a3ab0', slp: '#9fb0ff', frz: '#9fe8ff' };
 // 状態異常・まもる・デコイ などの 見た目
 function drawConditions(f, top, oy, img) {
@@ -4398,10 +4464,25 @@ function render() {
       ctx.fillStyle = fx.col; ctx.globalAlpha *= .45; ctx.beginPath(); ctx.moveTo(fx.x, fx.y); ctx.arc(fx.x, fx.y, fx.rad * (1.05 - k * .3), fx.ang - fx.half, fx.ang + fx.half); ctx.closePath(); ctx.fill();
       ctx.globalAlpha = clamp(k * 1.4, 0, 1); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(fx.x, fx.y - BODY, fx.rad * (1.05 - k * .3), fx.ang - fx.half, fx.ang + fx.half); ctx.stroke();
     }
-    else if (fx.type === 'ray') { ctx.strokeStyle = fx.col; ctx.lineWidth = 4; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(fx.x0, fx.y0); ctx.lineTo(fx.x1, fx.y1); ctx.stroke(); ctx.setLineDash([]); }
+    else if (fx.type === 'ray') {
+      const t = 1 - k, ex = fx.x0 + (fx.x1 - fx.x0) * Math.min(1, t * 3), ey = fx.y0 + (fx.y1 - fx.y0) * Math.min(1, t * 3);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = fx.col; ctx.lineWidth = 12 * k; ctx.globalAlpha = .35 * k; ctx.beginPath(); ctx.moveTo(fx.x0, fx.y0); ctx.lineTo(ex, ey); ctx.stroke(); ctx.restore();
+      ctx.globalAlpha = clamp(k * 1.4, 0, 1); ctx.strokeStyle = fx.col; ctx.lineWidth = 4; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -B.t * 80; ctx.beginPath(); ctx.moveTo(fx.x0, fx.y0); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+      for (let i = 0; i < 4; i++) { const u = (B.t * 2.5 + i / 4) % 1; glowDot(fx.x0 + (ex - fx.x0) * u, fx.y0 + (ey - fx.y0) * u, 8, fx.col, k); }
+      glowDot(ex, ey, 22, fx.col, k);
+    }
     else if (fx.type === 'toss') {
       const t = 1 - k, x = fx.x0 + (fx.x1 - fx.x0) * t, y = fx.y0 + (fx.y1 - fx.y0) * t - Math.sin(t * Math.PI) * 90;
-      for (let i = 0; i < 3; i++) { ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 5 + i * 9, y - 5 + (i % 2) * 6, 9, 9); ctx.fillStyle = fx.col; ctx.fillRect(x - 4 + i * 9, y - 4 + (i % 2) * 6, 7, 7); }
+      const n = fx.hz === 'rocks' ? 5 : 7;
+      for (let i = 0; i < n; i++) {
+        const a = i / n * 6.28 + t * 9, px = x + Math.cos(a) * 14 * (1 - t * .3), py = y + Math.sin(a) * 9;
+        glowDot(px, py, 10, fx.col, .5);
+        if (fx.hz === 'rocks') drawRock(px, py, 9, a, fx.col);
+        else drawSpike(px, py, 7, fx.hz === 'tspikes' ? '#b86ad8' : '#9a8a7a');
+        if (Math.random() < .5) B.parts.push({ x: px, y: py, vx: rand(-20, 20), vy: rand(-10, 20), life: .3, max: .3, col: fx.col, size: 3, g: 40, glow: true });
+      }
+      if (k < .08 && !fx.done) { fx.done = 1; impactFx(fx.x1, fx.y1, fx.hz === 'tspikes' ? 'poison' : fx.hz === 'rocks' ? 'rock' : 'ground', .6); }
     }
     else if (fx.type === 'impact') { // 金色のインパクトリング（参考画像の「BONK!」演出）
       const rr = fx.rad * (1.2 - k * .8);
@@ -4437,6 +4518,72 @@ function render() {
     }
     else if (fx.type === 'flash') { const r = fx.rad * (1.3 - k * .5); glowDot(fx.x, fx.y, r * 1.6, fx.col, k); ctx.globalAlpha = k; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(fx.x, fx.y, r * .45 * k, 0, 7); ctx.fill(); }
     else if (fx.type === 'shock') { const r = fx.rad * (1.15 - k); ctx.globalAlpha = k; ctx.strokeStyle = fx.col; ctx.lineWidth = 3 + 7 * k; ctx.beginPath(); ctx.ellipse(fx.x, fx.y, r, r * .62, 0, 0, 7); ctx.stroke(); }
+    else if (fx.type === 'pillar') {   // 光の 柱
+      const h = 150 * Math.min(1, (1 - k) * 4), w = fx.w * (0.4 + k * .6);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = k * .55;
+      const g = ctx.createLinearGradient(0, fx.y - h, 0, fx.y); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.6, fx.col); g.addColorStop(1, '#ffffff');
+      ctx.fillStyle = g; ctx.fillRect(fx.x - w, fx.y - h, w * 2, h); ctx.globalAlpha = k * .8; ctx.fillRect(fx.x - w * .3, fx.y - h, w * .6, h); ctx.restore();
+      ctx.globalAlpha = k; ctx.strokeStyle = fx.col; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(fx.x, fx.y, w * 1.4, w * .5, 0, 0, 7); ctx.stroke();
+    }
+    else if (fx.type === 'arrows') {  // のうりょく アップ／ダウンの 矢印
+      const r = srng(fx.seed | 0);
+      for (let i = 0; i < 5; i++) {
+        const ox = (r() - .5) * 50, ph = r() * .5, u = clamp((1 - k) * 1.6 - ph, 0, 1), dy = fx.up ? -u * 70 : u * 50 - 60;
+        if (u <= 0 || u >= 1) continue;
+        ctx.globalAlpha = Math.sin(u * Math.PI); drawArrow(fx.x + ox, fx.y - 30 + dy, fx.up, fx.col, fx.hi);
+      }
+    }
+    else if (fx.type === 'shieldUp') {  // まもる：六角の バリアが ひろがる
+      const r = fx.rad * (1.2 - k * .4);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = k * .35; ctx.fillStyle = fx.col; ctx.beginPath(); ctx.ellipse(fx.x, fx.y, r, r * .9, 0, 0, 7); ctx.fill(); ctx.restore();
+      ctx.globalAlpha = k; ctx.strokeStyle = fx.col; ctx.lineWidth = 2;
+      for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) { const hx = fx.x + i * 14 + (j % 2 ? 7 : 0), hy = fx.y + j * 12; if (Math.hypot((hx - fx.x) / r, (hy - fx.y) / (r * .9)) > .85) continue; hexPath(hx, hy, 7); ctx.stroke(); }
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(fx.x, fx.y, r, r * .9, 0, 0, 7); ctx.stroke();
+    }
+    else if (fx.type === 'smoke') {  // みがわり：ぽふん
+      const r = srng(fx.seed | 0), u = 1 - k;
+      for (let i = 0; i < 9; i++) { const a = r() * 6.28, d = 10 + u * 34 * (0.6 + r() * .6), rr = 10 + u * 12 + r() * 6; ctx.globalAlpha = k * .8; ctx.fillStyle = i % 3 ? '#e8e4f0' : '#ffffff'; ctx.beginPath(); ctx.arc(fx.x + Math.cos(a) * d, fx.y - 20 + Math.sin(a) * d * .6, rr, 0, 7); ctx.fill(); }
+    }
+    else if (fx.type === 'vortex') {  // うずまき（みちづれ・のろい・トリック）
+      ctx.lineWidth = 2.5;
+      for (let i = 0; i < 3; i++) { ctx.strokeStyle = i === 1 ? '#ffffff' : fx.col; ctx.beginPath(); for (let a = 0; a < 9; a += .25) { const rr = fx.rad * (1 - a / 9) * (1.2 - k * .4), aa = a + i * 2.1 - B.t * 8; ctx.lineTo(fx.x + Math.cos(aa) * rr, fx.y + Math.sin(aa) * rr * .6); } ctx.stroke(); }
+      glowDot(fx.x, fx.y, fx.rad * .7, fx.col, k * .8);
+    }
+    else if (fx.type === 'glint') {  // カウンター：きらり
+      const r = 26 * Math.sin(k * Math.PI);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = fx.col;
+      ctx.beginPath(); ctx.moveTo(fx.x - r, fx.y); ctx.lineTo(fx.x, fx.y - 3); ctx.lineTo(fx.x + r, fx.y); ctx.lineTo(fx.x, fx.y + 3); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(fx.x, fx.y - r); ctx.lineTo(fx.x + 3, fx.y); ctx.lineTo(fx.x, fx.y + r); ctx.lineTo(fx.x - 3, fx.y); ctx.fill(); ctx.restore();
+      glowDot(fx.x, fx.y, r, '#ffffff', k);
+    }
+    else if (fx.type === 'curseFx') {  // のろいの くぎ
+      const t = Math.min(1, (1 - k) * 2.5), x = fx.x0 + (fx.x1 - fx.x0) * t, y = fx.y0 + (fx.y1 - fx.y0) * t - Math.sin(t * Math.PI) * 50;
+      glowDot(x, y, 16, '#8a78c8', 1); ctx.fillStyle = '#e8e0ff'; ctx.fillRect(x - 2, y - 9, 4, 14); ctx.fillRect(x - 5, y - 9, 10, 3);
+      if (Math.random() < .8) B.parts.push({ x, y, vx: rand(-15, 15), vy: -20, life: .4, max: .4, col: '#a898e8', size: 5, g: -40, shape: 'wisp' });
+    }
+    else if (fx.type === 'room') {  // トリックルーム：ゆがんだ 格子
+      const st = B.st, cx = (st.fx0 + st.fx1) / 2, cy = (st.fy0 + st.fy1) / 2, u = 1 - k;
+      ctx.globalAlpha = Math.sin(k * Math.PI) * .8; ctx.strokeStyle = '#ff7ab0'; ctx.lineWidth = 4;
+      for (let i = -6; i <= 6; i++) {
+        const w = Math.sin(B.t * 6 + i) * 10 * u;
+        ctx.beginPath(); ctx.moveTo(cx + i * 70 + w, st.fy0); ctx.lineTo(cx + i * 70 * (1 + u * .3) - w, st.fy1); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(st.fx0, cy + i * 40 - w); ctx.lineTo(st.fx1, cy + i * 40 * (1 + u * .3) + w); ctx.stroke();
+      }
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.strokeRect(cx - (st.fx1 - st.fx0) / 2 * u, cy - (st.fy1 - st.fy0) / 2 * u, (st.fx1 - st.fx0) * u, (st.fy1 - st.fy0) * u);
+    }
+    else if (fx.type === 'gust') {  // おいかぜ：風の すじ
+      const st = B.st, r = srng(fx.seed | 0), W = st.fx1 - st.fx0, u = 1 - k;
+      ctx.lineWidth = 4;
+      for (let i = 0; i < 40; i++) {
+        const y = st.fy0 + r() * (st.fy1 - st.fy0), sp = .7 + r() * .6, x0 = fx.dir > 0 ? st.fx0 + ((u * sp * 1.6 + r()) % 1) * W : st.fx1 - ((u * sp * 1.6 + r()) % 1) * W, L = 80 + r() * 90;
+        ctx.globalAlpha = Math.sin(k * Math.PI) * .9; ctx.strokeStyle = i % 3 ? '#e8ffff' : '#a6ece6';
+        ctx.beginPath(); ctx.moveTo(x0, y); ctx.quadraticCurveTo(x0 - fx.dir * L / 2, y - 6, x0 - fx.dir * L, y); ctx.stroke();
+      }
+    }
+    else if (fx.type === 'rockIn') {  // うかびいしが つきささる
+      const t = clamp((1 - k) * 1.3, 0, 1), x = fx.x0 + (fx.x1 - fx.x0) * t, y = fx.y0 + (fx.y1 - fx.y0) * t;
+      ctx.globalAlpha = 1; glowDot(x, y, 12, '#c49a6c', .6); drawRock(x, y, 10, fx.rot + t * 6, '#c49a6c');
+    }
     else if (fx.type === 'beamIn') {
       ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(fx.x0, fx.y0); ctx.lineTo(fx.x1, fx.y1); ctx.stroke();
       ctx.strokeStyle = '#9ff0ff'; ctx.lineWidth = 2; ctx.stroke();
@@ -4571,6 +4718,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards }); },
 };
 })();
 </script>
