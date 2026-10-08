@@ -20,7 +20,8 @@ BASIC = {'fire': ['ember', 'flame', 'blaze'], 'water': ['bubble', 'tide', 'icicl
 roster = {}
 for n, i_, nm, t, base, body, size, note in re.findall(r'^\| (\d+) \| (\w+) \| (\S+) \| (\S+) \| (.+?) \| (\w) \| (\w) \| (.+?) \|$', open(os.path.join(HERE, 'ROSTER.md')).read(), re.M):
     roster[i_] = dict(no=int(n), name=nm, types=t.split('/'), base=base, body=body, size=size, note=note.replace('（完成）', '').strip())
-ids = sorted(json.load(open(os.path.join(HERE, 'ADOPTED.json'))), key=lambda k: roster[k]['no'])
+def _ids(): return sorted(json.load(open(os.path.join(HERE, 'ADOPTED.json'))), key=lambda k: roster[k]['no'])
+
 
 def h(s, k):  # 決まった ゆらぎ（-1〜1）
     return (int(hashlib.md5((s + k).encode()).hexdigest()[:6], 16) / 0xffffff) * 2 - 1
@@ -70,46 +71,52 @@ def learnset(i_, r):
             if len(out) >= 8: break
     return out
 
-data, species, learn = {}, {}, {}
-for i_ in ids:
-    r = roster[i_]; sp = json.load(open(os.path.join(HERE, i_, 'sprite.json')))
-    data[i_] = {'w': sp['w'], 'h': sp['h'], 'pal': sp['pal'], 'f': sp['f']}
-    L = learnset(i_, r)
-    species[i_] = {'n': r['name'], 'type': r['types'][0], **({'type2': r['types'][1]} if len(r['types']) > 1 else {}),
-                   'base': stats(i_, r), 'moves': [m for _, m in L[:2]], 'style': style(r),
-                   'catch': {'S': .5, 'M': .4, 'L': .3}[r['size']], 'rare': 1 if r['size'] == 'L' else 0,
-                   'desc': r['note'] + '。（もと：' + r['base'] + '）', 'hand': 1}
-    learn[i_] = L
+def main():
+    global src
+    ids = _ids()
+    data, species, learn = {}, {}, {}
+    for i_ in ids:
+        r = roster[i_]; sp = json.load(open(os.path.join(HERE, i_, 'sprite.json')))
+        data[i_] = {'w': sp['w'], 'h': sp['h'], 'pal': sp['pal'], 'f': sp['f']}
+        L = learnset(i_, r)
+        species[i_] = {'n': r['name'], 'type': r['types'][0], **({'type2': r['types'][1]} if len(r['types']) > 1 else {}),
+                       'base': stats(i_, r), 'moves': [m for _, m in L[:2]], 'style': style(r),
+                       'catch': {'S': .5, 'M': .4, 'L': .3}[r['size']], 'rare': 1 if r['size'] == 'L' else 0,
+                       'desc': r['note'] + '。（もと：' + r['base'] + '）', 'hand': 1}
+        learn[i_] = L
 
-js = BEGIN + '\n' + '''// 図鑑で 採用された 手打ちモンスター（%d体）。絵は 14コマ（パレット＋ランレングス）
-const HandMon = (() => {
-  const AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
-  const DATA = %s;
-  function frames(id) {
-    const m = DATA[id], pal = m.pal.map(c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]), F = {};
-    for (const k in m.f) {
-      const s = m.f[k], px = new Uint8ClampedArray(m.w * m.h * 4); let p = 0, i = 0;
-      while (i < s.length) {
-        const c = AL.indexOf(s[i]); let n;
-        if (s[i + 1] === '~') { n = parseInt(s.substr(i + 2, 3), 16); i += 5 } else { n = parseInt(s.substr(i + 1, 2), 16); i += 3 }
-        if (c > 0) { const col = pal[c - 1]; for (let q = p; q < p + n; q++) { px[q * 4] = col[0]; px[q * 4 + 1] = col[1]; px[q * 4 + 2] = col[2]; px[q * 4 + 3] = 255 } }
-        p += n;
+    js = BEGIN + '\n' + '''// 図鑑で 採用された 手打ちモンスター（%d体）。絵は 14コマ（パレット＋ランレングス）
+    const HandMon = (() => {
+      const AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
+      const DATA = %s;
+      function frames(id) {
+        const m = DATA[id], pal = m.pal.map(c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]), F = {};
+        for (const k in m.f) {
+          const s = m.f[k], px = new Uint8ClampedArray(m.w * m.h * 4); let p = 0, i = 0;
+          while (i < s.length) {
+            const c = AL.indexOf(s[i]); let n;
+            if (s[i + 1] === '~') { n = parseInt(s.substr(i + 2, 3), 16); i += 5 } else { n = parseInt(s.substr(i + 1, 2), 16); i += 3 }
+            if (c > 0) { const col = pal[c - 1]; for (let q = p; q < p + n; q++) { px[q * 4] = col[0]; px[q * 4 + 1] = col[1]; px[q * 4 + 2] = col[2]; px[q * 4 + 3] = 255 } }
+            p += n;
+          }
+          F[k] = px;
+        }
+        return F;
       }
-      F[k] = px;
-    }
-    return F;
-  }
-  return { DATA, frames };
-})();
-Object.assign(SPECIES, %s);
-Object.assign(LEARN, %s);
-''' % (len(ids), json.dumps(data, ensure_ascii=False, separators=(',', ':')), json.dumps(species, ensure_ascii=False, separators=(',', ':')),
-       json.dumps(learn, ensure_ascii=False, separators=(',', ':'))) + END
+      return { DATA, frames };
+    })();
+    Object.assign(SPECIES, %s);
+    Object.assign(LEARN, %s);
+    ''' % (len(ids), json.dumps(data, ensure_ascii=False, separators=(',', ':')), json.dumps(species, ensure_ascii=False, separators=(',', ':')),
+           json.dumps(learn, ensure_ascii=False, separators=(',', ':'))) + END
 
-if BEGIN in src:
-    a = src.index(BEGIN); b = src.index(END) + len(END); src = src[:a] + js + src[b:]
-else:
-    anchor = '// ====== ここまで AISPR ======'
-    k = src.index(anchor) + len(anchor); src = src[:k] + '\n' + js + src[k:]
-open(GAME, 'w').write(src)
-print('handmon', len(ids), 'species written,', len(js) // 1024, 'KB')
+    if BEGIN in src:
+        a = src.index(BEGIN); b = src.index(END) + len(END); src = src[:a] + js + src[b:]
+    else:
+        anchor = '// ====== ここまで AISPR ======'
+        k = src.index(anchor) + len(anchor); src = src[:k] + '\n' + js + src[k:]
+    open(GAME, 'w').write(src)
+    print('handmon', len(ids), 'species written,', len(js) // 1024, 'KB')
+
+if __name__ == '__main__':
+    main()
