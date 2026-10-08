@@ -85,6 +85,29 @@ for p in allc:
             c = (1.4 if dy and dx else 1.) * (1 + 6 * (lum[n] < 70))
             if dd + c < dist[n]: dist[n] = dd + c; lab[n] = j; heapq.heappush(hq, (dd + c, n, j))
     for j, o in enumerate(own): cells.setdefault(int(o), []).append(p[lab == j])
+# ホネリュウ（ドラゴン2）の 白い 翼が となりの ニチリンリュウ（ドラゴン3）に 入りこんでいるので、白っぽい ドットと その 輪郭を もどす
+if 91 in cells and 92 in cells:
+    q3 = np.concatenate(cells[92]); rgb_ = A[q3[:, 0], q3[:, 1], :3]
+    sat_ = rgb_.max(1) - rgb_.min(1); lum_ = rgb_.mean(1)
+    bone = (sat_ < 55) & (lum_ > 95)
+    bset = {(int(y), int(x)) for y, x in q3[bone]}
+    near = np.array([any((y + dy, x + dx) in bset for dy in (-1, 0, 1) for dx in (-1, 0, 1)) and s_ < 55 for (y, x), s_ in zip(q3, sat_)])
+    mv = (bone | near) & (q3[:, 1] < CEN[2] - 22)   # ニチリンリュウの 体より 左だけ
+    q2 = np.concatenate(cells[91]); r2 = A[q2[:, 0], q2[:, 1], :3]
+    red = (r2[:, 0] - r2[:, 2] > 40) & (r2.max(1) - r2.min(1) > 50)   # 翼に まじった 赤い かけらは ニチリンリュウへ
+    cells[91] = [q2[~red]]; cells[92] = [np.concatenate([q3, q2[red]])]; q3 = cells[92][0]
+    rgb_ = A[q3[:, 0], q3[:, 1], :3]; sat_ = rgb_.max(1) - rgb_.min(1); lum_ = rgb_.mean(1)
+    bone = (sat_ < 55) & (lum_ > 95); bset = {(int(y), int(x)) for y, x in q3[bone]}
+    near = np.array([any((y + dy, x + dx) in bset for dy in (-1, 0, 1) for dx in (-1, 0, 1)) and s_ < 55 for (y, x), s_ in zip(q3, sat_)])
+    notred = (rgb_[:, 0] - rgb_[:, 2] < 70) | (sat_ < 70)
+    mv = ((bone | near) | notred) & (q3[:, 1] < CEN[2] - 14)
+    cells[91].append(q3[mv]); cells[92] = [q3[~mv]]
+    q2 = np.concatenate(cells[91]); r2 = A[q2[:, 0], q2[:, 1], :3]
+    tint = (r2[:, 0] - r2[:, 2] > 45) & (r2[:, 0] > 1.8 * r2[:, 1] + 10) & (q2[:, 1] > 132)   # 右はしに まざった 赤っぽい ドットは ニチリンリュウへ
+    cells[91] = [q2[~tint]]; cells[92].append(q2[tint])
+    q2 = cells[91][0]; keep = np.zeros(len(q2), bool); B = np.zeros(A.shape[:2], bool); B[q2[:, 0], q2[:, 1]] = True
+    big = max(comps(B[:, :200]), key=len); bs = {(int(y), int(x)) for y, x in big}
+    keep = np.array([(int(y), int(x)) in bs for y, x in q2]); cells[91] = [q2[keep]]   # 本体と つながらない かけらを 消す
 for r, t in enumerate(TYPES):
     groups = {k: [] for k in range(10)}
     y0 = 0
