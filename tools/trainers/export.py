@@ -24,7 +24,7 @@ function trainerArt(key) {
       p += n; }
     return px; });
   const fr = { idle0: pose[0], idle1: pose[0], idle2: pose[0], idle3: pose[0], atk1: pose[1], atk2: pose[2], win: pose[3], ko: pose[0] };
-  const o = bakeFrames(fr, a.w, a.h); o.art = true; return o;
+  const o = bakeFrames(fr, a.w, a.h); o.art = true; o.h0 = a.h; return o;
 }
 ''' % json.dumps(data, separators=(',', ':')) + END
 src = open(GAME).read()
