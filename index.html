@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#141022">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Pixel Monster Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#141022; --panel:#241d38; --panel2:#2e2648; --edge:#4a4070; --ink:#f6f0e0; --dim:#a49ac0;
@@ -14,7 +16,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--ink)}
 body{
-  font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Hiragino Kaku Gothic ProN","Noto Sans JP",monospace;
+  font-family:"DotGothic16",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Hiragino Kaku Gothic ProN","Noto Sans JP",monospace;
   display:flex;justify-content:center;overflow:hidden;touch-action:none;
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
 }
@@ -86,6 +88,8 @@ h1.tlogo{font-size:clamp(30px,6vw,60px);line-height:1;display:flex;flex-directio
 @keyframes tglow{50%{box-shadow:0 4px 0 #b8892a,0 0 0 3px #0d0b14,0 0 22px 4px rgba(255,209,102,.55)}}
 .tfoot{position:absolute;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom));text-align:center;font-size:10px;color:rgba(255,255,255,.55);z-index:1;text-shadow:1px 1px 0 #000}
 .sndbtn{position:absolute;right:calc(12px + env(safe-area-inset-right));top:calc(12px + env(safe-area-inset-top));z-index:2;width:40px;height:40px;background:rgba(20,16,34,.75);box-shadow:0 0 0 2px var(--edge);font-size:18px;color:var(--acc)}
+.sndbtn.rotbtn{right:calc(60px + env(safe-area-inset-right))}
+.rotbtn.on{color:#1a1626;background:var(--acc)}
 .sndbtn.off{color:var(--dim);text-decoration:line-through}
 
 /* starter */
@@ -125,6 +129,42 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .cupinfo .rounds i.now{background:var(--bad);animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:.35}}
 
+/* team */
+.teamhint{font-size:12px;text-align:center;background:rgba(13,11,20,.6);padding:5px;border-radius:4px}
+.teamhint b{color:var(--acc)}
+.teamwrap{display:grid;grid-template-columns:1fr;gap:12px}
+.teamleft{display:flex;flex-direction:column;gap:8px;min-width:0}
+.slotlabel{font-size:13px} .slotlabel b{color:var(--acc)}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{position:relative;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;font-size:12px;text-align:center;touch-action:none;cursor:grab;
+  background:linear-gradient(180deg,var(--win1),var(--win2));box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2),0 4px 0 2px rgba(0,0,0,.35);border-radius:4px}
+.slot canvas{width:64px;height:64px}
+.slot .no{position:absolute;left:5px;top:4px;font-size:15px;color:var(--acc);text-shadow:2px 2px 0 #000}
+.slot .hpw{font-size:10px;color:var(--dim)}
+.slot.empty{background:rgba(13,11,20,.45);box-shadow:inset 0 0 0 2px var(--rim2);cursor:default;color:var(--dim)}
+.slot.main{background:linear-gradient(180deg,#4a3c1e,#2a2014);box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px #b8892a,0 4px 0 2px rgba(0,0,0,.35)}
+.slot.main.empty{background:rgba(60,45,15,.35)}
+.slot.sel{box-shadow:0 0 0 3px var(--acc),0 0 16px rgba(255,209,102,.6)!important;animation:selb 1s ease-in-out infinite}
+@keyframes selb{50%{transform:translateY(-3px)}}
+.slot.view{outline:2px dashed rgba(255,255,255,.5);outline-offset:2px}
+.slot.over{box-shadow:0 0 0 3px var(--good),0 0 18px rgba(79,209,165,.6)!important}
+.slot.dragging{opacity:.3}
+.boxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:42vh;overflow:auto;padding:4px;background:rgba(13,11,20,.5);border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}
+.boxgrid .slot{min-height:84px;font-size:10.5px}
+.boxgrid .slot canvas{width:44px;height:44px}
+.slot.drop{border:2px dashed var(--rim);background:transparent;box-shadow:none;color:var(--dim);cursor:default}
+.dragghost{position:fixed;z-index:200;pointer-events:none;width:72px;height:72px;transform:translate(-50%,-60%) scale(1.15);filter:drop-shadow(0 6px 4px rgba(0,0,0,.6))}
+.teamdetail{min-width:0;font-size:12px;line-height:1.6;display:flex;flex-direction:column;gap:8px}
+.teamdetail .dh{display:flex;gap:10px;align-items:center}
+.teamdetail .dh canvas{width:96px;height:96px;background:#1b1530;border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2);flex:none}
+.teamdetail .acts{display:flex;gap:6px;flex-wrap:wrap}
+.teamdetail .acts .btn{font-size:13px;padding:8px 12px}
+.mvl{display:flex;flex-direction:column;gap:4px}
+.mvl div{background:#15112a;border-radius:3px;padding:4px 7px;box-shadow:inset 4px 0 0 var(--c)}
+.mvl small{display:block;color:var(--dim);font-size:10.5px;line-height:1.35}
+html.land #scTeam{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px}
+html.land .teamwrap{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px} html.land.short .slot canvas{width:48px;height:48px}
 /* dex */
 .dexsum{display:flex;gap:14px;align-items:center;font-size:13px;flex-wrap:wrap}
 .dexsum b{font-size:18px;color:var(--acc)}
@@ -252,20 +292,74 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 #bTop{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dim)}
 #bTop button.off{text-decoration:line-through}
 #bTop button{font-size:11px;color:var(--dim);background:var(--panel);box-shadow:0 0 0 1px var(--edge);padding:2px 8px}
-@media (max-height:680px){ #cvWrap{width:min(100%, calc(42dvh * 16 / 9))} #banner{min-height:2.2em;font-size:11.5px} }
+@media (max-height:680px){ html:not(.land) #cvWrap{width:min(100%, calc(42dvh * 16 / 9))} html:not(.land) #banner{min-height:2.2em;font-size:11.5px} }
 /* 横長の 画面（1920×1080 など）：戦闘は 左に 16:9 の 画面、右に 情報と ボタン */
-@media (min-aspect-ratio: 4/3) and (min-width: 900px) {
-  #app{max-width:none}
-  #scDex{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px}
-  .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scDex){left:0;right:0;margin:0 auto;max-width:560px}
-  #scHub{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px} .hubgrid{grid-template-columns:1.1fr 1fr;gap:22px} .bigbtns .btn{padding:20px 8px;font-size:19px}
-  #scBattle:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto auto minmax(0,1fr);
+html.land #app{max-width:none}
+html.land #scDex{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px}
+html.land .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scDex):not(#scTeam){left:0;right:0;margin:0 auto;max-width:560px}
+html.land #scHub{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px}
+html.land .hubgrid{grid-template-columns:1.1fr 1fr;gap:22px}
+html.land .bigbtns .btn{padding:20px 8px;font-size:19px}
+html.land #scBattle:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto auto minmax(0,1fr);
     grid-template-areas:"top top" "cv plates" "cv banner" "cv ctrl";column-gap:16px;row-gap:10px;padding:14px 18px}
-  #bTop{grid-area:top} .plates{grid-area:plates;grid-template-columns:1fr} #banner{grid-area:banner}
-  #ctrl{grid-area:ctrl;align-items:start} #btns{flex:none;width:100%} #btns button.cmd{min-height:64px} .cmd.info{min-height:78px} .cmd.info .d{font-size:12px}
-  #cvWrap{grid-area:cv;align-self:start;width:min(100%, calc((100dvh - 64px) * 16 / 9))}
-  .cmd .a{font-size:15px} .cmd .b{font-size:11px} #banner{font-size:14px}
-}
+html.land #bTop{grid-area:top}
+html.land .plates{grid-area:plates;grid-template-columns:1fr}
+html.land #banner{grid-area:banner}
+html.land #ctrl{grid-area:ctrl;align-items:start}
+html.land #btns{flex:none;width:100%}
+html.land #btns button.cmd{min-height:64px}
+html.land .cmd.info{min-height:78px}
+html.land .cmd.info .d{font-size:12px}
+html.land #cvWrap{grid-area:cv;align-self:start;width:min(100%, calc((var(--appH, 100dvh) - 64px) * 16 / 9))}
+html.land .cmd .a{font-size:15px}
+html.land .cmd .b{font-size:11px}
+html.land #banner{font-size:14px}
+
+/* スマホの 横画面（高さが ひくい）：つめて 表示 */
+html.land.short #scBattle:not([hidden]){grid-template-columns:minmax(0,1fr) 290px;column-gap:10px;row-gap:5px;padding:6px 10px calc(6px + env(safe-area-inset-bottom))}
+html.land.short #cvWrap{width:min(100%, calc((var(--appH, 100dvh) - 36px) * 16 / 9))}
+html.land.short #btns{gap:5px} html.land.short #btns button.cmd{min-height:40px} html.land.short .cmd.info{min-height:44px;padding:2px 6px} html.land.short .cmd.info .d{font-size:9.5px;line-height:1.25}
+html.land.short .cmd .a{font-size:12px} html.land.short .cmd .b{font-size:9px} html.land.short #banner{font-size:11px;min-height:2em;padding:3px 6px}
+html.land.short .plate{padding:3px 6px;font-size:10px} html.land.short .plate .top b{font-size:12px} html.land.short .plate .cond{display:none} html.land.short .plates{gap:4px;grid-template-columns:1fr 1fr}
+html.land.short #scHub, html.land.short #scDex{padding:8px 14px} html.land.short .bigbtns .btn{padding:10px 8px;font-size:16px} html.land.short .hubgrid{gap:12px}
+html.land.short .screen{padding-top:calc(6px + env(safe-area-inset-top));padding-bottom:calc(6px + env(safe-area-inset-bottom))}
+html.land.short #scTitle{padding:0} html.land.short .tcenter{padding:10px 16px 70px;gap:8px} html.land.short h1.tlogo{font-size:clamp(24px,5vw,40px)}
+/* 横画面に 回す（スマホを たてに もった まま 横画面で あそぶ） */
+html.rot body{overflow:hidden}
+html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(90deg) translateY(-100%);max-width:none}
+
+
+/* ===== ゲームの UI（ウィンドウの わく・ボタン） ===== */
+:root{--win1:#2f2750;--win2:#1d1733;--rim:#8a7cd0;--rim2:#4a4070;--out:#0b0914}
+.card,.askbox,.plate,#banner,.mcard,.dexc,.pm,.chest,.starter,.tmlist button,.swaplist button{
+  background:linear-gradient(180deg,var(--win1),var(--win2));border:none;
+  box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2),inset 0 2px 0 2px rgba(255,255,255,.08),0 4px 0 2px rgba(0,0,0,.35);border-radius:4px}
+.askbox{box-shadow:0 0 0 3px var(--out),inset 0 0 0 3px var(--rim),inset 0 0 0 5px var(--out),0 10px 30px rgba(0,0,0,.6);border-radius:6px;padding:20px}
+.askbox h3{font-size:18px;color:var(--acc);text-shadow:2px 2px 0 #000;letter-spacing:.08em}
+.btn{border-radius:4px;background:linear-gradient(180deg,#ffe79a 0%,#ffd166 45%,#f2b33d 100%);box-shadow:0 0 0 3px var(--out),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18),0 5px 0 3px #6b4a10;text-shadow:0 1px 0 rgba(255,255,255,.5)}
+.btn:hover:not(:disabled){filter:brightness(1.07)}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 0 0 3px var(--out),inset 0 2px 0 rgba(255,255,255,.5),0 2px 0 3px #6b4a10}
+.btn.sub{background:linear-gradient(180deg,#3d3466,#2a2348);color:var(--ink);text-shadow:1px 1px 0 #000;box-shadow:0 0 0 3px var(--out),inset 0 0 0 2px var(--rim2),inset 0 2px 0 2px rgba(255,255,255,.08),0 4px 0 3px #0b0914}
+#btnWild{background:linear-gradient(180deg,#b6f3c2,#7bd88f 45%,#4fb868)!important;box-shadow:0 0 0 3px var(--out),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18),0 5px 0 3px #22542e!important}
+.cmd{border-radius:4px;background:linear-gradient(180deg,#342b58,#221b3a);box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2),0 3px 0 2px rgba(0,0,0,.4)}
+.cmd.mv{border-left:none;box-shadow:0 0 0 2px var(--out),inset 4px 0 0 var(--c),inset 0 0 0 2px var(--rim2),0 3px 0 2px rgba(0,0,0,.4)}
+.cmd.info{background:linear-gradient(180deg,#2a2346,#1b1630)}
+.cmd.hot{box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--acc),0 0 12px rgba(255,209,102,.45)}
+#cDodge,#cSwap{background:linear-gradient(180deg,#4a3f86,#2d2558)}
+#cDodge .a,#cSwap .a{color:var(--acc);text-shadow:1px 1px 0 #000}
+.sec-title{color:#cfc6ef;text-shadow:1px 1px 0 #000;letter-spacing:.06em}
+.sec-title > span:first-child{background:linear-gradient(90deg,rgba(138,124,208,.35),transparent);padding:2px 10px 2px 8px;border-left:3px solid var(--acc)}
+.plate .hp{height:10px;border-radius:2px;box-shadow:0 0 0 2px var(--out),inset 0 0 0 1px #000}
+.plate .hp i{box-shadow:inset 0 2px 0 rgba(255,255,255,.35);border-radius:1px}
+#banner{font-size:13.5px;letter-spacing:.04em}
+.chip{border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.6);text-shadow:none}
+.hres > span{border-radius:4px;background:linear-gradient(180deg,#2a2346,#16122a);box-shadow:0 0 0 2px var(--out),inset 0 0 0 1px var(--rim2)}
+.hicon,.sndbtn{border-radius:4px;background:linear-gradient(180deg,#3d3466,#241d40);box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2)}
+.logo,.hlogo{text-shadow:3px 3px 0 #000,-1px -1px 0 #000}
+.ov{background:radial-gradient(ellipse at center,rgba(30,22,58,.88),rgba(10,8,18,.94))}
+#cv{box-shadow:0 0 0 3px var(--out),0 0 0 5px var(--rim2),0 8px 0 5px rgba(0,0,0,.35);border-radius:2px}
+#bTop button{border-radius:3px;background:linear-gradient(180deg,#3d3466,#241d40);box-shadow:0 0 0 2px var(--out),inset 0 0 0 1px var(--rim2);color:#cfc6ef}
+.dexf button{border-radius:3px}
 </style>
 </head>
 <body>
@@ -274,7 +368,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
   <!-- タイトル -->
   <section class="screen" id="scTitle">
     <canvas id="titleCv"></canvas>
-    <button class="sndbtn" id="titleSnd" aria-label="おと">♪</button>
+    <button class="sndbtn" id="titleSnd" aria-label="おと">♪</button><button class="sndbtn rotbtn" id="titleRot" aria-label="よこがめん">⟳</button>
     <div class="center tcenter">
       <h1 class="logo tlogo"><span class="l1">PIXEL MONSTER</span><span class="l2">ARENA</span><small>ピクセル モンスター アリーナ</small></h1>
       <p class="lead tlead">つかまえて、そだてて、スタジアムで ぶつかりあえ！<br>リアルタイム モンスターバトル</p>
@@ -300,7 +394,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
       <h1 class="logo hlogo"><span>PIXEL MONSTER</span> ARENA</h1>
       <div class="hres">
         <span title="トロフィー">🏆 <b id="hTrophy">0</b></span><span title="クリスタル">💠 <b id="hCaps">0</b></span><span title="ジェム">💎 <b id="hGems">0</b></span>
-        <button class="hicon" id="hubSnd" aria-label="おと">♪</button><button class="hicon" id="btnOpt" aria-label="せってい">⚙</button>
+        <button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと">♪</button><button class="hicon" id="btnOpt" aria-label="せってい">⚙</button>
       </div>
     </div>
     <div class="hubgrid">
@@ -337,15 +431,24 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
   </section>
 
   <section class="screen" id="scTeam">
-    <div class="sec-title"><span style="font-size:16px;color:var(--ink)">パーティ</span><button class="btn sub" id="btnTeamBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
-    <div class="list" id="teamParty"></div>
-    <div class="sec-title"><span>ボックス</span><span id="boxCount"></span></div>
-    <div class="list" id="teamBox"></div>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">へんせい</span><button class="btn sub" id="btnTeamBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>して いれかえ　／　<b>タップ</b>で えらんで、いれたい わくを <b>タップ</b></p>
+    <div class="teamwrap">
+      <div class="teamleft">
+        <div class="slotlabel"><b>しゅつじょう</b> <span class="dim">— たたかいに でる 3たい（1ばんめから とうじょう）</span></div>
+        <div class="slots" id="tmMain"></div>
+        <div class="slotlabel"><b>ひかえ</b> <span class="dim">— パーティには いるが しあいには でない</span></div>
+        <div class="slots" id="tmSub"></div>
+        <div class="slotlabel"><b>ボックス</b> <span class="dim" id="boxCount"></span></div>
+        <div class="boxgrid" id="tmBox"></div>
+      </div>
+      <div class="teamdetail card" id="tmDetail"></div>
+    </div>
   </section>
 
   <!-- バトル -->
   <section class="screen" id="scBattle" hidden>
-    <div id="bTop"><span id="bTitle"></span><span style="display:flex;gap:6px"><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
+    <div id="bTop"><span id="bTitle"></span><span style="display:flex;gap:6px"><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
     <div class="plates">
       <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="lv"></span></div><div class="types"></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div></div>
       <div class="plate" id="plE"><div class="top"><span class="lv"></span><b class="nm"></b></div><div class="types"></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div></div>
@@ -2828,7 +2931,7 @@ function openChest(i) {
   for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="rar" style="background:${r.c}">${r.n}</span><div class="big">わざマシン：${m.n}</div>${typeChip(m.t)}<div class="dim">${moveDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
   bg.innerHTML = `<div class="askbox"><div id="rwBody"></div><div class="dim" id="rwCount" style="margin-top:6px"></div><button class="btn" id="rwNext" style="margin-top:10px;width:100%">つぎへ</button></div>`;
-  document.body.appendChild(bg);
+  $('app').appendChild(bg);
   const showK = () => { bg.querySelector('#rwBody').innerHTML = cards[k]; bg.querySelector('#rwCount').textContent = k ? `${k} / ${cards.length - 1}` : ''; bg.querySelector('#rwNext').textContent = k === cards.length - 1 ? 'とじる' : k === 0 ? 'あける！' : 'つぎへ'; };
   bg.querySelector('#rwNext').onclick = () => { k++; if (k >= cards.length) { bg.remove(); renderHub(); } else { SND.se(k === 1 ? 'open' : /エピック/.test(cards[k]) ? 'epic' : 'card'); showK(); } };
   showK();
@@ -2861,7 +2964,7 @@ function useTM(m) {
       save(); close(); renderTeam(m.uid); say0(`${SPECIES[m.sid].n}は ${old}を わすれて ${mv.n}を おぼえた！`);
     });
   };
-  document.body.appendChild(bg); step1();
+  $('app').appendChild(bg); step1();
 }
 
 function renderHub() {
@@ -2895,14 +2998,102 @@ function renderChart() {
   $('chartWrap').innerHTML = h;
   show('scChart');
 }
+// へんせい：しゅつじょう3・ひかえ3・ボックス。ドラッグ／タップ→タップで いれかえ
+let teamSel = null, teamView = null;
+function teamMon(r) { return r.w === 'p' ? S.party[r.i] : r.w === 'b' ? S.box[r.i] : null; }
+function teamMove(a, b) {
+  if (!a || !b || (a.w === b.w && a.i === b.i)) return false;
+  const P = S.party, X = S.box, ma = teamMon(a), mb = teamMon(b);
+  if (!ma) return false;
+  if (a.w === 'p' && b.w === 'p') { if (mb) [P[a.i], P[b.i]] = [P[b.i], P[a.i]]; else { P.splice(a.i, 1); P.push(ma); } }
+  else if (a.w === 'b' && b.w === 'p') { if (mb) { P[b.i] = ma; X[a.i] = mb; } else { X.splice(a.i, 1); P.push(ma); } }
+  else if (a.w === 'p' && (b.w === 'b' || b.w === 'drop')) {
+    if (mb && b.w === 'b') { X[b.i] = ma; P[a.i] = mb; }
+    else { if (P.length <= 1) { say0('パーティには 1たい いないと いけません'); return false; } P.splice(a.i, 1); X.unshift(ma); }
+  } else if (a.w === 'b' && b.w === 'b') { if (mb) [X[a.i], X[b.i]] = [X[b.i], X[a.i]]; }
+  else return false;
+  SND.se('swapIn'); save(); return true;
+}
 function renderTeam(openUid) {
-  const P = $('teamParty'), B = $('teamBox'); P.innerHTML = ''; B.innerHTML = '';
-  S.party.forEach((m, i) => P.appendChild(monCard(m, 'party', i, openUid)));
-  S.box.forEach((m, i) => B.appendChild(monCard(m, 'box', i, openUid)));
-  if (!S.box.length) B.innerHTML = '<p class="dim">（からっぽ）パーティは6たいまで。7たいめから ボックスに おくられます。</p>';
+  if (openUid != null) teamView = openUid;
+  const slot = (m, r, cls) => {
+    const d = document.createElement('div'); d.className = 'slot ' + cls + (m ? '' : ' empty'); d.dataset.w = r.w; d.dataset.i = r.i;
+    if (r.w === 'p' && r.i < 3) d.insertAdjacentHTML('beforeend', `<span class="no">${r.i + 1}</span>`);
+    if (m) {
+      const st = stats(m), sp = SPECIES[m.sid];
+      d.appendChild(spriteCanvas(m.sid, r.w === 'b' ? 44 : 64));
+      d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div>${r.w === 'p' ? `<div class="hpw">HP${st.hp}　${ivGrade(m)}</div>` : ''}`);
+      if (teamSel && teamSel.w === r.w && teamSel.i === r.i) d.classList.add('sel');
+      if (teamView === m.uid) d.classList.add('view');
+    } else d.insertAdjacentHTML('beforeend', `<div style="font-size:22px;opacity:.5">＋</div><div>${r.w === 'p' && r.i < 3 ? 'しゅつじょう わく' : 'あき'}</div>`);
+    return d;
+  };
+  const M = $('tmMain'), U = $('tmSub'), X = $('tmBox'); M.innerHTML = U.innerHTML = X.innerHTML = '';
+  for (let i = 0; i < 6; i++) (i < 3 ? M : U).appendChild(slot(S.party[i], { w: 'p', i }, i < 3 ? 'main' : ''));
+  const drop = document.createElement('div'); drop.className = 'slot drop'; drop.dataset.w = 'drop'; drop.dataset.i = 0; drop.innerHTML = '<div style="font-size:18px">⬇</div><div>ここに<br>あずける</div>'; X.appendChild(drop);
+  S.box.forEach((m, i) => X.appendChild(slot(m, { w: 'b', i }, '')));
   $('boxCount').textContent = `${S.box.length}たい`;
+  renderTeamDetail();
   show('scTeam');
 }
+function renderTeamDetail() {
+  const D = $('tmDetail'), all = [...S.party, ...S.box], m = all.find(x => x.uid === teamView) || S.party[0];
+  if (!m) { D.innerHTML = ''; return; }
+  teamView = m.uid;
+  const sp = SPECIES[m.sid], st = stats(m), inParty = S.party.includes(m), pi = S.party.indexOf(m), bi = S.box.indexOf(m);
+  const STN = [['HP', st.hp, 260], ['こうげき', Math.round(st.atk), 110], ['ぼうぎょ', Math.round(st.def), 110], ['すばやさ', st.spd, 130]];
+  D.innerHTML = `<div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
+      <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'ボックス'}　${ivGrade(m)}</div>
+      ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div>` : ''}</div></div>
+    <div style="display:flex;flex-direction:column;gap:3px">${STN.map(([n, v, mx]) => `<div class="sbar"><span>${n}</span><span>${v}</span><i><b style="width:${Math.min(100, v / mx * 100)}%;background:var(--good)"></b></i></div>`).join('')}</div>
+    <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
+    <div class="acts"><button class="btn sub" data-a="tm">わざマシン</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
+  D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
+  D.querySelector('.acts').onclick = (ev) => {
+    const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
+    if (act === 'tm') return useTM(m);
+    if (act === 'box') teamMove({ w: 'p', i: pi }, { w: 'drop', i: 0 });
+    if (act === 'party') teamMove({ w: 'b', i: bi }, { w: 'p', i: S.party.length });
+    if (act === 'release') { ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; save(); renderTeam(); }); return; }
+    teamSel = null; renderTeam();
+  };
+}
+// ドラッグ と タップ
+(() => {
+  let drag = null, justDragged = 0;
+  const refOf = (el) => { const d = el && el.closest && el.closest('#scTeam .slot'); return d ? { w: d.dataset.w, i: +d.dataset.i, el: d } : null; };
+  const under = (cx, cy) => { const g = drag && drag.ghost; if (g) g.style.display = 'none'; const el = document.elementFromPoint(cx, cy); if (g) g.style.display = ''; return refOf(el); };
+  document.addEventListener('pointerdown', (ev) => {
+    if ($('scTeam').hidden) return; const r = refOf(ev.target); if (!r || r.w === 'drop' || !teamMon(r)) return;
+    drag = { r, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, over: null };
+  });
+  document.addEventListener('pointermove', (ev) => {
+    if (!drag) return;
+    if (!drag.moved && Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) > 8) {
+      drag.moved = true; const m = teamMon(drag.r); drag.ghost = spriteCanvas(m.sid, 72); drag.ghost.className = 'pix dragghost'; $('app').appendChild(drag.ghost); drag.r.el.classList.add('dragging');
+    }
+    if (!drag.moved) return;
+    ev.preventDefault();
+    const a = toApp(ev.clientX, ev.clientY); drag.ghost.style.left = a.x + 'px'; drag.ghost.style.top = a.y + 'px';
+    const o = under(ev.clientX, ev.clientY); if (drag.over && (!o || o.el !== drag.over)) drag.over.classList.remove('over');
+    if (o && o.el !== drag.r.el) { o.el.classList.add('over'); drag.over = o.el; } else drag.over = null;
+  }, { passive: false });
+  const end = (ev) => {
+    if (!drag) return; const d = drag; drag = null;
+    if (d.ghost) d.ghost.remove(); d.r.el.classList.remove('dragging'); if (d.over) d.over.classList.remove('over');
+    if (d.moved) { justDragged = performance.now(); const o = under(ev.clientX, ev.clientY); teamSel = null; if (o) { teamView = teamMon(d.r).uid; teamMove(d.r, o); } renderTeam(); }
+  };
+  document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+  document.addEventListener('click', (ev) => {
+    if ($('scTeam').hidden || performance.now() - justDragged < 300) return; const r = refOf(ev.target); if (!r) return;
+    const m = teamMon(r);
+    if (teamSel) {
+      const s0 = teamSel; teamSel = null;
+      if (!(s0.w === r.w && s0.i === r.i)) { teamMove(s0, r); }
+    } else if (m) { teamSel = { w: r.w, i: r.i }; teamView = m.uid; SND.se('click'); }
+    renderTeam();
+  });
+})();
 const CAT_NAMES = { phys: 'ぶつり', spec: 'とくしゅ', stat: 'へんか' };
 // わざの せつめい文（データから自動で作る）
 function moveDesc(m) {
@@ -2952,7 +3143,7 @@ function ask(msg, ok = 'はい', ng = 'いいえ') {
     const [b1, b2] = bg.querySelectorAll('button');
     const done = v => { bg.remove(); res(v); };
     if (ng) { b1.onclick = () => done(false); b2.onclick = () => done(true); } else b1.onclick = () => done(true);
-    document.body.appendChild(bg); (ng ? b2 : b1).focus();
+    $('app').appendChild(bg); (ng ? b2 : b1).focus();
   });
 }
 const say0 = (t) => ask(t, 'OK', null);
@@ -5139,6 +5330,29 @@ document.addEventListener('gesturestart', (ev) => ev.preventDefault());
    画面遷移ボタン
    ===================================================================== */
 $('btnNew').onclick = async () => { if (loadSave() && !(await ask('セーブデータを けして はじめから あそびますか？'))) return; renderStarter(); };
+/* ---------- 画面の 向き：横長なら 横レイアウト。スマホを たてに もった ままでも「横画面」で 90度 回して あそべる ---------- */
+let LAND_PREF = (() => { try { return localStorage.getItem('pma_land') === '1'; } catch (e) { return false; } })();
+function layout() {
+  const iw = window.innerWidth, ih = window.innerHeight, rot = LAND_PREF && ih > iw;
+  const W = rot ? ih : iw, H = rot ? iw : ih, r = document.documentElement, app = $('app');
+  r.classList.toggle('rot', rot); r.classList.toggle('land', W / H >= 1.25); r.classList.toggle('short', W / H >= 1.25 && H < 560);
+  r.style.setProperty('--appW', W + 'px'); r.style.setProperty('--appH', H + 'px');
+  app.style.width = rot ? W + 'px' : ''; app.style.height = rot ? H + 'px' : '';
+  for (const id of ['titleRot', 'hubRot', 'bRot']) { const b = $(id); if (b) b.classList.toggle('on', LAND_PREF); }
+}
+// 画面の 座標 → 回した #app の 中の 座標
+function toApp(cx, cy) { return document.documentElement.classList.contains('rot') ? { x: cy, y: window.innerWidth - cx } : { x: cx, y: cy }; }
+function toggleLand() {
+  LAND_PREF = !LAND_PREF; try { localStorage.setItem('pma_land', LAND_PREF ? '1' : '0'); } catch (e) { }
+  // Android などは 全画面＋向きの 固定が できる（できない ときは 90度 回して 表示）
+  if (LAND_PREF && window.innerHeight > window.innerWidth && document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().then(() => screen.orientation && screen.orientation.lock ? screen.orientation.lock('landscape') : null).catch(() => { }).finally(layout);
+  } else if (!LAND_PREF && document.fullscreenElement) { try { screen.orientation.unlock(); } catch (e) { } document.exitFullscreen().catch(() => { }).finally(layout); }
+  layout();
+}
+window.addEventListener('resize', layout); window.addEventListener('orientationchange', () => setTimeout(layout, 120));
+for (const id of ['titleRot', 'hubRot', 'bRot']) { const b = $(id); if (b) b.onclick = (ev) => { ev.stopPropagation(); toggleLand(); }; }
+layout();
 const updSnd = () => { for (const id of ['titleSnd', 'hubSnd', 'bSnd']) { const b = $(id); if (b) b.classList.toggle('off', SND.opt.mute); } };
 for (const id of ['titleSnd', 'hubSnd', 'bSnd']) { const b = $(id); if (b) b.onclick = (ev) => { ev.stopPropagation(); SND.init(); SND.toggle(); updSnd(); }; }
 updSnd();
@@ -5191,7 +5405,7 @@ $('btnDex').onclick = renderDex;
 $('btnDexBack').onclick = () => renderHub();
 $('btnTeamBack').onclick = renderHub;
 // せってい：おとの 大きさ・セーブデータ
-function modal(html) { const bg = document.createElement('div'); bg.className = 'askbg'; bg.innerHTML = `<div class="askbox" style="max-width:440px;text-align:left">${html}</div>`; document.body.appendChild(bg); bg.addEventListener('pointerdown', (e) => { if (e.target === bg) bg.remove(); }); return bg; }
+function modal(html) { const bg = document.createElement('div'); bg.className = 'askbg'; bg.innerHTML = `<div class="askbox" style="max-width:440px;text-align:left">${html}</div>`; $('app').appendChild(bg); bg.addEventListener('pointerdown', (e) => { if (e.target === bg) bg.remove(); }); return bg; }
 $('btnOpt').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:12px">せってい</h3>
     <label class="optrow">BGM <input type="range" min="0" max="1" step="0.05" id="oMusic"></label>
