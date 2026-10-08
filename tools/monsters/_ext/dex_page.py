@@ -47,6 +47,8 @@ def main():
         rows.append({'no': no, 'id': k, 'n': name, 't': [T3[t]] + ([t2] if t2 != '-' else []), 'h': h, 'wt': float(wt), 'home': home, 'trait': trait,
                      'note': note, 'base': base, 'evo': None, 'pre': None, 'fly': body == 'F', 'rare': 1 if num == 10 else 0,
                      'sz': round(.72 + .72 * u, 3), 'w': s['w'], 'hh': s['h'], 'img': png(s, False), 'game': 0, 'batch': 3})
+    REJ = set(json.load(open(os.path.join(HERE, 'rejected.json')))) if os.path.exists(os.path.join(HERE, 'rejected.json')) else set()
+    for r in rows: r['game'] = 0 if r['id'] in REJ else 1
     tpl = open(os.path.join(HERE, 'dex_tpl.html')).read()
     out = tpl.replace('/*DATA*/', json.dumps(rows, ensure_ascii=False, separators=(',', ':'))).replace('/*TYPES*/', json.dumps(TYPES, ensure_ascii=False))
     dst = os.path.join(HERE, '..', 'dex.html'); open(dst, 'w').write(out)
