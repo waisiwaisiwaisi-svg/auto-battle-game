@@ -125,6 +125,29 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .cupinfo .rounds i.now{background:var(--bad);animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:.35}}
 
+/* dex */
+.dexsum{display:flex;gap:14px;align-items:center;font-size:13px;flex-wrap:wrap}
+.dexsum b{font-size:18px;color:var(--acc)}
+.dexsum .bar{flex:1;min-width:120px;height:8px;background:#0d0b14;box-shadow:0 0 0 1px var(--edge)}
+.dexsum .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--good),var(--acc))}
+.dexf{display:flex;gap:5px;flex-wrap:wrap}
+.dexf button{font-size:11px;padding:3px 8px;background:var(--panel);box-shadow:0 0 0 1px var(--edge)}
+.dexf button.on{background:var(--acc);color:#1a1626;font-weight:700}
+.dexgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.dexc{background:var(--panel);box-shadow:0 0 0 2px var(--edge);padding:6px 4px 5px;text-align:center;font-size:11px;position:relative;cursor:pointer;min-width:0}
+.dexc canvas{width:64px;height:64px;display:block;margin:0 auto}
+.dexc .no{position:absolute;left:4px;top:3px;font-size:9px;color:var(--dim);font-variant-numeric:tabular-nums}
+.dexc .got{position:absolute;right:4px;top:2px;color:var(--acc);font-size:12px}
+.dexc .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dexc.unseen canvas{filter:brightness(0);opacity:.35}
+.dexc.unseen{cursor:default}
+.dexc.seen canvas{filter:saturate(.35) brightness(.8)}
+.dexd{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.dexd canvas{width:128px;height:128px;background:#1b1530;box-shadow:0 0 0 2px var(--edge);flex:none}
+.dexd .info{flex:1;min-width:180px;font-size:12px;line-height:1.6}
+.sbar{display:grid;grid-template-columns:62px 30px 1fr;gap:6px;align-items:center;font-size:11px}
+.sbar i{display:block;height:7px;background:#0d0b14}
+.sbar i b{display:block;height:100%}
 /* team */
 .mcard{display:flex;gap:8px;align-items:center;background:var(--panel);box-shadow:0 0 0 2px var(--edge);padding:8px}
 .mcard.starterm{box-shadow:0 0 0 2px var(--acc)}
@@ -233,7 +256,8 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 /* 横長の 画面（1920×1080 など）：戦闘は 左に 16:9 の 画面、右に 情報と ボタン */
 @media (min-aspect-ratio: 4/3) and (min-width: 900px) {
   #app{max-width:none}
-  .screen:not(#scBattle):not(#scTitle):not(#scHub){left:0;right:0;margin:0 auto;max-width:560px}
+  #scDex{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px}
+  .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scDex){left:0;right:0;margin:0 auto;max-width:560px}
   #scHub{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px} .hubgrid{grid-template-columns:1.1fr 1fr;gap:22px} .bigbtns .btn{padding:20px 8px;font-size:19px}
   #scBattle:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto auto minmax(0,1fr);
     grid-template-areas:"top top" "cv plates" "cv banner" "cv ctrl";column-gap:16px;row-gap:10px;padding:14px 18px}
@@ -292,9 +316,17 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
       <div class="hcol">
         <div class="sec-title"><span>パーティ（上から3匹が しゅつじょう）</span><button class="dim" id="btnTeam" style="text-decoration:underline">へんせい ›</button></div>
         <div class="partyrow" id="hubParty"></div>
-        <div class="row" style="gap:8px"><button class="btn sub" id="btnChart" style="padding:8px;font-size:13px;flex:1">タイプあいしょう表</button><button class="btn sub" id="btnHelp" style="padding:8px;font-size:13px;flex:1">あそびかた</button></div>
+        <div class="row" style="gap:8px"><button class="btn sub" id="btnDex" style="padding:8px;font-size:13px;flex:1">ずかん</button><button class="btn sub" id="btnChart" style="padding:8px;font-size:13px;flex:1">あいしょう表</button><button class="btn sub" id="btnHelp" style="padding:8px;font-size:13px;flex:1">あそびかた</button></div>
       </div>
     </div>
+  </section>
+
+  <!-- ずかん -->
+  <section class="screen" id="scDex" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">モンスターずかん</span><button class="btn sub" id="btnDexBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <div id="dexSum" class="dexsum"></div>
+    <div id="dexFilter" class="dexf"></div>
+    <div id="dexGrid" class="dexgrid"></div>
   </section>
 
   <!-- チーム -->
@@ -2338,7 +2370,7 @@ function spriteCanvas(sid, size) {
    ===================================================================== */
 const SAVE_KEY = 'pixel-monster-arena-v1';
 let S = null;
-const defaultSave = () => ({ party: [], box: [], capsules: 10, tier: 0, round: 0, trophies: 0, auto: false, uid: 1, caught: 0, wins: 0, gems: 20, tms: {}, chests: [], chestIdx: 0 });
+const defaultSave = () => ({ party: [], box: [], capsules: 10, tier: 0, round: 0, trophies: 0, auto: false, uid: 1, caught: 0, wins: 0, gems: 20, tms: {}, chests: [], chestIdx: 0, dex: {} });
 function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
@@ -2355,7 +2387,9 @@ function loadSave() {
   } catch (e) {}
   return null;
 }
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+// ずかん：1＝みつけた・2＝つかまえた（てもちに いる ものは かならず 2）
+function dexMark(sid, lv) { if (!S) return; S.dex = S.dex || {}; if ((S.dex[sid] || 0) < lv) S.dex[sid] = lv; }
+function save() { if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
 function stats(m) {
   fixMon(m); const b = SPECIES[m.sid].base, L = MON_LV, iv = m.iv;
@@ -2465,11 +2499,64 @@ const SND = (() => {
       { w: 'triangle', v: .3, s: 'A2:4 G#2:4 G2:4 F#2:16' },
     ] },
   };
-  for (const k in SONGS) { const S_ = SONGS[k]; S_.parts = S_.ch.map(c => Object.assign({}, c, c.drum ? { p: parseDrum(c.s) } : { p: parse(c.s) })); S_.len = Math.max(...S_.parts.map(p => p.p.len)); }
+  const prep = (S_) => { S_.parts = S_.ch.map(c => Object.assign({}, c, c.drum ? { p: parseDrum(c.s) } : { p: parse(c.s) })); S_.len = Math.max(...S_.parts.map(p => p.p.len)); return S_; };
+  for (const k in SONGS) prep(SONGS[k]);
+  /* ---------- ステージごとの 曲：調・音階・テンポ・音色・リズムを かえて 自動で 作曲 ---------- */
+  const NN = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const nm = (midi) => NN[midi % 12] + (Math.floor(midi / 12) - 1);
+  const MODES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10], phrygian: [0, 1, 3, 5, 7, 8, 10],
+    harm: [0, 2, 3, 5, 7, 8, 11], mixo: [0, 2, 4, 5, 7, 9, 10], lydian: [0, 2, 4, 6, 7, 9, 11] };
+  const DRUMS = {
+    rock: 'k:2 h:2 s:2 h:2 k:2 k:2 s:2 h:2', four: 'k:2 h:2 k:2 h:2 k:2 h:2 k:2 h:2', march: 'k:2 s:1 s:1 s:2 h:2 k:2 s:1 s:1 s:2 s:2',
+    swing: 'k:3 h:1 s:3 h:1 k:3 h:1 s:2 h:2', light: 'k:4 h:2 h:2 s:4 h:4', tribal: 'k:2 k:1 h:1 s:2 h:2 k:1 k:1 k:2 s:2 h:2',
+  };
+  const STAGE_MUSIC = {
+    ice: { bpm: 128, root: 64, mode: 'dorian', lead: 'triangle', arp: 'sine', drum: 'light', prog: [0, 5, 3, 4], seed: 11 },
+    elec: { bpm: 160, root: 66, mode: 'minor', lead: 'square', arp: 'sawtooth', drum: 'four', prog: [0, 0, 5, 6], seed: 23 },
+    grass: { bpm: 120, root: 67, mode: 'major', lead: 'square', arp: 'triangle', drum: 'swing', prog: [0, 3, 4, 0], seed: 37 },
+    water: { bpm: 112, root: 62, mode: 'lydian', lead: 'triangle', arp: 'sine', drum: 'light', prog: [0, 1, 0, 4], seed: 41 },
+    fire: { bpm: 158, root: 64, mode: 'phrygian', lead: 'sawtooth', arp: 'square', drum: 'rock', prog: [0, 1, 0, 6], seed: 53 },
+    dragon: { bpm: 140, root: 62, mode: 'harm', lead: 'square', arp: 'sawtooth', drum: 'march', prog: [0, 5, 3, 4], seed: 67 },
+    wind: { bpm: 132, root: 69, mode: 'mixo', lead: 'square', arp: 'triangle', drum: 'light', prog: [0, 6, 3, 0], seed: 71 },
+    ground: { bpm: 124, root: 60, mode: 'dorian', lead: 'sawtooth', arp: 'square', drum: 'tribal', prog: [0, 3, 0, 4], seed: 83 },
+    poison: { bpm: 118, root: 61, mode: 'phrygian', lead: 'square', arp: 'sine', drum: 'swing', prog: [0, 1, 5, 4], seed: 97 },
+    fighting: { bpm: 150, root: 69, mode: 'minor', lead: 'square', arp: 'square', drum: 'rock', prog: [0, 6, 5, 4], seed: 103 },
+  };
+  function compose(o, boss) {
+    let sd = o.seed * 9301 + (boss ? 7 : 0); const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+    const sc = MODES[o.mode], deg = (d) => o.root + sc[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7);
+    const RHY = [[2, 2, 2, 2, 2, 2, 4], [4, 2, 2, 4, 4], [2, 2, 4, 2, 2, 4], [3, 3, 2, 2, 2, 4], [2, 1, 1, 2, 2, 4, 4], [6, 2, 4, 2, 2]];
+    const rA = RHY[Math.floor(r() * RHY.length)], rB = RHY[Math.floor(r() * RHY.length)];
+    const lead = [], bass = [], arp = [];
+    let cur = 2;
+    for (let bar = 0; bar < 8; bar++) {
+      const c = o.prog[bar % 4], rh = bar % 4 === 3 ? rB : rA, tones = [c, c + 2, c + 4];
+      if (bar === 7) lead.push(nm(deg(7)) + ':8', nm(deg(4)) + ':4', nm(deg(7)) + ':4');
+      else rh.forEach((len, i) => {
+        if (i === 0 || len >= 4) cur = tones[Math.floor(r() * 3)] + 7 * (r() < .3 ? 1 : 0);   // つよい 拍は 和音の 音
+        else cur += [-2, -1, -1, 1, 1, 2][Math.floor(r() * 6)];
+        cur = Math.max(-1, Math.min(10, cur));
+        lead.push((r() < .08 && i > 0 ? 'R' : nm(deg(cur) + 12 * (o.lead === 'sawtooth' ? -1 : 0))) + ':' + len);
+      });
+      const b = deg(c) - 24;
+      bass.push(o.drum === 'four' || o.drum === 'rock' ? `${nm(b)}:2 ${nm(b + 12)}:2 `.repeat(4) : `${nm(b)}:4 ${nm(b + 7)}:4 ${nm(b)}:4 ${nm(b + 12)}:4`);
+      const ch = tones.map(t => deg(t) - 12); arp.push([0, 1, 2, 1].map(i => nm(ch[i]) + ':2').join(' ').repeat(1) + ' ' + [2, 1, 0, 1].map(i => nm(ch[i]) + ':2').join(' '));
+    }
+    const S_ = { bpm: o.bpm + (boss ? 14 : 0), ch: [
+      { w: o.lead, v: o.lead === 'sawtooth' ? .1 : o.lead === 'triangle' ? .24 : .14, s: lead.join(' ') },
+      { w: o.arp, v: o.arp === 'sine' ? .1 : .05, s: arp.join(' ') },
+      { w: 'triangle', v: .34, s: bass.join(' ') },
+      { drum: 1, s: (DRUMS[o.drum] + ' ').repeat(8) },
+    ] };
+    if (boss) S_.ch.push({ w: 'square', v: .06, s: lead.map(t => { const [n, l] = t.split(':'); return n === 'R' ? t : nm(hzToMidi(n) - 5) + ':' + l; }).join(' ') });
+    return prep(S_);
+  }
+  const hzToMidi = (n) => { const m = /^([A-G]#?)(-?\d)$/.exec(n); return NN.indexOf(m[1]) + (+m[2] + 1) * 12; };
+  const songOf = (name) => { if (!SONGS[name] && /^st_/.test(name)) { const [, k, b] = /^st_(\w+?)(_boss)?$/.exec(name); if (STAGE_MUSIC[k]) SONGS[name] = compose(STAGE_MUSIC[k], !!b); } return SONGS[name] || null; };
   function parseDrum(str) { const ev = []; let t = 0; for (const tok of str.trim().split(/\s+/)) { const [n, l] = tok.split(':'); ev.push({ t, d: n }); t += +l || 1; } return { ev, len: t }; }
   function play(name, force) {
     if (name === songName && !force) return;
-    songName = name; song = name ? SONGS[name] : null; step = 0;
+    songName = name; song = name ? songOf(name) : null; step = 0;
     if (!ac) return; next = ac.currentTime + .08;
   }
   // 先よみで 予約する（16分音符ずつ）
@@ -2541,6 +2628,7 @@ const SND = (() => {
   window.addEventListener('pointerdown', unlock, { capture: true }); window.addEventListener('keydown', unlock, { capture: true });
   return {
     play, se, opt, init,
+    _song: (n) => { const x = songOf(n); return x ? { len: x.len, bpm: x.bpm, notes: x.parts.map(p => p.p.ev.length), bad: x.parts.some(p => p.p.ev.some(e => e.f === 0 || (e.f && !isFinite(e.f)))) } : null; },
     set(k, v) { opt[k] = v; saveOpt(); applyVol(); },
     toggle() { opt.mute = !opt.mute; saveOpt(); applyVol(); return opt.mute; },
   };
@@ -2554,7 +2642,7 @@ function setArtBg() {
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
-function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; if (id === 'scHub' || id === 'scTeam' || id === 'scChart' || id === 'scStarter') setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
+function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
   const p = sp.prof, evo = '';
@@ -2649,6 +2737,18 @@ function monRarity(sid) {
   return _monRank[sid] || 0;
 }
 const tmRarity = (id) => { const m = MOVES[id]; if (!MOVES100[id]) return 0; const p = m.power || 0; return p >= 100 || (m.cat === 'stat' && ['field', 'baton', 'dbond', 'curse'].includes(m.k)) ? 2 : p >= 75 || m.cat === 'stat' ? 1 : 0; };
+// わざマシンで おぼえられるか：もともと おぼえる わざ・同じ タイプ・ノーマル・見た目（せつめいの ことば）で にあう タイプ
+const LOOK_KW = { fire: /火|炎|燃|熱|溶岩|マグマ|灯/, water: /水|海|川|泳|波|雨|貝|魚|泡|しずく/, grass: /草|葉|花|木|森|種|実|苔|根|つる|キノコ/, elec: /電|雷|稲妻|ビリ|磁/,
+  ice: /氷|雪|冷|凍|つらら/, fighting: /拳|格闘|筋|蹴|武|けんか|パンチ|鍛/, poison: /毒|ヘドロ|沼|腐/, ground: /土|砂|地面|掘|泥|地中/, wind: /風|空|翼|鳥|羽|飛|雲/,
+  psychic: /念|夢|不思議|星|月|心|予知|瞑想/, bug: /虫|甲殻|糸|さなぎ|羽音/, rock: /岩|石|鉱|宝石|結晶/, ghost: /霊|幽|お化け|おばけ|影|魂|骨|呪/, dragon: /竜|龍|ドラゴン|鱗/ };
+function canLearn(sid, id) {
+  const sp = SPECIES[sid], m = MOVES[id]; if (!sp || !m) return false;
+  if (LEARN[sid] && LEARN[sid].some(([, x]) => x === id)) return true;
+  if (m.t === sp.type || m.t === sp.type2 || m.t === 'normal') return true;
+  if (m.t === 'wind' && (sp.fly || FLYING.includes(sid))) return true;
+  const txt = sp.n + (sp.desc || '') + (sp.prof ? (sp.prof.home || '') + (sp.prof.trait || '') : '');
+  return !!(LOOK_KW[m.t] && LOOK_KW[m.t].test(txt));
+}
 const TM_POOL = () => Object.keys(MOVES100).filter(id => MOVES[id]);
 function giveChest() {
   S.chests = S.chests || [];
@@ -2744,8 +2844,10 @@ function useTM(m) {
   const bg = document.createElement('div'); bg.className = 'askbg';
   const close = () => bg.remove();
   const step1 = () => {
-    bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>${SPECIES[m.sid].n}</b>に おぼえさせる わざを えらぶ</div><div class="tmlist">${ids.map(id => { const mv = MOVES[id], r = RARITY[tmRarity(id)], has = m.moves.includes(id);
-      return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}" ${has ? 'disabled' : ''}><b>${mv.n}</b> ×${S.tms[id]} <span class="rar" style="background:${r.c};color:#120e1c;font-size:10px;padding:0 5px">${r.n}</span> <span class="dim">${TYPES[mv.t].n}${has ? '・おぼえている' : ''}</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">やめる</button></div>`;
+    const ok = (id) => canLearn(m.sid, id) && !m.moves.includes(id);
+    const list = ids.slice().sort((a, b) => ok(b) - ok(a));
+    bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>${SPECIES[m.sid].n}</b>に おぼえさせる わざを えらぶ<div class="dim">タイプや すがたに あう わざだけ おぼえられます</div></div><div class="tmlist">${list.map(id => { const mv = MOVES[id], r = RARITY[tmRarity(id)], has = m.moves.includes(id), can = canLearn(m.sid, id);
+      return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}" ${has || !can ? 'disabled' : ''}><b>${mv.n}</b> ×${S.tms[id]} <span class="rar" style="background:${r.c};color:#120e1c;font-size:10px;padding:0 5px">${r.n}</span> <span class="dim">${TYPES[mv.t].n}${has ? '・おぼえている' : !can ? '・<b style="color:var(--bad)">おぼえられない</b>' : ''}</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">やめる</button></div>`;
     bg.querySelector('.btn.sub').onclick = close;
     bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => step2(b.dataset.id));
   };
@@ -3191,6 +3293,7 @@ function startBattle(cfg) {
   const st = cfg.kind === 'wild' ? makeWild() : makeStadium(cfg.field);
   const pf = S.party.slice(0, 3).map(m => mkFighter(m, 0));
   const ef = cfg.enemies.map(m => mkFighter(m, 1));
+  for (const m of cfg.enemies) dexMark(m.sid, 1);
   B = {
     kind: cfg.kind, st, cfg, t: 0, mode: 'intro', modeT: 0, paused: false, uidc: 0,
     sides: [
@@ -3206,7 +3309,7 @@ function startBattle(cfg) {
   $('cSwap').hidden = pf.length < 2;
   say(cfg.intro);
   show('scBattle');
-  SND.play(cfg.kind === 'wild' ? 'wild' : S.round >= ROUNDS.length - 1 ? 'boss' : 'battle');
+  SND.play(cfg.kind === 'wild' ? 'wild' : 'st_' + st.field + (S.round >= ROUNDS.length - 1 ? '_boss' : ''));
   setupCmds();
 }
 
@@ -3552,7 +3655,7 @@ function useStatusMove(f, o, m) {
       const idx = benchIdx(f.side);
       if (B.kind === 'wild' || idx < 0) { failMove(f, 'でも かわりが いない！'); return; }
       pillarFx(f, '#ffd166', .8); typeFx(f.x, f.y - BODY, 'normal', 20, 120, .7);
-      doSwitch(f, idx, { st: Object.assign({}, f.st), sub: f.v.sub || 0 });
+      doSwitch(f, idx, { st: Object.assign({}, f.st), sub: f.v.sub || 0 }, false, true);
       break;
     }
     case 'ray': {
@@ -3590,8 +3693,8 @@ function benchIdx(side, random) {
   return random ? choice(list) : list[0];
 }
 // いれかえ（バトンタッチ・とんぼがえり系・ふきとばし）
-function doSwitch(f, idx, pass, forced) {
-  SND.se('swapOut');
+function doSwitch(f, idx, pass, forced, byMove) {
+  SND.se('swapOut'); B.swapNoLag = !!byMove;   // わざで 交代（とんぼがえり・バトンタッチ）した ときは スキなし
   f.state = 'return'; f.stT = .3; f.cur = null; f.queued = null;
   B.swapTo = idx; B.swapPass = pass || null;
   B.sides[f.side].swapCd = SWAP_CD;
@@ -4074,7 +4177,7 @@ function updateFighter(f, dt) {
   // いしつぶてれんぱつ：つづけて うつ
   if (f.shots.length) { for (const s of f.shots) s.t -= dt; for (const s of f.shots.filter(s => s.t <= 0)) spawnProj(f, s.m, s.ang); f.shots = f.shots.filter(s => s.t > 0); }
   // とんぼがえり系：あてたら もどる
-  if (f.pendingOut != null && ['act', 'free'].includes(f.state)) { const idx = f.pendingOut; f.pendingOut = null; doSwitch(f, idx); }
+  if (f.pendingOut != null && ['act', 'free'].includes(f.state)) { const idx = f.pendingOut; f.pendingOut = null; doSwitch(f, idx, null, false, true); }
   switch (f.state) {
     case 'bench': case 'capt': return;
     case 'enter':
@@ -4090,7 +4193,7 @@ function updateFighter(f, dt) {
       break;
     case 'return':
       f.stT -= dt; f.scale = clamp(f.stT / .3, 0, 1);
-      if (f.stT <= 0) { f.state = 'bench'; f.scale = 1; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; if (f.status === 'tox') f.toxN = 1; B.pendingSend = { side: f.side, idx: B.swapTo, t: .2, pass: B.swapPass, lag: true, at: { x: f.x, y: f.y } }; B.swapPass = null; }
+      if (f.stT <= 0) { f.state = 'bench'; f.scale = 1; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; if (f.status === 'tox') f.toxN = 1; B.pendingSend = { side: f.side, idx: B.swapTo, t: .2, pass: B.swapPass, lag: !B.swapNoLag, at: { x: f.x, y: f.y } }; B.swapPass = null; B.swapNoLag = false; }
       return;
     case 'faint': f.stT -= dt; if (f.stT <= 0) afterFaint(f); return;
     case 'free': {
@@ -5044,6 +5147,48 @@ $('btnTeam').onclick = () => renderTeam();
 $('btnChart').onclick = renderChart;
 $('hubChests').addEventListener('click', (e) => { const b = e.target.closest('.chest[data-i]'); if (b) tapChest(+b.dataset.i); });
 $('btnChartBack').onclick = () => renderHub();
+/* ---------- ずかん ---------- */
+let dexType = 'all';
+const dexOrder = () => { const T = Object.keys(TYPES); return poolIds().slice().sort((a, b) => T.indexOf(SPECIES[a].type) - T.indexOf(SPECIES[b].type) || a.localeCompare(b, 'en', { numeric: true })); };
+function renderDex() {
+  for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2);
+  const ids = dexOrder(), D = S.dex || {}, seen = ids.filter(id => D[id] >= 1).length, got = ids.filter(id => D[id] >= 2).length;
+  $('dexSum').innerHTML = `<span>みつけた <b>${seen}</b></span><span>つかまえた <b>${got}</b></span><span class="dim">ぜんぶで ${ids.length}</span><span class="bar"><i style="width:${got / ids.length * 100}%"></i></span>`;
+  const ts = ['all', ...Object.keys(TYPES).filter(t => ids.some(id => SPECIES[id].type === t || SPECIES[id].type2 === t))];
+  $('dexFilter').innerHTML = ts.map(t => `<button data-t="${t}" class="${t === dexType ? 'on' : ''}" ${t !== 'all' ? `style="border-left:4px solid ${TYPES[t].c}"` : ''}>${t === 'all' ? 'ぜんぶ' : TYPES[t].n}</button>`).join('');
+  $('dexFilter').querySelectorAll('button').forEach(b => b.onclick = () => { dexType = b.dataset.t; renderDex(); });
+  const G = $('dexGrid'); G.innerHTML = '';
+  ids.forEach((id, i) => {
+    const sp = SPECIES[id]; if (dexType !== 'all' && sp.type !== dexType && sp.type2 !== dexType) return;
+    const lv = D[id] || 0, c = document.createElement('div'); c.className = 'dexc ' + (lv >= 2 ? 'got' : lv ? 'seen' : 'unseen');
+    c.appendChild(spriteCanvas(id, 64));
+    c.insertAdjacentHTML('afterbegin', `<span class="no">No.${String(i + 1).padStart(3, '0')}</span>${lv >= 2 ? '<span class="got">★</span>' : ''}`);
+    c.insertAdjacentHTML('beforeend', `<div class="nm">${lv ? sp.n : '？？？'}</div>`);
+    if (lv) c.onclick = () => dexDetail(id, i + 1);
+    G.appendChild(c);
+  });
+  show('scDex');
+}
+function dexDetail(id, no) {
+  const sp = SPECIES[id], lv = (S.dex || {})[id] || 0, p = sp.prof || {}, r = RARITY[monRarity(id)];
+  const STN = { hp: 'HP', atk: 'こうげき', def: 'ぼうぎょ', spd: 'すばやさ' }, mx = 130;
+  const bars = lv >= 2 ? Object.keys(STN).map(k => `<div class="sbar"><span>${STN[k]}</span><span>${sp.base[k]}</span><i><b style="width:${Math.min(100, sp.base[k] / mx * 100)}%;background:${sp.base[k] >= 80 ? 'var(--good)' : sp.base[k] >= 55 ? 'var(--acc)' : 'var(--bad)'}"></b></i></div>`).join('') : '<p class="dim">つかまえると くわしい ことが わかる</p>';
+  const mv = lv >= 2 ? [...new Set((LEARN[id] || []).map(([, x]) => x))].filter(x => MOVES[x]).map(x => `<span class="chip" style="background:${TYPES[MOVES[x].t].c}">${MOVES[x].n}</span>`).join(' ') : '';
+  const bg = modal(`<div class="dexd"><div></div><div class="info">
+      <div class="dim">No.${String(no).padStart(3, '0')}　<span class="chip" style="background:${r.c}">${r.n}</span>${lv >= 2 ? '　<b style="color:var(--acc)">★ つかまえた</b>' : '　みつけた'}</div>
+      <div style="font-size:20px;font-weight:700">${sp.n}</div>
+      <div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
+      <p style="margin-top:6px">${sp.desc || ''}</p>
+      ${p.h ? `<p class="dim">高さ ${p.h}m　重さ ${p.wt}kg　すみか：${p.home}</p><p class="dim">${p.trait || ''}</p>` : ''}
+    </div></div>
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">${bars}</div>
+    ${mv ? `<div style="margin-top:10px"><div class="dim" style="margin-bottom:4px">おぼえる わざ</div><div style="display:flex;flex-wrap:wrap;gap:4px">${mv}</div></div>` : ''}
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="dClose">とじる</button></div>`);
+  bg.querySelector('.dexd > div').replaceWith(spriteCanvas(id, 128));
+  bg.querySelector('#dClose').onclick = () => bg.remove();
+}
+$('btnDex').onclick = renderDex;
+$('btnDexBack').onclick = () => renderHub();
 $('btnTeamBack').onclick = renderHub;
 // せってい：おとの 大きさ・セーブデータ
 function modal(html) { const bg = document.createElement('div'); bg.className = 'askbg'; bg.innerHTML = `<div class="askbox" style="max-width:440px;text-align:left">${html}</div>`; document.body.appendChild(bg); bg.addEventListener('pointerdown', (e) => { if (e.target === bg) bg.remove(); }); return bg; }
@@ -5146,7 +5291,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds }); },
 };
 })();
 </script>
