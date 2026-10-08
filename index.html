@@ -3033,6 +3033,7 @@ function makeArena(key) {
   st.nav = { nw, nh, walk };
   return st;
 }
+const CAM_MAX = 1.6, CAM_PAD = 170;   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
 // 障害物との 当たりは 足もとだけ（当たり判定が 絵の 足もとに あわせて あるので、体の 円より 小さく）
 const footR = (f) => Math.max(10, f.r * .6);
@@ -4262,11 +4263,20 @@ function bStep(dt) {
   const a = active(0), e = active(1), st = B.st;
   let tx = st.W / 2, ty = st.H / 2, tz = 1;
   const vis = [a, e].filter(f => f && f.state !== 'bench');
-  // 寄らない：たたかう 場所 ぜんたいが いつも 見える 大きさに 固定
+  // ふたりの きょりに あわせて ズーム：はなれると ひいて 全体、ちかいと よる（ただし CAM_MAX ばい まで）
   const fit = Math.min(VW / (st.fx1 - st.fx0 + 60), VH / (st.fy1 - st.fy0 + 60));
   tx = (st.fx0 + st.fx1) / 2; ty = (st.fy0 + st.fy1) / 2 - 10; tz = fit;
+  if (vis.length === 2 && B.mode !== 'intro') {
+    const pts = vis.map(f => [f.x, f.y - BODY]); if (B.catchO) pts.push([B.catchO.x, B.catchO.y]);
+    const x0 = Math.min(...pts.map(p => p[0])), x1 = Math.max(...pts.map(p => p[0])), y0 = Math.min(...pts.map(p => p[1])), y1 = Math.max(...pts.map(p => p[1]));
+    const bw = x1 - x0 + CAM_PAD * 2, bh = y1 - y0 + CAM_PAD * 1.6 + 60;
+    tz = clamp(Math.min(VW / bw, VH / bh), fit, fit * CAM_MAX);
+    // よった ぶん だけ ふたりの まんなかへ
+    const k = (tz - fit) / (fit * CAM_MAX - fit || 1);
+    tx += ((x0 + x1) / 2 - tx) * Math.min(1, k * 1.5); ty += ((y0 + y1) / 2 - ty) * Math.min(1, k * 1.5);
+  }
   if (B.mode === 'intro') tz = B.modeT < .6 ? VW / st.W : VW / st.W + Math.min(1, (B.modeT - .6) / 1.6) * (fit - VW / st.W);
-  B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 3);
+  B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 1.6);
   B.cam.x += (tx - B.cam.x) * Math.min(1, dt * 4);
   B.cam.y += (ty - B.cam.y) * Math.min(1, dt * 4);
 }
