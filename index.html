@@ -2367,17 +2367,27 @@ function renderStarter() {
    ===================================================================== */
 const CHEST_T = 1 / 12;   /* テスト用に 解錠時間を 1/12 に（木5びょう〜でんせつ2ふん30びょう）。本番は 1 */
 const CHESTS = {
-  wood:   { n: '木の たからばこ',     c: '#b07a40', d: '#6a4420', sec: 60 * CHEST_T, cr: [1, 2],  tm: 1, gem: [0, 1], rar: [80, 18, 2] },
-  silver: { n: '銀の たからばこ',     c: '#c8d0e0', d: '#6a7488', sec: 180 * CHEST_T, cr: [2, 3],  tm: 2, gem: [0, 2], rar: [70, 25, 5] },
-  gold:   { n: '金の たからばこ',     c: '#ffd166', d: '#a87a10', sec: 480 * CHEST_T, cr: [3, 5],  tm: 3, gem: [2, 4], rar: [55, 35, 10] },
-  giant:  { n: 'ジャイアントばこ',     c: '#ff9a5a', d: '#a04a20', sec: 720 * CHEST_T, cr: [8, 12], tm: 4, gem: [3, 6], rar: [60, 30, 10] },
-  magic:  { n: 'マジックばこ',         c: '#c08aff', d: '#5a3a9a', sec: 720 * CHEST_T, cr: [4, 6],  tm: 5, gem: [4, 8], rar: [30, 45, 25] },
-  legend: { n: 'でんせつの たからばこ', c: '#7af0ff', d: '#2a7a9a', sec: 1800 * CHEST_T, cr: [6, 10], tm: 4, gem: [10, 15], rar: [0, 40, 60] },
+  wood:   { n: '木の たからばこ',     c: '#b07a40', d: '#6a4420', sec: 60 * CHEST_T, mon: 1, tm: 1, cr: [1, 2], rar: [80, 18, 2] },
+  silver: { n: '銀の たからばこ',     c: '#c8d0e0', d: '#6a7488', sec: 180 * CHEST_T, mon: 1, tm: 2, cr: [2, 3], rar: [70, 25, 5] },
+  gold:   { n: '金の たからばこ',     c: '#ffd166', d: '#a87a10', sec: 480 * CHEST_T, mon: 2, tm: 3, cr: [3, 5], rar: [55, 35, 10] },
+  giant:  { n: 'ジャイアントばこ',     c: '#ff9a5a', d: '#a04a20', sec: 720 * CHEST_T, mon: 4, tm: 4, cr: [8, 12], rar: [60, 30, 10] },
+  magic:  { n: 'マジックばこ',         c: '#c08aff', d: '#5a3a9a', sec: 720 * CHEST_T, mon: 2, tm: 5, cr: [4, 6], rar: [30, 45, 25] },
+  legend: { n: 'でんせつの たからばこ', c: '#7af0ff', d: '#2a7a9a', sec: 1800 * CHEST_T, mon: 2, tm: 4, cr: [6, 10], rar: [0, 40, 60] },
 };
 // もらえる じゅんばん（くりかえし）
 const CHEST_CYCLE = ['silver', 'silver', 'wood', 'gold', 'silver', 'silver', 'wood', 'silver', 'gold', 'magic', 'silver', 'silver', 'wood', 'gold', 'silver', 'giant',
   'silver', 'wood', 'silver', 'gold', 'silver', 'silver', 'magic', 'silver', 'gold', 'silver', 'wood', 'silver', 'giant', 'gold', 'silver', 'silver', 'legend'];
 const RARITY = [{ n: 'ノーマル', c: '#d8d0c0' }, { n: 'レア', c: '#7ab8ff' }, { n: 'エピック', c: '#d08aff' }];
+// モンスターの レア度：めずらしい種族は エピック、それ以外は 種族値の 合計で 上位10%＝エピック・つぎの30%＝レア
+let _monRank = null;
+function monRarity(sid) {
+  if (!_monRank) {
+    const tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; };
+    const ids = poolIds().slice().sort((a, b) => tot(b) - tot(a)); _monRank = {};
+    ids.forEach((id, i) => _monRank[id] = SPECIES[id].rare || i < ids.length * .1 ? 2 : i < ids.length * .4 ? 1 : 0);
+  }
+  return _monRank[sid] || 0;
+}
 const tmRarity = (id) => { const m = MOVES[id]; if (!MOVES100[id]) return 0; const p = m.power || 0; return p >= 100 || (m.cat === 'stat' && ['field', 'baton', 'dbond', 'curse'].includes(m.k)) ? 2 : p >= 75 || m.cat === 'stat' ? 1 : 0; };
 const TM_POOL = () => Object.keys(MOVES100).filter(id => MOVES[id]);
 function giveChest() {
@@ -2427,28 +2437,34 @@ async function tapChest(i) {
   if (await ask(`のこり ${fmtTime(left)}。\n💎${cost} ジェムで いますぐ あけますか？（もっている：${S.gems || 0}）`, 'あける', 'やめる')) payOpen(i, cost);
 }
 function payOpen(i, cost) {
-  if ((S.gems || 0) < cost) { say0('ジェムが たりません。たからばこから ジェムが でることが あります'); return; }
+  if ((S.gems || 0) < cost) { say0('ジェムが たりません'); return; }
   S.gems -= cost; openChest(i);
 }
 function rollChest(kind) {
-  const C = CHESTS[kind], out = { cr: randi(C.cr[0], C.cr[1]), gem: randi(C.gem[0], C.gem[1]), tms: [] };
+  const C = CHESTS[kind], out = { cr: randi(C.cr[0], C.cr[1]), tms: [], mons: [] };
+  const rollR = () => { let x = Math.random() * 100, r = 0; for (; r < 2 && x >= C.rar[r]; r++) x -= C.rar[r]; return r; };
   const pool = TM_POOL(), byR = [0, 1, 2].map(r => pool.filter(id => tmRarity(id) === r));
-  for (let k = 0; k < C.tm; k++) {
-    let x = Math.random() * 100, r = 0; for (; r < 2 && x >= C.rar[r]; r++) x -= C.rar[r];
-    const list = byR[r].length ? byR[r] : pool; out.tms.push(choice(list));
-  }
+  for (let k = 0; k < C.tm; k++) { const r = rollR(); out.tms.push(choice(byR[r].length ? byR[r] : pool)); }
+  const mp = poolIds(), mR = [0, 1, 2].map(r => mp.filter(id => monRarity(id) === r));
+  for (let k = 0; k < C.mon; k++) { const r = rollR(); out.mons.push(choice(mR[r].length ? mR[r] : mp)); }
   return out;
 }
 // あける：中身を 1つずつ 見せる
 function openChest(i) {
   const c = S.chests[i], C = CHESTS[c.kind], R = rollChest(c.kind);
   S.chests.splice(i, 1);
-  S.capsules += R.cr; S.gems = (S.gems || 0) + R.gem; S.tms = S.tms || {};
+  S.capsules += R.cr; S.tms = S.tms || {};
   for (const id of R.tms) S.tms[id] = (S.tms[id] || 0) + 1;
+  const owned = new Set([...S.party, ...S.box].map(m => m.sid));
+  const monCards = R.mons.map(sid => {
+    const m = newMon(sid), sp = SPECIES[sid], r = RARITY[monRarity(sid)], isNew = !owned.has(sid); owned.add(sid);
+    const where = S.party.length < 6 ? (S.party.push(m), 'パーティに くわわった！') : (S.box.push(m), 'ボックスに おくられた');
+    const img = spriteCanvas(sid, 96).toDataURL();
+    return `<div class="reward"><div style="display:flex;gap:6px;justify-content:center"><span class="rar" style="background:${r.c}">${r.n}</span>${isNew ? '<span class="rar" style="background:#ffd166">NEW</span>' : ''}</div><img src="${img}" class="pix" style="width:96px;height:96px;display:block;margin:6px auto"><div class="big">${sp.n}</div><div style="display:flex;gap:4px;justify-content:center">${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><div class="dim">${NATURES[m.nat].n}・${ivGrade(m)}<br>わざ：${m.moves.map(x => MOVES[x].n).join('・')}<br>${where}</div></div>`;
+  });
   save();
   const cards = [`<div class="reward">${chestIcon(c.kind).replace('class="ic"', 'style="width:120px;height:92px"')}<div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
-    `<div class="reward"><div class="big">クリスタル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
-  if (R.gem) cards.push(`<div class="reward"><div class="big">💎 ジェム ×${R.gem}</div><div class="dim">たからばこを すぐ あけられる</div></div>`);
+    ...monCards, `<div class="reward"><div class="big">クリスタル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
   for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="rar" style="background:${r.c}">${r.n}</span><div class="big">わざマシン：${m.n}</div>${typeChip(m.t)}<div class="dim">${moveDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
   bg.innerHTML = `<div class="askbox"><div id="rwBody"></div><div class="dim" id="rwCount" style="margin-top:6px"></div><button class="btn" id="rwNext" style="margin-top:10px;width:100%">つぎへ</button></div>`;
