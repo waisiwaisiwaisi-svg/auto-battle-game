@@ -7,8 +7,7 @@ AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-'
 TYPES = {'normal': ('ノーマル', '#d8d0c0'), 'fire': ('ほのお', '#ff8a3d'), 'water': ('みず', '#4aa8ff'), 'grass': ('くさ', '#62d26f'),
          'elec': ('でんき', '#ffd84a'), 'ice': ('こおり', '#9fe8ff'), 'fighting': ('かくとう', '#e0704a'), 'poison': ('どく', '#b86ad8'),
          'ground': ('じめん', '#d8b060'), 'wind': ('かぜ', '#a6ece6'), 'psychic': ('エスパー', '#ff7ab0'), 'bug': ('むし', '#a8c840'),
-         'rock': ('いわ', '#c49a6c'), 'ghost': ('ゴースト', '#8a78c8'), 'dragon': ('ドラゴン', '#7a6aff'), 'dark': ('あく', '#8a7060'),
-         'steel': ('はがね', '#b8c0d0'), 'fairy': ('フェアリー', '#ffb0e0')}
+         'rock': ('いわ', '#c49a6c'), 'ghost': ('ゴースト', '#8a78c8'), 'dragon': ('ドラゴン', '#7a6aff')}
 ORDER = ['fire', 'water', 'grass', 'elec', 'ice', 'fighting', 'poison', 'ground', 'wind', 'dragon', 'ghost']
 
 def png(sp):

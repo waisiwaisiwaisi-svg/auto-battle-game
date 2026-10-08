@@ -114,6 +114,12 @@ D = {
 assert len(D) == 100, len(D)
 
 TYPE_MAP = {'electric': 'elec', 'flying': 'wind'}
+# 初代の 15タイプだけを 使う（あく・はがね・フェアリーは なし）。その タイプの わざは 初代らしい タイプへ
+GEN1_DROP = ('dark', 'steel', 'fairy')
+GEN1_MOVE = {'taunt': 'normal', 'knock-off': 'normal', 'sucker-punch': 'normal', 'foul-play': 'normal', 'crunch': 'normal',
+             'nasty-plot': 'psychic', 'dark-pulse': 'ghost', 'iron-defense': 'normal', 'flash-cannon': 'normal', 'iron-head': 'rock',
+             'metal-burst': 'fighting', 'dazzling-gleam': 'psychic', 'draining-kiss': 'grass', 'play-rough': 'normal',
+             'moonblast': 'psychic', 'alluring-voice': 'psychic'}
 STAT = {'attack': 'atk', 'defense': 'def', 'special-attack': 'spa', 'special-defense': 'spd', 'speed': 'spe'}
 AIL = {'burn': 'brn', 'paralysis': 'par', 'poison': 'psn', 'freeze': 'frz'}
 SELF_DROP = {'close-combat', 'draco-meteor', 'overheat', 'leaf-storm'}
@@ -125,6 +131,7 @@ out = {}
 for o in src:
     mid = o['id']; name, k, p = D[mid]
     t = TYPE_MAP.get(o['type'], o['type'])
+    t = GEN1_MOVE.get(mid, t)
     cat = {'physical': 'phys', 'special': 'spec', 'status': 'stat'}[o['dmg']]
     acc = o['acc']  # 0 = 必中（または命中判定なし）
     m = {'n': name, 'ref': mid, 't': t, 'cat': cat, 'k': k, 'power': o['power'], 'acc': acc, 'prio': o['prio']}
@@ -175,6 +182,7 @@ if csvdir:
 else:
     chart = json.load(open(os.path.join(HERE, 'type-chart.json')))
 
+chart = {a: {b: f for b, f in r.items() if b not in GEN1_DROP} for a, r in chart.items() if a not in GEN1_DROP}
 js = '/* ---- ここから自動生成（tools/gen_moves.py）---- */\n'
 js += 'const CHART = ' + json.dumps(chart, ensure_ascii=False, separators=(',', ':')) + ';\n'
 js += 'const MOVES100 = {\n' + ',\n'.join(f'  {json.dumps(k)}: ' + json.dumps(v, ensure_ascii=False, separators=(", ", ": ")) for k, v in out.items()) + '\n};\n'

@@ -95,7 +95,7 @@
 "name": "エンジュウ",
 "types": [
 "fire",
-"dark"
+"rock"
 ],
 "base": "けもの",
 "body": "Q",
@@ -151,7 +151,7 @@
 "name": "クロホムラ",
 "types": [
 "fire",
-"dark"
+"ghost"
 ],
 "base": "オオカミ",
 "body": "Q",
@@ -337,8 +337,7 @@
 "a_water9": {
 "name": "キバザメ",
 "types": [
-"water",
-"dark"
+"water"
 ],
 "base": "サメ",
 "body": "W",
@@ -412,7 +411,7 @@
 "name": "ハナコロ",
 "types": [
 "grass",
-"fairy"
+"psychic"
 ],
 "base": "花の 精",
 "body": "B",
@@ -449,8 +448,7 @@
 "a_grass5": {
 "name": "ハナビラン",
 "types": [
-"grass",
-"fairy"
+"grass"
 ],
 "base": "花",
 "body": "P",
@@ -598,8 +596,7 @@
 "a_elec4": {
 "name": "エレキュウ",
 "types": [
-"elec",
-"steel"
+"elec"
 ],
 "base": "電気の たま",
 "body": "W",
@@ -691,8 +688,7 @@
 "a_elec9": {
 "name": "ライジュウガ",
 "types": [
-"elec",
-"dark"
+"elec"
 ],
 "base": "ヒョウ",
 "body": "Q",
@@ -803,7 +799,7 @@
 "name": "ユキウサ",
 "types": [
 "ice",
-"fairy"
+"normal"
 ],
 "base": "ウサギ",
 "body": "Q",
@@ -897,7 +893,7 @@
 "name": "スイショウバ",
 "types": [
 "ice",
-"fairy"
+"psychic"
 ],
 "base": "天馬",
 "body": "Q",
@@ -1007,7 +1003,7 @@
 "name": "パンダイ",
 "types": [
 "fighting",
-"dark"
+"normal"
 ],
 "base": "パンダ",
 "body": "B",
@@ -1082,7 +1078,7 @@
 "name": "オニゴリラ",
 "types": [
 "fighting",
-"dark"
+"ground"
 ],
 "base": "鬼＋ゴリラ",
 "body": "B",
@@ -1101,7 +1097,7 @@
 "name": "ドクネコ",
 "types": [
 "poison",
-"dark"
+"normal"
 ],
 "base": "ネコ",
 "body": "Q",
@@ -1474,7 +1470,7 @@
 "name": "フクロン",
 "types": [
 "wind",
-"dark"
+"psychic"
 ],
 "base": "フクロウ",
 "body": "F",
@@ -1530,7 +1526,7 @@
 "name": "ヨルコウモリ",
 "types": [
 "wind",
-"dark"
+"ghost"
 ],
 "base": "コウモリ",
 "body": "F",
@@ -1700,7 +1696,7 @@
 "name": "ヤミドラゴ",
 "types": [
 "dragon",
-"dark"
+"ghost"
 ],
 "base": "竜",
 "body": "F",
@@ -1831,7 +1827,7 @@
 "name": "ツボビ",
 "types": [
 "fire",
-"steel"
+"rock"
 ],
 "base": "火の つぼ",
 "body": "W",
@@ -1981,8 +1977,7 @@
 "b_water4": {
 "name": "センスイギョ",
 "types": [
-"water",
-"steel"
+"water"
 ],
 "base": "潜水艦＋魚",
 "body": "W",
@@ -2038,7 +2033,7 @@
 "name": "アワボウ",
 "types": [
 "water",
-"fairy"
+"psychic"
 ],
 "base": "あわの 精",
 "body": "B",
@@ -2166,7 +2161,7 @@
 "name": "ハナサキ",
 "types": [
 "grass",
-"fairy"
+"bug"
 ],
 "base": "花",
 "body": "P",
@@ -2204,7 +2199,7 @@
 "name": "トマトガブ",
 "types": [
 "grass",
-"dark"
+"poison"
 ],
 "base": "トマト",
 "body": "P",
@@ -2241,7 +2236,7 @@
 "name": "ハナウサギ",
 "types": [
 "grass",
-"fairy"
+"normal"
 ],
 "base": "ウサギ",
 "body": "Q",
@@ -2279,7 +2274,7 @@
 "name": "ビリザル",
 "types": [
 "elec",
-"dark"
+"normal"
 ],
 "base": "サル",
 "body": "Q",
@@ -2335,7 +2330,7 @@
 "name": "イカヅチネコ",
 "types": [
 "elec",
-"dark"
+"normal"
 ],
 "base": "ネコ",
 "body": "Q",
@@ -2354,7 +2349,7 @@
 "name": "デンチボット",
 "types": [
 "elec",
-"steel"
+"normal"
 ],
 "base": "電池",
 "body": "B",
@@ -2392,7 +2387,7 @@
 "name": "スパークボム",
 "types": [
 "elec",
-"steel"
+"water"
 ],
 "base": "機雷",
 "body": "W",
@@ -2410,8 +2405,7 @@
 "b_elec10": {
 "name": "イカヅチジュウ",
 "types": [
-"elec",
-"dark"
+"elec"
 ],
 "base": "雷獣",
 "body": "Q",
@@ -2540,7 +2534,7 @@
 "name": "ユキドーム",
 "types": [
 "ice",
-"fairy"
+"psychic"
 ],
 "base": "スノードーム",
 "body": "W",
@@ -2559,7 +2553,7 @@
 "name": "コオリチョウ",
 "types": [
 "ice",
-"fairy"
+"bug"
 ],
 "base": "チョウ",
 "body": "F",
@@ -2783,7 +2777,7 @@
 "name": "パンダボクサ",
 "types": [
 "fighting",
-"dark"
+"normal"
 ],
 "base": "パンダ",
 "body": "B",
@@ -2840,7 +2834,7 @@
 "name": "キノコヒメ",
 "types": [
 "poison",
-"fairy"
+"grass"
 ],
 "base": "キノコ",
 "body": "B",
@@ -2859,7 +2853,7 @@
 "name": "ノラドクネコ",
 "types": [
 "poison",
-"dark"
+"ghost"
 ],
 "base": "ネコ",
 "body": "Q",
@@ -2972,7 +2966,7 @@
 "name": "ペストガラス",
 "types": [
 "poison",
-"dark"
+"wind"
 ],
 "base": "カラス＋ペスト医者",
 "body": "B",
@@ -3009,7 +3003,7 @@
 "name": "ショベラー",
 "types": [
 "ground",
-"steel"
+"rock"
 ],
 "base": "ショベルカー",
 "body": "Q",
@@ -3083,7 +3077,7 @@
 "name": "トロッコン",
 "types": [
 "ground",
-"steel"
+"rock"
 ],
 "base": "トロッコ",
 "body": "Q",
@@ -3159,7 +3153,7 @@
 "name": "ドリルモグラ",
 "types": [
 "ground",
-"steel"
+"rock"
 ],
 "base": "ドリル＋モグラ",
 "body": "Q",
@@ -3234,7 +3228,7 @@
 "name": "フウセンボ",
 "types": [
 "wind",
-"fairy"
+"normal"
 ],
 "base": "風船",
 "body": "F",
@@ -3272,7 +3266,7 @@
 "name": "クモモ",
 "types": [
 "wind",
-"fairy"
+"water"
 ],
 "base": "雲",
 "body": "F",
@@ -3310,7 +3304,7 @@
 "name": "ヘリドリ",
 "types": [
 "wind",
-"steel"
+"normal"
 ],
 "base": "ヘリコプター＋鳥",
 "body": "F",
@@ -3329,7 +3323,7 @@
 "name": "ソラブネ",
 "types": [
 "wind",
-"steel"
+"water"
 ],
 "base": "飛行船＋マンボウ",
 "body": "F",
@@ -3386,7 +3380,7 @@
 "name": "シャリンリュウ",
 "types": [
 "dragon",
-"steel"
+"rock"
 ],
 "base": "竜＋車輪",
 "body": "Q",
@@ -3443,7 +3437,7 @@
 "name": "ホシゾラリュウ",
 "types": [
 "dragon",
-"fairy"
+"psychic"
 ],
 "base": "星空の 竜",
 "body": "B",
@@ -3462,7 +3456,7 @@
 "name": "ヨロイドラ",
 "types": [
 "dragon",
-"steel"
+"rock"
 ],
 "base": "竜",
 "body": "Q",
@@ -3519,7 +3513,7 @@
 "name": "シコクリュウ",
 "types": [
 "dragon",
-"dark"
+"ghost"
 ],
 "base": "竜",
 "body": "F",
@@ -3633,7 +3627,7 @@
 "name": "ユウレイネコ",
 "types": [
 "ghost",
-"dark"
+"psychic"
 ],
 "base": "黒ネコ",
 "body": "Q",
@@ -3652,7 +3646,7 @@
 "name": "ボウレイキシ",
 "types": [
 "ghost",
-"steel"
+"fighting"
 ],
 "base": "よろいの 騎士",
 "body": "B",
@@ -3671,7 +3665,7 @@
 "name": "メダマショ",
 "types": [
 "ghost",
-"dark"
+"psychic"
 ],
 "base": "目玉の 本",
 "body": "F",
@@ -3708,8 +3702,7 @@
 "g9": {
 "name": "シニガミン",
 "types": [
-"ghost",
-"dark"
+"ghost"
 ],
 "base": "死神",
 "body": "F",
