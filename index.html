@@ -2668,6 +2668,7 @@ const FIELD_NAMES = Object.fromEntries(FIELDS.map(k => [k, ARENAS[k].name]));
    ===================================================================== */
 const SND = (() => {
   let ac = null, master, musicG, sfxG, song = null, songName = '', next = 0, step = 0, timer = 0, noiseBuf = null;
+  const WAVES = {};
   const OPT_KEY = 'pma_sound';
   const opt = (() => { try { return Object.assign({ music: .55, sfx: .8, mute: false }, JSON.parse(localStorage.getItem(OPT_KEY) || '{}')); } catch (e) { return { music: .55, sfx: .8, mute: false }; } })();
   const saveOpt = () => { try { localStorage.setItem(OPT_KEY, JSON.stringify(opt)); } catch (e) { } };
@@ -2681,6 +2682,8 @@ const SND = (() => {
     const comp = ac.createDynamicsCompressor(); comp.connect(master);
     musicG = ac.createGain(); musicG.connect(comp); sfxG = ac.createGain(); sfxG.connect(comp);
     noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    // ファミコンふうの パルス波（デューティ 12.5%・25%）
+    for (const [k, d] of [['p12', .125], ['p25', .25]]) { const N = 32, re = new Float32Array(N), im = new Float32Array(N); for (let n = 1; n < N; n++) re[n] = 2 * Math.sin(n * Math.PI * d) / (n * Math.PI); WAVES[k] = ac.createPeriodicWave(re, im); }
     applyVol();
     timer = setInterval(tick, 30);
     if (songName) play(songName, true);
@@ -2689,7 +2692,7 @@ const SND = (() => {
   // 1音：波形・高さ（スライドあり）・長さ・音量
   function tone(dest, t, f0, dur, type = 'square', v = .3, f1 = null, att = .005) {
     const o = ac.createOscillator(), g = ac.createGain();
-    o.type = type; o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+    if (WAVES[type]) o.setPeriodicWave(WAVES[type]); else o.type = type; o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + att); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
     o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + .02);
   }
@@ -2757,6 +2760,7 @@ const SND = (() => {
     swing: 'k:3 h:1 s:3 h:1 k:3 h:1 s:2 h:2', light: 'k:4 h:2 h:2 s:4 h:4', tribal: 'k:2 k:1 h:1 s:2 h:2 k:1 k:1 k:2 s:2 h:2',
   };
   const STAGE_MUSIC = {
+    wild: { bpm: 164, root: 62, mode: 'dorian', lead: 'square', arp: 'square', drum: 'rock', prog: [0, 5, 6, 4], seed: 131 },
     ice: { bpm: 128, root: 64, mode: 'dorian', lead: 'triangle', arp: 'sine', drum: 'light', prog: [0, 5, 3, 4], seed: 11 },
     elec: { bpm: 160, root: 66, mode: 'minor', lead: 'square', arp: 'sawtooth', drum: 'four', prog: [0, 0, 5, 6], seed: 23 },
     grass: { bpm: 120, root: 67, mode: 'major', lead: 'square', arp: 'triangle', drum: 'swing', prog: [0, 3, 4, 0], seed: 37 },
@@ -2768,33 +2772,46 @@ const SND = (() => {
     poison: { bpm: 118, root: 61, mode: 'phrygian', lead: 'square', arp: 'sine', drum: 'swing', prog: [0, 1, 5, 4], seed: 97 },
     fighting: { bpm: 150, root: 69, mode: 'minor', lead: 'square', arp: 'square', drum: 'rock', prog: [0, 6, 5, 4], seed: 103 },
   };
+  // 8bit で はげしい 戦闘曲：パルス波の リフ（16分）→ メロディ → くりかえし。三角波の ベース、ノイズの ドラム
   function compose(o, boss) {
-    let sd = o.seed * 9301 + (boss ? 7 : 0); const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
-    const sc = MODES[o.mode], deg = (d) => o.root + sc[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7);
-    const RHY = [[2, 2, 2, 2, 2, 2, 4], [4, 2, 2, 4, 4], [2, 2, 4, 2, 2, 4], [3, 3, 2, 2, 2, 4], [2, 1, 1, 2, 2, 4, 4], [6, 2, 4, 2, 2]];
-    const rA = RHY[Math.floor(r() * RHY.length)], rB = RHY[Math.floor(r() * RHY.length)];
-    const lead = [], bass = [], arp = [];
-    let cur = 2;
-    for (let bar = 0; bar < 8; bar++) {
-      const c = o.prog[bar % 4], rh = bar % 4 === 3 ? rB : rA, tones = [c, c + 2, c + 4];
-      if (bar === 7) lead.push(nm(deg(7)) + ':8', nm(deg(4)) + ':4', nm(deg(7)) + ':4');
-      else rh.forEach((len, i) => {
-        if (i === 0 || len >= 4) cur = tones[Math.floor(r() * 3)] + 7 * (r() < .3 ? 1 : 0);   // つよい 拍は 和音の 音
-        else cur += [-2, -1, -1, 1, 1, 2][Math.floor(r() * 6)];
-        cur = Math.max(-1, Math.min(10, cur));
-        lead.push((r() < .08 && i > 0 ? 'R' : nm(deg(cur) + 12 * (o.lead === 'sawtooth' ? -1 : 0))) + ':' + len);
+    let sd = o.seed * 9301 + (boss ? 7 : 0); const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647), pick = (a) => a[Math.floor(r() * a.length)];
+    const mode = { major: 'mixo', lydian: 'dorian' }[o.mode] || o.mode, sc = MODES[mode], deg = (d) => o.root + sc[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7);
+    // リフの かた（和音の 根音からの 音階の ずれ・-9＝やすみ）
+    const RIFFS = [[0, 0, 4, 0, 3, 0, 2, 0, 0, 0, 4, 0, 5, 4, 3, 2], [0, 7, 0, 4, 0, 7, 0, 5, 0, 7, 0, 4, 2, 3, 4, 6], [0, 0, 0, 2, 3, -9, 3, 4, 0, 0, 0, 2, 4, -9, 3, 2],
+      [7, 4, 2, 0, 7, 4, 2, 0, 8, 5, 3, 1, 8, 5, 4, 2], [0, -9, 0, 7, -9, 0, 6, 7, 0, -9, 0, 7, 9, 8, 7, 4]];
+    const riff = pick(RIFFS), riff2 = pick(RIFFS);
+    const MEL_RHY = [[2, 2, 2, 2, 4, 4], [4, 2, 2, 2, 2, 4], [2, 2, 4, 2, 2, 4], [3, 3, 2, 4, 4], [2, 1, 1, 2, 2, 4, 4]];
+    const lead = [], bass = [], arp = [], drum = [];
+    let cur = 4;
+    for (let bar = 0; bar < 16; bar++) {
+      const c = o.prog[bar % 4], B = bar >= 8, last = bar % 8 === 7;
+      // リード：前半は 16分の リフ、後半は メロディ
+      if (!B) { const rf = bar % 4 === 3 ? riff2 : riff; for (const d of rf) lead.push(d === -9 ? 'R:1' : nm(deg(c + d) + 12) + ':1'); }
+      else if (last) lead.push(nm(deg(c + 7) + 12) + ':6', nm(deg(c + 4) + 12) + ':2', nm(deg(c + 7) + 12) + ':8');
+      else pick(MEL_RHY).forEach((len, i) => {
+        if (i === 0 || len >= 4) cur = c + pick([0, 2, 4, 7]); else cur += pick([-2, -1, 1, 1, 2]);
+        cur = Math.max(c - 2, Math.min(c + 9, cur)); lead.push(nm(deg(cur) + 12) + ':' + len);
       });
+      // アルペジオ：12.5%パルスで 16分の 和音くずし
+      const ch = [c, c + 2, c + 4, c + 7].map(d => nm(deg(d)));
+      arp.push(...[0, 1, 2, 3, 2, 1, 0, 1, 0, 1, 2, 3, 2, 1, 2, 3].map(k => ch[k] + ':1'));
+      // ベース：三角波の 8分 オクターブ、フレーズの おわりは 歩く
       const b = deg(c) - 24;
-      bass.push(o.drum === 'four' || o.drum === 'rock' ? `${nm(b)}:2 ${nm(b + 12)}:2 `.repeat(4) : `${nm(b)}:4 ${nm(b + 7)}:4 ${nm(b)}:4 ${nm(b + 12)}:4`);
-      const ch = tones.map(t => deg(t) - 12); arp.push([0, 1, 2, 1].map(i => nm(ch[i]) + ':2').join(' ').repeat(1) + ' ' + [2, 1, 0, 1].map(i => nm(ch[i]) + ':2').join(' '));
+      if (last) bass.push(`${nm(b)}:2 ${nm(b + 12)}:2 ${nm(b)}:2 ${nm(b + 12)}:2 ${nm(deg(c + 4) - 24)}:2 ${nm(deg(c + 3) - 24)}:2 ${nm(deg(c + 2) - 24)}:2 ${nm(deg(c + 1) - 24)}:2`);
+      else bass.push(`${nm(b)}:2 ${nm(b + 12)}:2 `.repeat(4).trim());
+      // ドラム：8分の ハイハット、2・4拍に スネア、つよい キック。フレーズの おわりは フィル
+      if (last) drum.push('k:2 h:2 s:2 h:2 f:1 f:1 f:1 f:1 s:1 f:1 s:1 s:1');
+      else drum.push((bar % 8 === 0 ? 'c:1 k:1' : 'k:2') + ' h:2 s:2 h:1 k:1 k:2 h:2 s:2 ' + (boss ? 'h:1 h:1' : 'h:2'));
     }
-    const S_ = { bpm: o.bpm + (boss ? 14 : 0), ch: [
-      { w: o.lead, v: o.lead === 'sawtooth' ? .1 : o.lead === 'triangle' ? .24 : .14, s: lead.join(' ') },
-      { w: o.arp, v: o.arp === 'sine' ? .1 : .05, s: arp.join(' ') },
-      { w: 'triangle', v: .34, s: bass.join(' ') },
-      { drum: 1, s: (DRUMS[o.drum] + ' ').repeat(8) },
+    // メロディの ハモり：後半の リードを 3度 下で（ボスは 前半も）
+    const lead2 = lead.map((t, i) => { const [n, l] = t.split(':'); return n === 'R' ? t : nm(hzToMidi(n) - (boss ? 5 : 4)) + ':' + l; });
+    const S_ = { chip: 1, bpm: Math.min(188, 158 + (o.seed % 6) * 4 + (boss ? 12 : 0)), ch: [
+      { w: o.lead === 'triangle' ? 'p25' : 'square', v: .12, s: lead.join(' ') },
+      { w: 'p12', v: .045, s: arp.join(' ') },
+      { w: 'triangle', v: .38, s: bass.join(' ') },
+      { drum: 1, s: drum.join(' ') },
     ] };
-    if (boss) S_.ch.push({ w: 'square', v: .06, s: lead.map(t => { const [n, l] = t.split(':'); return n === 'R' ? t : nm(hzToMidi(n) - 5) + ':' + l; }).join(' ') });
+    if (boss) S_.ch.push({ w: 'p25', v: .05, s: lead2.join(' ') });
     return prep(S_);
   }
   const hzToMidi = (n) => { const m = /^([A-G]#?)(-?\d)$/.exec(n); return NN.indexOf(m[1]) + (+m[2] + 1) * 12; };
@@ -2817,9 +2834,11 @@ const SND = (() => {
         for (const e of p.p.ev) {
           if (e.t !== s2) continue;
           if (p.drum) {
-            if (e.d === 'k') tone(musicG, next, 150, .14, 'sine', .55, 40);
-            else if (e.d === 's') { noise(musicG, next, .12, .22, 1500); tone(musicG, next, 220, .06, 'triangle', .12, 120); }
-            else if (e.d === 'h') noise(musicG, next, .035, .07, 7000);
+            if (e.d === 'k') { if (song.chip) tone(musicG, next, 190, .11, 'triangle', .6, 45); else tone(musicG, next, 150, .14, 'sine', .55, 40); }
+            else if (e.d === 's') { noise(musicG, next, song.chip ? .1 : .12, song.chip ? .26 : .22, song.chip ? 2200 : 1500); tone(musicG, next, 220, .06, song.chip ? 'p25' : 'triangle', .1, 120); }
+            else if (e.d === 'f') noise(musicG, next, .06, .16, 2600);   // フィルの スネア
+            else if (e.d === 'c') noise(musicG, next, .5, .14, 5000);    // シンバル
+            else if (e.d === 'h') noise(musicG, next, .03, song.chip ? .06 : .07, 8000);
           } else tone(musicG, next, e.f, e.len * spb * .92, p.w, p.v, null, .008);
         }
       }
@@ -2877,6 +2896,18 @@ const SND = (() => {
     onSe: null,
     play, se, opt, init,
     _song: (n) => { const x = songOf(n); return x ? { len: x.len, bpm: x.bpm, notes: x.parts.map(p => p.p.ev.length), bad: x.parts.some(p => p.p.ev.some(e => e.f === 0 || (e.f && !isFinite(e.f)))) } : null; },
+    // テスト用：曲を sec びょうぶん オフラインで 書きだす（Float32Array）
+    async _render(n, sec = 8) {
+      const keep = [ac, musicG, noiseBuf, song, next, step], off = new OfflineAudioContext(1, 44100 * sec, 44100);
+      ac = off; musicG = off.createGain(); musicG.gain.value = .5; musicG.connect(off.destination);
+      noiseBuf = off.createBuffer(1, 44100, 44100); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      for (const [k, du] of [['p12', .125], ['p25', .25]]) { const N = 32, re = new Float32Array(N), im = new Float32Array(N); for (let i = 1; i < N; i++) re[i] = 2 * Math.sin(i * Math.PI * du) / (i * Math.PI); WAVES[k] = off.createPeriodicWave(re, im); }
+      song = songOf(n); step = 0; next = 0; const spb = 60 / song.bpm / 4;
+      const tc = off.currentTime; Object.defineProperty(off, 'currentTime', { get: () => sec - .3, configurable: true }); tick(); void tc;
+      const buf = await off.startRendering(); [ac, musicG, noiseBuf, song, next, step] = keep; for (const k in WAVES) delete WAVES[k];
+      if (ac) for (const [k, du] of [['p12', .125], ['p25', .25]]) { const N = 32, re = new Float32Array(N), im = new Float32Array(N); for (let i = 1; i < N; i++) re[i] = 2 * Math.sin(i * Math.PI * du) / (i * Math.PI); WAVES[k] = ac.createPeriodicWave(re, im); }
+      void spb; return buf.getChannelData(0);
+    },
     set(k, v) { opt[k] = v; saveOpt(); applyVol(); },
     toggle() { opt.mute = !opt.mute; saveOpt(); applyVol(); return opt.mute; },
   };
@@ -3744,7 +3775,7 @@ function startBattle(cfg) {
 
   say(cfg.intro);
   show('scBattle');
-  SND.play(cfg.kind === 'wild' ? 'wild' : 'st_' + st.field + (S.round >= ROUNDS.length - 1 ? '_boss' : ''));
+  SND.play(cfg.kind === 'wild' ? 'st_wild' : 'st_' + st.field + (S.round >= ROUNDS.length - 1 ? '_boss' : ''));
   setupCmds();
 }
 
