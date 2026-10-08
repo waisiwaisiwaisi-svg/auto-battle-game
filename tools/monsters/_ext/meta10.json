@@ -1,0 +1,12 @@
+{
+ "kamadon":    {"name": "カマドン",   "types": ["fire", "rock"],      "base": "かまど",           "body": "Q", "size": "M", "note": "石を 積んだ かまどの 体。おなかの 火で なんでも 焼く"},
+ "pottoko":    {"name": "ポットコ",   "types": ["water", "normal"],   "base": "ティーポット＋タコ", "body": "W", "size": "M", "note": "ティーポットの 頭を もつ タコ。注ぎ口から 熱い お茶を 飛ばす"},
+ "hyoukyuu":   {"name": "ヒョウキュー", "types": ["ice", "normal"],    "base": "氷の キューブ",     "body": "Q", "size": "M", "note": "四角い 氷の 体。冷たい 角で 体当たりする"},
+ "yukidome":   {"name": "ユキドーム", "types": ["ice", "fairy"],      "base": "スノードーム",     "body": "W", "size": "M", "note": "ガラスの 中に 小さな 家と 雪景色。ふると 吹雪が 起きる"},
+ "furasukon":  {"name": "フラスコン", "types": ["poison", "water"],   "base": "フラスコ",         "body": "W", "size": "S", "note": "毒の 薬が 入った フラスコ。泡を ぶくぶく 飛ばす"},
+ "shoberaa":   {"name": "ショベラー", "types": ["ground", "steel"],   "base": "ショベルカー",     "body": "Q", "size": "M", "note": "黄色い ショベルカー。アームで 地面ごと すくいあげる"},
+ "sorabune":   {"name": "ソラブネ",   "types": ["wind", "steel"],     "base": "飛行船＋マンボウ", "body": "F", "size": "M", "note": "マンボウの 形の 飛行船。プロペラで 風を 起こす"},
+ "noroinui":   {"name": "ノロイヌイ", "types": ["ghost", "normal"],   "base": "呪いの ぬいぐるみ", "body": "B", "size": "M", "note": "ボタンの 目の つぎはぎ人形。霊火を まとって 呪う"},
+ "kitsunemen": {"name": "キツネメン", "types": ["ghost", "psychic"],  "base": "狐の お面",         "body": "F", "size": "M", "note": "宙に 浮かぶ 狐の お面。鈴の 音で 心を まどわす"},
+ "medamasho":  {"name": "メダマショ", "types": ["ghost", "dark"],     "base": "目玉の 本",         "body": "F", "size": "M", "note": "表紙に 大きな 目玉。ページの 触手で からめとる"}
+}

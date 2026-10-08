@@ -12,9 +12,9 @@ for i, m in meta.items():
     L = E.learnset(i, r)
     species[i] = {'n': m['name'], 'type': m['types'][0], **({'type2': m['types'][1]} if len(m['types']) > 1 else {}),
                   'base': E.stats(i, r), 'moves': [x for _, x in L[:2]], 'style': E.style(r),
-                  'catch': {'S': .5, 'M': .4, 'L': .3}[m['size']], 'rare': 0, 'desc': m['note'] + '。（もと：' + m['base'] + '）', 'ext': 1}
+                  'catch': {'S': .5, 'M': .4, 'L': .3}[m['size']], 'rare': m.get('rare', 0), 'desc': m['note'] + '。（もと：' + m['base'] + '）', 'ext': 1}
     learn[i] = L
-js = BEGIN + '\n// 他の AIで 作った 絵（%d体・ためし）。絵は 1枚 → AISpr の 変形で 14コマ\n' % len(meta)
+js = BEGIN + '\n// 他の AIで 作った 絵（%d体）。絵は 1枚 → AISpr の 変形で 14コマ\n' % len(meta)
 js += 'Object.assign(AISpr.DATA, %s);\nObject.assign(SPECIES, %s);\nObject.assign(LEARN, %s);\n' % (
     json.dumps({k: spr[k] for k in meta}, ensure_ascii=False, separators=(',', ':')), json.dumps(species, ensure_ascii=False, separators=(',', ':')),
     json.dumps(learn, ensure_ascii=False, separators=(',', ':'))) + END

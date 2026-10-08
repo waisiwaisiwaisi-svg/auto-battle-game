@@ -1,12 +1,2546 @@
 {
- "kamadon":    {"name": "カマドン",   "types": ["fire", "rock"],      "base": "かまど",           "body": "Q", "size": "M", "note": "石を 積んだ かまどの 体。おなかの 火で なんでも 焼く"},
- "pottoko":    {"name": "ポットコ",   "types": ["water", "normal"],   "base": "ティーポット＋タコ", "body": "W", "size": "M", "note": "ティーポットの 頭を もつ タコ。注ぎ口から 熱い お茶を 飛ばす"},
- "hyoukyuu":   {"name": "ヒョウキュー", "types": ["ice", "normal"],    "base": "氷の キューブ",     "body": "Q", "size": "M", "note": "四角い 氷の 体。冷たい 角で 体当たりする"},
- "yukidome":   {"name": "ユキドーム", "types": ["ice", "fairy"],      "base": "スノードーム",     "body": "W", "size": "M", "note": "ガラスの 中に 小さな 家と 雪景色。ふると 吹雪が 起きる"},
- "furasukon":  {"name": "フラスコン", "types": ["poison", "water"],   "base": "フラスコ",         "body": "W", "size": "S", "note": "毒の 薬が 入った フラスコ。泡を ぶくぶく 飛ばす"},
- "shoberaa":   {"name": "ショベラー", "types": ["ground", "steel"],   "base": "ショベルカー",     "body": "Q", "size": "M", "note": "黄色い ショベルカー。アームで 地面ごと すくいあげる"},
- "sorabune":   {"name": "ソラブネ",   "types": ["wind", "steel"],     "base": "飛行船＋マンボウ", "body": "F", "size": "M", "note": "マンボウの 形の 飛行船。プロペラで 風を 起こす"},
- "noroinui":   {"name": "ノロイヌイ", "types": ["ghost", "normal"],   "base": "呪いの ぬいぐるみ", "body": "B", "size": "M", "note": "ボタンの 目の つぎはぎ人形。霊火を まとって 呪う"},
- "kitsunemen": {"name": "キツネメン", "types": ["ghost", "psychic"],  "base": "狐の お面",         "body": "F", "size": "M", "note": "宙に 浮かぶ 狐の お面。鈴の 音で 心を まどわす"},
- "medamasho":  {"name": "メダマショ", "types": ["ghost", "dark"],     "base": "目玉の 本",         "body": "F", "size": "M", "note": "表紙に 大きな 目玉。ページの 触手で からめとる"}
+"a_fire1": {
+"name": "コギツネビ",
+"types": [
+"fire",
+"normal"
+],
+"base": "子ギツネ",
+"body": "Q",
+"size": "S",
+"note": "しっぽの 先に 小さな 火が ともる 子ギツネ",
+"rare": 0,
+"src": "a_fire1"
+},
+"a_fire2": {
+"name": "ヒバシリ",
+"types": [
+"fire"
+],
+"base": "リス",
+"body": "Q",
+"size": "S",
+"note": "火の しっぽを 立てて すばしっこく 走りまわる",
+"rare": 0,
+"src": "a_fire2"
+},
+"a_fire3": {
+"name": "ホノライ",
+"types": [
+"fire"
+],
+"base": "ライオンの 子",
+"body": "Q",
+"size": "S",
+"note": "燃える たてがみが 生えはじめた 子ライオン",
+"rare": 0,
+"src": "a_fire3"
+},
+"a_fire4": {
+"name": "ヒノトリ",
+"types": [
+"fire",
+"wind"
+],
+"base": "火の鳥",
+"body": "F",
+"size": "M",
+"note": "羽ばたくたびに 火の粉が 舞う",
+"rare": 0,
+"src": "a_fire4"
+},
+"a_fire5": {
+"name": "ボッコ",
+"types": [
+"fire"
+],
+"base": "火の 小鬼",
+"body": "B",
+"size": "M",
+"note": "まんまるの 体から 炎が ふきだす",
+"rare": 0,
+"src": "a_fire5"
+},
+"a_fire6": {
+"name": "エンジュウ",
+"types": [
+"fire",
+"dark"
+],
+"base": "けもの",
+"body": "Q",
+"size": "M",
+"note": "黒い 角と 赤い 毛並み。口から 熱い けむりを はく",
+"rare": 0,
+"src": "a_fire6"
+},
+"a_fire7": {
+"name": "マグマグマ",
+"types": [
+"fire",
+"rock"
+],
+"base": "クマ",
+"body": "B",
+"size": "M",
+"note": "溶岩の 毛皮を まとった 大グマ",
+"rare": 0,
+"src": "a_fire7"
+},
+"a_fire8": {
+"name": "ホムラギツネ",
+"types": [
+"fire"
+],
+"base": "キツネ",
+"body": "Q",
+"size": "M",
+"note": "三つに 分かれた 炎の しっぽで 敵を まどわす",
+"rare": 0,
+"src": "a_fire8"
+},
+"a_fire9": {
+"name": "クロホムラ",
+"types": [
+"fire",
+"dark"
+],
+"base": "オオカミ",
+"body": "Q",
+"size": "L",
+"note": "黒い 体に 燃える たてがみ。夜の 山を かける",
+"rare": 0,
+"src": "a_fire9"
+},
+"a_fire10": {
+"name": "エンリュウオウ",
+"types": [
+"fire",
+"dragon"
+],
+"base": "火竜",
+"body": "F",
+"size": "L",
+"note": "翼を ひろげると 空が 赤く そまる 炎の 竜",
+"rare": 1,
+"src": "a_fire10"
+},
+"a_water1": {
+"name": "アザラコ",
+"types": [
+"water",
+"normal"
+],
+"base": "アザラシの 子",
+"body": "W",
+"size": "S",
+"note": "白黒の ふわふわ。水に うかんで ねむる",
+"rare": 0,
+"src": "a_water1"
+},
+"a_water2": {
+"name": "ナミリュー",
+"types": [
+"water"
+],
+"base": "首長竜の 子",
+"body": "S",
+"size": "S",
+"note": "長い 首で 波の 上を すべる",
+"rare": 0,
+"src": "a_water2"
+},
+"a_water3": {
+"name": "ペンギーノ",
+"types": [
+"water",
+"ice"
+],
+"base": "ペンギン",
+"body": "B",
+"size": "S",
+"note": "胸を はって よちよち 歩く。泳ぐと 速い",
+"rare": 0,
+"src": "a_water3"
+},
+"a_water4": {
+"name": "クラゲリン",
+"types": [
+"water",
+"poison"
+],
+"base": "クラゲ",
+"body": "W",
+"size": "M",
+"note": "光る かさと 長い 足。さわると ピリッと しびれる",
+"rare": 0,
+"src": "a_water4"
+},
+"a_water5": {
+"name": "サメット",
+"types": [
+"water"
+],
+"base": "サメ",
+"body": "W",
+"size": "M",
+"note": "小さいけれど するどい 歯で かみつく",
+"rare": 0,
+"src": "a_water5"
+},
+"a_water6": {
+"name": "アオチビ",
+"types": [
+"water"
+],
+"base": "水の 小竜",
+"body": "B",
+"size": "M",
+"note": "頭の ひれを ふって 水しぶきを とばす",
+"rare": 0,
+"src": "a_water6"
+},
+"a_water7": {
+"name": "ウミヘビオ",
+"types": [
+"water",
+"dragon"
+],
+"base": "ウミヘビ",
+"body": "S",
+"size": "M",
+"note": "渦を まいて 船を まきこむ",
+"rare": 0,
+"src": "a_water7"
+},
+"a_water8": {
+"name": "カメッポ",
+"types": [
+"water",
+"rock"
+],
+"base": "カメ",
+"body": "Q",
+"size": "M",
+"note": "岩の ような 甲羅に こもって 身を 守る",
+"rare": 0,
+"src": "a_water8"
+},
+"a_water9": {
+"name": "キバザメ",
+"types": [
+"water",
+"dark"
+],
+"base": "サメ",
+"body": "W",
+"size": "L",
+"note": "大きな 口で なんでも かみくだく",
+"rare": 0,
+"src": "a_water9"
+},
+"a_water10": {
+"name": "ワダツミ",
+"types": [
+"water",
+"dragon"
+],
+"base": "海竜",
+"body": "F",
+"size": "L",
+"note": "海の 底から 現れる 青い 竜。嵐を 呼ぶ",
+"rare": 1,
+"src": "a_water10"
+},
+"a_grass1": {
+"name": "ハッパネコ",
+"types": [
+"grass"
+],
+"base": "ネコ",
+"body": "Q",
+"size": "S",
+"note": "葉っぱの 耳を ぴくぴく 動かす 子ネコ",
+"rare": 0,
+"src": "a_grass1"
+},
+"a_grass2": {
+"name": "コノハジカ",
+"types": [
+"grass"
+],
+"base": "子ジカ",
+"body": "Q",
+"size": "S",
+"note": "若葉の 角が 生えた 子ジカ",
+"rare": 0,
+"src": "a_grass2"
+},
+"a_grass3": {
+"name": "ハナコロ",
+"types": [
+"grass",
+"fairy"
+],
+"base": "花の 精",
+"body": "B",
+"size": "S",
+"note": "頭の 花から あまい かおりを 出す",
+"rare": 0,
+"src": "a_grass3"
+},
+"a_grass4": {
+"name": "モリガメ",
+"types": [
+"grass",
+"rock"
+],
+"base": "カメ",
+"body": "Q",
+"size": "M",
+"note": "背中の 森に 小鳥が すむ のんびり ガメ",
+"rare": 0,
+"src": "a_grass4"
+},
+"a_grass5": {
+"name": "ハナビラン",
+"types": [
+"grass",
+"fairy"
+],
+"base": "花",
+"body": "P",
+"size": "M",
+"note": "花びらを くるくる 回して 飛ばす",
+"rare": 0,
+"src": "a_grass5"
+},
+"a_grass6": {
+"name": "ツタヘビ",
+"types": [
+"grass"
+],
+"base": "ヘビ",
+"body": "S",
+"size": "M",
+"note": "ツタに まぎれて えものを 待つ",
+"rare": 0,
+"src": "a_grass6"
+},
+"a_grass7": {
+"name": "コケゴリラ",
+"types": [
+"grass",
+"fighting"
+],
+"base": "ゴリラ",
+"body": "B",
+"size": "M",
+"note": "全身 コケだらけ。太い 腕で 木を ひっこぬく",
+"rare": 0,
+"src": "a_grass7"
+},
+"a_grass8": {
+"name": "ハッパドリ",
+"types": [
+"grass",
+"wind"
+],
+"base": "オウム",
+"body": "F",
+"size": "M",
+"note": "葉っぱの 翼で 森の 上を すべる",
+"rare": 0,
+"src": "a_grass8"
+},
+"a_grass9": {
+"name": "モリジカ",
+"types": [
+"grass"
+],
+"base": "シカ",
+"body": "Q",
+"size": "L",
+"note": "大きな 枝角に つるが からむ 森の 番人",
+"rare": 0,
+"src": "a_grass9"
+},
+"a_grass10": {
+"name": "シンリンオウ",
+"types": [
+"grass",
+"dragon"
+],
+"base": "白いシカ＋竜",
+"body": "Q",
+"size": "L",
+"note": "森の 奥に すむ 王。つるの 竜を したがえる",
+"rare": 1,
+"src": "a_grass10"
+},
+"a_elec2": {
+"name": "デンヒヨ",
+"types": [
+"elec",
+"normal"
+],
+"base": "ヒヨコ",
+"body": "B",
+"size": "S",
+"note": "ふくらんだ 羽毛に 静電気を ためる",
+"rare": 0,
+"src": "a_elec2"
+},
+"a_elec3": {
+"name": "イナズマイヌ",
+"types": [
+"elec"
+],
+"base": "イヌ",
+"body": "Q",
+"size": "S",
+"note": "イナズマ形の しっぽで 電気を はなつ",
+"rare": 0,
+"src": "a_elec3"
+},
+"a_elec4": {
+"name": "エレキュウ",
+"types": [
+"elec",
+"steel"
+],
+"base": "電気の たま",
+"body": "W",
+"size": "M",
+"note": "まるい 体の 輪っかが 光って 回る",
+"rare": 0,
+"src": "a_elec4"
+},
+"a_elec5": {
+"name": "ライバット",
+"types": [
+"elec",
+"wind"
+],
+"base": "コウモリ",
+"body": "F",
+"size": "M",
+"note": "雷雲の 中を 飛びまわる",
+"rare": 0,
+"src": "a_elec5"
+},
+"a_elec6": {
+"name": "ライギツネ",
+"types": [
+"elec"
+],
+"base": "キツネ",
+"body": "Q",
+"size": "M",
+"note": "しっぽの 先から 火花が ちる",
+"rare": 0,
+"src": "a_elec6"
+},
+"a_elec7": {
+"name": "イナビカリ",
+"types": [
+"elec"
+],
+"base": "シカ",
+"body": "Q",
+"size": "M",
+"note": "長い 足で 稲妻の ように かける",
+"rare": 0,
+"src": "a_elec7"
+},
+"a_elec8": {
+"name": "ゴロビリ",
+"types": [
+"elec",
+"rock"
+],
+"base": "コガネムシ",
+"body": "Q",
+"size": "M",
+"note": "黒い 殻に 電気を ためて 転がる",
+"rare": 0,
+"src": "a_elec8"
+},
+"a_elec9": {
+"name": "ライジュウガ",
+"types": [
+"elec",
+"dark"
+],
+"base": "ヒョウ",
+"body": "Q",
+"size": "L",
+"note": "黒と 金の しま模様。雷の 速さで とびかかる",
+"rare": 0,
+"src": "a_elec9"
+},
+"a_elec10": {
+"name": "テンライオウ",
+"types": [
+"elec",
+"dragon"
+],
+"base": "雷獣",
+"body": "Q",
+"size": "L",
+"note": "全身から 稲妻を はなつ 雷の 王",
+"rare": 1,
+"src": "a_elec10"
+},
+"a_ice1": {
+"name": "コオリギツネ",
+"types": [
+"ice"
+],
+"base": "子ギツネ",
+"body": "Q",
+"size": "S",
+"note": "冷たい 息で 草を 白く 凍らせる",
+"rare": 0,
+"src": "a_ice1"
+},
+"a_ice2": {
+"name": "ツララグマ",
+"types": [
+"ice"
+],
+"base": "クマ",
+"body": "B",
+"size": "S",
+"note": "背中に つららが 生えた 白い クマ",
+"rare": 0,
+"src": "a_ice2"
+},
+"a_ice3": {
+"name": "シロクマル",
+"types": [
+"ice"
+],
+"base": "シロクマの 子",
+"body": "B",
+"size": "S",
+"note": "雪の 上で ころころ 転がって あそぶ",
+"rare": 0,
+"src": "a_ice3"
+},
+"a_ice4": {
+"name": "コウテイペン",
+"types": [
+"ice",
+"water"
+],
+"base": "ペンギン",
+"body": "B",
+"size": "M",
+"note": "氷の 海を まっすぐ 泳ぐ ペンギン",
+"rare": 0,
+"src": "a_ice4"
+},
+"a_ice5": {
+"name": "ユキウサ",
+"types": [
+"ice",
+"fairy"
+],
+"base": "ウサギ",
+"body": "Q",
+"size": "M",
+"note": "長い 耳で 雪の 音を 聞きわける",
+"rare": 0,
+"src": "a_ice5"
+},
+"a_ice6": {
+"name": "ヒョウチョウ",
+"types": [
+"ice",
+"wind"
+],
+"base": "鳥",
+"body": "F",
+"size": "M",
+"note": "氷の 羽を きらきら ちらして 飛ぶ",
+"rare": 0,
+"src": "a_ice6"
+},
+"a_ice7": {
+"name": "イエティオ",
+"types": [
+"ice",
+"fighting"
+],
+"base": "雪男",
+"body": "B",
+"size": "M",
+"note": "大きな 体で 雪山を 守る",
+"rare": 0,
+"src": "a_ice7"
+},
+"a_ice8": {
+"name": "ショウケツネ",
+"types": [
+"ice"
+],
+"base": "キツネ",
+"body": "Q",
+"size": "M",
+"note": "背中の 氷の とげを 逆立てて おこる",
+"rare": 0,
+"src": "a_ice8"
+},
+"a_ice9": {
+"name": "ユキマンモ",
+"types": [
+"ice",
+"ground"
+],
+"base": "マンモス",
+"body": "Q",
+"size": "L",
+"note": "分厚い 毛皮と 雪の ずきん",
+"rare": 0,
+"src": "a_ice9"
+},
+"a_ice10": {
+"name": "スイショウバ",
+"types": [
+"ice",
+"fairy"
+],
+"base": "天馬",
+"body": "Q",
+"size": "L",
+"note": "水晶の 翼を もつ 天馬。ふれた ものを 凍らせる",
+"rare": 1,
+"src": "a_ice10"
+},
+"a_fighting1": {
+"name": "ケンザル",
+"types": [
+"fighting"
+],
+"base": "サル",
+"body": "B",
+"size": "S",
+"note": "小さな こぶしで 毎日 修行する",
+"rare": 0,
+"src": "a_fighting1"
+},
+"a_fighting2": {
+"name": "ゴリラッシュ",
+"types": [
+"fighting"
+],
+"base": "ゴリラ",
+"body": "B",
+"size": "S",
+"note": "胸を たたいて 突進する",
+"rare": 0,
+"src": "a_fighting2"
+},
+"a_fighting3": {
+"name": "ホノケン",
+"types": [
+"fighting",
+"fire"
+],
+"base": "サル",
+"body": "B",
+"size": "S",
+"note": "燃える こぶしの 拳法家",
+"rare": 0,
+"src": "a_fighting3"
+},
+"a_fighting4": {
+"name": "クマボクサ",
+"types": [
+"fighting"
+],
+"base": "クマ",
+"body": "B",
+"size": "M",
+"note": "重い パンチで 岩を くだく",
+"rare": 0,
+"src": "a_fighting4"
+},
+"a_fighting5": {
+"name": "レッサパン",
+"types": [
+"fighting"
+],
+"base": "レッサーパンダ",
+"body": "B",
+"size": "M",
+"note": "身軽な けりわざが 得意",
+"rare": 0,
+"src": "a_fighting5"
+},
+"a_fighting6": {
+"name": "パンダイ",
+"types": [
+"fighting",
+"dark"
+],
+"base": "パンダ",
+"body": "B",
+"size": "M",
+"note": "目つきの 悪い 力自慢",
+"rare": 0,
+"src": "a_fighting6"
+},
+"a_fighting7": {
+"name": "ベニザル",
+"types": [
+"fighting"
+],
+"base": "サル",
+"body": "B",
+"size": "M",
+"note": "赤い 毛並みの すばやい 拳士",
+"rare": 0,
+"src": "a_fighting7"
+},
+"a_fighting8": {
+"name": "シシケンポー",
+"types": [
+"fighting",
+"fire"
+],
+"base": "獅子",
+"body": "B",
+"size": "M",
+"note": "獅子の 頭を もつ 拳法の 達人",
+"rare": 0,
+"src": "a_fighting8"
+},
+"a_fighting9": {
+"name": "ツノバッファ",
+"types": [
+"fighting",
+"ground"
+],
+"base": "バイソン",
+"body": "Q",
+"size": "L",
+"note": "大きな 角で 何でも はねとばす",
+"rare": 0,
+"src": "a_fighting9"
+},
+"a_fighting10": {
+"name": "オニゴリラ",
+"types": [
+"fighting",
+"dark"
+],
+"base": "鬼＋ゴリラ",
+"body": "B",
+"size": "L",
+"note": "ツノの ある 赤い 大ザル。地面を なぐって 割る",
+"rare": 1,
+"src": "a_fighting10"
+},
+"a_poison1": {
+"name": "ドクネコ",
+"types": [
+"poison",
+"dark"
+],
+"base": "ネコ",
+"body": "Q",
+"size": "S",
+"note": "しっぽの 先に 毒の しずく",
+"rare": 0,
+"src": "a_poison1"
+},
+"a_poison2": {
+"name": "ドクヘビ",
+"types": [
+"poison"
+],
+"base": "ヘビ",
+"body": "S",
+"size": "S",
+"note": "紫の うろこ。かまれると しびれる",
+"rare": 0,
+"src": "a_poison2"
+},
+"a_poison3": {
+"name": "ヤドクトカゲ",
+"types": [
+"poison"
+],
+"base": "トカゲ",
+"body": "Q",
+"size": "S",
+"note": "あざやかな 色は 毒の しるし",
+"rare": 0,
+"src": "a_poison3"
+},
+"a_poison4": {
+"name": "ウイルスン",
+"types": [
+"poison"
+],
+"base": "ウイルス",
+"body": "W",
+"size": "M",
+"note": "とげとげの 体で ふわふわ ただよう",
+"rare": 0,
+"src": "a_poison4"
+},
+"a_poison5": {
+"name": "ドクバット",
+"types": [
+"poison",
+"wind"
+],
+"base": "コウモリ",
+"body": "F",
+"size": "M",
+"note": "夜に 毒の 粉を まきちらす",
+"rare": 0,
+"src": "a_poison5"
+},
+"a_poison7": {
+"name": "ドクイカ",
+"types": [
+"poison",
+"water"
+],
+"base": "イカ",
+"body": "W",
+"size": "M",
+"note": "毒の すみを はく",
+"rare": 0,
+"src": "a_poison7"
+},
+"a_poison8": {
+"name": "ドクガエル",
+"types": [
+"poison",
+"grass"
+],
+"base": "カエル",
+"body": "Q",
+"size": "M",
+"note": "苔の 背中に 毒の いぼ",
+"rare": 0,
+"src": "a_poison8"
+},
+"a_poison9": {
+"name": "ドクリュウ",
+"types": [
+"poison",
+"dragon"
+],
+"base": "竜",
+"body": "F",
+"size": "L",
+"note": "毒の 息を はく 紫の 竜",
+"rare": 0,
+"src": "a_poison9"
+},
+"a_poison10": {
+"name": "オニタケ",
+"types": [
+"poison",
+"grass"
+],
+"base": "キノコ",
+"body": "P",
+"size": "L",
+"note": "大きな かさから 毒の 胞子を ふらせる",
+"rare": 1,
+"src": "a_poison10"
+},
+"a_ground2": {
+"name": "イワコロ",
+"types": [
+"ground",
+"rock"
+],
+"base": "アルマジロ",
+"body": "Q",
+"size": "S",
+"note": "岩の 甲羅で 丸まって 転がる",
+"rare": 0,
+"src": "a_ground2"
+},
+"a_ground3": {
+"name": "イノシシン",
+"types": [
+"ground"
+],
+"base": "イノシシ",
+"body": "Q",
+"size": "S",
+"note": "まっすぐ 突進して 地面を えぐる",
+"rare": 0,
+"src": "a_ground3"
+},
+"a_ground5": {
+"name": "サイロック",
+"types": [
+"ground",
+"rock"
+],
+"base": "サイ",
+"body": "Q",
+"size": "M",
+"note": "岩の よろいを 着た サイ",
+"rare": 0,
+"src": "a_ground5"
+},
+"a_ground6": {
+"name": "ドロゴーレム",
+"types": [
+"ground",
+"rock"
+],
+"base": "ゴーレム",
+"body": "B",
+"size": "M",
+"note": "泥と 石で できた 体。ゆっくり だが 力持ち",
+"rare": 0,
+"src": "a_ground6"
+},
+"a_ground7": {
+"name": "スナヘビ",
+"types": [
+"ground"
+],
+"base": "ヘビ",
+"body": "S",
+"size": "M",
+"note": "砂の 中を 泳ぐ ように 進む",
+"rare": 0,
+"src": "a_ground7"
+},
+"a_ground8": {
+"name": "サソリン",
+"types": [
+"ground",
+"poison"
+],
+"base": "サソリ",
+"body": "M",
+"size": "M",
+"note": "オレンジの ハサミと 毒の しっぽ",
+"rare": 0,
+"src": "a_ground8"
+},
+"a_ground9": {
+"name": "サバクガメ",
+"types": [
+"ground"
+],
+"base": "リクガメ",
+"body": "Q",
+"size": "L",
+"note": "砂漠を 何日も 歩きつづける",
+"rare": 0,
+"src": "a_ground9"
+},
+"a_ground10": {
+"name": "ガンセキオウ",
+"types": [
+"ground",
+"rock"
+],
+"base": "岩の 獣",
+"body": "Q",
+"size": "L",
+"note": "山の ような 体。ふみしめると 地面が ゆれる",
+"rare": 1,
+"src": "a_ground10"
+},
+"a_wind1": {
+"name": "ヒヨッコ",
+"types": [
+"wind",
+"normal"
+],
+"base": "ヒヨコ",
+"body": "F",
+"size": "S",
+"note": "まだ うまく 飛べない 小鳥",
+"rare": 0,
+"src": "a_wind1"
+},
+"a_wind2": {
+"name": "ツバメット",
+"types": [
+"wind"
+],
+"base": "ツバメ",
+"body": "F",
+"size": "S",
+"note": "風を きって 低く 飛ぶ",
+"rare": 0,
+"src": "a_wind2"
+},
+"a_wind3": {
+"name": "アカツバサ",
+"types": [
+"wind",
+"fire"
+],
+"base": "赤い鳥",
+"body": "F",
+"size": "S",
+"note": "夕焼け色の 羽で 熱い 風を おこす",
+"rare": 0,
+"src": "a_wind3"
+},
+"a_wind4": {
+"name": "フクロン",
+"types": [
+"wind",
+"dark"
+],
+"base": "フクロウ",
+"body": "F",
+"size": "M",
+"note": "夜の 森を 音も なく 飛ぶ",
+"rare": 0,
+"src": "a_wind4"
+},
+"a_wind6": {
+"name": "オウムン",
+"types": [
+"wind"
+],
+"base": "オウム",
+"body": "F",
+"size": "M",
+"note": "聞いた 声を まねして 敵を まどわす",
+"rare": 0,
+"src": "a_wind6"
+},
+"a_wind7": {
+"name": "ペリカーン",
+"types": [
+"wind",
+"water"
+],
+"base": "ペリカン",
+"body": "F",
+"size": "M",
+"note": "大きな くちばしで 水ごと すくう",
+"rare": 0,
+"src": "a_wind7"
+},
+"a_wind8": {
+"name": "ヨルコウモリ",
+"types": [
+"wind",
+"dark"
+],
+"base": "コウモリ",
+"body": "F",
+"size": "M",
+"note": "月の 夜に むれで 飛ぶ",
+"rare": 0,
+"src": "a_wind8"
+},
+"a_wind9": {
+"name": "イヌワシオウ",
+"types": [
+"wind",
+"fighting"
+],
+"base": "ワシ",
+"body": "F",
+"size": "L",
+"note": "するどい 爪で 急降下する",
+"rare": 0,
+"src": "a_wind9"
+},
+"a_wind10": {
+"name": "ハクリュウ",
+"types": [
+"wind",
+"dragon"
+],
+"base": "白い竜",
+"body": "F",
+"size": "L",
+"note": "雲の 上に すむ 白い 竜。羽ばたきで 竜巻を 起こす",
+"rare": 1,
+"src": "a_wind10"
+},
+"a_dragon1": {
+"name": "チビドラ",
+"types": [
+"dragon"
+],
+"base": "竜の 子",
+"body": "B",
+"size": "S",
+"note": "まだ 小さい 竜の 子。火も 吹けない",
+"rare": 0,
+"src": "a_dragon1"
+},
+"a_dragon2": {
+"name": "アオドラ",
+"types": [
+"dragon",
+"water"
+],
+"base": "竜の 子",
+"body": "B",
+"size": "S",
+"note": "青い うろこの 元気な 子竜",
+"rare": 0,
+"src": "a_dragon2"
+},
+"a_dragon3": {
+"name": "ミズチ",
+"types": [
+"dragon",
+"water"
+],
+"base": "水の 竜",
+"body": "S",
+"size": "S",
+"note": "川に すむ 竜。とぐろを まいて ねむる",
+"rare": 0,
+"src": "a_dragon3"
+},
+"a_dragon4": {
+"name": "シデンリュウ",
+"types": [
+"dragon",
+"poison"
+],
+"base": "竜",
+"body": "F",
+"size": "M",
+"note": "紫の 翼で 毒の 風を 起こす",
+"rare": 0,
+"src": "a_dragon4"
+},
+"a_dragon6": {
+"name": "ミドリュウ",
+"types": [
+"dragon",
+"grass"
+],
+"base": "竜",
+"body": "F",
+"size": "M",
+"note": "森の 竜。翼の まくは 葉っぱ もよう",
+"rare": 0,
+"src": "a_dragon6"
+},
+"a_dragon7": {
+"name": "キンリュウ",
+"types": [
+"dragon",
+"ground"
+],
+"base": "金の竜",
+"body": "S",
+"size": "M",
+"note": "金色の うろこで 光を はねかえす",
+"rare": 0,
+"src": "a_dragon7"
+},
+"a_dragon8": {
+"name": "ヤミドラゴ",
+"types": [
+"dragon",
+"dark"
+],
+"base": "竜",
+"body": "F",
+"size": "M",
+"note": "闇に まぎれて 空から おそう",
+"rare": 0,
+"src": "a_dragon8"
+},
+"a_dragon9": {
+"name": "ベニリュウ",
+"types": [
+"dragon",
+"fire"
+],
+"base": "竜",
+"body": "F",
+"size": "L",
+"note": "赤い 翼から 熱風を はなつ",
+"rare": 0,
+"src": "a_dragon9"
+},
+"a_dragon10": {
+"name": "ハクギンリュウ",
+"types": [
+"dragon",
+"ice"
+],
+"base": "白銀の竜",
+"body": "F",
+"size": "L",
+"note": "白銀の うろこ。ふぶきを まとう 竜の 王",
+"rare": 1,
+"src": "a_dragon10"
+},
+"b_fire1": {
+"name": "ロウソッピ",
+"types": [
+"fire"
+],
+"base": "ロウソク",
+"body": "B",
+"size": "S",
+"note": "頭の 火が 消えると しょんぼり する",
+"rare": 0,
+"src": "b_fire1"
+},
+"b_fire2": {
+"name": "タイマツネ",
+"types": [
+"fire"
+],
+"base": "キツネ＋たいまつ",
+"body": "Q",
+"size": "S",
+"note": "しっぽの たいまつで 夜道を 照らす",
+"rare": 0,
+"src": "b_fire2"
+},
+"kamadon": {
+"name": "カマドン",
+"types": [
+"fire",
+"rock"
+],
+"base": "かまど",
+"body": "Q",
+"size": "S",
+"note": "石を 積んだ かまどの 体。おなかの 火で なんでも 焼く",
+"rare": 0,
+"src": "b_fire3"
+},
+"b_fire4": {
+"name": "ヒバトリ",
+"types": [
+"fire",
+"wind"
+],
+"base": "火の鳥",
+"body": "F",
+"size": "M",
+"note": "炎の 羽を ひろげて 舞う",
+"rare": 0,
+"src": "b_fire4"
+},
+"b_fire5": {
+"name": "ツボビ",
+"types": [
+"fire",
+"steel"
+],
+"base": "火の つぼ",
+"body": "W",
+"size": "M",
+"note": "つぼの 中で 炎が ぐつぐつ 燃える",
+"rare": 0,
+"src": "b_fire5"
+},
+"b_fire6": {
+"name": "ホノサンショ",
+"types": [
+"fire"
+],
+"base": "サンショウウオ",
+"body": "Q",
+"size": "M",
+"note": "背中の 炎が 消えないように 雨を さける",
+"rare": 0,
+"src": "b_fire6"
+},
+"b_fire7": {
+"name": "ヒノタマン",
+"types": [
+"fire",
+"ghost"
+],
+"base": "火の玉",
+"body": "W",
+"size": "M",
+"note": "ゆらゆら ゆれる 生きた 炎",
+"rare": 0,
+"src": "b_fire7"
+},
+"b_fire8": {
+"name": "チョウチン",
+"types": [
+"fire",
+"ghost"
+],
+"base": "ちょうちん",
+"body": "F",
+"size": "M",
+"note": "祭りの 夜に ふわりと 浮かぶ",
+"rare": 0,
+"src": "b_fire8"
+},
+"b_fire9": {
+"name": "ホノイノシ",
+"types": [
+"fire",
+"ground"
+],
+"base": "イノシシ",
+"body": "Q",
+"size": "L",
+"note": "燃える 背中で 突っ込んでくる",
+"rare": 0,
+"src": "b_fire9"
+},
+"b_fire10": {
+"name": "マグマジン",
+"types": [
+"fire",
+"rock"
+],
+"base": "溶岩の 巨人",
+"body": "B",
+"size": "L",
+"note": "ひびから 溶岩が あふれる 巨人",
+"rare": 1,
+"src": "b_fire10"
+},
+"pottoko": {
+"name": "ポットコ",
+"types": [
+"water",
+"normal"
+],
+"base": "ティーポット＋タコ",
+"body": "W",
+"size": "S",
+"note": "ティーポットの 頭を もつ タコ。注ぎ口から 熱い お茶を 飛ばす",
+"rare": 0,
+"src": "b_water2"
+},
+"b_water3": {
+"name": "ミズクラゲ",
+"types": [
+"water",
+"poison"
+],
+"base": "クラゲ",
+"body": "W",
+"size": "S",
+"note": "すきとおった 体で 波に ゆられる",
+"rare": 0,
+"src": "b_water3"
+},
+"b_water4": {
+"name": "センスイギョ",
+"types": [
+"water",
+"steel"
+],
+"base": "潜水艦＋魚",
+"body": "W",
+"size": "M",
+"note": "深い 海を 探検する 鉄の 魚",
+"rare": 0,
+"src": "b_water4"
+},
+"b_water5": {
+"name": "チョウチンアンコ",
+"types": [
+"water",
+"elec"
+],
+"base": "アンコウ",
+"body": "W",
+"size": "M",
+"note": "頭の あかりで えものを さそう",
+"rare": 0,
+"src": "b_water5"
+},
+"b_water6": {
+"name": "イルカン",
+"types": [
+"water"
+],
+"base": "イルカ",
+"body": "W",
+"size": "M",
+"note": "水から 高く とびあがって あそぶ",
+"rare": 0,
+"src": "b_water6"
+},
+"b_water7": {
+"name": "アワボウ",
+"types": [
+"water",
+"fairy"
+],
+"base": "あわの 精",
+"body": "B",
+"size": "M",
+"note": "あわを ぷかぷか 浮かべて 遊ぶ",
+"rare": 0,
+"src": "b_water7"
+},
+"b_water8": {
+"name": "タツノコン",
+"types": [
+"water"
+],
+"base": "タツノオトシゴ",
+"body": "S",
+"size": "M",
+"note": "しっぽで 海草に つかまって 休む",
+"rare": 0,
+"src": "b_water8"
+},
+"b_water9": {
+"name": "サンゴガメ",
+"types": [
+"water",
+"rock"
+],
+"base": "カメ＋サンゴ",
+"body": "Q",
+"size": "L",
+"note": "背中に サンゴの 島を のせた 大ガメ",
+"rare": 0,
+"src": "b_water9"
+},
+"b_water10": {
+"name": "ミズビン",
+"types": [
+"water"
+],
+"base": "水の びん",
+"body": "W",
+"size": "L",
+"note": "びんの 中の 水が 体。ふたを とると あふれだす",
+"rare": 1,
+"src": "b_water10"
+},
+"b_grass1": {
+"name": "メバエ",
+"types": [
+"grass"
+],
+"base": "ふたば",
+"body": "P",
+"size": "S",
+"note": "頭の ふたばで 日の光を あびる",
+"rare": 0,
+"src": "b_grass1"
+},
+"b_grass2": {
+"name": "ヒマワリン",
+"types": [
+"grass"
+],
+"base": "ヒマワリ",
+"body": "P",
+"size": "S",
+"note": "いつも 太陽の ほうを 向いて いる",
+"rare": 0,
+"src": "b_grass2"
+},
+"b_grass3": {
+"name": "キボック",
+"types": [
+"grass"
+],
+"base": "木",
+"body": "P",
+"size": "S",
+"note": "年を とった 木に 顔が 生まれた",
+"rare": 0,
+"src": "b_grass3"
+},
+"b_grass4": {
+"name": "ハナサキ",
+"types": [
+"grass",
+"fairy"
+],
+"base": "花",
+"body": "P",
+"size": "M",
+"note": "大きな 花で 虫を 呼びよせる",
+"rare": 0,
+"src": "b_grass4"
+},
+"b_grass6": {
+"name": "ツルリュウ",
+"types": [
+"grass",
+"dragon"
+],
+"base": "つるの 竜",
+"body": "S",
+"size": "M",
+"note": "つるが よりあつまって 竜の 形に なった",
+"rare": 0,
+"src": "b_grass6"
+},
+"b_grass7": {
+"name": "トマトガブ",
+"types": [
+"grass",
+"dark"
+],
+"base": "トマト",
+"body": "P",
+"size": "M",
+"note": "まっかな 実に するどい 歯",
+"rare": 0,
+"src": "b_grass7"
+},
+"b_grass8": {
+"name": "ワカバジカ",
+"types": [
+"grass"
+],
+"base": "シカ",
+"body": "Q",
+"size": "M",
+"note": "若葉の 角で 春を 告げる",
+"rare": 0,
+"src": "b_grass8"
+},
+"b_grass9": {
+"name": "ハナウサギ",
+"types": [
+"grass",
+"fairy"
+],
+"base": "ウサギ",
+"body": "Q",
+"size": "L",
+"note": "花の 冠を つけた ウサギ",
+"rare": 0,
+"src": "b_grass9"
+},
+"b_grass10": {
+"name": "タイボクオウ",
+"types": [
+"grass",
+"ground"
+],
+"base": "大木",
+"body": "P",
+"size": "L",
+"note": "千年 生きた 大木。根で 大地を ゆらす",
+"rare": 1,
+"src": "b_grass10"
+},
+"b_elec2": {
+"name": "ビリザル",
+"types": [
+"elec",
+"dark"
+],
+"base": "サル",
+"body": "Q",
+"size": "S",
+"note": "長い しっぽの 先から 電気を とばす",
+"rare": 0,
+"src": "b_elec2"
+},
+"b_elec3": {
+"name": "ライジャ",
+"types": [
+"elec"
+],
+"base": "ヘビ",
+"body": "S",
+"size": "S",
+"note": "雷の もようの ヘビ",
+"rare": 0,
+"src": "b_elec3"
+},
+"b_elec4": {
+"name": "デンフクロウ",
+"types": [
+"elec",
+"wind"
+],
+"base": "フクロウ",
+"body": "F",
+"size": "M",
+"note": "大きな 目が 電球の ように 光る",
+"rare": 0,
+"src": "b_elec4"
+},
+"b_elec6": {
+"name": "イカヅチネコ",
+"types": [
+"elec",
+"dark"
+],
+"base": "ネコ",
+"body": "Q",
+"size": "M",
+"note": "毛を 逆立てると 火花が ちる",
+"rare": 0,
+"src": "b_elec6"
+},
+"b_elec7": {
+"name": "デンチボット",
+"types": [
+"elec",
+"steel"
+],
+"base": "電池",
+"body": "B",
+"size": "M",
+"note": "体の 電池で なんでも 動かす ロボ",
+"rare": 0,
+"src": "b_elec7"
+},
+"b_elec8": {
+"name": "ライカマキリ",
+"types": [
+"elec",
+"bug"
+],
+"base": "カマキリ",
+"body": "M",
+"size": "M",
+"note": "雷の カマで 切りさく",
+"rare": 0,
+"src": "b_elec8"
+},
+"b_elec9": {
+"name": "スパークボム",
+"types": [
+"elec",
+"steel"
+],
+"base": "機雷",
+"body": "W",
+"size": "L",
+"note": "さわると バチッと はじける",
+"rare": 0,
+"src": "b_elec9"
+},
+"b_elec10": {
+"name": "イカヅチジュウ",
+"types": [
+"elec",
+"dark"
+],
+"base": "雷獣",
+"body": "Q",
+"size": "L",
+"note": "黒い 毛並みに 金の 稲妻。吠えると 雷が おちる",
+"rare": 1,
+"src": "b_elec10"
+},
+"b_ice1": {
+"name": "ユキダルン",
+"types": [
+"ice"
+],
+"base": "雪だるま",
+"body": "B",
+"size": "S",
+"note": "冬の あいだだけ 動きだす 雪だるま",
+"rare": 0,
+"src": "b_ice1"
+},
+"b_ice2": {
+"name": "ヒョウロウ",
+"types": [
+"ice"
+],
+"base": "オオカミ",
+"body": "Q",
+"size": "S",
+"note": "氷の たてがみを もつ オオカミ",
+"rare": 0,
+"src": "b_ice2"
+},
+"b_ice3": {
+"name": "ユキウサギ",
+"types": [
+"ice"
+],
+"base": "ウサギ",
+"body": "Q",
+"size": "S",
+"note": "まっしろな 毛で 雪に とけこむ",
+"rare": 0,
+"src": "b_ice3"
+},
+"hyoukyuu": {
+"name": "ヒョウキュー",
+"types": [
+"ice",
+"normal"
+],
+"base": "氷の キューブ",
+"body": "Q",
+"size": "M",
+"note": "四角い 氷の 体。冷たい 角で 体当たりする",
+"rare": 0,
+"src": "b_ice4"
+},
+"b_ice5": {
+"name": "ペンギンヌ",
+"types": [
+"ice",
+"water"
+],
+"base": "ペンギン",
+"body": "B",
+"size": "M",
+"note": "おなかで 氷の 上を すべる",
+"rare": 0,
+"src": "b_ice5"
+},
+"b_ice6": {
+"name": "トナカイス",
+"types": [
+"ice"
+],
+"base": "トナカイ",
+"body": "Q",
+"size": "M",
+"note": "氷の 角で 吹雪を 切りひらく",
+"rare": 0,
+"src": "b_ice6"
+},
+"yukidome": {
+"name": "ユキドーム",
+"types": [
+"ice",
+"fairy"
+],
+"base": "スノードーム",
+"body": "W",
+"size": "M",
+"note": "ガラスの 中に 小さな 家と 雪景色。ふると 吹雪が 起きる",
+"rare": 0,
+"src": "b_ice7"
+},
+"b_ice8": {
+"name": "コオリチョウ",
+"types": [
+"ice",
+"fairy"
+],
+"base": "チョウ",
+"body": "F",
+"size": "M",
+"note": "氷の はねを もつ チョウ",
+"rare": 0,
+"src": "b_ice8"
+},
+"b_ice9": {
+"name": "セイウチャン",
+"types": [
+"ice",
+"water"
+],
+"base": "セイウチ",
+"body": "Q",
+"size": "L",
+"note": "大きな きばで 氷を 割る",
+"rare": 0,
+"src": "b_ice9"
+},
+"b_ice10": {
+"name": "ヒョウショウジュウ",
+"types": [
+"ice",
+"rock"
+],
+"base": "氷の 獣",
+"body": "Q",
+"size": "L",
+"note": "全身が 氷の 結晶で できた 獣",
+"rare": 1,
+"src": "b_ice10"
+},
+"b_fighting1": {
+"name": "モクジン",
+"types": [
+"fighting"
+],
+"base": "木人",
+"body": "B",
+"size": "S",
+"note": "修行の 相手を して いるうちに 動きだした",
+"rare": 0,
+"src": "b_fighting1"
+},
+"b_fighting2": {
+"name": "レッサーボクサ",
+"types": [
+"fighting"
+],
+"base": "レッサーパンダ",
+"body": "B",
+"size": "S",
+"note": "赤い グローブで 連打する",
+"rare": 0,
+"src": "b_fighting2"
+},
+"b_fighting3": {
+"name": "ルチャドリ",
+"types": [
+"fighting",
+"wind"
+],
+"base": "鳥＋覆面",
+"body": "B",
+"size": "S",
+"note": "覆面を つけた 空中殺法の 鳥",
+"rare": 0,
+"src": "b_fighting3"
+},
+"b_fighting4": {
+"name": "ハチマキザル",
+"types": [
+"fighting"
+],
+"base": "サル",
+"body": "B",
+"size": "M",
+"note": "はちまきを しめると 本気を 出す",
+"rare": 0,
+"src": "b_fighting4"
+},
+"b_fighting5": {
+"name": "ツルケン",
+"types": [
+"fighting",
+"wind"
+],
+"base": "ツル",
+"body": "B",
+"size": "M",
+"note": "片足で 立つ 拳法の 構え",
+"rare": 0,
+"src": "b_fighting5"
+},
+"b_fighting6": {
+"name": "ヨロイジロ",
+"types": [
+"fighting",
+"rock"
+],
+"base": "アルマジロ",
+"body": "Q",
+"size": "M",
+"note": "かたい 背中で 体当たり",
+"rare": 0,
+"src": "b_fighting6"
+},
+"b_fighting7": {
+"name": "クマグローブ",
+"types": [
+"fighting"
+],
+"base": "クマ",
+"body": "B",
+"size": "M",
+"note": "赤い グローブの 力持ち ボクサー",
+"rare": 0,
+"src": "b_fighting7"
+},
+"b_fighting8": {
+"name": "カマキリケン",
+"types": [
+"fighting",
+"bug"
+],
+"base": "カマキリ",
+"body": "M",
+"size": "M",
+"note": "カマの 両腕で 拳法を つかう",
+"rare": 0,
+"src": "b_fighting8"
+},
+"b_fighting9": {
+"name": "スモウリキ",
+"types": [
+"fighting",
+"rock"
+],
+"base": "力士",
+"body": "B",
+"size": "L",
+"note": "どっしり 構えて 押し出す",
+"rare": 0,
+"src": "b_fighting9"
+},
+"b_fighting10": {
+"name": "パンダボクサ",
+"types": [
+"fighting",
+"dark"
+],
+"base": "パンダ",
+"body": "B",
+"size": "L",
+"note": "赤い マフラーの チャンピオン",
+"rare": 1,
+"src": "b_fighting10"
+},
+"furasukon": {
+"name": "フラスコン",
+"types": [
+"poison",
+"water"
+],
+"base": "フラスコ",
+"body": "W",
+"size": "S",
+"note": "毒の 薬が 入った フラスコ。泡を ぶくぶく 飛ばす",
+"rare": 0,
+"src": "b_poison1"
+},
+"b_poison2": {
+"name": "ドクモリ",
+"types": [
+"poison",
+"wind"
+],
+"base": "コウモリ",
+"body": "F",
+"size": "S",
+"note": "洞くつの 奥で 毒の 歌を うたう",
+"rare": 0,
+"src": "b_poison2"
+},
+"b_poison3": {
+"name": "キノコヒメ",
+"types": [
+"poison",
+"fairy"
+],
+"base": "キノコ",
+"body": "B",
+"size": "S",
+"note": "かさを ふると 眠りの 胞子が 舞う",
+"rare": 0,
+"src": "b_poison3"
+},
+"b_poison4": {
+"name": "ノラドクネコ",
+"types": [
+"poison",
+"dark"
+],
+"base": "ネコ",
+"body": "Q",
+"size": "M",
+"note": "毒の けむりを まとった 野良ネコ",
+"rare": 0,
+"src": "b_poison4"
+},
+"b_poison5": {
+"name": "ドクマイマイ",
+"types": [
+"poison"
+],
+"base": "カタツムリ",
+"body": "M",
+"size": "M",
+"note": "通った あとに 毒の すじが 残る",
+"rare": 0,
+"src": "b_poison5"
+},
+"b_poison6": {
+"name": "ドクグモ",
+"types": [
+"poison",
+"bug"
+],
+"base": "クモ",
+"body": "M",
+"size": "M",
+"note": "紫の 糸で えものを しばる",
+"rare": 0,
+"src": "b_poison6"
+},
+"b_poison7": {
+"name": "ドクガスン",
+"types": [
+"poison",
+"ghost"
+],
+"base": "毒ガス",
+"body": "W",
+"size": "M",
+"note": "紫の けむりが 集まって 生まれた",
+"rare": 0,
+"src": "b_poison7"
+},
+"b_poison8": {
+"name": "パクリソウ",
+"types": [
+"poison",
+"grass"
+],
+"base": "ハエトリソウ",
+"body": "P",
+"size": "M",
+"note": "大きな 口で なんでも ぱくり",
+"rare": 0,
+"src": "b_poison8"
+},
+"b_poison9": {
+"name": "ムラサソリ",
+"types": [
+"poison",
+"ground"
+],
+"base": "サソリ",
+"body": "M",
+"size": "L",
+"note": "紫の 毒の しっぽを 高く かかげる",
+"rare": 0,
+"src": "b_poison9"
+},
+"b_poison10": {
+"name": "ペストガラス",
+"types": [
+"poison",
+"dark"
+],
+"base": "カラス＋ペスト医者",
+"body": "B",
+"size": "L",
+"note": "くちばしの マスクと シルクハット。毒の 薬を あやつる",
+"rare": 1,
+"src": "b_poison10"
+},
+"b_ground1": {
+"name": "モグラン",
+"types": [
+"ground"
+],
+"base": "モグラ",
+"body": "Q",
+"size": "S",
+"note": "大きな 爪で 土を ほりすすむ",
+"rare": 0,
+"src": "b_ground1"
+},
+"shoberaa": {
+"name": "ショベラー",
+"types": [
+"ground",
+"steel"
+],
+"base": "ショベルカー",
+"body": "Q",
+"size": "S",
+"note": "黄色い ショベルカー。アームで 地面ごと すくいあげる",
+"rare": 0,
+"src": "b_ground2"
+},
+"b_ground3": {
+"name": "レンガゴーレム",
+"types": [
+"ground",
+"rock"
+],
+"base": "ゴーレム",
+"body": "B",
+"size": "S",
+"note": "レンガを 積みあげた 体",
+"rare": 0,
+"src": "b_ground3"
+},
+"b_ground4": {
+"name": "ハニワウマ",
+"types": [
+"ground"
+],
+"base": "はにわの 馬",
+"body": "Q",
+"size": "M",
+"note": "土で できた 馬。走ると 砂ぼこりが 立つ",
+"rare": 0,
+"src": "b_ground4"
+},
+"b_ground5": {
+"name": "スナミミズ",
+"types": [
+"ground"
+],
+"base": "ミミズ",
+"body": "S",
+"size": "M",
+"note": "砂漠の 下を ぐねぐね 進む",
+"rare": 0,
+"src": "b_ground5"
+},
+"b_ground6": {
+"name": "トロッコン",
+"types": [
+"ground",
+"steel"
+],
+"base": "トロッコ",
+"body": "Q",
+"size": "M",
+"note": "鉱石を 積んで 線路を 走る",
+"rare": 0,
+"src": "b_ground6"
+},
+"b_ground7": {
+"name": "トゲイワサイ",
+"types": [
+"ground",
+"rock"
+],
+"base": "サイ",
+"body": "Q",
+"size": "M",
+"note": "岩の とげが びっしり 生えた サイ",
+"rare": 0,
+"src": "b_ground7"
+},
+"b_ground8": {
+"name": "ドグウン",
+"types": [
+"ground",
+"psychic"
+],
+"base": "土偶",
+"body": "B",
+"size": "M",
+"note": "大昔の 土偶。ひとつ目が 光る",
+"rare": 0,
+"src": "b_ground8"
+},
+"b_ground9": {
+"name": "コハクハリ",
+"types": [
+"ground",
+"rock"
+],
+"base": "ハリネズミ",
+"body": "Q",
+"size": "L",
+"note": "背中の コハクの とげが 光る",
+"rare": 0,
+"src": "b_ground9"
+},
+"b_ground10": {
+"name": "ドリルモグラ",
+"types": [
+"ground",
+"steel"
+],
+"base": "ドリル＋モグラ",
+"body": "Q",
+"size": "L",
+"note": "鼻の ドリルで 岩山を つらぬく",
+"rare": 1,
+"src": "b_ground10"
+},
+"b_wind1": {
+"name": "アオトリ",
+"types": [
+"wind"
+],
+"base": "青い鳥",
+"body": "F",
+"size": "S",
+"note": "しあわせを 運ぶと いわれる 小鳥",
+"rare": 0,
+"src": "b_wind1"
+},
+"b_wind2": {
+"name": "タコギツネ",
+"types": [
+"wind",
+"fire"
+],
+"base": "キツネ＋たこあげ",
+"body": "F",
+"size": "S",
+"note": "リボンの しっぽで 風に のる",
+"rare": 0,
+"src": "b_wind2"
+},
+"b_wind3": {
+"name": "カモメン",
+"types": [
+"wind",
+"water"
+],
+"base": "カモメ",
+"body": "F",
+"size": "S",
+"note": "海の 上を 風に のって 飛ぶ",
+"rare": 0,
+"src": "b_wind3"
+},
+"b_wind4": {
+"name": "フウセンボ",
+"types": [
+"wind",
+"fairy"
+],
+"base": "風船",
+"body": "F",
+"size": "M",
+"note": "たくさんの 風船で ぷかぷか 浮かぶ",
+"rare": 0,
+"src": "b_wind4"
+},
+"b_wind5": {
+"name": "カサドリ",
+"types": [
+"wind",
+"ghost"
+],
+"base": "からかさ＋ツル",
+"body": "F",
+"size": "M",
+"note": "紙の かさを さした 一本足の 鳥",
+"rare": 0,
+"src": "b_wind5"
+},
+"b_wind6": {
+"name": "クモモ",
+"types": [
+"wind",
+"fairy"
+],
+"base": "雲",
+"body": "F",
+"size": "M",
+"note": "ふわふわの 雲の 子。泣くと 雨が ふる",
+"rare": 0,
+"src": "b_wind6"
+},
+"b_wind7": {
+"name": "ライウン",
+"types": [
+"wind",
+"elec"
+],
+"base": "竜＋雷雲",
+"body": "F",
+"size": "M",
+"note": "雷雲を ひきつれて 飛ぶ",
+"rare": 0,
+"src": "b_wind7"
+},
+"b_wind8": {
+"name": "ヘリドリ",
+"types": [
+"wind",
+"steel"
+],
+"base": "ヘリコプター＋鳥",
+"body": "F",
+"size": "M",
+"note": "頭の プロペラで 空中に 止まる",
+"rare": 0,
+"src": "b_wind8"
+},
+"sorabune": {
+"name": "ソラブネ",
+"types": [
+"wind",
+"steel"
+],
+"base": "飛行船＋マンボウ",
+"body": "F",
+"size": "L",
+"note": "マンボウの 形の 飛行船。プロペラで 風を 起こす",
+"rare": 0,
+"src": "b_wind9"
+},
+"b_wind10": {
+"name": "タカオウ",
+"types": [
+"wind",
+"fighting"
+],
+"base": "タカ",
+"body": "F",
+"size": "L",
+"note": "空の 王者。大きな 翼で 突風を 起こす",
+"rare": 1,
+"src": "b_wind10"
+},
+"b_dragon1": {
+"name": "ヒチビドラ",
+"types": [
+"dragon",
+"fire"
+],
+"base": "竜の 子",
+"body": "B",
+"size": "S",
+"note": "しっぽの 先に 小さな 火",
+"rare": 0,
+"src": "b_dragon1"
+},
+"b_dragon2": {
+"name": "シャリンリュウ",
+"types": [
+"dragon",
+"steel"
+],
+"base": "竜＋車輪",
+"body": "Q",
+"size": "S",
+"note": "歯車の 体で 走る からくり竜",
+"rare": 0,
+"src": "b_dragon2"
+},
+"b_dragon3": {
+"name": "スイショウリュウ",
+"types": [
+"dragon",
+"ice"
+],
+"base": "水晶の 竜",
+"body": "Q",
+"size": "S",
+"note": "透きとおった うろこが 光を まげる",
+"rare": 0,
+"src": "b_dragon3"
+},
+"b_dragon4": {
+"name": "マキモノリュウ",
+"types": [
+"dragon",
+"psychic"
+],
+"base": "竜＋巻物",
+"body": "S",
+"size": "M",
+"note": "巻物に ひみつの 術を 書きしるす",
+"rare": 0,
+"src": "b_dragon4"
+},
+"b_dragon5": {
+"name": "ホシゾラリュウ",
+"types": [
+"dragon",
+"fairy"
+],
+"base": "星空の 竜",
+"body": "B",
+"size": "M",
+"note": "うろこに 星空が うつる",
+"rare": 0,
+"src": "b_dragon5"
+},
+"b_dragon6": {
+"name": "ヨロイドラ",
+"types": [
+"dragon",
+"steel"
+],
+"base": "竜",
+"body": "Q",
+"size": "M",
+"note": "鉄の ような うろこで 身を 守る",
+"rare": 0,
+"src": "b_dragon6"
+},
+"b_dragon7": {
+"name": "マツリュウ",
+"types": [
+"dragon",
+"fire"
+],
+"base": "祭りの 竜",
+"body": "S",
+"size": "M",
+"note": "祭りの 竜の ように 赤い リボンを なびかせる",
+"rare": 0,
+"src": "b_dragon7"
+},
+"b_dragon8": {
+"name": "ヒスイリュウ",
+"types": [
+"dragon",
+"grass"
+],
+"base": "竜",
+"body": "Q",
+"size": "M",
+"note": "ひすい色の うろこと 金の たてがみ",
+"rare": 0,
+"src": "b_dragon8"
+},
+"b_dragon9": {
+"name": "シコクリュウ",
+"types": [
+"dragon",
+"dark"
+],
+"base": "竜",
+"body": "F",
+"size": "L",
+"note": "紫黒の 翼で 夜空を おおう",
+"rare": 0,
+"src": "b_dragon9"
+},
+"b_dragon10": {
+"name": "タカラリュウ",
+"types": [
+"dragon",
+"ground"
+],
+"base": "竜＋財宝",
+"body": "Q",
+"size": "L",
+"note": "金貨の 山に ねそべる 欲ばりな 竜",
+"rare": 1,
+"src": "b_dragon10"
+},
+"g1": {
+"name": "オニビン",
+"types": [
+"ghost",
+"fire"
+],
+"base": "鬼火",
+"body": "W",
+"size": "M",
+"note": "青白い 炎が ふわふわ ただよう",
+"rare": 0,
+"src": "g1"
+},
+"g2": {
+"name": "トウロウ",
+"types": [
+"ghost",
+"fire"
+],
+"base": "灯籠",
+"body": "W",
+"size": "M",
+"note": "夜に なると 紫の 火が ともる",
+"rare": 0,
+"src": "g2"
+},
+"noroinui": {
+"name": "ノロイヌイ",
+"types": [
+"ghost",
+"normal"
+],
+"base": "呪いの ぬいぐるみ",
+"body": "B",
+"size": "M",
+"note": "ボタンの 目の つぎはぎ人形。霊火を まとって 呪う",
+"rare": 0,
+"src": "g3"
+},
+"kitsunemen": {
+"name": "キツネメン",
+"types": [
+"ghost",
+"psychic"
+],
+"base": "狐の お面",
+"body": "F",
+"size": "M",
+"note": "宙に 浮かぶ 狐の お面。鈴の 音で 心を まどわす",
+"rare": 0,
+"src": "g4"
+},
+"g5": {
+"name": "ユウレイネコ",
+"types": [
+"ghost",
+"dark"
+],
+"base": "黒ネコ",
+"body": "Q",
+"size": "M",
+"note": "けむりの しっぽを ゆらす 黒ネコの 霊",
+"rare": 0,
+"src": "g5"
+},
+"g6": {
+"name": "ボウレイキシ",
+"types": [
+"ghost",
+"steel"
+],
+"base": "よろいの 騎士",
+"body": "B",
+"size": "M",
+"note": "からっぽの よろいに 青い 霊火が やどる",
+"rare": 0,
+"src": "g6"
+},
+"medamasho": {
+"name": "メダマショ",
+"types": [
+"ghost",
+"dark"
+],
+"base": "目玉の 本",
+"body": "F",
+"size": "M",
+"note": "表紙に 大きな 目玉。ページの 触手で からめとる",
+"rare": 0,
+"src": "g7"
+},
+"g8": {
+"name": "タマメダマ",
+"types": [
+"ghost",
+"psychic"
+],
+"base": "目玉",
+"body": "W",
+"size": "M",
+"note": "たくさんの 目で あらゆる ものを 見とおす",
+"rare": 0,
+"src": "g8"
+},
+"g9": {
+"name": "シニガミン",
+"types": [
+"ghost",
+"dark"
+],
+"base": "死神",
+"body": "F",
+"size": "L",
+"note": "大きな カマを もつ 死神。霊を 連れさる",
+"rare": 1,
+"src": "g9"
+},
+"g10": {
+"name": "ユウレイクラゲ",
+"types": [
+"ghost",
+"water"
+],
+"base": "クラゲ",
+"body": "W",
+"size": "M",
+"note": "夜の 空を ただよう 白い クラゲの 霊",
+"rare": 0,
+"src": "g10"
+}
 }
