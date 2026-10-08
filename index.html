@@ -47,6 +47,11 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
 .tmlist .desc{font-size:10.5px;color:var(--dim)}
 .askbg{position:fixed;inset:0;overflow:hidden;background:rgba(10,8,18,.72);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
 .askbox{background:var(--panel);border:2px solid var(--edge);border-radius:10px;padding:18px 18px 14px;max-width:360px;width:100%;text-align:center;font-size:14px;line-height:1.6}
+.pvbox{max-width:760px!important}.pvhead{display:flex;justify-content:space-between;align-items:center}.pvt{font-size:26px;color:var(--acc);text-shadow:2px 2px 0 #000;font-variant-numeric:tabular-nums}
+.pvlab{margin:10px 0 6px;font-size:13px}.pvrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.pvc{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;font-size:11px;background:#1b1530;border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}
+.pvc:disabled{opacity:1;cursor:default}.pvc canvas{width:52px;height:52px}.pvc b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.pvc.mine{cursor:pointer}.pvc.on{box-shadow:inset 0 0 0 3px var(--acc);background:#3a3018}.pvn{position:absolute;left:5px;top:3px;font-size:18px;color:var(--acc);text-shadow:2px 2px 0 #000}
 .ntabs{display:flex;gap:6px;margin-bottom:10px}.ntabs button{flex:1;padding:7px;border-radius:4px;background:#1b1530;box-shadow:inset 0 0 0 2px var(--rim2)}.ntabs button.on{background:var(--acc);color:#1a1626;font-weight:700}
 .rankcard{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#15112a;border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}.rankcard .rr{font-size:30px;color:var(--acc);text-shadow:2px 2px 0 #000}
 .lb{display:flex;flex-direction:column;gap:3px;margin-top:6px}.lb div{display:grid;grid-template-columns:26px 1fr auto 44px 48px;gap:6px;align-items:center;font-size:12px;padding:3px 6px;background:#15112a;border-radius:3px}.lb div.me{box-shadow:inset 0 0 0 2px var(--acc)}.lb .lbn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
@@ -4582,31 +4587,47 @@ async function netGetRoom() {
   try { if (window.claude && window.claude.use) NET.room = await window.claude.use('room'); } catch (e) { NET.room = null; }
   return NET.room;
 }
-const teamOf = (list) => list.slice(0, 3).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice() }; });
+const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice() }; });
 const monFrom = (o) => fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) });
+const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
-function netReset() { SND.onSe = null; NET.ranked = false; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false }); }
+function netReset() { SND.onSe = null; NET.ranked = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false }); }
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
 async function netOpen(asHost, code, onStatus, opts = {}) {
   const room = await netGetRoom();
   if (!room) { onStatus('この ばしょでは オンライン対戦が つかえません。claude.ai に サインインして、この ゲームの ページを ひらいてください。', true); return; }
   netReset(); NET.code = code; NET.host = asHost; NET.guest = !asHost; NET.ranked = !!opts.ranked; NET.oppR = opts.oppR; NET.rated = false;
   try { NET.nr = await room.join('pma-' + code); } catch (e) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
-  const me = { role: asHost ? 'host' : 'guest', team: teamOf(S.party), v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0 };
+  NET.team6 = teamOf(S.party, 6); NET.myPick = null; NET.preview = null;
+  const me = { role: asHost ? 'host' : 'guest', team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0 };
   await NET.nr.presence(me).catch(() => { });
   onStatus(NET.ranked ? 'たいせんの じゅんびを しています…' : asHost ? `あいことば <b class="ncode">${code}</b> を あいてに つたえてね。<br>あいてが はいるのを まっています…` : 'ホストを さがしています…');
-  if (NET.ranked) setTimeout(() => { if (!NET.started && NET.ranked && NET.code === code) { onStatus('あいてと つながりませんでした。もういちど さがしてね', true); netReset(); } }, 20000);
+  if (NET.ranked) setTimeout(() => { if (!NET.started && !NET.preview && NET.ranked && NET.code === code) { onStatus('あいてと つながりませんでした。もういちど さがしてね', true); netReset(); } }, 20000);
   NET.nr.onPeers((ch) => {
     const others = ch.peers.filter(p => !p.isMe && p.presence);
     if (NET.started) { if (NET.peer && ch.left.some(p => p.peer === NET.peer)) netPeerLeft(); }
+    else if (NET.preview && NET.peer && ch.left.some(p => p.peer === NET.peer)) { rankPreviewClose(); onStatus('あいてが いなくなりました。もういちど さがしてね', true); netReset(); return; }
     if (asHost) {
       const g = others.find(p => p.presence.role === 'guest' && validTeam(p.presence.team));
+      if (g && !NET.started && NET.ranked && g.presence.rk && validTeam6(g.presence.team6)) {   // ランク：見せあい → 3たい えらぶ
+        NET.peer = g.peer; if (typeof g.presence.r === 'number') NET.oppR = g.presence.r;
+        if (!NET.preview) { onStatus('', false, true); rankPreview(g.presence.team6, g.presence.r); }
+        rankPreviewOpp(Array.isArray(g.presence.pick));
+        const gp = rankPickOk(g.presence.pick, g.presence.team6.length);
+        if (NET.myPick && gp) { const gteam = gp.map(i => g.presence.team6[i]), mine = NET.myPick.map(i => NET.team6[i]); rankPreviewClose(); netHostStart(gteam, mine); }
+        return;
+      }
       if (g && !NET.started && !!g.presence.rk === NET.ranked) { NET.peer = g.peer; if (typeof g.presence.r === 'number') NET.oppR = g.presence.r; netHostStart(g.presence.team); onStatus('', false, true); }
       if (g && NET.started) netHostInput(g.presence);
     } else {
       const h = others.find(p => p.presence.role === 'host');
       if (!h) return;
-      if (!NET.started && h.presence.start && validTeam(h.presence.start.h)) { NET.peer = h.peer; if (typeof h.presence.start.hr === 'number') NET.oppR = h.presence.start.hr; netGuestStart(h.presence.start); onStatus('', false, true); }
+      if (!NET.started && NET.ranked && h.presence.rk && validTeam6(h.presence.team6) && !h.presence.start) {
+        NET.peer = h.peer; if (typeof h.presence.r === 'number') NET.oppR = h.presence.r;
+        if (!NET.preview) { onStatus('', false, true); rankPreview(h.presence.team6, h.presence.r); }
+        rankPreviewOpp(Array.isArray(h.presence.pick));
+      }
+      if (!NET.started && h.presence.start && validTeam(h.presence.start.h)) { rankPreviewClose(); NET.peer = h.peer; if (typeof h.presence.start.hr === 'number') NET.oppR = h.presence.start.hr; netGuestStart(h.presence.start); onStatus('', false, true); }
       if (NET.started && h.presence.snap) netGuestSnap(h.presence.snap);
       if (!NET.started && others.some(p => p.presence.role === 'host')) onStatus(`ホストが みつかりました。はじまるのを まっています…`);
     }
@@ -4619,12 +4640,15 @@ function netPeerLeft() {
   else { B.remote = false; B.mode = 'end'; B.result = 'win'; B.resLines = ['あいてが つうしんを きりました', rankResult(true)]; showResult(); }
 }
 /* ---------- ホスト ---------- */
-function netHostStart(gteam) {
+function netHostStart(gteam, mineSel) {
   NET.started = true;
-  const field = choice(FIELDS), mine = teamOf(S.party);
-  startBattle({ kind: 'online', field, enemies: gteam.map(monFrom), trainer: { name: 'あいて', spr: TR_RIVAL }, title: NET.ranked ? 'ランク対戦' : 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
+  const field = choice(FIELDS), mine = mineSel || teamOf(S.party);
+  startBattle({ kind: 'online', field, enemies: gteam.map(monFrom), p0: mineSel ? mine.map(monFrom) : null, trainer: { name: 'あいて', spr: TR_RIVAL }, title: NET.ranked ? 'ランク対戦' : 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.net = 'host';
-  NET.nr.presence({ start: { field, h: mine, g: gteam, hr: myRank().r } }).catch(() => { });
+  // 見せあい用の 6たいは もう いらない（presence は ぜんぶで 4KB まで）
+  const startP = { start: { field, h: mine, g: gteam, hr: myRank().r }, team: null, team6: null, pick: null };
+  NET.nr.presence(startP).catch(() => { });
+  NET.baseLen = JSON.stringify({ role: 'host', v: 1, r: myRank().r, rk: 1, start: startP.start }).length;
   if (NET.ranked) B.cfg.title = 'ランク対戦';
   SND.onSe = (n, k) => { if (NET.host && B && B.net === 'host') netEv('se', [n, k]); };
 }
@@ -4658,13 +4682,14 @@ function netSnapshot() {
   const snap = { n: ++NET.snapN, t: r1(B.t), mt: r1(B.modeT), m: B.mode, sh: r1(B.shake), fl: r1(B.scrFlash || 0), ch: r1(B.cheer), tr: r1(B.trickRoom),
     f: [F(active(0)), F(active(1))], s: sides, p: B.projs.map(p => [r1(p.x), r1(p.y), r1(p.vx), r1(p.vy), MOVE_ID.get(p.m), r1(p.rot), p.side]),
     rc: B.remoteChoose ? 1 : 0, wc: B.choosing && !B.remoteChoose ? 1 : 0, res: B.mode === 'end' ? B.result : 0, rl: B.mode === 'end' ? (B.resLines || []) : 0, ev: [] };
-  let json = JSON.stringify(snap), evs = NET.ev.slice(-30);
-  for (let n = evs.length; n >= 0; n--) { snap.ev = slim(evs.slice(evs.length - n)); json = JSON.stringify(snap); if (json.length < 3900) break; }
+  let json = JSON.stringify(snap), evs = NET.ev.slice(-30), cap = 4000 - (NET.baseLen || 1200) - 40;
+  for (let n = evs.length; n >= 0; n--) { snap.ev = slim(evs.slice(evs.length - n)); json = JSON.stringify(snap); if (new Blob([json]).size < cap) break; }
   return snap;
 }
 /* ---------- ゲスト ---------- */
 function netGuestStart(st) {
   NET.started = true;
+  if (NET.nr) NET.nr.presence({ team6: null, pick: null }).catch(() => { });
   const host = st.h.map(monFrom), me = st.g.map(monFrom);
   startBattle({ kind: 'online', field: st.field, enemies: me, p0: host, trainer: { name: 'あなた', spr: TR_RIVAL }, title: 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.remote = true; B.my = 1; B.mode = 'intro'; B.snapT = 0; if (NET.ranked) $('bTitle').textContent = 'ランク対戦';
@@ -4789,26 +4814,64 @@ async function mmStart(stat) {
     if (!MM) return;
     const me = peers.find(p => p.isMe && p.sameTab), wait = peers.filter(p => !p.isMe && p.presence && p.presence.mm && typeof p.presence.mm.r === 'number');
     if (!me) return;
+    const go = (mate) => {
+      const host = me.peer < mate.peer, code = 'r' + hash36([me.peer, mate.peer].sort().join('|'));
+      mmStop(true);
+      room.presence({ mm: { r, with: mate.peer } }).catch(() => { });   // あいても こちらに 気づける ように しばらく 出しておく
+      setTimeout(() => { if (NET.room && !MM) NET.room.presence({ mm: null }).catch(() => { }); }, 8000);
+      stat(`あいてが みつかりました！（${tierOf(mate.presence.mm.r).n} ${mate.presence.mm.r}）`);
+      netOpen(host, code, stat, { ranked: true, oppR: mate.presence.mm.r });
+    };
+    const inv = wait.find(p => p.presence.mm.with === me.peer); if (inv) return go(inv);
+    const wait2 = wait.filter(p => !p.presence.mm.with);
     const best = (p0, list) => list.slice().sort((a, b) => Math.abs(a.presence.mm.r - p0.r) - Math.abs(b.presence.mm.r - p0.r) || (a.peer < b.peer ? -1 : 1))[0];
-    const mine = best({ r }, wait); if (!mine) return;
+    const mine = best({ r }, wait2); if (!mine) return;
     // あいても わたしを えらぶか（あいての 目線で かんがえる）
-    const all = wait.filter(p => p.peer !== mine.peer).concat([{ peer: me.peer, presence: { mm: { r } } }]);
+    const all = wait2.filter(p => p.peer !== mine.peer).concat([{ peer: me.peer, presence: { mm: { r } } }]);
     const theirs = best({ r: mine.presence.mm.r }, all);
     if (!theirs || theirs.peer !== me.peer) return;
-    const host = me.peer < mine.peer, code = 'r' + hash36([me.peer, mine.peer].sort().join('|'));
-    mmStop(true);
-    stat(`あいてが みつかりました！（${tierOf(mine.presence.mm.r).n} ${mine.presence.mm.r}）`);
-    netOpen(host, code, stat, { ranked: true, oppR: mine.presence.mm.r });
+    go(mine);
   };
   MM.off = room.onPeers((ch) => look(ch.peers), () => stat('つうしんが きれました', true));
-  MM.iv = setInterval(() => { if (!MM) return; const s = Math.floor((Date.now() - t0) / 1000); stat(`あいてを さがしています… ${s}びょう<br><span class="dim">いま さがしている 人：${room.peers().filter(p => !p.isMe && p.presence && p.presence.mm).length}人</span>`); look(room.peers()); }, 1000);
+  MM.iv = setInterval(() => { if (!MM) return; const s = Math.floor((Date.now() - t0) / 1000); stat(`あいてを さがしています… ${s}びょう<br><span class="dim">いま さがしている 人：${room.peers().filter(p => !p.isMe && p.presence && p.presence.mm && !p.presence.mm.with).length}人</span>`); look(room.peers()); }, 1000);
 }
-function mmStop(keepStat) {
+function mmStop(matched) {
   if (!MM) return; const m = MM; MM = null;
   if (m.off) m.off(); if (m.iv) clearInterval(m.iv);
-  if (NET.room) NET.room.presence({ mm: null }).catch(() => { });
+  if (NET.room && !matched) NET.room.presence({ mm: null }).catch(() => { });
 }
 
+/* ---------- ランク：見せあい（おたがいの 6たいを 見て、3たいと じゅんばんを えらぶ） ---------- */
+const PICK_SEC = 60;
+function rankPickOk(pk, n) { const need = Math.min(3, n); if (!Array.isArray(pk) || pk.length !== need) return null; const u = [...new Set(pk.map(x => x | 0))]; return u.length === need && u.every(i => i >= 0 && i < n) ? u : null; }
+function rankPreview(oppTeam, oppR) {
+  const mine = NET.team6, need = Math.min(3, mine.length); let sel = [], left = PICK_SEC;
+  const ov = document.createElement('div'); ov.className = 'askbg pv'; $('app').appendChild(ov); NET.preview = { ov };
+  const card = (o, i, mineSide) => { const sp = SPECIES[o.sid], k = mineSide ? sel.indexOf(i) : -1;
+    return `<button class="pvc ${mineSide ? 'mine' : ''} ${k >= 0 ? 'on' : ''}" data-i="${i}" ${mineSide ? '' : 'disabled'}>${k >= 0 ? `<span class="pvn">${k + 1}</span>` : ''}<i data-sid="${o.sid}"></i><b>${sp.n}</b><span>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</span></button>`; };
+  const draw = () => {
+    const done = !!NET.myPick, t = tierOf(typeof oppR === 'number' ? oppR : 1000);
+    ov.innerHTML = `<div class="askbox pvbox">
+      <div class="pvhead"><h3>ランク対戦　みせあい</h3><span class="pvt">${left}</span></div>
+      <div class="pvlab">あいて <span class="chip" style="background:${t.c}">${t.n}</span> ${typeof oppR === 'number' ? oppR : ''}　<span id="pvOpp" class="dim">${NET.oppPicked ? '✔ えらびおわった' : 'えらんでいます…'}</span></div>
+      <div class="pvrow">${oppTeam.map((o, i) => card(o, i, false)).join('')}</div>
+      <div class="pvlab">じぶん　<b style="color:var(--acc)">${done ? 'けってい ずみ' : `だす ${need}たいを じゅんばんに タップ（${sel.length}/${need}）`}</b></div>
+      <div class="pvrow">${mine.map((o, i) => card(o, i, true)).join('')}</div>
+      <div class="row" style="justify-content:flex-end;margin-top:10px;gap:8px">${done ? '<span class="dim">あいてを まっています…</span>' : `<button class="btn sub" id="pvClr">やりなおす</button><button class="btn" id="pvOk" ${sel.length === need ? '' : 'disabled'}>けってい</button>`}</div></div>`;
+    ov.querySelectorAll('i[data-sid]').forEach(el => el.replaceWith(spriteCanvas(el.dataset.sid, 52)));
+    if (!done) {
+      ov.querySelectorAll('.pvc.mine').forEach(b => b.onclick = () => { const i = +b.dataset.i, k = sel.indexOf(i); if (k >= 0) sel.splice(k, 1); else if (sel.length < need) sel.push(i); SND.se('click'); draw(); });
+      ov.querySelector('#pvClr').onclick = () => { sel = []; draw(); };
+      ov.querySelector('#pvOk').onclick = () => confirm();
+    }
+  };
+  const confirm = () => { if (NET.myPick) return; for (let i = 0; sel.length < need && i < mine.length; i++) if (!sel.includes(i)) sel.push(i); NET.myPick = sel.slice(); SND.se('ok');
+    if (NET.nr) NET.nr.presence({ pick: NET.myPick }).catch(() => { }); draw(); if (NET.host && NET.nr) { const g = NET.nr.peers().find(p => !p.isMe && p.presence && p.presence.role === 'guest'); if (g) { const gp = rankPickOk(g.presence.pick, (g.presence.team6 || []).length); if (gp) { rankPreviewClose(); netHostStart(gp.map(i => g.presence.team6[i]), NET.myPick.map(i => NET.team6[i])); } } } };
+  NET.preview.iv = setInterval(() => { left--; const el = ov.querySelector('.pvt'); if (el) el.textContent = Math.max(0, left); if (left <= 0 && !NET.myPick) confirm(); }, 1000);
+  NET.preview.draw = draw; draw();
+}
+function rankPreviewOpp(picked) { if (!NET.preview || NET.oppPicked === picked) return; NET.oppPicked = picked; const el = NET.preview.ov.querySelector('#pvOpp'); if (el) el.textContent = picked ? '✔ えらびおわった' : 'えらんでいます…'; }
+function rankPreviewClose() { if (!NET.preview) return; clearInterval(NET.preview.iv); NET.preview.ov.remove(); NET.preview = null; NET.oppPicked = false; }
 /* ---------- ロビー画面 ---------- */
 function onlineMenu() {
   const k = myRank(), t = tierOf(k.r);
