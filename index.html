@@ -2492,6 +2492,13 @@ function bakeFrames(fr, W, H) {
 }
 const MS = 1.6; // モンスターを 描く 倍率（48px の 絵 → 約77 ワールドpx）
 const AI_MS = 1.15; // 生成AIの 絵（約70px）の 倍率
+// タイプの 見なおし（見た目・名前に あわせる。null は タイプ1つ）
+const TYPE_FIX = {
+  birikurage: ['elec', 'ghost'], happamogu: ['grass', 'ground'], gorotan: ['rock', 'psychic'], a_grass6: ['grass', 'poison'], a_elec2: ['elec', 'wind'],
+  b_fire1: ['fire', 'ghost'], b_elec9: ['elec', 'fire'], b_fighting1: ['fighting', 'grass'], b_ground4: ['ground', 'ghost'],
+  c_water1: ['water', 'poison'],
+};
+for (const id in TYPE_FIX) if (SPECIES[id]) { const [t1, t2] = TYPE_FIX[id]; SPECIES[id].type = t1; if (t2) SPECIES[id].type2 = t2; else delete SPECIES[id].type2; }
 const SPR = {};
 // モンスターは 手打ちドット絵（HandPix）。ないときは 図形から 自動生成（SpriteGen）
 const HAND_MS = 1.45; // 手打ちモンスター（約55ドット）の 倍率
@@ -2512,7 +2519,7 @@ const BODY_RATIO = 3;
   const lo = Math.min(...ids.map(sz)), hi = Math.max(...ids.map(sz)), g = Math.sqrt(lo * hi), k = hi > lo ? Math.log(BODY_RATIO) / Math.log(hi / lo) : 1;
   const met = (id) => Math.sqrt(SPR[id].n.width * SPR[id].n.height) * SPR[id].ms;
   const M0 = Math.exp(ids.reduce((t, id) => t + Math.log(met(id)), 0) / ids.length);   // いまの 大きさの 平均（相乗）を まんなかに
-  for (const id of ids) { const v = Math.pow(sz(id) / g, k); SPR[id].ms *= M0 * v / met(id); SPECIES[id].vsz = g * v; }
+  for (const id of ids) { const v = Math.pow(sz(id) / g, k); SPR[id].ms *= M0 * v / met(id); SPECIES[id].vsz = g * v; SPECIES[id].bz = 2 * Math.log(v) / Math.log(BODY_RATIO); }   // bz：-1（いちばん 小さい）〜 +1（いちばん 大きい）
 })();
 const bodySz = (sp) => sp.vsz || sp.sz || 1;
 // ====== TRAINERART（tools/trainers/export.py が 自動生成）======
@@ -2587,13 +2594,17 @@ const STAT6_S = { hp: 'H', atk: 'A', def: 'B', spa: 'C', spd: 'D', spe: 'S', eva
 const STAT_LV = 50;
 // とくこう・とくぼうの 種族値は タイプの かたよりで つくる（もとの データは こうげき・ぼうぎょ だけ）
 const SPEC_LEAN = { fire: 1.12, water: 1.05, elec: 1.18, psychic: 1.3, ghost: 1.22, ice: 1.1, dragon: 1.05, poison: 1.02, grass: 1.06, wind: 1.06, bug: .9, normal: .92, fighting: .72, ground: .84, rock: .8 };
+const BODY_K = { hp: .2, atk: .05, def: .1, spe: -.3 };   // 体長（bz：-1〜+1）ごとの 種族値の かわり方
 const _base6 = {};
 function base6(sid) {
   if (_base6[sid]) return _base6[sid];
   const sp = SPECIES[sid], b = sp.base, h = (k) => { let x = 0; for (const c of sid + k) x = (x * 31 + c.charCodeAt(0)) >>> 0; return .92 + (x % 1000) / 1000 * .16; };
   const l1 = SPEC_LEAN[sp.type] || 1, lean = sp.type2 ? Math.sqrt(l1 * (SPEC_LEAN[sp.type2] || 1)) : l1;
-  const r = { hp: b.hp, atk: b.atk, def: b.def, spa: Math.round(b.atk * lean * h('a')), spd: Math.round(b.def * (.6 + lean * .4) * h('d')), spe: b.spd,
-    eva: Math.round(clamp(b.spd * .55 + (1.45 - (sp.sz || 1)) * 55 + (sp.fly ? 12 : 0), 20, 130) * h('e')) };   // かいひ：すばやく 小さく 飛ぶ ものほど 高い
+  // 体長：大きいほど HP・こうげき・ぼうぎょが 高く、すばやさ・かいひが ひくい（小さいほど その ぎゃく）
+  const z = sp.bz || 0, B = (v, k) => Math.round(v * (1 + k * z));
+  const hp = B(b.hp, BODY_K.hp), atk = B(b.atk, BODY_K.atk), def = B(b.def, BODY_K.def), spe = B(b.spd, BODY_K.spe);
+  const r = { hp, atk, def, spa: Math.round(atk * lean * h('a')), spd: Math.round(def * (.6 + lean * .4) * h('d')), spe,
+    eva: Math.round(clamp(spe * .55 + 25 - z * 30 + (sp.fly ? 12 : 0), 20, 130) * h('e')) };   // かいひ：すばやく 小さく 飛ぶ ものほど 高い
   return (_base6[sid] = r);
 }
 const natMod = (nat, k) => { const n = NATURES[nat]; return !n || !n.up || n.up === n.down ? 1 : n.up === k ? 1.1 : n.down === k ? .9 : 1; };
@@ -2923,7 +2934,7 @@ function renderStarter() {
     const sp = SPECIES[id], b = document.createElement('button'); b.className = 'starter';
     b.appendChild(spriteCanvas(id, 72));
     const d = document.createElement('div');
-    const pm = newMon(id); d.innerHTML = `<div class="nm">${sp.n} ${typeChip(sp.type)}</div><p>${sp.desc}</p>${sp.prof ? `<p>${profLine(sp)}</p>` : ''}<p>せいかく：${NATURES[pm.nat].n}（${ivGrade(pm)}）<br>わざ：${pm.moves.map(m => MOVES[m].n).join('・')}</p>`;
+    const pm = newMon(id); d.innerHTML = `<div class="nm">${sp.n} ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><p>${sp.desc}</p>${sp.prof ? `<p>${profLine(sp)}</p>` : ''}<p>せいかく：${NATURES[pm.nat].n}（${ivGrade(pm)}）<br>わざ：${pm.moves.map(m => MOVES[m].n).join('・')}</p>`;
     b.appendChild(d);
     b.onclick = () => { S = defaultSave(); pm.uid = S.uid++; S.party.push(pm); save(); renderHub(); setTimeout(() => $('btnHelp').click(), 350); };   /* はじめての ときは あそびかたを 見せる */
     L.appendChild(b);
@@ -3093,7 +3104,7 @@ function renderHub() {
   S.party.forEach((m, i) => {
     const d = document.createElement('div'); d.className = 'pm';
     d.appendChild(spriteCanvas(m.sid, 48));
-    d.insertAdjacentHTML('beforeend', `${i < 3 ? '<span class="tag">出場</span>' : ''}<div>${SPECIES[m.sid].n}</div><div class="pmt">${typeChip(SPECIES[m.sid].type)}</div>`);
+    d.insertAdjacentHTML('beforeend', `${i < 3 ? '<span class="tag">出場</span>' : ''}<div>${SPECIES[m.sid].n}</div><div class="pmt">${typeChip(SPECIES[m.sid].type)}${SPECIES[m.sid].type2 ? typeChip(SPECIES[m.sid].type2) : ''}</div>`);
     d.onclick = () => renderTeam(m.uid);
     P.appendChild(d);
   });
@@ -4941,7 +4952,7 @@ function netSendInput() { if (NET.nr) NET.nr.presence({ inp: NET.inp }).catch(()
 function netGuestChoose() {
   const sd = B.sides[1], alive = sd.fs.map((x, i) => i).filter(i => !sd.fs[i].fainted && sd.fs[i].hp > 0), L = $('chooseList'); L.innerHTML = '';
   for (const i of alive) { const x = sd.fs[i], b = document.createElement('button'); b.appendChild(spriteCanvas(x.mon.sid, 48));
-    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}<small class="dim"> HP ${Math.ceil(x.hp)}/${x.maxHp}</small></span>`);
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}${x.sp.type2 ? typeChip(x.sp.type2) : ''}<small class="dim"> HP ${Math.ceil(x.hp)}/${x.maxHp}</small></span>`);
     b.onclick = () => { $('chooseOv').hidden = true; NET.inp.ch = [NET.inp.ch[0] + 1, i]; netSendInput(); };
     L.appendChild(b); }
   $('chooseOv').hidden = false;
