@@ -2524,15 +2524,20 @@ for (const id in SPECIES) {
   // 生成AIの 絵は 大きめ（60〜80ドット）なので 倍率を 下げる
   SPR[id] = { fr, n: fr.idle0.n, w: fr.idle0.w, ms: ai ? (ai.ms || AI_MS) : MS };
 }
-// 体長：いちばん 小さい モンスターと いちばん 大きい モンスターの 差が ちょうど 3ばいに なるよう、見た目の 大きさを sz から きめなおす
+// 体長：sz の じゅんに 小・中・大・最大 の 4つに わける（ゲームには 出さない）。
+//   小＝全体の 20%、最大＝1たい だけ、大＝24%、のこりが 中。いちばん 小さい ものと 最大の 差は 3ばい
 // （大きさの めやす＝絵の 縦よこの 相乗平均 × 倍率。あたり判定の 半径も これに あわせる）
 const BODY_RATIO = 3;
+const BODY_CAT = { s: [1, 1.3], m: [1.38, 1.85], l: [1.95, 2.45], x: [3, 3] };   // カテゴリごとの 大きさ（いちばん 小さい＝1）
 (() => {
-  const ids = Object.keys(SPECIES).filter(id => SPR[id]), sz = (id) => SPECIES[id].sz || 1;
-  const lo = Math.min(...ids.map(sz)), hi = Math.max(...ids.map(sz)), g = Math.sqrt(lo * hi), k = hi > lo ? Math.log(BODY_RATIO) / Math.log(hi / lo) : 1;
   const met = (id) => Math.sqrt(SPR[id].n.width * SPR[id].n.height) * SPR[id].ms;
-  const M0 = Math.exp(ids.reduce((t, id) => t + Math.log(met(id)), 0) / ids.length);   // いまの 大きさの 平均（相乗）を まんなかに
-  for (const id of ids) { const v = Math.pow(sz(id) / g, k); SPR[id].ms *= M0 * v / met(id); SPECIES[id].vsz = g * v; SPECIES[id].bz = 2 * Math.log(v) / Math.log(BODY_RATIO); }   // bz：-1（いちばん 小さい）〜 +1（いちばん 大きい）
+  const ids = Object.keys(SPECIES).filter(id => SPR[id]).sort((a, b) => (SPECIES[a].sz || 1) - (SPECIES[b].sz || 1) || met(a) - met(b));
+  const n = ids.length, nS = Math.round(n * .2), nX = 1, nL = Math.round(n * .24), nM = n - nS - nL - nX;
+  const cats = [['s', nS], ['m', nM], ['l', nL], ['x', nX]], v = {};
+  let at = 0; for (const [c, cnt] of cats) { const [lo, hi] = BODY_CAT[c]; for (let i = 0; i < cnt; i++, at++) { const id = ids[at]; SPECIES[id].sizeCat = c; v[id] = lo + (hi - lo) * (cnt > 1 ? i / (cnt - 1) : 0); } }
+  const M0 = Math.exp(ids.reduce((t, id) => t + Math.log(met(id)), 0) / n), V0 = Math.exp(ids.reduce((t, id) => t + Math.log(v[id]), 0) / n);   // 平均の 大きさは いまの まま
+  const g = Math.exp(ids.reduce((t, id) => t + Math.log(SPECIES[id].sz || 1), 0) / n);
+  for (const id of ids) { const r = v[id] / V0; SPR[id].ms *= M0 * r / met(id); SPECIES[id].vsz = g * r; SPECIES[id].bz = 2 * Math.log(v[id]) / Math.log(BODY_RATIO) - 1; }   // bz：-1（いちばん 小さい）〜 +1（最大）
 })();
 const bodySz = (sp) => sp.vsz || sp.sz || 1;
 // ====== TRAINERART（tools/trainers/export.py が 自動生成）======
@@ -4464,7 +4469,11 @@ function aiPickMove(f, o) {
       case 'heal': w = f.hp < f.maxHp * .5 ? 4 : 0; break;
       case 'wall': w = !B.walls.some(x => x.side === f.side) && dist(f, o) > 120 && o.moves.some(x => ['proj', 'beam', 'cone'].includes(MOVES[x].k)) ? 1.8 : 0; break;
       case 'floor': w = !B.zones.some(z => z.side === f.side) && !flies(o) && effVs(m.t, o.sp) > 0 ? 1.7 : 0; break;
-      case 'self': w = Object.keys(e.self || {}).every(k => f.st[k] < 2) && f.hp > f.maxHp * .5 ? 2.2 : 0; break;
+      case 'self': {   // のうりょくアップ：まだ あげて いない・でてきた ばかり ほど つかう。+4 まで つみあげる
+        const ks = Object.keys(e.self || {}).filter(k => e.self[k] > 0), top = ks.length ? Math.max(...ks.map(k => f.st[k])) : 6;
+        w = top >= 4 || f.hp < f.maxHp * .25 ? 0 : (2.6 + (top <= 0 ? 1.6 + (f.enterT > 3 ? 2.5 : 0) : 0) + (f.enterT < 6 ? 1 : 0)) * (1 - top / 6);
+        break;
+      }
       case 'protect': case 'counter': w = 0; break; // 予兆に反応して使う
       case 'sub': w = !f.v.sub && f.hp > f.maxHp * .55 ? 1.5 : 0; break;
       case 'dbond': w = f.hp < f.maxHp * .3 ? 2.5 : 0; break;
