@@ -199,7 +199,8 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .sbar i b{display:block;height:100%}
 .sbar i u{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff;opacity:.8;text-decoration:none}
 .sbar span:nth-child(2){font-variant-numeric:tabular-nums;white-space:nowrap}
-.sbar{grid-template-columns:62px 44px 1fr!important}
+.sbar{grid-template-columns:64px 44px 1fr auto!important}
+.sbar em{font-style:normal;font-size:10px;color:var(--dim);min-width:18px;text-align:right}
 /* team */
 .mcard{display:flex;gap:8px;align-items:center;background:var(--panel);box-shadow:0 0 0 2px var(--edge);padding:8px}
 .mcard.starterm{box-shadow:0 0 0 2px var(--acc)}
@@ -897,7 +898,12 @@ function equipped(m) {
 function fixMon(m, bias) {
   m.lvl = MON_LV;
   if (!m.nat || !NATURES[m.nat]) m.nat = pickNature(SPECIES[m.sid]);
-  if (!m.iv) { const r = () => { let v = Math.random(); if (bias) v = v * (1 - bias) + bias * Math.max(v, Math.random()); return Math.round((.85 + .3 * v) * 100) / 100; }; m.iv = { hp: r(), atk: r(), def: r(), spd: r() }; }
+  const rIv = () => { let v = Math.random(); if (bias) v = v * (1 - bias) + bias * Math.max(v, Math.random()); return Math.min(31, Math.floor(v * 32)); };
+  if (!m.iv) m.iv = { hp: rIv(), atk: rIv(), def: rIv(), spa: rIv(), spd: rIv(), spe: rIv() };
+  else if (m.iv.spe == null) {   // むかしの セーブ（0.85〜1.15 の 倍率）→ 個体値 0〜31
+    const cv = (x) => Math.max(0, Math.min(31, Math.round(((x || 1) - .85) / .3 * 31)));
+    m.iv = { hp: cv(m.iv.hp), atk: cv(m.iv.atk), def: cv(m.iv.def), spa: rIv(), spd: rIv(), spe: cv(m.iv.spd) };
+  }
   const L = learned(m);
   if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // わざのまきものの わざも そのまま
   return m;
@@ -2538,10 +2544,33 @@ function loadSave() {
 function dexMark(sid, lv) { if (!S) return; S.dex = S.dex || {}; if ((S.dex[sid] || 0) < lv) S.dex[sid] = lv; }
 function save() { if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
-function stats(m) {
-  fixMon(m); const b = SPECIES[m.sid].base, L = MON_LV, iv = m.iv;
-  return { hp: Math.round(b.hp * iv.hp * (L + 10) / 12 + 10), atk: b.atk * iv.atk * (L + 10) / 30, def: b.def * iv.def * (L + 10) / 30, spd: Math.round(b.spd * iv.spd) };
+/* ===== ステータス（ポケモンと おなじ しくみ） =====
+   6つの のうりょく：HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ
+   種族値 × 個体値（0〜31）× 性格（ひとつが 1.1ばい、ひとつが 0.9ばい）で レベル50 の 実数値を 計算 */
+const STAT6 = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+const STAT6_N = { hp: 'HP', atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう', spd: 'とくぼう', spe: 'すばやさ' };
+const STAT6_S = { hp: 'H', atk: 'A', def: 'B', spa: 'C', spd: 'D', spe: 'S' };
+const STAT_LV = 50;
+// とくこう・とくぼうの 種族値は タイプの かたよりで つくる（もとの データは こうげき・ぼうぎょ だけ）
+const SPEC_LEAN = { fire: 1.12, water: 1.05, elec: 1.18, psychic: 1.3, ghost: 1.22, ice: 1.1, dragon: 1.05, poison: 1.02, grass: 1.06, wind: 1.06, bug: .9, normal: .92, fighting: .72, ground: .84, rock: .8 };
+const _base6 = {};
+function base6(sid) {
+  if (_base6[sid]) return _base6[sid];
+  const sp = SPECIES[sid], b = sp.base, h = (k) => { let x = 0; for (const c of sid + k) x = (x * 31 + c.charCodeAt(0)) >>> 0; return .92 + (x % 1000) / 1000 * .16; };
+  const l1 = SPEC_LEAN[sp.type] || 1, lean = sp.type2 ? Math.sqrt(l1 * (SPEC_LEAN[sp.type2] || 1)) : l1;
+  const r = { hp: b.hp, atk: b.atk, def: b.def, spa: Math.round(b.atk * lean * h('a')), spd: Math.round(b.def * (.6 + lean * .4) * h('d')), spe: b.spd };
+  return (_base6[sid] = r);
 }
+const natMod = (nat, k) => { const n = NATURES[nat]; return !n || !n.up || n.up === n.down ? 1 : n.up === k ? 1.1 : n.down === k ? .9 : 1; };
+function stats(m) {
+  fixMon(m); const b = base6(m.sid), L = STAT_LV, iv = m.iv, o = {};
+  for (const k of STAT6) {
+    const core = Math.floor((2 * b[k] + iv[k]) * L / 100);
+    o[k] = k === 'hp' ? core + L + 10 : Math.floor((core + 5) * natMod(m.nat, k));
+  }
+  return o;
+}
+const ivTotal = (m) => STAT6.reduce((a, k) => a + m.iv[k], 0);
 
 
 /* =====================================================================
@@ -3049,17 +3078,18 @@ function renderChart() {
 // ステータスの 色：ゲームに いる モンスターの 平均より 高い＝みどり ▲、低い＝あか ▼、だいたい 平均＝しろ
 let _avgBase = null;
 function avgBase() {
-  if (!_avgBase) { const ids = poolIds(), k = ['hp', 'atk', 'def', 'spd']; _avgBase = {}; for (const x of k) _avgBase[x] = ids.reduce((a, id) => a + SPECIES[id].base[x], 0) / ids.length; }
+  if (!_avgBase) { const ids = poolIds(); _avgBase = {}; for (const k of STAT6) _avgBase[k] = ids.reduce((a, id) => a + base6(id)[k], 0) / ids.length; }
   return _avgBase;
 }
-// 平均的な 個体の 実際の ステータス（stats() と おなじ 式）
-function avgStats() { const b = avgBase(), L = MON_LV; return { hp: b.hp * (L + 10) / 12 + 10, atk: b.atk * (L + 10) / 30, def: b.def * (L + 10) / 30, spd: b.spd }; }
+// 平均的な 個体（種族値 平均・個体値 15・性格 補正なし）の 実数値
+function avgStats() { const b = avgBase(), L = STAT_LV, o = {}; for (const k of STAT6) { const core = Math.floor((2 * b[k] + 15) * L / 100); o[k] = k === 'hp' ? core + L + 10 : core + 5; } return o; }
 function statTone(v, avg) { const r = v / avg; return r >= 1.08 ? { c: '#5ee08a', m: '▲', cls: 'hi' } : r <= .92 ? { c: '#ff7a6a', m: '▼', cls: 'lo' } : { c: '#f6f0e0', m: '', cls: '' }; }
-function statBars(vals, avg, maxes) {
-  const N = { hp: 'HP', atk: 'こうげき', def: 'ぼうぎょ', spd: 'すばやさ' };
-  return Object.keys(N).map(k => { const v = Math.round(vals[k]), t = statTone(vals[k], avg[k]), mk = Math.min(100, avg[k] / maxes[k] * 100);
-    return `<div class="sbar"><span>${N[k]}</span><span style="color:${t.c}">${v}${t.m}</span><i style="position:relative"><b style="width:${Math.min(100, v / maxes[k] * 100)}%;background:${t.c}"></b><u style="left:${mk}%"></u></i></div>`; }).join('')
-    + '<div class="dim" style="font-size:10px">｜＝ へいきん　<span style="color:#5ee08a">▲ へいきんより たかい</span>　<span style="color:#ff7a6a">▼ ひくい</span></div>';
+function statBars(vals, avg, maxes, m) {
+  const rows = STAT6.map(k => { const v = Math.round(vals[k]), t = statTone(vals[k], avg[k]), mx = maxes[k] || maxes.atk, mk = Math.min(100, avg[k] / mx * 100);
+    const nm = m ? natMod(m.nat, k) : 1, nc = nm > 1 ? '#ff8a7a' : nm < 1 ? '#7ab8ff' : '';
+    return `<div class="sbar"><span style="${nc ? `color:${nc}` : ''}">${STAT6_N[k]}${nm > 1 ? '↑' : nm < 1 ? '↓' : ''}</span><span style="color:${t.c}">${v}${t.m}</span><i style="position:relative"><b style="width:${Math.min(100, v / mx * 100)}%;background:${t.c}"></b><u style="left:${mk}%"></u></i>${m ? `<em title="こたいち">${m.iv[k]}</em>` : ''}</div>`; }).join('');
+  const tot = STAT6.reduce((a, k) => a + Math.round(vals[k]), 0);
+  return rows + `<div class="dim" style="font-size:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>ごうけい ${tot}${m ? `　こたいち ${ivTotal(m)}/186` : ''}</span><span>｜＝へいきん <span style="color:#5ee08a">▲たかい</span> <span style="color:#ff7a6a">▼ひくい</span>${m ? ' <span style="color:#ff8a7a">↑</span><span style="color:#7ab8ff">↓</span>＝せいかく' : ''}</span></div>`;
 }
 // へんせい：しゅつじょう3・ひかえ3・ボックス。ドラッグ／タップ→タップで いれかえ
 let teamSel = null, teamView = null;
@@ -3085,7 +3115,7 @@ function renderTeam(openUid) {
     if (m) {
       const st = stats(m), sp = SPECIES[m.sid];
       d.appendChild(spriteCanvas(m.sid, r.w === 'b' ? 44 : 64));
-      d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div>${r.w === 'p' ? `<div class="hpw">${(() => { const A = avgStats(); return [['HP', 'hp'], ['こ', 'atk'], ['ぼ', 'def'], ['は', 'spd']].map(([n, k]) => `<span style="color:${statTone(st[k], A[k]).c}">${n}${Math.round(st[k])}</span>`).join(' '); })()}</div>` : ''}`);
+      d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div>${r.w === 'p' ? `<div class="hpw">${(() => { const A = avgStats(); return STAT6.map(k => `<span style="color:${statTone(st[k], A[k]).c}">${STAT6_S[k]}${Math.round(st[k])}</span>`).join(' '); })()}</div>` : ''}`);
       if (teamSel && teamSel.w === r.w && teamSel.i === r.i) d.classList.add('sel');
       if (teamView === m.uid) d.classList.add('view');
     } else d.insertAdjacentHTML('beforeend', `<div style="font-size:22px;opacity:.5">＋</div><div>${r.w === 'p' && r.i < 3 ? 'しゅつじょう わく' : 'あき'}</div>`);
@@ -3108,7 +3138,7 @@ function renderTeamDetail() {
   D.innerHTML = `<div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
       <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'ボックス'}　${ivGrade(m)}</div>
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div>` : ''}</div></div>
-    <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 260, atk: 110, def: 110, spd: 130 })}</div>
+    <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="tm">わざのまきもの</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
@@ -3211,7 +3241,7 @@ function ask(msg, ok = 'はい', ng = 'いいえ') {
 }
 const say0 = (t) => ask(t, 'OK', null);
 // 個体の できばえ（種族の 中での ステータスの よさ）
-function ivGrade(m) { const v = (m.iv.hp + m.iv.atk + m.iv.def + m.iv.spd) / 4; return v >= 1.09 ? 'さいこうの こたい' : v >= 1.03 ? 'すぐれた こたい' : v >= .97 ? 'ふつうの こたい' : 'ひかえめな こたい'; }
+function ivGrade(m) { fixMon(m); const t = ivTotal(m); return t >= 170 ? 'さいこうの こたい' : t >= 130 ? 'すぐれた こたい' : t >= 70 ? 'ふつうの こたい' : 'ひかえめな こたい'; }
 function monCard(m, where, i, openUid) {
   const wrap = document.createElement('div'); wrap.className = 'mwrap';
   const sp = SPECIES[m.sid], st = stats(m), el = document.createElement('div');
@@ -3220,7 +3250,7 @@ function monCard(m, where, i, openUid) {
   el.appendChild(spriteCanvas(m.sid, 56));
   const info = document.createElement('div'); info.className = 'minfo';
   info.innerHTML = `<div class="mname">${sp.n} ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}${where === 'party' && i < 3 ? '<span class="tag">出場</span>' : ''}</div>` +
-    `<div class="mstat">HP${st.hp} こう${Math.round(st.atk)} ぼう${Math.round(st.def)} はや${st.spd}　<span class="dim">（${ivGrade(m)}）</span></div>` +
+    `<div class="mstat">${STAT6.map(k => STAT6_S[k] + st[k]).join(' ')}　<span class="dim">（${ivGrade(m)}）</span></div>` +
     (m.nat && NATURES[m.nat] ? `<div class="desc">せいかく：<b>${NATURES[m.nat].n}</b>（${NATURES[m.nat].d}）</div>` : '') +
     (sp.prof ? `<div class="desc">${profLine(sp)}</div>` : '') +
     `<div class="mmoves">${equipped(m).map(id => `<span style="--c:${TYPES[MOVES[id].t].c}" title="${moveDesc(MOVES[id])}">${MOVES[id].n}</span>`).join('')}</div>`;
@@ -3517,7 +3547,7 @@ const TICK = 3; // 状態異常ダメージの間隔（秒）＝ポケモンの�
 function mkFighter(mon, side) {
   const st = stats(mon), sp = SPECIES[mon.sid];
   return {
-    mon, sp, side, lvl: MON_LV, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, baseSpd: st.spd,
+    mon, sp, side, lvl: MON_LV, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, spa: st.spa, sdef: st.spd, baseSpd: Math.round(st.spe * .85 - 10),
     moves: equipped(mon).slice(),
     x: 0, y: 0, r: Math.round(23 * (sp.sz || 1)), face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
     inv: 0, flash: 0, kx: 0, ky: 0, dodgeCd: 0, aiT: 1, plan: null, planFor: 0, strafe: 1, stratT: 0,
@@ -3983,7 +4013,7 @@ function setStatus(f, s, by) {
 }
 
 /* ---------- ダメージ ---------- */
-const DMG_K = 1.35;   // 全体の ダメージ倍率（1戦が 長くなりすぎない ように）
+const DMG_K = .47;   // リアルタイム用の ダメージ倍率（ポケモンの 式の まま だと 1戦が みじかすぎる）
 function hit(att, def, m, ang, opt) {
   opt = opt || {};
   if (def.inv > 0) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
@@ -3997,16 +4027,18 @@ function hit(att, def, m, ang, opt) {
     const dmg0 = def.hp; def.hp = 0; popText(def.x, def.y - 92, 'いちげき！', '#ffd84a', 'comic'); B.shake = 10; faint(def, att); return dmg0;
   }
   const phys = m.cat === 'phys';
-  let A = phys ? att.atk * stageMul(att.st.atk) : att.atk * stageMul(att.st.spa);
+  let A = phys ? att.atk * stageMul(att.st.atk) : att.spa * stageMul(att.st.spa);
   if (m.useDef) A = att.def * stageMul(att.st.def);
   if (m.useFoeAtk) A = def.atk * stageMul(def.st.atk);
   if (phys && att.status === 'brn' && !m.useDef) A *= .5;
-  const D = (phys || m.hitDef) ? def.def * stageMul(def.st.def) : def.def * stageMul(def.st.spd);
+  const D = (phys || m.hitDef) ? def.def * stageMul(def.st.def) : def.sdef * stageMul(def.st.spd);
   const crit = Math.random() < (m.e && m.e.crit || m.crit ? 1 / 8 : 1 / 24);
-  const stab = hasType(att, m.t) ? 1.25 : 1;
+  const stab = hasType(att, m.t) ? 1.5 : 1;   // タイプ一致 1.5ばい
   let pow = m.pow; if (m.hits) pow = pow * (opt.hitNo + 1); // さんれんスピン：だんだん つよく
   const lagHit = def.state === 'lag';
-  let dmg = Math.max(1, Math.round(DMG_K * pow * A / D * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.88, 1.12)));
+  // ポケモンの ダメージ式：((2×Lv÷5＋2)×いりょく×A÷D÷50＋2)×タイプ一致×あいしょう×きゅうしょ×乱数(0.85〜1.00)。リアルタイム用に DMG_K を かける
+  const P = pow * 5, base = Math.floor(Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D) / 50) + 2;
+  let dmg = Math.max(1, Math.round(DMG_K * base * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
   if (lagHit) popText(def.x, def.y - 118, 'スキあり！', '#ff9a8a', true);
   const heavy = pow >= 19;
   // デコイ（みがわり）
@@ -4311,14 +4343,14 @@ function aiMove(f, o, dt, autoSpecial) {
 //   flank：横から 回りこむ 強さ  react：わざを 選ぶまでの 間の 倍率（小さいほど せっかち）  dodge：よけの うまさ（足し算）
 //   hitAway：わざの あと すぐ 陰へ さがる  roam：ときどき 気まぐれに 間合いを 変える  hold：わざが なくても 前に 出つづける
 const NATURES = {
-  yuukan:   { n: 'ゆうかん',     d: '前へ 前へ。ほとんど かくれない',             range: .6,  cover: .05, flee: .12, flank: .2, react: .85, dodge: -.1, hold: 1 },
-  okubyou:  { n: 'おくびょう',   d: 'すぐ 陰に かくれる。遠くから ねらう',         range: 1.45, cover: 1,  flee: .7,  flank: 0,  react: 1.1, dodge: .25 },
-  reisei:   { n: 'れいせい',     d: '間合いを 守り、ひまな ときは 陰で 待つ',     range: 1,   cover: .6, flee: .35, flank: .3, react: 1,   dodge: .15 },
-  sekkachi: { n: 'せっかち',     d: 'わざを どんどん 使う。待つのが 苦手',         range: .8,  cover: .15, flee: .2, flank: .1, react: .55, dodge: -.05 },
-  zurugashikoi: { n: 'ずるがしこい', d: '横から 回りこみ、当てたら すぐ 陰へ',   range: .9,  cover: .7, flee: .4,  flank: 1,  react: .9,  dodge: .2, hitAway: 1 },
-  nonki:    { n: 'のんき',       d: 'あまり 動かない。のんびり 戦う',             range: 1.1, cover: .2, flee: .25, flank: 0,  react: 1.6, dodge: -.15 },
-  kimagure: { n: 'きまぐれ',     d: '近づいたり 離れたり 読めない',               range: 1,   cover: .4, flee: .3,  flank: .5, react: 1,   dodge: 0, roam: 1 },
-  nebarizuyoi: { n: 'ねばりづよい', d: 'HPが へっても 引かない',                 range: .85, cover: .3, flee: 0,   flank: .3, react: .95, dodge: .05, hold: 1 },
+  yuukan:   { up: 'atk', down: 'spe', n: 'ゆうかん',     d: '前へ 前へ。ほとんど かくれない',             range: .6,  cover: .05, flee: .12, flank: .2, react: .85, dodge: -.1, hold: 1 },
+  okubyou:  { up: 'spe', down: 'atk', n: 'おくびょう',   d: 'すぐ 陰に かくれる。遠くから ねらう',         range: 1.45, cover: 1,  flee: .7,  flank: 0,  react: 1.1, dodge: .25 },
+  reisei:   { up: 'spa', down: 'spe', n: 'れいせい',     d: '間合いを 守り、ひまな ときは 陰で 待つ',     range: 1,   cover: .6, flee: .35, flank: .3, react: 1,   dodge: .15 },
+  sekkachi: { up: 'spe', down: 'def', n: 'せっかち',     d: 'わざを どんどん 使う。待つのが 苦手',         range: .8,  cover: .15, flee: .2, flank: .1, react: .55, dodge: -.05 },
+  zurugashikoi: { up: 'atk', down: 'spa', n: 'ずるがしこい', d: '横から 回りこみ、当てたら すぐ 陰へ',   range: .9,  cover: .7, flee: .4,  flank: 1,  react: .9,  dodge: .2, hitAway: 1 },
+  nonki:    { up: 'def', down: 'spe', n: 'のんき',       d: 'あまり 動かない。のんびり 戦う',             range: 1.1, cover: .2, flee: .25, flank: 0,  react: 1.6, dodge: -.15 },
+  kimagure: { up: '', down: '', n: 'きまぐれ',     d: '近づいたり 離れたり 読めない',               range: 1,   cover: .4, flee: .3,  flank: .5, react: 1,   dodge: 0, roam: 1 },
+  nebarizuyoi: { up: 'spd', down: 'spa', n: 'ねばりづよい', d: 'HPが へっても 引かない',                 range: .85, cover: .3, flee: 0,   flank: .3, react: .95, dodge: .05, hold: 1 },
 };
 const NATURE_KEYS = Object.keys(NATURES);
 // 性格を きめる（戦い方の タイプで 少し かたよる）
@@ -4921,6 +4953,12 @@ function bStep(dt) {
     if (B.sent === 0 && B.modeT > .8) { B.sent = 1; sendOut(1, 0); }
     if (B.sent === 1 && B.modeT > 1.7) { B.sent = 2; sendOut(0, 0); }
     if (B.modeT > 2.3) { B.mode = 'fight'; B.modeT = 0; say('バトル スタート！'); }
+  }
+  // 見はり：交代の とちゅうなどで HP 0 の まま のこったら たおれた あつかいに する
+  if (B.mode === 'fight' && !B.pendingSend && !B.choosing && !B.remoteChoose) for (const sd of B.sides) {
+    const f = sd.fs[sd.act]; if (!f) continue;
+    if (f.hp <= 0 && !f.fainted && !['faint', 'return', 'enter'].includes(f.state)) { f.state = 'faint'; f.stT = .6; f.cur = null; }
+    else if (f.fainted && f.state === 'bench') afterFaint(f);
   }
   if (B.pendingSend) { B.pendingSend.t -= dt; if (B.pendingSend.t <= 0) { const p = B.pendingSend; B.pendingSend = null; sendOut(p.side, p.idx, p.pass, p.lag, p.at); } }
 
@@ -5824,7 +5862,7 @@ function renderDex() {
 function dexDetail(id, no) {
   const sp = SPECIES[id], lv = (S.dex || {})[id] || 0, p = sp.prof || {}, r = RARITY[monRarity(id)];
   const STN = { hp: 'HP', atk: 'こうげき', def: 'ぼうぎょ', spd: 'すばやさ' }, mx = 130;
-  const bars = lv >= 2 ? statBars(sp.base, avgBase(), { hp: mx, atk: mx, def: mx, spd: mx }) : '<p class="dim">つかまえると くわしい ことが わかる</p>';
+  const bars = lv >= 2 ? statBars(base6(id), avgBase(), { hp: 150, atk: 150, def: 150, spa: 150, spd: 150, spe: 150 }) : '<p class="dim">つかまえると くわしい ことが わかる</p>';
   const mv = lv >= 2 ? [...new Set((LEARN[id] || []).map(([, x]) => x))].filter(x => MOVES[x]).map(x => `<span class="chip" style="background:${TYPES[MOVES[x].t].c}">${MOVES[x].n}</span>`).join(' ') : '';
   const bg = modal(`<div class="dexd"><div></div><div class="info">
       <div class="dim">No.${String(no).padStart(3, '0')}　<span class="chip" style="background:${r.c}">${r.n}</span>${lv >= 2 ? '　<b style="color:var(--acc)">★ つかまえた</b>' : '　みつけた'}</div>
@@ -5865,6 +5903,7 @@ $('btnHelp').onclick = () => {
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
     <p><b>くさむら</b>で よわらせて <b>ふういんクリスタル</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
     <p><b>たからばこ</b>は 勝つと もらえる。時間が たつと あき、モンスター・クリスタル・わざのまきものが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
+    <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ の 6つ。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。ぶつりわざは こうげき→ぼうぎょ、とくしゅわざは とくこう→とくぼう で ダメージが きまる。</p>
     <p><b>わざのまきもの</b>で すきな わざを おぼえさせよう（てもち → わざのまきもの）。</p>
     <p class="dim">PC：Space＝かわす　X＝こうたい</p></div>
     <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="hClose">とじる</button></div>`);
