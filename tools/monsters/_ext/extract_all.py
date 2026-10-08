@@ -10,8 +10,8 @@ IMG = '/tmp/claude-0/-home-user-auto-battle-game/27abe3ed-76ac-5b94-8383-de41dcf
 TYPES = ['fire', 'water', 'grass', 'elec', 'ice', 'fighting', 'poison', 'ground', 'wind', 'dragon']
 SHEETS = {  # 名前: (ファイル, ドット 1粒の 大きさの 目安, 左の ラベルの 幅)
     'g': ('13.webp', 4.0, 0),      # ゴースト 2段×5
-    'a': ('14.webp', 3.3, 70),     # 通常（いきもの）10段×10
-    'b': ('15.webp', 3.3, 70),     # 無機物・どうぐ 10段×10
+    'a': ('14.webp', 2.0, 70),     # 通常（いきもの）10段×10
+    'b': ('15.webp', 2.0, 70),     # 無機物・どうぐ 10段×10
 }
 
 def comps(m):
