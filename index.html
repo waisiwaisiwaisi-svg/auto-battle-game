@@ -188,6 +188,9 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .sbar{display:grid;grid-template-columns:62px 30px 1fr;gap:6px;align-items:center;font-size:11px}
 .sbar i{display:block;height:7px;background:#0d0b14}
 .sbar i b{display:block;height:100%}
+.sbar i u{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff;opacity:.8;text-decoration:none}
+.sbar span:nth-child(2){font-variant-numeric:tabular-nums;white-space:nowrap}
+.sbar{grid-template-columns:62px 44px 1fr!important}
 /* team */
 .mcard{display:flex;gap:8px;align-items:center;background:var(--panel);box-shadow:0 0 0 2px var(--edge);padding:8px}
 .mcard.starterm{box-shadow:0 0 0 2px var(--acc)}
@@ -3030,6 +3033,21 @@ function renderChart() {
   $('chartWrap').innerHTML = h;
   show('scChart');
 }
+// ステータスの 色：ゲームに いる モンスターの 平均より 高い＝みどり ▲、低い＝あか ▼、だいたい 平均＝しろ
+let _avgBase = null;
+function avgBase() {
+  if (!_avgBase) { const ids = poolIds(), k = ['hp', 'atk', 'def', 'spd']; _avgBase = {}; for (const x of k) _avgBase[x] = ids.reduce((a, id) => a + SPECIES[id].base[x], 0) / ids.length; }
+  return _avgBase;
+}
+// 平均的な 個体の 実際の ステータス（stats() と おなじ 式）
+function avgStats() { const b = avgBase(), L = MON_LV; return { hp: b.hp * (L + 10) / 12 + 10, atk: b.atk * (L + 10) / 30, def: b.def * (L + 10) / 30, spd: b.spd }; }
+function statTone(v, avg) { const r = v / avg; return r >= 1.08 ? { c: '#5ee08a', m: '▲', cls: 'hi' } : r <= .92 ? { c: '#ff7a6a', m: '▼', cls: 'lo' } : { c: '#f6f0e0', m: '', cls: '' }; }
+function statBars(vals, avg, maxes) {
+  const N = { hp: 'HP', atk: 'こうげき', def: 'ぼうぎょ', spd: 'すばやさ' };
+  return Object.keys(N).map(k => { const v = Math.round(vals[k]), t = statTone(vals[k], avg[k]), mk = Math.min(100, avg[k] / maxes[k] * 100);
+    return `<div class="sbar"><span>${N[k]}</span><span style="color:${t.c}">${v}${t.m}</span><i style="position:relative"><b style="width:${Math.min(100, v / maxes[k] * 100)}%;background:${t.c}"></b><u style="left:${mk}%"></u></i></div>`; }).join('')
+    + '<div class="dim" style="font-size:10px">｜＝ へいきん　<span style="color:#5ee08a">▲ へいきんより たかい</span>　<span style="color:#ff7a6a">▼ ひくい</span></div>';
+}
 // へんせい：しゅつじょう3・ひかえ3・ボックス。ドラッグ／タップ→タップで いれかえ
 let teamSel = null, teamView = null;
 function teamMon(r) { return r.w === 'p' ? S.party[r.i] : r.w === 'b' ? S.box[r.i] : null; }
@@ -3054,7 +3072,7 @@ function renderTeam(openUid) {
     if (m) {
       const st = stats(m), sp = SPECIES[m.sid];
       d.appendChild(spriteCanvas(m.sid, r.w === 'b' ? 44 : 64));
-      d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div>${r.w === 'p' ? `<div class="hpw">HP${st.hp}　${ivGrade(m)}</div>` : ''}`);
+      d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div>${r.w === 'p' ? `<div class="hpw">${(() => { const A = avgStats(); return [['HP', 'hp'], ['こ', 'atk'], ['ぼ', 'def'], ['は', 'spd']].map(([n, k]) => `<span style="color:${statTone(st[k], A[k]).c}">${n}${Math.round(st[k])}</span>`).join(' '); })()}</div>` : ''}`);
       if (teamSel && teamSel.w === r.w && teamSel.i === r.i) d.classList.add('sel');
       if (teamView === m.uid) d.classList.add('view');
     } else d.insertAdjacentHTML('beforeend', `<div style="font-size:22px;opacity:.5">＋</div><div>${r.w === 'p' && r.i < 3 ? 'しゅつじょう わく' : 'あき'}</div>`);
@@ -3077,7 +3095,7 @@ function renderTeamDetail() {
   D.innerHTML = `<div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
       <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'ボックス'}　${ivGrade(m)}</div>
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div>` : ''}</div></div>
-    <div style="display:flex;flex-direction:column;gap:3px">${STN.map(([n, v, mx]) => `<div class="sbar"><span>${n}</span><span>${v}</span><i><b style="width:${Math.min(100, v / mx * 100)}%;background:var(--good)"></b></i></div>`).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 260, atk: 110, def: 110, spd: 130 })}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="tm">わざのまきもの</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
@@ -3537,7 +3555,7 @@ function startBattle(cfg) {
 }
 
 function sendOut(side, idx, pass, lag, at) {
-  SND.se('swapIn');
+  SND.se('swapIn'); if (B) B.sendT = B.t;
   const sd = B.sides[side]; sd.act = idx;
   const f = sd.fs[idx], st = B.st;
   if (at) { f.x = at.x; f.y = at.y; }   // 交代：もどった モンスターが いた 場所に 出す
@@ -3723,7 +3741,7 @@ function beginMove(f, id) {
   f.cur = cur;
   if (id !== 'tackle') f.cd[id] = (f.v.rampage && id === 'outrage') ? 0 : m.cd; else f.cd[id] = m.cd;
   f.state = 'wind';
-  f.lastMove = id;
+  f.lastMove = id; B.lastMoveT = B.t;
   if (B.log) B.log.push(id);
   if (m.k !== 'melee' || id !== 'tackle') {
     say(`${prefix(f)}${f.sp.n}の ${m.n}！`);
@@ -4214,6 +4232,8 @@ function aiSwitch(f, o, dt) {
   return true;
 }
 
+// にらみあいで うごかない：5びょう だれも わざを つかって いない か、9びょう ダメージが ない
+const stalled = () => B.t - Math.max(B.lastMoveT || 0, B.sendT || 0) > 5 || B.t - Math.max(B.lastDmgT || 0, B.sendT || 0) > 9;
 function aiMove(f, o, dt, autoSpecial) {
   const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
   if (f.side === 1 && aiSwitch(f, o, dt)) return;
@@ -4238,14 +4258,14 @@ function aiMove(f, o, dt, autoSpecial) {
     const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k);
     const see = !shot || losClear(f, o);
     if (d <= reach && see) { const q = f.queued; f.queued = null; beginMove(f, q); if (per.hitAway && isDamaging(m)) f.awayT = rand(1.2, 2); return; }
-    if (B.t - (B.lastDmgT || 0) > 9 && B.st.nav && !flies(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
+    if (stalled() && B.st.nav && !flies(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
       f.aiMode = 'attack'; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
     }
     want = { R: idealRange(f, m, reach, per) * roamK, los: shot, cover: false, flank: per.flank > .25 && !shot, mode: 'attack' };
   } else {
     const dmgCd = f.moves.filter(id => isDamaging(MOVES[id])).map(id => f.cd[id] || 0), soon = dmgCd.length ? Math.min(...dmgCd) : 9;
     const oThreat = o.moves.some(id => isDamaging(MOVES[id]) && (o.cd[id] || 0) < 1);
-    const stall = B.t - (B.lastDmgT || 0) > 9;   // しばらく だれも ダメージを うけて いない：かくれず せめる
+    const stall = stalled();   // しばらく だれも ダメージを うけて いない：かくれず せめる
     const hide = !stall && (f.awayT > 0 || hurt || (oThreat && Math.random() < per.cover));
     if (!hide && (soon < .9 || per.hold || stall)) want = { R: prefRange(f, per) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' };
     else want = { R: (prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' };
@@ -5440,7 +5460,7 @@ function renderDex() {
 function dexDetail(id, no) {
   const sp = SPECIES[id], lv = (S.dex || {})[id] || 0, p = sp.prof || {}, r = RARITY[monRarity(id)];
   const STN = { hp: 'HP', atk: 'こうげき', def: 'ぼうぎょ', spd: 'すばやさ' }, mx = 130;
-  const bars = lv >= 2 ? Object.keys(STN).map(k => `<div class="sbar"><span>${STN[k]}</span><span>${sp.base[k]}</span><i><b style="width:${Math.min(100, sp.base[k] / mx * 100)}%;background:${sp.base[k] >= 80 ? 'var(--good)' : sp.base[k] >= 55 ? 'var(--acc)' : 'var(--bad)'}"></b></i></div>`).join('') : '<p class="dim">つかまえると くわしい ことが わかる</p>';
+  const bars = lv >= 2 ? statBars(sp.base, avgBase(), { hp: mx, atk: mx, def: mx, spd: mx }) : '<p class="dim">つかまえると くわしい ことが わかる</p>';
   const mv = lv >= 2 ? [...new Set((LEARN[id] || []).map(([, x]) => x))].filter(x => MOVES[x]).map(x => `<span class="chip" style="background:${TYPES[MOVES[x].t].c}">${MOVES[x].n}</span>`).join(' ') : '';
   const bg = modal(`<div class="dexd"><div></div><div class="info">
       <div class="dim">No.${String(no).padStart(3, '0')}　<span class="chip" style="background:${r.c}">${r.n}</span>${lv >= 2 ? '　<b style="color:var(--acc)">★ つかまえた</b>' : '　みつけた'}</div>
