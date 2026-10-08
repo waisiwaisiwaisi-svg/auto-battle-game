@@ -33,15 +33,24 @@ for c in ncs:
     if CEN and c - CEN[-1][-1] < 14: CEN[-1].append(c)
     else: CEN.append([c])
 CEN = np.array([np.mean(c) for c in CEN]); assert len(CEN) == 10
-mm = m.copy(); mm[:, :53] = False
-# 番号の 文字を 消す：各段の 番号の 行で、列の まんなか ±8 の 白っぽい／灰色の ドット
+mm = m.copy()
+mm[:, :54] = False   # 左の タイプ見出し（光の にじみ を ふくめ x 50 まで）
+for q in comps(m[:, :70]):
+    if q[:, 1].min() <= 2:
+        for yy, xx in q: mm[yy, xx] = False
+# 番号の 文字を 消す：各段の 番号の 行で、列の まんなか ±9 の 白っぽい／灰色の ドット
+# （白い 体が 番号の 行まで のびている モンスターは のぞく）
+KEEP_WHITE = {(9, 1)}   # ホネリュウ（ドラゴン2）
 rgb = A[..., :3]; sat = rgb.max(-1) - rgb.min(-1)
-for lt, lb in ROWS:
-    for c in CEN:
-        y0_, y1_ = lb - 3, lb + 15; x0_, x1_ = int(c - 9), int(c + 10)
-        box = mm[y0_:y1_, x0_:x1_]; low = sat[y0_:y1_, x0_:x1_] < 40
-        box[low] = False
-allc = [p for p in comps(mm) if len(p) >= 4]
+for r, (lt, lb) in enumerate(ROWS):
+    for k, c in enumerate(CEN):
+        if (r, k) in KEEP_WHITE:
+            y0_, y1_ = lb + 4, lb + 15   # 数字の 下半分だけ（足と かさならない ところ）
+        else:
+            y0_, y1_ = lb - 3, lb + 15
+        x0_, x1_ = int(c - 9), int(c + 10)
+        box = mm[y0_:y1_, x0_:x1_]; box[sat[y0_:y1_, x0_:x1_] < 40] = False
+allc = [p for p in comps(mm) if len(p) >= 4 and (p[:, 1] < 47).mean() < .5]   # 左の 見出しの アイコンは のぞく
 def is_num(p):   # 番号の 文字：小さくて 番号の 行に おさまる
     y0, y1 = p[:, 0].min(), p[:, 0].max()
     return len(p) < 170 and any(a <= y0 and y1 <= b for a, b in NUM) and (y1 - y0) <= 13
