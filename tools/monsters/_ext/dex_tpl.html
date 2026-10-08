@@ -1,0 +1,140 @@
+<title>ピクセルモンスター図鑑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+/* 闘技場の 夜の 観客席。カードは 一体ずつの 図鑑ページ、絵は ゲームと 同じ 大きさの 比率で 台座に 立つ */
+:root {
+  --bg: #f1edf6; --panel: #ffffff; --stage: #e6e0ee; --line: #d6cfe2; --fg: #221b31; --dim: #6b6280; --acc: #b5791a; --chipfg: #1d1726;
+  --display: 'DotGothic16', 'Zen Maru Gothic', ui-monospace, monospace;
+  --body: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15121d; --panel: #1f1a2b; --stage: #2a2339; --line: #352c48; --fg: #ece6f5; --dim: #a39ab8; --acc: #ffd166; --chipfg: #1d1726; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #15121d; --panel: #1f1a2b; --stage: #2a2339; --line: #352c48; --fg: #ece6f5; --dim: #a39ab8; --acc: #ffd166; --chipfg: #1d1726; color-scheme: dark }
+* { box-sizing: border-box }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 500 14px/1.6 var(--body) }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px; margin-bottom: 14px }
+h1 { font: 400 clamp(26px, 5vw, 38px)/1.1 var(--display); margin: 0; letter-spacing: .04em; text-wrap: balance }
+.sum { color: var(--dim); font-size: 13px; font-variant-numeric: tabular-nums }
+.sum b { color: var(--fg); font-family: var(--display); font-weight: 400 }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 16px }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.tchip { border: 0; border-radius: 4px; padding: 3px 9px; font: 700 12px/1.4 var(--body); color: var(--chipfg); background: var(--c); cursor: pointer; opacity: .45 }
+.tchip[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--fg) }
+.tchip.all { --c: var(--line); color: var(--fg) }
+.tchip:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px }
+input[type=search], select { font: 500 13px var(--body); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px }
+input[type=search] { flex: 1 1 180px; min-width: 0 }
+.tog { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--dim); cursor: pointer }
+.count { margin-left: auto; color: var(--dim); font-size: 12px; font-variant-numeric: tabular-nums }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 8px; min-width: 0; scroll-margin-top: 140px }
+.card:target { box-shadow: 0 0 0 2px var(--acc) }
+.top { display: grid; grid-template-columns: 116px 1fr; gap: 12px; align-items: start }
+.stage { height: 116px; background: var(--stage); border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; position: relative; padding-bottom: 12px; overflow: hidden }
+.stage::after { content: ''; position: absolute; bottom: 8px; left: 50%; width: 46%; height: 8px; transform: translateX(-50%); border-radius: 50%; background: var(--line); z-index: 0 }
+.stage img { position: relative; z-index: 1; image-rendering: pixelated; image-rendering: crisp-edges; max-width: 108px; max-height: 100px }
+.stage.fly img { margin-bottom: 14px; animation: bob 2.4s ease-in-out infinite }
+.stage.fly::after { width: 30%; opacity: .7 }
+@keyframes bob { 50% { transform: translateY(-4px) } }
+@media (prefers-reduced-motion: reduce) { .stage.fly img { animation: none } }
+.no { font: 400 12px var(--display); color: var(--dim); font-variant-numeric: tabular-nums }
+.nm { font: 400 20px/1.2 var(--display); margin: 2px 0 6px; overflow-wrap: anywhere }
+.types { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px }
+.types span { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 3px; background: var(--c); color: var(--chipfg) }
+.tags { display: flex; gap: 4px; flex-wrap: wrap }
+.tag { font-size: 11px; padding: 0 6px; border-radius: 3px; border: 1px solid var(--line); color: var(--dim) }
+.tag.rare { border-color: var(--acc); color: var(--acc) }
+dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; font-size: 12.5px }
+dt { color: var(--dim) }
+dd { margin: 0; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere }
+.note { margin: 0; font-size: 13px }
+.trait { margin: 0; font-size: 12.5px; color: var(--dim) }
+.evo { font-size: 12px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 4px 12px; border-top: 1px dashed var(--line); padding-top: 6px }
+.evo a { color: var(--acc); text-decoration: none; font-weight: 700 }
+.evo a:hover { text-decoration: underline }
+.empty { color: var(--dim); padding: 40px 0; text-align: center }
+@media (max-width: 600px) { .bar { position: static } }
+@media (max-width: 420px) { .top { grid-template-columns: 96px 1fr } .stage { height: 100px } }
+</style>
+<div class="wrap">
+  <header>
+    <h1>ピクセルモンスター図鑑</h1>
+    <div class="sum" id="sum"></div>
+  </header>
+  <div class="bar">
+    <div class="row" id="types"></div>
+    <div class="row">
+      <input type="search" id="q" placeholder="名前・すみか・もとで さがす" aria-label="さがす">
+      <select id="sort" aria-label="ならびかえ">
+        <option value="no">図鑑の 番号</option><option value="h">高い 順</option><option value="hl">低い 順</option><option value="wt">重い 順</option><option value="n">名前の 順</option>
+      </select>
+      <label class="tog"><input type="checkbox" id="fly"> 飛ぶ</label>
+      <label class="tog"><input type="checkbox" id="rare"> レア</label>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>あてはまる モンスターが いません</p>
+</div>
+<script>
+const MON = /*DATA*/;
+const TYPES = /*TYPES*/;
+const byId = Object.fromEntries(MON.map(m => [m.id, m]));
+const used = [...new Set(MON.flatMap(m => m.t))].sort((a, b) => Object.keys(TYPES).indexOf(a) - Object.keys(TYPES).indexOf(b));
+const sel = new Set();
+const $ = (id) => document.getElementById(id);
+$('sum').innerHTML = `<b>${MON.length}</b> 種　·　<b>${used.length}</b> タイプ　·　飛ぶ <b>${MON.filter(m => m.fly).length}</b>　·　レア <b>${MON.filter(m => m.rare).length}</b>`;
+const all = document.createElement('button'); all.className = 'tchip all'; all.textContent = 'すべて'; all.setAttribute('aria-pressed', 'true');
+all.onclick = () => { sel.clear(); sync(); }; $('types').appendChild(all);
+for (const t of used) {
+  const b = document.createElement('button'); b.className = 'tchip'; b.dataset.t = t; b.textContent = TYPES[t][0]; b.style.setProperty('--c', TYPES[t][1]);
+  b.onclick = () => { sel.has(t) ? sel.delete(t) : sel.add(t); sync(); }; $('types').appendChild(b);
+}
+function sync() {
+  all.setAttribute('aria-pressed', String(sel.size === 0));
+  for (const b of document.querySelectorAll('.tchip[data-t]')) b.setAttribute('aria-pressed', String(sel.has(b.dataset.t)));
+  render();
+}
+const chip = (t) => `<span style="--c:${TYPES[t][1]}">${TYPES[t][0]}</span>`;
+const link = (id) => byId[id] ? `<a href="#m-${id}">${byId[id].n}</a>` : '';
+function card(m) {
+  const k = 88 * m.sz / Math.max(m.w, m.hh) * .82;   // ゲームと 同じ 比率の 大きさ
+  return `<article class="card" id="m-${m.id}">
+    <div class="top">
+      <div class="stage${m.fly ? ' fly' : ''}"><img src="${m.img}" width="${Math.round(m.w * k)}" height="${Math.round(m.hh * k)}" alt="${m.n}"></div>
+      <div style="min-width:0">
+        <div class="no">No.${String(m.no).padStart(3, '0')}</div>
+        <div class="nm">${m.n}</div>
+        <div class="types">${m.t.map(chip).join('')}</div>
+        <dl><dt>高さ</dt><dd>${m.h} m</dd><dt>重さ</dt><dd>${m.wt} kg</dd><dt>もと</dt><dd>${m.base}</dd></dl>
+      </div>
+    </div>
+    <p class="note">${m.note}。</p>
+    <p class="trait">すみか：${m.home}。${m.trait}。</p>
+    ${(m.fly || m.rare) ? `<div class="tags">${m.fly ? '<span class="tag">飛ぶ</span>' : ''}${m.rare ? '<span class="tag rare">レア</span>' : ''}</div>` : ''}
+    ${(m.pre || m.evo) ? `<div class="evo">${m.pre ? `<span>しんか前：${link(m.pre)}</span>` : ''}${m.evo ? `<span>しんか：${link(m.evo)}</span>` : ''}</div>` : ''}
+  </article>`;
+}
+function render() {
+  const q = $('q').value.trim(), fly = $('fly').checked, rare = $('rare').checked, so = $('sort').value;
+  let list = MON.filter(m => (!sel.size || m.t.some(t => sel.has(t))) && (!fly || m.fly) && (!rare || m.rare) && (!q || (m.n + m.home + m.base + m.note).includes(q)));
+  const cmp = { no: (a, b) => a.no - b.no, h: (a, b) => b.h - a.h, hl: (a, b) => a.h - b.h, wt: (a, b) => b.wt - a.wt, n: (a, b) => a.n.localeCompare(b.n, 'ja') }[so];
+  list.sort(cmp);
+  $('grid').innerHTML = list.map(card).join('');
+  $('count').textContent = `${list.length} / ${MON.length} 体`;
+  $('empty').hidden = list.length > 0;
+}
+for (const id of ['q', 'sort', 'fly', 'rare']) $(id).addEventListener('input', render);
+// しんかの リンク：しぼりこみを 外してから その カードへ
+$('grid').addEventListener('click', (e) => {
+  const a = e.target.closest('.evo a'); if (!a) return;
+  e.preventDefault(); sel.clear(); $('q').value = ''; $('fly').checked = $('rare').checked = false; sync();
+  const el = document.querySelector(a.getAttribute('href')); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus?.(); history.replaceState(null, '', a.getAttribute('href')); }
+});
+render();
+if (location.hash) { const el = document.querySelector(location.hash); if (el) el.scrollIntoView(); }
+</script>
