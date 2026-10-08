@@ -25,41 +25,56 @@ def comps(mask):
                 out.append(np.array(pts))
     return out
 out = {}
-prev_end = 0
+# 番号の 行（各段の 見出しの 下はし付近）と 列の まんなか
+NUM = [(lb - 3, lb + 11) for lt, lb in ROWS]
+nb = m[ROWS[0][1] - 2:ROWS[0][1] + 10]
+ncs = sorted(p[:, 1].mean() for p in comps(nb) if len(p) >= 8); CEN = []
+for c in ncs:
+    if CEN and c - CEN[-1][-1] < 14: CEN[-1].append(c)
+    else: CEN.append([c])
+CEN = np.array([np.mean(c) for c in CEN]); assert len(CEN) == 10
+mm = m.copy(); mm[:, :53] = False
+# 番号の 文字を 消す：各段の 番号の 行で、列の まんなか ±8 の 白っぽい／灰色の ドット
+rgb = A[..., :3]; sat = rgb.max(-1) - rgb.min(-1)
+for lt, lb in ROWS:
+    for c in CEN:
+        y0_, y1_ = lb - 3, lb + 15; x0_, x1_ = int(c - 9), int(c + 10)
+        box = mm[y0_:y1_, x0_:x1_]; low = sat[y0_:y1_, x0_:x1_] < 40
+        box[low] = False
+allc = [p for p in comps(mm) if len(p) >= 4]
+def is_num(p):   # 番号の 文字：小さくて 番号の 行に おさまる
+    y0, y1 = p[:, 0].min(), p[:, 0].max()
+    return len(p) < 170 and any(a <= y0 and y1 <= b for a, b in NUM) and (y1 - y0) <= 13
+cells = {}
+for p in allc:
+    if is_num(p): continue
+    row = np.searchsorted(np.array([b for a, b in NUM]), p[:, 0] + 0)   # 番号の 行より 上なら その段
+    row = np.clip(row, 0, 9)
+    col = np.argmin(np.abs(p[:, 1:2] - CEN[None]), 1)
+    cell = row * 10 + col
+    us, cn = np.unique(cell, return_counts=True)
+    own = us[cn >= cn.max() * .3]   # いちばん 多い 列の 3割 以上 ある 列が もちぬし
+    if len(own) <= 1: cells.setdefault(int(us[np.argmax(cn)]), []).append(p); continue
+    # くっついた 2体以上：ドットごとに 近い もちぬしへ（行は 段の ちがい、列は 横の きょり）
+    orow, ocol = own // 10, own % 10
+    d = (np.abs(row[:, None] - orow[None]) * 1000) + np.abs(p[:, 1:2] - CEN[ocol][None])
+    w = own[np.argmin(d, 1)]
+    for o in own: cells.setdefault(int(o), []).append(p[w == o])
 for r, t in enumerate(TYPES):
-    lt, lb = ROWS[r]
-    # 番号の 文字（見出しの 下はしの すぐ 下）から 各モンスターの まんなかを 知る
-    nb = m[lb - 2:lb + 10]
-    ncs = sorted(p[:, 1].mean() for p in comps(nb) if len(p) >= 8)
-    cen = []
-    for c in ncs:
-        if cen and c - cen[-1][-1] < 14: cen[-1].append(c)
-        else: cen.append([c])
-    cen = [np.mean(c) for c in cen]
-    if len(cen) != 10: cen = CEN0   # 番号が うまく 読めない 段は 1段目の 位置を つかう（同じ 格子に ならんでいる）
-    if r == 0: CEN0 = cen; print('centers', [round(c) for c in cen])
-    edges = [0] + [(cen[k] + cen[k + 1]) / 2 for k in range(9)] + [W]
-    y0 = max(prev_end, lt - 14); y1 = lb - 3; prev_end = lb + 10
     groups = {k: [] for k in range(10)}
+    y0 = 0
     for k in range(10):
-        x0, x1 = int(edges[k]), int(edges[k + 1])
-        tile = m[y0:y1, x0:x1].copy(); tile[:, :max(0, 53 - x0)] = False
-        cs = [p for p in comps(tile) if len(p) >= 4]
-        if not cs: continue
-        big = max(len(p) for p in cs); tw = x1 - x0
-        for p in cs:
-            edge = p[:, 1].min() == 0 or p[:, 1].max() == tw - 1
-            if edge and len(p) < big * .3 and len(p) != big: continue   # となりから はみ出した 切れはし
-            if len(p) < big * .02: continue
-            if p[:, 0].min() == 0 and len(p) < big * .12: continue   # 上の 段の 番号の かけら
-            if edge and len(p) < big * .45 and abs(p[:, 1].mean() - (cen[k] - x0)) > tw * .38: continue   # 列の はしに よった はみ出し
-            groups[k].append(p + [0, x0])
+        ps = cells.get(r * 10 + k, [])
+        if not ps: continue
+        big = max(len(q) for q in ps)
+        mainq = max(ps, key=len); bot = mainq[:, 0].max()
+        groups[k] = [q for q in ps if len(q) >= max(6, big * .015) and not (len(q) < big * .06 and q[:, 0].min() > bot - 4)]   # 下に はなれた 小さな かけらは 消す
     for k, ps in groups.items():
         if not ps: print('missing', t, k + 1); continue
         P = np.concatenate(ps); ya, xa = P.min(0); yb, xb = P.max(0)
         sub = np.zeros((yb - ya + 1, xb - xa + 1, 4), int)
         for pp in ps:
-            for yy, xx in pp: sub[yy - ya, xx - xa] = A[y0 + yy, xx]
+            for yy, xx in pp: sub[yy - ya, xx - xa] = A[yy, xx]
         # 半透明の ふちは 消す／色を まとめる
         on = sub[..., 3] > 110
         rgb = Image.fromarray(sub[..., :3].astype(np.uint8)).quantize(48, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
