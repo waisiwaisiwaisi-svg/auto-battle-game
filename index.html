@@ -2934,7 +2934,7 @@ function sendOut(side, idx, pass, lag, at) {
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
   f.swapLag = lag ? SWAP_LAG : 0; if (lag) f.inv = 0;
   const tr = sd.trainer;
-  if (tr) { B.fx.push({ type: 'beamIn', x0: tr.x, y0: tr.y - 30, x1: f.x, y1: f.y - 20, life: .45, max: .45 }); tr.shout = .7; }
+  if (tr) { B.fx.push({ type: 'beamIn', x0: tr.x, y0: tr.y - 30, x1: f.x, y1: f.y - 20, life: .45, max: .45 }); tr.shout = .7; tr.pose = 'open'; }
   else burst(f.x, f.y - 4, '#3f9040', 16, 90, .5);
   burst(f.x, f.y - 10, '#ffffff', 12, 80, .45);
   B.cheer = Math.max(B.cheer, .7);
@@ -3100,7 +3100,7 @@ function beginMove(f, id) {
   if (B.log) B.log.push(id);
   if (m.k !== 'melee' || id !== 'tackle') {
     say(`${prefix(f)}${f.sp.n}の ${m.n}！`);
-    if (B.sides[f.side].trainer) B.sides[f.side].trainer.shout = .6;
+    if (B.sides[f.side].trainer) cmdPose(f.side);
   }
 }
 function multiPoints(f, o, m, ang) {
@@ -3462,9 +3462,16 @@ function startDodge(f, dirOverride) {
 
 /* ---------- AI ---------- */
 const canAct = (f) => f.status !== 'slp' && f.status !== 'frz';
+// 指示なしで かわす かくりつ：すばやさ（種族値）と すばやさの 強化で かわる。さいだい 50%
+function autoDodgeP(f) {
+  let p = (.04 + f.baseSpd / 700) * stageMul(f.st.spe);
+  if (f.status === 'par') p *= .5;
+  if (B.sides[f.side].tail > 0) p *= 1.2;
+  return clamp(p, 0, .5);
+}
 function aiDodgeCheck(f, o) {
   const isP = f.side === 0;
-  const skill = isP ? 0 : B.skill;   // プレイヤーの かわすは 手動
+  const skill = isP ? autoDodgeP(f) : B.skill;   // プレイヤーの モンスターも 指示なしで たまに かわす
   if (skill <= 0 || f.dodgeCd > 0 || !['free', 'act'].includes(f.state) || !canAct(f)) return;
   if (o && o.state === 'wind' && o.cur && ZONE_KINDS.includes(o.cur.m.k) && isDamaging(o.cur.m)) {
     if (f.planFor !== o.cur.uid) {
@@ -3836,7 +3843,7 @@ function cmdCapsule() {
   if (S.capsules <= 0) { say('クリスタルが もう ない！'); return; }
   const e = active(1); if (!targetable(e)) return;
   S.capsules--; save();
-  const tr = B.sides[0].trainer; tr.shout = .6;
+  const tr = B.sides[0].trainer; tr.shout = .6; tr.pose = 'open';
   B.mode = 'catch';
   B.catchO = { phase: 'throw', t: 0, sx: tr.x, sy: tr.y - 30, tx: e.x, ty: e.y - 12, shakes: 0, p: catchProb(e), x: tr.x, y: tr.y };
   say('いけっ！ ふういんクリスタル！');
@@ -3883,7 +3890,7 @@ function bStep(dt) {
   B.cheer = Math.max(.15, B.cheer - dt * .4);
   B.shake = Math.max(0, B.shake - dt * 20);
   if (B.trickRoom > 0) { B.trickRoom -= dt; if (B.trickRoom <= 0) say('ねじれた じくうが もとに もどった！'); }
-  for (const sd of B.sides) sd.swapCd = Math.max(0, (sd.swapCd || 0) - dt);
+  for (const sd of B.sides) { sd.swapCd = Math.max(0, (sd.swapCd || 0) - dt); sd.dodgeCmd = Math.max(0, (sd.dodgeCmd || 0) - dt); }
   for (const sd of B.sides) if (sd.tail > 0) { sd.tail -= dt; if (sd.tail <= 0) say('おいかぜが やんだ'); }
 
   if (B.mode === 'intro') {
@@ -4057,11 +4064,13 @@ function cmdMove(i) {
   if ((f.cd[id] || 0) > 0) return;
   f.queued = id;
 }
+const DODGE_CMD_CD = 5;   // かわすの 指示は 1かい つかうと 5びょう つかえない
 function cmdDodge() {
   if (!canCommand()) return;
-  const f = active(0); if (!f || f.dodgeCd > 0 || !['free', 'act', 'wind'].includes(f.state) || !canAct(f)) return;
+  const f = active(0); if (!f || (B.sides[0].dodgeCmd || 0) > 0 || !['free', 'act', 'wind'].includes(f.state) || !canAct(f)) return;
   const v = playerVec();
   startDodge(f, v.active ? Math.atan2(v.y, v.x) : null);
+  B.sides[0].dodgeCmd = DODGE_CMD_CD; cmdPose(0);
 }
 function cmdSwap() {
   if (!canCommand()) return;
@@ -4132,7 +4141,8 @@ function updHUD() {
     const left = healMax(m) ? `（のこり ${Math.max(0, healLeft(f, id))}）` : '';
     setText(b.querySelector('.b'), (eff ? `${TYPES[m.t].n}・${eff === '2' ? 'ばつぐん！' : eff === '0' ? 'きかない' : 'いまいち'}` : moveSub(m)) + left);
   });
-  $('cDodge').querySelector('.cdv').style.height = (f.dodgeCd / .9 * 100) + '%';
+  $('cDodge').querySelector('.cdv').style.height = ((B.sides[0].dodgeCmd || 0) / DODGE_CMD_CD * 100) + '%';
+  setText($('cDodge').querySelector('.b'), (B.sides[0].dodgeCmd || 0) > 0 ? `あと ${Math.ceil(B.sides[0].dodgeCmd)}びょう` : `じどう ${Math.round(autoDodgeP(f) * 100)}%`);
   $('cSwap').querySelector('.cdv').style.height = (B.sides[0].swapCd / SWAP_CD * 100) + '%';
   setText($('capN'), `のこり ${S.capsules}`);
 }
@@ -4383,12 +4393,14 @@ function drawFighter(f) {
   }
 }
 
+// 指示を だすと 指を さす（召喚・クリスタルは 手を ひろげる）
+function cmdPose(side) { const t = B.sides[side].trainer; if (t && !(t.shout > .3 && t.pose === 'open')) { t.shout = .6; t.pose = 'point'; } }
 function drawTrainer(sd) {
   const t = sd.trainer; if (!t) return;
   const jump = t.shout > 0 ? Math.round(Math.abs(Math.sin(t.shout * 12)) * 5) : 0;
   shadow(t.x, t.y, 14);
   const won = B.result === (sd === B.sides[0] ? 'win' : 'lose'), lost = B.result === (sd === B.sides[0] ? 'lose' : 'win');
-  const tf = won && t.spr.win ? 'win' : t.shout > .3 ? 'atk1' : t.shout > 0 ? 'atk2' : (lost ? 'ko' : 'idle' + (Math.floor(B.t * 4) % 4));
+  const tf = won && t.spr.win ? 'win' : t.shout > 0 ? (t.pose === 'open' ? 'atk2' : 'atk1') : (lost ? 'ko' : 'idle' + (Math.floor(B.t * 4) % 4));
   const bob = t.spr.art && !t.shout && !B.result ? (Math.floor(B.t * 2) % 2) : 0;   // 絵の トレーナーは 息づかいで 1ドット ゆれる
   drawSprite(t.spr[tf].n, t.x, t.y - jump + bob, sd === B.sides[0] ? 1 : -1, t.spr.art ? (B.st.solid ? TR_MS * 1.3 : TR_MS) : MS, lost && t.spr.art ? .55 : null);
   if (t.shout > .2) { ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px monospace'; ctx.textAlign = 'center'; ctx.fillText('!', t.x + (sd === B.sides[0] ? 22 : -22), t.y - 56); }
