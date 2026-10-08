@@ -149,7 +149,11 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 #swapList .hpb{height:4px;background:#0d0b14;margin-top:3px}
 #swapList .hpb i{display:block;height:100%;background:var(--good)}
 #swapCancel{min-height:34px;flex:none}
-#btns{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-auto-rows:1fr;gap:6px;min-height:0}
+#btns{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:auto;gap:6px;min-height:0;align-content:start}
+.cmd.info{grid-column:span 2;align-items:flex-start;text-align:left;padding:4px 8px;cursor:default;min-height:52px}
+.cmd.info:active{transform:none}
+.cmd.info .d{font-size:10px;line-height:1.35;color:var(--ink);opacity:.85;white-space:normal}
+#btns button.cmd{min-height:46px}
 .cmd{
   position:relative;overflow:hidden;background:var(--panel);box-shadow:0 0 0 2px var(--edge),0 3px 0 #0d0b14;
   display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;min-height:38px;touch-action:none;
@@ -174,7 +178,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
   #scBattle{display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto auto minmax(0,1fr);
     grid-template-areas:"top top" "cv plates" "cv banner" "cv ctrl";column-gap:16px;row-gap:10px;padding:14px 18px}
   #bTop{grid-area:top} .plates{grid-area:plates;grid-template-columns:1fr} #banner{grid-area:banner}
-  #ctrl{grid-area:ctrl;align-items:start} #btns{grid-auto-rows:72px;flex:none;width:100%}
+  #ctrl{grid-area:ctrl;align-items:start} #btns{flex:none;width:100%} #btns button.cmd{min-height:64px} .cmd.info{min-height:78px} .cmd.info .d{font-size:12px}
   #cvWrap{grid-area:cv;align-self:start;width:min(100%, calc((100dvh - 64px) * 16 / 9))}
   .cmd .a{font-size:15px} .cmd .b{font-size:11px} #banner{font-size:14px}
 }
@@ -254,14 +258,13 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
     <div id="ctrl">
       <div id="swapBar" hidden><div class="sbHead">こうたい（バトルは とまりません）</div><div id="swapList"></div><button class="cmd" id="swapCancel"><span class="a">やめる</span></button></div>
       <div id="btns">
-        <button class="cmd mv" data-mv="0"><span class="a"></span><span class="b"></span><i class="cdv"></i></button>
-        <button class="cmd mv" data-mv="1"><span class="a"></span><span class="b"></span><i class="cdv"></i></button>
-        <button class="cmd mv" data-mv="2"><span class="a"></span><span class="b"></span><i class="cdv"></i></button>
-        <button class="cmd mv" data-mv="3"><span class="a"></span><span class="b"></span><i class="cdv"></i></button>
+        <div class="cmd mv info" data-mv="0"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
+        <div class="cmd mv info" data-mv="1"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
+        <div class="cmd mv info" data-mv="2"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
+        <div class="cmd mv info" data-mv="3"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
         <button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button>
         <button class="cmd" id="cSwap"><span class="a">こうたい</span><span class="b">ひかえと</span><i class="cdv"></i></button>
         <button class="cmd" id="cCap"><span class="a">クリスタル</span><span class="b" id="capN"></span></button>
-        <button class="cmd" id="cAuto"><span class="a">オート</span><span class="b" id="autoS">OFF</span></button>
         <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
       </div>
     </div>
@@ -2781,11 +2784,12 @@ function startBattle(cfg) {
   setupCmds();
 }
 
-function sendOut(side, idx, pass, lag) {
+function sendOut(side, idx, pass, lag, at) {
   const sd = B.sides[side]; sd.act = idx;
   const f = sd.fs[idx], st = B.st;
-  f.x = side ? st.fx1 - 120 : st.fx0 + 120; f.y = (st.fy0 + st.fy1) / 2 + rand(-20, 20);
-  if (st.solid) freeSpot(f);
+  if (at) { f.x = at.x; f.y = at.y; }   // 交代：もどった モンスターが いた 場所に 出す
+  else { f.x = side ? st.fx1 - 120 : st.fx0 + 120; f.y = (st.fy0 + st.fy1) / 2 + rand(-20, 20); }   // はじめ・たおれた あと：初期位置
+  clampF(f); if (st.solid) freeSpot(f);
   f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
   f.enterT = 0; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; f.lastMove = null; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
@@ -3246,7 +3250,7 @@ function startDodge(f, dirOverride) {
 const canAct = (f) => f.status !== 'slp' && f.status !== 'frz';
 function aiDodgeCheck(f, o) {
   const isP = f.side === 0;
-  const skill = isP ? (S.auto ? .5 : 0) : B.skill;
+  const skill = isP ? 0 : B.skill;   // プレイヤーの かわすは 手動
   if (skill <= 0 || f.dodgeCd > 0 || !['free', 'act'].includes(f.state) || !canAct(f)) return;
   if (o && o.state === 'wind' && o.cur && ZONE_KINDS.includes(o.cur.m.k) && isDamaging(o.cur.m)) {
     if (f.planFor !== o.cur.uid) {
@@ -3543,7 +3547,7 @@ function updateFighter(f, dt) {
       break;
     case 'return':
       f.stT -= dt; f.scale = clamp(f.stT / .3, 0, 1);
-      if (f.stT <= 0) { f.state = 'bench'; f.scale = 1; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; if (f.status === 'tox') f.toxN = 1; B.pendingSend = { side: f.side, idx: B.swapTo, t: .2, pass: B.swapPass, lag: true }; B.swapPass = null; }
+      if (f.stT <= 0) { f.state = 'bench'; f.scale = 1; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; if (f.status === 'tox') f.toxN = 1; B.pendingSend = { side: f.side, idx: B.swapTo, t: .2, pass: B.swapPass, lag: true, at: { x: f.x, y: f.y } }; B.swapPass = null; }
       return;
     case 'faint': f.stT -= dt; if (f.stT <= 0) afterFaint(f); return;
     case 'free': {
@@ -3555,7 +3559,7 @@ function updateFighter(f, dt) {
       if (f.state !== 'free') break;
       if (f.v.encore && f.queued !== f.v.encore.id && f.queued !== null) f.queued = null;
       // 移動は モンスター自身が おこなう。オートOFFなら わざは プレイヤーの 指示だけ
-      aiMove(f, o, dt, f.side === 0 ? (S.auto && !f.v.rampage) : !f.v.rampage);
+      aiMove(f, o, dt, !f.v.rampage);   // わざは 自動（プレイヤーは かわす・交代 だけ）
       break;
     }
     case 'wind': {
@@ -3669,7 +3673,7 @@ function bStep(dt) {
     if (B.sent === 1 && B.modeT > 1.7) { B.sent = 2; sendOut(0, 0); }
     if (B.modeT > 2.3) { B.mode = 'fight'; B.modeT = 0; say('バトル スタート！'); }
   }
-  if (B.pendingSend) { B.pendingSend.t -= dt; if (B.pendingSend.t <= 0) { const p = B.pendingSend; B.pendingSend = null; sendOut(p.side, p.idx, p.pass, p.lag); } }
+  if (B.pendingSend) { B.pendingSend.t -= dt; if (B.pendingSend.t <= 0) { const p = B.pendingSend; B.pendingSend = null; sendOut(p.side, p.idx, p.pass, p.lag, p.at); } }
 
   if (B.mode === 'catch') updateCatch(dt);
   else if (B.mode === 'fight' || B.mode === 'intro') {
@@ -3778,6 +3782,40 @@ function showResult() {
 
 /* ---------- コマンド ---------- */
 const KIND_LABEL = { proj: 'とびどうぐ', beam: 'ちょくせん', aoe: 'まわり', strike: 'あしもと', dash: 'とっしん', melee: 'せっきん', swipe: 'まえ', cone: 'おうぎ', multi: 'はんい', ray: 'ほじょ', self: 'じぶん', heal: 'かいふく', protect: 'まもる', sub: 'デコイ', dbond: 'ほじょ', counter: 'カウンター', curse: 'ほじょ', field: 'ば', hazard: 'しかけ', baton: 'いれかえ' };
+// わざの 効果の 説明
+function moveDesc(m) {
+  const e = m.e || {}, out = [], SN = { atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう', spd: 'とくぼう', spe: 'すばやさ' };
+  const ST = { brn: 'やけど', par: 'まひ', psn: 'どく', tox: 'もうどく', frz: 'こおり', slp: 'ねむり' };
+  const stg = (o) => Object.entries(o).map(([k, v]) => `${SN[k]}${v > 0 ? '+' : ''}${v}`).join('・');
+  const pw = m.power || (m.pow ? Math.round(m.pow * 5) : 0);
+  if (m.cat !== 'stat' && m.k !== 'counter') out.push(pw ? `いりょく${pw}` : 'こうげき');
+  if (m.cnt > 1) out.push(`${m.cnt}はつ`);
+  if (m.cat !== 'stat' && m.acc && m.acc < 100) out.push(`めいちゅう${m.acc}`);
+  if (e.st) out.push(`${e.stCh || 100}%で ${ST[e.st]}`);
+  if (e.flinch) out.push(`${e.flinch}%で ひるませる`);
+  if (e.foe) out.push(`あいての ${stg(e.foe)}`);
+  if (e.self) out.push(`じぶんの ${stg(e.self)}`);
+  if (e.drain) out.push(`ダメージの ${e.drain}%を かいふく`);
+  if (e.recoil) out.push(`はんどうで ${e.recoil}%うける`);
+  if (e.heal) out.push(`HPを ${e.heal}%かいふく`);
+  if (e.seed) out.push('まいびょう HPを すいとる');
+  if (m.switchOut) out.push('あてたら こうたい');
+  if (m.fakeout) out.push('でてすぐ だけ つかえる');
+  if (m.ohko) out.push('あたれば いちげき');
+  if (m.homing) out.push('おいかける');
+  if (m.sucker) out.push('あいての こうげきに さきまわり');
+  if (m.rampage) out.push('しばらく あばれる');
+  if (m.useFoeAtk) out.push('あいての こうげきで ダメージ');
+  if (m.superVsWater) out.push('みずに こうかばつぐん');
+  if (m.rapidSpin) out.push('しかけを はらう');
+  const K = { protect: 'すこしの あいだ こうげきを ふせぐ', counter: 'うけた ダメージを かえす', sub: 'HPを けずって みがわりを つくる', dbond: 'たおされたら あいても たおす',
+    curse: 'HPを けずって あいてを のろう', baton: 'のうりょくの へんかを ひきついで こうたい' };
+  if (K[m.k]) out.push(K[m.k]);
+  if (m.k === 'field') out.push(m.fld === 'trickroom' ? 'おそい ほうが はやく なる ば' : 'みかたの すばやさ アップ');
+  if (m.k === 'hazard') out.push({ rocks: 'こうたいで でてきた あいてに ダメージ', spikes: 'まきびしを まく', tspikes: 'こうたいで でてきた あいてを どくに' }[m.hz]);
+  if (m.sp) out.push({ taunt: 'あいては へんかわざが つかえない', encore: 'あいてに おなじ わざを くりかえさせる', yawn: 'しばらくして ねむらせる', trick: 'あいての のうりょくアップを うばう', roar: 'あいてを むりやり こうたい' }[m.sp]);
+  return out.filter(Boolean).join('・');
+}
 function moveSub(m) {
   const aim = m.cat === 'stat' ? '' : (m.aim === 'dir' ? '◎' : '');
   return `${TYPES[m.t].n}・${KIND_LABEL[m.k] || ''}${aim}`;
@@ -3792,6 +3830,7 @@ function setupCmds() {
     b.querySelector('.a').textContent = m.n;
     b.querySelector('.a').style.fontSize = m.n.length > 8 ? '10.5px' : m.n.length > 6 ? '11.5px' : '';
     b.querySelector('.b').textContent = moveSub(m); b.querySelector('.b')._t = null; b.dataset.eff = '';
+    b.querySelector('.d').textContent = moveDesc(m);
     b.style.setProperty('--c', TYPES[m.t].c);
   });
 }
@@ -3835,7 +3874,7 @@ function cmdSwap() {
 }
 function cmdRun() { if (!canCommand() || B.kind !== 'wild') return; say('うまく にげきれた！'); endBattle('run'); }
 function cmdAuto() { S.auto = !S.auto; save(); updAutoBtn(); }
-function updAutoBtn() { $('autoS').textContent = S.auto ? 'ON' : 'OFF'; $('cAuto').classList.toggle('on', S.auto); }
+function updAutoBtn() {}
 
 /* ---------- HUD ---------- */
 function setText(el, t) { if (el._t !== t) { el._t = t; el.textContent = t; } }
@@ -4221,14 +4260,12 @@ function render() {
    入力（ボタン・キーボード）
    ===================================================================== */
 const tap = (el, fn) => el.addEventListener('pointerdown', (ev) => { ev.preventDefault(); fn(); });
-document.querySelectorAll('.cmd.mv').forEach(b => tap(b, () => cmdMove(+b.dataset.mv)));
 tap($('cDodge'), cmdDodge); tap($('cSwap'), cmdSwap);
-tap($('cCap'), cmdCapsule); tap($('cRun'), cmdRun); tap($('cAuto'), cmdAuto);
+tap($('cCap'), cmdCapsule); tap($('cRun'), cmdRun);
 document.addEventListener('keydown', (ev) => {
   const k = ev.key.toLowerCase();
   input.keys.add(k);
   if (!B || $('scBattle').hidden) return;
-  if (k === 'k') cmdMove(0); if (k === 'l') cmdMove(1); if (k === 'u') cmdMove(2); if (k === 'i') cmdMove(3);
   if (k === ' ') { ev.preventDefault(); cmdDodge(); }
   if (k === 'c') cmdCapsule(); if (k === 'x') cmdSwap();
 });
