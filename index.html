@@ -175,7 +175,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 @media (min-aspect-ratio: 4/3) and (min-width: 900px) {
   #app{max-width:none}
   .screen:not(#scBattle){left:0;right:0;margin:0 auto;max-width:560px}
-  #scBattle{display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto auto minmax(0,1fr);
+  #scBattle:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto auto minmax(0,1fr);
     grid-template-areas:"top top" "cv plates" "cv banner" "cv ctrl";column-gap:16px;row-gap:10px;padding:14px 18px}
   #bTop{grid-area:top} .plates{grid-area:plates;grid-template-columns:1fr} #banner{grid-area:banner}
   #ctrl{grid-area:ctrl;align-items:start} #btns{flex:none;width:100%} #btns button.cmd{min-height:64px} .cmd.info{min-height:78px} .cmd.info .d{font-size:12px}
@@ -221,9 +221,9 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
     <div class="sec-title"><span>パーティ（上から3匹が しゅつじょう）</span><button class="dim" id="btnTeam" style="text-decoration:underline">へんせい ›</button></div>
     <div class="partyrow" id="hubParty"></div>
     <div class="card dim" style="line-height:1.7">
-      <b style="color:var(--ink)">そうさ</b>：モンスターは じぶんで うごきます。あなたは ボタンで わざ・かわす・こうたい を しじ！<br>
+      <b style="color:var(--ink)">そうさ</b>：モンスターは じぶんで うごきます。わざも じぶんで えらんで つかいます。あなたが できるのは <b style="color:var(--ink)">かわす</b> と <b style="color:var(--ink)">こうたい</b>！<br>
       赤い はんいは あいての わざの よちょう。<b style="color:var(--ink)">かわす</b>で むてきに なれる！<br>
-      ◎の わざは 命中100未満：だした しゅんかんの 方向・はんいに うつので よけられる<br>PC：J=こうげき　K・L・U・I=わざ　Space=かわす　X=こうたい
+      ◎の わざは 命中100未満：だした しゅんかんの 方向・はんいに うつので よけられる<br>モンスターは つかまえた ときに せいかく・ステータス・わざが きまります（レベル・しんかは ありません）<br>PC：Space=かわす　X=こうたい
     </div>
     <button class="dim" id="btnReset" style="align-self:center;text-decoration:underline;margin-top:auto">セーブデータを けす</button>
   </section>
@@ -636,14 +636,23 @@ const EXTRA = {
   yorukoumo: [[37, 'flash-cannon'], [40, 'alluring-voice']],
 };
 for (const k in EXTRA) LEARN[k].push(...EXTRA[k]);
-const learned = (m) => LEARN[m.sid].filter(([l]) => l <= m.lvl).map(([, id]) => id);
+// レベルは なし：おぼえる わざは 種族の わざ ぜんぶが 候補
+const learned = (m) => [...new Set(LEARN[m.sid].map(([, id]) => id))];
+const MON_LV = 20;   // 計算用の 固定レベル（表示しない）
 // 装備中のわざ（最大4つ）。未設定なら おぼえた順の さいごの4つ
+// わざは 獲得した ときに 4つ 確定（あとから 変えられない）
 function equipped(m) {
-  const L = learned(m);
-  if (!Array.isArray(m.moves) || !m.moves.length) m.moves = L.slice(-4);
-  m.moves = m.moves.filter(id => L.includes(id)).slice(0, 4);
-  if (!m.moves.length) m.moves = L.slice(-4);
+  fixMon(m);
   return m.moves;
+}
+// 個体を 確定：性格・ステータス（種族値の ±15% の 中で ランダム）・わざ 4つ。bias(0〜1) が 大きいほど 強い 個体に なりやすい
+function fixMon(m, bias) {
+  m.lvl = MON_LV;
+  if (!m.nat || !NATURES[m.nat]) m.nat = pickNature(SPECIES[m.sid]);
+  if (!m.iv) { const r = () => { let v = Math.random(); if (bias) v = v * (1 - bias) + bias * Math.max(v, Math.random()); return Math.round((.85 + .3 * v) * 100) / 100; }; m.iv = { hp: r(), atk: r(), def: r(), spd: r() }; }
+  const L = learned(m);
+  if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !L.includes(id))) m.moves = pickMoves(m);
+  return m;
 }
 
 const TRAINER_ROWS = [
@@ -2278,17 +2287,12 @@ function loadSave() {
   return null;
 }
 function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
-const newMon = (sid, lvl) => ({ uid: S.uid++, sid, lvl, exp: 0, nat: pickNature(SPECIES[sid]) });
+const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
 function stats(m) {
-  const b = SPECIES[m.sid].base, L = m.lvl;
-  return { hp: Math.round(b.hp * (L + 10) / 12 + 10), atk: b.atk * (L + 10) / 30, def: b.def * (L + 10) / 30, spd: b.spd };
+  fixMon(m); const b = SPECIES[m.sid].base, L = MON_LV, iv = m.iv;
+  return { hp: Math.round(b.hp * iv.hp * (L + 10) / 12 + 10), atk: b.atk * iv.atk * (L + 10) / 30, def: b.def * iv.def * (L + 10) / 30, spd: Math.round(b.spd * iv.spd) };
 }
-const expNext = (l) => 8 + l * 6;
-function gainExp(m, x) {
-  m.exp += x; let ups = 0;
-  while (m.exp >= expNext(m.lvl) && m.lvl < 99) { m.exp -= expNext(m.lvl); m.lvl++; ups++; }
-  return ups;
-}
+
 
 /* =====================================================================
    たいかい
@@ -2316,7 +2320,7 @@ const FIELD_NAMES = Object.fromEntries(FIELDS.map(k => [k, ARENAS[k].name]));
 function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
-  const p = sp.prof, evo = p.evo && SPECIES[p.evo] ? `　しんか→${SPECIES[p.evo].n}` : '';
+  const p = sp.prof, evo = '';
   return `高さ ${p.h}m　重さ ${p.wt}kg　すみか：${p.home}${evo}<br>${p.trait}`;
 }
 const typeChip = (t) => `<span class="chip" style="background:${TYPES[t].c}">${TYPES[t].n}</span>`;
@@ -2333,9 +2337,9 @@ function renderStarter() {
     const sp = SPECIES[id], b = document.createElement('button'); b.className = 'starter';
     b.appendChild(spriteCanvas(id, 72));
     const d = document.createElement('div');
-    d.innerHTML = `<div class="nm">${sp.n} ${typeChip(sp.type)}</div><p>${sp.desc}</p>${sp.prof ? `<p>${profLine(sp)}</p>` : ''}<p>わざ：${LEARN[id].filter(([l]) => l <= 5).map(([, m]) => MOVES[m].n).join('・')}</p>`;
+    const pm = newMon(id); d.innerHTML = `<div class="nm">${sp.n} ${typeChip(sp.type)}</div><p>${sp.desc}</p>${sp.prof ? `<p>${profLine(sp)}</p>` : ''}<p>せいかく：${NATURES[pm.nat].n}（${ivGrade(pm)}）<br>わざ：${pm.moves.map(m => MOVES[m].n).join('・')}</p>`;
     b.appendChild(d);
-    b.onclick = () => { S = defaultSave(); S.party.push(newMon(id, 5)); save(); renderHub(); };
+    b.onclick = () => { S = defaultSave(); pm.uid = S.uid++; S.party.push(pm); save(); renderHub(); };
     L.appendChild(b);
   }
   show('scStarter');
@@ -2343,13 +2347,13 @@ function renderStarter() {
 function renderHub() {
   $('hTrophy').textContent = S.trophies; $('hCaps').textContent = S.capsules; $('hCaught').textContent = S.caught;
   const r = ROUNDS[S.round];
-  $('cupInfo').innerHTML = `<b style="color:var(--acc)">${cupName()}</b><br>つぎ：<b>${r.n}</b> vs ${r.tr}<br><span class="dim">あいての レベル ${roundLv(r)} ぜんご ／ ${r.size}たい</span>` +
+  $('cupInfo').innerHTML = `<b style="color:var(--acc)">${cupName()}</b><br>つぎ：<b>${r.n}</b> vs ${r.tr}<br><span class="dim">あいて ${r.size}たい</span>` +
     `<div class="rounds">${ROUNDS.map((_, i) => `<i class="${i < S.round ? 'done' : i === S.round ? 'now' : ''}"></i>`).join('')}</div>`;
   const P = $('hubParty'); P.innerHTML = '';
   S.party.forEach((m, i) => {
     const d = document.createElement('div'); d.className = 'pm';
     d.appendChild(spriteCanvas(m.sid, 48));
-    d.insertAdjacentHTML('beforeend', `${i < 3 ? '<span class="tag">出場</span>' : ''}<div>${SPECIES[m.sid].n}</div><div class="dim">Lv${m.lvl}</div>`);
+    d.insertAdjacentHTML('beforeend', `${i < 3 ? '<span class="tag">出場</span>' : ''}<div>${SPECIES[m.sid].n}</div>`);
     P.appendChild(d);
   });
   show('scHub');
@@ -2408,21 +2412,12 @@ function moveDesc(m) {
   if (m.healBlock) a.push('6びょう かいふく ふうじ'); if (m.superVsWater) a.push('みずタイプに ばつぐん'); if (m.confuseIfBoosted) a.push('のうりょくが あがった あいてを こんらん');
   return a.join(' ／ ');
 }
-function moveEditor(m) {
+function moveEditor(m) {   // おぼえている わざ（獲得した ときに 確定・変えられない）と その 効果
   const box = document.createElement('div'); box.className = 'medit';
-  const eq = equipped(m), all = LEARN[m.sid];
-  box.innerHTML = `<div class="dim">わざを 4つまで えらべます（タップで つける／はずす）</div>` + all.map(([l, id]) => {
-    const mv = MOVES[id], ok = l <= m.lvl, on = eq.includes(id);
-    return `<button class="mrow${on ? ' on' : ''}" data-id="${id}" ${ok ? '' : 'disabled'} style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${CAT_NAMES[mv.cat]}${ok ? '' : `・Lv${l}で おぼえる`}</span><br><span class="desc">${moveDesc(mv)}</span></button>`;
+  box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります</div>` + equipped(m).map(id => {
+    const mv = MOVES[id];
+    return `<div class="mrow on" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${CAT_NAMES[mv.cat]}</span><div class="desc">${moveDesc(mv)}</div></div>`;
   }).join('');
-  box.onclick = (ev) => {
-    const b = ev.target.closest('.mrow'); if (!b || b.disabled) return;
-    const id = b.dataset.id, cur = equipped(m);
-    if (cur.includes(id)) { if (cur.length > 1) m.moves = cur.filter(x => x !== id); }
-    else if (cur.length < 4) m.moves = cur.concat(id);
-    else { say0('4つまでです。どれかを はずしてから えらんでね'); return; }
-    save(); renderTeam(m.uid);
-  };
   return box;
 }
 // ブラウザの alert / confirm は 埋めこみ表示で 出ないので、ページ内の 小窓で たずねる
@@ -2438,6 +2433,8 @@ function ask(msg, ok = 'はい', ng = 'いいえ') {
   });
 }
 const say0 = (t) => ask(t, 'OK', null);
+// 個体の できばえ（種族の 中での ステータスの よさ）
+function ivGrade(m) { const v = (m.iv.hp + m.iv.atk + m.iv.def + m.iv.spd) / 4; return v >= 1.09 ? 'さいこうの こたい' : v >= 1.03 ? 'すぐれた こたい' : v >= .97 ? 'ふつうの こたい' : 'ひかえめな こたい'; }
 function monCard(m, where, i, openUid) {
   const wrap = document.createElement('div'); wrap.className = 'mwrap';
   const sp = SPECIES[m.sid], st = stats(m), el = document.createElement('div');
@@ -2445,12 +2442,11 @@ function monCard(m, where, i, openUid) {
   el.className = 'mcard' + (where === 'party' && i < 3 ? ' starterm' : '');
   el.appendChild(spriteCanvas(m.sid, 56));
   const info = document.createElement('div'); info.className = 'minfo';
-  info.innerHTML = `<div class="mname">${sp.n} <span class="lv">Lv${m.lvl}</span> ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}${where === 'party' && i < 3 ? '<span class="tag">出場</span>' : ''}</div>` +
-    `<div class="mstat">HP${st.hp} こう${Math.round(st.atk)} ぼう${Math.round(st.def)} はや${st.spd}</div>` +
+  info.innerHTML = `<div class="mname">${sp.n} ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}${where === 'party' && i < 3 ? '<span class="tag">出場</span>' : ''}</div>` +
+    `<div class="mstat">HP${st.hp} こう${Math.round(st.atk)} ぼう${Math.round(st.def)} はや${st.spd}　<span class="dim">（${ivGrade(m)}）</span></div>` +
     (m.nat && NATURES[m.nat] ? `<div class="desc">せいかく：<b>${NATURES[m.nat].n}</b>（${NATURES[m.nat].d}）</div>` : '') +
     (sp.prof ? `<div class="desc">${profLine(sp)}</div>` : '') +
-    `<div class="mmoves">${equipped(m).map(id => `<span style="--c:${TYPES[MOVES[id].t].c}">${MOVES[id].n}</span>`).join('')}</div>` +
-    `<div class="expbar"><i style="width:${Math.min(100, m.exp / expNext(m.lvl) * 100)}%"></i></div>`;
+    `<div class="mmoves">${equipped(m).map(id => `<span style="--c:${TYPES[MOVES[id].t].c}" title="${moveDesc(MOVES[id])}">${MOVES[id].n}</span>`).join('')}</div>`;
   el.appendChild(info);
   const a = document.createElement('div'); a.className = 'macts';
   if (where === 'party') {
@@ -2466,7 +2462,7 @@ function monCard(m, where, i, openUid) {
     if (act === 'down') [S.party[i + 1], S.party[i]] = [S.party[i], S.party[i + 1]];
     if (act === 'box') S.box.push(S.party.splice(i, 1)[0]);
     if (act === 'party') S.party.push(S.box.splice(i, 1)[0]);
-    if (act === 'release') { ask(`${sp.n}（Lv${m.lvl}）を にがしますか？`).then(y => { if (!y) return; S.box.splice(i, 1); save(); renderTeam(); }); return; }
+    if (act === 'release') { ask(`${sp.n}を にがしますか？`).then(y => { if (!y) return; S.box.splice(i, 1); save(); renderTeam(); }); return; }
     save(); renderTeam();
   };
   el.appendChild(a);
@@ -2736,7 +2732,7 @@ const TICK = 3; // 状態異常ダメージの間隔（秒）＝ポケモンの�
 function mkFighter(mon, side) {
   const st = stats(mon), sp = SPECIES[mon.sid];
   return {
-    mon, sp, side, lvl: mon.lvl, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, baseSpd: st.spd,
+    mon, sp, side, lvl: MON_LV, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, baseSpd: st.spd,
     moves: equipped(mon).slice(),
     x: 0, y: 0, r: Math.round(23 * (sp.sz || 1)), face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
     inv: 0, flash: 0, kx: 0, ky: 0, dodgeCd: 0, aiT: 1, plan: null, planFor: 0, strafe: 1, stratT: 0,
@@ -2801,7 +2797,7 @@ function sendOut(side, idx, pass, lag, at) {
   B.cheer = Math.max(B.cheer, .7);
   if (side === 0) { say(`いけっ！ ${f.sp.n}！`); setupCmds(); }
   else if (tr) say(`${tr.name}は ${f.sp.n}を くりだした！`);
-  else say(`あっ！ やせいの ${f.sp.n}（Lv${f.lvl}）が とびだしてきた！`);
+  else say(`あっ！ やせいの ${f.sp.n}が とびだしてきた！`);
   applyHazards(f);
 }
 
@@ -3195,7 +3191,6 @@ function faint(f, by) {
   burst(f.x, f.y - BODY, '#ffffff', 24, 140, .7);
   if (f.side === 1) {
     const me = active(0);
-    if (me) B.exp[me.mon.uid] = (B.exp[me.mon.uid] || 0) + Math.round((f.lvl * 6 + 4) * (B.kind === 'cup' ? 1.5 : 1));
   }
 }
 function afterFaint(f) {
@@ -3737,20 +3732,13 @@ function endBattle(res) {
   B.mode = 'end'; B.result = res; B.endT = res === 'caught' ? 1.6 : 1.4;
   const lines = [];
   const caps0 = S.capsules;
-  const grant = (m, x, tag) => {
-    const before = m.lvl, ups = gainExp(m, x);
-    lines.push(`${SPECIES[m.sid].n} は けいけんち ${x} を もらった${tag || ''}`);
-    if (ups) { lines.push(`<b style="color:var(--acc)">${SPECIES[m.sid].n} は Lv${before} → Lv${m.lvl} に あがった！</b>`); lines.push(...learnLines(m, before)); }
-  };
-  for (const uid in B.exp) { const m = S.party.find(x => x.uid === +uid); if (m) grant(m, B.exp[uid]); }
   if (B.kind === 'wild') {
     if (res === 'caught') {
-      const e = active(1); const nm = newMon(e.mon.sid, e.mon.lvl); if (NATURES[e.mon.nat]) nm.nat = e.mon.nat;   // 戦った ときの 性格の まま
+      const e = active(1); const nm = { uid: S.uid++, sid: e.mon.sid, nat: e.mon.nat, iv: e.mon.iv, moves: e.mon.moves.slice() };   // 戦った ときの 性格・ステータス・わざ の まま
       S.caught++;
-      if (S.party.length < 6) { S.party.push(nm); lines.unshift(`${SPECIES[nm.sid].n}（Lv${nm.lvl}）が パーティに くわわった！`); }
-      else { S.box.push(nm); lines.unshift(`${SPECIES[nm.sid].n}（Lv${nm.lvl}）は ボックスに おくられた`); }
+      if (S.party.length < 6) { S.party.push(nm); lines.unshift(`${SPECIES[nm.sid].n}が パーティに くわわった！（${NATURES[nm.nat].n}・${ivGrade(nm)}）`); }
+      else { S.box.push(nm); lines.unshift(`${SPECIES[nm.sid].n}は ボックスに おくられた（${NATURES[nm.nat].n}・${ivGrade(nm)}）`); }
       const me = active(0);
-      if (me) grant(me.mon, 6 + e.lvl * 3);
     } else if (res === 'win') { S.capsules += 1; }
     else if (res === 'lose') lines.unshift('ちからつきて しまった… でも モンスターたちは すぐに げんきに なった');
     else if (res === 'run') lines.unshift('くさむらから ぶじに にげだした');
@@ -3861,7 +3849,7 @@ function cmdSwap() {
     if (i === sd.act || x.fainted || x.hp <= 0) return;
     const b = document.createElement('button'); b.className = 'cmd';
     b.appendChild(spriteCanvas(x.mon.sid, 40));
-    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><span class="a">${x.sp.n}</span> <span class="b">Lv${x.lvl}${x.status ? '・' + STATUS_NAMES[x.status] : ''}</span><div class="hpb"><i style="width:${x.hp / x.maxHp * 100}%"></i></div></span>`);
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><span class="a">${x.sp.n}</span> <span class="b">${x.status ? STATUS_NAMES[x.status] : ''}</span><div class="hpb"><i style="width:${x.hp / x.maxHp * 100}%"></i></div></span>`);
     tap(b, () => {
       const cur = active(0);
       if (!canCommand() || !cur || !['free', 'act', 'stun'].includes(cur.state)) return;
@@ -3890,7 +3878,7 @@ function condText(f) {
 function updPlate(id, side) {
   const root = $(id), f = active(side); if (!f) return;
   setText(root.querySelector('.nm'), f.sp.n);
-  setText(root.querySelector('.lv'), `Lv${f.lvl}`);
+  setText(root.querySelector('.lv'), '');
   const tsig = f.sp.type + (f.sp.type2 || '');
   const tEl = root.querySelector('.types'); if (tEl._t !== tsig) { tEl._t = tsig; tEl.innerHTML = typeChip(f.sp.type) + (f.sp.type2 ? typeChip(f.sp.type2) : ''); }
   const k = f.hp / f.maxHp, bar = root.querySelector('.hp i');
@@ -4305,9 +4293,8 @@ function startWild() {
   const weights = pool.map(id => SPECIES[id].rare ? .5 : 3);
   let r = Math.random() * weights.reduce((a, b) => a + b, 0), sid = pool[0];
   for (let i = 0; i < pool.length; i++) { r -= weights[i]; if (r <= 0) { sid = pool[i]; break; } }
-  const lv = Math.max(2, Math.round(avgLevel()) - 3 + randi(0, 3) + (SPECIES[sid].rare ? 1 : 0));
   startBattle({
-    kind: 'wild', enemies: [(m => (m.moves = pickMoves(m), m))({ uid: -1, sid, lvl: lv, exp: 0 })], skill: .15,
+    kind: 'wild', enemies: [fixMon({ uid: -1, sid })], skill: .15,
     title: 'くさむら', intro: 'くさむらが ガサガサ ゆれている…',
   });
 }
@@ -4315,7 +4302,7 @@ function startCup(fieldArg) {
   const r = ROUNDS[S.round], lv = roundLv(r);
   const pool = poolIds().filter(id => r.rare || !SPECIES[id].rare);
   const enemies = [];
-  for (let i = 0; i < r.size; i++) { let sid; do { sid = choice(pool); } while (enemies.some(e => e.sid === sid) && pool.length > r.size); const em = { uid: -1 - i, sid, lvl: Math.max(2, lv + randi(-1, 1) + (i === r.size - 1 ? 1 : 0)), exp: 0 }; em.moves = pickMoves(em); enemies.push(em); }
+  for (let i = 0; i < r.size; i++) { let sid; do { sid = choice(pool); } while (enemies.some(e => e.sid === sid) && pool.length > r.size); const em = fixMon({ uid: -1 - i, sid }, clamp(S.round * .15 + S.tier * .2, 0, .9)); /* 後の 回戦ほど 強い 個体 */ enemies.push(em); }
   const field = FIELDS.includes(fieldArg) ? fieldArg : choice(FIELDS);
   startBattle({
     kind: 'cup', enemies, field, skill: clamp(.3 + S.round * .1 + S.tier * .06, 0, .8),
