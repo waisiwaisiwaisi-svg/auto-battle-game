@@ -3034,7 +3034,7 @@ function openChest(i) {
   const cards = [`<div class="reward">${chestIcon(c.kind).replace('class="ic"', 'style="width:120px;height:92px"')}<div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
     ...monCards, `<div class="reward"><div class="big">クリスタル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
   for (const k of R.items || []) cards.push(`<div class="reward"><div style="font-size:46px">${ITEMS[k].ic}</div><div class="big">${ITEMS[k].n}</div><div class="dim">${ITEMS[k].d}</div></div>`);
-  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="rar" style="background:${r.c}">${r.n}</span><div class="big">わざのまきもの：${m.n}</div>${typeChip(m.t)}<div class="dim">${moveDesc(m)}</div></div>`); }
+  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="chip" style="background:${TYPES[m.t].c};font-size:13px;padding:2px 10px">${TYPES[m.t].n}</span><div class="big">わざのまきもの：${m.n}</div><span style="color:${r.c};font-size:11px;opacity:.8">${r.n}</span><div class="dim">${moveDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
   bg.innerHTML = `<div class="askbox"><div id="rwBody"></div><div class="dim" id="rwCount" style="margin-top:6px"></div><button class="btn" id="rwNext" style="margin-top:10px;width:100%">つぎへ</button></div>`;
   $('app').appendChild(bg);
@@ -3049,14 +3049,14 @@ document.addEventListener('pointerdown', (ev) => { const b = ev.target.closest &
 function useTM(m) {
   const ids = Object.keys(S.tms || {}).filter(id => S.tms[id] > 0 && MOVES[id]);
   if (!ids.length) { say0('わざのまきものを もっていません。たからばこから でます'); return; }
-  ids.sort((a, b) => tmRarity(b) - tmRarity(a) || MOVES[a].t.localeCompare(MOVES[b].t));
+  ids.sort((a, b) => MOVES[a].t.localeCompare(MOVES[b].t) || tmRarity(b) - tmRarity(a));   // タイプごとに ならべる
   const bg = document.createElement('div'); bg.className = 'askbg';
   const close = () => bg.remove();
   const step1 = () => {
     const ok = (id) => canLearn(m.sid, id) && !m.moves.includes(id);
     const list = ids.slice().sort((a, b) => ok(b) - ok(a));
     bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>${SPECIES[m.sid].n}</b>に おぼえさせる わざを えらぶ<div class="dim">タイプや すがたに あう わざだけ おぼえられます</div></div><div class="tmlist">${list.map(id => { const mv = MOVES[id], r = RARITY[tmRarity(id)], has = m.moves.includes(id), can = canLearn(m.sid, id);
-      return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}" ${has || !can ? 'disabled' : ''}><b>${mv.n}</b> ×${S.tms[id]} <span class="rar" style="background:${r.c};color:#120e1c;font-size:10px;padding:0 5px">${r.n}</span> <span class="dim">${TYPES[mv.t].n}${has ? '・おぼえている' : !can ? '・<b style="color:var(--bad)">おぼえられない</b>' : ''}</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">やめる</button></div>`;
+      return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}" ${has || !can ? 'disabled' : ''}><span class="chip" style="background:${TYPES[mv.t].c};font-size:12px;padding:1px 8px">${TYPES[mv.t].n}</span> <b>${mv.n}</b> ×${S.tms[id]} <span style="color:${r.c};font-size:10px;opacity:.75">${r.n}</span><span class="dim">${has ? '・おぼえている' : !can ? '・<b style="color:var(--bad)">おぼえられない</b>' : ''}</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">やめる</button></div>`;
     bg.querySelector('.btn.sub').onclick = close;
     bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => step2(b.dataset.id));
   };
