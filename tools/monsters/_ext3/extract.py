@@ -55,11 +55,27 @@ for p in allc:
     us, cn = np.unique(cell, return_counts=True)
     own = us[cn >= cn.max() * .3]   # いちばん 多い 列の 3割 以上 ある 列が もちぬし
     if len(own) <= 1: cells.setdefault(int(us[np.argmax(cn)]), []).append(p); continue
-    # くっついた 2体以上：ドットごとに 近い もちぬしへ（行は 段の ちがい、列は 横の きょり）
+    # くっついた 2体以上：それぞれの 体の まんなかから 同時に 広げて 分ける（黒い 輪郭は 越えにくい）
+    import heapq
     orow, ocol = own // 10, own % 10
-    d = (np.abs(row[:, None] - orow[None]) * 1000) + np.abs(p[:, 1:2] - CEN[ocol][None])
-    w = own[np.argmin(d, 1)]
-    for o in own: cells.setdefault(int(o), []).append(p[w == o])
+    pos = {(int(y), int(x)): i for i, (y, x) in enumerate(p)}
+    lum = A[p[:, 0], p[:, 1], :3].mean(-1)
+    dist = np.full(len(p), 1e9); lab = np.full(len(p), -1); hq = []
+    for j, o in enumerate(own):
+        sel = np.nonzero(cell == o)[0]
+        # 種：その マスの 中で 列の まんなかに 近い ドット
+        cx = CEN[ocol[j]]; d0 = np.abs(p[sel, 1] - cx); seeds = sel[d0 <= np.percentile(d0, 15)]
+        for i in seeds: dist[i] = 0; lab[i] = j; heapq.heappush(hq, (0., i, j))
+    while hq:
+        dd, i, j = heapq.heappop(hq)
+        if dd > dist[i] or lab[i] != j: continue
+        y, x = p[i]
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+            n = pos.get((y + dy, x + dx))
+            if n is None: continue
+            c = (1.4 if dy and dx else 1.) * (1 + 6 * (lum[n] < 70))
+            if dd + c < dist[n]: dist[n] = dd + c; lab[n] = j; heapq.heappush(hq, (dd + c, n, j))
+    for j, o in enumerate(own): cells.setdefault(int(o), []).append(p[lab == j])
 for r, t in enumerate(TYPES):
     groups = {k: [] for k in range(10)}
     y0 = 0
