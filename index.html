@@ -27,6 +27,22 @@ body{
 button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 button:disabled{opacity:.4;cursor:default}
 canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
+.chests{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.chest{background:var(--panel);box-shadow:0 0 0 2px var(--edge),0 3px 0 #0d0b14;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;font-size:10.5px;line-height:1.25;text-align:center}
+.chest.empty{opacity:.35;box-shadow:0 0 0 2px var(--edge) inset}
+.chest.ready{box-shadow:0 0 0 2px var(--acc),0 3px 0 #0d0b14;animation:chestbob 1s ease-in-out infinite}
+.chest.opening{box-shadow:0 0 0 2px var(--good),0 3px 0 #0d0b14}
+@keyframes chestbob{50%{transform:translateY(-3px)}}
+.chest .ic{width:44px;height:34px}
+.chest b{font-size:11px}
+.inv{display:flex;gap:14px;font-size:12px;color:var(--dim);flex-wrap:wrap}
+.inv b{color:var(--ink)}
+.reward{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:150px;justify-content:center}
+.reward .big{font-size:26px;font-weight:700}
+.reward .rar{font-size:11px;padding:1px 8px;border-radius:3px;color:#120e1c}
+.tmlist{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow:auto;text-align:left}
+.tmlist button{background:var(--bg);box-shadow:0 0 0 1px var(--edge);padding:6px 8px;text-align:left;border-left:5px solid var(--c)}
+.tmlist .desc{font-size:10.5px;color:var(--dim)}
 .askbg{position:fixed;inset:0;background:rgba(10,8,18,.72);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
 .askbox{background:var(--panel);border:2px solid var(--edge);border-radius:10px;padding:18px 18px 14px;max-width:360px;width:100%;text-align:center;font-size:14px;line-height:1.6}
 .askbox .row{display:flex;gap:10px;justify-content:center;margin-top:14px}
@@ -213,6 +229,8 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
       <div class="stat">トロフィー <b id="hTrophy">0</b><br>クリスタル <b id="hCaps">0</b><br>つかまえた <b id="hCaught">0</b></div>
     </div>
     <div class="card cupinfo" id="cupInfo"></div>
+    <div class="sec-title"><span>たからばこ（かつと もらえる・4つまで）</span><span class="inv">ジェム <b id="hGems">0</b>　わざマシン <b id="hTms">0</b></span></div>
+    <div class="chests" id="hubChests"></div>
     <div class="bigbtns">
       <button class="btn" id="btnCup">たいかいへ<span>スタジアムで しあい</span></button>
       <button class="btn" id="btnWild" style="background:#7bd88f;box-shadow:0 4px 0 #3f8a50,0 0 0 3px #0d0b14">くさむらへ<span>モンスターを つかまえる</span></button>
@@ -651,7 +669,7 @@ function fixMon(m, bias) {
   if (!m.nat || !NATURES[m.nat]) m.nat = pickNature(SPECIES[m.sid]);
   if (!m.iv) { const r = () => { let v = Math.random(); if (bias) v = v * (1 - bias) + bias * Math.max(v, Math.random()); return Math.round((.85 + .3 * v) * 100) / 100; }; m.iv = { hp: r(), atk: r(), def: r(), spd: r() }; }
   const L = learned(m);
-  if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !L.includes(id))) m.moves = pickMoves(m);
+  if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // わざマシンの わざも そのまま
   return m;
 }
 
@@ -2269,7 +2287,7 @@ function spriteCanvas(sid, size) {
    ===================================================================== */
 const SAVE_KEY = 'pixel-monster-arena-v1';
 let S = null;
-const defaultSave = () => ({ party: [], box: [], capsules: 10, tier: 0, round: 0, trophies: 0, auto: false, uid: 1, caught: 0, wins: 0 });
+const defaultSave = () => ({ party: [], box: [], capsules: 10, tier: 0, round: 0, trophies: 0, auto: false, uid: 1, caught: 0, wins: 0, gems: 20, tms: {}, chests: [], chestIdx: 0 });
 function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
@@ -2344,6 +2362,128 @@ function renderStarter() {
   }
   show('scStarter');
 }
+/* =====================================================================
+   たからばこ（クラッシュ・ロワイヤル式：勝つと もらえる／4スロット／1つずつ 時間で あく／ジェムで すぐ あく）
+   ===================================================================== */
+const CHESTS = {
+  wood:   { n: '木の たからばこ',     c: '#b07a40', d: '#6a4420', sec: 60,   cr: [1, 2],  tm: 1, gem: [0, 1], rar: [80, 18, 2] },
+  silver: { n: '銀の たからばこ',     c: '#c8d0e0', d: '#6a7488', sec: 180,  cr: [2, 3],  tm: 2, gem: [0, 2], rar: [70, 25, 5] },
+  gold:   { n: '金の たからばこ',     c: '#ffd166', d: '#a87a10', sec: 480,  cr: [3, 5],  tm: 3, gem: [2, 4], rar: [55, 35, 10] },
+  giant:  { n: 'ジャイアントばこ',     c: '#ff9a5a', d: '#a04a20', sec: 720,  cr: [8, 12], tm: 4, gem: [3, 6], rar: [60, 30, 10] },
+  magic:  { n: 'マジックばこ',         c: '#c08aff', d: '#5a3a9a', sec: 720,  cr: [4, 6],  tm: 5, gem: [4, 8], rar: [30, 45, 25] },
+  legend: { n: 'でんせつの たからばこ', c: '#7af0ff', d: '#2a7a9a', sec: 1800, cr: [6, 10], tm: 4, gem: [10, 15], rar: [0, 40, 60] },
+};
+// もらえる じゅんばん（くりかえし）
+const CHEST_CYCLE = ['silver', 'silver', 'wood', 'gold', 'silver', 'silver', 'wood', 'silver', 'gold', 'magic', 'silver', 'silver', 'wood', 'gold', 'silver', 'giant',
+  'silver', 'wood', 'silver', 'gold', 'silver', 'silver', 'magic', 'silver', 'gold', 'silver', 'wood', 'silver', 'giant', 'gold', 'silver', 'silver', 'legend'];
+const RARITY = [{ n: 'ノーマル', c: '#d8d0c0' }, { n: 'レア', c: '#7ab8ff' }, { n: 'エピック', c: '#d08aff' }];
+const tmRarity = (id) => { const m = MOVES[id]; if (!MOVES100[id]) return 0; const p = m.power || 0; return p >= 100 || (m.cat === 'stat' && ['field', 'baton', 'dbond', 'curse'].includes(m.k)) ? 2 : p >= 75 || m.cat === 'stat' ? 1 : 0; };
+const TM_POOL = () => Object.keys(MOVES100).filter(id => MOVES[id]);
+function giveChest() {
+  S.chests = S.chests || [];
+  if (S.chests.length >= 4) return null;
+  const kind = CHEST_CYCLE[(S.chestIdx || 0) % CHEST_CYCLE.length]; S.chestIdx = (S.chestIdx || 0) + 1;
+  S.chests.push({ kind, at: null });
+  return kind;
+}
+const chestLeft = (c) => c.at == null ? null : Math.max(0, Math.ceil((c.at - Date.now()) / 1000));
+const gemCost = (sec) => Math.max(1, Math.ceil(sec / 60));
+const fmtTime = (s) => s >= 3600 ? `${Math.floor(s / 3600)}じかん${Math.floor(s % 3600 / 60)}ふん` : s >= 60 ? `${Math.floor(s / 60)}ふん${s % 60 ? (s % 60) + 'びょう' : ''}` : `${s}びょう`;
+function chestIcon(kind) {
+  const C = CHESTS[kind];
+  return `<svg class="ic" viewBox="0 0 44 34"><rect x="3" y="12" width="38" height="20" rx="2" fill="${C.c}" stroke="#120e1c" stroke-width="2"/><path d="M3 14 Q22 -2 41 14 Z" fill="${C.c}" stroke="#120e1c" stroke-width="2"/><rect x="3" y="15" width="38" height="4" fill="${C.d}"/><rect x="18" y="13" width="8" height="10" rx="1" fill="#120e1c"/><rect x="20" y="15" width="4" height="5" fill="#fff6c0"/></svg>`;
+}
+function renderChests() {
+  const box = $('hubChests'); if (!box) return;
+  S.chests = S.chests || [];
+  const opening = S.chests.some(c => c.at != null && chestLeft(c) > 0);
+  let h = '';
+  for (let i = 0; i < 4; i++) {
+    const c = S.chests[i];
+    if (!c) { h += `<div class="chest empty"><span>あき</span></div>`; continue; }
+    const C = CHESTS[c.kind], left = chestLeft(c);
+    const st = left === 0 ? 'ready' : left != null ? 'opening' : '';
+    const sub = left === 0 ? '<b style="color:var(--acc)">あける！</b>' : left != null ? `のこり ${fmtTime(left)}<br>💎${gemCost(left)}で すぐ` : opening ? `${fmtTime(C.sec)}<br><span class="dim">まちじゅん</span>` : `${fmtTime(C.sec)}<br><b>タップで かいじょ</b>`;
+    h += `<button class="chest ${st}" data-i="${i}">${chestIcon(c.kind)}<span>${C.n}</span><span>${sub}</span></button>`;
+  }
+  if (box._h !== h) { box._h = h; box.innerHTML = h; }   // かわった ときだけ かきかえる
+  $('hGems').textContent = S.gems || 0;
+  $('hTms').textContent = Object.values(S.tms || {}).reduce((a, b) => a + b, 0);
+}
+async function tapChest(i) {
+  const c = S.chests[i]; if (!c) return;
+  const C = CHESTS[c.kind], left = chestLeft(c);
+  if (left === 0) return openChest(i);
+  if (left == null) {
+    if (S.chests.some(x => x.at != null && chestLeft(x) > 0)) {
+      const cost = gemCost(C.sec);
+      if (await ask(`ほかの たからばこを かいじょちゅうです。\n💎${cost} ジェムで いますぐ あけますか？（もっている：${S.gems || 0}）`, 'あける', 'やめる')) payOpen(i, cost);
+      return;
+    }
+    c.at = Date.now() + C.sec * 1000; save(); renderChests(); return;
+  }
+  const cost = gemCost(left);
+  if (await ask(`のこり ${fmtTime(left)}。\n💎${cost} ジェムで いますぐ あけますか？（もっている：${S.gems || 0}）`, 'あける', 'やめる')) payOpen(i, cost);
+}
+function payOpen(i, cost) {
+  if ((S.gems || 0) < cost) { say0('ジェムが たりません。たからばこから ジェムが でることが あります'); return; }
+  S.gems -= cost; openChest(i);
+}
+function rollChest(kind) {
+  const C = CHESTS[kind], out = { cr: randi(C.cr[0], C.cr[1]), gem: randi(C.gem[0], C.gem[1]), tms: [] };
+  const pool = TM_POOL(), byR = [0, 1, 2].map(r => pool.filter(id => tmRarity(id) === r));
+  for (let k = 0; k < C.tm; k++) {
+    let x = Math.random() * 100, r = 0; for (; r < 2 && x >= C.rar[r]; r++) x -= C.rar[r];
+    const list = byR[r].length ? byR[r] : pool; out.tms.push(choice(list));
+  }
+  return out;
+}
+// あける：中身を 1つずつ 見せる
+function openChest(i) {
+  const c = S.chests[i], C = CHESTS[c.kind], R = rollChest(c.kind);
+  S.chests.splice(i, 1);
+  S.capsules += R.cr; S.gems = (S.gems || 0) + R.gem; S.tms = S.tms || {};
+  for (const id of R.tms) S.tms[id] = (S.tms[id] || 0) + 1;
+  save();
+  const cards = [`<div class="reward">${chestIcon(c.kind).replace('class="ic"', 'style="width:120px;height:92px"')}<div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
+    `<div class="reward"><div class="big">クリスタル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
+  if (R.gem) cards.push(`<div class="reward"><div class="big">💎 ジェム ×${R.gem}</div><div class="dim">たからばこを すぐ あけられる</div></div>`);
+  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="rar" style="background:${r.c}">${r.n}</span><div class="big">わざマシン：${m.n}</div>${typeChip(m.t)}<div class="dim">${moveDesc(m)}</div></div>`); }
+  const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
+  bg.innerHTML = `<div class="askbox"><div id="rwBody"></div><div class="dim" id="rwCount" style="margin-top:6px"></div><button class="btn" id="rwNext" style="margin-top:10px;width:100%">つぎへ</button></div>`;
+  document.body.appendChild(bg);
+  const showK = () => { bg.querySelector('#rwBody').innerHTML = cards[k]; bg.querySelector('#rwCount').textContent = k ? `${k} / ${cards.length - 1}` : ''; bg.querySelector('#rwNext').textContent = k === cards.length - 1 ? 'とじる' : k === 0 ? 'あける！' : 'つぎへ'; };
+  bg.querySelector('#rwNext').onclick = () => { k++; if (k >= cards.length) { bg.remove(); renderHub(); } else showK(); };
+  showK();
+}
+setInterval(() => { if (S && !$('scHub').hidden) renderChests(); }, 1000);
+
+/* ---------- わざマシン：もっている わざを 好きな モンスターに おぼえさせる ---------- */
+function useTM(m) {
+  const ids = Object.keys(S.tms || {}).filter(id => S.tms[id] > 0 && MOVES[id]);
+  if (!ids.length) { say0('わざマシンを もっていません。たからばこから でます'); return; }
+  ids.sort((a, b) => tmRarity(b) - tmRarity(a) || MOVES[a].t.localeCompare(MOVES[b].t));
+  const bg = document.createElement('div'); bg.className = 'askbg';
+  const close = () => bg.remove();
+  const step1 = () => {
+    bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>${SPECIES[m.sid].n}</b>に おぼえさせる わざを えらぶ</div><div class="tmlist">${ids.map(id => { const mv = MOVES[id], r = RARITY[tmRarity(id)], has = m.moves.includes(id);
+      return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}" ${has ? 'disabled' : ''}><b>${mv.n}</b> ×${S.tms[id]} <span class="rar" style="background:${r.c};color:#120e1c;font-size:10px;padding:0 5px">${r.n}</span> <span class="dim">${TYPES[mv.t].n}${has ? '・おぼえている' : ''}</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">やめる</button></div>`;
+    bg.querySelector('.btn.sub').onclick = close;
+    bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => step2(b.dataset.id));
+  };
+  const step2 = (id) => {
+    const mv = MOVES[id];
+    bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>${mv.n}</b>を おぼえる かわりに わすれる わざ</div><div class="tmlist">${m.moves.map((x, i) => { const o = MOVES[x];
+      return `<button data-i="${i}" style="--c:${TYPES[o.t].c}"><b>${o.n}</b> <span class="dim">${TYPES[o.t].n}</span><div class="desc">${moveDesc(o)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">もどる</button></div>`;
+    bg.querySelector('.btn.sub').onclick = step1;
+    bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => {
+      const old = MOVES[m.moves[+b.dataset.i]].n; m.moves[+b.dataset.i] = id; S.tms[id]--; if (!S.tms[id]) delete S.tms[id];
+      save(); close(); renderTeam(m.uid); say0(`${SPECIES[m.sid].n}は ${old}を わすれて ${mv.n}を おぼえた！`);
+    });
+  };
+  document.body.appendChild(bg); step1();
+}
+
 function renderHub() {
   $('hTrophy').textContent = S.trophies; $('hCaps').textContent = S.capsules; $('hCaught').textContent = S.caught;
   const r = ROUNDS[S.round];
@@ -2356,6 +2496,7 @@ function renderHub() {
     d.insertAdjacentHTML('beforeend', `${i < 3 ? '<span class="tag">出場</span>' : ''}<div>${SPECIES[m.sid].n}</div>`);
     P.appendChild(d);
   });
+  renderChests();
   show('scHub');
 }
 const TYPE_SHORT = { normal: 'ノ', fire: '炎', water: '水', grass: '草', elec: '電', ice: '氷', fighting: '闘', poison: '毒', ground: '地', wind: '風', psychic: '超', bug: '虫', rock: '岩', ghost: '霊', dragon: '竜', dark: '悪', steel: '鋼', fairy: '妖' };
@@ -2414,7 +2555,7 @@ function moveDesc(m) {
 }
 function moveEditor(m) {   // おぼえている わざ（獲得した ときに 確定・変えられない）と その 効果
   const box = document.createElement('div'); box.className = 'medit';
-  box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります</div>` + equipped(m).map(id => {
+  box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります。わざマシンで いれかえられます</div>` + equipped(m).map(id => {
     const mv = MOVES[id];
     return `<div class="mrow on" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${CAT_NAMES[mv.cat]}</span><div class="desc">${moveDesc(mv)}</div></div>`;
   }).join('');
@@ -2425,7 +2566,7 @@ function ask(msg, ok = 'はい', ng = 'いいえ') {
   return new Promise(res => {
     const bg = document.createElement('div'); bg.className = 'askbg';
     bg.innerHTML = `<div class="askbox"><div></div><div class="row">${ng ? '<button class="btn sub">' + ng + '</button>' : ''}<button class="btn">${ok}</button></div></div>`;
-    bg.querySelector('.askbox > div').textContent = msg;
+    bg.querySelector('.askbox > div').textContent = msg; bg.querySelector('.askbox > div').style.whiteSpace = 'pre-line';
     const [b1, b2] = bg.querySelectorAll('button');
     const done = v => { bg.remove(); res(v); };
     if (ng) { b1.onclick = () => done(false); b2.onclick = () => done(true); } else b1.onclick = () => done(true);
@@ -2450,14 +2591,15 @@ function monCard(m, where, i, openUid) {
   el.appendChild(info);
   const a = document.createElement('div'); a.className = 'macts';
   if (where === 'party') {
-    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="up" ${i === 0 ? 'disabled' : ''}>▲ うえへ</button><button data-a="down" ${i === S.party.length - 1 ? 'disabled' : ''}>▼ したへ</button><button data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>`;
+    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm">わざマシン</button><button data-a="up" ${i === 0 ? 'disabled' : ''}>▲ うえへ</button><button data-a="down" ${i === S.party.length - 1 ? 'disabled' : ''}>▼ したへ</button><button data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>`;
   } else {
-    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>つれていく</button><button data-a="release">にがす</button>`;
+    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm">わざマシン</button><button data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>つれていく</button><button data-a="release">にがす</button>`;
   }
   if (openUid === m.uid) wrap.appendChild(moveEditor(m));
   a.onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
     if (act === 'moves') { renderTeam(openUid === m.uid ? null : m.uid); return; }
+    if (act === 'tm') { useTM(m); return; }
     if (act === 'up') [S.party[i - 1], S.party[i]] = [S.party[i], S.party[i - 1]];
     if (act === 'down') [S.party[i + 1], S.party[i]] = [S.party[i], S.party[i + 1]];
     if (act === 'box') S.box.push(S.party.splice(i, 1)[0]);
@@ -3795,7 +3937,6 @@ function endBattle(res) {
       S.wins++;
       const r = ROUNDS[S.round];
       S.capsules += 3;
-      for (const f of B.sides[0].fs) grant(f.mon, 4 + r.lv, '（ボーナス）');
       S.round++;
       if (S.round >= ROUNDS.length) { S.round = 0; S.trophies++; lines.unshift(`<b style="color:var(--acc)">🏆 ${cupName()} ゆうしょう！</b>`); S.tier++; lines.push(`つぎは ${cupName()} に ちょうせんできる！`); }
       else lines.unshift(`${r.n} とっぱ！ つぎは ${ROUNDS[S.round].n}`);
@@ -3805,6 +3946,7 @@ function endBattle(res) {
     }
   }
   if (S.capsules > caps0) lines.push(`クリスタルを ${S.capsules - caps0}こ てにいれた`);
+  if (res === 'win') { const ck = giveChest(); lines.push(ck ? `<b style="color:var(--acc)">${CHESTS[ck].n}を てにいれた！</b>` : '<span class="dim">たからばこが いっぱいで もらえなかった…</span>'); }
   B.resLines = lines;
   save();
 }
@@ -4351,6 +4493,7 @@ $('btnNew').onclick = async () => { if (loadSave() && !(await ask('セーブデ�
 $('btnContinue').onclick = () => { S = loadSave(); if (S) { updAutoBtn(); renderHub(); } };
 $('btnTeam').onclick = () => renderTeam();
 $('btnChart').onclick = renderChart;
+$('hubChests').addEventListener('click', (e) => { const b = e.target.closest('.chest[data-i]'); if (b) tapChest(+b.dataset.i); });
 $('btnChartBack').onclick = () => renderHub();
 $('btnTeamBack').onclick = renderHub;
 $('btnReset').onclick = async () => { if (!(await ask('セーブデータを けしますか？ もとに もどせません。'))) return; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; renderTitle(); };
