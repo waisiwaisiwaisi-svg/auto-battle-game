@@ -9,7 +9,8 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 GAME = os.path.join(HERE, '..', '..', 'index.html')
 BEGIN, END = '// ====== ARENAS（tools/arenas/build_arenas.py が 自動生成）======', '// ====== ここまで ARENAS ======'
-K = 0.7
+K = 1.0      # 世界座標の 倍率（大きいほど ステージが 広く、モンスターが 相対的に 小さく 見える）
+IMG_K = 0.7  # 画像を 保存する 倍率（カメラで 縮めて 映すので これで 十分）
 
 ARENAS = {
     'ice': dict(name='こおりの', floor=[110, 150, 1375, 900], trainers=[[85, 525], [1365, 525]],
@@ -113,7 +114,7 @@ def main():
     for name, a in ARENAS.items():
         im = Image.open(os.path.join(HERE, 'src', name + '.webp')).convert('RGB')
         W, H = round(im.width * K), round(im.height * K)
-        im = im.resize((W, H), Image.LANCZOS)
+        im = im.resize((round(im.width * IMG_K), round(im.height * IMG_K)), Image.LANCZOS)
         buf = io.BytesIO(); im.save(buf, 'WEBP', quality=82, method=6)
         out[name] = {'name': a['name'], 'W': W, 'H': H, 'floor': sc(a['floor']), 'trainers': [sc(t) for t in a['trainers']],
                      'solid': [sc(r) for r in a['solid'][:2]] + [sc(foot(r)) for r in a['solid'][2:]], 'low': [sc(r) for r in a['low']],
