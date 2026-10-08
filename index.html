@@ -590,7 +590,10 @@ const SPECIES = {
       '.i...i...i.',
     ] },
 };
-const STARTERS = ['hinokon', 'mizupuku', 'happamogu'];
+let STARTERS = ['hinokon', 'mizupuku', 'happamogu'];
+// 新しい（外部AIの）モンスターだけを 出す。false に すると 全員 出る
+const NEW_ONLY = true;
+function poolIds() { const ext = Object.keys(SPECIES).filter(id => SPECIES[id].ext); return NEW_ONLY && ext.length ? ext : Object.keys(SPECIES); }
 // 見た目を大きくしたぶん、距離・速さも K 倍にそろえる
 const K = 1.6, BODY = 30;
 for (const id in MOVES) { const m = MOVES[id]; for (const p of ['len', 'rad', 'wid', 'spd', 'r']) if (m[p]) m[p] *= K; }
@@ -2172,6 +2175,7 @@ Object.assign(AISpr.DATA, {"kamadon":{"w":24,"h":30,"pal":["#fdfdf6","#f9f4cf","
 Object.assign(SPECIES, {"kamadon":{"n":"カマドン","type":"fire","type2":"rock","base":{"hp":55,"atk":61,"def":67,"spd":52},"moves":["ember","flame"],"style":"melee","catch":0.4,"rare":0,"desc":"石を 積んだ かまどの 体。おなかの 火で なんでも 焼く。（もと：かまど）","ext":1},"pottoko":{"n":"ポットコ","type":"water","type2":"normal","base":{"hp":67,"atk":53,"def":58,"spd":57},"moves":["bubble","tide"],"style":"mid","catch":0.4,"rare":0,"desc":"ティーポットの 頭を もつ タコ。注ぎ口から 熱い お茶を 飛ばす。（もと：ティーポット＋タコ）","ext":1},"hyoukyuu":{"n":"ヒョウキュー","type":"ice","type2":"normal","base":{"hp":65,"atk":70,"def":51,"spd":49},"moves":["tackle","rapid-spin"],"style":"ranged","catch":0.4,"rare":0,"desc":"四角い 氷の 体。冷たい 角で 体当たりする。（もと：氷の キューブ）","ext":1},"yukidome":{"n":"ユキドーム","type":"ice","type2":"fairy","base":{"hp":60,"atk":59,"def":61,"spd":55},"moves":["tackle","triple-axel"],"style":"ranged","catch":0.4,"rare":0,"desc":"ガラスの 中に 小さな 家と 雪景色。ふると 吹雪が 起きる。（もと：スノードーム）","ext":1},"furasukon":{"n":"フラスコン","type":"poison","type2":"water","base":{"hp":55,"atk":47,"def":53,"spd":50},"moves":["bubble","tide"],"style":"mid","catch":0.5,"rare":0,"desc":"毒の 薬が 入った フラスコ。泡を ぶくぶく 飛ばす。（もと：フラスコ）","ext":1},"shoberaa":{"n":"ショベラー","type":"ground","type2":"steel","base":{"hp":54,"atk":66,"def":67,"spd":48},"moves":["tackle","metal-burst"],"style":"melee","catch":0.4,"rare":0,"desc":"黄色い ショベルカー。アームで 地面ごと すくいあげる。（もと：ショベルカー）","ext":1},"sorabune":{"n":"ソラブネ","type":"wind","type2":"steel","base":{"hp":52,"atk":60,"def":53,"spd":71},"moves":["gust","tornado"],"style":"mid","catch":0.4,"rare":0,"desc":"マンボウの 形の 飛行船。プロペラで 風を 起こす。（もと：飛行船＋マンボウ）","ext":1},"noroinui":{"n":"ノロイヌイ","type":"ghost","type2":"normal","base":{"hp":63,"atk":59,"def":54,"spd":59},"moves":["tackle","shadow-sneak"],"style":"ranged","catch":0.4,"rare":0,"desc":"ボタンの 目の つぎはぎ人形。霊火を まとって 呪う。（もと：呪いの ぬいぐるみ）","ext":1},"kitsunemen":{"n":"キツネメン","type":"ghost","type2":"psychic","base":{"hp":45,"atk":62,"def":54,"spd":74},"moves":["tackle","shadow-sneak"],"style":"ranged","catch":0.4,"rare":0,"desc":"宙に 浮かぶ 狐の お面。鈴の 音で 心を まどわす。（もと：狐の お面）","ext":1},"medamasho":{"n":"メダマショ","type":"ghost","type2":"dark","base":{"hp":51,"atk":63,"def":46,"spd":75},"moves":["tackle","shadow-sneak"],"style":"ranged","catch":0.4,"rare":0,"desc":"表紙に 大きな 目玉。ページの 触手で からめとる。（もと：目玉の 本）","ext":1}});
 Object.assign(LEARN, {"kamadon":[[1,"ember"],[1,"flame"],[1,"rock-blast"],[4,"will-o-wisp"],[7,"rock-tomb"],[10,"stealth-rock"],[13,"flamethrower"],[16,"flame-charge"],[19,"rock-slide"],[22,"fire-blast"],[25,"stone-edge"],[28,"flare-blitz"]],"pottoko":[[1,"bubble"],[1,"tide"],[1,"fake-out"],[4,"yawn"],[7,"baton-pass"],[10,"roar"],[13,"rapid-spin"],[16,"quick-attack"],[19,"recover"],[22,"slack-off"],[25,"swords-dance"],[28,"flip-turn"]],"hyoukyuu":[[1,"tackle"],[1,"rapid-spin"],[1,"icy-wind"],[4,"fake-out"],[7,"triple-axel"],[10,"quick-attack"],[13,"freeze-dry"],[16,"ice-shard"],[19,"slack-off"],[22,"protect"],[25,"encore"],[28,"ice-punch"]],"yukidome":[[1,"tackle"],[1,"triple-axel"],[1,"ice-shard"],[4,"icy-wind"],[7,"ice-fang"],[10,"dazzling-gleam"],[13,"ice-punch"],[16,"freeze-dry"],[19,"alluring-voice"],[22,"draining-kiss"],[25,"ice-beam"],[28,"moonblast"]],"furasukon":[[1,"bubble"],[1,"tide"],[1,"flip-turn"],[4,"aqua-jet"],[7,"toxic-spikes"],[10,"sludge-wave"],[13,"poison-jab"],[16,"liquidation"],[19,"toxic"],[22,"sludge-bomb"],[25,"hydro-pump"],[28,"surf"]],"shoberaa":[[1,"tackle"],[1,"metal-burst"],[1,"fissure"],[4,"spikes"],[7,"flash-cannon"],[10,"earthquake"],[13,"iron-defense"],[16,"iron-head"],[19,"earth-power"]],"sorabune":[[1,"gust"],[1,"tornado"],[1,"iron-defense"],[4,"tailwind"],[7,"air-slash"],[10,"iron-head"],[13,"flash-cannon"],[16,"metal-burst"],[19,"roost"],[22,"brave-bird"]],"noroinui":[[1,"tackle"],[1,"shadow-sneak"],[1,"slack-off"],[4,"baton-pass"],[7,"rapid-spin"],[10,"fake-out"],[13,"protect"],[16,"quick-attack"],[19,"hyper-voice"],[22,"curse"],[25,"encore"],[28,"substitute"]],"kitsunemen":[[1,"tackle"],[1,"shadow-sneak"],[1,"calm-mind"],[4,"shadow-ball"],[7,"curse"],[10,"psyshock"],[13,"psychic-noise"],[16,"psychic"],[19,"mirror-coat"],[22,"trick"],[25,"destiny-bond"],[28,"trick-room"]],"medamasho":[[1,"tackle"],[1,"shadow-sneak"],[1,"curse"],[4,"nasty-plot"],[7,"crunch"],[10,"foul-play"],[13,"knock-off"],[16,"taunt"],[19,"shadow-ball"],[22,"destiny-bond"],[25,"sucker-punch"],[28,"dark-pulse"]]});
 // ====== ここまで EXTMON ======
+if (NEW_ONLY && SPECIES.kamadon) STARTERS = ['kamadon', 'pottoko', 'kitsunemen'];
 
 // RGBA → キャンバス（すきまを 切りおとして 足もとを 下端に そろえる）。white=true で 白シルエット
 // アニメの 全コマを 同じ わくで 切りだす（コマごとに 足もとが ずれないように）
@@ -2282,7 +2286,7 @@ const typeChip = (t) => `<span class="chip" style="background:${TYPES[t].c}">${T
 
 function renderTitle() {
   const tm = $('titleMons'); tm.innerHTML = '';
-  for (const id of Object.keys(SPECIES).slice(0, 8)) tm.appendChild(spriteCanvas(id, 48));
+  for (const id of poolIds().slice(0, 8)) tm.appendChild(spriteCanvas(id, 48));
   $('btnContinue').hidden = !loadSave();
   show('scTitle');
 }
@@ -4022,7 +4026,7 @@ function pickMoves(m) {
 }
 function avgLevel() { const t = S.party.slice(0, 3); return t.reduce((s, m) => s + m.lvl, 0) / t.length; }
 function startWild() {
-  const pool = Object.keys(SPECIES).filter(id => !STARTERS.includes(id) || Math.random() < .35);
+  const pool = poolIds().filter(id => !STARTERS.includes(id) || Math.random() < .35);
   const weights = pool.map(id => SPECIES[id].rare ? .5 : 3);
   let r = Math.random() * weights.reduce((a, b) => a + b, 0), sid = pool[0];
   for (let i = 0; i < pool.length; i++) { r -= weights[i]; if (r <= 0) { sid = pool[i]; break; } }
@@ -4034,7 +4038,7 @@ function startWild() {
 }
 function startCup() {
   const r = ROUNDS[S.round], lv = roundLv(r);
-  const pool = Object.keys(SPECIES).filter(id => r.rare || !SPECIES[id].rare);
+  const pool = poolIds().filter(id => r.rare || !SPECIES[id].rare);
   const enemies = [];
   for (let i = 0; i < r.size; i++) { let sid; do { sid = choice(pool); } while (enemies.some(e => e.sid === sid) && pool.length > r.size); const em = { uid: -1 - i, sid, lvl: Math.max(2, lv + randi(-1, 1) + (i === r.size - 1 ? 1 : 0)), exp: 0 }; em.moves = pickMoves(em); enemies.push(em); }
   const field = choice(FIELDS);
