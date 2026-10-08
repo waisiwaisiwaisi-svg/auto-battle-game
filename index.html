@@ -45,7 +45,7 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
 .tmlist{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow:auto;text-align:left}
 .tmlist button{background:var(--bg);box-shadow:0 0 0 1px var(--edge);padding:6px 8px;text-align:left;border-left:5px solid var(--c)}
 .tmlist .desc{font-size:10.5px;color:var(--dim)}
-.askbg{position:fixed;inset:0;background:rgba(10,8,18,.72);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
+.askbg{position:fixed;inset:0;overflow:hidden;background:rgba(10,8,18,.72);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
 .askbox{background:var(--panel);border:2px solid var(--edge);border-radius:10px;padding:18px 18px 14px;max-width:360px;width:100%;text-align:center;font-size:14px;line-height:1.6}
 .optrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--edge)}
 .optrow input[type=range]{width:55%;accent-color:var(--acc)}
@@ -261,15 +261,6 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 
 #ctrl{flex:1;min-height:0;display:flex;gap:10px;align-items:stretch}
 #ctrl{position:relative}
-#swapBar{position:absolute;left:0;right:0;top:0;bottom:0;z-index:5;background:var(--bg);display:flex;flex-direction:column;gap:6px}
-#swapBar[hidden]{display:none}
-#swapBar .sbHead{font-size:11px;color:var(--acc);text-align:center}
-#swapList{flex:1;display:flex;flex-direction:column;gap:6px;min-height:0}
-#swapList .cmd{flex:1;flex-direction:row;justify-content:flex-start;gap:8px;padding:2px 8px;text-align:left}
-#swapList canvas{width:40px;height:40px;flex:none}
-#swapList .hpb{height:4px;background:#0d0b14;margin-top:3px}
-#swapList .hpb i{display:block;height:100%;background:var(--good)}
-#swapCancel{min-height:34px;flex:none}
 #btns{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:auto;gap:6px;min-height:0;align-content:start}
 .cmd.info{grid-column:span 2;align-items:flex-start;text-align:left;padding:4px 8px;cursor:default;min-height:52px}
 .cmd.info:active{transform:none}
@@ -303,14 +294,10 @@ html.land .bigbtns .btn{padding:20px 8px;font-size:19px}
 html.land #scBattle:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto auto minmax(0,1fr);
     grid-template-areas:"top top" "cv plates" "cv banner" "cv ctrl";column-gap:16px;row-gap:10px;padding:14px 18px}
 html.land #bTop{grid-area:top}
-html.land .plates{grid-area:plates;grid-template-columns:1fr}
-html.land #banner{grid-area:banner}
-html.land #ctrl{grid-area:ctrl;align-items:start}
 html.land #btns{flex:none;width:100%}
 html.land #btns button.cmd{min-height:64px}
 html.land .cmd.info{min-height:78px}
 html.land .cmd.info .d{font-size:12px}
-html.land #cvWrap{grid-area:cv;align-self:start;width:min(100%, calc((var(--appH, 100dvh) - 64px) * 16 / 9))}
 html.land .cmd .a{font-size:15px}
 html.land .cmd .b{font-size:11px}
 html.land #banner{font-size:14px}
@@ -345,8 +332,8 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 .cmd.mv{border-left:none;box-shadow:0 0 0 2px var(--out),inset 4px 0 0 var(--c),inset 0 0 0 2px var(--rim2),0 3px 0 2px rgba(0,0,0,.4)}
 .cmd.info{background:linear-gradient(180deg,#2a2346,#1b1630)}
 .cmd.hot{box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--acc),0 0 12px rgba(255,209,102,.45)}
-#cDodge,#cSwap{background:linear-gradient(180deg,#4a3f86,#2d2558)}
-#cDodge .a,#cSwap .a{color:var(--acc);text-shadow:1px 1px 0 #000}
+#cDodge{background:linear-gradient(180deg,#4a3f86,#2d2558)}
+#cDodge .a{color:var(--acc);text-shadow:1px 1px 0 #000}
 .sec-title{color:#cfc6ef;text-shadow:1px 1px 0 #000;letter-spacing:.06em}
 .sec-title > span:first-child{background:linear-gradient(90deg,rgba(138,124,208,.35),transparent);padding:2px 10px 2px 8px;border-left:3px solid var(--acc)}
 .plate .hp{height:10px;border-radius:2px;box-shadow:0 0 0 2px var(--out),inset 0 0 0 1px #000}
@@ -360,6 +347,47 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 #cv{box-shadow:0 0 0 3px var(--out),0 0 0 5px var(--rim2),0 8px 0 5px rgba(0,0,0,.35);border-radius:2px}
 #bTop button{border-radius:3px;background:linear-gradient(180deg,#3d3466,#241d40);box-shadow:0 0 0 2px var(--out),inset 0 0 0 1px var(--rim2);color:#cfc6ef}
 .dexf button{border-radius:3px}
+
+/* ===== 戦闘画面：HPは ステージの 上、かわす と ひかえ（タップで こうたい）は 下 ===== */
+#cvWrap .hudtop{position:absolute;left:6px;right:6px;top:6px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;line-height:1.2;z-index:2}
+#cvWrap .hudtop .plate{width:min(40%,300px);padding:4px 8px;background:linear-gradient(180deg,rgba(47,39,80,.88),rgba(29,23,51,.88));font-size:10px}
+#cvWrap .hudtop .plate .top{align-items:center}
+#cvWrap .hudtop .plate .top b{font-size:13px}
+#cvWrap .hudtop .plate .types{display:flex;gap:3px}
+#cvWrap .hudtop .plate .hp{margin:3px 0 2px}
+#cvWrap .hudtop .plate .cond{min-height:0;font-size:9.5px}
+#bbar{display:flex;gap:8px;align-items:stretch}
+#bbar #cDodge{flex:0 0 26%;min-height:62px}
+#cDodge .a{font-size:17px}
+#bench{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;min-width:0}
+.bmon{display:flex;flex-direction:row!important;align-items:center;gap:6px;padding:4px 8px!important;text-align:left;min-height:62px}
+.bmon canvas{width:44px;height:44px;flex:none}
+.bmon .bn{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bmon .bh{height:5px;background:#0d0b14;margin-top:3px;border-radius:1px}
+.bmon .bh i{display:block;height:100%;background:var(--good)}
+.bmon .bs{font-size:9.5px;color:var(--dim)}
+.bmon.out{opacity:.35;filter:grayscale(1)}
+.bmon .sw{color:var(--acc);font-size:10px}
+#bbar #cCap,#bbar #cRun{flex:0 0 auto;min-width:72px}
+#bside{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
+#chooseOv .swaplist button{padding:6px 10px;font-size:14px}
+#chooseOv .swaplist canvas{width:48px;height:48px}
+html.land #scBattle:not([hidden]){grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"top top" "cv side" "bbar side"}
+html.land #cvWrap{grid-area:cv;width:min(100%, calc((var(--appH, 100dvh) - 150px) * 16 / 9))}
+html.land #bbar{grid-area:bbar;align-self:start}
+html.land #bside{grid-area:side}
+html.land.short #scBattle:not([hidden]){grid-template-columns:minmax(0,1fr) 250px}
+html.land.short #cvWrap{width:min(100%, calc((var(--appH, 100dvh) - 96px) * 16 / 9))}
+html.land.short #bbar #cDodge,html.land.short .bmon{min-height:46px} html.land.short .bmon canvas{width:32px;height:32px} html.land.short #cDodge .a{font-size:14px}
+html.land.short #cvWrap .hudtop .plate{padding:2px 6px} html.land.short #cvWrap .hudtop .plate .top b{font-size:11px}
+
+/* ポップアップは 画面の 高さに おさめ、中身を スクロール */
+.askbox{max-height:calc(var(--appH, 100dvh) - 24px);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.tmlist{max-height:none;overflow:visible}
+.askbox .tmlist{max-height:calc(var(--appH, 100dvh) - 200px);overflow-y:auto;touch-action:pan-y}
+/* たて画面：かわす と ひかえは いちばん 下 */
+html.short .askbox .tmlist{max-height:calc(var(--appH, 100dvh) - 150px)}
+html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
 </style>
 </head>
 <body>
@@ -404,7 +432,7 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
           <button class="btn" id="btnCup">たいかいへ<span>スタジアムで しあい</span></button>
           <button class="btn" id="btnWild" style="background:#7bd88f;box-shadow:0 4px 0 #3f8a50,0 0 0 3px #0d0b14">くさむらへ<span>モンスターを つかまえる</span></button>
         </div>
-        <div class="sec-title"><span>たからばこ（かつと もらえる・4つまで）</span><span class="inv">わざマシン <b id="hTms">0</b>　つかまえた <b id="hCaught">0</b></span></div>
+        <div class="sec-title"><span>たからばこ（かつと もらえる・4つまで）</span><span class="inv">わざのまきもの <b id="hTms">0</b>　つかまえた <b id="hCaught">0</b></span></div>
         <div class="chests" id="hubChests"></div>
       </div>
       <div class="hcol">
@@ -449,27 +477,31 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
   <!-- バトル -->
   <section class="screen" id="scBattle" hidden>
     <div id="bTop"><span id="bTitle"></span><span style="display:flex;gap:6px"><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
-    <div class="plates">
-      <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="lv"></span></div><div class="types"></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div></div>
-      <div class="plate" id="plE"><div class="top"><span class="lv"></span><b class="nm"></b></div><div class="types"></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div></div>
-    </div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="1920" height="1080"></canvas>
+      <div class="plates hudtop">
+        <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="types"></span></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div></div>
+        <div class="plate" id="plE"><div class="top"><span class="types"></span><b class="nm"></b></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div></div>
+      </div>
       <div class="ov" id="pauseOv" hidden><h2>PAUSE</h2><button class="btn" id="btnResume">つづける</button><button class="btn sub" id="btnQuit" style="font-size:13px">しあいを やめる（まけ あつかい）</button></div>
+      <div class="ov" id="chooseOv" hidden><h2 style="font-size:22px">つぎは だれを だす？</h2><div class="swaplist" id="chooseList"></div></div>
       <div class="ov" id="resultOv" hidden><h2 id="resTitle"></h2><div class="lines" id="resLines"></div><button class="btn" id="resNext">つぎへ</button></div>
     </div>
-    <div id="banner"></div>
-    <div id="ctrl">
-      <div id="swapBar" hidden><div class="sbHead">こうたい（バトルは とまりません）</div><div id="swapList"></div><button class="cmd" id="swapCancel"><span class="a">やめる</span></button></div>
-      <div id="btns">
-        <div class="cmd mv info" data-mv="0"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
-        <div class="cmd mv info" data-mv="1"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
-        <div class="cmd mv info" data-mv="2"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
-        <div class="cmd mv info" data-mv="3"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
-        <button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button>
-        <button class="cmd" id="cSwap"><span class="a">こうたい</span><span class="b">ひかえと</span><i class="cdv"></i></button>
-        <button class="cmd" id="cCap"><span class="a">クリスタル</span><span class="b" id="capN"></span></button>
-        <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
+    <div id="bbar">
+      <button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button>
+      <div id="bench"></div>
+      <button class="cmd" id="cCap"><span class="a">クリスタル</span><span class="b" id="capN"></span></button>
+      <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
+    </div>
+    <div id="bside">
+      <div id="banner"></div>
+      <div id="ctrl">
+        <div id="btns">
+          <div class="cmd mv info" data-mv="0"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
+          <div class="cmd mv info" data-mv="1"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
+          <div class="cmd mv info" data-mv="2"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
+          <div class="cmd mv info" data-mv="3"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
+        </div>
       </div>
     </div>
   </section>
@@ -855,7 +887,7 @@ function fixMon(m, bias) {
   if (!m.nat || !NATURES[m.nat]) m.nat = pickNature(SPECIES[m.sid]);
   if (!m.iv) { const r = () => { let v = Math.random(); if (bias) v = v * (1 - bias) + bias * Math.max(v, Math.random()); return Math.round((.85 + .3 * v) * 100) / 100; }; m.iv = { hp: r(), atk: r(), def: r(), spd: r() }; }
   const L = learned(m);
-  if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // わざマシンの わざも そのまま
+  if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // わざのまきものの わざも そのまま
   return m;
 }
 
@@ -2840,7 +2872,7 @@ function monRarity(sid) {
   return _monRank[sid] || 0;
 }
 const tmRarity = (id) => { const m = MOVES[id]; if (!MOVES100[id]) return 0; const p = m.power || 0; return p >= 100 || (m.cat === 'stat' && ['field', 'baton', 'dbond', 'curse'].includes(m.k)) ? 2 : p >= 75 || m.cat === 'stat' ? 1 : 0; };
-// わざマシンで おぼえられるか：もともと おぼえる わざ・同じ タイプ・ノーマル・見た目（せつめいの ことば）で にあう タイプ
+// わざのまきもので おぼえられるか：もともと おぼえる わざ・同じ タイプ・ノーマル・見た目（せつめいの ことば）で にあう タイプ
 const LOOK_KW = { fire: /火|炎|燃|熱|溶岩|マグマ|灯/, water: /水|海|川|泳|波|雨|貝|魚|泡|しずく/, grass: /草|葉|花|木|森|種|実|苔|根|つる|キノコ/, elec: /電|雷|稲妻|ビリ|磁/,
   ice: /氷|雪|冷|凍|つらら/, fighting: /拳|格闘|筋|蹴|武|けんか|パンチ|鍛/, poison: /毒|ヘドロ|沼|腐/, ground: /土|砂|地面|掘|泥|地中/, wind: /風|空|翼|鳥|羽|飛|雲/,
   psychic: /念|夢|不思議|星|月|心|予知|瞑想/, bug: /虫|甲殻|糸|さなぎ|羽音/, rock: /岩|石|鉱|宝石|結晶/, ghost: /霊|幽|お化け|おばけ|影|魂|骨|呪/, dragon: /竜|龍|ドラゴン|鱗/ };
@@ -2928,7 +2960,7 @@ function openChest(i) {
   save();
   const cards = [`<div class="reward">${chestIcon(c.kind).replace('class="ic"', 'style="width:120px;height:92px"')}<div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
     ...monCards, `<div class="reward"><div class="big">クリスタル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
-  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="rar" style="background:${r.c}">${r.n}</span><div class="big">わざマシン：${m.n}</div>${typeChip(m.t)}<div class="dim">${moveDesc(m)}</div></div>`); }
+  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="rar" style="background:${r.c}">${r.n}</span><div class="big">わざのまきもの：${m.n}</div>${typeChip(m.t)}<div class="dim">${moveDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
   bg.innerHTML = `<div class="askbox"><div id="rwBody"></div><div class="dim" id="rwCount" style="margin-top:6px"></div><button class="btn" id="rwNext" style="margin-top:10px;width:100%">つぎへ</button></div>`;
   $('app').appendChild(bg);
@@ -2939,10 +2971,10 @@ function openChest(i) {
 setInterval(() => { if (S && !$('scHub').hidden) renderChests(); }, 1000);
 document.addEventListener('pointerdown', (ev) => { const b = ev.target.closest && ev.target.closest('button'); if (b && !b.disabled && !b.closest('#btns')) SND.se(/もどる|やめる|とじる/.test(b.textContent) ? 'back' : 'click'); }, true);
 
-/* ---------- わざマシン：もっている わざを 好きな モンスターに おぼえさせる ---------- */
+/* ---------- わざのまきもの：もっている わざを 好きな モンスターに おぼえさせる ---------- */
 function useTM(m) {
   const ids = Object.keys(S.tms || {}).filter(id => S.tms[id] > 0 && MOVES[id]);
-  if (!ids.length) { say0('わざマシンを もっていません。たからばこから でます'); return; }
+  if (!ids.length) { say0('わざのまきものを もっていません。たからばこから でます'); return; }
   ids.sort((a, b) => tmRarity(b) - tmRarity(a) || MOVES[a].t.localeCompare(MOVES[b].t));
   const bg = document.createElement('div'); bg.className = 'askbg';
   const close = () => bg.remove();
@@ -3047,7 +3079,7 @@ function renderTeamDetail() {
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${STN.map(([n, v, mx]) => `<div class="sbar"><span>${n}</span><span>${v}</span><i><b style="width:${Math.min(100, v / mx * 100)}%;background:var(--good)"></b></i></div>`).join('')}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
-    <div class="acts"><button class="btn sub" data-a="tm">わざマシン</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
+    <div class="acts"><button class="btn sub" data-a="tm">わざのまきもの</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
@@ -3128,7 +3160,7 @@ function moveDesc(m) {
 }
 function moveEditor(m) {   // おぼえている わざ（獲得した ときに 確定・変えられない）と その 効果
   const box = document.createElement('div'); box.className = 'medit';
-  box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります。わざマシンで いれかえられます</div>` + equipped(m).map(id => {
+  box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります。わざのまきもので いれかえられます</div>` + equipped(m).map(id => {
     const mv = MOVES[id];
     return `<div class="mrow on" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${CAT_NAMES[mv.cat]}</span><div class="desc">${moveDesc(mv)}</div></div>`;
   }).join('');
@@ -3164,9 +3196,9 @@ function monCard(m, where, i, openUid) {
   el.appendChild(info);
   const a = document.createElement('div'); a.className = 'macts';
   if (where === 'party') {
-    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm">わざマシン</button><button data-a="up" ${i === 0 ? 'disabled' : ''}>▲ うえへ</button><button data-a="down" ${i === S.party.length - 1 ? 'disabled' : ''}>▼ したへ</button><button data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>`;
+    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm">わざのまきもの</button><button data-a="up" ${i === 0 ? 'disabled' : ''}>▲ うえへ</button><button data-a="down" ${i === S.party.length - 1 ? 'disabled' : ''}>▼ したへ</button><button data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>`;
   } else {
-    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm">わざマシン</button><button data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>つれていく</button><button data-a="release">にがす</button>`;
+    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm">わざのまきもの</button><button data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>つれていく</button><button data-a="release">にがす</button>`;
   }
   if (openUid === m.uid) wrap.appendChild(moveEditor(m));
   a.onclick = (ev) => {
@@ -3494,10 +3526,10 @@ function startBattle(cfg) {
     projs: [], parts: [], texts: [], fx: [], decals: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
     cam: { x: st.W / 2, y: st.H / 2, z: VW / st.W }, catchO: null, result: null, exp: {}, skill: cfg.skill, sent: 0,
   };
-  $('resultOv').hidden = true; $('swapBar').hidden = true; $('pauseOv').hidden = true;
+  $('resultOv').hidden = true; $('chooseOv').hidden = true; $('pauseOv').hidden = true;
   $('bTitle').textContent = cfg.title;
   for (const id of ['cCap', 'cRun']) $(id).hidden = cfg.kind !== 'wild';
-  $('cSwap').hidden = pf.length < 2;
+
   say(cfg.intro);
   show('scBattle');
   SND.play(cfg.kind === 'wild' ? 'wild' : 'st_' + st.field + (S.round >= ROUNDS.length - 1 ? '_boss' : ''));
@@ -3520,7 +3552,7 @@ function sendOut(side, idx, pass, lag, at) {
   else burst(f.x, f.y - 4, '#3f9040', 16, 90, .5);
   burst(f.x, f.y - 10, '#ffffff', 12, 80, .45);
   B.cheer = Math.max(B.cheer, .7);
-  if (side === 0) { say(`いけっ！ ${f.sp.n}！`); setupCmds(); }
+  if (side === 0) { say(`いけっ！ ${f.sp.n}！`); setupCmds(); renderBench(); }
   else if (tr) say(`${tr.name}は ${f.sp.n}を くりだした！`);
   else say(`あっ！ やせいの ${f.sp.n}が とびだしてきた！`);
   applyHazards(f);
@@ -3889,7 +3921,6 @@ function doSwitch(f, idx, pass, forced, byMove) {
   f.state = 'return'; f.stT = .3; f.cur = null; f.queued = null;
   B.swapTo = idx; B.swapPass = pass || null;
   B.sides[f.side].swapCd = SWAP_CD;
-  if (f.side === 0) $('swapBar').hidden = true;
   say(forced ? `${f.sp.n}は ひきずりだされた！` : `${prefix(f)}${f.sp.n}は もどっていった！`);
 }
 function aura(f, col) { B.fx.push({ type: 'ring', x: f.x, y: f.y, rad: 34, col, life: .45, max: .45 }); burst(f.x, f.y - BODY, col, 12, 60, .5); }
@@ -4025,6 +4056,7 @@ function afterFaint(f) {
   f.fainted = true; f.state = 'bench';
   const next = benchIdx(f.side);
   if (next < 0) { endBattle(f.side === 0 ? 'lose' : 'win'); return; }
+  if (f.side === 0 && !B.autoChoose) { chooseNext(f); return; }
   B.pendingSend = { side: f.side, idx: next, t: .5 };
 }
 
@@ -4701,28 +4733,51 @@ function cmdDodge() {
   startDodge(f, v.active ? Math.atan2(v.y, v.x) : null);
   B.sides[0].dodgeCmd = DODGE_CMD_CD; cmdPose(0);
 }
-function cmdSwap() {
-  if (!canCommand()) return;
-  const bar = $('swapBar');
-  if (!bar.hidden) { bar.hidden = true; return; }
-  const sd = B.sides[0], f = active(0);
-  if (sd.swapCd > 0) { say(`まだ こうたい できない！（あと ${Math.ceil(sd.swapCd)}びょう）`); return; }
-  if (!f || !['free', 'act', 'stun'].includes(f.state)) return;
-  const L = $('swapList'); L.innerHTML = '';
+// ひかえの モンスター：タップで こうたい（ボタンが 交代の かわり）
+function renderBench() {
+  const sd = B.sides[0], L = $('bench'); L.innerHTML = '';
   sd.fs.forEach((x, i) => {
-    if (i === sd.act || x.fainted || x.hp <= 0) return;
-    const b = document.createElement('button'); b.className = 'cmd';
-    b.appendChild(spriteCanvas(x.mon.sid, 40));
-    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><span class="a">${x.sp.n}</span> <span class="b">${x.status ? STATUS_NAMES[x.status] : ''}</span><div class="hpb"><i style="width:${x.hp / x.maxHp * 100}%"></i></div></span>`);
-    tap(b, () => {
-      const cur = active(0);
-      if (!canCommand() || !cur || !['free', 'act', 'stun'].includes(cur.state)) return;
-      doSwitch(cur, i); say(`もどれ、${cur.sp.n}！ いけっ、${x.sp.n}！`);
-    });
+    if (i === sd.act) return;
+    const b = document.createElement('button'); b.className = 'cmd bmon'; b.dataset.i = i;
+    b.appendChild(spriteCanvas(x.mon.sid, 44));
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1;min-width:0"><div class="bn">${x.sp.n}</div><div class="bh"><i></i></div><div class="bs"></div></span><i class="cdv"></i>`);
+    tap(b, () => swapTo(i));
     L.appendChild(b);
   });
-  if (!L.children.length) { say('こうたいできる モンスターが いない！'); return; }
-  bar.hidden = false;
+}
+function swapTo(i) {
+  if (!canCommand()) return;
+  const sd = B.sides[0], cur = active(0), x = sd.fs[i];
+  if (!x || i === sd.act || x.fainted || x.hp <= 0) return;
+  if (sd.swapCd > 0) { say(`まだ こうたい できない！（あと ${Math.ceil(sd.swapCd)}びょう）`); SND.se('deny'); return; }
+  if (!cur || !['free', 'act', 'stun'].includes(cur.state)) return;
+  doSwitch(cur, i); say(`もどれ、${cur.sp.n}！ いけっ、${x.sp.n}！`); cmdPose(0);
+}
+function updBench() {
+  const sd = B.sides[0];
+  $('bench').querySelectorAll('.bmon').forEach(b => {
+    const x = sd.fs[+b.dataset.i]; if (!x) return;
+    const out = x.fainted || x.hp <= 0, k = Math.max(0, x.hp / x.maxHp);
+    b.classList.toggle('out', out);
+    b.querySelector('.bh i').style.width = (k * 100) + '%'; b.querySelector('.bh i').style.background = k > .5 ? 'var(--good)' : k > .2 ? 'var(--mid)' : 'var(--bad)';
+    setText(b.querySelector('.bs'), out ? 'ひんし' : sd.swapCd > 0 ? `こうたい あと${Math.ceil(sd.swapCd)}びょう` : (x.status ? STATUS_NAMES[x.status] + '・' : '') + 'タップで こうたい');
+    b.querySelector('.cdv').style.height = out ? '0%' : (sd.swapCd / SWAP_CD * 100) + '%';
+  });
+}
+// たおれた ときは とめて つぎの モンスターを えらぶ
+function chooseNext(f) {
+  const sd = B.sides[0], alive = sd.fs.map((x, i) => i).filter(i => !sd.fs[i].fainted && sd.fs[i].hp > 0);
+  if (alive.length === 1) { B.pendingSend = { side: 0, idx: alive[0], t: .5 }; return; }
+  B.paused = true; B.choosing = true;
+  const L = $('chooseList'); L.innerHTML = '';
+  for (const i of alive) {
+    const x = sd.fs[i], b = document.createElement('button');
+    b.appendChild(spriteCanvas(x.mon.sid, 48));
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}${x.sp.type2 ? typeChip(x.sp.type2) : ''}<div class="hpb" style="height:5px;background:#0d0b14;margin-top:4px"><i style="display:block;height:100%;width:${x.hp / x.maxHp * 100}%;background:var(--good)"></i></div><small class="dim">HP ${Math.ceil(x.hp)}/${x.maxHp}</small></span>`);
+    b.onclick = () => { $('chooseOv').hidden = true; B.paused = false; B.choosing = false; B.pendingSend = { side: 0, idx: i, t: .2 }; };
+    L.appendChild(b);
+  }
+  $('chooseOv').hidden = false;
 }
 function cmdRun() { if (!canCommand() || B.kind !== 'wild') return; say('うまく にげきれた！'); endBattle('run'); }
 function cmdAuto() { S.auto = !S.auto; save(); updAutoBtn(); }
@@ -4742,7 +4797,6 @@ function condText(f) {
 function updPlate(id, side) {
   const root = $(id), f = active(side); if (!f) return;
   setText(root.querySelector('.nm'), f.sp.n);
-  setText(root.querySelector('.lv'), '');
   const tsig = f.sp.type + (f.sp.type2 || '');
   const tEl = root.querySelector('.types'); if (tEl._t !== tsig) { tEl._t = tsig; tEl.innerHTML = typeChip(f.sp.type) + (f.sp.type2 ? typeChip(f.sp.type2) : ''); }
   const k = f.hp / f.maxHp, bar = root.querySelector('.hp i');
@@ -4772,7 +4826,7 @@ function updHUD() {
   });
   $('cDodge').querySelector('.cdv').style.height = ((B.sides[0].dodgeCmd || 0) / DODGE_CMD_CD * 100) + '%';
   setText($('cDodge').querySelector('.b'), (B.sides[0].dodgeCmd || 0) > 0 ? `あと ${Math.ceil(B.sides[0].dodgeCmd)}びょう` : `じどう ${Math.round(autoDodgeP(f) * 100)}%`);
-  $('cSwap').querySelector('.cdv').style.height = (B.sides[0].swapCd / SWAP_CD * 100) + '%';
+  updBench();
   setText($('capN'), `のこり ${S.capsules}`);
 }
 
@@ -5300,7 +5354,7 @@ function render() {
   // ミニマップ（広いステージの全体像）
   ctx.setTransform(RS, 0, 0, RS, 0, 0);
   if (B.trickRoom > 0) { ctx.fillStyle = `rgba(255,120,200,${.08 + Math.sin(B.t * 3) * .03})`; ctx.fillRect(0, 0, VW, VH); ctx.strokeStyle = 'rgba(255,150,220,.6)'; ctx.lineWidth = 3; ctx.strokeRect(2, 2, VW - 4, VH - 4); }
-  const mw = 54, mh = Math.round(mw * (st.fy1 - st.fy0) / (st.fx1 - st.fx0)), mx = VW - mw - 4, my = 4;
+  const mw = 54, mh = Math.round(mw * (st.fy1 - st.fy0) / (st.fx1 - st.fx0)), mx = VW - mw - 4, my = VH - mh - 4;   // ミニマップは 右下（上は HP の 表示）
   ctx.fillStyle = 'rgba(13,11,20,.6)'; ctx.fillRect(mx - 1, my - 1, mw + 2, mh + 2);
   ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(mx + .5, my + .5, mw - 1, mh - 1);
   for (const f of [a, e]) if (f && f.state !== 'bench') {
@@ -5313,14 +5367,14 @@ function render() {
    入力（ボタン・キーボード）
    ===================================================================== */
 const tap = (el, fn) => el.addEventListener('pointerdown', (ev) => { ev.preventDefault(); fn(); });
-tap($('cDodge'), cmdDodge); tap($('cSwap'), cmdSwap);
+tap($('cDodge'), cmdDodge);
 tap($('cCap'), cmdCapsule); tap($('cRun'), cmdRun);
 document.addEventListener('keydown', (ev) => {
   const k = ev.key.toLowerCase();
   input.keys.add(k);
   if (!B || $('scBattle').hidden) return;
   if (k === ' ') { ev.preventDefault(); cmdDodge(); }
-  if (k === 'c') cmdCapsule(); if (k === 'x') cmdSwap();
+  if (k === 'c') cmdCapsule(); if (k === 'x' && B) { const sd = B.sides[0]; const i = sd.fs.findIndex((x, j) => j !== sd.act && !x.fainted && x.hp > 0); if (i >= 0) swapTo(i); }
 });
 document.addEventListener('keyup', (ev) => input.keys.delete(ev.key.toLowerCase()));
 window.addEventListener('blur', () => input.keys.clear());
@@ -5425,8 +5479,8 @@ $('btnHelp').onclick = () => {
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
     <p><b>くさむら</b>で よわらせて <b>ふういんクリスタル</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
-    <p><b>たからばこ</b>は 勝つと もらえる。時間が たつと あき、モンスター・クリスタル・わざマシンが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
-    <p><b>わざマシン</b>で すきな わざを おぼえさせよう（てもち → わざマシン）。</p>
+    <p><b>たからばこ</b>は 勝つと もらえる。時間が たつと あき、モンスター・クリスタル・わざのまきものが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
+    <p><b>わざのまきもの</b>で すきな わざを おぼえさせよう（てもち → わざのまきもの）。</p>
     <p class="dim">PC：Space＝かわす　X＝こうたい</p></div>
     <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="hClose">とじる</button></div>`);
   bg.querySelector('#hClose').onclick = () => bg.remove();
@@ -5434,9 +5488,9 @@ $('btnHelp').onclick = () => {
 $('btnWild').onclick = startWild;
 $('btnCup').onclick = startCup;
 $('resNext').onclick = () => { $('resultOv').hidden = true; B = null; renderHub(); };
-tap($('swapCancel'), () => { $('swapBar').hidden = true; });
-$('btnPause').onclick = () => { if (!B || B.mode === 'end') return; B.paused = true; $('pauseOv').hidden = false; };
-$('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B) B.paused = false; };
+
+$('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; B.paused = true; $('pauseOv').hidden = false; };
+$('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
 $('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; B.paused = false; endBattle(B.kind === 'wild' ? 'run' : 'lose'); B.endT = 0; };
 document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end') { B.paused = true; $('pauseOv').hidden = false; } });
 
