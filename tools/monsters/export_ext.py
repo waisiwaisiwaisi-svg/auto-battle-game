@@ -12,7 +12,7 @@ for i, m in meta.items():
     L = E.learnset(i, r)
     species[i] = {'n': m['name'], 'type': m['types'][0], **({'type2': m['types'][1]} if len(m['types']) > 1 else {}),
                   'base': E.stats(i, r), 'moves': [x for _, x in L[:2]], 'style': E.style(r),
-                  'catch': {'S': .5, 'M': .4, 'L': .3}[m['size']], 'rare': m.get('rare', 0), 'desc': m['note'] + '。（もと：' + m['base'] + '）', 'ext': 1,
+                  'catch': {'S': .5, 'M': .4, 'L': .3}[m['size']], 'rare': m.get('rare', 0), 'desc': m['note'] + '。（もと：' + m['base'] + '）', 'ext': 1, **({'fly': 1} if m.get('body') == 'F' else {}),
                   **({'prof': {'h': m['h'], 'wt': m['wt'], 'home': m['home'], 'trait': m['trait'], 'evo': m.get('evo')}, 'sz': m['sz']} if 'h' in m else {})}
     learn[i] = L
 js = BEGIN + '\n// 他の AIで 作った 絵（%d体）。絵は 1枚 → AISpr の 変形で 14コマ（fx:1 ＝ 左向きの 絵を 反転して 右向きに）\n' % len(meta)
