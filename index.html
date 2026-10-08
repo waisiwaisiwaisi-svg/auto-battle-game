@@ -3793,7 +3793,7 @@ function burst(x, y, col, n, spd, life) {
   if (NET.host) netEv('bu', [x, y, col, n, spd, life]);
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2, s = rand(spd * .3, spd);
-    B.parts.push({ x, y, vx: Math.cos(a) * s * K, vy: (Math.sin(a) * s - 20) * K, life: rand(life * .5, life), max: life, col, size: Math.random() < .3 ? 3 : 2, g: 160 });
+    B.parts.push({ x, y, vx: Math.cos(a) * s * K, vy: (Math.sin(a) * s - 20) * K, life: rand(life * .5, life), max: life, col, size: Math.random() < .3 ? 5 : 3, g: 160, shape: COL_SHAPE[col] || 'star', rot: Math.random() * 6, vr: rand(-6, 6) });
   }
 }
 // ---- わざの エフェクト（タイプごとの 粒・光・衝撃）----
@@ -3814,13 +3814,15 @@ const FX_STYLE = {
   dragon:   { cols: ['#ffffff', '#c0b8ff', '#7a6aff', '#ff7ab0'], shape: 'spark', g: 0 },
   normal:   { cols: ['#ffffff', '#fff6d8', '#d8d0c0'], shape: 'star', g: 0 },
 };
+// 色から つぶの かたちを えらぶ（タイプの 色なら その タイプの かたち）
+const COL_SHAPE = {}; for (const t in TYPES) { COL_SHAPE[TYPES[t].c] = (FX_STYLE[t] || FX_STYLE.normal).shape; for (const c of (FX_STYLE[t] || { cols: [] }).cols.slice(1)) if (!COL_SHAPE[c]) COL_SHAPE[c] = FX_STYLE[t].shape; }
 function typeFx(x, y, t, n, spd, life, opt = {}) {
   if (NET.host) netEv('tf', [x, y, t, n, spd, life, opt]);
   const S_ = FX_STYLE[t] || FX_STYLE.normal;
   for (let i = 0; i < n; i++) {
     const a = opt.ang != null ? opt.ang + rand(-opt.spread || -.6, opt.spread || .6) : Math.random() * Math.PI * 2, v = rand(spd * .35, spd);
     B.parts.push({ x: x + rand(-3, 3), y: y + rand(-3, 3), vx: Math.cos(a) * v * K, vy: Math.sin(a) * v * K - (S_.g < 0 ? 20 : 30), life: rand(life * .5, life), max: life,
-      col: choice(S_.cols), size: Math.random() < .35 ? 7 : 5, g: S_.g, shape: S_.shape, rot: Math.random() * 6, vr: rand(-8, 8), glow: i % 3 === 0 });
+      col: choice(S_.cols), size: Math.random() < .4 ? 6 : 3, g: S_.g, shape: S_.shape, rot: Math.random() * 6, vr: rand(-8, 8) });
   }
 }
 // 当たった しゅんかんの 光と 衝撃波（強さ k：0〜1）
@@ -3854,8 +3856,8 @@ function tickFx(f) {
   SND.se('hit', 1.6);
   const x = f.x, y = f.y - BODY, v = f.v;
   f.flash = Math.max(f.flash, .15); B.shake = Math.max(B.shake, 2);
-  if (f.status === 'brn') { fxp({ type: 'flash', x, y, rad: 40, col: '#ff8a3d', life: .25 }); typeFx(x, f.y, 'fire', 26, 120, .8, { ang: -Math.PI / 2, spread: .8 }); fxp({ type: 'shock', x, y: f.y, rad: 40, col: '#ff8a3d', life: .35 }); }
-  if (f.status === 'psn' || f.status === 'tox') { fxp({ type: 'flash', x, y, rad: 40, col: '#b86ad8', life: .25 }); typeFx(x, y, 'poison', f.status === 'tox' ? 30 : 20, 110, .9); fxp({ type: 'skull', x, y: y - 46, col: f.status === 'tox' ? '#8a3ab0' : '#b86ad8', life: .8 }); }
+  if (f.status === 'brn') typeFx(x, y, 'fire', 8, 70, .6, { ang: -Math.PI / 2, spread: .6 });
+  if (f.status === 'psn' || f.status === 'tox') { typeFx(x, y, 'poison', f.status === 'tox' ? 9 : 6, 60, .7, { ang: -Math.PI / 2, spread: .9 }); if (f.status === 'tox') fxp({ type: 'skull', x, y: y - 46, col: '#8a3ab0', life: .6 }); }
   if (v.curse) { fxp({ type: 'vortex', x, y, rad: 40, col: '#5a4a9a', life: .6 }); typeFx(x, y, 'ghost', 18, 90, .8); }
   if (v.seed) { const t = active(v.seed - 1); typeFx(x, y, 'grass', 16, 90, .7); if (t && t !== f) fxp({ type: 'drain', x0: x, y0: y, x1: t.x, y1: t.y - BODY, col: '#62d26f', life: .7 }); }
 }
@@ -3865,8 +3867,8 @@ function statusFx(f, s) {
   impactFx(x, y, t, .7);
   if (s === 'par') fxp({ type: 'bolt', x, y: f.y, rad: 30, col: '#ffd84a', life: .35 });
   if (s === 'frz') { fxp({ type: 'flash', x, y, rad: 50, col: '#d8f8ff', life: .3 }); typeFx(x, y, 'ice', 24, 160, .7); }
-  if (s === 'brn') typeFx(x, f.y, 'fire', 28, 120, .8, { ang: -Math.PI / 2, spread: .7 });
-  if (s === 'psn' || s === 'tox') typeFx(x, y, 'poison', s === 'tox' ? 30 : 18, 90, .9);
+  if (s === 'brn') typeFx(x, y, 'fire', 14, 100, .7, { ang: -Math.PI / 2, spread: .7 });
+  if (s === 'psn' || s === 'tox') typeFx(x, y, 'poison', s === 'tox' ? 14 : 10, 80, .8);
   if (s === 'slp') for (let i = 0; i < 3; i++) popText(x + 14 + i * 9, y - 30 - i * 12, 'Z', '#cfd8ff');
 }
 function popText(x, y, txt, col, big) {
@@ -5837,29 +5839,58 @@ function glowDot(x, y, r, col, a) {
   const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore();
 }
+// つぶの ドット絵（c＝その色・d＝こい・l＝うすい・w＝白・k＝ふちどり）。1ドット＝エフェクトの 1ドット
+const PART_ROWS = {
+  leaf:   [['.cc..', 'cdlc.', 'cldlc', '.cldc', '..cc.'], ['cc.', 'cdc', '.cc']],
+  bubble: [['.ccc.', 'cw..c', 'c...c', 'c...c', '.ccc.'], ['.c.', 'c.c', '.c.']],
+  drop:   [['..c..', '.ccc.', 'clccc', 'cwccc', '.ccc.'], ['.c.', 'clc', '.c.']],
+  ember:  [['..c..', '.cl..', '.clc.', 'clwlc', '.ccc.'], ['.c.', 'clc', '.c.']],
+  wisp:   [['..c..', '.cc..', '.clc.', 'clwlc', '.ccc.'], ['.c.', 'clc', 'ccc']],
+  spark:  [['...w.', '..c..', '.wcw.', '..c..', '.w...'], ['..w', '.c.', 'w..']],
+  shard:  [['..w..', '.cwc.', '.clc.', '.ccc.', '..c..'], ['.w.', 'clc', '.c.']],
+  star:   [['..c..', '..c..', 'ccwcc', '..c..', '..c..'], ['.c.', 'cwc', '.c.']],
+  chunk:  [['.ll..', 'lccd.', 'ccdd.', '.dd..'], ['lc', 'cd']],
+  swirl:  [['.ccc.', 'c...c', 'c.c.c', 'c..c.', '.c...'], ['cc.', 'c.c', '.cc']],
+  ring:   [['.ccc.', 'c...c', 'c...c', 'c...c', '.ccc.'], ['ccc', 'c.c', 'ccc']],
+  plus:   [['..c..', '.cwc.', 'cwwwc', '.cwc.', '..c..'], ['.c.', 'cwc', '.c.']],
+};
+const SPR_CACHE = new Map();
+const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16), f = (v) => clamp(Math.round(k > 0 ? v + (255 - v) * k : v * (1 + k)), 0, 255); return '#' + [n >> 16, (n >> 8) & 255, n & 255].map(v => f(v).toString(16).padStart(2, '0')).join(''); };
+// rows（文字の ならび）と 色から 小さな キャンバスを つくる（キャッシュ）
+function pixSpr(rows, col, key) {
+  const K = key + col; let c = SPR_CACHE.get(K); if (c) return c;
+  const pal = { c: col, d: shade(col, -.35), l: shade(col, .45), w: '#ffffff', k: '#1a1424', p: shade(col, -.6) };
+  c = document.createElement('canvas'); c.width = Math.max(...rows.map(r => r.length)); c.height = rows.length; const g = c.getContext('2d');
+  rows.forEach((r, y) => [...r].forEach((ch, x) => { if (pal[ch]) { g.fillStyle = pal[ch]; g.fillRect(x, y, 1, 1); } }));
+  SPR_CACHE.set(K, c); return c;
+}
+const ROT_SHAPES = { leaf: 1, shard: 1, swirl: 1 };
 function drawPart(q) {
-  const a = clamp(q.life / q.max * 1.5, 0, 1), x = Math.round(q.x), y = Math.round(q.y), z = q.size;
-  if (q.glow) glowDot(x, y, z * 3.2, q.col, a * .7);
-  ctx.globalAlpha = a; ctx.fillStyle = q.col; ctx.strokeStyle = q.col;
-  switch (q.shape) {
-    case 'spark': ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x - q.vx * .03, y - q.vy * .03); ctx.lineTo(x + 1, y + 1); ctx.stroke(); break;
-    case 'shard': ctx.save(); ctx.translate(x, y); ctx.rotate(q.rot + q.life * q.vr); ctx.beginPath(); ctx.moveTo(0, -z * 1.4); ctx.lineTo(z * .6, 0); ctx.lineTo(0, z * 1.4); ctx.lineTo(-z * .6, 0); ctx.fill(); ctx.restore(); break;
-    case 'leaf': ctx.save(); ctx.translate(x, y); ctx.rotate(q.rot + q.life * q.vr); ctx.beginPath(); ctx.ellipse(0, 0, z * 1.2, z * .55, 0, 0, 7); ctx.fill(); ctx.restore(); break;
-    case 'bubble': ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, z * .9, 0, 7); ctx.stroke(); ctx.fillRect(x - 1, y - 1, 1, 1); break;
-    case 'ring': ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, z * (1.8 - a), 0, 7); ctx.stroke(); break;
-    case 'plus': { const w = Math.max(2, z * .45 | 0); ctx.fillRect(x - z, y - w / 2, z * 2, w); ctx.fillRect(x - w / 2, y - z, w, z * 2); break; }
-    case 'star': ctx.fillRect(x - z, y, z * 2 + 1, 1); ctx.fillRect(x, y - z, 1, z * 2 + 1); ctx.fillRect(x - 1, y - 1, 3, 3); break;
-    case 'drop': ctx.beginPath(); ctx.ellipse(x, y, z * .6, z, Math.atan2(q.vy, q.vx) + 1.57, 0, 7); ctx.fill(); break;
-    case 'wisp': ctx.globalAlpha = a * .8; ctx.beginPath(); ctx.arc(x, y, z * (1.3 - a * .4), 0, 7); ctx.fill(); break;
-    case 'swirl': ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, z * 1.5, q.rot + q.life * 10, q.rot + q.life * 10 + 3); ctx.stroke(); break;
-    default: ctx.fillRect(x, y, z, z);
-  }
+  const a = clamp(q.life / q.max * 1.5, 0, 1), sh = PART_ROWS[q.shape] || PART_ROWS.star, small = (q.size || 3) < 4.5;
+  const img = pixSpr(sh[small ? 1 : 0], q.col, (q.shape || 'star') + (small ? 's' : 'b')), w = img.width * PIX_D, h = img.height * PIX_D;
+  ctx.globalAlpha = a;
+  if (ROT_SHAPES[q.shape]) { ctx.save(); ctx.translate(Math.round(q.x), Math.round(q.y)); ctx.rotate(Math.round((q.rot + q.life * q.vr) / (Math.PI / 4)) * Math.PI / 4); ctx.drawImage(img, -w / 2, -h / 2, w, h); ctx.restore(); }
+  else ctx.drawImage(img, Math.round(q.x - w / 2), Math.round(q.y - h / 2), w, h);
   ctx.globalAlpha = 1;
 }
+// とぶ わざの ドット絵（9×9）。ないタイプは まるい 玉
+const PROJ_ROWS = {
+  poison:   ['...kkk...', '..kcccck.', '.kclwccdk', 'kcllcccdk', 'kccccccdk', 'kcccccddk', '.kccdddk.', '..kkddk..', '....kk...'],
+  elec:     ['....w....', '..kkckk..', '.kclwcdk.', 'wcllcccdw', '.kccccdk.', '.kcccddk.', '..kkdkk..', '...w.w...', '..w...w..'],
+  psychic:  ['..kkkkk..', '.kllcccdk', 'klk...kdk', 'kck.w.kdk', 'kck...kdk', 'kcckkkddk', '.kcccddk.', '..kkkkk..', '.........'],
+  ghost:    ['....k....', '...kck...', '..kclck..', '.kclwlck.', '.kcllcck.', 'kcccccdk.', 'kcckcckdk', '.kk.kk.k.', '.........'],
+  dragon:   ['...k.k...', '..kckck..', '.kclllck.', 'kclwwlcdk', 'kclllccdk', 'kcccccddk', '.kccdddk.', '..kkkkk..', '.........'],
+  fighting: ['....k....', '...kck...', 'kkkclckkk', 'kcllwlcdk', '.kcllcdk.', '.kccccdk.', 'kccdkdcdk', 'kdk...kdk', 'kk.....kk'],
+  normal:   ['....k....', '...kck...', 'kkkclckkk', 'kcllwlcdk', '.kcllcdk.', '.kccccdk.', 'kccdkdcdk', 'kdk...kdk', 'kk.....kk'],
+  ice:      ['....k....', '...kwk...', '...klk...', '..kclck..', '..kclck..', '..kccdk..', '..kccdk..', '...kdk...', '....k....'],
+  bug:      ['.........', '.....kk..', '....klck.', '...klcck.', '..klccdk.', '.kcccdk..', '.kcddk...', 'kddkk....', 'kk.......'],
+  grass:    ['.........', '.....kk..', '....klck.', '...klcck.', '..klccdk.', '.kcccdk..', '.kcddk...', 'kddkk....', 'kk.......'],
+};
+const PROJ_ROT = { ice: Math.PI / 2, bug: Math.PI / 4, grass: Math.PI / 4 };   // とぶ 向きに あわせて まわす（絵の もとの 向き）
 function drawProj(p) {
   const x = Math.round(p.x), y = Math.round(p.y), t = p.m.t, R = p.r, S_ = FX_STYLE[t] || FX_STYLE.normal;
-  glowDot(x, y, R * 3.2, S_.cols[1], .55);
-  if (Math.random() < .8) B.parts.push({ x: p.x + rand(-2, 2), y: p.y + rand(-2, 2), vx: -p.vx * .15 + rand(-12, 12), vy: -p.vy * .15 + rand(-12, 12), life: .32, max: .32, col: choice(S_.cols), size: 5, g: 0, shape: S_.shape, rot: Math.random() * 6, vr: 6, glow: Math.random() < .5 });
+  glowDot(x, y, R * 2.2, S_.cols[1], .35);
+  if (Math.random() < .45) B.parts.push({ x: p.x + rand(-2, 2), y: p.y + rand(-2, 2), vx: -p.vx * .15 + rand(-12, 12), vy: -p.vy * .15 + rand(-12, 12), life: .32, max: .32, col: choice(S_.cols), size: 5, g: 0, shape: S_.shape, rot: Math.random() * 6, vr: 6, glow: Math.random() < .5 });
   ctx.fillStyle = 'rgba(10,8,18,.25)'; ctx.beginPath(); ctx.ellipse(x, y + BODY, R, R * .4, 0, 0, 7); ctx.fill();
   if (t === 'fire') {
     ctx.fillStyle = '#c0281e'; ctx.beginPath(); ctx.arc(x, y, R + 2, 0, 7); ctx.fill();
@@ -5870,11 +5901,13 @@ function drawProj(p) {
     ctx.fillStyle = '#1d3d7a'; ctx.beginPath(); ctx.arc(x, y, R + 1.5, 0, 7); ctx.fill();
     ctx.fillStyle = '#7ac8ff'; ctx.beginPath(); ctx.arc(x, y, R, 0, 7); ctx.fill();
     ctx.fillStyle = '#ffffff'; ctx.fillRect(x - R * .5 | 0, y - R * .5 | 0, 2, 2);
-  } else if (t === 'grass') {
-    ctx.save(); ctx.translate(x, y); ctx.rotate(p.rot); ctx.fillStyle = '#1e5a26'; ctx.fillRect(-R - 2, -3, R * 2 + 4, 6); ctx.fillStyle = '#7be07b'; ctx.fillRect(-R, -1.5, R * 2, 3); ctx.restore();
   } else if (t === 'wind') {
     ctx.save(); ctx.translate(x, y); ctx.rotate(p.rot); ctx.strokeStyle = '#e8ffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, R, 0, 4.5); ctx.stroke(); ctx.strokeStyle = '#7fd8d0'; ctx.beginPath(); ctx.arc(0, 0, R * .55, 1, 5.5); ctx.stroke(); ctx.restore();
-  } else { ctx.fillStyle = '#120e1c'; ctx.fillRect(x - R - 1, y - R - 1, R * 2 + 2, R * 2 + 2); ctx.fillStyle = TYPES[t].c; ctx.fillRect(x - R, y - R, R * 2, R * 2); }
+  } else if (t === 'rock' || t === 'ground') drawRock(x, y, R + 1, p.rot, TYPES[t].c);
+  else {
+    const rows = PROJ_ROWS[t] || PROJ_ROWS.poison, img = pixSpr(rows, TYPES[t].c, 'pj' + t), sz = Math.max(PIX_D * 7, R * 2.6);
+    ctx.save(); ctx.translate(x, y); if (PROJ_ROT[t] != null) ctx.rotate(Math.atan2(p.vy, p.vx) + PROJ_ROT[t]); ctx.drawImage(img, -sz / 2, -sz / 2, sz, sz); ctx.restore();
+  }
 }
 
 function drawFlame(x, y, w, hgt) {
@@ -5949,9 +5982,8 @@ function drawConditions(f, top, oy, img) {
   if (f.status) {
     const W = img.width, T = B.t, S_ = f.status;
     if (S_ === 'brn') {   // やけど：からだの まわりに ゆらめく ほのお
-      glowDot(cx, cy + h * .2, W * 1.1, '#ff6a20', .35 + Math.sin(T * 12) * .1);
-      for (let i = 0; i < 5; i++) { const fx_ = cx + (i - 2) * W * .35, fh = 10 + Math.sin(T * 14 + i * 1.7) * 4; drawFlame(fx_, f.y - 2, 5, fh); }
-      if (Math.random() < .5) B.parts.push({ x: cx + rand(-W * .8, W * .8), y: f.y - rand(0, h * .6), vx: rand(-10, 10), vy: -rand(40, 80), life: .5, max: .5, col: choice(['#ffd166', '#ff8a3d', '#e8401e']), size: 4, g: -60, shape: 'ember', glow: true });
+      for (let i = 0; i < 2; i++) { const fx_ = cx + (i ? 1 : -1) * W * .55, fh = 7 + Math.sin(T * 14 + i * 2.3) * 3; drawFlame(fx_, cy + h * .15, 3, fh); }   // からだの よこに 小さな ほのお 2つ
+      if (Math.random() < .12) B.parts.push({ x: cx + rand(-W * .6, W * .6), y: cy + rand(-h * .2, h * .3), vx: rand(-6, 6), vy: -rand(30, 50), life: .5, max: .5, col: choice(['#ffd166', '#ff8a3d']), size: 3, g: -40, shape: 'ember' });
     }
     if (S_ === 'par') {   // まひ：ときどき からだを 電気が はしる
       glowDot(cx, cy, W * 1.1, '#ffd84a', Math.floor(T * 10) % 3 ? .12 : .35);
@@ -5960,9 +5992,7 @@ function drawConditions(f, top, oy, img) {
     }
     if (S_ === 'psn' || S_ === 'tox') {   // どく：むらさきの あわが ぶくぶく
       const pc = S_ === 'tox' ? '#8a3ab0' : '#b86ad8';
-      glowDot(cx, cy, W * 1.1, pc, .25 + Math.sin(T * 5) * .08);
-      ctx.fillStyle = pc; ctx.globalAlpha = .6; ctx.beginPath(); ctx.ellipse(cx, f.y, W * .9, 4, 0, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
-      if (Math.random() < (S_ === 'tox' ? .5 : .3)) B.parts.push({ x: cx + rand(-W * .8, W * .8), y: f.y - rand(0, h * .7), vx: rand(-6, 6), vy: -rand(20, 45), life: .9, max: .9, col: choice([pc, '#f0c0ff', '#d8a0f0']), size: rand(3, 6), g: -10, shape: 'bubble', glow: Math.random() < .3 });
+      if (Math.random() < (S_ === 'tox' ? .16 : .1)) B.parts.push({ x: cx + rand(-W * .6, W * .6), y: cy + rand(-h * .3, h * .2), vx: rand(-4, 4), vy: -rand(18, 32), life: .8, max: .8, col: choice([pc, '#d8a0f0']), size: Math.random() < .4 ? 6 : 3, g: -8, shape: 'bubble' });   // ぶくぶく（すこしだけ）
     }
     if (S_ === 'slp') {   // ねむり：Z が ふわふわ のぼる
       ctx.fillStyle = 'rgba(30,30,80,.18)'; ctx.beginPath(); ctx.ellipse(cx, cy, W * 1.1, h * .62, 0, 0, 7); ctx.fill();
@@ -6377,7 +6407,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst }); },
 };
 })();
 </script>
