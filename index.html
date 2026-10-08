@@ -200,6 +200,14 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .sbar i u{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff;opacity:.8;text-decoration:none}
 .sbar span:nth-child(2){font-variant-numeric:tabular-nums;white-space:nowrap}
 .sbar{grid-template-columns:64px 44px 1fr auto!important}
+.evb{color:var(--acc);font-weight:400;margin-left:2px;font-size:9.5px}
+.bsum{display:flex;justify-content:space-between;margin:8px 0;font-size:13px}
+.bgrid{display:flex;flex-direction:column;gap:4px}
+.brow{display:grid;grid-template-columns:62px 34px 30px 1fr 42px 30px 30px;gap:5px;align-items:center;font-size:12px}
+.brow i{height:7px;background:#0d0b14;border-radius:2px}.brow i u{display:block;height:100%;background:var(--acc);border-radius:2px}
+.brow button{height:26px;border-radius:3px;background:#2a2348;box-shadow:inset 0 0 0 1px var(--rim2);font-size:15px;color:var(--acc)}
+.bdups{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px;max-height:30vh;overflow:auto}
+.bdup{display:flex;flex-direction:column;align-items:center;padding:4px;background:#1b1530;border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2);font-size:10px}.bdup canvas{width:40px;height:40px}.bdup.on{box-shadow:inset 0 0 0 3px var(--acc);background:#3a3018}
 .sbar em{font-style:normal;font-size:10px;color:var(--dim);min-width:18px;text-align:right}
 /* team */
 .mcard{display:flex;gap:8px;align-items:center;background:var(--panel);box-shadow:0 0 0 2px var(--edge);padding:8px}
@@ -2566,10 +2574,16 @@ function stats(m) {
   fixMon(m); const b = base6(m.sid), L = STAT_LV, iv = m.iv, o = {};
   for (const k of STAT6) {
     const core = Math.floor((2 * b[k] + iv[k]) * L / 100);
-    o[k] = k === 'hp' ? core + L + 10 : Math.floor((core + 5) * natMod(m.nat, k));
+    o[k] = (k === 'hp' ? core + L + 10 : Math.floor((core + 5) * natMod(m.nat, k))) + evBonus(m, k);
   }
   return o;
 }
+/* 強化（努力値の かわり）：おなじ モンスターを 1たい つかう ごとに 強化ポイント +1（1たいに つき 50 まで）。
+   ポイントは すきな のうりょくに ふりわける（1つの のうりょくに 25 まで）。1ポイントで 実数値 +1.3 */
+const EV_MAX = 50, EV_STAT_MAX = 25, EV_K = 1.3;
+const evBonus = (m, k) => m.ev ? Math.floor((m.ev[k] || 0) * EV_K) : 0;
+const evUsed = (m) => m.ev ? STAT6.reduce((a, k) => a + (m.ev[k] || 0), 0) : 0;
+const evFed = (m) => m.fed || 0;
 const ivTotal = (m) => STAT6.reduce((a, k) => a + m.iv[k], 0);
 
 
@@ -3087,9 +3101,9 @@ function statTone(v, avg) { const r = v / avg; return r >= 1.08 ? { c: '#5ee08a'
 function statBars(vals, avg, maxes, m) {
   const rows = STAT6.map(k => { const v = Math.round(vals[k]), t = statTone(vals[k], avg[k]), mx = maxes[k] || maxes.atk, mk = Math.min(100, avg[k] / mx * 100);
     const nm = m ? natMod(m.nat, k) : 1, nc = nm > 1 ? '#ff8a7a' : nm < 1 ? '#7ab8ff' : '';
-    return `<div class="sbar"><span style="${nc ? `color:${nc}` : ''}">${STAT6_N[k]}${nm > 1 ? '↑' : nm < 1 ? '↓' : ''}</span><span style="color:${t.c}">${v}${t.m}</span><i style="position:relative"><b style="width:${Math.min(100, v / mx * 100)}%;background:${t.c}"></b><u style="left:${mk}%"></u></i>${m ? `<em title="こたいち">${m.iv[k]}</em>` : ''}</div>`; }).join('');
+    return `<div class="sbar"><span style="${nc ? `color:${nc}` : ''}">${STAT6_N[k]}${nm > 1 ? '↑' : nm < 1 ? '↓' : ''}</span><span style="color:${t.c}">${v}${t.m}</span><i style="position:relative"><b style="width:${Math.min(100, v / mx * 100)}%;background:${t.c}"></b><u style="left:${mk}%"></u></i>${m ? `<em title="こたいち／きょうか">${m.iv[k]}${evBonus(m, k) ? `<b class="evb">+${evBonus(m, k)}</b>` : ''}</em>` : ''}</div>`; }).join('');
   const tot = STAT6.reduce((a, k) => a + Math.round(vals[k]), 0);
-  return rows + `<div class="dim" style="font-size:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>ごうけい ${tot}${m ? `　こたいち ${ivTotal(m)}/186` : ''}</span><span>｜＝へいきん <span style="color:#5ee08a">▲たかい</span> <span style="color:#ff7a6a">▼ひくい</span>${m ? ' <span style="color:#ff8a7a">↑</span><span style="color:#7ab8ff">↓</span>＝せいかく' : ''}</span></div>`;
+  return rows + `<div class="dim" style="font-size:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>ごうけい ${tot}${m ? `　こたいち ${ivTotal(m)}/186　きょうか ${evFed(m)}/${EV_MAX}` : ''}</span><span>｜＝へいきん <span style="color:#5ee08a">▲たかい</span> <span style="color:#ff7a6a">▼ひくい</span>${m ? ' <span style="color:#ff8a7a">↑</span><span style="color:#7ab8ff">↓</span>＝せいかく' : ''}</span></div>`;
 }
 // へんせい：しゅつじょう3・ひかえ3・ボックス。ドラッグ／タップ→タップで いれかえ
 let teamSel = null, teamView = null;
@@ -3140,16 +3154,51 @@ function renderTeamDetail() {
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
-    <div class="acts"><button class="btn sub" data-a="tm">わざのまきもの</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
+    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc)">きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm">わざのまきもの</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
     if (act === 'tm') return useTM(m);
+    if (act === 'boost') return openBoost(m);
     if (act === 'box') teamMove({ w: 'p', i: pi }, { w: 'drop', i: 0 });
     if (act === 'party') teamMove({ w: 'b', i: bi }, { w: 'p', i: S.party.length });
     if (act === 'release') { ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; save(); renderTeam(); }); return; }
     teamSel = null; renderTeam();
   };
+}
+// 強化：おなじ モンスターを つかって ポイントを ふやし、のうりょくに ふりわける
+function openBoost(m) {
+  m.ev = m.ev || { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fed = m.fed || 0;
+  const sp = SPECIES[m.sid];
+  let pick = new Set();
+  const bg = modal('<div id="bst"></div>'); bg.querySelector('.askbox').style.maxWidth = '520px';
+  const draw = () => {
+    const st = stats(m), free = m.fed - evUsed(m);
+    const dups = [...S.box.map((x, i) => ({ x, w: 'b', i })), ...S.party.map((x, i) => ({ x, w: 'p', i }))].filter(o => o.x !== m && o.x.sid === m.sid);
+    const room = EV_MAX - m.fed;
+    bg.querySelector('#bst').innerHTML = `<h3 style="margin-bottom:6px">${sp.n}を きょうか</h3>
+      <p class="dim" style="font-size:12px">おなじ モンスターを 1たい つかうと きょうかポイント +1（さいだい ${EV_MAX}）。ポイントは すきな のうりょくに ふりわけ（1つ ${EV_STAT_MAX} まで・1ポイントで +${EV_K}）。</p>
+      <div class="bsum"><span>つかった <b>${m.fed}</b>/${EV_MAX}たい</span><span>のこり ポイント <b style="color:var(--acc)">${free}</b></span></div>
+      <div class="bgrid">${STAT6.map(k => `<div class="brow"><span>${STAT6_N[k]}</span><b>${st[k]}</b><span class="dim">+${evBonus(m, k)}</span><i><u style="width:${m.ev[k] / EV_STAT_MAX * 100}%"></u></i><span>${m.ev[k]}/${EV_STAT_MAX}</span><button data-k="${k}" data-d="-1" ${m.ev[k] ? '' : 'disabled'}>−</button><button data-k="${k}" data-d="1" ${free > 0 && m.ev[k] < EV_STAT_MAX ? '' : 'disabled'}>＋</button></div>`).join('')}</div>
+      <div class="row" style="justify-content:flex-end;gap:6px;margin-top:6px"><button class="btn sub" id="bReset" style="font-size:12px;padding:6px 10px" ${evUsed(m) ? '' : 'disabled'}>ふりなおす</button></div>
+      <div class="sec-title" style="margin-top:10px"><span>つかう モンスター（${sp.n}）</span><span class="dim">${dups.length}たい</span></div>
+      ${dups.length ? `<div class="bdups">${dups.map((o, j) => `<button class="bdup ${pick.has(j) ? 'on' : ''}" data-j="${j}"><i data-sid="${o.x.sid}"></i><small>${o.w === 'p' ? 'パーティ' : 'ボックス'}</small><small>${ivGrade(o.x).replace('の こたい', '')}</small>${o.x.fed ? `<small style="color:var(--acc)">きょうか${o.x.fed}</small>` : ''}</button>`).join('')}</div>` : `<p class="dim">${sp.n}を もう 1たい てに いれると つかえます（くさむら・たからばこ）</p>`}
+      <div class="row" style="justify-content:space-between;margin-top:12px;gap:8px"><button class="btn" id="bFeed" ${pick.size && room > 0 ? '' : 'disabled'}>えらんだ ${pick.size}たいを つかう（+${Math.min(pick.size, room)}）</button><button class="btn sub" id="bClose">とじる</button></div>`;
+    bg.querySelectorAll('i[data-sid]').forEach(el => el.replaceWith(spriteCanvas(el.dataset.sid, 40)));
+    bg.querySelectorAll('.brow button').forEach(b => b.onclick = () => { const k = b.dataset.k, d = +b.dataset.d; if (d > 0 && m.fed - evUsed(m) > 0 && m.ev[k] < EV_STAT_MAX) m.ev[k]++; if (d < 0 && m.ev[k] > 0) m.ev[k]--; SND.se(d > 0 ? 'up' : 'click'); save(); draw(); });
+    bg.querySelector('#bReset').onclick = () => { for (const k of STAT6) m.ev[k] = 0; save(); draw(); };
+    bg.querySelectorAll('.bdup').forEach(b => b.onclick = () => { const j = +b.dataset.j; if (pick.has(j)) pick.delete(j); else if (pick.size < room) pick.add(j); draw(); });
+    bg.querySelector('#bFeed').onclick = async () => {
+      const list = [...pick].map(j => dups[j]).slice(0, room);
+      if (list.some(o => o.w === 'p') && S.party.length - list.filter(o => o.w === 'p').length < 1) { say0('パーティが 0たいに なってしまいます'); return; }
+      if (!(await ask(`${sp.n} ${list.length}たいを つかって きょうかしますか？\nつかった モンスターは いなくなります。`))) return;
+      const gone = new Set(list.map(o => o.x));
+      S.box = S.box.filter(x => !gone.has(x)); S.party = S.party.filter(x => !gone.has(x));
+      m.fed = Math.min(EV_MAX, m.fed + list.length); pick = new Set(); SND.se('heal'); save(); draw();
+    };
+    bg.querySelector('#bClose').onclick = () => { bg.remove(); renderTeam(m.uid); };
+  };
+  draw();
 }
 // ドラッグ と タップ
 (() => {
@@ -4619,8 +4668,8 @@ async function netGetRoom() {
   try { if (window.claude && window.claude.use) NET.room = await window.claude.use('room'); } catch (e) { NET.room = null; }
   return NET.room;
 }
-const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice() }; });
-const monFrom = (o) => fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) });
+const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0 }; });
+const monFrom = (o) => { const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
 function netReset() { SND.onSe = null; NET.ranked = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false }); }
@@ -5904,6 +5953,7 @@ $('btnHelp').onclick = () => {
     <p><b>くさむら</b>で よわらせて <b>ふういんクリスタル</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
     <p><b>たからばこ</b>は 勝つと もらえる。時間が たつと あき、モンスター・クリスタル・わざのまきものが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
     <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ の 6つ。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。ぶつりわざは こうげき→ぼうぎょ、とくしゅわざは とくこう→とくぼう で ダメージが きまる。</p>
+    <p><b>きょうか</b>：おなじ モンスターを てに いれたら、へんせい → きょうか で つかうと ポイントが ふえる（1たい 50まで）。すきな のうりょくに ふりわけよう。</p>
     <p><b>わざのまきもの</b>で すきな わざを おぼえさせよう（てもち → わざのまきもの）。</p>
     <p class="dim">PC：Space＝かわす　X＝こうたい</p></div>
     <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="hClose">とじる</button></div>`);
