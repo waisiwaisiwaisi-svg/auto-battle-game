@@ -5,7 +5,7 @@
 <style>
 /* 闘技場の 夜の 観客席。カードは 一体ずつの 図鑑ページ、絵は ゲームと 同じ 大きさの 比率で 台座に 立つ */
 :root {
-  --bg: #f1edf6; --panel: #ffffff; --stage: #e6e0ee; --line: #d6cfe2; --fg: #221b31; --dim: #6b6280; --acc: #b5791a; --chipfg: #1d1726;
+  --bg: #f1edf6; --panel: #ffffff; --stage: #e6e0ee; --line: #d6cfe2; --fg: #221b31; --dim: #6b6280; --acc: #b5791a; --chipfg: #1d1726; --okc: #5cb85c; --ngc: #e0645a;
   --display: 'DotGothic16', 'Zen Maru Gothic', ui-monospace, monospace;
   --body: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', system-ui, sans-serif;
   color-scheme: light;
@@ -57,6 +57,22 @@ dd { margin: 0; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap:
 .evo a { color: var(--acc); text-decoration: none; font-weight: 700 }
 .evo a:hover { text-decoration: underline }
 .empty { color: var(--dim); padding: 40px 0; text-align: center }
+/* 採用・不採用 */
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--line) }
+.tab { border: 0; background: none; color: var(--dim); font: 700 13px var(--body); padding: 6px 12px; border-bottom: 3px solid transparent; cursor: pointer; font-variant-numeric: tabular-nums }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--acc) }
+.save { font-size: 12px; color: var(--dim); margin-left: auto }
+.vrow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap }
+.vb { font: 700 12px var(--body); border-radius: 5px; border: 1px solid var(--line); background: var(--stage); color: var(--fg); padding: 4px 12px; cursor: pointer }
+.vb.ok[aria-pressed="true"] { background: var(--okc); border-color: var(--okc); color: #10210f }
+.vb.ng[aria-pressed="true"] { background: var(--ngc); border-color: var(--ngc); color: #2a0d0d }
+.vnote { flex: 1 1 140px; min-width: 0; font: 500 12px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 4px 8px }
+.card.v-adopt { border-color: var(--okc) }
+.card.v-reject { border-color: var(--ngc); opacity: .78 }
+.vmark { font-size: 11px; font-weight: 700; padding: 0 6px; border-radius: 3px }
+.v-adopt .vmark { background: var(--okc); color: #10210f }
+.v-reject .vmark { background: var(--ngc); color: #2a0d0d }
+.nodb { font-size: 12px; color: var(--dim) }
 @media (max-width: 600px) { .bar { position: static } }
 @media (max-width: 420px) { .top { grid-template-columns: 96px 1fr } .stage { height: 100px } }
 </style>
@@ -66,6 +82,13 @@ dd { margin: 0; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap:
     <div class="sum" id="sum"></div>
   </header>
   <div class="bar">
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-v="all" aria-selected="true">すべて</button>
+      <button class="tab" role="tab" data-v="todo" aria-selected="false">未判定</button>
+      <button class="tab" role="tab" data-v="adopt" aria-selected="false">採用</button>
+      <button class="tab" role="tab" data-v="reject" aria-selected="false">不採用</button>
+      <span class="save" id="save" aria-live="polite"></span>
+    </div>
     <div class="row" id="types"></div>
     <div class="row">
       <input type="search" id="q" placeholder="名前・すみか・もとで さがす" aria-label="さがす">
@@ -86,6 +109,9 @@ const TYPES = /*TYPES*/;
 const byId = Object.fromEntries(MON.map(m => [m.id, m]));
 const used = [...new Set(MON.flatMap(m => m.t))].sort((a, b) => Object.keys(TYPES).indexOf(a) - Object.keys(TYPES).indexOf(b));
 const sel = new Set();
+// 採用・不採用（共有の db：verdicts/<id> = {v: 'adopt'|'reject'|'todo', note, at}）
+let verdicts = {}, db = null, tab = 'all';
+const vOf = (id) => (verdicts[id] && verdicts[id].v) || 'todo';
 const $ = (id) => document.getElementById(id);
 $('sum').innerHTML = `<b>${MON.length}</b> 種　·　<b>${used.length}</b> タイプ　·　飛ぶ <b>${MON.filter(m => m.fly).length}</b>　·　レア <b>${MON.filter(m => m.rare).length}</b>`;
 const all = document.createElement('button'); all.className = 'tchip all'; all.textContent = 'すべて'; all.setAttribute('aria-pressed', 'true');
@@ -103,11 +129,11 @@ const chip = (t) => `<span style="--c:${TYPES[t][1]}">${TYPES[t][0]}</span>`;
 const link = (id) => byId[id] ? `<a href="#m-${id}">${byId[id].n}</a>` : '';
 function card(m) {
   const k = 88 * m.sz / Math.max(m.w, m.hh) * .82;   // ゲームと 同じ 比率の 大きさ
-  return `<article class="card" id="m-${m.id}">
+  return `<article class="card v-${vOf(m.id)}" id="m-${m.id}">
     <div class="top">
       <div class="stage${m.fly ? ' fly' : ''}"><img src="${m.img}" width="${Math.round(m.w * k)}" height="${Math.round(m.hh * k)}" alt="${m.n}"></div>
       <div style="min-width:0">
-        <div class="no">No.${String(m.no).padStart(3, '0')}</div>
+        <div class="no">No.${String(m.no).padStart(3, '0')} ${vOf(m.id) === 'adopt' ? '<span class="vmark">採用</span>' : vOf(m.id) === 'reject' ? '<span class="vmark">不採用</span>' : ''}</div>
         <div class="nm">${m.n}</div>
         <div class="types">${m.t.map(chip).join('')}</div>
         <dl><dt>高さ</dt><dd>${m.h} m</dd><dt>重さ</dt><dd>${m.wt} kg</dd><dt>もと</dt><dd>${m.base}</dd></dl>
@@ -116,18 +142,49 @@ function card(m) {
     <p class="note">${m.note}。</p>
     <p class="trait">すみか：${m.home}。${m.trait}。</p>
     ${(m.fly || m.rare) ? `<div class="tags">${m.fly ? '<span class="tag">飛ぶ</span>' : ''}${m.rare ? '<span class="tag rare">レア</span>' : ''}</div>` : ''}
+    <div class="vrow" data-id="${m.id}">${db ? `<button class="vb ok" data-act="adopt" aria-pressed="${vOf(m.id) === 'adopt'}">採用</button><button class="vb ng" data-act="reject" aria-pressed="${vOf(m.id) === 'reject'}">不採用</button><input class="vnote" placeholder="メモ" aria-label="${m.n}の メモ" value="${((verdicts[m.id] || {}).note || '').replace(/"/g, '&quot;')}">` : `<span class="vmark"></span>`}</div>
     ${(m.pre || m.evo) ? `<div class="evo">${m.pre ? `<span>しんか前：${link(m.pre)}</span>` : ''}${m.evo ? `<span>しんか：${link(m.evo)}</span>` : ''}</div>` : ''}
   </article>`;
 }
 function render() {
   const q = $('q').value.trim(), fly = $('fly').checked, rare = $('rare').checked, so = $('sort').value;
-  let list = MON.filter(m => (!sel.size || m.t.some(t => sel.has(t))) && (!fly || m.fly) && (!rare || m.rare) && (!q || (m.n + m.home + m.base + m.note).includes(q)));
+  let list = MON.filter(m => (tab === 'all' || vOf(m.id) === tab) && (!sel.size || m.t.some(t => sel.has(t))) && (!fly || m.fly) && (!rare || m.rare) && (!q || (m.n + m.home + m.base + m.note).includes(q)));
   const cmp = { no: (a, b) => a.no - b.no, h: (a, b) => b.h - a.h, hl: (a, b) => a.h - b.h, wt: (a, b) => b.wt - a.wt, n: (a, b) => a.n.localeCompare(b.n, 'ja') }[so];
   list.sort(cmp);
   $('grid').innerHTML = list.map(card).join('');
   $('count').textContent = `${list.length} / ${MON.length} 体`;
   $('empty').hidden = list.length > 0;
+  const c = { all: MON.length, todo: 0, adopt: 0, reject: 0 }; for (const m of MON) c[vOf(m.id)]++;
+  for (const b of document.querySelectorAll('.tab')) b.textContent = `${{ all: 'すべて', todo: '未判定', adopt: '採用', reject: '不採用' }[b.dataset.v]} ${c[b.dataset.v]}`;
 }
+for (const b of document.querySelectorAll('.tab')) b.onclick = () => { tab = b.dataset.v; for (const x of document.querySelectorAll('.tab')) x.setAttribute('aria-selected', String(x === b)); render(); };
+const setSave = (t) => { $('save').textContent = t; };
+async function write(id, body) {
+  const prev = verdicts[id];
+  verdicts = { ...verdicts, [id]: { ...(prev || {}), ...body } }; render();
+  try { await db.collection('verdicts').doc(id).set({ ...(prev || {}), ...body, at: new Date().toISOString() }); setSave('保存しました'); }
+  catch (e) { verdicts = { ...verdicts, [id]: prev }; render(); setSave('保存できませんでした（編集できる人だけが 保存できます）'); }
+}
+$('grid').addEventListener('click', (e) => {
+  const b = e.target.closest('.vb'); if (!b || !db) return;
+  const id = b.closest('.vrow').dataset.id, act = b.dataset.act;
+  write(id, { v: vOf(id) === act ? 'todo' : act });   // もう一度 押すと 未判定に もどる
+});
+$('grid').addEventListener('change', (e) => {
+  const n = e.target.closest('.vnote'); if (!n || !db) return;
+  const id = n.closest('.vrow').dataset.id, cur = verdicts[id] || {};
+  if ((cur.note || '') !== n.value.trim()) write(id, { v: vOf(id), note: n.value.trim() });
+});
+(async () => {
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+  if (!db) { setSave('採用・不採用の 保存は claude.ai で 開いたときに 使えます'); return; }
+  render();
+  db.collection('verdicts').onSnapshot((snap) => {
+    const m = {}; for (const d of snap.docs) m[d.id] = d.data(); verdicts = m;
+    if (document.activeElement && document.activeElement.classList.contains('vnote')) return;   // メモを 書いている 間は 書きかえない
+    render();
+  }, () => setSave('保存した 判定を 読みこめませんでした'));
+})();
 for (const id of ['q', 'sort', 'fly', 'rare']) $(id).addEventListener('input', render);
 // しんかの リンク：しぼりこみを 外してから その カードへ
 $('grid').addEventListener('click', (e) => {
