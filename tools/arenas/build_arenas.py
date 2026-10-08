@@ -3,6 +3,7 @@
 #   src/<名前>.webp（1448×1086）を K 倍に 縮めて index.html の「ARENAS」区間に 画像と 当たり判定を 書きこむ
 #   座標は すべて 元の 画像（1448×1086）の ピクセルで 書く → K 倍して ゲームの 世界座標に
 #   solid = 通れない・わざの 弾も 止まる（柱・岩・機械・木）
+#   hit/<名前>.json が あれば そちらの こまかい 当たり判定（足もと）を つかう（確認: python3 tools/arenas/overlay.py <名前>）
 #   low   = 通れないが 弾は 上を 飛ぶ（水・溶岩・池）
 import base64, io, json, os
 from PIL import Image
@@ -116,8 +117,13 @@ def main():
         W, H = round(im.width * K), round(im.height * K)
         im = im.resize((round(im.width * IMG_K), round(im.height * IMG_K)), Image.LANCZOS)
         buf = io.BytesIO(); im.save(buf, 'WEBP', quality=82, method=6)
+        hp = os.path.join(HERE, 'hit', name + '.json')
+        if os.path.exists(hp):   # 絵に あわせて こまかく おいた 当たり判定（足もとだけ）。overlay.py で 確認できる
+            h = json.load(open(hp)); solid = [sc(r) for r in h['platforms']] + [sc(r) for r in h['solid']]; low = [sc(r) for r in h['low']]
+        else:
+            solid = [sc(r) for r in a['solid'][:2]] + [sc(foot(r)) for r in a['solid'][2:]]; low = [sc(r) for r in a['low']]
         out[name] = {'name': a['name'], 'W': W, 'H': H, 'floor': sc(a['floor']), 'trainers': [sc(t) for t in a['trainers']],
-                     'solid': [sc(r) for r in a['solid'][:2]] + [sc(foot(r)) for r in a['solid'][2:]], 'low': [sc(r) for r in a['low']],
+                     'solid': solid, 'low': low,
                      'img': 'data:image/webp;base64,' + base64.b64encode(buf.getvalue()).decode()}
         print(name, W, H, len(buf.getvalue()) // 1024, 'KB')
     js = BEGIN + '\n// 大会の 闘技場の 絵と 当たり判定（solid＝通れない・弾も 止まる、low＝通れないが 弾は 飛ぶ）。座標は ゲームの 世界座標\n'

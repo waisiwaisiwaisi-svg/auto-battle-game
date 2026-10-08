@@ -2829,12 +2829,15 @@ function pushOut(f) {
   }
 }
 // a から b まで（足もとの 線）に かたい 障害物が ないか
-function losClear(a, b) {
-  if (flies(a)) return true;   // 飛んでいる ものは 上から うつ
-  const sol = obstacles(false); if (!sol.length) return true;
-  for (let i = 1; i < 16; i++) { const t = i / 16, x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t; if (sol.some(o => circRect(x, y, 5, o))) return false; }
-  return true;
+// 方向わざの さえぎり：f の 足もとから ang の 向きに すすんで、はじめて solid（弾も 止まる 障害物）に ぶつかる までの 距離
+function rayLen(f, ang, len) {
+  if (flies(f)) return len;   // 飛んでいる ものは 上から うつ
+  const sol = obstacles(false); if (!sol.length) return len;
+  const c = Math.cos(ang), s = Math.sin(ang);
+  for (let d = 4; d < len; d += 5) { const x = f.x + c * d, y = f.y + s * d; if (sol.some(o => x > o.x0 && x < o.x1 && y > o.y0 && y < o.y1)) return d; }
+  return len;
 }
+function losClear(a, b) { const L = Math.hypot(b.x - a.x, b.y - a.y); return rayLen(a, Math.atan2(b.y - a.y, b.x - a.x), L) >= L - 2; }
 // 出てくる 場所が 障害物の 中なら 近くの あいた 場所を さがす
 function freeSpot(f) {
   const N = B.st.nav;
@@ -3077,7 +3080,7 @@ function inZone(cur, owner, x, y, r) {
   if (m.k === 'cone') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, m.half, r);
   if (m.k === 'swipe') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad + owner.r, .95, r);
   if (m.k === 'beam' || m.k === 'dash') {
-    const len = m.len, wid = m.k === 'dash' ? owner.r * 2 + 8 : m.wid;
+    const len = m.k === 'beam' && cur.len != null ? cur.len : m.len, wid = m.k === 'dash' ? owner.r * 2 + 8 : m.wid;
     const c = Math.cos(cur.ang), s = Math.sin(cur.ang), dx = x - owner.x, dy = y - owner.y;
     const along = dx * c + dy * s, perp = -dx * s + dy * c;
     return along >= -10 && along <= len + 10 && Math.abs(perp) <= wid / 2 + r;
@@ -3156,11 +3159,11 @@ function fireMove(f) {
   switch (m.k) {
     case 'melee':
       B.fx.push({ type: 'swipe', x: f.x, y: f.y - BODY, ang: cur.ang, life: .14, max: .14, col: id2col(m) });
-      if (targetable(o) && dist(f, o) <= f.r + o.r + 20) hit(f, o, m, cur.ang);
+      if (targetable(o) && dist(f, o) <= f.r + o.r + 20 && losClear(f, o)) hit(f, o, m, cur.ang);
       endAct(f, .22); break;
     case 'swipe':
       B.fx.push({ type: 'sector', x: f.x, y: f.y, ang: cur.ang, rad: m.rad + f.r, half: .95, col, life: .18, max: .18 });
-      if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang, { hitNo: cur.hits });
+      if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) { if (losClear(f, o)) hit(f, o, m, cur.ang, { hitNo: cur.hits }); else blockedFx(f, o, m); }
       cur.hits++;
       if (m.hits && cur.hits < m.hits && f.state === 'wind') { cur.t = cur.wind - .16; return; } // さんれんスピン：同じ向きで あと2回
       endAct(f, .25); break;
@@ -3174,17 +3177,21 @@ function fireMove(f) {
       }
       endAct(f, .25); break;
     }
-    case 'beam':
-      B.fx.push({ type: 'beam', x: f.x, y: f.y - BODY, ang: cur.ang, len: m.len, wid: m.wid, col, look: m.look, life: .3, max: .3 }); for (let d = 20; d < m.len; d += 40) typeFx(f.x + Math.cos(cur.ang) * d, f.y - BODY + Math.sin(cur.ang) * d, m.t, 2, 70, .4);
+    case 'beam': {
+      cur.len = rayLen(f, cur.ang, m.len);   // 障害物で とまる
+      const L = cur.len, ex = f.x + Math.cos(cur.ang) * L, ey = f.y + Math.sin(cur.ang) * L;
+      B.fx.push({ type: 'beam', x: f.x, y: f.y - BODY, ang: cur.ang, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 }); for (let d = 20; d < L; d += 40) typeFx(f.x + Math.cos(cur.ang) * d, f.y - BODY + Math.sin(cur.ang) * d, m.t, 2, 70, .4);
       B.shake = Math.max(B.shake, 3);
-      if (m.look) addDecal(f.x + Math.cos(cur.ang) * m.len / 2, f.y + Math.sin(cur.ang) * m.len / 2, 16, 'crater');
+      if (L < m.len) { impactFx(ex, ey - BODY * .5, m.t, .6); addDecal(ex, ey, 14, m.t === 'fire' || m.t === 'elec' ? 'scorch' : 'crater'); }
+      if (m.look) addDecal(f.x + Math.cos(cur.ang) * L / 2, f.y + Math.sin(cur.ang) * L / 2, 16, 'crater');
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang);
       endAct(f, .35); break;
+    }
     case 'cone':
       B.fx.push({ type: 'sector', x: f.x, y: f.y, ang: cur.ang, rad: m.rad, half: m.half, col, life: .35, max: .35 }); typeFx(f.x, f.y - BODY, m.t, 22, m.rad * 2.4, .45, { ang: cur.ang, spread: m.half });
       for (let i = 0; i < 26; i++) { const a = cur.ang + rand(-m.half, m.half), s = rand(150, 320); B.parts.push({ x: f.x, y: f.y - BODY, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: .6, max: .6, col, size: 3, g: 0 }); }
       B.shake = Math.max(B.shake, 3);
-      if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang);
+      if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) { if (losClear(f, o)) hit(f, o, m, cur.ang); else blockedFx(f, o, m); }
       endAct(f, .35); break;
     case 'aoe':
       B.fx.push({ type: 'ring', x: f.x, y: f.y, rad: m.rad, col, life: .35, max: .35 }); B.fx.push({ type: 'shock', x: f.x, y: f.y, rad: m.rad * 1.1, col, life: .4, max: .4 }); typeFx(f.x, f.y - 10, m.t, 26, m.rad * 2.2, .5);
@@ -3211,6 +3218,11 @@ function fireMove(f) {
       useStatusMove(f, o, m);
       if (f.state === 'wind') endAct(f, .3);
   }
+}
+// 障害物に さえぎられた：ぶつかった 場所で はじける
+function blockedFx(f, o, m) {
+  const a = Math.atan2(o.y - f.y, o.x - f.x), L = rayLen(f, a, dist(f, o)), x = f.x + Math.cos(a) * L, y = f.y + Math.sin(a) * L;
+  impactFx(x, y - BODY * .5, m.t, .45); popText(x, y - 50, 'さえぎられた', '#c8c0e0');
 }
 const id2col = (m) => m.t === 'normal' ? '#ffffff' : TYPES[m.t].c;
 function endAct(f, t) { if (f.state === 'wind' || f.state === 'dash') { f.state = 'act'; f.stT = t; } afterMoveUsed(f); }
@@ -3271,6 +3283,7 @@ function useStatusMove(f, o, m) {
     }
     case 'ray': {
       if (!o || !targetable(o)) return;
+      if (!losClear(f, o)) { const a = Math.atan2(o.y - f.y, o.x - f.x), L = rayLen(f, a, dist(f, o)); fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: f.x + Math.cos(a) * L, y1: f.y + Math.sin(a) * L - BODY, col: TYPES[m.t].c, life: .45 }); blockedFx(f, o, m); return; }
       fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: TYPES[m.t].c, life: .45 });
       if (o.v.protect > 0) { popText(o.x, o.y - 66, 'ガード！', '#9ff0ff'); return; }
       if (o.inv > 0) { popText(o.x, o.y - 66, 'かわした！', '#7fd8ff'); return; }
@@ -3535,7 +3548,7 @@ function aiPickMove(f, o) {
       if (m.fakeout && f.enterT > 1.8) continue;
       if (m.sucker && !(o.state === 'wind' && o.cur && isDamaging(o.cur.m))) continue;
       if (m.switchOut && B.kind !== 'cup') w *= .8;
-      { const dd = dist(f, o), rc = moveReach(f, o, m); if (dd > rc) w *= clamp(1 - (dd - rc) / 500, .4, 1); if ((m.k === 'proj' || m.k === 'multi') && !losClear(f, o)) w *= .65; }
+      { const dd = dist(f, o), rc = moveReach(f, o, m); if (dd > rc) w *= clamp(1 - (dd - rc) / 500, .4, 1); if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !losClear(f, o)) w *= .5; }
     } else switch (m.k) {
       case 'heal': w = f.hp < f.maxHp * .5 ? 4 : 0; break;
       case 'self': w = Object.keys(e.self || {}).every(k => f.st[k] < 2) && f.hp > f.maxHp * .5 ? 2.2 : 0; break;
@@ -3616,7 +3629,7 @@ function aiMove(f, o, dt, autoSpecial) {
   f.awayT = Math.max(0, (f.awayT || 0) - dt);
   let want;   // 立ち位置の ねらい：{ R: 間合い, los: 見える場所, cover: 陰に かくれる, flank: 横から }
   if (f.queued) {
-    const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = m.k === 'proj' || m.k === 'multi';
+    const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k);
     const see = !shot || losClear(f, o);
     if (d <= reach && see) { const q = f.queued; f.queued = null; beginMove(f, q); if (per.hitAway && isDamaging(m)) f.awayT = rand(1.2, 2); return; }
     want = { R: idealRange(f, m, reach, per) * roamK, los: shot, cover: false, flank: per.flank > .25 && !shot, mode: 'attack' };
@@ -4205,7 +4218,7 @@ function drawTele(f) {
     else if (m.k === 'cone') sector(f.x, f.y, cur.ang, m.rad, m.half, k);
     else if (m.k === 'swipe' || m.k === 'melee') sector(f.x, f.y, cur.ang, (m.rad || 40) + f.r, .95, k);
     else if (m.k === 'beam' || m.k === 'dash') {
-      const c = Math.cos(cur.ang), s = Math.sin(cur.ang), L = m.len * k, hw = (m.k === 'dash' ? f.r * 2 + 8 : m.wid) / 2;
+      const c = Math.cos(cur.ang), s = Math.sin(cur.ang), L = (m.k === 'beam' ? rayLen(f, cur.ang, m.len) : m.len) * k, hw = (m.k === 'dash' ? f.r * 2 + 8 : m.wid) / 2;
       ctx.moveTo(f.x - s * hw, f.y + c * hw); ctx.lineTo(f.x + c * L - s * hw, f.y + s * L + c * hw); ctx.lineTo(f.x + c * L + s * hw, f.y + s * L - c * hw); ctx.lineTo(f.x + s * hw, f.y - c * hw); ctx.closePath();
     } else if (m.k === 'proj') {
       // ねらう わざ（命中100未満）は とぶ方向を ながい線で みせる
@@ -4808,7 +4821,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear }); },
 };
 })();
 </script>
