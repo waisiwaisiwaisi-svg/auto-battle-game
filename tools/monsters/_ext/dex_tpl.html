@@ -97,6 +97,7 @@ dd { margin: 0; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap:
       </select>
       <label class="tog"><input type="checkbox" id="fly"> 飛ぶ</label>
       <label class="tog"><input type="checkbox" id="rare"> レア</label>
+      <select id="batch" aria-label="どの 絵"><option value="">ぜんぶ</option><option value="1">ゲームに いる</option><option value="3">第3弾（まだ ゲームに いない）</option></select>
       <span class="count" id="count"></span>
     </div>
   </div>
@@ -113,7 +114,7 @@ const sel = new Set();
 let verdicts = {}, db = null, tab = 'all';
 const vOf = (id) => (verdicts[id] && verdicts[id].v) || 'todo';
 const $ = (id) => document.getElementById(id);
-$('sum').innerHTML = `<b>${MON.length}</b> 種　·　<b>${used.length}</b> タイプ　·　飛ぶ <b>${MON.filter(m => m.fly).length}</b>　·　レア <b>${MON.filter(m => m.rare).length}</b>`;
+$('sum').innerHTML = `<b>${MON.length}</b> 種（ゲームに いる <b>${MON.filter(m => m.batch !== 3).length}</b>）　·　<b>${used.length}</b> タイプ　·　飛ぶ <b>${MON.filter(m => m.fly).length}</b>　·　レア <b>${MON.filter(m => m.rare).length}</b>`;
 const all = document.createElement('button'); all.className = 'tchip all'; all.textContent = 'すべて'; all.setAttribute('aria-pressed', 'true');
 all.onclick = () => { sel.clear(); sync(); }; $('types').appendChild(all);
 for (const t of used) {
@@ -141,14 +142,14 @@ function card(m) {
     </div>
     <p class="note">${m.note}。</p>
     <p class="trait">すみか：${m.home}。${m.trait}。</p>
-    ${(m.fly || m.rare) ? `<div class="tags">${m.fly ? '<span class="tag">飛ぶ</span>' : ''}${m.rare ? '<span class="tag rare">レア</span>' : ''}</div>` : ''}
+    ${(m.fly || m.rare || m.batch === 3) ? `<div class="tags">${m.fly ? '<span class="tag">飛ぶ</span>' : ''}${m.rare ? '<span class="tag rare">レア</span>' : ''}${m.batch === 3 ? '<span class="tag">第3弾</span>' : ''}</div>` : ''}
     <div class="vrow" data-id="${m.id}">${db ? `<button class="vb ok" data-act="adopt" aria-pressed="${vOf(m.id) === 'adopt'}">採用</button><button class="vb ng" data-act="reject" aria-pressed="${vOf(m.id) === 'reject'}">不採用</button><input class="vnote" placeholder="メモ" aria-label="${m.n}の メモ" value="${((verdicts[m.id] || {}).note || '').replace(/"/g, '&quot;')}">` : `<span class="vmark"></span>`}</div>
     ${(m.pre || m.evo) ? `<div class="evo">${m.pre ? `<span>しんか前：${link(m.pre)}</span>` : ''}${m.evo ? `<span>しんか：${link(m.evo)}</span>` : ''}</div>` : ''}
   </article>`;
 }
 function render() {
   const q = $('q').value.trim(), fly = $('fly').checked, rare = $('rare').checked, so = $('sort').value;
-  let list = MON.filter(m => (tab === 'all' || vOf(m.id) === tab) && (!sel.size || m.t.some(t => sel.has(t))) && (!fly || m.fly) && (!rare || m.rare) && (!q || (m.n + m.home + m.base + m.note).includes(q)));
+  let list = MON.filter(m => (tab === 'all' || vOf(m.id) === tab) && (!sel.size || m.t.some(t => sel.has(t))) && (!fly || m.fly) && (!rare || m.rare) && (!$('batch').value || ($('batch').value === '3' ? m.batch === 3 : m.batch !== 3)) && (!q || (m.n + m.home + m.base + m.note).includes(q)));
   const cmp = { no: (a, b) => a.no - b.no, h: (a, b) => b.h - a.h, hl: (a, b) => a.h - b.h, wt: (a, b) => b.wt - a.wt, n: (a, b) => a.n.localeCompare(b.n, 'ja') }[so];
   list.sort(cmp);
   $('grid').innerHTML = list.map(card).join('');
@@ -185,7 +186,7 @@ $('grid').addEventListener('change', (e) => {
     render();
   }, () => setSave('保存した 判定を 読みこめませんでした'));
 })();
-for (const id of ['q', 'sort', 'fly', 'rare']) $(id).addEventListener('input', render);
+for (const id of ['q', 'sort', 'fly', 'rare', 'batch']) $(id).addEventListener('input', render);
 // しんかの リンク：しぼりこみを 外してから その カードへ
 $('grid').addEventListener('click', (e) => {
   const a = e.target.closest('.evo a'); if (!a) return;
