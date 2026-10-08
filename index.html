@@ -2250,7 +2250,7 @@ function loadSave() {
   return null;
 }
 function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
-const newMon = (sid, lvl) => ({ uid: S.uid++, sid, lvl, exp: 0 });
+const newMon = (sid, lvl) => ({ uid: S.uid++, sid, lvl, exp: 0, nat: pickNature(SPECIES[sid]) });
 function stats(m) {
   const b = SPECIES[m.sid].base, L = m.lvl;
   return { hp: Math.round(b.hp * (L + 10) / 12 + 10), atk: b.atk * (L + 10) / 30, def: b.def * (L + 10) / 30, spd: b.spd };
@@ -2419,6 +2419,7 @@ function monCard(m, where, i, openUid) {
   const info = document.createElement('div'); info.className = 'minfo';
   info.innerHTML = `<div class="mname">${sp.n} <span class="lv">Lv${m.lvl}</span> ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}${where === 'party' && i < 3 ? '<span class="tag">出場</span>' : ''}</div>` +
     `<div class="mstat">HP${st.hp} こう${Math.round(st.atk)} ぼう${Math.round(st.def)} はや${st.spd}</div>` +
+    (m.nat && NATURES[m.nat] ? `<div class="desc">せいかく：<b>${NATURES[m.nat].n}</b>（${NATURES[m.nat].d}）</div>` : '') +
     (sp.prof ? `<div class="desc">${profLine(sp)}</div>` : '') +
     `<div class="mmoves">${equipped(m).map(id => `<span style="--c:${TYPES[MOVES[id].t].c}">${MOVES[id].n}</span>`).join('')}</div>` +
     `<div class="expbar"><i style="width:${Math.min(100, m.exp / expNext(m.lvl) * 100)}%"></i></div>`;
@@ -3324,27 +3325,31 @@ function aiMove(f, o, dt, autoSpecial) {
   if (autoSpecial && !f.queued) {
     f.aiT -= dt;
     if (f.aiT <= 0) {
-      f.aiT = rand(.5, 1.3) * (f.side === 1 ? (1.2 - B.skill * .5) : 1);
+      f.aiT = rand(.5, 1.3) * (f.side === 1 ? (1.2 - B.skill * .5) : 1) * persona(f).react;
       if (Math.random() < .8) f.queued = aiPickMove(f, o);
     }
   }
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
-  if (o.state === 'wind' && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5) {
+  if (o.state === 'wind' && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
     const t = threatDir(f, o); return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
   }
-  const per = persona(f), hurt = f.hp < f.maxHp * .35;
+  const per = persona(f), hurt = f.hp < f.maxHp * per.flee;
+  if (per.roam) { f.roamT = (f.roamT || 0) - dt; if (f.roamT <= 0) { f.roamT = rand(2, 4.5); f.roamK = rand(.55, 1.6); } }
+  const roamK = per.roam ? (f.roamK || 1) : 1;
+  f.awayT = Math.max(0, (f.awayT || 0) - dt);
   let want;   // 立ち位置の ねらい：{ R: 間合い, los: 見える場所, cover: 陰に かくれる, flank: 横から }
   if (f.queued) {
     const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = m.k === 'proj' || m.k === 'multi';
     const see = !shot || losClear(f, o);
-    if (d <= reach && see) { const q = f.queued; f.queued = null; beginMove(f, q); return; }
-    want = { R: idealRange(f, m, reach, per), los: shot, cover: false, flank: !shot && f.sp.style !== 'ranged', mode: 'attack' };
+    if (d <= reach && see) { const q = f.queued; f.queued = null; beginMove(f, q); if (per.hitAway && isDamaging(m)) f.awayT = rand(1.2, 2); return; }
+    want = { R: idealRange(f, m, reach, per) * roamK, los: shot, cover: false, flank: per.flank > .25 && !shot, mode: 'attack' };
   } else {
     const dmgCd = f.moves.filter(id => isDamaging(MOVES[id])).map(id => f.cd[id] || 0), soon = dmgCd.length ? Math.min(...dmgCd) : 9;
     const oThreat = o.moves.some(id => isDamaging(MOVES[id]) && (o.cd[id] || 0) < 1);
-    if (soon < .9 && !hurt) want = { R: prefRange(f, per), los: true, cover: false, flank: f.sp.style === 'melee', mode: 'setup' };
-    else want = { R: prefRange(f, per) + 90 + (hurt ? 60 : 0), los: false, cover: oThreat || hurt || per.aggr < .5, flank: false, mode: 'rest' };
+    const hide = f.awayT > 0 || hurt || (oThreat && Math.random() < per.cover);
+    if (!hide && (soon < .9 || per.hold)) want = { R: prefRange(f, per) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' };
+    else want = { R: (prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' };
   }
   const g = pickSpot(f, o, want, dt);
   f.aiMode = want.mode;
@@ -3359,18 +3364,39 @@ function aiMove(f, o, dt, autoSpecial) {
   moveDir(f, Math.cos(tang) * .35, Math.sin(tang) * .35, dt);
 }
 // ---- 立ち回りの しくみ ----
-// モンスターごとの 性格（0＝慎重 〜 1＝攻撃的）。タイプの 戦い方＋種族で 少し ゆらす
+// 性格（せいかく）：1体ずつ ちがう。戦いかたを きめる
+//   range：好む 間合いの 倍率（小さいほど 近づく）  cover：陰に かくれる 強さ（0〜1）  flee：この HP 割合を 切ると かくれがち
+//   flank：横から 回りこむ 強さ  react：わざを 選ぶまでの 間の 倍率（小さいほど せっかち）  dodge：よけの うまさ（足し算）
+//   hitAway：わざの あと すぐ 陰へ さがる  roam：ときどき 気まぐれに 間合いを 変える  hold：わざが なくても 前に 出つづける
+const NATURES = {
+  yuukan:   { n: 'ゆうかん',     d: '前へ 前へ。ほとんど かくれない',             range: .6,  cover: .05, flee: .12, flank: .2, react: .85, dodge: -.1, hold: 1 },
+  okubyou:  { n: 'おくびょう',   d: 'すぐ 陰に かくれる。遠くから ねらう',         range: 1.45, cover: 1,  flee: .7,  flank: 0,  react: 1.1, dodge: .25 },
+  reisei:   { n: 'れいせい',     d: '間合いを 守り、ひまな ときは 陰で 待つ',     range: 1,   cover: .6, flee: .35, flank: .3, react: 1,   dodge: .15 },
+  sekkachi: { n: 'せっかち',     d: 'わざを どんどん 使う。待つのが 苦手',         range: .8,  cover: .15, flee: .2, flank: .1, react: .55, dodge: -.05 },
+  zurugashikoi: { n: 'ずるがしこい', d: '横から 回りこみ、当てたら すぐ 陰へ',   range: .9,  cover: .7, flee: .4,  flank: 1,  react: .9,  dodge: .2, hitAway: 1 },
+  nonki:    { n: 'のんき',       d: 'あまり 動かない。のんびり 戦う',             range: 1.1, cover: .2, flee: .25, flank: 0,  react: 1.6, dodge: -.15 },
+  kimagure: { n: 'きまぐれ',     d: '近づいたり 離れたり 読めない',               range: 1,   cover: .4, flee: .3,  flank: .5, react: 1,   dodge: 0, roam: 1 },
+  nebarizuyoi: { n: 'ねばりづよい', d: 'HPが へっても 引かない',                 range: .85, cover: .3, flee: 0,   flank: .3, react: .95, dodge: .05, hold: 1 },
+};
+const NATURE_KEYS = Object.keys(NATURES);
+// 性格を きめる（戦い方の タイプで 少し かたよる）
+function pickNature(sp) {
+  const w = NATURE_KEYS.map(k => k === 'yuukan' || k === 'sekkachi' ? (sp.style === 'melee' ? 2 : 1) : k === 'okubyou' || k === 'reisei' ? (sp.style === 'ranged' ? 2 : 1) : 1);
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < w.length; i++) { r -= w[i]; if (r <= 0) return NATURE_KEYS[i]; }
+  return NATURE_KEYS[0];
+}
 function persona(f) {
   if (f.per) return f.per;
-  let h = 0; for (const c of f.mon.sid) h = (h * 31 + c.charCodeAt(0)) % 9973;
-  const base = f.sp.style === 'melee' ? .75 : f.sp.style === 'mid' ? .55 : .35;
-  return (f.per = { aggr: clamp(base + (h / 9973 - .5) * .35, .1, .95), seed: h });
+  if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp);
+  let h = 0; for (const c of f.mon.sid + f.mon.nat) h = (h * 31 + c.charCodeAt(0)) % 9973;
+  return (f.per = { ...NATURES[f.mon.nat], key: f.mon.nat, seed: h });
 }
 // ふだん 好む 間合い
-function prefRange(f, per) { return (f.sp.style === 'melee' ? 70 : f.sp.style === 'mid' ? 150 : 220) * (1.25 - per.aggr * .5); }
+function prefRange(f, per) { return (f.sp.style === 'melee' ? 75 : f.sp.style === 'mid' ? 150 : 210) * per.range; }
 // その わざを 使う ときの 間合い
 function idealRange(f, m, reach, per) {
-  if (m.k === 'proj' || m.k === 'multi') return Math.min(reach, 230) * (1.15 - per.aggr * .35);
+  if (m.k === 'proj' || m.k === 'multi') return Math.min(reach, 230) * clamp(per.range, .6, 1.3);
   if (m.k === 'strike') return prefRange(f, per);
   return Math.min(reach, 400) * .7;
 }
@@ -3396,8 +3422,8 @@ function pickSpot(f, o, w, dt) {
     if (!ok(x, y)) continue;
     const dO = Math.hypot(x - o.x, y - o.y);
     let sc = Math.abs(dO - w.R) * .9 + Math.hypot(x - f.x, y - f.y) * .3;
-    if (w.los || w.cover) { const see = !hasObs || losFrom(x, y, o); if (w.los && !see) sc += 220; if (w.cover && see && hasObs) sc += 120 * (1.2 - per.aggr); }
-    if (w.flank) { const da = Math.abs(wrapAng(Math.atan2(y - o.y, x - o.x) - baseA)); sc += Math.abs(da - 1.1) * 40; }   // 正面より 斜め横から
+    if (w.los || w.cover) { const see = !hasObs || losFrom(x, y, o); if (w.los && !see) sc += 220; if (w.cover && see && hasObs) sc += 160 * per.cover; }
+    if (w.flank) { const da = Math.abs(wrapAng(Math.atan2(y - o.y, x - o.x) - baseA)); sc += Math.abs(da - 1.1) * 45 * per.flank; }   // 正面より 斜め横から
     const edge = Math.min(x - st.fx0, st.fx1 - x, y - st.fy0, st.fy1 - y); if (edge < 60) sc += (60 - edge) * 1.2;   // 壁ぎわは きらう
     if (o.state === 'wind' && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, x, y, f.r)) sc += 400;   // 相手の わざの はんいは さける
     if (f.spot && Math.hypot(x - f.spot.x, y - f.spot.y) < 8) sc -= 18;   // 少し 前の ねらいを つづける（ふらふら しない）
@@ -3689,7 +3715,7 @@ function endBattle(res) {
   for (const uid in B.exp) { const m = S.party.find(x => x.uid === +uid); if (m) grant(m, B.exp[uid]); }
   if (B.kind === 'wild') {
     if (res === 'caught') {
-      const e = active(1); const nm = newMon(e.mon.sid, e.mon.lvl);
+      const e = active(1); const nm = newMon(e.mon.sid, e.mon.lvl); if (NATURES[e.mon.nat]) nm.nat = e.mon.nat;   // 戦った ときの 性格の まま
       S.caught++;
       if (S.party.length < 6) { S.party.push(nm); lines.unshift(`${SPECIES[nm.sid].n}（Lv${nm.lvl}）が パーティに くわわった！`); }
       else { S.box.push(nm); lines.unshift(`${SPECIES[nm.sid].n}（Lv${nm.lvl}）は ボックスに おくられた`); }
