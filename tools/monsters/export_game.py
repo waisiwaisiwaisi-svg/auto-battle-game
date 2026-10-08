@@ -2,7 +2,7 @@
 # 使い方: python3 tools/monsters/export_game.py
 #   ADOPTED.json（図鑑の 採用 一覧）の モンスターを、
 #   index.html の「HANDMON」区間に 絵（14コマ）・SPECIES（種族値・タイプ・説明）・LEARN（おぼえる わざ）として 書きこむ
-import json, os, re, hashlib
+import json, os, re, hashlib, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 GAME = os.path.join(HERE, '..', '..', 'index.html')
 BEGIN, END = '// ====== HANDMON（tools/monsters/export_game.py が 自動生成）======', '// ====== ここまで HANDMON ======'
@@ -73,6 +73,11 @@ def learnset(i_, r):
 
 def main():
     global src
+    if '--off' in sys.argv:   # 手打ちモンスターを ゲームから 外す（データは tools/monsters に のこる）
+        if BEGIN in src:
+            a = src.index(BEGIN); b = src.index(END) + len(END); src = src[:a] + BEGIN + '\n// （いまは 外している：python3 tools/monsters/export_game.py で もどす）\n' + END + src[b:]
+            open(GAME, 'w').write(src)
+        print('handmon off'); return
     ids = _ids()
     data, species, learn = {}, {}, {}
     for i_ in ids:
