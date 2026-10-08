@@ -2748,7 +2748,7 @@ const SND = (() => {
       { w: 'triangle', v: .3, s: 'A2:4 G#2:4 G2:4 F#2:16' },
     ] },
   };
-  const prep = (S_) => { S_.parts = S_.ch.map(c => Object.assign({}, c, c.drum ? { p: parseDrum(c.s) } : { p: parse(c.s) })); S_.len = Math.max(...S_.parts.map(p => p.p.len)); return S_; };
+  const prep = (S_) => { if (S_.shift == null) S_.shift = S_.chip ? 0 : -5; S_.parts = S_.ch.map(c => Object.assign({}, c, c.drum ? { p: parseDrum(c.s) } : { p: parse(c.s) })); S_.len = Math.max(...S_.parts.map(p => p.p.len)); return S_; };
   for (const k in SONGS) prep(SONGS[k]);
   /* ---------- ステージごとの 曲：調・音階・テンポ・音色・リズムを かえて 自動で 作曲 ---------- */
   const NN = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -2786,14 +2786,14 @@ const SND = (() => {
     for (let bar = 0; bar < 16; bar++) {
       const c = o.prog[bar % 4], B = bar >= 8, last = bar % 8 === 7;
       // リード：前半は 16分の リフ、後半は メロディ
-      if (!B) { const rf = bar % 4 === 3 ? riff2 : riff; for (const d of rf) lead.push(d === -9 ? 'R:1' : nm(deg(c + d) + 12) + ':1'); }
-      else if (last) lead.push(nm(deg(c + 7) + 12) + ':6', nm(deg(c + 4) + 12) + ':2', nm(deg(c + 7) + 12) + ':8');
+      if (!B) { const rf = bar % 4 === 3 ? riff2 : riff; for (const d of rf) lead.push(d === -9 ? 'R:1' : nm(deg(c + d)) + ':1'); }
+      else if (last) lead.push(nm(deg(c + 7)) + ':6', nm(deg(c + 4)) + ':2', nm(deg(c + 7)) + ':8');
       else pick(MEL_RHY).forEach((len, i) => {
         if (i === 0 || len >= 4) cur = c + pick([0, 2, 4, 7]); else cur += pick([-2, -1, 1, 1, 2]);
-        cur = Math.max(c - 2, Math.min(c + 9, cur)); lead.push(nm(deg(cur) + 12) + ':' + len);
+        cur = Math.max(c - 2, Math.min(c + 9, cur)); lead.push(nm(deg(cur)) + ':' + len);
       });
       // アルペジオ：12.5%パルスで 16分の 和音くずし
-      const ch = [c, c + 2, c + 4, c + 7].map(d => nm(deg(d)));
+      const ch = [c, c + 2, c + 4, c + 7].map(d => nm(deg(d) - 12));
       arp.push(...[0, 1, 2, 3, 2, 1, 0, 1, 0, 1, 2, 3, 2, 1, 2, 3].map(k => ch[k] + ':1'));
       // ベース：三角波の 8分 オクターブ、フレーズの おわりは 歩く
       const b = deg(c) - 24;
@@ -2806,8 +2806,8 @@ const SND = (() => {
     // メロディの ハモり：後半の リードを 3度 下で（ボスは 前半も）
     const lead2 = lead.map((t, i) => { const [n, l] = t.split(':'); return n === 'R' ? t : nm(hzToMidi(n) - (boss ? 5 : 4)) + ':' + l; });
     const S_ = { chip: 1, bpm: Math.min(188, 158 + (o.seed % 6) * 4 + (boss ? 12 : 0)), ch: [
-      { w: o.lead === 'triangle' ? 'p25' : 'square', v: .12, s: lead.join(' ') },
-      { w: 'p12', v: .045, s: arp.join(' ') },
+      { w: o.lead === 'triangle' ? 'p25' : 'square', v: .14, s: lead.join(' ') },
+      { w: 'p25', v: .045, s: arp.join(' ') },
       { w: 'triangle', v: .38, s: bass.join(' ') },
       { drum: 1, s: drum.join(' ') },
     ] };
@@ -2839,7 +2839,7 @@ const SND = (() => {
             else if (e.d === 'f') noise(musicG, next, .06, .16, 2600);   // フィルの スネア
             else if (e.d === 'c') noise(musicG, next, .5, .14, 5000);    // シンバル
             else if (e.d === 'h') noise(musicG, next, .03, song.chip ? .06 : .07, 8000);
-          } else tone(musicG, next, e.f, e.len * spb * .92, p.w, p.v, null, .008);
+          } else tone(musicG, next, e.f * (p.w === 'triangle' && e.f < 140 ? 1 : Math.pow(2, song.shift / 12)), e.len * spb * .92, p.w, p.v, null, .008);   // ぜんたいを すこし ひくく
         }
       }
       next += spb; step++;
@@ -4143,16 +4143,16 @@ function placeFloor(f, o, m) {
 }
 const inZoneFloor = (z, x, y) => ((x - z.x) / z.rad) ** 2 + ((y - z.y) / (z.rad * .62)) ** 2 < 1;
 // あいての ゆかの 上に いるか（AI は さける）
-const onFoeFloor = (f, x, y) => !flies(f) && B.zones.some(z => z.side !== f.side && inZoneFloor(z, x, y));
+const onFoeFloor = (f, x, y) => !hovers(f) && B.zones.some(z => z.side !== f.side && inZoneFloor(z, x, y));
 function updatePlaced(dt) {
   let ch = false;
   for (const w of B.walls) { w.life -= dt; if (w.life <= 0) { ch = true; for (const b of w.blocks) burst(b.x, b.y, TYPES[w.t].c, 3, 50, .3); }
-    else if (w.thorn) for (const sd of B.sides) { const x = sd.fs[sd.act]; if (sd !== B.sides[w.side] && x && targetable(x) && !flies(x) && (x.thornT = (x.thornT || 0) - dt / B.walls.length) <= 0 && w.blocks.some(b => circRect(x.x, x.y, footR(x) + 4, b))) { x.thornT = .6; floorDmg(x, w, 1 / 24); } } }
+    else if (w.thorn) for (const sd of B.sides) { const x = sd.fs[sd.act]; if (sd !== B.sides[w.side] && x && targetable(x) && !hovers(x) && (x.thornT = (x.thornT || 0) - dt / B.walls.length) <= 0 && w.blocks.some(b => circRect(x.x, x.y, footR(x) + 4, b))) { x.thornT = .6; floorDmg(x, w, 1 / 24); } } }
   if (ch) { B.walls = B.walls.filter(w => w.life > 0); wallsChanged(); }
   for (const z of B.zones) {
     z.life -= dt; z.tick -= dt;
     if (z.tick <= 0) { z.tick = .5;
-      const x = active(1 - z.side); if (x && targetable(x) && !flies(x) && inZoneFloor(z, x.x, x.y)) { floorDmg(x, z, 1 / 16); const e = MOVES[z.id].e || {}; if (e.st && x.hp > 0 && Math.random() * 100 < e.stCh) setStatus(x, e.st, z.f); }
+      const x = active(1 - z.side); if (x && targetable(x) && !hovers(x) && inZoneFloor(z, x.x, x.y)) { floorDmg(x, z, 1 / 16); const e = MOVES[z.id].e || {}; if (e.st && x.hp > 0 && Math.random() * 100 < e.stCh) setStatus(x, e.st, z.f); }
     }
     if (Math.random() < dt * 10) typeFx(z.x + rand(-z.rad, z.rad) * .8, z.y + rand(-z.rad, z.rad) * .45, z.t, 1, 30, .5);
   }
@@ -4693,7 +4693,7 @@ function pickSpot(f, o, w, dt) {
 function moveDir(f, mx, my, dt, nav) {
   if (f.v.confuse > 0) { const a = Math.atan2(my, mx) + Math.sin(B.t * 3 + f.side) * 2.2; const L = Math.hypot(mx, my); mx = Math.cos(a) * L; my = Math.sin(a) * L; }
   let sp = speedOf(f);
-  if (B.zones.length && !flies(f)) { const zs = B.zones.find(z => z.side !== f.side && MOVES[z.id].slow && inZoneFloor(z, f.x, f.y)); if (zs) sp *= MOVES[zs.id].slow; }   // ありじごく：あしが とられる
+  if (B.zones.length && !hovers(f)) { const zs = B.zones.find(z => z.side !== f.side && MOVES[z.id].slow && inZoneFloor(z, f.x, f.y)); if (zs) sp *= MOVES[zs.id].slow; }   // ありじごく：あしが とられる
   if (B.st.pools.length && inPool(f.x, f.y)) {
     sp *= f.sp.type === 'water' ? 1.2 : .6;
     f.splashT -= dt; if (f.splashT <= 0 && (mx || my)) { f.splashT = .12; B.parts.push({ x: f.x + rand(-5, 5), y: f.y, vx: rand(-20, 20), vy: -40, life: .3, max: .3, col: '#bfe4ff', size: 2, g: 200 }); }
@@ -5956,6 +5956,12 @@ function drawStar(x, y, r, col) {
 const FLYING = ['birikurage', 'soyodori', 'yorukoumo', 'tsuraran'];
 // 飛ぶ モンスター：浮いて 見え、障害物の 上を 飛びこえる（弾も 上から うつので 障害物に 止められない）
 const flies = (f) => !!(f && f.sp && (f.sp.fly || FLYING.includes(f.mon.sid)));
+// 見た目だけ 浮かぶ（羽が ある・ただよう）モンスター：歩かずに はばたいて／ふわふわ 移動する
+const HOVER_LOOK = new Set(['a_water4', 'a_ice10', 'a_poison4', 'b_fire7', 'b_water7', 'g1', 'g2', 'g10', 'c_fire5', 'c_elec1', 'c_elec5', 'c_elec7', 'b_dragon5', 'b_dragon7', 'b_poison7', 'b_poison10', 'b_fighting5', 'b_fighting3', 'c_dragon8']);
+const hovers = (f) => flies(f) || !!(f && f.mon && HOVER_LOOK.has(f.mon.sid));
+// はばたく か ただよう か（羽の ある もの・鳥・竜は はばたき、ゴースト・くも・あわ などは ただよう）
+const WING_RX = /翼|羽|はね|つばさ|鳥|ドリ|バット|コウモリ|竜|リュウ|チョウ|ガーゴイ|グリフィ|ピクシー|ヒヨ|ガラス|ツル/;
+const flaps = (f) => WING_RX.test(f.sp.n + (f.sp.desc || ''));
 function drawRock(x, y, r, a, col) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(a);
   const P = [[0, -1.2], [.9, -.5], [1, .6], [.2, 1.1], [-.8, .8], [-1, -.4]];
@@ -6068,10 +6074,10 @@ function monFrame(f) {
     case 'wind': return f.cur && f.cur.m.cat === 'stat' ? 'idle' + (Math.floor(B.t * 8) % 4) : 'atk0';
     case 'dash': case 'chan': return 'atk1';
     case 'act': return B.t - (f.fireT || 0) < .12 ? 'atk1' : 'atk2';
-    case 'dodge': return 'walk1';
+    case 'dodge': return hovers(f) ? 'idle1' : 'walk1';
     case 'lag': return 'idle' + (Math.floor(B.t * 3) % 4);
   }
-  if (f.moving) return 'walk' + (Math.floor(f.walk * 9) % 4);
+  if (f.moving) return hovers(f) ? 'idle' + (Math.floor(B.t * 9 + f.side * 2) % 4) : 'walk' + (Math.floor(f.walk * 9) % 4);   // 浮かぶ ものは 足を うごかさない
   if ((B.t + f.side * 1.7) % 3.6 < .14) return 'blink';
   return 'idle' + (Math.floor(B.t * 5 + f.side * 2) % 4);
 }
@@ -6083,8 +6089,13 @@ function drawFighter(f) {
   if (f.state === 'enter' || f.state === 'return') { sx = sy = Math.max(.05, f.scale); }
   if (f.state === 'lag') { sy = 1 + Math.sin(B.t * 14) * .03; sx = 2 - sy; }
   if (f.state === 'dodge') alpha = .75;
-  const fly = flies(f), bob = Math.sin(B.t * 3.2 + f.side * 1.7);
-  if (fly) oy = -Math.round(26 * bodySz(f.sp) + bob * 4);
+  const fly = hovers(f), wing = fly && flaps(f), mv = fly && f.moving && ['free', 'act'].includes(f.state), bob = Math.sin(B.t * (mv ? (wing ? 9 : 5) : 3.2) + f.side * 1.7);
+  if (fly) oy = -Math.round(26 * bodySz(f.sp) + bob * (mv ? 6 : 4));
+  if (fly && f.state === 'free' || mv) {   // はばたき：たてに すばやく のびちぢみ／ただよう：ゆっくり ゆれる
+    const fl = wing ? Math.sin(B.t * (mv ? 24 : 12) + f.side) : Math.sin(B.t * 4 + f.side);
+    sy *= 1 + fl * (wing ? (mv ? .07 : .035) : .03); sx *= 1 - fl * (wing ? (mv ? .04 : .02) : .015);
+    if (mv && Math.random() < (wing ? .25 : .15)) B.parts.push({ x: f.x + rand(-10, 10) - f.face * 14, y: f.y + oy - rand(10, 30), vx: -f.face * rand(10, 30), vy: wing ? rand(10, 30) : -rand(5, 15), life: .5, max: .5, col: wing ? '#ffffff' : (FX_STYLE[f.sp.type] || FX_STYLE.normal).cols[1], size: 3, g: wing ? 30 : -10, shape: wing ? 'leaf' : 'wisp', rot: Math.random() * 6, vr: rand(-4, 4) });
+  }
   const fr = SPR[f.mon.sid].fr[monFrame(f)], img0 = SPR[f.mon.sid].n;
   const ms = SPR[f.mon.sid].ms;
   if (fly) { ctx.globalAlpha = .7 - bob * .08; shadow(f.x, f.y, img0.width * ms * (.22 - bob * .015)); ctx.globalAlpha = 1; }
