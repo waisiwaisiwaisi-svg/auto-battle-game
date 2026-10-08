@@ -3466,14 +3466,10 @@ function bStep(dt) {
   const a = active(0), e = active(1), st = B.st;
   let tx = st.W / 2, ty = st.H / 2, tz = 1;
   const vis = [a, e].filter(f => f && f.state !== 'bench');
-  if (B.mode === 'intro') { const z0 = VW / st.W; tz = B.modeT < .6 ? z0 : z0 + Math.min(1, (B.modeT - .6) / 1.6) * (.95 - z0); ty = (st.fy0 + st.fy1) / 2 - 20; }
-  else if (B.mode === 'end' && B.endT < .8) tz = .5;
-  else if (vis.length) {
-    tx = vis.reduce((s, f) => s + f.x, 0) / vis.length; ty = vis.reduce((s, f) => s + f.y, 0) / vis.length - 40;
-    const d = vis.length > 1 ? dist(vis[0], vis[1]) : 0;
-    tz = clamp(1.02 - d / 900, st.kind === 'stadium' ? .6 : .66, .96);
-  }
-  if (B.mode === 'catch' && B.catchO) { tx = (B.catchO.x + (a ? a.x : B.catchO.x)) / 2; }
+  // 寄らない：たたかう 場所 ぜんたいが いつも 見える 大きさに 固定
+  const fit = Math.min(VW / (st.fx1 - st.fx0 + 90), VH / (st.fy1 - st.fy0 + 150));
+  tx = (st.fx0 + st.fx1) / 2; ty = (st.fy0 + st.fy1) / 2 - 30; tz = fit;
+  if (B.mode === 'intro') tz = B.modeT < .6 ? VW / st.W : VW / st.W + Math.min(1, (B.modeT - .6) / 1.6) * (fit - VW / st.W);
   B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 3);
   B.cam.x += (tx - B.cam.x) * Math.min(1, dt * 4);
   B.cam.y += (ty - B.cam.y) * Math.min(1, dt * 4);
