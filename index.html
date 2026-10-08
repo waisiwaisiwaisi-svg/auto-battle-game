@@ -677,7 +677,7 @@ const effVs = (mt, sp) => effOf(mt, sp.type) * (sp.type2 ? effOf(mt, sp.type2) :
 /* k: melee=近接 / proj=弾 / beam=直線 / aoe=自分の周囲 / strike=相手の足元 / dash=突進
    ここはオリジナルのわざ（命中100あつかい）。ランキング上位100のわざは MOVES100（自動生成）。 */
 const MOVES = {
-  tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 7,  cd: 0.7, wind: 0.12 },
+  tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 7,  cd: 2.4, wind: 0.12 },   // こうかの ある わざが ない ときの つなぎ（連打しすぎない）
   ember:   { n: 'ひのたま',       t: 'fire',  k: 'proj',   pow: 13, cd: 2.4, wind: .3,  spd: 190, cnt: 1, r: 5 },
   flame:   { n: 'かえんうず',     t: 'fire',  k: 'aoe',    pow: 24, cd: 7,   wind: .85, rad: 62 },
   blaze:   { n: 'バーンラッシュ', t: 'fire',  k: 'dash',   pow: 22, cd: 5,   wind: .5,  len: 160 },
@@ -3913,6 +3913,7 @@ function spawnProj(f, m, a) {
 
 function fireMove(f) {
   f.fireT = B.t;
+  if (B.stats && f.cur) { const k = f.cur.id; B.stats.fire[k] = (B.stats.fire[k] || 0) + 1; }
   if (f.cur && f.cur.m) SND.se({ melee: 'swing', swipe: 'swing', proj: 'shoot', beam: 'beam', cone: 'beam', aoe: 'boom', strike: 'boom', multi: 'boom', dash: 'dash' }[f.cur.m.k] || 'charge');
   if (f.cur && f.cur.m) { const m0 = f.cur.m; fxPush({ type: 'flash', x: f.x, y: f.y - BODY, rad: 22, col: (FX_STYLE[m0.t] || FX_STYLE.normal).cols[1], life: .16, max: .16 }); typeFx(f.x, f.y - BODY, m0.t, 8, 90, .35, { ang: f.cur.ang, spread: .5 }); }
   const cur = f.cur, m = cur.m, o = opp(f);
@@ -4111,9 +4112,14 @@ function setStatus(f, s, by) {
 }
 
 /* ---------- ダメージ ---------- */
+// わざの 種類ごとの ダメージ補正（当たりやすさの ちがいを ならす：当たりにくい ものは 少し つよく）
+const KIND_DMG = { proj: 1.3, beam: 1.3, swipe: .9, strike: .7, melee: .6, cone: 1.1, aoe: .94, multi: .95, dash: 1 };
+// あたりやすさの めやす（たくさん たたかわせて はかった 命中の わりあい）
+const KIND_HIT = { melee: '◎', strike: '○', multi: '○', swipe: '○', aoe: '△', cone: '△', beam: '△', dash: '△', proj: '△' };
 const DMG_K = .47;   // リアルタイム用の ダメージ倍率（ポケモンの 式の まま だと 1戦が みじかすぎる）
 function hit(att, def, m, ang, opt) {
   opt = opt || {};
+  if (B.stats) { B.stats.tryhit[MOVE_ID.get(m)] = (B.stats.tryhit[MOVE_ID.get(m)] || 0) + 1; if (def.inv > 0) B.stats.dodged[MOVE_ID.get(m)] = (B.stats.dodged[MOVE_ID.get(m)] || 0) + 1; }
   if (def.inv > 0) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
   if (def.v.protect > 0) { SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 }); return false; }
   if (m.cat === 'stat') return statusHit(att, def, m);
@@ -4135,7 +4141,7 @@ function hit(att, def, m, ang, opt) {
   let pow = m.pow; if (m.hits) pow = pow * (opt.hitNo + 1); // さんれんスピン：だんだん つよく
   const lagHit = def.state === 'lag';
   // ポケモンの ダメージ式：((2×Lv÷5＋2)×いりょく×A÷D÷50＋2)×タイプ一致×あいしょう×きゅうしょ×乱数(0.85〜1.00)。リアルタイム用に DMG_K を かける
-  const P = pow * 5, base = Math.floor(Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D) / 50) + 2;
+  const P = pow * 5 * (KIND_DMG[m.k] || 1), base = Math.floor(Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D) / 50) + 2;
   let dmg = Math.max(1, Math.round(DMG_K * base * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
   if (lagHit) popText(def.x, def.y - 118, 'スキあり！', '#ff9a8a', true);
   const heavy = pow >= 19;
@@ -4149,6 +4155,7 @@ function hit(att, def, m, ang, opt) {
   }
   dmg = Math.min(dmg, Math.ceil(def.hp));
   def.hp = Math.max(0, def.hp - dmg); def.flash = .12; B.lastDmgT = B.t;
+  if (B.stats) { const k = MOVE_ID.get(m); B.stats.hit[k] = (B.stats.hit[k] || 0) + 1; B.stats.dmg[k] = (B.stats.dmg[k] || 0) + dmg; B.stats.dmgPct[k] = (B.stats.dmgPct[k] || 0) + dmg / def.maxHp; }
   def.cur = null; if (!def.v.rampage) def.queued = null;
   if (!lagHit) { def.state = 'stun'; def.stT = heavy ? .45 : .25; }
   def.kx = Math.cos(ang) * (heavy ? 230 : 140) * K; def.ky = Math.sin(ang) * (heavy ? 230 : 140) * K;
@@ -4619,13 +4626,13 @@ function updateFighter(f, dt) {
       const m = cur.m;
       // 命中100（ロック）の わざだけ 予兆の とちゅうまで あいてを 追う
       if (oT && m.aim === 'lock') {
-        if ((m.k === 'beam' || m.k === 'dash' || m.k === 'cone') && cur.t < cur.wind * .6) {
+        if ((m.k === 'beam' || m.k === 'dash' || m.k === 'cone' || m.k === 'swipe') && cur.t < cur.wind * (m.k === 'swipe' ? .75 : .6)) {
           const want = Math.atan2(o.y - f.y, o.x - f.x);
           cur.ang += clamp(wrapAng(want - cur.ang), -3 * dt, 3 * dt);
         }
-        if (m.k === 'strike' && cur.t < cur.wind * .75) { cur.tx += (o.x - cur.tx) * Math.min(1, dt * 8); cur.ty += (o.y - cur.ty) * Math.min(1, dt * 8); }
+        if (m.k === 'strike' && cur.t < cur.wind * .55) { cur.tx += (o.x - cur.tx) * Math.min(1, dt * 8); cur.ty += (o.y - cur.ty) * Math.min(1, dt * 8); }
       }
-      if (m.k === 'melee' && oT && dist(f, o) > f.r + o.r + 6) { const a = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(a) * 120 * dt; f.y += Math.sin(a) * 120 * dt; }
+      if ((m.k === 'melee' || m.k === 'swipe') && oT && dist(f, o) > f.r + o.r + 6) { const a = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(a) * 120 * dt; f.y += Math.sin(a) * 120 * dt; }
       if (cur.t >= cur.wind) fireMove(f);
       if (f.side !== 0) aiDodgeCheck(f, o);
       break;
@@ -5192,6 +5199,7 @@ function moveDesc(m) {
   const stg = (o) => Object.entries(o).map(([k, v]) => `${SN[k]}${v > 0 ? '+' : ''}${v}`).join('・');
   const pw = m.power || (m.pow ? Math.round(m.pow * 5) : 0);
   if (m.cat !== 'stat' && m.k !== 'counter') out.push(pw ? `いりょく${pw}` : 'こうげき');
+  if (m.cat !== 'stat' && KIND_HIT[m.k]) out.push(`あたりやすさ${KIND_HIT[m.k]}`);
   if (m.cnt > 1) out.push(`${m.cnt}はつ`);
   if (m.cat !== 'stat' && m.acc && m.acc < 100) out.push(`めいちゅう${m.acc}`);
   if (e.st) out.push(`${e.stCh || 100}%で ${ST[e.st]}`);
