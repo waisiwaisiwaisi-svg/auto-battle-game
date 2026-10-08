@@ -1,6 +1,8 @@
 # 切りだした 絵（all.json）に 名前・タイプ・説明を つけて ゲーム用の sprites.json / meta.json を 作る
 # 使い方: python3 build_meta.py && python3 ../export_ext.py
-import json
+import json, math
+from lore import load as load_lore
+LORE = load_lore()
 ROW = {'fire': 'fire', 'water': 'water', 'grass': 'grass', 'elec': 'elec', 'ice': 'ice', 'fighting': 'fighting',
        'poison': 'poison', 'ground': 'ground', 'wind': 'wind', 'dragon': 'dragon'}
 # 前から 入っている 10体は id を そのまま（セーブが 消えないように）
@@ -221,12 +223,18 @@ if __name__ == '__main__':
         if k.startswith('g'): t1 = 'ghost'; num = int(k[1:])
         else:
             t = k[2:].rstrip('0123456789'); t1 = ROW[t]; num = int(k[2 + len(t):])
-        size = 'S' if num <= 3 else 'M' if num <= 8 else 'L'
-        if k.startswith('g'): size = 'L' if num == 9 else 'M'
+        L = LORE[k]
+        size = 'S' if L['h'] < .7 else 'M' if L['h'] < 1.8 else 'L'      # 強さの 合計は 高さで きまる
         rare = 1 if (num == 10 and not k.startswith('g')) or k == 'g9' else 0
         gid = KEEP.get(k, k)
-        meta[gid] = {'name': name, 'types': [t1] + ([t2] if t2 != '-' else []), 'base': base, 'body': body, 'size': size, 'note': note, 'rare': rare, 'src': k}
-        v = allv[k]; spr[gid] = {'w': v['w'], 'h': v['h'], 'pal': v['pal'], 'd': v['d'], 'ms': round(76 / max(v['w'], v['h']), 3)}
+        # ゲーム内の 大きさ：高さ 0.25m 以下 = 0.72倍、4m 以上 = 1.44倍（あいだは 対数で なめらかに）
+        u = min(1, max(0, (math.log10(L['h']) - math.log10(.25)) / (math.log10(4) - math.log10(.25))))
+        sz = round(.72 + .72 * u, 3)
+        meta[gid] = {'name': name, 'types': [t1] + ([t2] if t2 != '-' else []), 'base': base, 'body': body, 'size': size, 'note': note, 'rare': rare, 'src': k,
+                     'h': L['h'], 'wt': L['wt'], 'home': L['home'], 'trait': L['trait'], 'evo': KEEP.get(L['evo'], L['evo']) if L['evo'] else None, 'sz': sz}
+        v = allv[k]; spr[gid] = {'w': v['w'], 'h': v['h'], 'pal': v['pal'], 'd': v['d'], 'ms': round(76 * sz / max(v['w'], v['h']), 3)}
+    for gid, m in meta.items():   # しんか先が 外した モンスターなら 消す
+        if m['evo'] and m['evo'] not in meta: m['evo'] = None
     json.dump(meta, open('meta.json', 'w'), ensure_ascii=False, indent=0)
     json.dump(spr, open('sprites.json', 'w'), separators=(',', ':'))
     print(len(meta), 'monsters')
