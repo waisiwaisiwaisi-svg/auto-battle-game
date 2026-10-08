@@ -201,9 +201,10 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .sbar span:nth-child(2){font-variant-numeric:tabular-nums;white-space:nowrap}
 .sbar{grid-template-columns:64px 44px 1fr auto!important}
 .evb{color:var(--acc);font-weight:400;margin-left:2px;font-size:9.5px}
+.itlist{display:flex;flex-direction:column;gap:6px}.it{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;background:#15112a;border-radius:4px;padding:6px 8px;text-align:left}.it .iic{font-size:24px}.it small{display:block;color:var(--dim);font-size:10.5px;line-height:1.4}.it .btn{font-size:12px;padding:6px 10px}
 .bsum{display:flex;justify-content:space-between;margin:8px 0;font-size:13px}
 .bgrid{display:flex;flex-direction:column;gap:4px}
-.brow{display:grid;grid-template-columns:62px 34px 30px 1fr 42px 30px 30px;gap:5px;align-items:center;font-size:12px}
+.brow{display:grid;grid-template-columns:62px 34px 30px 1fr 42px 34px;gap:5px;align-items:center;font-size:12px}
 .brow i{height:7px;background:#0d0b14;border-radius:2px}.brow i u{display:block;height:100%;background:var(--acc);border-radius:2px}
 .brow button{height:26px;border-radius:3px;background:#2a2348;box-shadow:inset 0 0 0 1px var(--rim2);font-size:15px;color:var(--acc)}
 .bdups{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px;max-height:30vh;overflow:auto}
@@ -453,7 +454,7 @@ html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
           <button class="btn" id="btnCup">たいかいへ<span>スタジアムで しあい</span></button>
           <button class="btn" id="btnWild" style="background:#7bd88f;box-shadow:0 4px 0 #3f8a50,0 0 0 3px #0d0b14">くさむらへ<span>モンスターを つかまえる</span></button>
         </div>
-        <div class="sec-title"><span>たからばこ（かつと もらえる・4つまで）</span><span class="inv">わざのまきもの <b id="hTms">0</b>　つかまえた <b id="hCaught">0</b></span></div>
+        <div class="sec-title"><span>たからばこ（かつと もらえる・4つまで）</span><span class="inv">わざのまきもの <b id="hTms">0</b>　どうぐ <b id="hItems">0</b>　つかまえた <b id="hCaught">0</b></span></div>
         <div class="chests" id="hubChests"></div>
       </div>
       <div class="hcol">
@@ -2531,7 +2532,7 @@ function spriteCanvas(sid, size) {
    ===================================================================== */
 const SAVE_KEY = 'pixel-monster-arena-v1';
 let S = null;
-const defaultSave = () => ({ party: [], box: [], capsules: 10, tier: 0, round: 0, trophies: 0, auto: false, uid: 1, caught: 0, wins: 0, gems: 20, tms: {}, chests: [], chestIdx: 0, dex: {} });
+const defaultSave = () => ({ party: [], box: [], capsules: 10, tier: 0, round: 0, trophies: 0, auto: false, uid: 1, caught: 0, wins: 0, gems: 20, tms: {}, chests: [], chestIdx: 0, dex: {}, items: { respec: 1, reroll4: 1, reroll1: 1, retype: 1 } });
 function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
@@ -2972,6 +2973,7 @@ function renderChests() {
   }
   if (box._h !== h) { box._h = h; box.innerHTML = h; }   // かわった ときだけ かきかえる
   $('hGems').textContent = S.gems || 0;
+  $('hItems').textContent = Object.values(S.items || {}).reduce((a, b) => a + b, 0);
   { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<b style="color:${t.c}">${t.n}</b> ${k.r}`; }
   $('hTms').textContent = Object.values(S.tms || {}).reduce((a, b) => a + b, 0);
 }
@@ -3001,6 +3003,9 @@ function rollChest(kind) {
   for (let k = 0; k < C.tm; k++) { const r = rollR(); out.tms.push(choice(byR[r].length ? byR[r] : pool)); }
   const mp = poolIds(), mR = [0, 1, 2].map(r => mp.filter(id => monRarity(id) === r));
   for (let k = 0; k < C.mon; k++) { const r = rollR(); out.mons.push(choice(mR[r].length ? mR[r] : mp)); }
+  // どうぐ：いい はこほど おおく でる
+  out.items = []; const IT_N = { wood: .3, silver: .5, gold: 1, giant: 1.5, magic: 2.5, legend: 3 }[kind] || .5, keys = Object.keys(ITEMS);
+  for (let n = IT_N; n > 0; n--) if (n >= 1 || Math.random() < n) out.items.push(choice(keys));
   return out;
 }
 // あける：中身を 1つずつ 見せる
@@ -3009,6 +3014,7 @@ function openChest(i) {
   S.chests.splice(i, 1);
   S.capsules += R.cr; S.tms = S.tms || {};
   for (const id of R.tms) S.tms[id] = (S.tms[id] || 0) + 1;
+  S.items = S.items || {}; for (const k of R.items || []) S.items[k] = (S.items[k] || 0) + 1;
   const owned = new Set([...S.party, ...S.box].map(m => m.sid));
   const monCards = R.mons.map(sid => {
     const m = newMon(sid), sp = SPECIES[sid], r = RARITY[monRarity(sid)], isNew = !owned.has(sid); owned.add(sid);
@@ -3019,6 +3025,7 @@ function openChest(i) {
   save();
   const cards = [`<div class="reward">${chestIcon(c.kind).replace('class="ic"', 'style="width:120px;height:92px"')}<div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
     ...monCards, `<div class="reward"><div class="big">クリスタル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
+  for (const k of R.items || []) cards.push(`<div class="reward"><div style="font-size:46px">${ITEMS[k].ic}</div><div class="big">${ITEMS[k].n}</div><div class="dim">${ITEMS[k].d}</div></div>`);
   for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="rar" style="background:${r.c}">${r.n}</span><div class="big">わざのまきもの：${m.n}</div>${typeChip(m.t)}<div class="dim">${moveDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
   bg.innerHTML = `<div class="askbox"><div id="rwBody"></div><div class="dim" id="rwCount" style="margin-top:6px"></div><button class="btn" id="rwNext" style="margin-top:10px;width:100%">つぎへ</button></div>`;
@@ -3154,17 +3161,63 @@ function renderTeamDetail() {
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
-    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc)">きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm">わざのまきもの</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
+    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc)">きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm">わざのまきもの</button><button class="btn sub" data-a="item">どうぐ</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
     if (act === 'tm') return useTM(m);
     if (act === 'boost') return openBoost(m);
+    if (act === 'item') return itemMenu(m);
     if (act === 'box') teamMove({ w: 'p', i: pi }, { w: 'drop', i: 0 });
     if (act === 'party') teamMove({ w: 'b', i: bi }, { w: 'p', i: S.party.length });
     if (act === 'release') { ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; save(); renderTeam(); }); return; }
     teamSel = null; renderTeam();
   };
+}
+/* ---------- どうぐ ---------- */
+const ITEMS = {
+  respec: { n: 'ふりなおしのくすり', ic: '💊', d: 'きょうかポイントの ふりわけを ぜんぶ もどす（つかった 数は そのまま）' },
+  reroll4: { n: 'すべてわすれのかね', ic: '🔔', d: 'おぼえている わざ 4つを ぜんぶ ランダムに おぼえなおす' },
+  reroll1: { n: 'ひとつわすれのは', ic: '🍃', d: 'えらんだ わざ 1つを、その モンスターが おぼえる わざの なかから ランダムに おぼえなおす' },
+  retype: { n: 'おなじタイプのいし', ic: '💎', d: 'えらんだ わざを、おなじ タイプの わざ（おぼえられる もの）から ランダムに おぼえなおす' },
+};
+const itemN = (k) => (S.items && S.items[k]) || 0;
+function useItem(k) { S.items = S.items || {}; S.items[k] = Math.max(0, itemN(k) - 1); }
+// わざの おぼえなおし
+function rerollPool(m, idx, sameType) {
+  const cur = m.moves, old = MOVES[cur[idx]];
+  const ids = sameType ? Object.keys(MOVES).filter(id => id !== 'tackle' && MOVES[id].t === old.t && canLearn(m.sid, id)) : learned(m);
+  return ids.filter(id => MOVES[id] && !cur.includes(id));
+}
+function itemMenu(m) {
+  const sp = SPECIES[m.sid];
+  const bg = modal('<div id="itm"></div>');
+  const draw = (pickFor) => {
+    const box = bg.querySelector('#itm');
+    if (pickFor) {   // わざを えらぶ
+      box.innerHTML = `<h3 style="margin-bottom:6px">${ITEMS[pickFor].ic} ${ITEMS[pickFor].n}</h3><p class="dim" style="margin-bottom:8px">おぼえなおす わざを えらんでね</p><div class="tmlist">${m.moves.map((id, i) => { const mv = MOVES[id], n = rerollPool(m, i, pickFor === 'retype').length;
+        return `<button data-i="${i}" style="--c:${TYPES[mv.t].c}" ${n ? '' : 'disabled'}><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}・こうほ ${n}こ</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div>
+        <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn sub" id="iBack">もどる</button></div>`;
+      box.querySelector('#iBack').onclick = () => draw();
+      box.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => {
+        const i = +b.dataset.i, pool = rerollPool(m, i, pickFor === 'retype'); if (!pool.length) return;
+        const old = MOVES[m.moves[i]].n, nu = choice(pool); m.moves[i] = nu; useItem(pickFor); save(); SND.se('up');
+        say0(`${sp.n}は ${old}を わすれて ${MOVES[nu].n}を おぼえた！`); draw();
+      });
+      return;
+    }
+    box.innerHTML = `<h3 style="margin-bottom:6px">どうぐ — ${sp.n}</h3><div class="itlist">${Object.keys(ITEMS).map(k => `<div class="it"><span class="iic">${ITEMS[k].ic}</span><span><b>${ITEMS[k].n}</b> <span class="dim">×${itemN(k)}</span><small>${ITEMS[k].d}</small></span><button class="btn sub" data-k="${k}" ${itemN(k) ? '' : 'disabled'}>つかう</button></div>`).join('')}</div>
+      <p class="dim" style="margin-top:8px;font-size:11px">どうぐは たからばこから でます</p>
+      <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" id="iClose">とじる</button></div>`;
+    box.querySelector('#iClose').onclick = () => { bg.remove(); renderTeam(m.uid); };
+    box.querySelectorAll('.it .btn').forEach(b => b.onclick = async () => {
+      const k = b.dataset.k;
+      if (k === 'respec') { if (!evUsed(m)) { say0('まだ ポイントを ふって いません'); return; } if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の きょうかポイントを ふりなおしますか？`))) return; for (const x of STAT6) m.ev[x] = 0; useItem(k); save(); SND.se('heal'); bg.remove(); openBoost(m); return; }
+      if (k === 'reroll4') { if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の わざを 4つ ぜんぶ おぼえなおしますか？`))) return; const before = m.moves.slice(); let tries = 0; do { m.moves = pickMoves(m); } while (m.moves.join() === before.join() && ++tries < 8); useItem(k); save(); SND.se('up'); say0(`${sp.n}は あたらしく ${m.moves.map(id => MOVES[id].n).join('・')} を おぼえた！`); draw(); return; }
+      draw(k);
+    });
+  };
+  draw();
 }
 // 強化：おなじ モンスターを つかって ポイントを ふやし、のうりょくに ふりわける
 function openBoost(m) {
@@ -3179,14 +3232,14 @@ function openBoost(m) {
     bg.querySelector('#bst').innerHTML = `<h3 style="margin-bottom:6px">${sp.n}を きょうか</h3>
       <p class="dim" style="font-size:12px">おなじ モンスターを 1たい つかうと きょうかポイント +1（さいだい ${EV_MAX}）。ポイントは すきな のうりょくに ふりわけ（1つ ${EV_STAT_MAX} まで・1ポイントで +${EV_K}）。</p>
       <div class="bsum"><span>つかった <b>${m.fed}</b>/${EV_MAX}たい</span><span>のこり ポイント <b style="color:var(--acc)">${free}</b></span></div>
-      <div class="bgrid">${STAT6.map(k => `<div class="brow"><span>${STAT6_N[k]}</span><b>${st[k]}</b><span class="dim">+${evBonus(m, k)}</span><i><u style="width:${m.ev[k] / EV_STAT_MAX * 100}%"></u></i><span>${m.ev[k]}/${EV_STAT_MAX}</span><button data-k="${k}" data-d="-1" ${m.ev[k] ? '' : 'disabled'}>−</button><button data-k="${k}" data-d="1" ${free > 0 && m.ev[k] < EV_STAT_MAX ? '' : 'disabled'}>＋</button></div>`).join('')}</div>
-      <div class="row" style="justify-content:flex-end;gap:6px;margin-top:6px"><button class="btn sub" id="bReset" style="font-size:12px;padding:6px 10px" ${evUsed(m) ? '' : 'disabled'}>ふりなおす</button></div>
+      <div class="bgrid">${STAT6.map(k => `<div class="brow"><span>${STAT6_N[k]}</span><b>${st[k]}</b><span class="dim">+${evBonus(m, k)}</span><i><u style="width:${m.ev[k] / EV_STAT_MAX * 100}%"></u></i><span>${m.ev[k]}/${EV_STAT_MAX}</span><button data-k="${k}" data-d="1" ${free > 0 && m.ev[k] < EV_STAT_MAX ? '' : 'disabled'}>＋</button></div>`).join('')}</div>
+      <div class="row" style="justify-content:space-between;gap:6px;margin-top:6px"><span class="dim" style="font-size:11px">ふった ポイントは もどせません（${ITEMS.respec.ic}${ITEMS.respec.n}で ふりなおし）</span><button class="btn sub" id="bReset" style="font-size:12px;padding:6px 10px" ${evUsed(m) && itemN('respec') ? '' : 'disabled'}>${ITEMS.respec.ic} ふりなおす ×${itemN('respec')}</button></div>
       <div class="sec-title" style="margin-top:10px"><span>つかう モンスター（${sp.n}）</span><span class="dim">${dups.length}たい</span></div>
       ${dups.length ? `<div class="bdups">${dups.map((o, j) => `<button class="bdup ${pick.has(j) ? 'on' : ''}" data-j="${j}"><i data-sid="${o.x.sid}"></i><small>${o.w === 'p' ? 'パーティ' : 'ボックス'}</small><small>${ivGrade(o.x).replace('の こたい', '')}</small>${o.x.fed ? `<small style="color:var(--acc)">きょうか${o.x.fed}</small>` : ''}</button>`).join('')}</div>` : `<p class="dim">${sp.n}を もう 1たい てに いれると つかえます（くさむら・たからばこ）</p>`}
       <div class="row" style="justify-content:space-between;margin-top:12px;gap:8px"><button class="btn" id="bFeed" ${pick.size && room > 0 ? '' : 'disabled'}>えらんだ ${pick.size}たいを つかう（+${Math.min(pick.size, room)}）</button><button class="btn sub" id="bClose">とじる</button></div>`;
     bg.querySelectorAll('i[data-sid]').forEach(el => el.replaceWith(spriteCanvas(el.dataset.sid, 40)));
-    bg.querySelectorAll('.brow button').forEach(b => b.onclick = () => { const k = b.dataset.k, d = +b.dataset.d; if (d > 0 && m.fed - evUsed(m) > 0 && m.ev[k] < EV_STAT_MAX) m.ev[k]++; if (d < 0 && m.ev[k] > 0) m.ev[k]--; SND.se(d > 0 ? 'up' : 'click'); save(); draw(); });
-    bg.querySelector('#bReset').onclick = () => { for (const k of STAT6) m.ev[k] = 0; save(); draw(); };
+    bg.querySelectorAll('.brow button').forEach(b => b.onclick = () => { const k = b.dataset.k; if (m.fed - evUsed(m) > 0 && m.ev[k] < EV_STAT_MAX) m.ev[k]++; SND.se('up'); save(); draw(); });
+    bg.querySelector('#bReset').onclick = async () => { if (!itemN('respec')) return; if (!(await ask(`${ITEMS.respec.n}を 1こ つかって ふりなおしますか？`))) return; for (const k of STAT6) m.ev[k] = 0; useItem('respec'); save(); SND.se('heal'); draw(); };
     bg.querySelectorAll('.bdup').forEach(b => b.onclick = () => { const j = +b.dataset.j; if (pick.has(j)) pick.delete(j); else if (pick.size < room) pick.add(j); draw(); });
     bg.querySelector('#bFeed').onclick = async () => {
       const list = [...pick].map(j => dups[j]).slice(0, room);
@@ -5953,7 +6006,8 @@ $('btnHelp').onclick = () => {
     <p><b>くさむら</b>で よわらせて <b>ふういんクリスタル</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
     <p><b>たからばこ</b>は 勝つと もらえる。時間が たつと あき、モンスター・クリスタル・わざのまきものが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
     <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ の 6つ。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。ぶつりわざは こうげき→ぼうぎょ、とくしゅわざは とくこう→とくぼう で ダメージが きまる。</p>
-    <p><b>きょうか</b>：おなじ モンスターを てに いれたら、へんせい → きょうか で つかうと ポイントが ふえる（1たい 50まで）。すきな のうりょくに ふりわけよう。</p>
+    <p><b>きょうか</b>：おなじ モンスターを てに いれたら、へんせい → きょうか で つかうと ポイントが ふえる（1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりなおしのくすり）。</p>
+    <p><b>どうぐ</b>：ふりなおしのくすり・すべてわすれのかね・ひとつわすれのは・おなじタイプのいし。たからばこから でる。へんせい → どうぐ で つかう。</p>
     <p><b>わざのまきもの</b>で すきな わざを おぼえさせよう（てもち → わざのまきもの）。</p>
     <p class="dim">PC：Space＝かわす　X＝こうたい</p></div>
     <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="hClose">とじる</button></div>`);
