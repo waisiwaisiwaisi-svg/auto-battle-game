@@ -3258,6 +3258,7 @@ function aiPickMove(f, o) {
       if (m.fakeout && f.enterT > 1.8) continue;
       if (m.sucker && !(o.state === 'wind' && o.cur && isDamaging(o.cur.m))) continue;
       if (m.switchOut && B.kind !== 'cup') w *= .8;
+      { const dd = dist(f, o), rc = moveReach(f, o, m); if (dd > rc) w *= clamp(1 - (dd - rc) / 500, .4, 1); if ((m.k === 'proj' || m.k === 'multi') && !losClear(f, o)) w *= .65; }
     } else switch (m.k) {
       case 'heal': w = f.hp < f.maxHp * .5 ? 4 : 0; break;
       case 'self': w = Object.keys(e.self || {}).every(k => f.st[k] < 2) && f.hp > f.maxHp * .5 ? 2.2 : 0; break;
@@ -3328,29 +3329,82 @@ function aiMove(f, o, dt, autoSpecial) {
     }
   }
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
+  // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
+  if (o.state === 'wind' && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5) {
+    const t = threatDir(f, o); return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
+  }
+  const per = persona(f), hurt = f.hp < f.maxHp * .35;
+  let want;   // 立ち位置の ねらい：{ R: 間合い, los: 見える場所, cover: 陰に かくれる, flank: 横から }
   if (f.queued) {
-    const m = MOVES[f.queued];
-    // 弾の わざは あいだに 障害物が あると 止まるので、見える 場所まで 回りこんでから うつ
-    const needLos = (m.k === 'proj' || m.k === 'multi') && !losClear(f, o);
-    if (d <= moveReach(f, o, m) && !needLos) { const q = f.queued; f.queued = null; beginMove(f, q); return; }
-    if (B.st.nav) { const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, f.navPath && f.navPath.length > 0); }
-    return moveDir(f, Math.cos(ang), Math.sin(ang), dt);
+    const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = m.k === 'proj' || m.k === 'multi';
+    const see = !shot || losClear(f, o);
+    if (d <= reach && see) { const q = f.queued; f.queued = null; beginMove(f, q); return; }
+    want = { R: idealRange(f, m, reach, per), los: shot, cover: false, flank: !shot && f.sp.style !== 'ranged', mode: 'attack' };
+  } else {
+    const dmgCd = f.moves.filter(id => isDamaging(MOVES[id])).map(id => f.cd[id] || 0), soon = dmgCd.length ? Math.min(...dmgCd) : 9;
+    const oThreat = o.moves.some(id => isDamaging(MOVES[id]) && (o.cd[id] || 0) < 1);
+    if (soon < .9 && !hurt) want = { R: prefRange(f, per), los: true, cover: false, flank: f.sp.style === 'melee', mode: 'setup' };
+    else want = { R: prefRange(f, per) + 90 + (hurt ? 60 : 0), los: false, cover: oThreat || hurt || per.aggr < .5, flank: false, mode: 'rest' };
   }
-  f.stratT -= dt;
-  if (f.stratT <= 0) { f.stratT = rand(.4, .9); if (Math.random() < .3) f.strafe *= -1; }
-  const allCd = f.moves.every(id => (f.cd[id] || 0) > 1.2);
-  let pref = f.sp.style === 'melee' ? 0 : f.sp.style === 'mid' ? 96 : 160;
-  if (allCd || !autoSpecial) pref = f.sp.style === 'ranged' && autoSpecial ? 96 : 0;
-  const k = clamp((d - pref) / 48, -1, 1), tang = ang + f.strafe * Math.PI / 2;
-  let mx = Math.cos(ang) * k + Math.cos(tang) * .6, my = Math.sin(ang) * k + Math.sin(tang) * .6;
-  // 予兆の はんいの中なら 外へ にげる（命中100未満の わざは これで よけられる）
-  if (o.state === 'wind' && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .3) {
-    const t = threatDir(f, o); mx = Math.cos(t.base) * 1.5; my = Math.sin(t.base) * 1.5;
+  const g = pickSpot(f, o, want, dt);
+  f.aiMode = want.mode;
+  const gd = Math.hypot(g.x - f.x, g.y - f.y);
+  if (gd > 14) {
+    if (B.st.nav) { const a = navDir(f, g.x, g.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, f.navPath && f.navPath.length > 0); }
+    const a = Math.atan2(g.y - f.y, g.x - f.x); return moveDir(f, Math.cos(a), Math.sin(a), dt);
   }
-  const st = B.st, mg = 40;
-  if (f.x < st.fx0 + mg) mx += 1; if (f.x > st.fx1 - mg) mx -= 1; if (f.y < st.fy0 + mg) my += 1; if (f.y > st.fy1 - mg) my -= 1;
-  const L = Math.hypot(mx, my); if (L > 1) { mx /= L; my /= L; }
-  moveDir(f, mx, my, dt);
+  // 着いたら 少しだけ 横に ゆれる（棒立ちに しない）
+  f.stratT -= dt; if (f.stratT <= 0) { f.stratT = rand(.5, 1.2); f.strafe *= -1; }
+  const tang = ang + f.strafe * Math.PI / 2;
+  moveDir(f, Math.cos(tang) * .35, Math.sin(tang) * .35, dt);
+}
+// ---- 立ち回りの しくみ ----
+// モンスターごとの 性格（0＝慎重 〜 1＝攻撃的）。タイプの 戦い方＋種族で 少し ゆらす
+function persona(f) {
+  if (f.per) return f.per;
+  let h = 0; for (const c of f.mon.sid) h = (h * 31 + c.charCodeAt(0)) % 9973;
+  const base = f.sp.style === 'melee' ? .75 : f.sp.style === 'mid' ? .55 : .35;
+  return (f.per = { aggr: clamp(base + (h / 9973 - .5) * .35, .1, .95), seed: h });
+}
+// ふだん 好む 間合い
+function prefRange(f, per) { return (f.sp.style === 'melee' ? 70 : f.sp.style === 'mid' ? 150 : 220) * (1.25 - per.aggr * .5); }
+// その わざを 使う ときの 間合い
+function idealRange(f, m, reach, per) {
+  if (m.k === 'proj' || m.k === 'multi') return Math.min(reach, 230) * (1.15 - per.aggr * .35);
+  if (m.k === 'strike') return prefRange(f, per);
+  return Math.min(reach, 400) * .7;
+}
+// 点（x, y）から o が 見えるか
+const losFrom = (x, y, o) => losClear({ x, y }, o);
+// 立ち位置えらび：相手の まわりに 候補を ならべて 点数を つけ、いちばん よい 場所へ（.45秒ごとに 見なおす）
+function pickSpot(f, o, w, dt) {
+  f.spotT = (f.spotT || 0) - dt;
+  if (f.spot && f.spotT > 0 && f.spotMode === w.mode) return f.spot;
+  f.spotT = .45; f.spotMode = w.mode;
+  const st = B.st, N = st.nav, per = persona(f), hasObs = !!st.solid && st.solid.length > 2;
+  const ok = (x, y) => {
+    if (!inField(x, y, f.r)) return false;
+    if (N) { const i = Math.floor(x / NAV), j = Math.floor(y / NAV); return !!N.walk[j * N.nw + i]; }
+    return true;
+  };
+  const baseA = Math.atan2(f.y - o.y, f.x - o.x), cands = [];
+  for (let k = 0; k < 20; k++) { const a = baseA + (k / 20) * Math.PI * 2; for (const rr of [.75, 1, 1.25]) cands.push([o.x + Math.cos(a) * w.R * rr, o.y + Math.sin(a) * w.R * rr]); }
+  cands.push([f.x, f.y]);
+  if (f.spot) cands.push([f.spot.x, f.spot.y]);
+  let best = null, bs = 1e9;
+  for (const [x, y] of cands) {
+    if (!ok(x, y)) continue;
+    const dO = Math.hypot(x - o.x, y - o.y);
+    let sc = Math.abs(dO - w.R) * .9 + Math.hypot(x - f.x, y - f.y) * .3;
+    if (w.los || w.cover) { const see = !hasObs || losFrom(x, y, o); if (w.los && !see) sc += 220; if (w.cover && see && hasObs) sc += 120 * (1.2 - per.aggr); }
+    if (w.flank) { const da = Math.abs(wrapAng(Math.atan2(y - o.y, x - o.x) - baseA)); sc += Math.abs(da - 1.1) * 40; }   // 正面より 斜め横から
+    const edge = Math.min(x - st.fx0, st.fx1 - x, y - st.fy0, st.fy1 - y); if (edge < 60) sc += (60 - edge) * 1.2;   // 壁ぎわは きらう
+    if (o.state === 'wind' && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, x, y, f.r)) sc += 400;   // 相手の わざの はんいは さける
+    if (f.spot && Math.hypot(x - f.spot.x, y - f.spot.y) < 8) sc -= 18;   // 少し 前の ねらいを つづける（ふらふら しない）
+    sc += ((per.seed * 7 + x * 3 + y) % 13);   // 性格で 少し ばらつき
+    if (sc < bs) { bs = sc; best = { x, y }; }
+  }
+  return (f.spot = best || { x: f.x, y: f.y });
 }
 function moveDir(f, mx, my, dt, nav) {
   if (f.v.confuse > 0) { const a = Math.atan2(my, mx) + Math.sin(B.t * 3 + f.side) * 2.2; const L = Math.hypot(mx, my); mx = Math.cos(a) * L; my = Math.sin(a) * L; }
