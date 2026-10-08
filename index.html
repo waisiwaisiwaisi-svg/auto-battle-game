@@ -2857,8 +2857,12 @@ function clampF(f) { const st = B.st; if (st.solid && !flies(f)) pushOut(f); f.x
 function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.rx, dy = (y - p.y) / p.ry; if (dx * dx + dy * dy < 1) return true; } return false; }
 
 /* ---------- わざが つかえるか ---------- */
+// 回復できる わざは 1戦で 使える 回数に 上限
+function healMax(m) { const e = m.e || {}; return m.k === 'heal' ? 2 : e.drain ? 3 : e.seed ? 2 : e.heal ? 2 : 0; }
+const healLeft = (f, id) => healMax(MOVES[id]) - ((f.uses && f.uses[id]) || 0);
 function moveBlocked(f, id) {
   const m = MOVES[id];
+  if (healMax(m) && healLeft(f, id) <= 0) return 'つかいきった';
   if (f.v.taunt > 0 && m.cat === 'stat') return 'ちょうはつ中';
   if (f.v.encore && f.v.encore.id !== id) return 'アンコール中';
   if (f.v.healBlock > 0 && (m.k === 'heal' || (m.e && m.e.drain))) return 'かいふく ふうじ';
@@ -2871,6 +2875,7 @@ const isDamaging = (m) => m.cat !== 'stat';
 function beginMove(f, id) {
   const o = opp(f); if (!o) return;
   const m = MOVES[id];
+  if (healMax(m)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }
   let ang = Math.atan2(o.y - f.y, o.x - f.x), tx = o.x, ty = o.y;
   // ◎（命中100未満）の わざ：（スティック廃止のため 通常は あいての いた 方向・いちに 固定）
   if (f.side === 0 && !S.auto && m.aim === 'dir') {
@@ -3802,6 +3807,7 @@ function moveDesc(m) {
   if (m.k === 'field') out.push(m.fld === 'trickroom' ? 'おそい ほうが はやく なる ば' : 'みかたの すばやさ アップ');
   if (m.k === 'hazard') out.push({ rocks: 'こうたいで でてきた あいてに ダメージ', spikes: 'まきびしを まく', tspikes: 'こうたいで でてきた あいてを どくに' }[m.hz]);
   if (m.sp) out.push({ taunt: 'あいては へんかわざが つかえない', encore: 'あいてに おなじ わざを くりかえさせる', yawn: 'しばらくして ねむらせる', trick: 'あいての のうりょくアップを うばう', roar: 'あいてを むりやり こうたい' }[m.sp]);
+  if (healMax(m)) out.push(`1せん ${healMax(m)}かいまで`);
   return out.filter(Boolean).join('・');
 }
 function moveSub(m) {
@@ -3903,7 +3909,8 @@ function updHUD() {
     const o = active(1); let eff = '';
     if (o && m.cat !== 'stat') { const v = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1); eff = v >= 2 ? '2' : v === 0 ? '0' : v < 1 ? '0.5' : ''; }
     if (b.dataset.eff !== eff) b.dataset.eff = eff;
-    setText(b.querySelector('.b'), eff ? `${TYPES[m.t].n}・${eff === '2' ? 'ばつぐん！' : eff === '0' ? 'きかない' : 'いまいち'}` : moveSub(m));
+    const left = healMax(m) ? `（のこり ${Math.max(0, healLeft(f, id))}）` : '';
+    setText(b.querySelector('.b'), (eff ? `${TYPES[m.t].n}・${eff === '2' ? 'ばつぐん！' : eff === '0' ? 'きかない' : 'いまいち'}` : moveSub(m)) + left);
   });
   $('cDodge').querySelector('.cdv').style.height = (f.dodgeCd / .9 * 100) + '%';
   $('cSwap').querySelector('.cdv').style.height = (B.sides[0].swapCd / SWAP_CD * 100) + '%';
