@@ -130,6 +130,11 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .pmt{margin-top:2px}.pmt .chip{font-size:9px}
 .pm .tag{position:absolute;left:3px;top:3px;font-size:9px;background:var(--acc);color:#1a1626;padding:0 3px;font-weight:700}
 .bigbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acbody{display:flex;flex-direction:column;gap:12px;max-width:640px}
+.acbody .card{padding:12px}.acstages{display:flex;gap:6px;flex-wrap:wrap}.acstages i{width:44px;height:30px;border-radius:4px;background:#2a2440 center/cover;border:2px solid #0d0b14;position:relative;opacity:.45}
+.acstages i.done{opacity:1}.acstages i.now{opacity:1;border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}.acstages i.boss::after{content:'👑';position:absolute;top:-10px;right:-6px;font-size:12px}
+.acteam{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.acteam>div{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px}.acteam .bar{width:100%;height:6px;background:#2a2440;border-radius:3px;overflow:hidden}.acteam .bar i{display:block;height:100%;background:#7bd88f}
+.acscore{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}.acscore b{font-size:26px;color:var(--acc);font-variant-numeric:tabular-nums}
 .jrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .jrc{position:relative;border:2px solid var(--edge);border-radius:8px;overflow:hidden;background:#141022 center/cover;min-height:118px;color:#fff;font:inherit;text-align:left;padding:0;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end}
 .jrc::before{content:'';position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(10,8,20,.88))}
@@ -461,6 +466,7 @@ html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
         <div class="card cupinfo" id="cupInfo"></div>
         <div class="bigbtns">
           <button class="btn" id="btnJourney" style="grid-column:1/-1;background:#ffb547;box-shadow:0 4px 0 #a86a10,0 0 0 3px #0d0b14">たびに でる<span id="jrSub">10の ジムを めぐって バッジを あつめよう</span></button>
+          <button class="btn" id="btnArcade" style="grid-column:1/-1;background:#ff7ab0;box-shadow:0 4px 0 #a03a6a,0 0 0 3px #0d0b14">アーケード<span id="acSub">10れんせんで ハイスコアを ねらえ</span></button>
           <button class="btn" id="btnCup">フリーたいかい<span>スタジアムで しあい</span></button>
           <button class="btn" id="btnWild" style="background:#7bd88f;box-shadow:0 4px 0 #3f8a50,0 0 0 3px #0d0b14">くさむらへ<span>モンスターを つかまえる</span></button>
         </div>
@@ -480,6 +486,12 @@ html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">たび：バッジ <b id="jrBadges">0</b>/10</span><button class="btn sub" id="btnJrBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <p class="dim" id="jrStory" style="margin:4px 0 10px"></p>
     <div id="jrGrid" class="jrgrid"></div>
+  </section>
+
+  <!-- アーケード -->
+  <section class="screen" id="scArcade" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">アーケード</span><button class="btn sub" id="btnAcBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <div id="acBody" class="acbody"></div>
   </section>
 
   <!-- ずかん -->
@@ -2974,7 +2986,7 @@ function setArtBg() {
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
-function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
+function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
   const p = sp.prof, evo = '';
@@ -3197,6 +3209,7 @@ function useTM(m) {
 }
 
 function renderHub() {
+  { const A = ac(), el = $('acSub'); if (el) el.textContent = A.run ? `ステージ ${A.run.stage + 1}/10 から つづける・スコア ${A.run.score}` : `10れんせん・ハイスコア ${A.best}`; }
   { const J = jr(); const el = $('jrSub'); if (el) el.textContent = J.champ ? `でんどういり ${J.champ}かい・バッジ ${J.badges.length}/10` : J.gym < GYMS.length ? `バッジ ${J.badges.length}/10・つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム` : 'バッジが そろった！ チャンピオンリーグへ'; }
   $('hTrophy').textContent = S.trophies; $('hCaps').textContent = S.capsules; $('hCaught').textContent = S.caught;
   const r = ROUNDS[S.round];
@@ -3822,6 +3835,11 @@ function startBattle(cfg) {
     projs: [], parts: [], texts: [], fx: [], decals: [], walls: [], wallRects: [], zones: [], holes: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
     cam: { x: st.W / 2, y: st.H / 2, z: VW / st.W }, catchO: null, result: null, exp: {}, skill: cfg.skill, sent: 0,
   };
+  if (cfg.eMul) for (const f of B.sides[1].fs) { const k = cfg.eMul; f.maxHp = f.hp = Math.round(f.maxHp * k); f.atk *= k; f.spa *= k; f.def *= Math.sqrt(k); f.sdef *= Math.sqrt(k); }   // アーケード：はじめの 敵は よわめ
+  if (cfg.hpCarry) {   // アーケード：まえの たたかいの HP を ひきつぐ
+    pf.forEach((f, i) => { const k = cfg.hpCarry[i]; if (k == null) return; f.hp = Math.round(f.maxHp * k); if (f.hp <= 0) { f.hp = 0; f.fainted = true; } });
+    B.sides[0].act = Math.max(0, pf.findIndex(f => !f.fainted));
+  }
   $('resultOv').hidden = true; $('chooseOv').hidden = true; $('pauseOv').hidden = true;
   $('bTitle').textContent = cfg.title;
   for (const id of ['cCap', 'cRun']) $(id).hidden = cfg.kind !== 'wild';
@@ -5381,7 +5399,7 @@ function bStep(dt) {
 
   if (B.mode === 'intro') {
     if (B.sent === 0 && B.modeT > .8) { B.sent = 1; sendOut(1, 0); }
-    if (B.sent === 1 && B.modeT > 1.7) { B.sent = 2; sendOut(0, 0); }
+    if (B.sent === 1 && B.modeT > 1.7) { B.sent = 2; sendOut(0, B.sides[0].act); }
     if (B.modeT > 2.3) { B.mode = 'fight'; B.modeT = 0; say('バトル スタート！'); }
   }
   // 見はり：交代の とちゅうなどで HP 0 の まま のこったら たおれた あつかいに する
@@ -5483,6 +5501,7 @@ function endBattle(res) {
     else if (res === 'lose') lines.unshift('ちからつきて しまった… でも モンスターたちは すぐに げんきに なった');
     else if (res === 'run') lines.unshift('くさむらから ぶじに にげだした');
   } else if (B.cfg.journey) journeyResult(res, lines);
+  else if (B.cfg.arcade) arcadeResult(res, lines);
   else {
     if (res === 'win') {
       S.wins++;
@@ -6531,8 +6550,10 @@ $('btnHelp').onclick = () => {
 $('btnWild').onclick = startWild;
 $('btnCup').onclick = startCup;
 $('btnJourney').onclick = renderJourney;
+$('btnArcade').onclick = renderArcade;
+$('btnAcBack').onclick = () => renderHub();
 $('btnJrBack').onclick = () => renderHub();
-$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey; B = null; if (jr) renderJourney(); else renderHub(); };
+$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else renderHub(); };
 
 $('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { NET.ended = true; B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rankResult(false)]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); netReset(); showResult(); } else { netReset(); endBattle('lose'); } }); return; } B.paused = true; $('pauseOv').hidden = false; };
 $('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
@@ -6647,6 +6668,77 @@ function renderJourney() {
   if (lo) L.onclick = () => { SND.se('ok'); startLeague(); };
   g.appendChild(L);
 }
+/* =====================================================================
+   アーケード：パーティの 上3体で 10れんせん。HP は ひきつぎ（かつと 40% かいふく、5せんめの あとは ひんしも 50% で ふっかつ）
+   5・10せんめは ボス。まけたら そこで おわり。スコア＝ステージ×1000＋のこりHP＋はやさ
+   ===================================================================== */
+const AC_N = 10, AC_BOSS = [4, 9];
+const ac = () => { S.arcade = S.arcade || { best: 0, bestStage: 0, clears: 0, run: null }; return S.arcade; };
+function arcadeNew() {
+  const A = ac(), team = S.party.slice(0, 3);
+  const order = FIELDS.slice().sort(() => Math.random() - .5);
+  A.run = { stage: 0, score: 0, hp: team.map(() => 1), uids: team.map(m => m.uid), order, seeds: order.map(() => Math.floor(Math.random() * 1e9)) };
+  save(); renderArcade();
+}
+function arcadeTeam() { const A = ac(); if (!A.run) return null; const all = S.party.concat(S.box); const t = A.run.uids.map(u => all.find(m => m.uid === u)); return t.every(Boolean) ? t : null; }
+function arcadeStart() {
+  const A = ac(), R = A.run; if (!R) return; const team = arcadeTeam(); if (!team) { A.run = null; save(); renderArcade(); return; }
+  const i = R.stage, boss = AC_BOSS.includes(i), f = R.order[i % R.order.length];
+  const ids = poolIds().filter(id => i >= 4 || !SPECIES[id].rare), en = [];
+  const nE = i === 0 ? 1 : i < 4 ? 2 : 3;   // はじめは 1たい、だんだん ふえる
+  for (let k = 0; k < nE; k++) { let sid, g = 0; do { sid = choice(ids); } while (en.some(e => e.sid === sid) && g++ < 20);
+    const em = fixMon({ uid: -1 - k, sid }, clamp(i * .055 + (boss ? .08 : 0), 0, .95));
+    if (boss || i >= 6) { const pts = Math.min(EV_MAX, i * 2.5 + (boss ? 4 : 0)), b = base6(sid), main = b.atk >= b.spa ? 'atk' : 'spa'; em.ev = { [main]: Math.min(EV_STAT_MAX, Math.ceil(pts * .5)), spe: Math.min(EV_STAT_MAX, Math.floor(pts * .3)), hp: Math.floor(pts * .2) }; }
+    en.push(em); }
+  const t = TR_NPC[(R.seeds[i] || i) % TR_NPC.length];
+  startBattle({ kind: 'cup', field: f, enemies: en, p0: team, hpCarry: R.hp, boss, arcade: { stage: i }, eMul: Math.min(1.05, .55 + i * .045 + (boss ? .04 : 0)),
+    trainer: { name: boss ? `ボス ${t[1].split(' ')[1]}` : t[1], spr: trArt(boss && i === AC_N - 1 ? 'girl' : t[0]) },
+    skill: clamp(.2 + i * .05 + (boss ? .08 : 0), 0, .85), title: `アーケード　ステージ ${i + 1}/${AC_N}${boss ? '　BOSS' : ''}`,
+    intro: boss ? 'ボスが あらわれた！' : `ステージ ${i + 1}！ ${t[1]}が しょうぶを しかけてきた！` });
+}
+function arcadeResult(res, lines) {
+  const A = ac(), R = A.run; if (!R) return;
+  const fs = B.sides[0].fs; R.hp = fs.map(f => f.fainted || f.hp <= 0 ? 0 : f.hp / f.maxHp);
+  if (res !== 'win') {
+    lines.unshift(`<b style="color:var(--bad)">GAME OVER</b>　ステージ ${R.stage + 1}`, `スコア ${R.score}`);
+    if (R.score > A.best) { A.best = R.score; lines.push('<b style="color:var(--acc)">ハイスコア こうしん！</b>'); }
+    A.bestStage = Math.max(A.bestStage, R.stage); A.run = null; return;
+  }
+  S.wins++;
+  const hpPct = R.hp.reduce((a, b) => a + b, 0) / R.hp.length, tb = Math.max(0, Math.round((120 - B.t) * 10)), gain = 1000 * (R.stage + 1) + Math.round(hpPct * 1500) + tb;
+  R.score += gain; S.capsules += 1; S.gems = (S.gems || 0) + 1;
+  lines.unshift(`ステージ ${R.stage + 1} クリア！　+${gain}`, `<span class="dim">ステージ ${1000 * (R.stage + 1)}・のこりHP ${Math.round(hpPct * 1500)}・タイム ${tb}</span>`);
+  R.stage++;
+  if (R.stage >= AC_N) {
+    R.score += 5000; S.gems += 20; S.trophies++; A.clears++;
+    lines.unshift(`<b style="color:var(--acc)">🏆 アーケード クリア！</b>　スコア ${R.score}`);
+    if (R.score > A.best) { A.best = R.score; lines.push('<b style="color:var(--acc)">ハイスコア こうしん！</b>'); }
+    A.bestStage = AC_N; A.run = null; return;
+  }
+  const revive = AC_BOSS.includes(R.stage - 1);
+  R.hp = R.hp.map(h => h <= 0 ? (revive ? .5 : 0) : Math.min(1, h + .4));
+  lines.push(revive ? 'ボスを たおした！ ひんしの モンスターも ふっかつ！' : 'モンスターの HPが 40% かいふくした');
+}
+function renderArcade() {
+  show('scArcade'); const A = ac(), R = A.run, body = $('acBody');
+  const head = `<div class="card acscore"><span>ハイスコア <b>${A.best}</b></span><span class="dim">さいこう ステージ ${A.bestStage}/${AC_N}・クリア ${A.clears}かい</span></div>`;
+  if (!R) {
+    const team = S.party.slice(0, 3);
+    body.innerHTML = head + `<div class="card"><div style="margin-bottom:8px">パーティの 上3体で 10れんせん。HPは つぎの たたかいに ひきつがれる（かつと 40% かいふく、ボスの あとは ひんしも ふっかつ）。まけたら おわり。</div>
+      <div class="acteam">${team.map(m => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b></div>`).join('')}</div></div>
+      <button class="btn" id="acGo">スタート</button>`;
+    body.querySelector('#acGo').onclick = () => { SND.se('ok'); arcadeNew(); };
+  } else {
+    const team = arcadeTeam() || [];
+    body.innerHTML = head + `<div class="card"><div class="acscore" style="margin-bottom:8px"><span>ステージ <b>${R.stage + 1}</b>/${AC_N}</span><span>スコア <b style="font-size:20px">${R.score}</b></span></div>
+      <div class="acstages">${R.order.concat(R.order).slice(0, AC_N).map((f, i) => `<i class="${i < R.stage ? 'done' : i === R.stage ? 'now' : ''} ${AC_BOSS.includes(i) ? 'boss' : ''}" style="background-image:url(${ARENAS[f].img})"></i>`).join('')}</div></div>
+      <div class="card acteam">${team.map((m, i) => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b><span class="bar"><i style="width:${Math.round(R.hp[i] * 100)}%;background:${R.hp[i] > .5 ? '#7bd88f' : R.hp[i] > .2 ? '#ffd166' : '#ff6a6a'}"></i></span><small>${R.hp[i] > 0 ? Math.round(R.hp[i] * 100) + '%' : 'ひんし'}</small></div>`).join('')}</div>
+      <div class="row" style="gap:10px"><button class="btn" id="acGo" style="flex:2">${AC_BOSS.includes(R.stage) ? 'ボスに ちょうせん！' : 'つぎの たたかいへ'}</button><button class="btn sub" id="acQuit" style="flex:1">あきらめる</button></div>`;
+    body.querySelector('#acGo').onclick = () => { SND.se('ok'); arcadeStart(); };
+    body.querySelector('#acQuit').onclick = async () => { if (!(await ask('アーケードを おわりますか？\nここまでの スコアで きろくします。'))) return; if (R.score > A.best) A.best = R.score; A.bestStage = Math.max(A.bestStage, R.stage); A.run = null; save(); renderArcade(); };
+  }
+  body.querySelectorAll('canvas[data-sid]').forEach(c => c.replaceWith(spriteCanvas(c.dataset.sid, 56)));
+}
 // その 回戦の あいて（ランクごとに かわる。じぶんと おなじ みためは でない）
 function roundTrainer(i) {
   if (i >= ROUNDS.length - 1) return { k: 'girl', n: ROUNDS[i].tr };
@@ -6700,7 +6792,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac }); },
 };
 })();
 </script>
