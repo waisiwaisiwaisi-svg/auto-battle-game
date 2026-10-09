@@ -3835,6 +3835,8 @@ function startBattle(cfg) {
     projs: [], parts: [], texts: [], fx: [], decals: [], walls: [], wallRects: [], zones: [], holes: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
     cam: { x: st.W / 2, y: st.H / 2, z: VW / st.W }, catchO: null, result: null, exp: {}, skill: cfg.skill, sent: 0,
   };
+  // AI の かしこさ：みかたの モンスターは いつも かしこく わざを えらぶ。あいては せっていの「あいての つよさ」しだい（オンラインは どちらも かしこく、よけは ふつう）
+  { const lv = S.aiLevel == null ? 0 : S.aiLevel; B.smart = [true, cfg.kind === 'online' || lv >= 1]; B.smartDodge = cfg.kind !== 'online' && cfg.kind !== 'wild' && lv >= 2; }
   if (cfg.eMul) for (const f of B.sides[1].fs) { const k = cfg.eMul; f.maxHp = f.hp = Math.round(f.maxHp * k); f.atk *= k; f.spa *= k; f.def *= Math.sqrt(k); f.sdef *= Math.sqrt(k); }   // アーケード：はじめの 敵は よわめ
   if (cfg.hpCarry) {   // アーケード：まえの たたかいの HP を ひきつぐ
     pf.forEach((f, i) => { const k = cfg.hpCarry[i]; if (k == null) return; f.hp = Math.round(f.maxHp * k); if (f.hp <= 0) { f.hp = 0; f.fainted = true; } });
@@ -4577,14 +4579,16 @@ function autoDodgeP(f) {
 }
 function aiDodgeCheck(f, o) {
   const isP = f.side === 0 || B.kind === 'online';
-  const skill = isP ? autoDodgeP(f) : clamp(B.skill * (f.eva || 70) / avgStats().eva, 0, .95);   // プレイヤーの モンスターも 指示なしで たまに かわす
+  const skill = isP ? autoDodgeP(f) : isSmart(f) ? 1 : clamp(B.skill * (f.eva || 70) / avgStats().eva, 0, .95);   // プレイヤーの モンスターも 指示なしで たまに かわす
   if (skill <= 0 || f.dodgeCd > 0 || !['free', 'act'].includes(f.state) || !canAct(f)) return;
   if (o && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && isDamaging(o.cur.m)) {
     if (f.planFor !== o.cur.uid) {
       f.planFor = o.cur.uid;
       // ガード系の わざを もっていれば たまに それで うける
       const guard = f.moves.find(id => ['protect', 'counter'].includes(MOVES[id].k) && (f.cd[id] || 0) <= 0 && !moveBlocked(f, id));
-      f.plan = { will: Math.random() < skill, at: rand(.12, .4) * o.cur.wind / .8, guard: guard && Math.random() < .4 ? guard : null };
+      f.plan = B.smartDodge && f.side === 1
+        ? { will: true, at: Math.max(o.cur.wind * .62, o.cur.wind - .28), guard: guard && estDmg(o, f, o.cur.m) > f.hp * .3 ? guard : null }   // かしこい AI：ねらいが きまってから ぎりぎりで よける
+        : { will: Math.random() < skill, at: rand(.12, .4) * o.cur.wind / .8, guard: guard && Math.random() < .4 ? guard : null };
     }
     if (f.plan.will && o.cur.t >= f.plan.at && inZone(o.cur, o, f.x, f.y, f.r)) {
       const g = f.plan.guard, gm = g && MOVES[g];
@@ -4596,13 +4600,84 @@ function aiDodgeCheck(f, o) {
     if (p.side === f.side) continue;
     const dx = f.x - p.x, dy = f.y - BODY - p.y, d = Math.hypot(dx, dy);
     if (d > 110) continue;
-    if (!p.rolled) { p.rolled = true; p.will = Math.random() < skill * .8; }
+    if (!p.rolled) { p.rolled = true; p.will = Math.random() < (B.smartDodge && f.side === 1 ? 1 : skill * .8); }
     if (p.will && (dx * p.vx + dy * p.vy) > 0) { startDodge(f); return; }
   }
 }
 
 // AI の わざえらび：状況に あわせて 重みづけ
+/* ---------- かしこい AI：ダメージを みつもって いちばん 得な わざを えらぶ ---------- */
+const KIND_P = { melee: .95, swipe: .78, strike: .8, multi: .8, proj: .68, beam: .75, cone: .68, aoe: .72, dash: .72, vault: .66 };
+// わざ m を f が o に あてた ときの ダメージ（へいきん）
+function estDmg(f, o, m) {
+  if (!isDamaging(m) || m.ohko || m.k === 'counter') return 0;
+  let eff = effVs(m.t, o.sp); if (m.superVsWater && hasType(o, 'water')) eff = eff / effOf('ice', 'water') * 2; if (!eff) return 0;
+  const phys = m.cat === 'phys'; let A = phys ? f.atk * stageMul(f.st.atk) : f.spa * stageMul(f.st.spa);
+  if (m.useDef) A = f.def * stageMul(f.st.def); if (m.useFoeAtk) A = o.atk * stageMul(o.st.atk); if (phys && f.status === 'brn' && !m.useDef) A *= .5;
+  const D = (phys || m.hitDef) ? o.def * stageMul(o.st.def) : o.sdef * stageMul(o.st.spd);
+  const P = (m.pow || 0) * 5 * (KIND_DMG[m.k] || 1), base = Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D / 50) + 2;
+  let d = DMG_K * base * (hasType(f, m.t) ? 1.5 : 1) * eff * .925 * (1 + (m.e && m.e.crit || m.crit ? .06 : .02));
+  if (m.hits) d *= m.hits * (m.hits + 1) / 2; if (m.cnt > 1) d *= 1 + (m.cnt - 1) * .4; if (m.burst) d *= 2.2; if (m.chan) d *= CHAN_SUM * .75;
+  return d;
+}
+// わざ ごとの ねうち（あいての のこりHP に たいする わりあい ていど の たんい）
+function smartScore(f, o, id) {
+  const m = MOVES[id], e = m.e || {}, hpF = f.hp / f.maxHp, d = dist(f, o);
+  if (isDamaging(m)) {
+    if (m.ohko) return o.lvl > f.lvl ? 0 : .12;
+    if (m.fakeout && f.enterT > 1.8) return 0;
+    if (m.sucker && !(o.state === 'wind' && o.cur && isDamaging(o.cur.m))) return 0;
+    let p = KIND_P[m.k] || .7;
+    if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !losClear(f, o)) p *= .3;
+    if (o.v.protect > 0 || o.inv > .2) p *= .2;
+    if (o.v.counter && (o.v.counter.ctr === 'any' || (o.v.counter.ctr === 'spec' && m.cat === 'spec'))) p *= .1;   // かえされる
+    if (o.state === 'wind' && o.cur && o.cur.boost) p = Math.min(1, p * 1.3);   // ため中は ねらいどき
+    const dmg = estDmg(f, o, m) * p, rc = moveReach(f, o, m), travel = Math.max(0, d - rc) / Math.max(40, speedOf(f));
+    if (dmg >= o.hp * 1.05) return 5 - (m.wind || .3) - travel;   // とどめ：はやい わざを
+    let v = dmg / o.maxHp / ((m.wind || .3) + .35 + travel);
+    if (e.drain && hpF < .7) v *= 1.25; if (e.recoil) v *= .85; if (e.self && Object.values(e.self).some(x => x < 0)) v *= .85;
+    if (e.st && !o.status) v *= 1 + e.stCh / 200; if (m.switchOut && benchIdx(f.side) >= 0 && hpF < .4) v *= 1.3;
+    return v;
+  }
+  const oPhys = o.atk * stageMul(o.st.atk) > o.spa * stageMul(o.st.spa), myPhys = f.moves.filter(x => isDamaging(MOVES[x]) && MOVES[x].cat === 'phys').length >= f.moves.filter(x => isDamaging(MOVES[x]) && MOVES[x].cat === 'spec').length;
+  const threat = o.moves.some(x => isDamaging(MOVES[x]) && (o.cd[x] || 0) < 1.2) && d < 260;
+  switch (m.k) {
+    case 'heal': return hpF < .45 ? (1 - hpF) * .5 : 0;
+    case 'self': { const ks = Object.keys(e.self || {}).filter(k => e.self[k] > 0); if (!ks.length || ks.some(k => f.st[k] >= 4) || hpF < .55) return 0;
+      const useful = ks.some(k => (k === 'atk' && myPhys) || (k === 'spa' && !myPhys) || k === 'spe' || (k === 'def' && oPhys) || (k === 'spd' && !oPhys));
+      return useful ? (threat ? .05 : .22) * (o.hp / o.maxHp) * (2 - Math.max(...ks.map(k => f.st[k])) / 2) : 0; }
+    case 'protect': case 'counter': return 0;
+    case 'sub': return !f.v.sub && hpF > .6 ? .12 : 0;
+    case 'dbond': return hpF < .25 ? .35 : 0;
+    case 'curse': return hasType(f, 'ghost') ? (hpF > .65 && !o.v.curse && o.hp / o.maxHp > .5 ? .3 : 0) : (f.st.atk < 2 && myPhys && hpF > .55 ? .15 : 0);
+    case 'field': return m.fld === 'trickroom' ? (B.trickRoom <= 0 && f.baseSpd < o.baseSpd ? .28 : 0) : (B.sides[f.side].tail <= 0 ? .16 : 0);
+    case 'hazard': { const hz = B.sides[1 - f.side].hz, max = { rocks: 1, spikes: 3, tspikes: 2 }[m.hz]; return hz[m.hz] < max && benchIdx(1 - f.side) >= 0 ? .14 : 0; }
+    case 'baton': return STAGE_KEYS.some(k => f.st[k] >= 2) && benchIdx(f.side) >= 0 && hpF < .5 ? .3 : 0;
+    case 'wall': return !B.walls.some(x => x.side === f.side) && d > 150 && o.moves.some(x => ['proj', 'beam', 'cone'].includes(MOVES[x].k)) ? .12 : 0;
+    case 'floor': return !B.zones.some(z => z.side === f.side) && !hovers(o) && effVs(m.t, o.sp) > 0 ? .13 : 0;
+    case 'ray':
+      if (m.sp === 'taunt') return !o.v.taunt && o.moves.some(x => MOVES[x].cat === 'stat') ? .15 : 0;
+      if (m.sp === 'encore') return o.lastMove && MOVES[o.lastMove].cat === 'stat' && !o.v.encore ? .25 : 0;
+      if (m.sp === 'yawn') return !o.status && !o.v.yawn ? .2 : 0;
+      if (m.sp === 'trick' || m.sp === 'roar') return STAGE_KEYS.some(k => o.st[k] > 0) ? .3 : 0;
+      return .05;
+    default:   // 状態異常の 弾
+      if (o.status || o.v.sub > 0) return 0;
+      if (e.seed) return !o.v.seed && !hasType(o, 'grass') ? .16 : 0;
+      if (e.st === 'brn') return hasType(o, 'fire') ? 0 : oPhys ? .3 : .12;
+      if (e.st === 'par') return hasType(o, 'elec') ? 0 : o.baseSpd >= f.baseSpd ? .26 : .16;
+      if (e.st === 'tox' || e.st === 'psn') return hasType(o, 'poison') ? 0 : o.hp / o.maxHp > .6 ? .26 : .1;
+      return .12;
+  }
+}
+const isSmart = (f) => B && B.smart && B.smart[f.side];
 function aiPickMove(f, o) {
+  if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
+    let best = null, bv = 0;
+    for (const id of f.moves.concat(f.moves.some(x => isDamaging(MOVES[x])) ? [] : ['tackle'])) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; const v = smartScore(f, o, id); if (v > bv) { bv = v; best = id; } }
+    if (!best && MOVES.tackle && !(f.cd.tackle > 0)) best = 'tackle';
+    return best;
+  }
   const opts = [];
   for (const id of f.moves) {
     if ((f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue;
@@ -4675,6 +4750,12 @@ function aiSwitch(f, o, dt) {
   f.swapT = (f.swapT == null ? 3 : f.swapT) - dt;
   if (f.swapT > 0) return false;
   f.swapT = rand(2.5, 4.5);
+  if (isSmart(f)) {   // かしこい AI：あたえる ダメージ と うける ダメージ の バランスで いちばん いい モンスターへ
+    const mu = (x) => { const give = Math.max(0, ...x.moves.map(id => estDmg(x, o, MOVES[id]))) / o.hp, take = Math.max(.01, ...o.moves.map(id => estDmg(o, x, MOVES[id]))) / x.hp; return give / take; };
+    const now = mu(f); let best = -1, bv = now * 1.8;
+    sd.fs.forEach((x, i) => { if (i !== sd.act && !x.fainted && x.hp > 0) { const v = mu(x) * .9; if (v > bv) { bv = v; best = i; } } });
+    if (best < 0 || now > .8) return false; doSwitch(f, best); return true;
+  }
   const threat = (x) => Math.max(1, ...o.moves.filter(id => MOVES[id].cat !== 'stat').map(id => effVs(MOVES[id].t, x.sp)));
   const now = threat(f);
   if (now < 2 || f.hp < f.maxHp * .3) return false;
@@ -4698,8 +4779,11 @@ function aiMove(f, o, dt, autoSpecial) {
   if (autoSpecial && !f.queued) {
     f.aiT -= dt;
     if (f.aiT <= 0) {
+      if (isSmart(f)) { f.aiT = .15; f.queued = aiPickMove(f, o); }   // かしこい AI：まよわない
+      else {
       f.aiT = rand(.5, 1.3) * (f.side === 1 ? (1.2 - B.skill * .5) : 1) * persona(f).react;
       if (Math.random() < .8) f.queued = aiPickMove(f, o);
+      }
     }
   }
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
@@ -6515,11 +6599,13 @@ $('btnOpt').onclick = () => {
     <label class="optrow">BGM <input type="range" min="0" max="1" step="0.05" id="oMusic"></label>
     <label class="optrow">こうかおん <input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
+    <label class="optrow">あいての つよさ <select id="oAi"><option value="0">ふつう</option><option value="1">かしこい</option><option value="2">さいきょう（かならず よける）</option></select></label>
     <div style="margin-top:12px">トレーナーの みため</div><div class="looks" id="oLooks"></div>
     <div class="row" style="margin-top:16px;justify-content:space-between"><button class="dim" id="oReset" style="text-decoration:underline">セーブデータを けす</button><button class="btn" id="oClose">とじる</button></div>`);
   const m = bg.querySelector('#oMusic'), x = bg.querySelector('#oSfx'), u = bg.querySelector('#oMute');
   m.value = SND.opt.music; x.value = SND.opt.sfx; u.checked = SND.opt.mute;
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
+  const AI = bg.querySelector('#oAi'); AI.value = S ? String(S.aiLevel == null ? 0 : S.aiLevel) : '0'; AI.disabled = !S; AI.onchange = () => { if (S) { S.aiLevel = +AI.value; save(); } };
   const LK = bg.querySelector('#oLooks');
   const drawLooks = () => { LK.innerHTML = ''; for (const [k, n] of TR_LOOKS) {
     const b = document.createElement('button'), a = trArt(k), img = a.idle0.n, c = document.createElement('canvas'), z = 2;
@@ -6792,7 +6878,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, fixMon: (m, b) => fixMon(m, b) }); },
 };
 })();
 </script>
