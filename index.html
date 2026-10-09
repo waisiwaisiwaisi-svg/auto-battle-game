@@ -2918,6 +2918,7 @@ const SND = (() => {
     const t = now + .005, D = sfxG;
     switch (name) {
       case 'click': tone(D, t, 880, .05, 'square', .12); break;
+      case 'beat': tone(D, t, 70, .12, 'sine', .5, 45); tone(D, t + .16, 62, .14, 'sine', .4, 40); break;
       case 'ok': tone(D, t, 660, .06, 'square', .15); tone(D, t + .06, 990, .09, 'square', .15); break;
       case 'back': tone(D, t, 520, .06, 'square', .12); tone(D, t + .05, 390, .08, 'square', .12); break;
       case 'deny': tone(D, t, 180, .14, 'square', .14); break;
@@ -4425,7 +4426,8 @@ function hit(att, def, m, ang, opt) {
   const P = pow * 5 * (KIND_DMG[m.k] || 1), base = Math.floor(Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D) / 50) + 2;
   let dmg = Math.max(1, Math.round(DMG_K * base * (opt.mul || 1) * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
   if (lagHit) popText(def.x, def.y - 118, 'スキあり！', '#ff9a8a', true);
-  const heavy = !opt.tick && pow >= 19, big = !opt.tick || opt.first;   // うちつづける わざは 1回ごとは かるい
+  const heavy = !opt.tick && pow >= 19, big = !opt.tick || opt.first;
+  const tier = opt.tick ? 0 : (crit && (heavy || eff > 1)) || (heavy && eff > 1) ? 2 : heavy || eff > 1 || crit ? 1 : 0;   // ヒットの 大きさ 3だんかい   // うちつづける わざは 1回ごとは かるい
   // デコイ（みがわり）
   if (def.v.sub > 0 && !['hyper-voice', 'alluring-voice', 'psychic-noise'].includes(m.ref)) {
     def.v.sub -= dmg; popText(def.x, def.y - 66, String(dmg), '#e8e0cc');
@@ -4442,10 +4444,11 @@ function hit(att, def, m, ang, opt) {
     def.cur = null; if (!def.v.rampage) def.queued = null;
     if (!lagHit) { def.state = 'stun'; def.stT = heavy ? .45 : .25; }
     def.kx = Math.cos(ang) * (heavy ? 230 : 140) * K; def.ky = Math.sin(ang) * (heavy ? 230 : 140) * K;
-    B.hitstop = Math.max(B.hitstop, heavy ? .1 : .05);
+    B.hitstop = Math.max(B.hitstop, tier === 2 ? .16 : tier === 1 ? .09 : .025);   // 小さい ヒットは かるく、大きい ヒットは ずしっと
   }
   SND.se(crit ? 'crit' : 'hit', heavy ? .8 : opt.tick ? 1.5 : 1.2); if (big) { if (eff > 1) SND.se('super'); else if (eff < 1) SND.se('weak'); }
-  B.shake = Math.max(B.shake, heavy ? 7 : 3);
+  B.shake = Math.max(B.shake, tier === 2 ? 11 : tier === 1 ? 6 : 1.5);
+  if (tier === 2) { impactBeat(def.x, def.y - BODY, .55, .28); B.scrFlash = Math.max(B.scrFlash || 0, .06); } else if (tier === 1) impactBeat(def.x, def.y - BODY, .25, 0);
   B.cheer = Math.min(1, B.cheer + (heavy ? .7 : .3));
   popText(def.x + rand(-6, 6), def.y - 66, String(dmg), eff > 1 ? '#ffd166' : eff < 1 ? '#a49ac0' : '#ffffff', eff > 1 || heavy);
   burst(def.x, def.y - BODY, id2col(m), heavy ? 16 : 8, 110, .4);
@@ -4500,10 +4503,20 @@ function statusHit(att, def, m) {
   return true;
 }
 
+// メリハリ：スロー と カメラの よせ（強さ k：0〜1）
+function impactBeat(x, y, k, slowT) {
+  if (!B || B.headless) return;
+  if (NET.host || B.remote) slowT = 0;   // オンラインは スローなし（あいてと ずれない ように）
+  B.punch = Math.max(B.punch || 0, k); B.punchAt = { x, y };
+  if (slowT) { B.slowT = Math.max(B.slowT || 0, slowT); B.slowK = .3; }
+}
 function faint(f, by) {
   if (f.state === 'faint' || f.fainted) return;
   f.state = 'faint'; f.stT = 1.2; f.cur = null; f.queued = null; SND.se('ko');
-  B.cheer = 1; B.shake = Math.max(B.shake, 6);
+  B.cheer = 1; B.shake = Math.max(B.shake, 10);
+  { const last = !B.sides[f.side].fs.some(x => x !== f && !x.fainted && x.hp > 0);   // さいごの 1たい：おおきく スロー
+    impactBeat(f.x, f.y - BODY, last ? 1 : .7, last ? 1.1 : .55); B.scrFlash = Math.max(B.scrFlash || 0, last ? .16 : .08);
+    if (last) popText(f.x, f.y - 110, 'FINISH!', '#ffd84a', 'comic'); }
   say(`${prefix(f)}${f.sp.n}は たおれた！`);
   burst(f.x, f.y - BODY, '#ffffff', 10, 120, .6); sheetFx('ko', f.x, f.y - BODY, 1.4);
   if (f.side === 1) {
@@ -5470,6 +5483,7 @@ function onlineMenu() {
 /* ---------- メインループ ---------- */
 function bStep(dt) {
   if (B && B.remote) { netGuestStep(dt); bVisual(dt); return; }
+  if (B && B.slowT > 0) { B.slowT -= dt; dt *= B.slowK || .3; }   // スロー
   if (!B || B.paused) { if (B && B.net === 'host') netHostTick(dt); return; }
   if (sayTimer > 0) sayTimer -= dt;
   for (const sd of B.sides) if (sd.trainer) sd.trainer.shout = Math.max(0, sd.trainer.shout - dt);
@@ -5492,6 +5506,13 @@ function bStep(dt) {
     if (f.hp <= 0 && !f.fainted && !['faint', 'return', 'enter'].includes(f.state)) { f.state = 'faint'; f.stT = .6; f.cur = null; }
     else if (f.fainted && f.state === 'bench') afterFaint(f);
   }
+  // ラストスパート：どちらかが のこり 1たいに なったら 曲が ボス版に。じぶんが ピンチなら こどう
+  if (B.mode === 'fight' && !B.lastStand && B.kind !== 'wild' && B.sides.some(sd => sd.fs.filter(x => !x.fainted && x.hp > 0).length === 1)) {
+    B.lastStand = true; if (!B.cfg.boss) SND.play('st_' + B.st.field + '_boss'); say('ラストスパート！'); B.cheer = 1;
+  }
+  { const me = active(B.my || 0), pin = me && B.mode === 'fight' && me.hp > 0 && me.hp < me.maxHp * .3 && !B.sides[B.my || 0].fs.some(x => x !== me && !x.fainted && x.hp > 0);
+    B.pinch = pin ? Math.min(1, (B.pinch || 0) + dt * 2) : Math.max(0, (B.pinch || 0) - dt * 2);
+    if (pin && (B.beatT = (B.beatT || 0) - dt) <= 0) { B.beatT = .85; SND.se('beat'); } }
   if (B.pendingSend) { B.pendingSend.t -= dt; if (B.pendingSend.t <= 0) { const p = B.pendingSend; B.pendingSend = null; sendOut(p.side, p.idx, p.pass, p.lag, p.at); } }
 
   if (B.mode === 'catch') updateCatch(dt);
@@ -5526,6 +5547,7 @@ function bStep(dt) {
 }
 // 見た目だけの 更新（粒・文字・エフェクト・カメラ）。オンラインの ゲストは これだけ うごかす
 function bVisual(dt) {
+  if (B.punch > 0) B.punch = Math.max(0, B.punch - dt * 2.2);
   for (const q of B.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += q.g * dt; q.vx *= .96; q.life -= dt; }
   if (B.scrFlash > 0) B.scrFlash -= dt;
   if (B.parts.length > 900) B.parts.splice(0, B.parts.length - 900);
@@ -6403,10 +6425,10 @@ function render() {
   ctx.setTransform(RS, 0, 0, RS, 0, 0);
   ctx.fillStyle = '#141022'; ctx.fillRect(0, 0, VW, VH);
   if (!B) return;
-  const st = B.st, cam = B.cam, z = cam.z;
-  const hw = VW / 2 / z, hh = VH / 2 / z;
-  const cx = st.W > hw * 2 ? clamp(cam.x, hw, st.W - hw) : st.W / 2;
-  const cy = st.H > hh * 2 ? clamp(cam.y, hh, st.H - hh) : st.H / 2;
+  const st = B.st, cam = B.cam, pk = B.punch > 0 ? B.punch : 0, z = cam.z * (1 + pk * .28);   // ヒットの ときだけ ぐっと よる
+  const hw = VW / 2 / z, hh = VH / 2 / z, px = pk && B.punchAt ? cam.x + (B.punchAt.x - cam.x) * pk * .45 : cam.x, py = pk && B.punchAt ? cam.y + (B.punchAt.y - cam.y) * pk * .45 : cam.y;
+  const cx = st.W > hw * 2 ? clamp(px, hw, st.W - hw) : st.W / 2;
+  const cy = st.H > hh * 2 ? clamp(py, hh, st.H - hh) : st.H / 2;
   const sh = B.shake > 0 ? [rand(-B.shake, B.shake), rand(-B.shake, B.shake)] : [0, 0];
   ctx.setTransform(z * RS, 0, 0, z * RS, Math.round((VW / 2 - cx * z + sh[0]) * RS), Math.round((VH / 2 - cy * z + sh[1]) * RS));
   ctx.imageSmoothingEnabled = false;
@@ -6472,6 +6494,9 @@ function render() {
   }
 
   if (B.scrFlash > 0) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = Math.min(.5, B.scrFlash * 3); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.restore(); }
+  if (B.pinch > 0) {   // ピンチ：画面の ふちが 赤く どくどく
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); const W = cv.width, H = cv.height, g = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, W * .62);
+    g.addColorStop(0, 'rgba(255,0,0,0)'); g.addColorStop(1, `rgba(200,10,20,${B.pinch * (.28 + .18 * Math.max(0, Math.sin(B.t * 7.4)))})`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore(); }
   ctx.globalAlpha = 1;
   if (st.crowd.length) drawCrowd(true);
 
@@ -6878,7 +6903,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, fixMon: (m, b) => fixMon(m, b) }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, fixMon: (m, b) => fixMon(m, b) }); },
 };
 })();
 </script>
