@@ -4268,10 +4268,11 @@ function placeWall(f, o, m) {
   typeFx(w.x, w.y - 10, m.t, 16, 120, .5); B.shake = Math.max(B.shake, 4);
   say(`${m.n}が あらわれた！`);
 }
+const FLOOR_LIFE = 99999;
 function placeFloor(f, o, m) {
   const x = o ? o.x : f.x + f.face * 120, y = o ? o.y : f.y;
   B.zones = B.zones.filter(z => z.side !== f.side || z.t !== m.t);
-  B.zones.push({ id: MOVE_ID.get(m), t: m.t, x, y, rad: m.rad, life: m.life, max: m.life, side: f.side, tick: .5, uid: ++B.uidc, f });
+  B.zones.push({ id: MOVE_ID.get(m), t: m.t, x, y, rad: m.rad, life: FLOOR_LIFE, max: FLOOR_LIFE, side: f.side, tick: .5, uid: ++B.uidc, f });   // ゆかは きえない（おなじ わざを おきなおすと うつる）
   fxPush({ type: 'shock', x, y, rad: m.rad, col: TYPES[m.t].c, life: .4, max: .4 }); typeFx(x, y - 6, m.t, 18, m.rad * 2, .5);
   say(`${m.n}が ひろがった！`);
 }
@@ -4286,7 +4287,7 @@ function updatePlaced(dt) {
   for (const z of B.zones) {
     z.life -= dt; z.tick -= dt;
     if (z.tick <= 0) { z.tick = .5;
-      const x = active(1 - z.side); if (x && targetable(x) && !hovers(x) && inZoneFloor(z, x.x, x.y)) { floorDmg(x, z, 1 / 16); const e = MOVES[z.id].e || {}; if (e.st && x.hp > 0 && Math.random() * 100 < e.stCh) setStatus(x, e.st, z.f); }
+      const x = active(1 - z.side); if (x && targetable(x) && !hovers(x) && inZoneFloor(z, x.x, x.y)) { floorDmg(x, z, 0); const e = MOVES[z.id].e || {}; if (e.st && x.hp > 0 && Math.random() * 100 < e.stCh) setStatus(x, e.st, z.f); }
     }
     if (Math.random() < dt * 10) typeFx(z.x + rand(-z.rad, z.rad) * .8, z.y + rand(-z.rad, z.rad) * .45, z.t, 1, 30, .5);
   }
@@ -4295,7 +4296,7 @@ function updatePlaced(dt) {
 // ゆか・とげの ダメージ（さいだいHP の わりあい × あいしょう）
 function floorDmg(x, src, frac) {
   const eff = effVs(src.t, x.sp); if (eff === 0) return;
-  const dmg = Math.max(1, Math.round(x.maxHp * frac * Math.min(eff, 2)));
+  const dmg = frac ? Math.max(1, Math.round(x.maxHp * frac * Math.min(eff, 2))) : 1;   // frac 0：ゆか（いつも 1）
   x.hp = Math.max(0, x.hp - dmg); x.flash = .1; B.lastDmgT = B.t;
   popText(x.x + rand(-6, 6), x.y - 60, String(dmg), eff > 1 ? '#ffd166' : '#ff9a8a');
   typeFx(x.x, x.y - 8, src.t, 5, 60, .35);
@@ -5101,12 +5102,13 @@ function updateEffects(f, dt) {
   if (f.tickT <= 0) {
     f.tickT = TICK;
     let dmg = 0, col = '#b86ad8';
-    if (f.status === 'brn') { dmg += f.maxHp / 16; col = '#ff8a3d'; }
-    if (f.status === 'psn') dmg += f.maxHp / 8;
-    if (f.status === 'tox') { dmg += f.maxHp * f.toxN / 16; f.toxN = Math.min(15, f.toxN + 1); }
-    if (v.curse) { dmg += f.maxHp / 4; col = '#8a78c8'; }
+    // 3びょうごと（ポケモンの 1ターン の 半分くらいに おさえる）
+    if (f.status === 'brn') { dmg += f.maxHp / 32; col = '#ff8a3d'; }
+    if (f.status === 'psn') dmg += f.maxHp / 24;
+    if (f.status === 'tox') { dmg += f.maxHp * f.toxN / 48; f.toxN = Math.min(4, f.toxN + 1); }   // もうどく：1/48 → 4/48（1/12）まで ふえる
+    if (v.curse) { dmg += f.maxHp / 10; col = '#8a78c8'; }
     if (v.seed) {
-      const s = Math.max(1, Math.round(f.maxHp / 8)); dmg += s; col = '#62d26f';
+      const s = Math.max(1, Math.round(f.maxHp / 16)); dmg += s; col = '#62d26f';
       const tgt = active(v.seed - 1); if (tgt && tgt.hp > 0 && tgt !== f && !(tgt.v.healBlock > 0)) healHp(tgt, s);
     }
     if (dmg > 0) { dmg = Math.max(1, Math.round(dmg)); f.hp = Math.max(0, f.hp - dmg); popText(f.x, f.y - 66, `-${dmg}`, col); tickFx(f); if (f.hp <= 0) faint(f, opp(f)); }
@@ -5795,7 +5797,7 @@ function moveDesc(m) {
   if (m.chan) out.push(`${m.chan}びょう うちつづける`);
   if (m.k === 'wall') out.push(`あいてとの あいだに かべを つくる（${m.life}びょう）。わざも とおさない${m.thorn ? '・さわると ダメージ' : ''}`);
   if (m.k === 'vault') out.push(m.hide === 'fly' ? 'そらへ とびあがり、あいての ところへ おりて こうげき（とんでいる あいだは うたれない）' : 'じめんに もぐり、あいての 足もとから こうげき（もぐっている あいだは うたれない）。ほった 穴は のこり、じぶんより 大きくない モンスターは 穴から 穴へ くぐれる');
-  if (m.k === 'floor') out.push(`あいての 足もとに ${m.n}（${m.life}びょう）。ふむと ダメージ${m.slow ? '・あしが おそくなる' : ''}`);
+  if (m.k === 'floor') out.push(`あいての 足もとに ${m.n}（きえない）。ふむと 1ダメージ${m.slow ? '・あしが おそくなる' : ''}`);
   if (m.cnt > 1) out.push(`${m.cnt}はつ`);
   if (m.cat !== 'stat' && m.acc && m.acc < 100) out.push(`めいちゅう${m.acc}`);
   if (e.st) out.push(`${e.stCh || 100}%で ${ST[e.st]}`);
