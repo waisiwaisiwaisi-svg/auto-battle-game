@@ -905,6 +905,17 @@ Object.assign(MOVES100, {
   'volt-floor':   { n: 'でんきのゆか',   ref: 'volt-floor',   t: 'elec',   cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .5,  cd: 8,   pow: 0, life: 5, rad: 58, e: { st: 'par', stCh: 15 } },
   'fly':          { n: 'そらをとぶ',     ref: 'fly',          t: 'wind',   cat: 'phys', k: 'vault', power: 90, acc: 100, prio: 0, aim: 'lock', wind: .35, cd: 7,   pow: 18, rad: 36, hide: 'fly', e: {} },
   'dig':          { n: 'あなをほる',     ref: 'dig',          t: 'ground', cat: 'phys', k: 'vault', power: 80, acc: 100, prio: 0, aim: 'lock', wind: .35, cd: 6.5, pow: 16, rad: 38, hide: 'dig', e: {} },
+  // かべごしに とどく わざ（あいての あしもとに おとす）：かくれながら うてる
+  'fire-pillar':  { n: 'ひばしら',       ref: 'fire-pillar',  t: 'fire',     cat: 'spec', k: 'strike', power: 80, acc: 100, prio: 0, aim: 'lock', wind: .75, cd: 4.1, pow: 16, rad: 50, e: { st: 'brn', stCh: 10 } },
+  'geyser':       { n: 'みずばしら',     ref: 'geyser',       t: 'water',    cat: 'spec', k: 'strike', power: 80, acc: 100, prio: 0, aim: 'lock', wind: .75, cd: 4.1, pow: 16, rad: 52, e: {} },
+  'root-snare':   { n: 'ねっこのわな',   ref: 'root-snare',   t: 'grass',    cat: 'phys', k: 'strike', power: 70, acc: 100, prio: 0, aim: 'lock', wind: .7,  cd: 3.7, pow: 14, rad: 46, e: { foe: { spe: -1 }, foeCh: 30 } },
+  'thunder-fall': { n: 'らくらい',       ref: 'thunder-fall', t: 'elec',     cat: 'spec', k: 'strike', power: 100, acc: 90, prio: 0, aim: 'dir',  wind: .9,  cd: 4.8, pow: 20, rad: 48, e: { st: 'par', stCh: 20 } },
+  'icicle-drop':  { n: 'つららおとし',   ref: 'icicle-drop',  t: 'ice',      cat: 'phys', k: 'strike', power: 85, acc: 95, prio: 0, aim: 'dir',  wind: .8,  cd: 4.2, pow: 17, rad: 46, e: { flinch: 30 } },
+  'tornado':      { n: 'たつまき',       ref: 'tornado',      t: 'wind',     cat: 'spec', k: 'strike', power: 75, acc: 100, prio: 0, aim: 'lock', wind: .7,  cd: 3.8, pow: 15, rad: 56, e: {} },
+  'acid-rain':    { n: 'どくのあめ',     ref: 'acid-rain',    t: 'poison',   cat: 'spec', k: 'multi',  power: 70, acc: 90, prio: 0, aim: 'dir',  wind: .85, cd: 4.3, pow: 14, rad: 38, pattern: 'around', e: { st: 'psn', stCh: 30 } },
+  'bug-swarm':    { n: 'むしのむれ',     ref: 'bug-swarm',    t: 'bug',      cat: 'phys', k: 'strike', power: 65, acc: 100, prio: 0, aim: 'lock', wind: .65, cd: 3.4, pow: 13, rad: 50, e: {} },
+  'far-strike':   { n: 'とおあて',       ref: 'far-strike',   t: 'fighting', cat: 'spec', k: 'strike', power: 70, acc: 100, prio: 0, aim: 'lock', wind: .7,  cd: 3.7, pow: 14, rad: 44, e: {} },
+  'heavy-drop':   { n: 'ドスンおとし',   ref: 'heavy-drop',   t: 'normal',   cat: 'phys', k: 'strike', power: 80, acc: 95, prio: 0, aim: 'dir',  wind: .8,  cd: 4.2, pow: 16, rad: 50, e: {} },
   'quicksand':    { n: 'ありじごく',     ref: 'quicksand',    t: 'ground', cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8.5, pow: 0, life: 6, rad: 62, slow: .45, e: {} },
 });
 Object.assign(MOVES, MOVES100);
@@ -2554,6 +2565,7 @@ const COVER = { fire: ['ground', 'rock', 'fighting', 'dragon', 'normal', 'elec']
   poison: ['ground', 'ghost', 'grass', 'bug', 'psychic', 'water'], ground: ['rock', 'fighting', 'fire', 'poison', 'normal', 'grass'], wind: ['normal', 'bug', 'ice', 'elec', 'fighting', 'ghost'],
   psychic: ['ghost', 'fighting', 'elec', 'ice', 'normal', 'grass'], bug: ['grass', 'poison', 'fighting', 'rock', 'normal', 'wind'], rock: ['ground', 'fighting', 'fire', 'ice', 'normal', 'dragon'],
   ghost: ['psychic', 'poison', 'ice', 'fighting', 'normal', 'fire'], dragon: ['fire', 'water', 'elec', 'ground', 'wind', 'ice'], normal: ['fighting', 'ground', 'ghost', 'elec', 'ice', 'rock'] };
+const INDIRECT = (m) => !!m && (m.k === 'strike' || m.k === 'multi') && m.cat !== 'stat';   // しょうがいぶつ ごしに とどく
 const STYLE_K = { melee: { melee: 3, swipe: 3, dash: 3, strike: 1.5, multi: 1, vault: 2 }, ranged: { proj: 3, beam: 3, cone: 2, aoe: 1.5, strike: 2, multi: 2 }, mid: { proj: 2, beam: 2, cone: 2, aoe: 2, dash: 2, swipe: 2, strike: 2, multi: 1.5 } };
 (() => {
   const ATK = Object.keys(MOVES).filter(id => isDmgMove(MOVES[id]) && id !== 'tackle' && MOVES[id].k !== 'counter'), SUP = Object.keys(MOVES).filter(id => MOVES[id].cat === 'stat' && !['wall', 'floor'].includes(MOVES[id].k));
@@ -2567,6 +2579,11 @@ const STYLE_K = { melee: { melee: 3, swipe: 3, dash: 3, strike: 1.5, multi: 1, v
     pickN(ATK.filter(id => my.includes(MOVES[id].t)), 3 + (r() < .5 ? 1 : 0), m => (wk[m.k] || 1) * (m.power >= 100 ? .7 : 1) * (m.ohko ? .15 : 1));
     pickN(ATK.filter(id => cov.includes(MOVES[id].t)), 2 + (r() < .5 ? 1 : 0), m => (wk[m.k] || 1) * (m.ohko ? .15 : 1));
     pickN(SUP, 2 + (r() < .4 ? 1 : 0), m => (my.includes(m.t) ? 2 : 1) * (m.k === 'self' ? .8 : 1));
+    if (!out.some(([, id]) => INDIRECT(MOVES[id]))) {   // かべごしに とどく わざを 1つは おぼえる（かくれる 子の ため）
+      const ind = ATK.filter(id => INDIRECT(MOVES[id]) && my.includes(MOVES[id].t)), ind2 = ind.length ? ind : ATK.filter(id => INDIRECT(MOVES[id]) && cov.includes(MOVES[id].t));
+      const pick = (ind2.length ? ind2 : ATK.filter(id => INDIRECT(MOVES[id])))[Math.floor(r() * 1e6) % Math.max(1, (ind2.length ? ind2 : ATK.filter(id => INDIRECT(MOVES[id]))).length)];
+      if (pick) out.push([4 + Math.floor(r() * 8), pick]);
+    }
     LEARN[sid] = out.filter(([, id]) => id !== 'tackle');   // 通常攻撃は なし：わざだけで たたかう
   }
 })();
@@ -4694,6 +4711,7 @@ const STAT_JP = { atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう',
 function natPref(f, m) {
   const nat = f.mon.nat, e = m.e || {}, dmg = isDamaging(m), close = ['melee', 'swipe', 'dash', 'vault'].includes(m.k), boost = m.k === 'self' || m.k === 'curse';
   const guardy = ['heal', 'wall', 'floor', 'hazard', 'sub', 'protect', 'counter', 'field'].includes(m.k), status = !dmg && !boost && !guardy, drain = !!e.drain || m.k === 'heal';
+  if (INDIRECT(m)) { const k = { okubyou: 2.6, reisei: 1.6, nonki: 1.5 }[nat]; if (k) return k; }
   switch (nat) {
     case 'yuukan': return dmg ? (close ? 1.6 : .8) : boost ? .3 : .45;
     case 'okubyou': return dmg ? (close ? .4 : 1.2) : status ? 1.6 : guardy ? 1.5 : .8;
@@ -4725,7 +4743,7 @@ function aiPickMove(f, o) {
       if (m.fakeout && f.enterT > 1.8) continue;
       if (m.sucker && !(o.state === 'wind' && o.cur && isDamaging(o.cur.m))) continue;
       if (m.switchOut && B.kind !== 'cup') w *= .8;
-      { const dd = dist(f, o), rc = moveReach(f, o, m); if (dd > rc) w *= clamp(1 - (dd - rc) / 500, .4, 1); if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !losClear(f, o)) w *= .5; }
+      { const dd = dist(f, o), rc = moveReach(f, o, m); if (dd > rc) w *= clamp(1 - (dd - rc) / 500, .4, 1); if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !losClear(f, o)) w *= .5; else if (INDIRECT(m) && !losClear(f, o)) w *= 1.8; }
     } else switch (m.k) {
       case 'heal': w = f.hp < f.maxHp * .5 ? 4 : 0; break;
       case 'wall': w = !B.walls.some(x => x.side === f.side) && dist(f, o) > 120 && o.moves.some(x => ['proj', 'beam', 'cone'].includes(MOVES[x].k)) ? 1.8 : 0; break;
@@ -4844,8 +4862,9 @@ function aiMove(f, o, dt, autoSpecial) {
     const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k);
     const see = !shot || losClear(f, o);
     const close = CLOSE_KINDS.includes(m.k);
+    if (close && isDamaging(m) && flankStep(f, o, reach, d, per, dt)) return;   // まわりこみ：よこへ まわって から つっこむ
     if (d <= reach && see) {
-      const q = f.queued; f.queued = null;
+      const q = f.queued; f.queued = null; f.flFor = null;
       if (f.pace > 1.5) { burst(f.x, f.y, '#d8c8a8', 8, 80, .3); f.pace = .3; }   // ダッシュから ブレーキ：すなけむり
       beginMove(f, q);
       if (per.hitAway && isDamaging(m)) f.awayT = rand(1.2, 2); else if (close && isDamaging(m)) f.awayT = per.hold ? rand(.35, .6) : rand(.6, 1.1);   // うったら いったん はなれる
@@ -4855,7 +4874,7 @@ function aiMove(f, o, dt, autoSpecial) {
     if (stalled() && B.st.nav && !flies(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
       f.aiMode = 'attack'; if (close) f.paceT = 2.3 * per.rush; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
     }
-    want = { R: (close ? Math.min(reach * .8, idealRange(f, m, reach, per)) : idealRange(f, m, reach, per)) * roamK, los: shot, cover: false, flank: per.flank > .25 && !shot, mode: 'attack' };
+    want = { R: (close ? Math.min(reach * .8, idealRange(f, m, reach, per)) : idealRange(f, m, reach, per)) * roamK, los: shot, cover: INDIRECT(m) && per.cover > .3, flank: per.flank > .25 && !shot, mode: 'attack' };   // かべごしの わざは かくれた まま
   } else {
     const dmgCd = f.moves.filter(id => isDamaging(MOVES[id])).map(id => f.cd[id] || 0), soon = dmgCd.length ? Math.min(...dmgCd) : 9;
     const oThreat = o.moves.some(id => isDamaging(MOVES[id]) && (o.cd[id] || 0) < 1);
@@ -4875,6 +4894,44 @@ function aiMove(f, o, dt, autoSpecial) {
   f.stratT -= dt; if (f.stratT <= 0) { f.stratT = rand(.5, 1.2); f.strafe *= -1; }
   const tang = ang + f.strafe * Math.PI / 2;
   moveDir(f, Math.cos(tang) * .35, Math.sin(tang) * .35, dt);
+}
+// ---- まわりこみ：あいての 真横あたりを めざして 弧を えがいて まわり、それから つっこむ。障害物は 道さがしで よける ----
+function spotOk(f, x, y) {
+  if (!inField(x, y, f.r + 8) || (!flies(f) && blockedAt(x, y, footR(f) + 6))) return false;
+  const N = B.st.nav; if (N && !flies(f)) { const i = Math.floor(x / NAV), j = Math.floor(y / NAV); if (!N.walk[j * N.nw + i]) return false; }
+  return true;
+}
+function planFlank(f, o, reach, only) {
+  const base = Math.atan2(f.y - o.y, f.x - o.x), R = clamp(reach + 45, 100, 190); let best = null, bs = -1e9;
+  for (const da of [1.6, 1.25]) for (const sg of only ? [only] : [1, -1]) {
+    const a = base + sg * da, x = o.x + Math.cos(a) * R, y = o.y + Math.sin(a) * R;
+    if (!spotOk(f, x, y)) continue;
+    const mid = base + sg * da * .5, mx = o.x + Math.cos(mid) * R, my = o.y + Math.sin(mid) * R;   // とちゅうも とおれるか
+    const st = B.st, edge = Math.min(x - st.fx0, st.fx1 - x, y - st.fy0, st.fy1 - y);
+    const sc = edge * .5 + (spotOk(f, mx, my) ? 120 : 0) + da * 40 + Math.random() * 30;
+    if (sc > bs) { bs = sc; best = { a, sg, R, t: 0, ck: .5, lx: f.x, ly: f.y, stuck: 0, flip: !!only }; }
+  }
+  return best;
+}
+function flankStep(f, o, reach, d, per, dt) {
+  if (f.flFor !== f.queued) { f.flFor = f.queued; f.fl = null; f.flWant = per.flank >= .45 && Math.random() < per.flank + .2; }
+  if (!f.fl && f.flWant) {   // まずは ちかづく。まわりこめる きょりに なったら けいかくを たてる
+    if (d > reach + 25 && d < clamp(reach + 45, 100, 190) + 110) { f.fl = planFlank(f, o, reach); f.flWant = false; }
+    else return false;
+  }
+  const F = f.fl; if (!F || F.done) return false;
+  F.t += dt;
+  const cur = Math.atan2(f.y - o.y, f.x - o.x), diff = wrapAng(F.a - cur);
+  F.ck -= dt; if (F.ck <= 0) { F.stuck = Math.hypot(f.x - F.lx, f.y - F.ly) < 14 ? F.stuck + 1 : 0; F.ck = .4; F.lx = f.x; F.ly = f.y; }   // ひっかかって いないか
+  if (F.stuck >= 2 && !F.flip) { const nf = planFlank(f, o, reach, -F.sg); if (nf) { f.fl = nf; return true; } }   // はんたいがわから
+  if (Math.abs(diff) < .45 || F.t > 4 || F.stuck >= 2) { F.done = true; F.why = Math.abs(diff) < .45 ? 'ok' : F.stuck >= 2 ? 'stuck' : 'time'; if (B.flankLog) B.flankLog.push(F.why); return false; }   // まわりこめた（or あきらめ）→ つっこむ
+  const as = cur + Math.sign(diff) * Math.min(.85, Math.abs(diff)), R = Math.max(reach + 25, Math.min(F.R, d));
+  let wx = o.x + Math.cos(as) * R, wy = o.y + Math.sin(as) * R;
+  if (!spotOk(f, wx, wy)) { wx = o.x + Math.cos(F.a) * F.R; wy = o.y + Math.sin(F.a) * F.R; }
+  f.paceT = 1.9 * per.rush; f.aiMode = 'flank';
+  const nav = B.st.nav && !flies(f) && !walkClear(f, wx, wy), a = nav ? navDir(f, wx, wy) : Math.atan2(wy - f.y, wx - f.x);
+  moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0);
+  return true;
 }
 // ---- 立ち回りの しくみ ----
 // 性格（せいかく）：1体ずつ ちがう。戦いかたを きめる
@@ -6764,7 +6821,9 @@ function pickMoves(m) {
   const nf = { mon: m, hp: 1, maxHp: 1 };   // 性格に あう わざほど えらばれやすい
   const shuffle = (a) => a.map(x => [Math.pow(Math.random(), 1 / Math.max(.1, natPref(nf, MOVES[x]))), x]).sort((p, q) => q[0] - p[0]).map(p => p[1]);
   const sp = SPECIES[m.sid], stab = shuffle(atk.filter(id => MOVES[id].t === sp.type || MOVES[id].t === sp.type2));
-  const order = stab.length ? [stab[0]].concat(shuffle(atk.filter(id => id !== stab[0]))) : shuffle(atk);   // じぶんの タイプの こうげきを かならず 1つ
+  let order = stab.length ? [stab[0]].concat(shuffle(atk.filter(id => id !== stab[0]))) : shuffle(atk);   // じぶんの タイプの こうげきを かならず 1つ
+  const ind = order.find(id => INDIRECT(MOVES[id]));
+  if (ind && ['okubyou', 'reisei', 'nonki'].includes(m.nat)) order = [ind].concat(order.filter(id => id !== ind));   // かくれる 子は かべごしの わざを かならず
   const supN = Math.min(['yuukan', 'sekkachi'].includes(m.nat) ? 1 : 2, sup.length);
   const res = order.slice(0, Math.max(1, 4 - supN));
   return res.concat(shuffle(sup)).slice(0, 4);
