@@ -966,6 +966,7 @@ function fixMon(m, bias) {
     m.iv = { hp: cv(m.iv.hp), atk: cv(m.iv.atk), def: cv(m.iv.def), spa: rIv(), spd: rIv(), spe: cv(m.iv.spd), eva: rIv() };
   }
   const L = learned(m);
+  if (Array.isArray(m.moves) && m.moves.includes('tackle')) { m.moves = m.moves.filter(id => id !== 'tackle'); for (const id of pickMoves(m)) if (m.moves.length < 4 && !m.moves.includes(id)) m.moves.push(id); }   // むかしの たいあたりは わざに おきかえ
   if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // わざのまきものの わざも そのまま
   return m;
 }
@@ -2566,8 +2567,7 @@ const STYLE_K = { melee: { melee: 3, swipe: 3, dash: 3, strike: 1.5, multi: 1, v
     pickN(ATK.filter(id => my.includes(MOVES[id].t)), 3 + (r() < .5 ? 1 : 0), m => (wk[m.k] || 1) * (m.power >= 100 ? .7 : 1) * (m.ohko ? .15 : 1));
     pickN(ATK.filter(id => cov.includes(MOVES[id].t)), 2 + (r() < .5 ? 1 : 0), m => (wk[m.k] || 1) * (m.ohko ? .15 : 1));
     pickN(SUP, 2 + (r() < .4 ? 1 : 0), m => (my.includes(m.t) ? 2 : 1) * (m.k === 'self' ? .8 : 1));
-    if (out.filter(([, id]) => isDmgMove(MOVES[id])).length < 3) out.push([out.length * 3, 'tackle']);
-    LEARN[sid] = out;
+    LEARN[sid] = out.filter(([, id]) => id !== 'tackle');   // 通常攻撃は なし：わざだけで たたかう
   }
 })();
 for (const sid in SPECIES) { const sp = SPECIES[sid]; if (!LEARN[sid]) continue; if ((sp.fly || sp.type === 'wind' || sp.type2 === 'wind') && !LEARN[sid].some(([, x]) => x === 'fly')) LEARN[sid].push([28, 'fly']); if ((sp.type === 'ground' || sp.type2 === 'ground') && !sp.fly && !LEARN[sid].some(([, x]) => x === 'dig')) LEARN[sid].push([28, 'dig']); for (const id of PLACE_MOVES) if ([sp.type, sp.type2].includes(MOVES[id].t) && !LEARN[sid].some(([, x]) => x === id)) LEARN[sid].push([30, id]); }
@@ -4406,6 +4406,7 @@ function hit(att, def, m, ang, opt) {
   if (m.cat === 'stat') return statusHit(att, def, m);
   let eff = m.t === 'normal' ? effOf('normal', def.sp.type) * (def.sp.type2 ? effOf('normal', def.sp.type2) : 1) : effVs(m.t, def.sp);
   if (m.superVsWater && hasType(def, 'water')) eff = eff / effOf('ice', 'water') * 2;
+  if (eff === 0 && desperate(att, def)) { eff = .25; popText(def.x, def.y - 80, 'むりやり！', '#c8b8e8'); }
   if (eff === 0) { popText(def.x, def.y - 66, 'こうかなし', '#a49ac0'); say(`${def.sp.n}には こうかが ないようだ…`); return false; }
   if (m.ohko) { // だいちのさけめ：あたれば いちげき（レベルが上の あいてには きかない）
     if (def.lvl > att.lvl) { say('でも あいてには きかなかった！'); return false; }
@@ -4624,7 +4625,7 @@ const KIND_P = { melee: .95, swipe: .78, strike: .8, multi: .8, proj: .68, beam:
 // わざ m を f が o に あてた ときの ダメージ（へいきん）
 function estDmg(f, o, m) {
   if (!isDamaging(m) || m.ohko || m.k === 'counter') return 0;
-  let eff = effVs(m.t, o.sp); if (m.superVsWater && hasType(o, 'water')) eff = eff / effOf('ice', 'water') * 2; if (!eff) return 0;
+  let eff = effVs(m.t, o.sp); if (m.superVsWater && hasType(o, 'water')) eff = eff / effOf('ice', 'water') * 2; if (!eff && desperate(f, o)) eff = .25; if (!eff) return 0;
   const phys = m.cat === 'phys'; let A = phys ? f.atk * stageMul(f.st.atk) : f.spa * stageMul(f.st.spa);
   if (m.useDef) A = f.def * stageMul(f.st.def); if (m.useFoeAtk) A = o.atk * stageMul(o.st.atk); if (phys && f.status === 'brn' && !m.useDef) A *= .5;
   const D = (phys || m.hitDef) ? o.def * stageMul(o.st.def) : o.sdef * stageMul(o.st.spd);
@@ -4685,8 +4686,9 @@ function smartScore(f, o, id) {
 }
 const isSmart = (f) => B && B.smart && B.smart[f.side];
 // たいあたり（通常攻撃）は つなぎ：ほかの こうげきわざが しばらく 使えない ときだけ
-const realAtks = (f, o) => f.moves.filter(id => id !== 'tackle' && MOVES[id] && isDamaging(MOVES[id]) && effVs(MOVES[id].t, o.sp) > 0 && !moveBlocked(f, id));
-function fillerOk(f, o) { const ids = realAtks(f, o); return !ids.length || Math.min(...ids.map(id => f.cd[id] || 0)) > 2.5; }
+const realAtks = (f, o) => f.moves.filter(id => MOVES[id] && isDamaging(MOVES[id]) && effVs(MOVES[id].t, o.sp) > 0 && !moveBlocked(f, id));
+// こうかの ある こうげきわざが 1つも ない：こうかなしの わざでも むりやり すこし とおす（きまらない たたかいを ふせぐ）
+const desperate = (f, o) => f.moves.some(id => MOVES[id] && isDamaging(MOVES[id])) && !realAtks(f, o).length;
 // 性格ごとの わざの このみ
 const STAT_JP = { atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう', spd: 'とくぼう', spe: 'すばやさ' };
 function natPref(f, m) {
@@ -4706,9 +4708,8 @@ function natPref(f, m) {
 function aiPickMove(f, o) {
   if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
     let best = null, bv = 0;
-    for (const id of f.moves.concat(f.moves.some(x => isDamaging(MOVES[x])) ? [] : ['tackle'])) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; const v = smartScore(f, o, id) * Math.pow(natPref(f, MOVES[id]), .8); if (v > bv) { bv = v; best = id; } }
-    if (best === 'tackle' && !fillerOk(f, o)) best = null;
-    if (!best && MOVES.tackle && !(f.cd.tackle > 0) && fillerOk(f, o)) best = 'tackle';
+    for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; const v = smartScore(f, o, id) * Math.pow(natPref(f, MOVES[id]), .8); if (v > bv) { bv = v; best = id; } }
+    if (!best && desperate(f, o)) best = f.moves.find(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id)) || null;
     return best;
   }
   const opts = [];
@@ -4718,10 +4719,9 @@ function aiPickMove(f, o) {
     let w = 0;
     if (isDamaging(m)) {
       const eff = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1);
-      if (eff === 0) continue;
-      w = (m.pow || 8) / 10 * eff * (hasType(f, m.t) ? 1.3 : 1);
+      if (eff === 0 && !desperate(f, o)) continue;
+      w = (m.pow || 8) / 10 * Math.max(eff, .25) * (hasType(f, m.t) ? 1.3 : 1);
       if (m.ohko && o.lvl > f.lvl) continue;
-      if (id === 'tackle') { if (!fillerOk(f, o)) continue; w *= .4; }
       if (m.fakeout && f.enterT > 1.8) continue;
       if (m.sucker && !(o.state === 'wind' && o.cur && isDamaging(o.cur.m))) continue;
       if (m.switchOut && B.kind !== 'cup') w *= .8;
@@ -4756,8 +4756,6 @@ function aiPickMove(f, o) {
     w *= natPref(f, m);
     if (w > 0) opts.push([id, w]);
   }
-  // こうかの ある こうげきわざが ない（あいしょうで ぜんぶ むこう など）：たいあたりで せめる
-  if (!opts.some(([id]) => isDamaging(MOVES[id])) && MOVES.tackle && !(f.cd.tackle > 0) && fillerOk(f, o) && (!opts.length || Math.random() < .5)) return 'tackle';
   if (!opts.length) return null;
   let r = Math.random() * opts.reduce((s, [, w]) => s + w, 0);
   for (const [id, w] of opts) { r -= w; if (r <= 0) return id; }
@@ -4824,7 +4822,6 @@ function aiMove(f, o, dt, autoSpecial) {
     }
   }
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
-  if (f.queued === 'tackle' && realAtks(f, o).some(id => !(f.cd[id] > 0))) f.queued = aiPickMove(f, o);   // わざが もどったら そっちを 優先
   if (o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
   if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
