@@ -2761,22 +2761,23 @@ const SND = (() => {
     swing: 'k:3 h:1 s:3 h:1 k:3 h:1 s:2 h:2', light: 'k:4 h:2 h:2 s:4 h:4', tribal: 'k:2 k:1 h:1 s:2 h:2 k:1 k:1 k:2 s:2 h:2',
   };
   const STAGE_MUSIC = {
-    wild: { bpm: 164, root: 62, mode: 'dorian', lead: 'square', arp: 'square', drum: 'rock', prog: [0, 5, 6, 4], seed: 131 },
-    ice: { bpm: 128, root: 64, mode: 'dorian', lead: 'triangle', arp: 'sine', drum: 'light', prog: [0, 5, 3, 4], seed: 11 },
-    elec: { bpm: 160, root: 66, mode: 'minor', lead: 'square', arp: 'sawtooth', drum: 'four', prog: [0, 0, 5, 6], seed: 23 },
-    grass: { bpm: 120, root: 67, mode: 'major', lead: 'square', arp: 'triangle', drum: 'swing', prog: [0, 3, 4, 0], seed: 37 },
-    water: { bpm: 112, root: 62, mode: 'lydian', lead: 'triangle', arp: 'sine', drum: 'light', prog: [0, 1, 0, 4], seed: 41 },
-    fire: { bpm: 158, root: 64, mode: 'phrygian', lead: 'sawtooth', arp: 'square', drum: 'rock', prog: [0, 1, 0, 6], seed: 53 },
-    dragon: { bpm: 140, root: 62, mode: 'harm', lead: 'square', arp: 'sawtooth', drum: 'march', prog: [0, 5, 3, 4], seed: 67 },
-    wind: { bpm: 132, root: 69, mode: 'mixo', lead: 'square', arp: 'triangle', drum: 'light', prog: [0, 6, 3, 0], seed: 71 },
-    ground: { bpm: 124, root: 60, mode: 'dorian', lead: 'sawtooth', arp: 'square', drum: 'tribal', prog: [0, 3, 0, 4], seed: 83 },
-    poison: { bpm: 118, root: 61, mode: 'phrygian', lead: 'square', arp: 'sine', drum: 'swing', prog: [0, 1, 5, 4], seed: 97 },
-    fighting: { bpm: 150, root: 69, mode: 'minor', lead: 'square', arp: 'square', drum: 'rock', prog: [0, 6, 5, 4], seed: 103 },
+    wild: { bpm: 154, root: 62, mode: 'dorian', lead: 'square', arp: 'triangle', drum: 'rock', prog: [0, 5, 6, 4], seed: 131, riff: 1, bass: 'oct' },
+    // ステージの ふんいき：riff＝前半を きざむ リフに、bass＝ベースの うごき、arpOn＝伴奏
+    ice: { bpm: 132, root: 64, mode: 'dorian', lead: 'triangle', arp: 'triangle', drum: 'light', prog: [0, 5, 3, 4], seed: 11, riff: 0, bass: 'half' },          // しずかに きらめく
+    elec: { bpm: 164, root: 66, mode: 'minor', lead: 'square', arp: 'square', drum: 'four', prog: [0, 0, 5, 6], seed: 23, riff: 1, bass: 'oct' },              // テクノ・4つうち
+    grass: { bpm: 136, root: 67, mode: 'major', lead: 'square', arp: 'triangle', drum: 'swing', prog: [0, 3, 4, 0], seed: 37, riff: 0, bass: 'walk' },         // あかるく はずむ
+    water: { bpm: 120, root: 62, mode: 'lydian', lead: 'triangle', arp: 'triangle', drum: 'swing', prog: [0, 1, 0, 4], seed: 41, riff: 0, bass: 'half' },      // ながれる・ゆったり
+    fire: { bpm: 166, root: 64, mode: 'phrygian', lead: 'square', arp: 'square', drum: 'rock', prog: [0, 1, 0, 6], seed: 53, riff: 1, bass: 'oct' },          // あつく はげしい
+    dragon: { bpm: 146, root: 62, mode: 'harm', lead: 'square', arp: 'triangle', drum: 'march', prog: [0, 5, 3, 4], seed: 67, riff: 1, bass: 'oct' },         // そうだいな マーチ
+    wind: { bpm: 150, root: 69, mode: 'mixo', lead: 'p25', arp: 'triangle', drum: 'light', prog: [0, 6, 3, 0], seed: 71, riff: 0, bass: 'oct' },              // かろやかに かける
+    ground: { bpm: 128, root: 60, mode: 'dorian', lead: 'square', arp: 'triangle', drum: 'tribal', prog: [0, 3, 0, 4], seed: 83, riff: 1, bass: 'half' },     // どっしり・たいこ
+    poison: { bpm: 116, root: 61, mode: 'phrygian', lead: 'triangle', arp: 'square', drum: 'swing', prog: [0, 1, 5, 4], seed: 97, riff: 0, bass: 'walk' },    // あやしく ゆらゆら
+    fighting: { bpm: 158, root: 69, mode: 'minor', lead: 'square', arp: 'square', drum: 'rock', prog: [0, 6, 5, 4], seed: 103, riff: 1, bass: 'oct' },       // あつい ロック
   };
   // 8bit で はげしい 戦闘曲：パルス波の リフ（16分）→ メロディ → くりかえし。三角波の ベース、ノイズの ドラム
   function compose(o, boss) {
     let sd = o.seed * 9301 + (boss ? 7 : 0); const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647), pick = (a) => a[Math.floor(r() * a.length)];
-    const mode = { major: 'mixo', lydian: 'dorian' }[o.mode] || o.mode, sc = MODES[mode], deg = (d) => o.root + sc[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7);
+    const mode = o.mode, sc = MODES[mode], deg = (d) => o.root + sc[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7);
     // リフの かた（和音の 根音からの 音階の ずれ・-9＝やすみ）
     const RIFFS = [[0, 0, 4, 0, 3, 0, 2, 0, 0, 0, 4, 0, 5, 4, 3, 2], [0, 7, 0, 4, 0, 7, 0, 5, 0, 7, 0, 4, 2, 3, 4, 6], [0, 0, 0, 2, 3, -9, 3, 4, 0, 0, 0, 2, 4, -9, 3, 2],
       [7, 4, 2, 0, 7, 4, 2, 0, 8, 5, 3, 1, 8, 5, 4, 2], [0, -9, 0, 7, -9, 0, 6, 7, 0, -9, 0, 7, 9, 8, 7, 4]];
@@ -2787,9 +2788,9 @@ const SND = (() => {
     for (let bar = 0; bar < 16; bar++) {
       const c = o.prog[bar % 4], B = bar >= 8, last = bar % 8 === 7;
       // リード：前半は 16分の リフ、後半は メロディ
-      if (!B) { const rf = bar % 4 === 3 ? riff2 : riff; for (const d of rf) lead.push(d === -9 ? 'R:1' : nm(deg(c + d)) + ':1'); }
+      if (!B && o.riff) { const rf = bar % 4 === 3 ? riff2 : riff; for (const d of rf) lead.push(d === -9 ? 'R:1' : nm(deg(c + d)) + ':1'); }
       else if (last) lead.push(nm(deg(c + 7)) + ':6', nm(deg(c + 4)) + ':2', nm(deg(c + 7)) + ':8');
-      else pick(MEL_RHY).forEach((len, i) => {
+      else pick(o.riff ? MEL_RHY : MEL_RHY.concat([[4, 4, 4, 4], [6, 2, 8], [4, 2, 2, 8]])).forEach((len, i) => {
         if (i === 0 || len >= 4) cur = c + pick([0, 2, 4, 7]); else cur += pick([-2, -1, 1, 1, 2]);
         cur = Math.max(c - 2, Math.min(c + 9, cur)); lead.push(nm(deg(cur)) + ':' + len);
       });
@@ -2799,16 +2800,19 @@ const SND = (() => {
       // ベース：三角波の 8分 オクターブ、フレーズの おわりは 歩く
       const b = deg(c) - 24;
       if (last) bass.push(`${nm(b)}:2 ${nm(b + 12)}:2 ${nm(b)}:2 ${nm(b + 12)}:2 ${nm(deg(c + 4) - 24)}:2 ${nm(deg(c + 3) - 24)}:2 ${nm(deg(c + 2) - 24)}:2 ${nm(deg(c + 1) - 24)}:2`);
+      else if (o.bass === 'half') bass.push(`${nm(b)}:4 ${nm(b + 7)}:4 ${nm(b)}:4 ${nm(b + 12)}:4`);
+      else if (o.bass === 'walk') bass.push([0, 2, 4, 5].map(d => nm(deg(c + d) - 24) + ':4').join(' '));
       else bass.push(`${nm(b)}:2 ${nm(b + 12)}:2 `.repeat(4).trim());
       // ドラム：8分の ハイハット、2・4拍に スネア、つよい キック。フレーズの おわりは フィル
       if (last) drum.push('k:2 h:2 s:2 h:2 f:1 f:1 f:1 f:1 s:1 f:1 s:1 s:1');
+      else if (o.drum && o.drum !== 'rock' && DRUMS[o.drum]) drum.push((bar % 8 === 0 ? 'c:1 ' + DRUMS[o.drum].replace(/^k:(\d)/, (_, n) => 'k:' + (n - 1)) : DRUMS[o.drum]));
       else drum.push((bar % 8 === 0 ? 'c:1 k:1' : 'k:2') + ' h:2 s:2 h:1 k:1 k:2 h:2 s:2 ' + (boss ? 'h:1 h:1' : 'h:2'));
     }
     // メロディの ハモり：後半の リードを 3度 下で（ボスは 前半も）
     const lead2 = lead.map((t, i) => { const [n, l] = t.split(':'); return n === 'R' ? t : nm(hzToMidi(n) - (boss ? 5 : 4)) + ':' + l; });
-    const S_ = { chip: 1, bpm: Math.min(176, 150 + (o.seed % 6) * 3 + (boss ? 10 : 0)), ch: [
-      { w: 'square', v: .1, s: lead.join(' ') },
-      { w: 'triangle', v: .09, s: arp.join(' ') },
+    const S_ = { chip: 1, bpm: Math.min(178, o.bpm + (boss ? 10 : 0)), ch: [
+      { w: o.lead, v: { triangle: .2, square: .1, p25: .08 }[o.lead] || .1, s: lead.join(' ') },
+      { w: o.arp, v: o.arp === 'square' ? .035 : .09, s: arp.join(' ') },
       { w: 'triangle', v: .38, s: bass.join(' ') },
       { drum: 1, s: drum.join(' ') },
     ] };
@@ -3979,7 +3983,8 @@ function beginMove(f, id) {
     if (v.active) { ang = Math.atan2(v.y, v.x); const d = dist(f, o); tx = clamp(f.x + v.x / Math.hypot(v.x, v.y) * d, B.st.fx0, B.st.fx1); ty = clamp(f.y + v.y / Math.hypot(v.x, v.y) * d, B.st.fy0, B.st.fy1); }
   }
   // 命中100未満の わざは この瞬間の むき・いち で固定（追尾しない）
-  const cur = { id, m, t: 0, wind: m.wind, ang, uid: ++B.uidc, tx, ty, hits: 0 };
+  const boost = m.k === 'self' || (m.k === 'curse' && !hasType(f, 'ghost'));   // のうりょくアップ：ためが ながく、そのあいだに うたれると ダメージ アップ
+  const cur = { id, m, t: 0, wind: boost ? Math.max(1.4, m.wind * 3) : m.wind, ang, uid: ++B.uidc, tx, ty, hits: 0, boost };
   if (m.k === 'multi') cur.pts = multiPoints(f, { x: tx, y: ty }, m, ang);
   f.cur = cur;
   const cdv = m.cd * cdScale(f); f.cdMax = f.cdMax || {}; f.cdMax[id] = cdv;
@@ -4314,7 +4319,8 @@ function hit(att, def, m, ang, opt) {
   const crit = Math.random() < (m.e && m.e.crit || m.crit ? 1 / 8 : 1 / 24);
   const stab = hasType(att, m.t) ? 1.5 : 1;   // タイプ一致 1.5ばい
   let pow = m.pow; if (m.hits) pow = pow * (opt.hitNo + 1); // さんれんスピン：だんだん つよく
-  const lagHit = def.state === 'lag';
+  const boostHit = def.state === 'wind' && def.cur && def.cur.boost;   // のうりょくアップの ため中を ねらわれた
+  const lagHit = def.state === 'lag' || boostHit;
   // ポケモンの ダメージ式：((2×Lv÷5＋2)×いりょく×A÷D÷50＋2)×タイプ一致×あいしょう×きゅうしょ×乱数(0.85〜1.00)。リアルタイム用に DMG_K を かける
   const P = pow * 5 * (KIND_DMG[m.k] || 1), base = Math.floor(Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D) / 50) + 2;
   let dmg = Math.max(1, Math.round(DMG_K * base * (opt.mul || 1) * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
@@ -4598,6 +4604,7 @@ function aiMove(f, o, dt, autoSpecial) {
     }
   }
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
+  if (o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
   if ((o.state === 'wind' || o.state === 'chan') && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
     const t = threatDir(f, o); return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
@@ -5613,6 +5620,13 @@ function drawTele(f) {
     }
   };
   if (m.k === 'proj') { path(1); ctx.fillStyle = `rgba(${base},.8)`; ctx.fill(); ctx.restore(); return; }
+  if (cur.boost) {   // のうりょくアップの ため：おおきな 光の わと ゲージ（スキだらけ）
+    const R = 34 + f.r * .6;
+    ctx.strokeStyle = `rgba(255,209,102,${.5 + prog * .5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(f.x, f.y, R + prog * 14, (R + prog * 14) * .42, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 4; ctx.strokeStyle = blink ? '#ffffff' : '#ffd166'; ctx.beginPath(); ctx.arc(f.x, f.y - BODY, R * .9, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2); ctx.stroke();
+    ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#120e1c'; ctx.strokeText('ためている！', f.x, f.y - BODY - R - 8); ctx.fillStyle = '#ffd166'; ctx.fillText('ためている！', f.x, f.y - BODY - R - 8);
+    ctx.restore(); return;
+  }
   if (!ZONE_KINDS.includes(m.k) && m.k !== 'melee') { // 補助わざ：じぶんの まわりに ひかる輪
     ctx.strokeStyle = `rgba(255,209,102,${.4 + prog * .5})`; ctx.beginPath(); ctx.ellipse(f.x, f.y, 26 + prog * 10, 12 + prog * 4, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); return;
   }
