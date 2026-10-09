@@ -678,7 +678,7 @@ const effVs = (mt, sp) => effOf(mt, sp.type) * (sp.type2 ? effOf(mt, sp.type2) :
 /* k: melee=近接 / proj=弾 / beam=直線 / aoe=自分の周囲 / strike=相手の足元 / dash=突進
    ここはオリジナルのわざ（命中100あつかい）。ランキング上位100のわざは MOVES100（自動生成）。 */
 const MOVES = {
-  tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 10, cd: 2.0, wind: 0.12 },   // こうかの ある わざが ない ときの つなぎ（連打しすぎない）
+  tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 10, cd: 2.0, wind: 0.12, lunge: 70 },   // こうかの ある わざが ない ときの つなぎ（連打しすぎない）
   ember:   { n: 'ひのたま',       t: 'fire',  k: 'proj',   pow: 13, cd: 2.4, wind: .3,  spd: 190, cnt: 1, r: 5 },
   flame:   { n: 'かえんうず',     t: 'fire',  k: 'aoe',    pow: 24, cd: 7,   wind: .85, rad: 62 },
   blaze:   { n: 'バーンラッシュ', t: 'fire',  k: 'dash',   pow: 22, cd: 5,   wind: .5,  len: 160 },
@@ -2516,6 +2516,32 @@ const TYPE_FIX = {
   c_water1: ['water', 'poison'],
 };
 for (const id in TYPE_FIX) if (SPECIES[id]) { const [t1, t2] = TYPE_FIX[id]; SPECIES[id].type = t1; if (t2) SPECIES[id].type2 = t2; else delete SPECIES[id].type2; }
+// おぼえる わざを 種族ごとに ばらけさせる（おなじ タイプでも ちがう 顔ぶれに）
+//   レベル1の 2つ（その種族の 定番）は のこし、のこりを 種族ごとの 種から えらびなおす：
+//   じぶんの タイプの こうげき 3〜4・ほかの タイプの こうげき 2〜3・補助 2〜3。とくいな きょり（style）に あう かたちを えらびやすく
+const isDmgMove = (m) => m && m.cat !== 'stat';
+const COVER = { fire: ['ground', 'rock', 'fighting', 'dragon', 'normal', 'elec'], water: ['ice', 'ground', 'normal', 'poison', 'dragon', 'psychic'], grass: ['ground', 'poison', 'normal', 'bug', 'fighting', 'psychic'],
+  elec: ['ice', 'wind', 'normal', 'psychic', 'fire', 'water'], ice: ['water', 'ground', 'psychic', 'wind', 'normal', 'rock'], fighting: ['rock', 'ground', 'ghost', 'normal', 'elec', 'fire'],
+  poison: ['ground', 'ghost', 'grass', 'bug', 'psychic', 'water'], ground: ['rock', 'fighting', 'fire', 'poison', 'normal', 'grass'], wind: ['normal', 'bug', 'ice', 'elec', 'fighting', 'ghost'],
+  psychic: ['ghost', 'fighting', 'elec', 'ice', 'normal', 'grass'], bug: ['grass', 'poison', 'fighting', 'rock', 'normal', 'wind'], rock: ['ground', 'fighting', 'fire', 'ice', 'normal', 'dragon'],
+  ghost: ['psychic', 'poison', 'ice', 'fighting', 'normal', 'fire'], dragon: ['fire', 'water', 'elec', 'ground', 'wind', 'ice'], normal: ['fighting', 'ground', 'ghost', 'elec', 'ice', 'rock'] };
+const STYLE_K = { melee: { melee: 3, swipe: 3, dash: 3, strike: 1.5, multi: 1, vault: 2 }, ranged: { proj: 3, beam: 3, cone: 2, aoe: 1.5, strike: 2, multi: 2 }, mid: { proj: 2, beam: 2, cone: 2, aoe: 2, dash: 2, swipe: 2, strike: 2, multi: 1.5 } };
+(() => {
+  const ATK = Object.keys(MOVES).filter(id => isDmgMove(MOVES[id]) && id !== 'tackle' && MOVES[id].k !== 'counter'), SUP = Object.keys(MOVES).filter(id => MOVES[id].cat === 'stat' && !['wall', 'floor'].includes(MOVES[id].k));
+  for (const sid in SPECIES) {
+    const sp = SPECIES[sid]; if (!LEARN[sid]) continue;
+    let h = 0; for (const c of sid) h = (h * 31 + c.charCodeAt(0)) >>> 0; const r = () => ((h = (h * 16807 + 11) % 2147483647) / 2147483647);
+    const keep = LEARN[sid].filter(([l]) => l <= 1), have = new Set(keep.map(([, x]) => x)), out = keep.slice();
+    const wk = STYLE_K[sp.style] || STYLE_K.mid;
+    const pickN = (list, n, wf) => { const c = list.filter(id => !have.has(id)).map(id => [id, wf(MOVES[id]) * (.4 + r())]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]); for (const [id] of c.slice(0, n)) { have.add(id); out.push([out.length * 3, id]); } };
+    const my = [sp.type, sp.type2].filter(Boolean), cov = (COVER[sp.type] || COVER.normal).slice().sort(() => r() - .5).slice(0, 3);
+    pickN(ATK.filter(id => my.includes(MOVES[id].t)), 3 + (r() < .5 ? 1 : 0), m => (wk[m.k] || 1) * (m.power >= 100 ? .7 : 1) * (m.ohko ? .15 : 1));
+    pickN(ATK.filter(id => cov.includes(MOVES[id].t)), 2 + (r() < .5 ? 1 : 0), m => (wk[m.k] || 1) * (m.ohko ? .15 : 1));
+    pickN(SUP, 2 + (r() < .4 ? 1 : 0), m => (my.includes(m.t) ? 2 : 1) * (m.k === 'self' ? .8 : 1));
+    if (out.filter(([, id]) => isDmgMove(MOVES[id])).length < 3) out.push([out.length * 3, 'tackle']);
+    LEARN[sid] = out;
+  }
+})();
 for (const sid in SPECIES) { const sp = SPECIES[sid]; if (!LEARN[sid]) continue; if ((sp.fly || sp.type === 'wind' || sp.type2 === 'wind') && !LEARN[sid].some(([, x]) => x === 'fly')) LEARN[sid].push([28, 'fly']); if ((sp.type === 'ground' || sp.type2 === 'ground') && !sp.fly && !LEARN[sid].some(([, x]) => x === 'dig')) LEARN[sid].push([28, 'dig']); for (const id of PLACE_MOVES) if ([sp.type, sp.type2].includes(MOVES[id].t) && !LEARN[sid].some(([, x]) => x === id)) LEARN[sid].push([30, id]); }
 const SPR = {};
 // モンスターは 手打ちドット絵（HandPix）。ないときは 図形から 自動生成（SpriteGen）
@@ -4043,6 +4069,11 @@ function fireMove(f) {
   switch (m.k) {
     case 'melee':
       sheetFx('slash', f.x + Math.cos(cur.ang) * (f.r + 14), f.y - BODY + Math.sin(cur.ang) * (f.r + 14), .9, cur.ang);
+      if (m.lunge && o) {   // たいあたり：あいてへ むかって ふみこむ
+        const gap = Math.max(0, dist(f, o) - (f.r + o.r + 6)), step = Math.min(m.lunge, gap), px = f.x, py = f.y;
+        f.x += Math.cos(cur.ang) * step; f.y += Math.sin(cur.ang) * step; clampF(f);
+        fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 });
+      }
       if (targetable(o) && dist(f, o) <= f.r + o.r + 20 && losClear(f, o)) hit(f, o, m, cur.ang);
       endAct(f, .22); break;
     case 'swipe':
@@ -4590,7 +4621,7 @@ function aiPickMove(f, o) {
 // わざを だすのに ひつような きょり
 function moveReach(f, o, m) {
   switch (m.k) {
-    case 'melee': return f.r + o.r + 18;
+    case 'melee': return f.r + o.r + 18 + (m.lunge || 0);
     case 'swipe': return m.rad + f.r + o.r * .5;
     case 'dash': return m.len * .8;
     case 'aoe': return m.rad * .75;
@@ -6492,7 +6523,9 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && B &
 function pickMoves(m) {
   const L = learned(m), atk = L.filter(id => MOVES[id].cat !== 'stat'), sup = L.filter(id => MOVES[id].cat === 'stat');
   const shuffle = (a) => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
-  const res = shuffle(atk).slice(0, Math.max(2, 4 - Math.min(2, sup.length)));
+  const sp = SPECIES[m.sid], stab = shuffle(atk.filter(id => MOVES[id].t === sp.type || MOVES[id].t === sp.type2));
+  const order = stab.length ? [stab[0]].concat(shuffle(atk.filter(id => id !== stab[0]))) : shuffle(atk);   // じぶんの タイプの こうげきを かならず 1つ
+  const res = order.slice(0, Math.max(2, 4 - Math.min(2, sup.length)));
   return res.concat(shuffle(sup)).slice(0, 4);
 }
 function avgLevel() { const t = S.party.slice(0, 3); return t.reduce((s, m) => s + m.lvl, 0) / t.length; }
