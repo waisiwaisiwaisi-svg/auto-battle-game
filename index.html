@@ -678,7 +678,7 @@ const effVs = (mt, sp) => effOf(mt, sp.type) * (sp.type2 ? effOf(mt, sp.type2) :
 /* k: melee=近接 / proj=弾 / beam=直線 / aoe=自分の周囲 / strike=相手の足元 / dash=突進
    ここはオリジナルのわざ（命中100あつかい）。ランキング上位100のわざは MOVES100（自動生成）。 */
 const MOVES = {
-  tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 7,  cd: 2.4, wind: 0.12 },   // こうかの ある わざが ない ときの つなぎ（連打しすぎない）
+  tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 10, cd: 2.0, wind: 0.12 },   // こうかの ある わざが ない ときの つなぎ（連打しすぎない）
   ember:   { n: 'ひのたま',       t: 'fire',  k: 'proj',   pow: 13, cd: 2.4, wind: .3,  spd: 190, cnt: 1, r: 5 },
   flame:   { n: 'かえんうず',     t: 'fire',  k: 'aoe',    pow: 24, cd: 7,   wind: .85, rad: 62 },
   blaze:   { n: 'バーンラッシュ', t: 'fire',  k: 'dash',   pow: 22, cd: 5,   wind: .5,  len: 160 },
