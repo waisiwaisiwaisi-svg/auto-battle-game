@@ -875,6 +875,8 @@ Object.assign(MOVES100, {
   'poison-swamp': { n: 'どくのぬま',     ref: 'poison-swamp', t: 'poison', cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8,   pow: 0, life: 6, rad: 64, e: { st: 'psn', stCh: 25 } },
   'fire-sea':     { n: 'ひのうみ',       ref: 'fire-sea',     t: 'fire',   cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8.5, pow: 0, life: 5, rad: 60, e: { st: 'brn', stCh: 15 } },
   'volt-floor':   { n: 'でんきのゆか',   ref: 'volt-floor',   t: 'elec',   cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .5,  cd: 8,   pow: 0, life: 5, rad: 58, e: { st: 'par', stCh: 15 } },
+  'fly':          { n: 'そらをとぶ',     ref: 'fly',          t: 'wind',   cat: 'phys', k: 'vault', power: 90, acc: 100, prio: 0, aim: 'lock', wind: .35, cd: 7,   pow: 18, rad: 36, hide: 'fly', e: {} },
+  'dig':          { n: 'あなをほる',     ref: 'dig',          t: 'ground', cat: 'phys', k: 'vault', power: 80, acc: 100, prio: 0, aim: 'lock', wind: .35, cd: 6.5, pow: 16, rad: 38, hide: 'dig', e: {} },
   'quicksand':    { n: 'ありじごく',     ref: 'quicksand',    t: 'ground', cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8.5, pow: 0, life: 6, rad: 62, slow: .45, e: {} },
 });
 Object.assign(MOVES, MOVES100);
@@ -2511,7 +2513,7 @@ const TYPE_FIX = {
   c_water1: ['water', 'poison'],
 };
 for (const id in TYPE_FIX) if (SPECIES[id]) { const [t1, t2] = TYPE_FIX[id]; SPECIES[id].type = t1; if (t2) SPECIES[id].type2 = t2; else delete SPECIES[id].type2; }
-for (const sid in SPECIES) { const sp = SPECIES[sid]; if (!LEARN[sid]) continue; for (const id of PLACE_MOVES) if ([sp.type, sp.type2].includes(MOVES[id].t) && !LEARN[sid].some(([, x]) => x === id)) LEARN[sid].push([30, id]); }
+for (const sid in SPECIES) { const sp = SPECIES[sid]; if (!LEARN[sid]) continue; if ((sp.fly || sp.type === 'wind' || sp.type2 === 'wind') && !LEARN[sid].some(([, x]) => x === 'fly')) LEARN[sid].push([28, 'fly']); if ((sp.type === 'ground' || sp.type2 === 'ground') && !sp.fly && !LEARN[sid].some(([, x]) => x === 'dig')) LEARN[sid].push([28, 'dig']); for (const id of PLACE_MOVES) if ([sp.type, sp.type2].includes(MOVES[id].t) && !LEARN[sid].some(([, x]) => x === id)) LEARN[sid].push([30, id]); }
 const SPR = {};
 // モンスターは 手打ちドット絵（HandPix）。ないときは 図形から 自動生成（SpriteGen）
 const HAND_MS = 1.45; // 手打ちモンスター（約55ドット）の 倍率
@@ -3940,6 +3942,7 @@ function inZone(cur, owner, x, y, r) {
   const m = cur.m;
   if (m.k === 'aoe') return Math.hypot(x - owner.x, y - owner.y) <= m.rad + r;
   if (m.k === 'strike') return Math.hypot(x - cur.tx, y - cur.ty) <= m.rad + r;
+  if (m.k === 'vault') return Math.hypot(x - cur.tx, y - cur.ty) <= m.rad + r * .5;
   if (m.k === 'multi') return cur.pts.some(p => Math.hypot(x - p.x, y - p.y) <= m.rad + r);
   if (m.k === 'cone') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, m.half, r);
   if (m.k === 'swipe') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad + owner.r, .95, r);
@@ -3951,9 +3954,11 @@ function inZone(cur, owner, x, y, r) {
   }
   return false;
 }
-const ZONE_KINDS = ['aoe', 'strike', 'multi', 'cone', 'swipe', 'beam', 'dash'];
+const ZONE_KINDS = ['aoe', 'strike', 'multi', 'cone', 'swipe', 'beam', 'dash', 'vault'];
+// あいての わざが せまっている（ため中・うちつづけ中・空／地中に かくれている）
+const threatState = (o) => o && (o.state === 'wind' || o.state === 'chan' || o.state === 'hide');
 const inField = (x, y, r) => x >= B.st.fx0 + r && x <= B.st.fx1 - r && y >= B.st.fy0 + r && y <= B.st.fy1 - r;
-function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRects.length)) && !flies(f)) pushOut(f); f.x = clamp(f.x, st.fx0 + f.r, st.fx1 - f.r); f.y = clamp(f.y, st.fy0 + f.r, st.fy1 - f.r); }
+function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRects.length)) && !flies(f) && f.state !== 'hide') pushOut(f); f.x = clamp(f.x, st.fx0 + f.r, st.fx1 - f.r); f.y = clamp(f.y, st.fy0 + f.r, st.fy1 - f.r); }
 function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.rx, dy = (y - p.y) / p.ry; if (dx * dx + dy * dy < 1) return true; } return false; }
 
 /* ---------- わざが つかえるか ---------- */
@@ -4025,6 +4030,11 @@ function fireMove(f) {
   // 失敗する条件
   if (m.fakeout && f.enterT > 2.3) return failMove(f, 'でも うまく きまらなかった！');
   if (m.sucker && !(o && o.state === 'wind' && o.cur && isDamaging(o.cur.m))) return failMove(f, 'でも うまく きまらなかった！');
+  if (m.k === 'vault') {   // そらをとぶ・あなをほる：空／地中に かくれて あいての ところへ。おりてくる ばしょは 見えるので よけられる
+    cur.t = 0; cur.wind = 1.4; cur.tx = o ? o.x : f.x; cur.ty = o ? o.y : f.y; f.state = 'hide'; f.inv = 0;
+    sheetFx(m.hide === 'fly' ? 'speed' : 'st_ground', f.x, f.y - 20, 1.1); B.shake = Math.max(B.shake, m.hide === 'dig' ? 4 : 2);
+    say(m.hide === 'fly' ? `${f.sp.n}は そらたかく とびあがった！` : `${f.sp.n}は じめんに もぐった！`); return;
+  }
   if (m.chan && (m.k === 'beam' || m.k === 'cone')) { cur.ch = 0; cur.next = 0; cur.n = Math.round(m.chan / CHAN_TICK); cur.landed = 0; f.state = 'chan'; B.shake = Math.max(B.shake, 3); return; }
   switch (m.k) {
     case 'melee':
@@ -4285,8 +4295,8 @@ function setStatus(f, s, by) {
   if (by && f.v.sub > 0) return false;
   if ((s === 'brn' && hasType(f, 'fire')) || (s === 'par' && hasType(f, 'elec')) || ((s === 'psn' || s === 'tox') && (hasType(f, 'poison') || hasType(f, 'steel'))) || (s === 'frz' && hasType(f, 'ice'))) return false;
   f.status = s; f.toxN = 1; f.tickT = TICK; statusFx(f, s);
-  if (s === 'slp') { f.statusT = 3; f.cur = null; f.queued = null; if (f.state === 'wind' || f.state === 'chan' || f.state === 'dash') f.state = 'free'; }
-  if (s === 'frz') { f.statusT = 2.5; f.cur = null; f.queued = null; if (f.state === 'wind' || f.state === 'chan' || f.state === 'dash') f.state = 'free'; }
+  if (s === 'slp') { f.statusT = 3; f.cur = null; f.queued = null; if (['wind', 'chan', 'dash', 'hide'].includes(f.state)) f.state = 'free'; }
+  if (s === 'frz') { f.statusT = 2.5; f.cur = null; f.queued = null; if (['wind', 'chan', 'dash', 'hide'].includes(f.state)) f.state = 'free'; }
   say(`${prefix(f)}${f.sp.n}は ${{ brn: 'やけどを おった', par: 'まひして うごきにくくなった', psn: 'どくを あびた', tox: 'もうどくを あびた', slp: 'ねむってしまった', frz: 'こおりついた' }[s]}！`);
   return true;
 }
@@ -4295,7 +4305,7 @@ function setStatus(f, s, by) {
 // わざの 種類ごとの ダメージ補正（当たりやすさの ちがいを ならす：当たりにくい ものは 少し つよく）
 const KIND_DMG = { proj: 1.3, beam: 1.3, swipe: .9, strike: .7, melee: .6, cone: 1.1, aoe: .94, multi: .95, dash: 1 };
 // あたりやすさの めやす（たくさん たたかわせて はかった 命中の わりあい）
-const KIND_HIT = { melee: '◎', strike: '○', multi: '○', swipe: '○', aoe: '△', cone: '△', beam: '△', dash: '△', proj: '△' };
+const KIND_HIT = { vault: '○', melee: '◎', strike: '○', multi: '○', swipe: '○', aoe: '△', cone: '△', beam: '△', dash: '△', proj: '△' };
 const DMG_K = .47;   // リアルタイム用の ダメージ倍率（ポケモンの 式の まま だと 1戦が みじかすぎる）
 function hit(att, def, m, ang, opt) {
   opt = opt || {};
@@ -4424,12 +4434,12 @@ function afterFaint(f) {
 
 /* ---------- 回避 ---------- */
 function threatDir(f, o) {
-  if (o && o.cur && (o.state === 'wind' || o.state === 'chan') && ZONE_KINDS.includes(o.cur.m.k)) {
+  if (o && o.cur && threatState(o) && ZONE_KINDS.includes(o.cur.m.k)) {
     const cur = o.cur, m = cur.m; let base;
     if (m.k === 'beam' || m.k === 'dash') {
       const s = Math.sign(-(f.x - o.x) * Math.sin(cur.ang) + (f.y - o.y) * Math.cos(cur.ang)) || 1;
       base = cur.ang + s * Math.PI / 2;
-    } else if (m.k === 'strike') base = Math.atan2(f.y - cur.ty, f.x - cur.tx);
+    } else if (m.k === 'strike' || m.k === 'vault') base = Math.atan2(f.y - cur.ty, f.x - cur.tx);
     else if (m.k === 'cone' || m.k === 'swipe') { const s = Math.sign(wrapAng(Math.atan2(f.y - o.y, f.x - o.x) - cur.ang)) || 1; base = cur.ang + s * 1.6; }
     else base = Math.atan2(f.y - o.y, f.x - o.x);
     return { base, test: (x, y) => inZone(cur, o, x, y, f.r) };
@@ -4481,7 +4491,7 @@ function aiDodgeCheck(f, o) {
   const isP = f.side === 0 || B.kind === 'online';
   const skill = isP ? autoDodgeP(f) : clamp(B.skill * (f.eva || 70) / avgStats().eva, 0, .95);   // プレイヤーの モンスターも 指示なしで たまに かわす
   if (skill <= 0 || f.dodgeCd > 0 || !['free', 'act'].includes(f.state) || !canAct(f)) return;
-  if (o && (o.state === 'wind' || o.state === 'chan') && o.cur && ZONE_KINDS.includes(o.cur.m.k) && isDamaging(o.cur.m)) {
+  if (o && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && isDamaging(o.cur.m)) {
     if (f.planFor !== o.cur.uid) {
       f.planFor = o.cur.uid;
       // ガード系の わざを もっていれば たまに それで うける
@@ -4565,6 +4575,7 @@ function moveReach(f, o, m) {
     case 'beam': return m.len * .8;
     case 'cone': return m.rad * .8;
     case 'multi': return 260;
+    case 'vault': return 520;
     default: return 999;
   }
 }
@@ -4606,7 +4617,7 @@ function aiMove(f, o, dt, autoSpecial) {
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
   if (o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
-  if ((o.state === 'wind' || o.state === 'chan') && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
+  if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
     const t = threatDir(f, o); return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
   }
   const per = persona(f), hurt = f.hp < f.maxHp * per.flee;
@@ -4704,7 +4715,7 @@ function pickSpot(f, o, w, dt) {
     if (w.los || w.cover) { const see = !hasObs || losFrom(x, y, o); if (w.los && !see) sc += 220; if (w.cover && see && hasObs) sc += 160 * per.cover; }
     if (w.flank) { const da = Math.abs(wrapAng(Math.atan2(y - o.y, x - o.x) - baseA)); sc += Math.abs(da - 1.1) * 45 * per.flank; }   // 正面より 斜め横から
     const edge = Math.min(x - st.fx0, st.fx1 - x, y - st.fy0, st.fy1 - y); if (edge < 60) sc += (60 - edge) * 1.2;   // 壁ぎわは きらう
-    if ((o.state === 'wind' || o.state === 'chan') && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, x, y, f.r)) sc += 400;   // 相手の わざの はんいは さける
+    if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, x, y, f.r)) sc += 400;   // 相手の わざの はんいは さける
     if (onFoeFloor(f, x, y)) sc += 260;   // あいての ゆかも さける
     if (f.spot && Math.hypot(x - f.spot.x, y - f.spot.y) < 8) sc -= 18;   // 少し 前の ねらいを つづける（ふらふら しない）
     sc += ((per.seed * 7 + x * 3 + y) % 13);   // 性格で 少し ばらつき
@@ -4804,6 +4815,9 @@ function updateFighter(f, dt) {
     case 'free': {
       if (!canAct(f)) break; // ねむり・こおり
       if (!oT) {
+        // あいてが 空／地中に いる：おりてくる ばしょから にげる
+        if (o && o.state === 'hide' && o.cur && f.hideFor !== o.cur.uid) { f.hideFor = o.cur.uid; f.hideFlee = Math.random() < (f.side === 1 ? .35 + B.skill * .4 : .5); }   // にげるか どうかは 1回ごとに きめる
+        if (o && o.state === 'hide' && o.cur && f.hideFlee && o.cur.t > o.cur.wind * .35 && inZone(o.cur, o, f.x, f.y, f.r + 10)) { const t = threatDir(f, o); moveDir(f, Math.cos(t.base), Math.sin(t.base), dt); }
         break;
       }
       aiDodgeCheck(f, o);
@@ -4832,6 +4846,21 @@ function updateFighter(f, dt) {
       if ((m.k === 'melee' || m.k === 'swipe') && oT && dist(f, o) > f.r + o.r + 6) { const a = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(a) * 120 * dt; f.y += Math.sin(a) * 120 * dt; }
       if (cur.t >= cur.wind) fireMove(f);
       if (f.side !== 0) aiDodgeCheck(f, o);
+      break;
+    }
+    case 'hide': {   // 空／地中：はじめは あいてを おいかけ、さいごの 半分は おりる ばしょが きまる（よけられる）
+      const cur = f.cur; if (!cur) { f.state = 'free'; break; }
+      cur.t += dt;
+      if (oT && cur.t < cur.wind * .5) { cur.tx += (o.x - cur.tx) * Math.min(1, dt * 5); cur.ty += (o.y - cur.ty) * Math.min(1, dt * 5); }
+      f.x += (cur.tx - f.x) * Math.min(1, dt * 4); f.y += (cur.ty - f.y) * Math.min(1, dt * 4);
+      if (cur.m.hide === 'dig' && Math.random() < dt * 20) B.parts.push({ x: f.x + rand(-10, 10), y: f.y, vx: rand(-40, 40), vy: -rand(40, 90), life: .4, max: .4, col: choice(['#d8b060', '#8a6a3a', '#f0d8a0']), size: 3, g: 300, shape: 'chunk' });
+      if (cur.t >= cur.wind) {
+        const m = cur.m; f.x = cur.tx; f.y = cur.ty; if (blockedAt(f.x, f.y, footR(f))) freeSpot(f);
+        sheetFx(m.hide === 'fly' ? 'slam' : 'st_ground', f.x, f.y - 20, 1.3); B.shake = Math.max(B.shake, 7); SND.se('boom');
+        if (m.hide === 'dig') addDecal(f.x, f.y, 18, 'crater');
+        if (oT && Math.hypot(o.x - cur.tx, o.y - cur.ty) <= m.rad + o.r * .5) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x));
+        f.state = 'wind'; endAct(f, .4);
+      }
       break;
     }
     case 'chan': {   // うちつづける：ゆっくり あいてへ むきを あわせながら はなつ
@@ -5415,6 +5444,7 @@ function moveDesc(m) {
   if (m.cat !== 'stat' && KIND_HIT[m.k]) out.push(`あたりやすさ${KIND_HIT[m.k]}`);
   if (m.chan) out.push(`${m.chan}びょう うちつづける`);
   if (m.k === 'wall') out.push(`あいてとの あいだに かべを つくる（${m.life}びょう）。わざも とおさない${m.thorn ? '・さわると ダメージ' : ''}`);
+  if (m.k === 'vault') out.push(m.hide === 'fly' ? 'そらへ とびあがり、あいての ところへ おりて こうげき（とんでいる あいだは うたれない）' : 'じめんに もぐり、あいての 足もとから こうげき（もぐっている あいだは うたれない）');
   if (m.k === 'floor') out.push(`あいての 足もとに ${m.n}（${m.life}びょう）。ふむと ダメージ${m.slow ? '・あしが おそくなる' : ''}`);
   if (m.cnt > 1) out.push(`${m.cnt}はつ`);
   if (m.cat !== 'stat' && m.acc && m.acc < 100) out.push(`めいちゅう${m.acc}`);
@@ -6112,6 +6142,12 @@ function monFrame(f) {
 
 function drawFighter(f) {
   if (!f || f.state === 'bench' || f.state === 'capt') return;
+  if (f.state === 'hide' && f.cur) {   // 空：上空に ちいさく 見えて かげだけ 地面に／地中：もりあがる つち
+    const u = clamp(f.cur.t / f.cur.wind, 0, 1), img0 = SPR[f.mon.sid].n, ms = SPR[f.mon.sid].ms;
+    if (f.cur.m.hide === 'fly') { const up = Math.sin(u * Math.PI) * 260 + 40; shadow(f.x, f.y, img0.width * ms * (.15 + .2 * (1 - Math.sin(u * Math.PI)))); drawSprite(SPR[f.mon.sid].fr.idle1.n, f.x, f.y - up, f.face, ms * .7, .85); }
+    else { ctx.fillStyle = '#6a4a2a'; ctx.beginPath(); ctx.ellipse(f.x, f.y, 16, 7, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#a8804a'; ctx.beginPath(); ctx.ellipse(f.x, f.y - 3, 11, 5, 0, 0, 7); ctx.fill(); }
+    return;
+  }
   let alpha = null, sy = 1, sx = 1, oy = 0;
   if (f.state === 'faint') { alpha = clamp(f.stT / 1.2, 0, 1); sy = .4 + .6 * alpha; }
   if (f.state === 'enter' || f.state === 'return') { sx = sy = Math.max(.05, f.scale); }
@@ -6203,6 +6239,12 @@ function render() {
     for (const zn of B.zones) drawFloor(zn);
     for (const f of [a, e]) if (f && f.state === 'wind' && f.cur) drawTele(f);
     for (const f of [a, e]) if (f && f.state === 'chan' && f.cur) drawChan(f);
+    for (const f of [a, e]) if (f && f.state === 'hide' && f.cur) {   // おりてくる ばしょ
+      const cur = f.cur, prog = clamp(cur.t / cur.wind, 0, 1), base = f.side === 1 ? '255,60,70' : '90,190,255', R = cur.m.rad;
+      ctx.lineWidth = 2; ctx.fillStyle = `rgba(${base},.15)`; ctx.strokeStyle = prog > .5 && Math.floor(B.t * 18) % 2 ? '#ffffff' : `rgba(${base},.9)`;
+      ctx.beginPath(); ctx.ellipse(cur.tx, cur.ty, R, R * .6, 0, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = `rgba(${base},${.2 + prog * .3})`; ctx.beginPath(); ctx.ellipse(cur.tx, cur.ty, R * prog, R * .6 * prog, 0, 0, 7); ctx.fill();
+    }
   });
 
   for (const fx of B.fx) if (fx.type === 'ghost' && fx.sid) drawSprite(SPR[fx.sid].fr.walk1.w, fx.x, fx.y + 3, fx.face, SPR[fx.sid].ms, .3 * fx.life / fx.max);
