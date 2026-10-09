@@ -885,6 +885,9 @@ Object.assign(MOVES, MOVES100);
 const CHAN = { flamethrower: 1.2, 'hydro-pump': 1.4, 'giga-drain': 1.2, blizzard: 1.5, 'icy-wind': 1.0 };
 const CHAN_TICK = .25, CHAN_SUM = 1.1;   // ぜんぶ あてたときの 合計は ふつうの 1.1ばい（あてつづけるのは むずかしい ぶん）
 for (const id in CHAN) if (MOVES[id]) MOVES[id].chan = CHAN[id];
+// ダメージを かえす わざ（はんしゃのまく・はがねのしかえし）：かまえは ながく（3びょう）、つかえる 回数は 1戦 2回まで
+const COUNTER_T = 3;
+for (const id in MOVES) if (MOVES[id].k === 'counter') MOVES[id].cd = 9;
 
 // おぼえる わざ（[レベル, わざ]）。ランキング上位100のわざは すべて どれかの モンスターが おぼえる
 const LEARN = {
@@ -3963,7 +3966,7 @@ function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.r
 
 /* ---------- わざが つかえるか ---------- */
 // 回復できる わざは 1戦で 使える 回数に 上限
-function healMax(m) { const e = m.e || {}; return m.k === 'heal' ? 2 : e.drain ? 3 : e.seed ? 2 : e.heal ? 2 : 0; }
+function healMax(m) { const e = m.e || {}; return m.k === 'counter' ? 2 : m.k === 'heal' ? 2 : e.drain ? 3 : e.seed ? 2 : e.heal ? 2 : 0; }
 const healLeft = (f, id) => healMax(MOVES[id]) - ((f.uses && f.uses[id]) || 0);
 function moveBlocked(f, id) {
   const m = MOVES[id];
@@ -4210,7 +4213,7 @@ function useStatusMove(f, o, m) {
       if (f.hp <= f.maxHp / 4) { failMove(f, 'たいりょくが たりない！'); return; }
       f.hp -= Math.floor(f.maxHp / 4); f.v.sub = Math.floor(f.maxHp / 4); sheetFx('poof', f.x + f.face * -26, f.y - BODY, 1.4); fxp({ type: 'smoke', x: f.x + f.face * -26, y: f.y, life: .8, seed: Math.random() * 99 }); break;
     case 'dbond': f.v.dbond = 2.5; sheetFx('curse', f.x, f.y - BODY, 1.4); typeFx(f.x, f.y - BODY, 'ghost', 24, 120, .9); say(`${prefix(f)}${f.sp.n}は あいてを みちづれに しようとしている！`); break;
-    case 'counter': f.v.counter = { ctr: m.ctr, mult: m.mult, t: 1.2 }; sheetFx('counter', f.x, f.y - BODY, 1.2); fxp({ type: 'glint', x: f.x + f.face * 10, y: f.y - BODY - 10, col: m.ctr === 'spec' ? '#ff7ab0' : '#ffd0a0', life: .5 }); fxp({ type: 'shieldUp', x: f.x, y: f.y - BODY, rad: 36, col: m.ctr === 'spec' ? '#ff7ab0' : '#ffffff', life: .35 }); break;
+    case 'counter': f.v.counter = { ctr: m.ctr, mult: m.mult, t: COUNTER_T }; sheetFx('counter', f.x, f.y - BODY, 1.2); fxp({ type: 'glint', x: f.x + f.face * 10, y: f.y - BODY - 10, col: m.ctr === 'spec' ? '#ff7ab0' : '#ffd0a0', life: .5 }); fxp({ type: 'shieldUp', x: f.x, y: f.y - BODY, rad: 36, col: m.ctr === 'spec' ? '#ff7ab0' : '#ffffff', life: .35 }); break;
     case 'curse':
       if (hasType(f, 'ghost')) { if (o && targetable(o)) { f.hp = Math.max(1, f.hp - Math.floor(f.maxHp / 2)); o.v.curse = 1; fxp({ type: 'curseFx', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, life: .8 }); fxp({ type: 'vortex', x: o.x, y: o.y - BODY, rad: 40, col: '#8a78c8', life: .8 }); say(`${o.sp.n}に のろいを かけた！`); } }
       else changeStages(f, { atk: 1, def: 1, spe: -1 }, true);
@@ -5441,6 +5444,7 @@ function moveDesc(m) {
   const stg = (o) => Object.entries(o).map(([k, v]) => `${SN[k]}${v > 0 ? '+' : ''}${v}`).join('・');
   const pw = m.power || (m.pow ? Math.round(m.pow * 5) : 0);
   if (m.cat !== 'stat' && m.k !== 'counter') out.push(pw ? `いりょく${pw}` : 'こうげき');
+  if (m.k === 'counter') out.push(`${COUNTER_T}びょう かまえて うけた ダメージを ${m.mult}ばいで かえす（1戦 ${healMax(m)}回まで）`);
   if (m.cat !== 'stat' && KIND_HIT[m.k]) out.push(`あたりやすさ${KIND_HIT[m.k]}`);
   if (m.chan) out.push(`${m.chan}びょう うちつづける`);
   if (m.k === 'wall') out.push(`あいてとの あいだに かべを つくる（${m.life}びょう）。わざも とおさない${m.thorn ? '・さわると ダメージ' : ''}`);
