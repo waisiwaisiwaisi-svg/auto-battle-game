@@ -3851,7 +3851,7 @@ function startBattle(cfg) {
       { fs: ef, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: cfg.trainer ? { name: cfg.trainer.name, spr: cfg.trainer.spr, x: st.trainers[1].x, y: st.trainers[1].y, shout: 0 } : null },
     ],
     projs: [], parts: [], texts: [], fx: [], decals: [], walls: [], wallRects: [], zones: [], holes: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
-    cam: { x: st.W / 2, y: st.H / 2, z: VW / st.W }, catchO: null, result: null, exp: {}, skill: cfg.skill, sent: 0,
+    cam: { x: st.W / 2, y: st.H / 2, z: VW / st.W }, catchO: null, result: null, exp: {}, skill: cfg.skill ?? .4, sent: 0,
   };
   // AI の かしこさ：みかたの モンスターは いつも かしこく わざを えらぶ。あいては せっていの「あいての つよさ」しだい（オンラインは どちらも かしこく、よけは ふつう）
   { const lv = S.aiLevel == null ? 0 : S.aiLevel; B.smart = [true, cfg.kind === 'online' || lv >= 1]; B.smartDodge = cfg.kind !== 'online' && cfg.kind !== 'wild' && lv >= 2; }
@@ -4047,14 +4047,17 @@ function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.r
 
 /* ---------- わざが つかえるか ---------- */
 // 回復できる わざは 1戦で 使える 回数に 上限
-function healMax(m) { const e = m.e || {}; return m.k === 'counter' ? 2 : m.k === 'heal' ? 2 : e.drain ? 3 : e.seed ? 2 : e.heal ? 2 : 0; }
+function healMax(m) { const e = m.e || {}; return m.k === 'counter' ? 2 : m.k === 'heal' ? 2 : e.seed ? 2 : e.heal ? 2 : 0; }
+// すいとる こうげき：なんどでも うてる。かいふく するのは 1戦 DRAIN_MAX 回まで（それいこうは ふつうの こうげき）
+const DRAIN_MAX = 3;
+const drainLeft = (f, id) => DRAIN_MAX - ((f.drains && f.drains[id]) || 0);
 const healLeft = (f, id) => healMax(MOVES[id]) - ((f.uses && f.uses[id]) || 0);
 function moveBlocked(f, id) {
   const m = MOVES[id];
   if (healMax(m) && healLeft(f, id) <= 0) return 'つかいきった';
   if (f.v.taunt > 0 && m.cat === 'stat') return 'ちょうはつ中';
   if (f.v.encore && f.v.encore.id !== id) return 'アンコール中';
-  if (f.v.healBlock > 0 && (m.k === 'heal' || (m.e && m.e.drain))) return 'かいふく ふうじ';
+  if (f.v.healBlock > 0 && m.k === 'heal') return 'かいふく ふうじ';
   if (m.fakeout && f.enterT > 2) return 'でてすぐ だけ';
   return null;
 }
@@ -4505,7 +4508,7 @@ function hit(att, def, m, ang, opt) {
 // 攻撃した側への効果（吸収・反動・能力変化・いれかえ）
 function afterHitSelf(att, def, m, dmg, opt) {
   const e = m.e || {};
-  if (e.drain && att.hp > 0) { if (att.v.healBlock > 0) { } else healHp(att, dmg * e.drain / 100); }
+  if (e.drain && att.hp > 0 && !(att.v.healBlock > 0)) { const id = MOVE_ID.get(m); att.drains = att.drains || {}; if (drainLeft(att, id) > 0) { att.drains[id] = (att.drains[id] || 0) + 1; healHp(att, dmg * e.drain / 100); } }
   if (e.recoil && att.hp > 0) { const r = Math.max(1, Math.round(dmg * e.recoil / 100)); att.hp = Math.max(0, att.hp - r); popText(att.x, att.y - 66, `-${r}`, '#ff9a8a'); if (att.hp <= 0) faint(att, def); }
   if (e.self && att.hp > 0 && (!opt || !opt.tick || opt.first)) changeStages(att, e.self, true);
   if (m.rapidSpin) { const hz = B.sides[att.side].hz; hz.rocks = hz.spikes = hz.tspikes = 0; att.v.seed = 0; }
@@ -4727,7 +4730,9 @@ function natPref(f, m) {
 function aiPickMove(f, o) {
   if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
     let best = null, bv = 0;
-    for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; const v = smartScore(f, o, id) * Math.pow(natPref(f, MOVES[id]), .8); if (v > bv) { bv = v; best = id; } }
+    for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; let v = smartScore(f, o, id) * Math.pow(natPref(f, MOVES[id]), .8);
+      if (v <= 0 && isDamaging(MOVES[id]) && estDmg(f, o, MOVES[id]) > 0) v = 1e-4 * estDmg(f, o, MOVES[id]);   // とおくても きく わざは うつ（まちぼうけ しない）
+      if (v > bv) { bv = v; best = id; } }
     if (!best && desperate(f, o)) best = f.moves.find(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id)) || null;
     return best;
   }
@@ -4831,12 +4836,15 @@ function aiMove(f, o, dt, autoSpecial) {
   f.paceT = 1;
   if (f.side === 1 && aiSwitch(f, o, dt)) return;
   if (autoSpecial && !f.queued) {
+    if (f.aiT > .1 && f.moves.some(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id))) f.aiT = .1;   // うてる わざが あるのに またない
     f.aiT -= dt;
     if (f.aiT <= 0) {
-      if (isSmart(f)) { f.aiT = .15; f.queued = aiPickMove(f, o); }   // かしこい AI：まよわない
+      if (isSmart(f)) { f.aiT = .1; f.queued = aiPickMove(f, o); }   // かしこい AI：まよわない
       else {
-      f.aiT = rand(.5, 1.3) * (f.side === 1 ? (1.2 - B.skill * .5) : 1) * persona(f).react;
-      if (Math.random() < .8) f.queued = aiPickMove(f, o);
+        // つかえる こうげきわざが あれば すぐ うつ（まのびさせない）。ほじょ わざしか ない ときだけ すこし まよう
+        const atkReady = f.moves.some(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id));
+        f.aiT = (atkReady ? rand(.08, .25) : rand(.4, .9)) * (f.side === 1 ? (1.2 - B.skill * .5) : 1) * persona(f).react;
+        f.queued = aiPickMove(f, o);
       }
     }
   }
@@ -5804,7 +5812,7 @@ function moveDesc(m) {
   if (e.flinch) out.push(`${e.flinch}%で ひるませる`);
   if (e.foe) out.push(`あいての ${stg(e.foe)}`);
   if (e.self) out.push(`じぶんの ${stg(e.self)}`);
-  if (e.drain) out.push(`ダメージの ${e.drain}%を かいふく`);
+  if (e.drain) out.push(`ダメージの ${e.drain}%を かいふく（1せん ${DRAIN_MAX}かいまで。そのあとも こうげきは できる）`);
   if (e.recoil) out.push(`はんどうで ${e.recoil}%うける`);
   if (e.heal) out.push(`HPを ${e.heal}%かいふく`);
   if (e.seed) out.push('まいびょう HPを すいとる');
@@ -5952,7 +5960,7 @@ function updHUD() {
     const o = active(1); let eff = '';
     if (o && m.cat !== 'stat') { const v = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1); eff = v >= 2 ? '2' : v === 0 ? '0' : v < 1 ? '0.5' : ''; }
     if (b.dataset.eff !== eff) b.dataset.eff = eff;
-    const left = healMax(m) ? `（のこり ${Math.max(0, healLeft(f, id))}）` : '';
+    const left = healMax(m) ? `（のこり ${Math.max(0, healLeft(f, id))}）` : m.e && m.e.drain ? `（かいふく ${Math.max(0, drainLeft(f, id))}）` : '';
     setText(b.querySelector('.b'), (eff ? `${TYPES[m.t].n}・${eff === '2' ? 'ばつぐん！' : eff === '0' ? 'きかない' : 'いまいち'}` : moveSub(m)) + left);
   });
   $('cDodge').querySelector('.cdv').style.height = ((B.sides[my].dodgeCmd || 0) / DODGE_CMD_CD * 100) + '%';
@@ -7053,7 +7061,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, fixMon: (m, b) => fixMon(m, b) }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, fixMon: (m, b) => fixMon(m, b) }); },
 };
 })();
 </script>
