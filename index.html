@@ -3304,7 +3304,7 @@ function renderTeamDetail() {
   const STN = [['HP', st.hp, 260], ['こうげき', Math.round(st.atk), 110], ['ぼうぎょ', Math.round(st.def), 110], ['すばやさ', st.spd, 130]];
   D.innerHTML = `<div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
       <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'ボックス'}　${ivGrade(m)}</div>
-      ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div>` : ''}</div></div>
+      ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span><div class="dim" style="font-size:11px">${natRelText(m.nat)}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc)">きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm">わざのまきもの</button><button class="btn sub" data-a="item">どうぐ</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
@@ -3499,7 +3499,7 @@ function monCard(m, where, i, openUid) {
   const info = document.createElement('div'); info.className = 'minfo';
   info.innerHTML = `<div class="mname">${sp.n} ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}${where === 'party' && i < 3 ? '<span class="tag">出場</span>' : ''}</div>` +
     `<div class="mstat">${STAT6.map(k => STAT6_S[k] + st[k]).join(' ')}　<span class="dim">（${ivGrade(m)}）</span></div>` +
-    (m.nat && NATURES[m.nat] ? `<div class="desc">せいかく：<b>${NATURES[m.nat].n}</b>（${NATURES[m.nat].d}）</div>` : '') +
+    (m.nat && NATURES[m.nat] ? `<div class="desc">せいかく：<b>${NATURES[m.nat].n}</b>（${NATURES[m.nat].d}）<br><span class="dim">${natRelText(m.nat)}</span></div>` : '') +
     (sp.prof ? `<div class="desc">${profLine(sp)}</div>` : '') +
     `<div class="mmoves">${equipped(m).map(id => `<span style="--c:${TYPES[MOVES[id].t].c}" title="${moveDesc(MOVES[id])}">${MOVES[id].n}</span>`).join('')}</div>`;
   el.appendChild(info);
@@ -4808,6 +4808,7 @@ function aiMove(f, o, dt, autoSpecial) {
     const t = threatDir(f, o); f.paceT = 1.5; return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
   }
   const per = persona(f), hurt = f.hp < f.maxHp * per.flee;
+  if (f.moodPop) { const M = f.moodPop; f.moodPop = null; if (!B.headless) popText(f.x, f.y - 86, M.n, M.col, true); }
   f.tunCd = Math.max(0, (f.tunCd || 0) - dt);
   if (tryTunnel(f, o, hurt ? 400 : prefRange(f, per))) return;
   if (per.roam) { f.roamT = (f.roamT || 0) - dt; if (f.roamT <= 0) { f.roamT = rand(2, 4.5); f.roamK = rand(.55, 1.6); } }
@@ -4825,9 +4826,9 @@ function aiMove(f, o, dt, autoSpecial) {
       if (per.hitAway && isDamaging(m)) f.awayT = rand(1.2, 2); else if (close && isDamaging(m)) f.awayT = per.hold ? rand(.35, .6) : rand(.6, 1.1);   // うったら いったん はなれる
       return;
     }
-    if (close && isDamaging(m)) f.paceT = d > reach + 40 ? 2.3 : 1.6;   // 近接わざ：まあいまで いっきに かけこむ
+    if (close && isDamaging(m)) f.paceT = (d > reach + 40 ? 2.3 : 1.6) * per.rush;   // 近接わざ：まあいまで いっきに かけこむ
     if (stalled() && B.st.nav && !flies(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
-      f.aiMode = 'attack'; if (close) f.paceT = 2.3; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
+      f.aiMode = 'attack'; if (close) f.paceT = 2.3 * per.rush; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
     }
     want = { R: (close ? Math.min(reach * .8, idealRange(f, m, reach, per)) : idealRange(f, m, reach, per)) * roamK, los: shot, cover: false, flank: per.flank > .25 && !shot, mode: 'attack' };
   } else {
@@ -4835,8 +4836,8 @@ function aiMove(f, o, dt, autoSpecial) {
     const oThreat = o.moves.some(id => isDamaging(MOVES[id]) && (o.cd[id] || 0) < 1);
     const stall = stalled();   // しばらく だれも ダメージを うけて いない：かくれず せめる
     const hide = !stall && (f.awayT > 0 || hurt || (oThreat && Math.random() < per.cover));
-    if (!hide && (soon < .9 || per.hold || stall)) { want = { R: prefRange(f, per) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' }; f.paceT = stall ? 1 : .8; }
-    else { want = { R: (prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' }; f.paceT = hurt || f.awayT > 0 ? 1.1 : .6; }   // ひまな ときは のんびり あるく
+    if (!hide && (soon < .9 || per.hold || stall)) { want = { R: prefRange(f, per) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' }; f.paceT = stall ? 1 : (per.idle + 1) / 2; }
+    else { want = { R: (prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' }; f.paceT = hurt || f.awayT > 0 ? 1.1 : per.idle; }   // ひまな ときは のんびり あるく
   }
   const g = pickSpot(f, o, want, dt);
   f.aiMode = want.mode;
@@ -4856,16 +4857,22 @@ function aiMove(f, o, dt, autoSpecial) {
 //   flank：横から 回りこむ 強さ  react：わざを 選ぶまでの 間の 倍率（小さいほど せっかち）  dodge：よけの うまさ（足し算）
 //   hitAway：わざの あと すぐ 陰へ さがる  roam：ときどき 気まぐれに 間合いを 変える  hold：わざが なくても 前に 出つづける
 const NATURES = {
-  yuukan:   { up: 'atk', down: 'spe', n: 'ゆうかん',     d: '前へ 前へ。ほとんど かくれない',             range: .6,  cover: .05, flee: .12, flank: .2, react: .85, dodge: -.1, hold: 1 },
-  okubyou:  { up: 'spe', down: 'atk', n: 'おくびょう',   d: 'すぐ 陰に かくれる。遠くから ねらう',         range: 1.45, cover: 1,  flee: .7,  flank: 0,  react: 1.1, dodge: .25 },
-  reisei:   { up: 'spa', down: 'spe', n: 'れいせい',     d: '間合いを 守り、ひまな ときは 陰で 待つ',     range: 1,   cover: .6, flee: .35, flank: .3, react: 1,   dodge: .15 },
-  sekkachi: { up: 'spe', down: 'def', n: 'せっかち',     d: 'わざを どんどん 使う。待つのが 苦手',         range: .8,  cover: .15, flee: .2, flank: .1, react: .55, dodge: -.05 },
-  zurugashikoi: { up: 'atk', down: 'spa', n: 'ずるがしこい', d: '横から 回りこみ、当てたら すぐ 陰へ',   range: .9,  cover: .7, flee: .4,  flank: 1,  react: .9,  dodge: .2, hitAway: 1 },
-  nonki:    { up: 'def', down: 'spe', n: 'のんき',       d: 'あまり 動かない。のんびり 戦う',             range: 1.1, cover: .2, flee: .25, flank: 0,  react: 1.6, dodge: -.15 },
-  kimagure: { up: '', down: '', n: 'きまぐれ',     d: '近づいたり 離れたり 読めない',               range: 1,   cover: .4, flee: .3,  flank: .5, react: 1,   dodge: 0, roam: 1 },
-  nebarizuyoi: { up: 'spd', down: 'spa', n: 'ねばりづよい', d: 'HPが へっても 引かない',                 range: .85, cover: .3, flee: 0,   flank: .3, react: .95, dodge: .05, hold: 1 },
+  yuukan:   { up: 'atk', down: 'spe', n: 'ゆうかん',     d: '前へ 前へ。ほとんど かくれない',             range: .6,  cover: .05, flee: .12, flank: .2, react: .85, dodge: -.1, hold: 1, rush: 1.1, idle: .75 },
+  okubyou:  { up: 'spe', down: 'atk', n: 'おくびょう',   d: 'すぐ 陰に かくれる。遠くから ねらう',         range: 1.45, cover: 1,  flee: .7,  flank: 0,  react: 1.1, dodge: .25, rush: 0.95, idle: .7 },
+  reisei:   { up: 'spa', down: 'spe', n: 'れいせい',     d: '間合いを 守り、ひまな ときは 陰で 待つ',     range: 1,   cover: .6, flee: .35, flank: .3, react: 1,   dodge: .15, rush: 1, idle: .6 },
+  sekkachi: { up: 'spe', down: 'def', n: 'せっかち',     d: 'わざを どんどん 使う。待つのが 苦手',         range: .8,  cover: .15, flee: .2, flank: .1, react: .55, dodge: -.05, rush: 1.15, idle: .95 },
+  zurugashikoi: { up: 'atk', down: 'spa', n: 'ずるがしこい', d: '横から 回りこみ、当てたら すぐ 陰へ',   range: .9,  cover: .7, flee: .4,  flank: 1,  react: .9,  dodge: .2, hitAway: 1, rush: 1.1, idle: .65 },
+  nonki:    { up: 'def', down: 'spe', n: 'のんき',       d: 'あまり 動かない。のんびり 戦う',             range: 1.1, cover: .2, flee: .25, flank: 0,  react: 1.6, dodge: -.15, rush: 0.8, idle: .45 },
+  kimagure: { up: '', down: '', n: 'きまぐれ',     d: '近づいたり 離れたり 読めない',               range: 1,   cover: .4, flee: .3,  flank: .5, react: 1,   dodge: 0, roam: 1, rush: 1, idle: .6 },
+  nebarizuyoi: { up: 'spd', down: 'spa', n: 'ねばりづよい', d: 'HPが へっても 引かない',                 range: .85, cover: .3, flee: 0,   flank: .3, react: .95, dodge: .05, hold: 1, rush: 1, idle: .6 },
 };
 const NATURE_KEYS = Object.keys(NATURES);
+// 性格の 相性を ひとことで（せつめい用）
+function natRelText(k) {
+  if (k === 'kimagure') return 'あいてに かかわらず 気分しだい';
+  const R = NAT_REL[k] || {}, by = (ms) => Object.keys(R).filter(x => ms.includes(R[x])).map(x => NATURES[x].n).join('・');
+  return [['にがて', by(['scared', 'wary'])], ['もえる', by(['rival', 'fired', 'chase', 'irri'])], ['なめてる', by(['mock'])]].filter(x => x[1]).map(x => x[0] + '：' + x[1]).join('　');
+}
 // 性格を きめる（戦い方の タイプで 少し かたよる）
 function pickNature(sp) {
   const w = NATURE_KEYS.map(k => k === 'yuukan' || k === 'sekkachi' ? (sp.style === 'melee' ? 2 : 1) : k === 'okubyou' || k === 'reisei' ? (sp.style === 'ranged' ? 2 : 1) : 1);
@@ -4873,11 +4880,47 @@ function pickNature(sp) {
   for (let i = 0; i < w.length; i++) { r -= w[i]; if (r <= 0) return NATURE_KEYS[i]; }
   return NATURE_KEYS[0];
 }
+// 性格どうしの 相性：あいての 性格で きもちが かわり、たちまわりも かわる
+const MOODS = {
+  fired:  { n: 'やる気まんまん！', col: '#ffa94a', range: .8,  cover: .5, flee: .6, react: .8,  rush: 1.15, idle: 1.2 },
+  rival:  { n: 'ライバルだ！',     col: '#ff5a5a', range: .7,  cover: .2, flee: .3, react: .75, rush: 1.25, idle: 1.4, hold: 1 },
+  chase:  { n: 'まてまてー！',     col: '#ffd84a', range: .75, cover: .6, flee: .8, react: .85, rush: 1.2,  idle: 1.2, flank: .4 },
+  scared: { n: 'びくびく…',        col: '#8ab8ff', range: 1.4, cover: 1.8, flee: 1.6, react: 1.25, rush: .85, idle: 1.35, dodge: .15 },
+  irri:   { n: 'イライラ…',        col: '#ff7a9a', range: .9,  cover: .6, flee: .8, react: .65, rush: 1.1,  idle: 1.3, dodge: -.1 },
+  wary:   { n: 'けいかい',         col: '#6ad8c8', range: 1.15, cover: 1.3, flee: 1.1, react: 1.1, rush: 1,   idle: .9, dodge: .15, flank: .2 },
+  mock:   { n: 'よゆう〜',         col: '#9ae07a', range: .9,  cover: .6, flee: .8, react: 1.3, rush: .95,  idle: .7, dodge: -.1 },
+};
+//  じぶんの 性格 → { あいての 性格: きもち }
+const NAT_REL = {
+  yuukan:       { yuukan: 'rival', nebarizuyoi: 'rival', okubyou: 'chase', nonki: 'mock', zurugashikoi: 'irri', sekkachi: 'fired' },
+  okubyou:      { yuukan: 'scared', sekkachi: 'scared', zurugashikoi: 'scared', nebarizuyoi: 'wary', nonki: 'fired', okubyou: 'mock' },
+  reisei:       { sekkachi: 'mock', yuukan: 'mock', kimagure: 'wary', zurugashikoi: 'wary', reisei: 'rival' },
+  sekkachi:     { nonki: 'irri', reisei: 'irri', okubyou: 'chase', sekkachi: 'rival', nebarizuyoi: 'irri' },
+  zurugashikoi: { nonki: 'chase', okubyou: 'chase', yuukan: 'mock', reisei: 'wary', zurugashikoi: 'rival' },
+  nonki:        { sekkachi: 'mock', nonki: 'mock', yuukan: 'wary' },
+  kimagure:     {},   // あいてに かかわらず その ときの 気分しだい
+  nebarizuyoi:  { yuukan: 'rival', nebarizuyoi: 'rival', zurugashikoi: 'irri', okubyou: 'fired', sekkachi: 'fired' },
+};
+function natOf(f) { if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp); return f.mon.nat; }
+function moodVs(f, o) {
+  const me = natOf(f);
+  if (me === 'kimagure') return choice([null, null, 'fired', 'scared', 'chase', 'mock', 'irri']);
+  return NAT_REL[me][natOf(o)] || null;
+}
 function persona(f) {
-  if (f.per) return f.per;
-  if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp);
-  let h = 0; for (const c of f.mon.sid + f.mon.nat) h = (h * 31 + c.charCodeAt(0)) % 9973;
-  return (f.per = { ...NATURES[f.mon.nat], key: f.mon.nat, seed: h });
+  const o = B && B.sides ? opp(f) : null, key = o && o.mon ? o.mon.uid + ':' + o.mon.sid : '';
+  if (f.per && f.perFor === key) return f.per;
+  const nat = natOf(f);
+  let h = 0; for (const c of f.mon.sid + nat) h = (h * 31 + c.charCodeAt(0)) % 9973;
+  const per = { ...NATURES[nat], key: nat, seed: h }, md = o && o.mon ? moodVs(f, o) : null, M = MOODS[md];
+  if (M) {
+    per.range *= M.range; per.cover = clamp(per.cover * M.cover + (M.cover > 1 ? .2 : 0), 0, 1); per.flee = clamp(per.flee * M.flee + (M.flee > 1 ? .1 : 0), 0, .8);
+    per.react *= M.react; per.rush *= M.rush; per.idle *= M.idle; per.dodge += M.dodge || 0; per.flank = clamp(per.flank + (M.flank || 0), 0, 1);
+    if (M.hold) per.hold = 1;
+    if (f.perFor !== undefined || key) f.moodPop = M;   // でてきた ときに きもちを ふきだしで
+  }
+  per.mood = md; f.perFor = key;
+  return (f.per = per);
 }
 // ふだん 好む 間合い
 function prefRange(f, per) { return (f.sp.style === 'melee' ? 75 : f.sp.style === 'mid' ? 150 : 210) * per.range; }
