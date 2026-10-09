@@ -4112,7 +4112,7 @@ function fireMove(f) {
         f.x += Math.cos(cur.ang) * step; f.y += Math.sin(cur.ang) * step; clampF(f);
         fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 });
       }
-      if (targetable(o) && dist(f, o) <= f.r + o.r + 20 && losClear(f, o)) hit(f, o, m, cur.ang);
+      if (targetable(o) && dist(f, o) <= f.r + o.r + 20 && losClear(f, o)) { hit(f, o, m, cur.ang); f.kx -= Math.cos(cur.ang) * 170; f.ky -= Math.sin(cur.ang) * 170; }   // あてたら はねかえって 飛びのく
       endAct(f, .22); break;
     case 'swipe':
       sheetFx('claw', f.x + Math.cos(cur.ang) * (m.rad * .6 + f.r * .5), f.y - BODY + Math.sin(cur.ang) * (m.rad * .6 + f.r * .5), (m.rad + f.r) / 60, cur.ang);
@@ -4786,8 +4786,10 @@ function cdScale(f) {
   let sp = (f.speStat || 70) * stageMul(f.st.spe); if (f.status === 'par') sp *= .5;
   return clamp(Math.pow(avgStats().spe / Math.max(10, sp), .75), .6, 1.6);
 }
+const CLOSE_KINDS = ['melee', 'swipe', 'dash'];
 function aiMove(f, o, dt, autoSpecial) {
   const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
+  f.paceT = 1;
   if (f.side === 1 && aiSwitch(f, o, dt)) return;
   if (autoSpecial && !f.queued) {
     f.aiT -= dt;
@@ -4803,7 +4805,7 @@ function aiMove(f, o, dt, autoSpecial) {
   if (o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
   if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
-    const t = threatDir(f, o); return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
+    const t = threatDir(f, o); f.paceT = 1.5; return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
   }
   const per = persona(f), hurt = f.hp < f.maxHp * per.flee;
   f.tunCd = Math.max(0, (f.tunCd || 0) - dt);
@@ -4815,18 +4817,26 @@ function aiMove(f, o, dt, autoSpecial) {
   if (f.queued) {
     const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k);
     const see = !shot || losClear(f, o);
-    if (d <= reach && see) { const q = f.queued; f.queued = null; beginMove(f, q); if (per.hitAway && isDamaging(m)) f.awayT = rand(1.2, 2); return; }
-    if (stalled() && B.st.nav && !flies(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
-      f.aiMode = 'attack'; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
+    const close = CLOSE_KINDS.includes(m.k);
+    if (d <= reach && see) {
+      const q = f.queued; f.queued = null;
+      if (f.pace > 1.5) { burst(f.x, f.y, '#d8c8a8', 8, 80, .3); f.pace = .3; }   // ダッシュから ブレーキ：すなけむり
+      beginMove(f, q);
+      if (per.hitAway && isDamaging(m)) f.awayT = rand(1.2, 2); else if (close && isDamaging(m)) f.awayT = per.hold ? rand(.35, .6) : rand(.6, 1.1);   // うったら いったん はなれる
+      return;
     }
-    want = { R: idealRange(f, m, reach, per) * roamK, los: shot, cover: false, flank: per.flank > .25 && !shot, mode: 'attack' };
+    if (close && isDamaging(m)) f.paceT = d > reach + 40 ? 2.3 : 1.6;   // 近接わざ：まあいまで いっきに かけこむ
+    if (stalled() && B.st.nav && !flies(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
+      f.aiMode = 'attack'; if (close) f.paceT = 2.3; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
+    }
+    want = { R: (close ? Math.min(reach * .8, idealRange(f, m, reach, per)) : idealRange(f, m, reach, per)) * roamK, los: shot, cover: false, flank: per.flank > .25 && !shot, mode: 'attack' };
   } else {
     const dmgCd = f.moves.filter(id => isDamaging(MOVES[id])).map(id => f.cd[id] || 0), soon = dmgCd.length ? Math.min(...dmgCd) : 9;
     const oThreat = o.moves.some(id => isDamaging(MOVES[id]) && (o.cd[id] || 0) < 1);
     const stall = stalled();   // しばらく だれも ダメージを うけて いない：かくれず せめる
     const hide = !stall && (f.awayT > 0 || hurt || (oThreat && Math.random() < per.cover));
-    if (!hide && (soon < .9 || per.hold || stall)) want = { R: prefRange(f, per) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' };
-    else want = { R: (prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' };
+    if (!hide && (soon < .9 || per.hold || stall)) { want = { R: prefRange(f, per) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' }; f.paceT = stall ? 1 : .8; }
+    else { want = { R: (prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' }; f.paceT = hurt || f.awayT > 0 ? 1.1 : .6; }   // ひまな ときは のんびり あるく
   }
   const g = pickSpot(f, o, want, dt);
   f.aiMode = want.mode;
@@ -4913,6 +4923,13 @@ function pickSpot(f, o, w, dt) {
 function moveDir(f, mx, my, dt, nav) {
   if (f.v.confuse > 0) { const a = Math.atan2(my, mx) + Math.sin(B.t * 3 + f.side) * 2.2; const L = Math.hypot(mx, my); mx = Math.cos(a) * L; my = Math.sin(a) * L; }
   let sp = speedOf(f);
+  // 緩急：ダッシュ・ふつう・のんびり を なめらかに きりかえる
+  const pt = f.paceT || 1; f.pace = f.pace == null ? pt : f.pace + (pt - f.pace) * Math.min(1, dt * (pt > f.pace ? 7 : 4)); sp *= f.pace;
+  if (f.pace > 1.7 && (mx || my)) {   // かけこみ：のこりかげと すなけむり
+    if (!f.rushing) { f.rushing = true; SND.se('dash'); fxPush({ type: 'ring', x: f.x, y: f.y, rad: 14, col: '#ffffff', life: .2, max: .2 }); }
+    f.ghostT = (f.ghostT || 0) - dt; if (f.ghostT <= 0) { f.ghostT = .07; fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .16, max: .16 }); }
+    if (Math.random() < dt * 25) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: -mx * 60 + rand(-15, 15), vy: -rand(10, 30), life: .3, max: .3, col: '#d8c8a8', size: 3, g: 60 });
+  } else if (f.pace < 1.3) f.rushing = false;
   if (B.zones.length && !hovers(f)) { const zs = B.zones.find(z => z.side !== f.side && MOVES[z.id].slow && inZoneFloor(z, f.x, f.y)); if (zs) sp *= MOVES[zs.id].slow; }   // ありじごく：あしが とられる
   if (B.st.pools.length && inPool(f.x, f.y)) {
     sp *= f.sp.type === 'water' ? 1.2 : .6;
@@ -4933,7 +4950,7 @@ function moveDir(f, mx, my, dt, nav) {
     } else if (Math.random() < dt * .3) f.avoid = 0;
   }
   f.x += mx * sp * dt; f.y += my * sp * dt;
-  f.moving = Math.hypot(mx, my) > .15; if (f.moving) f.walk += dt;
+  f.moving = Math.hypot(mx, my) > .15; if (f.moving) f.walk += dt * clamp(f.pace, .7, 1.8);
 }
 
 /* ---------- 入力 ---------- */
@@ -5004,7 +5021,7 @@ function updateFighter(f, dt) {
       if (!oT) {
         // あいてが 空／地中に いる：おりてくる ばしょから にげる
         if (o && o.state === 'hide' && o.cur && f.hideFor !== o.cur.uid) { f.hideFor = o.cur.uid; f.hideFlee = Math.random() < (f.side === 1 ? .35 + B.skill * .4 : .5); }   // にげるか どうかは 1回ごとに きめる
-        if (o && o.state === 'hide' && o.cur && f.hideFlee && o.cur.t > o.cur.wind * .35 && inZone(o.cur, o, f.x, f.y, f.r + 10)) { const t = threatDir(f, o); moveDir(f, Math.cos(t.base), Math.sin(t.base), dt); }
+        if (o && o.state === 'hide' && o.cur && f.hideFlee && o.cur.t > o.cur.wind * .35 && inZone(o.cur, o, f.x, f.y, f.r + 10)) { const t = threatDir(f, o); f.paceT = 1.5; moveDir(f, Math.cos(t.base), Math.sin(t.base), dt); }
         break;
       }
       aiDodgeCheck(f, o);
