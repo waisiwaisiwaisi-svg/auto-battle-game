@@ -130,6 +130,14 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .pmt{margin-top:2px}.pmt .chip{font-size:9px}
 .pm .tag{position:absolute;left:3px;top:3px;font-size:9px;background:var(--acc);color:#1a1626;padding:0 3px;font-weight:700}
 .bigbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.jrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.jrc{position:relative;border:2px solid var(--edge);border-radius:8px;overflow:hidden;background:#141022 center/cover;min-height:118px;color:#fff;font:inherit;text-align:left;padding:0;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end}
+.jrc::before{content:'';position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(10,8,20,.88))}
+.jrc>*{position:relative}.jrc .in{padding:8px 10px;display:flex;flex-direction:column;gap:3px}
+.jrc b{font-size:15px}.jrc small{font-size:11px;opacity:.85}.jrc .dots{display:flex;gap:4px}.jrc .dots i{width:10px;height:10px;border-radius:50%;background:#3a3350;border:1px solid #0d0b14}.jrc .dots i.on{background:var(--acc)}.jrc .dots i.ld{border-radius:2px;width:14px}
+.jrc .badge{position:absolute;top:6px;right:8px;font-size:22px;filter:drop-shadow(0 0 4px #000)}
+.jrc.lock{filter:grayscale(1) brightness(.5);cursor:not-allowed}.jrc.next{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
+.jrc.league{grid-column:1/-1;min-height:90px;background:linear-gradient(135deg,#3a2a6a,#1a1430)}
 .bigbtns .btn{padding:14px 8px;display:flex;flex-direction:column;gap:3px;align-items:center}
 .bigbtns .btn span{font-size:10.5px;font-weight:400;opacity:.85}
 .cupinfo{font-size:13px;line-height:1.7}
@@ -452,7 +460,8 @@ html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
       <div class="hcol">
         <div class="card cupinfo" id="cupInfo"></div>
         <div class="bigbtns">
-          <button class="btn" id="btnCup">たいかいへ<span>スタジアムで しあい</span></button>
+          <button class="btn" id="btnJourney" style="grid-column:1/-1;background:#ffb547;box-shadow:0 4px 0 #a86a10,0 0 0 3px #0d0b14">たびに でる<span id="jrSub">10の ジムを めぐって バッジを あつめよう</span></button>
+          <button class="btn" id="btnCup">フリーたいかい<span>スタジアムで しあい</span></button>
           <button class="btn" id="btnWild" style="background:#7bd88f;box-shadow:0 4px 0 #3f8a50,0 0 0 3px #0d0b14">くさむらへ<span>モンスターを つかまえる</span></button>
         </div>
         <div class="sec-title"><span>たからばこ（かつと もらえる・4つまで・じかんで あく）</span><span class="inv">わざのまきもの <b id="hTms">0</b>　どうぐ <b id="hItems">0</b>　つかまえた <b id="hCaught">0</b></span></div>
@@ -464,6 +473,13 @@ html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
         <div class="row" style="gap:8px"><button class="btn sub" id="btnOnline" style="padding:8px;font-size:13px;flex:1;color:var(--acc)">オンライン</button><button class="btn sub" id="btnDex" style="padding:8px;font-size:13px;flex:1">ずかん</button><button class="btn sub" id="btnChart" style="padding:8px;font-size:13px;flex:1">あいしょう表</button><button class="btn sub" id="btnHelp" style="padding:8px;font-size:13px;flex:1">あそびかた</button></div>
       </div>
     </div>
+  </section>
+
+  <!-- たび -->
+  <section class="screen" id="scJourney" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">たび：バッジ <b id="jrBadges">0</b>/10</span><button class="btn sub" id="btnJrBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <p class="dim" id="jrStory" style="margin:4px 0 10px"></p>
+    <div id="jrGrid" class="jrgrid"></div>
   </section>
 
   <!-- ずかん -->
@@ -2958,7 +2974,7 @@ function setArtBg() {
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
-function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
+function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
   const p = sp.prof, evo = '';
@@ -3181,6 +3197,7 @@ function useTM(m) {
 }
 
 function renderHub() {
+  { const J = jr(); const el = $('jrSub'); if (el) el.textContent = J.champ ? `でんどういり ${J.champ}かい・バッジ ${J.badges.length}/10` : J.gym < GYMS.length ? `バッジ ${J.badges.length}/10・つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム` : 'バッジが そろった！ チャンピオンリーグへ'; }
   $('hTrophy').textContent = S.trophies; $('hCaps').textContent = S.capsules; $('hCaught').textContent = S.caught;
   const r = ROUNDS[S.round];
   $('cupInfo').innerHTML = `<b style="color:var(--acc)">${cupName()}</b><br>つぎ：<b>${r.n}</b> vs ${roundTrainer(S.round).n}<br><span class="dim">あいて ${r.size}たい</span>` +
@@ -3811,7 +3828,7 @@ function startBattle(cfg) {
 
   say(cfg.intro);
   show('scBattle');
-  SND.play(cfg.kind === 'wild' ? 'st_wild' : 'st_' + st.field + (S.round >= ROUNDS.length - 1 ? '_boss' : ''));
+  SND.play(cfg.kind === 'wild' ? 'st_wild' : 'st_' + st.field + ((cfg.boss != null ? cfg.boss : S.round >= ROUNDS.length - 1) ? '_boss' : ''));
   setupCmds();
 }
 
@@ -5465,7 +5482,8 @@ function endBattle(res) {
     } else if (res === 'win') { S.capsules += 1; S.gems = (S.gems || 0) + randi(1, 2); }
     else if (res === 'lose') lines.unshift('ちからつきて しまった… でも モンスターたちは すぐに げんきに なった');
     else if (res === 'run') lines.unshift('くさむらから ぶじに にげだした');
-  } else {
+  } else if (B.cfg.journey) journeyResult(res, lines);
+  else {
     if (res === 'win') {
       S.wins++;
       const r = ROUNDS[S.round];
@@ -6512,7 +6530,9 @@ $('btnHelp').onclick = () => {
 };
 $('btnWild').onclick = startWild;
 $('btnCup').onclick = startCup;
-$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); B = null; renderHub(); };
+$('btnJourney').onclick = renderJourney;
+$('btnJrBack').onclick = () => renderHub();
+$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey; B = null; if (jr) renderJourney(); else renderHub(); };
 
 $('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { NET.ended = true; B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rankResult(false)]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); netReset(); showResult(); } else { netReset(); endBattle('lose'); } }); return; } B.paused = true; $('pauseOv').hidden = false; };
 $('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
@@ -6538,6 +6558,94 @@ function startWild() {
     kind: 'wild', enemies: [fixMon({ uid: -1, sid })], skill: .15,
     title: 'くさむら', intro: 'くさむらが ガサガサ ゆれている…',
   });
+}
+/* =====================================================================
+   たび：10の ジムを めぐって バッジを あつめ、チャンピオンリーグへ
+   各ジム：トレーナー 2人 → ジムリーダー。リーダーに かつと バッジ・ジェム・タイプの わざのまきもの
+   ===================================================================== */
+const GYMS = [
+  { f: 'grass', lead: 'florist', ln: 'ジムリーダー コハル', say: 'はなと みどりの ちから、うけとめてね！' },
+  { f: 'water', lead: 'barista', ln: 'ジムリーダー リク', say: 'ながれに さからえるかな？' },
+  { f: 'fire', lead: 'chef', ln: 'ジムリーダー ショウ', say: 'あつあつの しあいを めしあがれ！' },
+  { f: 'elec', lead: 'gamer', ln: 'ジムリーダー ネネ', say: 'はんのう そくど、ついてこられる？' },
+  { f: 'ice', lead: 'camera', ln: 'ジムリーダー ハヤト', say: 'こおりつく いっしゅんを とらえてやる！' },
+  { f: 'ground', lead: 'mechanic', ln: 'ジムリーダー ジン', say: 'どっしり かまえて うけてたつ！' },
+  { f: 'poison', lead: 'researcher', ln: 'ジムリーダー シオリ', say: 'どくの けんきゅう せいか、みせてあげる。' },
+  { f: 'wind', lead: 'ranger', ln: 'ジムリーダー タクミ', say: 'そらから すべて みえているぞ！' },
+  { f: 'fighting', lead: 'firefighter', ln: 'ジムリーダー アカリ', say: 'こころも からだも きたえてきた！' },
+  { f: 'dragon', lead: 'vet', ln: 'ジムリーダー アカネ', say: 'ドラゴンの ほんきを みせてあげる。' },
+];
+const LEAGUE = [['ranger', 'してんのう タクミ'], ['researcher', 'してんのう シオリ'], ['firefighter', 'してんのう アカリ'], ['girl', 'チャンピオン レイ']];
+const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; return S.journey; };
+// 敵チーム：そのジムの タイプの モンスター（たりなければ ほかから）。後の ジムほど 個体値が 高く、リーダーは きょうかも
+function gymTeam(type, n, i, leader, rare) {
+  const ids = poolIds().filter(id => rare || !SPECIES[id].rare);
+  let pool = type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids;
+  if (pool.length < n + 2) pool = pool.concat(ids.filter(id => !pool.includes(id)).slice(0, 8));
+  const out = [], loop = jr().champ ? .25 : 0;
+  for (let k = 0; k < n; k++) { let sid, g = 0; do { sid = choice(pool); } while (out.some(e => e.sid === sid) && g++ < 20);
+    const em = fixMon({ uid: -1 - k, sid }, clamp(.03 + i * .06 + (leader ? .06 : 0) + loop, 0, .95));
+    if (leader || loop) { const pts = Math.min(EV_MAX, Math.round(4 + i * 3 + loop * 40)), b = base6(sid), main = b.atk >= b.spa ? 'atk' : 'spa'; em.ev = { [main]: Math.min(EV_STAT_MAX, Math.ceil(pts * .5)), spe: Math.min(EV_STAT_MAX, Math.floor(pts * .3)), hp: Math.floor(pts * .2) }; }
+    out.push(em); }
+  return out;
+}
+function startJourney(gi) {
+  const J = jr(), G = GYMS[gi];
+  if (gi > J.gym && !J.champ) return;
+  const step = gi < J.gym ? 2 : J.step, leader = step >= 2, i = gi + (jr().champ ? 2 : 0);
+  const others = TR_NPC.filter(t => t[0] !== G.lead && t[0] !== myLook());
+  const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${FIELD_NAMES[G.f]}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
+  startBattle({
+    kind: 'cup', field: G.f, enemies: gymTeam(G.f, leader ? 3 : (gi < 3 ? 2 : 3), i, leader, gi >= 5), trainer: tr, boss: leader,
+    skill: clamp(.25 + i * .045 + (leader ? .08 : 0), 0, .9), journey: { gi, step },
+    title: `${FIELD_NAMES[G.f]}ジム　${leader ? 'ジムリーダー' : `トレーナー ${step + 1}`}`,
+    intro: leader ? `${G.ln}「${G.say}」` : `${tr.name}が しょうぶを しかけてきた！`,
+  });
+}
+function startLeague() {
+  const J = jr(); if (J.badges.length < GYMS.length) return;
+  const k = J.league, [lk, ln] = LEAGUE[k];
+  startBattle({ kind: 'cup', field: choice(FIELDS), enemies: gymTeam(null, 3, 10 + k, true, true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3,
+    skill: clamp(.72 + k * .05, 0, .9), journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「リーグの かべは あついぞ！」` });
+}
+function journeyResult(res, lines) {
+  const J = jr(), c = B.cfg.journey;
+  if (c.league != null) {
+    if (res === 'win') { S.wins++; S.gems = (S.gems || 0) + 5; J.league++;
+      if (J.league >= LEAGUE.length) { J.league = 0; J.champ++; S.trophies++; S.gems += 30; lines.unshift('<b style="color:var(--acc)">👑 チャンピオンリーグ ゆうしょう！ でんどういり！</b>'); lines.push('ジムリーダーたちが さらに つよく なって まっている…'); }
+      else lines.unshift(`${LEAGUE[J.league - 1][1]}に かった！ つぎは ${LEAGUE[J.league][1]}`); }
+    else if (res === 'lose') { J.league = 0; lines.unshift('まけてしまった… リーグは さいしょから やりなおし'); }
+    return;
+  }
+  const G = GYMS[c.gi];
+  if (res !== 'win') { if (res === 'lose') lines.unshift('まけてしまった… モンスターを きたえて また ちょうせんしよう'); return; }
+  S.wins++; S.capsules += 2; S.gems = (S.gems || 0) + 2;
+  if (c.step < 2) { if (c.gi === J.gym) J.step = c.step + 1; lines.unshift(`トレーナーに かった！ ${J.step >= 2 ? 'つぎは ジムリーダー！' : ''}`); return; }
+  // ジムリーダーに かった
+  S.gems += 10;
+  if (!J.badges.includes(G.f)) { J.badges.push(G.f); lines.unshift(`<b style="color:var(--acc)">🏅 ${FIELD_NAMES[G.f]}バッジを てにいれた！</b>`); }
+  else lines.unshift(`${G.ln}に また かった！`);
+  const tms = TM_POOL().filter(id => MOVES[id].t === G.f && isDamaging(MOVES[id])); if (tms.length) { const t = choice(tms); S.tms = S.tms || {}; S.tms[t] = (S.tms[t] || 0) + 1; lines.push(`わざのまきもの「${MOVES[t].n}」を もらった`); }
+  if (c.gi === J.gym && J.gym < GYMS.length) { J.gym++; J.step = 0; if (J.gym < GYMS.length) lines.push(`つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム！`); else lines.push('<b>バッジが 10こ そろった！ チャンピオンリーグへ いこう！</b>'); }
+}
+function renderJourney() {
+  show('scJourney'); const J = jr();
+  $('jrBadges').textContent = J.badges.length;
+  $('jrStory').textContent = J.champ ? `でんどういり ${J.champ}かい！ ジムリーダーたちは つよく なって まっている。` : J.badges.length >= GYMS.length ? 'バッジが そろった！ チャンピオンリーグに いどもう。' : '10の とうぎじょうを めぐって ジムリーダーに かち、バッジを あつめよう。ぜんぶ そろうと チャンピオンリーグへ。';
+  const g = $('jrGrid'); g.innerHTML = '';
+  GYMS.forEach((G, i) => {
+    const open = i <= J.gym || J.champ, done = J.badges.includes(G.f), cur = i === J.gym && !J.champ, step = i < J.gym || J.champ ? 3 : J.step;
+    const b = document.createElement('button'); b.className = 'jrc' + (open ? '' : ' lock') + (cur ? ' next' : '');
+    b.style.backgroundImage = `url(${ARENAS[G.f].img})`;
+    b.innerHTML = `${done ? '<span class="badge">🏅</span>' : ''}<div class="in"><b>${FIELD_NAMES[G.f]}ジム ${typeChip(G.f)}</b><small>${G.ln}</small><div class="dots"><i class="${step > 0 ? 'on' : ''}"></i><i class="${step > 1 ? 'on' : ''}"></i><i class="ld ${done ? 'on' : ''}"></i></div><small>${!open ? 'まえの ジムを クリアすると あく' : cur ? (J.step < 2 ? `トレーナー ${J.step + 1}人め` : 'ジムリーダーに ちょうせん') : 'リーダーに さいせん'}</small></div>`;
+    if (open) b.onclick = () => { SND.se('ok'); startJourney(i); };
+    g.appendChild(b);
+  });
+  const L = document.createElement('button'), lo = J.badges.length >= GYMS.length;
+  L.className = 'jrc league' + (lo ? ' next' : ' lock');
+  L.innerHTML = `${J.champ ? '<span class="badge">👑</span>' : ''}<div class="in"><b>チャンピオンリーグ</b><small>${lo ? `してんのう 3人と チャンピオン（${J.league + 1}/4 せんめ）` : 'バッジを 10こ あつめると ちょうせんできる'}</small></div>`;
+  if (lo) L.onclick = () => { SND.se('ok'); startLeague(); };
+  g.appendChild(L);
 }
 // その 回戦の あいて（ランクごとに かわる。じぶんと おなじ みためは でない）
 function roundTrainer(i) {
@@ -6592,7 +6700,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr }); },
 };
 })();
 </script>
