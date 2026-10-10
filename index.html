@@ -319,7 +319,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 #bTop{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dim)}
 #bTop button.off{text-decoration:line-through}
 #bTop button{font-size:11px;color:var(--dim);background:var(--panel);box-shadow:0 0 0 1px var(--edge);padding:2px 8px}
-@media (max-height:680px){ html:not(.land) #cvWrap{width:min(100%, calc(42dvh * 16 / 9))} html:not(.land) #banner{min-height:2.2em;font-size:11.5px} }
+
 /* 横長の 画面（1920×1080 など）：戦闘は 左に 16:9 の 画面、右に 情報と ボタン */
 html.land #app{max-width:none}
 html.land #scDex{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px}
@@ -424,6 +424,67 @@ html.land.short #cvWrap .hudtop .plate{padding:2px 6px} html.land.short #cvWrap 
 /* たて画面：かわす と ひかえは いちばん 下 */
 html.short .askbox .tmlist{max-height:calc(var(--appH, 100dvh) - 150px)}
 html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
+/* ===== スマホ（たて画面）むけ ===== */
+.looks{grid-template-columns:repeat(auto-fill,minmax(76px,1fr))}
+.looks > *{min-width:0}
+.looks span,.looks small,.looks div{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jrc::before{background:linear-gradient(rgba(10,8,20,.35),rgba(10,8,20,.92) 60%)}
+.jrc b,.jrc small{text-shadow:1px 1px 0 #000}
+.optrow > span:first-child,.optrow > label:first-child{white-space:nowrap}
+.optrow select{max-width:55%}
+.hicons{display:flex;gap:8px}
+.chesthead small{font-size:10.5px;color:var(--dim);letter-spacing:0;margin-left:4px}
+.inv{gap:6px 14px;margin-top:-4px}
+html:not(.land) .hubhead{display:grid;grid-template-columns:1fr auto;grid-template-areas:"logo icons" "res res";row-gap:10px;align-items:center}
+html:not(.land) .hlogo{grid-area:logo} html:not(.land) .hicons{grid-area:icons}
+html:not(.land) .hres{grid-area:res;flex-wrap:nowrap;justify-content:space-between;gap:6px}
+html:not(.land) .hres > span{flex:1 1 auto;text-align:center;padding:4px 6px;font-size:12.5px;white-space:nowrap}
+html:not(.land) .hicon{width:38px;height:38px}
+html.land .hubhead{flex-wrap:nowrap} html.land .hres{flex:1;justify-content:flex-end}
+/* たたかい（よこ）：左に 戦場を 高さ いっぱい、右の 列に 実況・わざ・かわす/ひかえ */
+html.land #scBattle:not([hidden]){grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"top top" "cv side" "cv bbar";align-items:start}
+html.land #cvWrap{width:min(100%, calc((var(--appH, 100dvh) - 70px) * 16 / 9))}
+html.land #bside{align-self:stretch;min-height:0}
+html.land #ctrl{flex:1;min-height:0}
+html.land #btns{grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));height:100%;max-height:260px}
+html.land .cmd.info{grid-column:auto;min-height:0;justify-content:flex-start}
+html.land .cmd.info .d{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+html.land #bbar{align-self:end}
+html.land #bbar #cDodge{flex:0 0 30%}
+html.land #bench{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
+html.land .bmon > div{min-width:0;flex:1}
+html.land .bmon .bs{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.land.short #scBattle:not([hidden]){grid-template-columns:minmax(0,1fr) 270px}
+html.land.short #cvWrap{width:min(100%, calc((var(--appH, 100dvh) - 44px) * 16 / 9))}
+html.land.short .cmd.info .d{-webkit-line-clamp:2}
+html.land.short #bbar #cDodge,html.land.short .bmon{min-height:50px}
+html.land .bmon{flex-direction:column!important;justify-content:center;gap:2px;text-align:center}
+html.land .bmon > div{width:100%}
+html.land .bmon canvas{width:30px;height:30px}
+html.land .bmon .bn{font-size:10.5px} html.land .bmon .bs{display:none}
+html.land #bbar{flex-wrap:wrap} html.land #bench{flex:1 1 55%} html.land #bbar #cCap,html.land #bbar #cRun{flex:1 1 40%;min-height:40px;order:5}
+/* たたかい（たて）：戦場は よこ いっぱい、のこりは わざボタン */
+html:not(.land) #scBattle{padding:calc(6px + env(safe-area-inset-top)) 8px calc(8px + env(safe-area-inset-bottom));gap:6px}
+html:not(.land) #cvWrap{width:calc(100% + 16px);margin:0 -8px;aspect-ratio:var(--cvAR, 16 / 9)}
+html:not(.land) #cv{box-shadow:0 2px 0 2px var(--out),0 4px 0 2px var(--rim2)}
+html:not(.land) #bTop{min-height:30px}
+html:not(.land) #bTop button{padding:4px 10px;font-size:12px}
+html:not(.land) #bside{min-height:0}
+html:not(.land) #banner{min-height:2.4em;font-size:12.5px;padding:4px 8px;display:flex;align-items:center;justify-content:center}
+html:not(.land) #ctrl{flex:1;min-height:0}
+html:not(.land) #btns{grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,minmax(0,1fr));height:100%;max-height:300px;gap:8px;align-content:stretch}
+html:not(.land) .cmd.info{grid-column:auto;min-height:0;justify-content:flex-start;padding:8px 10px 6px 12px;gap:2px}
+html:not(.land) .cmd.info .a{font-size:15px}
+html:not(.land) .cmd.info .b{font-size:10.5px;white-space:normal;line-height:1.3}
+html:not(.land) .cmd.info .d{font-size:10.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+html:not(.land) #bbar{gap:6px}
+html:not(.land) #bbar #cDodge{flex:0 0 28%;min-height:64px}
+html:not(.land) #cvWrap .hudtop .plate{width:min(47%,300px)}
+html:not(.land) #bench{grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px}
+html:not(.land) .bmon{min-height:64px;padding:4px 6px!important;gap:4px}
+html:not(.land) .bmon canvas{width:38px;height:38px}
+html:not(.land) .bmon > div{min-width:0;flex:1}
+html:not(.land) .bmon .bs{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -458,8 +519,8 @@ html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
       <h1 class="logo hlogo"><span>PIXEL MONSTER</span> ARENA</h1>
       <div class="hres">
         <span title="トロフィー">🏆 <b id="hTrophy">0</b></span><span title="クリスタル">💠 <b id="hCaps">0</b></span><span title="ジェム">💎 <b id="hGems">0</b></span><span title="ランク" id="hRank"></span>
-        <button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと">♪</button><button class="hicon" id="btnOpt" aria-label="せってい">⚙</button>
       </div>
+      <div class="hicons"><button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと">♪</button><button class="hicon" id="btnOpt" aria-label="せってい">⚙</button></div>
     </div>
     <div class="hubgrid">
       <div class="hcol">
@@ -470,7 +531,8 @@ html:not(.land) #bside{order:3} html:not(.land) #bbar{order:4;margin-top:auto}
           <button class="btn" id="btnCup">フリーたいかい<span>スタジアムで しあい</span></button>
           <button class="btn" id="btnWild" style="background:#7bd88f;box-shadow:0 4px 0 #3f8a50,0 0 0 3px #0d0b14">くさむらへ<span>モンスターを つかまえる</span></button>
         </div>
-        <div class="sec-title"><span>たからばこ（かつと もらえる・4つまで・じかんで あく）</span><span class="inv">わざのまきもの <b id="hTms">0</b>　どうぐ <b id="hItems">0</b>　つかまえた <b id="hCaught">0</b></span></div>
+        <div class="sec-title chesthead"><span>たからばこ <small>かつと もらえる・4つまで</small></span></div>
+        <div class="inv"><span>わざのまきもの <b id="hTms">0</b></span><span>どうぐ <b id="hItems">0</b></span><span>つかまえた <b id="hCaught">0</b></span></div>
         <div class="chests" id="hubChests"></div>
       </div>
       <div class="hcol">
@@ -3545,7 +3607,7 @@ function monCard(m, where, i, openUid) {
 /* =====================================================================
    ステージ（オフスクリーンに焼き込み）
    ===================================================================== */
-const VW = 480, VH = 270;   // 16:9（内部は 1920×1080 で 描く）
+let VW = 480, VH = 270;   // ふつうは 16:9（内部は 1920×1080 で 描く）。スマホの たて画面では 画面に あわせて たてに のばす
 function srng(seed) { let s = seed % 2147483647 || 1; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 
 // なめらかなノイズ（芝生や土のまだら模様用）
@@ -5729,6 +5791,7 @@ function bVisual(dt) {
     tx += ((x0 + x1) / 2 - tx) * Math.min(1, k * 1.5); ty += ((y0 + y1) / 2 - ty) * Math.min(1, k * 1.5);
   }
   if (B.mode === 'intro') tz = B.modeT < .6 ? VW / st.W : VW / st.W + Math.min(1, (B.modeT - .6) / 1.6) * (fit - VW / st.W);
+  tz = Math.max(tz, VH / st.H);   // たてに ながい 画面でも 上下に すきまを ださない
   B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 1.6);
   B.cam.x += (tx - B.cam.x) * Math.min(1, dt * 4);
   B.cam.y += (ty - B.cam.y) * Math.min(1, dt * 4);
@@ -6703,6 +6766,9 @@ function layout() {
   const W = rot ? ih : iw, H = rot ? iw : ih, r = document.documentElement, app = $('app');
   r.classList.toggle('rot', rot); r.classList.toggle('land', W / H >= 1.25); r.classList.toggle('short', W / H >= 1.25 && H < 560);
   r.style.setProperty('--appW', W + 'px'); r.style.setProperty('--appH', H + 'px');
+  // たて画面：のこりの UI（約 390px）を のぞいた 高さで 戦場を たてに のばす（16:9 〜 1:1）
+  VH = W / H >= 1.25 ? 270 : Math.round(480 * clamp((H - 390) / W, 9 / 16, 1));
+  r.style.setProperty('--cvAR', `480 / ${VH}`);
   app.style.width = rot ? W + 'px' : ''; app.style.height = rot ? H + 'px' : '';
   for (const id of ['titleRot', 'hubRot', 'bRot']) { const b = $(id); if (b) b.classList.toggle('on', LAND_PREF); }
 }
@@ -7029,7 +7095,7 @@ function startCup(fieldArg) {
 
 // キャンバスは いつも 1920×1080（論理座標 480×270 の 4倍）
 function fitCanvas() {
-  const w = 1920, h = 1080;
+  const w = 1920, h = Math.round(1920 * VH / VW);
   if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; ctx.imageSmoothingEnabled = false; }
 }
 
