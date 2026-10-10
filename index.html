@@ -520,6 +520,15 @@ html #app #bpanel .bmon .bn{font-size:10.5px} html #app #bpanel .bmon .bs{displa
 html #app #bpanel #bbar #cCap,html #app #bpanel #bbar #cRun{flex:0 0 auto;min-width:58px;min-height:42px;order:0}
 html.land #app #bpanel #bbar{flex-wrap:wrap} html.land #app #bpanel #bench{flex:1 1 55%}
 html.land #app #bpanel #bbar #cCap,html.land #app #bpanel #bbar #cRun{flex:1 1 40%;order:5;min-height:36px}
+/* よこ画面：わざは 右はしに たて 1れつ（列を ほそくして 戦場を ひろく） */
+html.land #bpanel{width:min(200px,26vw)}
+html.land #app #cvWrap .hudtop{right:calc(min(200px,26vw) + 18px)}
+html.land #app #bpanel #btns{grid-template-columns:1fr}
+html.land #app #bpanel .cmd.info{min-height:36px}
+html.land #app #bpanel #bbar{flex-wrap:wrap}
+html.land #app #bpanel #bbar #cDodge{flex:1 1 100%;min-height:36px}
+html.land #app #bpanel #bench{flex:1 1 100%}
+html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #app #bpanel .bmon .bn{display:none} html.land #app #bpanel .bmon > div{flex:0 1 50%}
 </style>
 </head>
 <body>
