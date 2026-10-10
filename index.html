@@ -528,7 +528,7 @@ html.land #app #bpanel .cmd.info{min-height:36px}
 html.land #app #bpanel #bbar{flex-wrap:wrap}
 html.land #app #bpanel #bbar #cDodge{flex:1 1 100%;min-height:36px}
 html.land #app #bpanel #bench{flex:1 1 100%}
-html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #app #bpanel .bmon .bn{display:none} html.land #app #bpanel .bmon > div{flex:0 1 50%}
+html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #app #bpanel .bmon .bn{display:none} html.land #app #bpanel .bmon{flex-direction:column!important;gap:2px;padding:3px 8px!important} html.land #app #bpanel .bmon > span{flex:none!important;width:100%;display:block} html.land #app #bpanel .bmon .bh{margin-top:0}
 </style>
 </head>
 <body>
@@ -1085,6 +1085,7 @@ function fixMon(m, bias) {
     m.iv = { hp: cv(m.iv.hp), atk: cv(m.iv.atk), def: cv(m.iv.def), spa: rIv(), spd: rIv(), spe: cv(m.iv.spd), eva: rIv() };
   }
   const L = learned(m);
+  if (Array.isArray(m.moves) && m.moves.some(id => MOVES[id] && MOVES[id].cat === 'stat' && !canLearn(m.sid, id))) m.moves = m.moves.filter(id => !(MOVES[id] && MOVES[id].cat === 'stat' && !canLearn(m.sid, id))).concat(['tackle']);   // おぼえられない ほじょわざは おきかえ（下で うめる）
   if (Array.isArray(m.moves) && m.moves.includes('tackle')) { m.moves = m.moves.filter(id => id !== 'tackle'); for (const id of pickMoves(m)) if (m.moves.length < 4 && !m.moves.includes(id)) m.moves.push(id); }   // むかしの たいあたりは わざに おきかえ
   if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // わざのまきものの わざも そのまま
   return m;
@@ -2686,13 +2687,15 @@ const STYLE_K = { melee: { melee: 3, swipe: 3, dash: 3, strike: 1.5, multi: 1, v
     const my = [sp.type, sp.type2].filter(Boolean), cov = (COVER[sp.type] || COVER.normal).slice().sort(() => r() - .5).slice(0, 3);
     pickN(ATK.filter(id => my.includes(MOVES[id].t)), 3 + (r() < .5 ? 1 : 0), m => (wk[m.k] || 1) * (m.power >= 100 ? .7 : 1) * (m.ohko ? .15 : 1));
     pickN(ATK.filter(id => cov.includes(MOVES[id].t)), 2 + (r() < .5 ? 1 : 0), m => (wk[m.k] || 1) * (m.ohko ? .15 : 1));
-    pickN(SUP, 2 + (r() < .4 ? 1 : 0), m => (my.includes(m.t) ? 2 : 1) * (m.k === 'self' ? .8 : 1));
+    // ほじょわざは じぶんの タイプ・ノーマル（とべる 子は かぜ も）だけ：やどりぎ や はねやすめ を へんな 子が おぼえない
+    const supOk = (m) => my.includes(m.t) || m.t === 'normal' || (m.t === 'wind' && sp.fly);
+    pickN(SUP.filter(id => supOk(MOVES[id])), 2 + (r() < .4 ? 1 : 0), m => (my.includes(m.t) ? 2 : 1) * (m.k === 'self' ? .8 : 1));
     if (!out.some(([, id]) => INDIRECT(MOVES[id]))) {   // かべごしに とどく わざを 1つは おぼえる（かくれる 子の ため）
       const ind = ATK.filter(id => INDIRECT(MOVES[id]) && my.includes(MOVES[id].t)), ind2 = ind.length ? ind : ATK.filter(id => INDIRECT(MOVES[id]) && cov.includes(MOVES[id].t));
       const pick = (ind2.length ? ind2 : ATK.filter(id => INDIRECT(MOVES[id])))[Math.floor(r() * 1e6) % Math.max(1, (ind2.length ? ind2 : ATK.filter(id => INDIRECT(MOVES[id]))).length)];
       if (pick) out.push([4 + Math.floor(r() * 8), pick]);
     }
-    LEARN[sid] = out.filter(([, id]) => id !== 'tackle');   // 通常攻撃は なし：わざだけで たたかう
+    LEARN[sid] = out.filter(([, id]) => id !== 'tackle' && (MOVES[id].cat !== 'stat' || supOk(MOVES[id])));   // 通常攻撃は なし：わざだけで たたかう
   }
 })();
 for (const sid in SPECIES) { const sp = SPECIES[sid]; if (!LEARN[sid]) continue; if ((sp.fly || sp.type === 'wind' || sp.type2 === 'wind') && !LEARN[sid].some(([, x]) => x === 'fly')) LEARN[sid].push([28, 'fly']); if ((sp.type === 'ground' || sp.type2 === 'ground') && !sp.fly && !LEARN[sid].some(([, x]) => x === 'dig')) LEARN[sid].push([28, 'dig']); for (const id of PLACE_MOVES) if ([sp.type, sp.type2].includes(MOVES[id].t) && !LEARN[sid].some(([, x]) => x === id)) LEARN[sid].push([30, id]); }
@@ -3959,7 +3962,7 @@ function startBattle(cfg) {
       { fs: ef, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: cfg.trainer ? { name: cfg.trainer.name, spr: cfg.trainer.spr, x: st.trainers[1].x, y: st.trainers[1].y, shout: 0 } : null },
     ],
     projs: [], parts: [], texts: [], fx: [], decals: [], walls: [], wallRects: [], zones: [], holes: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
-    cam: { x: st.W / 2, y: st.H / 2, z: VW / st.W }, catchO: null, result: null, exp: {}, skill: cfg.skill ?? .4, sent: 0,
+    cam: { x: st.W / 2, y: st.H / 2, z: Math.max(VW / st.W, VH / st.H) }, catchO: null, result: null, exp: {}, skill: cfg.skill ?? .4, sent: 0,
   };
   // AI の かしこさ：みかたの モンスターは いつも かしこく わざを えらぶ。あいては せっていの「あいての つよさ」しだい（オンラインは どちらも かしこく、よけは ふつう）
   { const lv = S.aiLevel == null ? 0 : S.aiLevel; B.smart = [true, cfg.kind === 'online' || lv >= 1]; B.smartDodge = cfg.kind !== 'online' && cfg.kind !== 'wild' && lv >= 2; }
@@ -5838,7 +5841,7 @@ function bVisual(dt) {
     const k = Math.max(.35, (tz - fit) / (up - fit || 1));
     tx += ((x0 + x1) / 2 - tx) * Math.min(1, k * 1.5); ty += ((y0 + y1) / 2 - ty) * Math.min(1, k * 1.5);
   }
-  if (B.mode === 'intro') tz = B.modeT < .6 ? aw / st.W : aw / st.W + Math.min(1, (B.modeT - .6) / 1.6) * (fit - aw / st.W);
+  if (B.mode === 'intro') { const z0 = Math.max(aw / st.W, ah / st.H), z1 = Math.max(fit, Math.min(ah / st.H, aw / (fw * .88))); tz = B.modeT < .6 ? z0 : z0 + Math.min(1, (B.modeT - .6) / 1.6) * (z1 - z0); }
   B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 1.6);
   B.cam.x += (tx - B.cam.x) * Math.min(1, dt * 4);
   B.cam.y += (ty - B.cam.y) * Math.min(1, dt * 4);
@@ -6690,7 +6693,7 @@ function render() {
   ctx.fillStyle = '#141022'; ctx.fillRect(0, 0, VW, VH);
   if (!B) return;
   const st = B.st, cam = B.cam, pk = B.punch > 0 ? B.punch : 0, z = cam.z * (1 + pk * .28);   // ヒットの ときだけ ぐっと よる
-  if ((B.padT = (B.padT || 0) - 1) <= 0) { B.padT = 20; updPad(); }
+  if ((B.padT = (B.padT || 0) - 1) <= 0) B.padT = updPad() && B.t > 1.5 ? 20 : 1;   // はじめは まいフレーム はかる（UI が でそろう まで）
   const aw = VW - VPAD.l - VPAD.r, ah = VH - VPAD.t - VPAD.b, BX = VPAD.l + aw / 2, BY = VPAD.t + ah / 2;   // UI に かくれない ところの まんなか
   const hw = aw / 2 / z, hh = ah / 2 / z, px = pk && B.punchAt ? cam.x + (B.punchAt.x - cam.x) * pk * .45 : cam.x, py = pk && B.punchAt ? cam.y + (B.punchAt.y - cam.y) * pk * .45 : cam.y;
   // ステージの 絵は 画面の はしまで しきつめる（UI の 下も）。たりない ときは あいている ところの まんなかに
@@ -7154,10 +7157,11 @@ function startCup(fieldArg) {
 // 戦場の うえに かさねた UI に かくれる はば（VW 単位）。カメラは のこりの ところに 戦場を おさめる
 let VPAD = { l: 0, t: 0, r: 0, b: 0 };
 function updPad() {
-  const wr = $('cvWrap'); if (!wr || !wr.offsetWidth) return;
+  const wr = $('cvWrap'); if (!wr || !wr.offsetWidth) return false;
   const u = VW / wr.offsetWidth, ht = wr.querySelector('.hudtop'), bp = $('bpanel'), land = document.documentElement.classList.contains('land');
   const t = ht ? (ht.offsetTop + ht.offsetHeight + 4) * u : 0;
   VPAD = land ? { l: 0, t, r: bp ? (bp.offsetWidth + 16) * u : 0, b: 0 } : { l: 0, t, r: 0, b: bp ? (bp.offsetHeight + 4) * u : 0 };
+  return !!(bp && bp.offsetWidth);
 }
 function fitCanvas() {
   const cw = $('cvWrap').clientWidth || 960, w = clamp(Math.round(cw * Math.min(2, window.devicePixelRatio || 1) / 8) * 8, 640, 1920), h = Math.round(w * VH / VW);   // 画面の 大きさに あわせた 解像度（おもく しない）
