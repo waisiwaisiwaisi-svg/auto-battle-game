@@ -485,6 +485,41 @@ html:not(.land) .bmon{min-height:64px;padding:4px 6px!important;gap:4px}
 html:not(.land) .bmon canvas{width:38px;height:38px}
 html:not(.land) .bmon > div{min-width:0;flex:1}
 html:not(.land) .bmon .bs{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ===== たたかい：戦場を 画面いっぱいに。そうさは 戦場の うえに 小さく かさねる ===== */
+html #app #scBattle:not([hidden]){display:block;padding:0;overflow:hidden}
+html #app #scBattle #cvWrap{position:absolute;inset:0;width:auto;height:auto;margin:0;aspect-ratio:auto}
+html #app #scBattle #cv{width:100%;height:100%;display:block;box-shadow:none;border-radius:0}
+html #app #scBattle #bTop{position:absolute;left:0;right:0;top:0;z-index:5;min-height:0;padding:calc(4px + env(safe-area-inset-top)) 8px 6px;background:linear-gradient(rgba(10,8,20,.7),transparent);pointer-events:none}
+#bTop > *{pointer-events:auto} #bTop #bTitle{text-shadow:1px 1px 0 #000;color:#cfc6ef}
+html #app #scBattle #bTop button{padding:3px 9px;font-size:11px}
+html #app #cvWrap .hudtop{top:calc(34px + env(safe-area-inset-top));left:8px;right:8px}
+html #app #cvWrap .hudtop .plate{width:min(46%,300px);padding:3px 7px}
+#cvWrap .ov{z-index:10}
+#bpanel{position:absolute;z-index:4;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+#bpanel > *{pointer-events:auto}
+html:not(.land) #bpanel{left:0;right:0;bottom:0;padding:14px 8px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(10,8,20,.78) 26px)}
+html.land #bpanel{top:calc(34px + env(safe-area-inset-top));right:8px;bottom:calc(8px + env(safe-area-inset-bottom));width:min(290px,36vw);justify-content:flex-end}
+html.land #app #cvWrap .hudtop{right:calc(min(290px,36vw) + 18px)}
+html #app #bpanel #bside{flex:none;gap:5px;order:1}
+html #app #bpanel #bbar{order:2}
+html #app #bpanel #banner{min-height:0;padding:3px 8px;font-size:11.5px;line-height:1.35;background:rgba(20,16,34,.8)}
+html #app #bpanel #ctrl{flex:none}
+html #app #bpanel #btns{grid-template-columns:1fr 1fr;grid-template-rows:none;height:auto;max-height:none;gap:5px}
+html #app #bpanel .cmd.info{grid-column:auto;min-height:40px;padding:2px 8px 2px 11px;justify-content:center;gap:0;opacity:.94}
+html #app #bpanel .cmd.info .a{font-size:12px}
+html #app #bpanel .cmd.info .b{font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+html #app #bpanel .cmd.info .d{display:none}
+html #app #bpanel #bbar{flex-wrap:nowrap;gap:5px;margin:0}
+html #app #bpanel #bbar #cDodge{flex:0 0 26%;min-height:42px;opacity:.94}
+html #app #bpanel #cDodge .a{font-size:14px}
+html #app #bpanel #bench{flex:1;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:5px}
+html #app #bpanel .bmon{min-height:42px;flex-direction:row!important;gap:4px;padding:2px 6px!important;text-align:left;opacity:.94}
+html #app #bpanel .bmon > div{min-width:0;flex:1;width:auto}
+html #app #bpanel .bmon canvas{width:28px;height:28px}
+html #app #bpanel .bmon .bn{font-size:10.5px} html #app #bpanel .bmon .bs{display:none}
+html #app #bpanel #bbar #cCap,html #app #bpanel #bbar #cRun{flex:0 0 auto;min-width:58px;min-height:42px;order:0}
+html.land #app #bpanel #bbar{flex-wrap:wrap} html.land #app #bpanel #bench{flex:1 1 55%}
+html.land #app #bpanel #bbar #cCap,html.land #app #bpanel #bbar #cRun{flex:1 1 40%;order:5;min-height:36px}
 </style>
 </head>
 <body>
@@ -600,6 +635,7 @@ html:not(.land) .bmon .bs{white-space:nowrap;overflow:hidden;text-overflow:ellip
       <div class="ov" id="chooseOv" hidden><h2 style="font-size:22px">つぎは だれを だす？</h2><div class="swaplist" id="chooseList"></div></div>
       <div class="ov" id="resultOv" hidden><h2 id="resTitle"></h2><div class="lines" id="resLines"></div><button class="btn" id="resNext">つぎへ</button></div>
     </div>
+    <div id="bpanel">
     <div id="bbar">
       <button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button>
       <div id="bench"></div>
@@ -616,6 +652,7 @@ html:not(.land) .bmon .bs{white-space:nowrap;overflow:hidden;text-overflow:ellip
           <div class="cmd mv info" data-mv="3"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
         </div>
       </div>
+    </div>
     </div>
   </section>
 </div>
@@ -5779,19 +5816,20 @@ function bVisual(dt) {
   let tx = st.W / 2, ty = st.H / 2, tz = 1;
   const vis = [a, e].filter(f => f && f.state !== 'bench');
   // ふたりの きょりに あわせて ズーム：はなれると ひいて 全体、ちかいと よる（ただし CAM_MAX ばい まで）
-  const fit = Math.min(VW / (st.fx1 - st.fx0 + 60), VH / (st.fy1 - st.fy0 + 60));
-  tx = (st.fx0 + st.fx1) / 2; ty = (st.fy0 + st.fy1) / 2 - 10; tz = fit;
+  const aw = Math.max(80, VW - VPAD.l - VPAD.r), ah = Math.max(60, VH - VPAD.t - VPAD.b), fw = st.fx1 - st.fx0 + 60, fh = st.fy1 - st.fy0 + 60;
+  const fit = Math.min(aw / fw, ah / fh), up = Math.max(fit * CAM_MAX, Math.min(ah / st.H, aw / (fw * .6)));   // up：たてに ながい 画面では もっと よれる
+  tx = (st.fx0 + st.fx1) / 2; ty = (st.fy0 + st.fy1) / 2 - 10; tz = Math.min(up, Math.max(fit, Math.min(ah / st.H, aw / st.W)));
   if (vis.length === 2 && B.mode !== 'intro') {
     const pts = vis.map(f => [f.x, f.y - BODY]); if (B.catchO) pts.push([B.catchO.x, B.catchO.y]);
     const x0 = Math.min(...pts.map(p => p[0])), x1 = Math.max(...pts.map(p => p[0])), y0 = Math.min(...pts.map(p => p[1])), y1 = Math.max(...pts.map(p => p[1]));
     const bw = x1 - x0 + CAM_PAD * 2, bh = y1 - y0 + CAM_PAD * 1.6 + 60;
-    tz = clamp(Math.min(VW / bw, VH / bh), fit, fit * CAM_MAX);
+    const lo = Math.max(fit, Math.min(ah / st.H, aw / (fw * .88)));   // たて画面で ひきすぎない（よこ 88% くらいまで）
+    tz = clamp(Math.min(aw / bw, ah / bh), lo, Math.max(lo, up));
     // よった ぶん だけ ふたりの まんなかへ
-    const k = (tz - fit) / (fit * CAM_MAX - fit || 1);
+    const k = Math.max(.35, (tz - fit) / (up - fit || 1));
     tx += ((x0 + x1) / 2 - tx) * Math.min(1, k * 1.5); ty += ((y0 + y1) / 2 - ty) * Math.min(1, k * 1.5);
   }
-  if (B.mode === 'intro') tz = B.modeT < .6 ? VW / st.W : VW / st.W + Math.min(1, (B.modeT - .6) / 1.6) * (fit - VW / st.W);
-  tz = Math.max(tz, VH / st.H);   // たてに ながい 画面でも 上下に すきまを ださない
+  if (B.mode === 'intro') tz = B.modeT < .6 ? aw / st.W : aw / st.W + Math.min(1, (B.modeT - .6) / 1.6) * (fit - aw / st.W);
   B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 1.6);
   B.cam.x += (tx - B.cam.x) * Math.min(1, dt * 4);
   B.cam.y += (ty - B.cam.y) * Math.min(1, dt * 4);
@@ -6643,19 +6681,30 @@ function render() {
   ctx.fillStyle = '#141022'; ctx.fillRect(0, 0, VW, VH);
   if (!B) return;
   const st = B.st, cam = B.cam, pk = B.punch > 0 ? B.punch : 0, z = cam.z * (1 + pk * .28);   // ヒットの ときだけ ぐっと よる
-  const hw = VW / 2 / z, hh = VH / 2 / z, px = pk && B.punchAt ? cam.x + (B.punchAt.x - cam.x) * pk * .45 : cam.x, py = pk && B.punchAt ? cam.y + (B.punchAt.y - cam.y) * pk * .45 : cam.y;
-  const cx = st.W > hw * 2 ? clamp(px, hw, st.W - hw) : st.W / 2;
-  const cy = st.H > hh * 2 ? clamp(py, hh, st.H - hh) : st.H / 2;
+  if ((B.padT = (B.padT || 0) - 1) <= 0) { B.padT = 20; updPad(); }
+  const aw = VW - VPAD.l - VPAD.r, ah = VH - VPAD.t - VPAD.b, BX = VPAD.l + aw / 2, BY = VPAD.t + ah / 2;   // UI に かくれない ところの まんなか
+  const hw = aw / 2 / z, hh = ah / 2 / z, px = pk && B.punchAt ? cam.x + (B.punchAt.x - cam.x) * pk * .45 : cam.x, py = pk && B.punchAt ? cam.y + (B.punchAt.y - cam.y) * pk * .45 : cam.y;
+  // ステージの 絵は 画面の はしまで しきつめる（UI の 下も）。たりない ときは あいている ところの まんなかに
+  const lx = BX / z, rx = st.W - (VW - BX) / z, ty_ = BY / z, by_ = st.H - (VH - BY) / z;
+  const cx = lx <= rx ? clamp(px, lx, rx) : st.W > hw * 2 ? clamp(px, hw, st.W - hw) : st.W / 2;
+  const cy = ty_ <= by_ ? clamp(py, ty_, by_) : st.H > hh * 2 ? clamp(py, hh, st.H - hh) : st.H / 2;
   const sh = B.shake > 0 ? [rand(-B.shake, B.shake), rand(-B.shake, B.shake)] : [0, 0];
-  ctx.setTransform(z * RS, 0, 0, z * RS, Math.round((VW / 2 - cx * z + sh[0]) * RS), Math.round((VH / 2 - cy * z + sh[1]) * RS));
+  ctx.setTransform(z * RS, 0, 0, z * RS, Math.round((BX - cx * z + sh[0]) * RS), Math.round((BY - cy * z + sh[1]) * RS));
   ctx.imageSmoothingEnabled = false;
+  { // ステージの そと：ステージの 絵を かがみうつしに して うすぐらく しきつめる（まっくらな すきまを ださない）
+    const W_ = st.W, H_ = st.H;
+    for (const [sx, sy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      ctx.save(); ctx.translate(sx ? (sx < 0 ? 0 : 2 * W_) : 0, sy ? (sy < 0 ? 0 : 2 * H_) : 0); ctx.scale(sx ? -1 : 1, sy ? -1 : 1); ctx.drawImage(st.bg, 0, 0); ctx.restore();
+    }
+    ctx.fillStyle = 'rgba(12,9,22,.62)'; ctx.fillRect(-W_, -H_, W_ * 3, H_ * 3);
+  }
   ctx.drawImage(st.bg, 0, 0);
   if (QS.get('hit') && st.solid) { ctx.lineWidth = 2; for (const [arr, col] of [[st.solid, 'rgba(255,40,40,.8)'], [st.low, 'rgba(40,160,255,.8)']]) { ctx.strokeStyle = col; for (const o of arr) ctx.strokeRect(o.x0, o.y0, o.x1 - o.x0, o.y1 - o.y0); } }
   if (st.crowd.length) drawCrowd(false);
   // 水面のきらめき
   for (const p of st.pools) { if (Math.floor(B.t * 3 + p.x) % 2) { ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(p.x - p.rx * .4 | 0, p.y - 3 | 0, 6, 1); ctx.fillRect(p.x + p.rx * .2 | 0, p.y + 4 | 0, 4, 1); } }
   const a = active(0), e = active(1);
-  const T = [z * RS, Math.round((VW / 2 - cx * z + sh[0]) * RS), Math.round((VH / 2 - cy * z + sh[1]) * RS)];
+  const T = [z * RS, Math.round((BX - cx * z + sh[0]) * RS), Math.round((BY - cy * z + sh[1]) * RS)];
   // 地面の エフェクト（ドット絵に して かさねる）
   pixLayer(T, () => {
     for (const d of B.decals) drawDecal(d);
@@ -6729,7 +6778,7 @@ function render() {
   // ミニマップ（広いステージの全体像）
   ctx.setTransform(RS, 0, 0, RS, 0, 0);
   if (B.trickRoom > 0) { ctx.fillStyle = `rgba(255,120,200,${.08 + Math.sin(B.t * 3) * .03})`; ctx.fillRect(0, 0, VW, VH); ctx.strokeStyle = 'rgba(255,150,220,.6)'; ctx.lineWidth = 3; ctx.strokeRect(2, 2, VW - 4, VH - 4); }
-  const mw = 54, mh = Math.round(mw * (st.fy1 - st.fy0) / (st.fx1 - st.fx0)), mx = VW - mw - 4, my = VH - mh - 4;   // ミニマップは 右下（上は HP の 表示）
+  const mw = 54, mh = Math.round(mw * (st.fy1 - st.fy0) / (st.fx1 - st.fx0)), mx = VW - VPAD.r - mw - 4, my = VH - VPAD.b - mh - 4;   // ミニマップは 右下（上は HP の 表示）
   ctx.fillStyle = 'rgba(13,11,20,.6)'; ctx.fillRect(mx - 1, my - 1, mw + 2, mh + 2);
   ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; ctx.strokeRect(mx + .5, my + .5, mw - 1, mh - 1);
   for (const f of [a, e]) if (f && f.state !== 'bench') {
@@ -6766,9 +6815,8 @@ function layout() {
   const W = rot ? ih : iw, H = rot ? iw : ih, r = document.documentElement, app = $('app');
   r.classList.toggle('rot', rot); r.classList.toggle('land', W / H >= 1.25); r.classList.toggle('short', W / H >= 1.25 && H < 560);
   r.style.setProperty('--appW', W + 'px'); r.style.setProperty('--appH', H + 'px');
-  // たて画面：のこりの UI（約 390px）を のぞいた 高さで 戦場を たてに のばす（16:9 〜 1:1）
-  VH = W / H >= 1.25 ? 270 : Math.round(480 * clamp((H - 390) / W, 9 / 16, 1));
-  r.style.setProperty('--cvAR', `480 / ${VH}`);
+    VH = Math.round(480 * clamp(H / W, .3, 2.4));   // 戦場は 画面 ぜんたい
+  updPad();
   app.style.width = rot ? W + 'px' : ''; app.style.height = rot ? H + 'px' : '';
   for (const id of ['titleRot', 'hubRot', 'bRot']) { const b = $(id); if (b) b.classList.toggle('on', LAND_PREF); }
 }
@@ -7094,8 +7142,16 @@ function startCup(fieldArg) {
 }
 
 // キャンバスは いつも 1920×1080（論理座標 480×270 の 4倍）
+// 戦場の うえに かさねた UI に かくれる はば（VW 単位）。カメラは のこりの ところに 戦場を おさめる
+let VPAD = { l: 0, t: 0, r: 0, b: 0 };
+function updPad() {
+  const wr = $('cvWrap'); if (!wr || !wr.offsetWidth) return;
+  const u = VW / wr.offsetWidth, ht = wr.querySelector('.hudtop'), bp = $('bpanel'), land = document.documentElement.classList.contains('land');
+  const t = ht ? (ht.offsetTop + ht.offsetHeight + 4) * u : 0;
+  VPAD = land ? { l: 0, t, r: bp ? (bp.offsetWidth + 16) * u : 0, b: 0 } : { l: 0, t, r: 0, b: bp ? (bp.offsetHeight + 4) * u : 0 };
+}
 function fitCanvas() {
-  const w = 1920, h = Math.round(1920 * VH / VW);
+  const cw = $('cvWrap').clientWidth || 960, w = clamp(Math.round(cw * Math.min(2, window.devicePixelRatio || 1) / 8) * 8, 640, 1920), h = Math.round(w * VH / VW);   // 画面の 大きさに あわせた 解像度（おもく しない）
   if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; ctx.imageSmoothingEnabled = false; }
 }
 
