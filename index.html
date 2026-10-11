@@ -1345,7 +1345,7 @@ for (const id in MOVES) { const m = MOVES[id];
 }
 /* ---- わざ メモで なおした ところ（なまえ・すうち・タイプ・しゅるい） ---- */
 delete MOVES['air-slash']; delete MOVES100['air-slash'];   // そらのやいば：けした
-Object.entries({ 'aqua-jet': 'アクアダッシュ', 'heavy-drop': 'だいばくはつ', 'swords-dance': 'やるきアップ', tailwind: 'おいかぜ', 'dragon-pulse': 'ドラゴンブレス', 'mirror-coat': 'はんしゃのかべ', 'thorn-hedge': 'いばらのかべ' }).forEach(([id, n]) => { if (MOVES[id]) MOVES[id].n = n; });
+Object.entries({ 'rapid-spin': 'ふりはらい', 'aqua-jet': 'アクアダッシュ', 'heavy-drop': 'だいばくはつ', 'swords-dance': 'やるきアップ', tailwind: 'おいかぜ', 'dragon-pulse': 'ドラゴンブレス', 'mirror-coat': 'はんしゃのかべ', 'thorn-hedge': 'いばらのかべ' }).forEach(([id, n]) => { if (MOVES[id]) MOVES[id].n = n; });
 const MOVE_FIX = {
   'nasty-plot': { t: 'ghost' }, 'triple-axel': { t: 'normal', spinSelf: 1, selfConfuse: 3 }, 'icy-wind': { t: 'wind' },
   'dragon-dance': { e: { self: { atk: 1, spa: 1 } } }, 'draco-meteor': { e: { self: { spa: -1 } }, pattern: 'meteor' },
@@ -1357,7 +1357,7 @@ const MOVE_FIX = {
   flamethrower: { k: 'cone', rad: 250, half: .2, chan: 1.4, pat: '' },
   'dragon-pulse': { k: 'cone', rad: 210, half: .34, chan: 2.4, chanMove: 1, pat: '', homing: 0, wind: .45 },
   'psychic-noise': { k: 'cone', rad: 210, half: .5, pat: 'sound', homing: 0, wind: .45 },
-  'rapid-spin': { k: 'swipe', rad: 70, pat: '' },
+  'rapid-spin': { k: 'swipe', rad: 115, half: 1.45, pat: '' },
   'alluring-voice': { confuseIfBoosted: 0, confuse: 4 },
   protect: { cd: 12, wind: .1 }, 'toxic-spikes': { k: 'protect', hz: '', psnGuard: 1, cd: 12, wind: .15 },
   'fake-out': { prio: 1 },
@@ -1365,7 +1365,7 @@ const MOVE_FIX = {
   'body-press': { guardDash: 1, dashSpd: 115, len: 230, wind: .3 },
   'close-combat': { grab: 1, pat: '' },
   'flare-blitz': { trail: 1 }, 'iron-head': { wallBreak: 1 }, spark: { len: 240 },
-  'flip-turn': { pat: 'orbit', len: 120 }, 'u-turn': { back: 1, switchOut: 0 },
+  'flip-turn': { pat: 'orbit', len: 120 }, 'u-turn': { back: 1, switchOut: 0, len: 300 },
   curse: { k: 'curse', wind: .45 },
   'foul-play': { k: 'flip', cat: 'stat', power: 0, pow: 0, wind: .02, cd: 6, useFoeAtk: 0, aim: 'lock' },
   'knock-off': { slap: 1 },
@@ -1379,7 +1379,7 @@ const MOVE_FIX = {
   substitute: { cd: 12 },
   'sucker-punch': { k: 'stance', sucker: 0, len: 260, wind: .1, cd: 6 },
   surf: { k: 'wave', pat: '', len: 460, wid: 120, spd: 150, wind: .55 },
-  tornado: { pat: 'bounce', homing: 0, spd: 75, life: 20, r: 16, bounces: 999, multiHit: { cd: 1.4, max: 3, mul: .5 }, cd: 9 },
+  tornado: { k: 'proj', aim: 'lock', wind: .5, pat: 'bounce', homing: 0, spd: 75, life: 20, r: 16, bounces: 999, multiHit: { cd: 1.4, max: 3, mul: .5 }, cd: 9 },
   vine: { k: 'swipe', hits: 2, rad: 108, pow: 10, whip: 1, noRamp: 1, len: 0 },
   'will-o-wisp': { pat: 'wisp', homing: 1.6, spd: 110, life: 4.5 },
   yawn: { k: 'proj', sp: '', pat: 'yawnball', spd: 120, homing: 1.3, life: 4.5, r: 10, acc: 100, e: { yawn: 1 } },
@@ -4709,9 +4709,10 @@ function inZone(cur, owner, x, y, r) {
   if (m.k === 'multi') return cur.pts.some(p => Math.hypot(x - p.x, y - p.y) <= m.rad + r);
   if (m.k === 'aoe') return Math.hypot(x - owner.x, y - owner.y) <= m.rad + r;   // pulse など：まずは ふつうの まる
   if (m.k === 'cone') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, m.half, r);
-  if (m.k === 'swipe') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad + owner.r, .95, r);
+  if (m.k === 'swipe') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad + owner.r, m.half || .95, r);
   if (m.k === 'beam' && m.pat === 'erupt' && cur.pts) return cur.pts.some(p => Math.hypot(x - p.x, y - p.y) <= p.r + r);
   if (m.k === 'beam' && m.pat === 'split' && !cur.splitting) { cur.splitting = 1; const a0 = cur.ang, ok = [-.32, 0, .32].some(da => { cur.ang = a0 + da; return inZone(cur, owner, x, y, r); }); cur.ang = a0; cur.splitting = 0; return ok; }
+  if (m.k === 'dash' && m.pat === 'zigzag') { const c = Math.cos(cur.ang), s = Math.sin(cur.ang), dx = x - owner.x, dy = y - owner.y, al = dx * c + dy * s; return al >= -10 && al <= m.len + 10 && Math.abs(-dx * s + dy * c - zigOff(Math.max(0, al))) <= owner.r + 4 + r; }
   if (m.k === 'beam' || m.k === 'dash') {
     const len = m.k === 'beam' && cur.len != null ? cur.len : m.len, wid = m.k === 'dash' ? owner.r * 2 + 8 : m.wid;
     const c = Math.cos(cur.ang), s = Math.sin(cur.ang), dx = x - owner.x, dy = y - owner.y;
@@ -4772,7 +4773,7 @@ function beginMove(f, id) {
   if (healMax(m)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }
   if (m.fakeout) f.v.fakeUsed = true;   // びっくりてうち：1かい でるごとに 1かい
   let ang = Math.atan2(o.y - f.y, o.x - f.x), tx = o.x, ty = o.y, decoy = null;
-  if (o.clones && o.clones.length && isDamaging(m)) { const dl = o.clones.find(c => c.doll), k = dl && Math.random() < .7 ? o.clones.indexOf(dl) + 1 : Math.floor(Math.random() * (o.clones.length + 1)); if (k > 0) { decoy = o.clones[k - 1]; ang = Math.atan2(decoy.y - f.y, decoy.x - f.x); tx = decoy.x; ty = decoy.y; } }   // かげぶんしん：どれを ねらうかは うんしだい
+  if (o.clones && o.clones.length && isDamaging(m)) { const dl = o.clones.find(c => c.doll), k = dl ? o.clones.indexOf(dl) + 1 : Math.floor(Math.random() * (o.clones.length + 1)); if (k > 0) { decoy = o.clones[k - 1]; ang = Math.atan2(decoy.y - f.y, decoy.x - f.x); tx = decoy.x; ty = decoy.y; } }   // かげぶんしん：どれを ねらうかは うんしだい
   // ◎（命中100未満）の わざ：（スティック廃止のため 通常は あいての いた 方向・いちに 固定）
   if (f.side === 0 && !S.auto && m.aim === 'dir') {
     const v = playerVec();
@@ -7649,6 +7650,13 @@ function drawSprite(img, x, y, face, scale, alpha, sx, sy) {
 }
 function shadow(x, y, rx) { ctx.fillStyle = 'rgba(10,8,18,.35)'; ctx.beginPath(); ctx.ellipse(x, y, rx, rx * .4, 0, 0, Math.PI * 2); ctx.fill(); }
 
+// ジグザグの とっしんの みち（はしる とおりの かたち）
+const zigOff = (d) => { const u = d % 110; return 1.15 * (u < 55 ? u : 110 - u); };
+function zigPath(f, ang, L, w) {
+  const c = Math.cos(ang), s = Math.sin(ang), hw = w / 2, P = (d, side) => { const l = zigOff(d) + side * hw; return [f.x + c * d - s * l, f.y + s * d + c * l]; }, ds = [];
+  for (let d = 0; d < L; d += 55 / 2) ds.push(d); ds.push(L);
+  ctx.moveTo(...P(0, -1)); for (const d of ds) ctx.lineTo(...P(d, -1)); for (let i = ds.length - 1; i >= 0; i--) ctx.lineTo(...P(ds[i], 1)); ctx.closePath();
+}
 function drawTele(f) {
   const cur = f.cur, m = cur.m;
   if (m.k === 'melee' && cur.id === 'tackle') return;
@@ -7671,7 +7679,8 @@ function drawTele(f) {
     else if (m.k === 'strike') ctx.arc(cur.tx, cur.ty, m.rad * k, 0, Math.PI * 2);
     else if (m.k === 'multi') for (const p of cur.pts) { ctx.moveTo(p.x + m.rad * k, p.y); ctx.arc(p.x, p.y, m.rad * k, 0, Math.PI * 2); }
     else if (m.k === 'cone') sector(f.x, f.y, cur.ang, m.rad, m.half, k);
-    else if (m.k === 'swipe' || m.k === 'melee') sector(f.x, f.y, cur.ang, (m.rad || 40) + f.r, .95, k);
+    else if (m.k === 'swipe' || m.k === 'melee') sector(f.x, f.y, cur.ang, (m.rad || 40) + f.r, m.half || .95, k);
+    else if (m.k === 'dash' && m.pat === 'zigzag') zigPath(f, cur.ang, m.len * k, f.r * 2 + 8);
     else if (m.k === 'beam' || m.k === 'dash') {
       const c = Math.cos(cur.ang), s = Math.sin(cur.ang), L = (m.k === 'beam' ? rayLen(f, cur.ang, m.len) : m.len) * k, hw = (m.k === 'dash' ? f.r * 2 + 8 : m.wid) / 2;
       ctx.moveTo(f.x - s * hw, f.y + c * hw); ctx.lineTo(f.x + c * L - s * hw, f.y + s * L + c * hw); ctx.lineTo(f.x + c * L + s * hw, f.y + s * L - c * hw); ctx.lineTo(f.x + s * hw, f.y - c * hw); ctx.closePath();
