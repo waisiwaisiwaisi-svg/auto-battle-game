@@ -1397,6 +1397,8 @@ const MOVE_FIX = {
   'hyper-voice': { bigKb: 1 }, 'focus-blast': { pat: 'palm' }, moonblast: { pat: 'moon' }, gust: { look: 'blade' }, 'iron-defense': { look: 'iron' },
 };
 for (const id in MOVE_FIX) if (MOVES[id]) { const fx = MOVE_FIX[id]; Object.assign(MOVES[id], fx, fx.e ? { e: Object.assign({}, MOVES[id].e, fx.e) } : {}); const e = MOVES[id].e; for (const k in e) if (e[k] == null) delete e[k]; }
+const MOVE_CD = 4.4;   // クールダウンは ぜんぶの わざで おなじ（すばやさで すこし かわる）
+for (const id in MOVES) MOVES[id].cd = MOVE_CD;
 for (const id in MOVES) if (/こぶし|ナックル|パンチ/.test(MOVES[id].n) && MOVES[id].k === 'melee') MOVES[id].punch = 1;   // こぶしの わざ：グーの ヒット
 
 // おぼえる わざ（[レベル, わざ]）。ランキング上位100のわざは すべて どれかの モンスターが おぼえる
@@ -7550,7 +7552,7 @@ function orderSpot(f, o, k) {
     if (!spotOk(f, x, y)) continue;
     const see = losFrom(x, y, o), dO = Math.hypot(x - o.x, y - o.y), dF = Math.hypot(x - f.x, y - f.y);
     let sc;
-    if (k === 'hide') { if (see || [[14, 0], [-14, 0], [0, 14], [0, -14]].some(([dx, dy]) => losFrom(x + dx, y + dy, o))) continue; let deep = 0; for (const [ox, oy] of [[40, 0], [-40, 0], [0, 40], [0, -40]]) if (!losClear({ x, y }, { x: o.x + ox, y: o.y + oy })) deep++; sc = dF + (dO < 140 ? (140 - dO) * 3 : 0) - deep * 35; }   // あいてが すこし うごいても みえない ところ   // ちかくて、あいてから みえない ところ
+    if (k === 'hide') { if (see || [[14, 0], [-14, 0], [0, 14], [0, -14]].some(([dx, dy]) => losFrom(x + dx, y + dy, o))) continue; let deep = 0; for (const [ox, oy] of [[40, 0], [-40, 0], [0, 40], [0, -40]]) if (!losClear({ x, y }, { x: o.x + ox, y: o.y + oy })) deep++; const tow = ((x - f.x) * (o.x - f.x) + (y - f.y) * (o.y - f.y)) / Math.max(1, dF * Math.hypot(o.x - f.x, o.y - f.y)); sc = dF + (dO < 160 ? (160 - dO) * 3 : 0) - deep * 35 + Math.max(0, tow) * dF * 1.6 - Math.min(dO, 400) * .15; }   // あいての いちを みて：あいてから はなれる むきの かげ   // あいてが すこし うごいても みえない ところ   // ちかくて、あいてから みえない ところ
     else { if (!see) continue; const da = Math.abs(wrapAng(Math.atan2(y - o.y, x - o.x) - base)); sc = Math.abs(dO - 150) * .8 + dF * .25 + Math.abs(da - 1.5) * 70 + (losFrom(f.x, f.y, o) ? 0 : -dF * .15); }   // よこ・うしろ から ねらえる ところ
     if (onFoeFloor(f, x, y)) sc += 200;
     if (sc < bs) { bs = sc; best = { x, y }; }
@@ -7563,7 +7565,10 @@ function giveOrder(f, k, side) {
   if (f.order && f.order.k === k) { f.order = null; sd.orderCd = .5; say(`${f.sp.n}は もとの うごきに もどった`); return; }   // もういちど おすと やめる
   const spot = orderSpot(f, o, k);
   if (!spot) { say(k === 'hide' ? 'かくれる ばしょが ない！' : 'まわりこむ みちが ない！'); SND.se('deny'); return; }
-  f.order = { k, t: ORDER_T[k], spot, re: .5 }; f.want = null; f.queued = null; sd.orderCd = ORDER_CD; f.navT = 0;
+  f.order = { k, t: ORDER_T[k], spot, re: .5, ox: o.x, oy: o.y }; f.want = null;
+  if (k === 'flank' && losFrom(f.x, f.y, o)) {   // かべが ない：あいての まわりを まわって よこ・うしろへ
+    const base = Math.atan2(f.y - o.y, f.x - o.x), R = clamp(dist(f, o), 90, 150), room = (sg) => [.8, 1.6, 2.4].filter(da => spotOk(f, o.x + Math.cos(base + sg * da) * R, o.y + Math.sin(base + sg * da) * R)).length;
+    const sg = room(1) >= room(-1) ? 1 : -1; Object.assign(f.order, { circle: true, sg, goal: base + sg * 2.5, R, stuck: 0, lx: f.x, ly: f.y, ck: .4 }); } f.queued = null; sd.orderCd = ORDER_CD; f.navT = 0;
   popText(f.x, f.y - 96, k === 'hide' ? 'かくれろ！' : 'まわりこめ！', '#bfe8ff', 'comic'); SND.se('click'); cmdPose(side);
 }
 function cmdOrder(k) {
@@ -7575,6 +7580,17 @@ function cmdOrder(k) {
 function orderStep(f, o, dt) {
   const R = f.order; R.t -= dt; R.re -= dt;
   if (R.t <= 0 || !targetable(o)) { f.order = null; return false; }
+  if (R.circle) {
+    const cur = Math.atan2(f.y - o.y, f.x - o.x), diff = wrapAng(R.goal - cur);
+    R.ck -= dt; if (R.ck <= 0) { R.stuck = Math.hypot(f.x - R.lx, f.y - R.ly) < 12 ? R.stuck + 1 : 0; R.ck = .4; R.lx = f.x; R.ly = f.y; }
+    if (R.stuck >= 2 && !R.flip) { R.flip = true; R.sg = -R.sg; R.goal = cur + R.sg * 2.5; R.stuck = 0; }   // つかえたら はんたいまわり
+    if (Math.abs(diff) < .3) { f.order = null; popText(f.x, f.y - 90, 'まわりこんだ！', '#bfe8ff'); f.aiT = 0; return false; }
+    const as = cur + Math.sign(diff) * Math.min(.75, Math.abs(diff)); let wx = o.x + Math.cos(as) * R.R, wy = o.y + Math.sin(as) * R.R;
+    if (!spotOk(f, wx, wy)) { wx = o.x + Math.cos(as) * R.R * .7; wy = o.y + Math.sin(as) * R.R * .7; }
+    f.paceT = 1.9; const nav = B.st.nav && !flies(f) && !walkClear(f, wx, wy), a = nav ? navDir(f, wx, wy) : Math.atan2(wy - f.y, wx - f.x);
+    moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); return true;
+  }
+  if (R.k === 'hide' && Math.hypot(o.x - R.ox, o.y - R.oy) > 60) { R.re = 0; R.ox = o.x; R.oy = o.y; }   // あいてが うごいたら すぐ みなおす
   if (R.re <= 0) { R.re = .5; const sp = orderSpot(f, o, R.k); if (sp && (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o))) R.spot = sp; }   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
   const d = Math.hypot(R.spot.x - f.x, R.spot.y - f.y);
   if (R.k === 'flank' && (d < 50 || R.t < ORDER_T.flank - 1.2) && losFrom(f.x, f.y, o) && Math.hypot(f.x - o.x, f.y - o.y) < 330) { f.order = null; popText(f.x, f.y - 90, 'まわりこんだ！', '#bfe8ff'); f.aiT = 0; return false; }
