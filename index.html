@@ -535,7 +535,54 @@ html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #
 .hbar{display:flex;gap:8px;align-items:center}
 .hme{display:flex;align-items:center;gap:6px;padding:2px 8px 2px 2px;flex:none;min-height:44px}
 .hme canvas{height:40px;width:auto;image-rendering:pixelated;background:#1b1530}
-.hme #hRank{font-size:11px;line-height:1.2;text-align:left}
+.hme #hRank{font-size:11px;line-height:1.2;text-align:left;display:grid;grid-template-columns:auto auto;column-gap:5px;align-items:center}
+.hme #hRank .ico{grid-row:1/3;width:26px;height:26px}
+.hme #hRank .mb{grid-column:2;display:block;width:64px;height:5px;background:#0b0914;box-shadow:0 0 0 1px #3a3060;margin-top:2px}.hme #hRank .mb i{display:block;height:100%}
+.rkbody{display:flex;flex-direction:column;gap:10px}
+.rkme{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;padding:12px 14px}
+.rkme .big{width:84px;height:84px;grid-row:1/3}
+.rkme .tn{font-size:20px;font-weight:700;letter-spacing:.08em;text-shadow:2px 2px 0 #000}
+.rkme .rr{font-size:32px;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;text-shadow:2px 2px 0 #000}
+.rkme .rr small{font-size:12px;color:var(--dim);margin-left:4px}
+.rkbar{position:relative;height:12px;background:#0b0914;box-shadow:0 0 0 2px #3a3060;margin:6px 0 3px}
+.rkbar i{position:absolute;inset:0 auto 0 0;box-shadow:inset 0 3px 0 rgba(255,255,255,.35)}
+.rkbar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 2px),#0b0914 calc(10% - 2px) 10%)}
+.rkme .nx{font-size:12px;color:var(--dim)}.rkme .nx b{color:var(--ink)}
+.rkme .st{grid-column:1/3;display:flex;gap:6px;flex-wrap:wrap;font-size:12px}
+.rkme .st span{background:#120e1c;box-shadow:inset 0 0 0 1px #3a3060;padding:3px 8px}.rkme .st b{color:var(--acc);font-variant-numeric:tabular-nums}
+.rkme svg{grid-column:1/3;width:100%;height:56px;display:block;background:#120e1c;box-shadow:inset 0 0 0 1px #3a3060}
+.rkladder{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:8px 6px;position:relative}
+.rkladder div{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--dim);position:relative;padding:4px 0}
+.rkladder .ico{width:36px;height:36px}
+.rkladder div.lock .ico{filter:grayscale(1) brightness(.45)}
+.rkladder div.on{background:rgba(255,209,102,.14);box-shadow:inset 0 0 0 2px var(--acc);color:var(--ink)}
+.rkladder div.on::before{content:"▼";position:absolute;top:-12px;color:var(--acc);font-size:11px;animation:blink 1s steps(2) infinite}
+.rkladder b{font-size:10.5px;white-space:nowrap}
+.rktabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rktabs button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;font-size:14px;font-weight:700;color:var(--dim);background:#1b1530;border:3px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)}
+.rktabs button.on{background:linear-gradient(180deg,#ffd27a,#f2962d);color:#2a1606;box-shadow:inset 0 2px 0 rgba(255,255,255,.6)}
+.rktabs .ico{width:26px;height:26px}
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:6px;margin-top:4px}
+.podium .pc{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;text-align:center}
+.podium .pc canvas,.podium .pc .gdemb{width:52px;height:52px;image-rendering:pixelated}
+.podium .pc .nm{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.podium .pc .v{font-size:12px;color:var(--acc);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:3px}
+.podium .pc .v .ico{width:18px;height:18px}
+.podium .pl{width:100%;display:flex;align-items:flex-start;justify-content:center;font-size:22px;font-weight:700;color:#2a1606;padding-top:4px;border:3px solid #0b0914;box-shadow:inset 0 3px 0 rgba(255,255,255,.5)}
+.podium .p1 .pl{height:70px;background:linear-gradient(180deg,#ffe08a,#e0a020)}
+.podium .p2 .pl{height:50px;background:linear-gradient(180deg,#eef2fa,#9aa2b8)}
+.podium .p3 .pl{height:36px;background:linear-gradient(180deg,#f0b080,#b06a30)}
+.podium .p1 canvas,.podium .p1 .gdemb{width:64px;height:64px}
+.podium .pc.me .nm{color:var(--acc)}
+.rkrow{display:grid;grid-template-columns:30px 26px 1fr auto;gap:8px;align-items:center;padding:6px 8px;font-size:13px}
+.rkrow .rk{text-align:center;font-weight:700;color:var(--acc);font-variant-numeric:tabular-nums}
+.rkrow .ico,.rkrow .gdemb{width:26px;height:26px}
+.rkrow .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkrow .nm small{display:block;color:var(--dim);font-size:10.5px}
+.rkrow .v{text-align:right;font-variant-numeric:tabular-nums}.rkrow .v small{display:block;color:var(--dim);font-size:10.5px}
+.rkrow .gbar{display:block;height:5px;background:#0b0914;margin-top:3px}.rkrow .gbar i{display:block;height:100%}
+.rkrow.me{border-image-source:var(--fr-gold)!important;background:rgba(255,209,102,.1)!important}
+.rkup{display:inline-flex;align-items:center;gap:6px}.rkup img{width:32px;height:32px;image-rendering:pixelated}
 #scHub .hres{flex:1;display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
 #scHub .hres > span{display:flex;align-items:center;gap:3px;padding:3px 8px 3px 4px;font-size:13px;white-space:nowrap}
 #scHub .hres .ico{width:22px;height:22px}
@@ -709,7 +756,7 @@ html:not(.land) #btnOnline,html:not(.land) #btnDex,html:not(.land) #btnChart,htm
   <section class="screen" id="scHub">
     <!-- うえ：じぶん・しげん・こまった とき の ボタン -->
     <div class="hbar">
-      <button class="hme" id="hMe" title="へんせい"><canvas id="hAvatar" class="pix"></canvas><span id="hRank"></span></button>
+      <button class="hme" id="hMe" title="ランキング"><canvas id="hAvatar" class="pix"></canvas><span id="hRank"></span></button>
       <div class="hres">
         <span title="トロフィー"><i class="ico" data-ico="trophy"></i><b id="hTrophy">0</b></span><span title="クリスタル"><i class="ico" data-ico="crystal"></i><b id="hCaps">0</b></span><span title="ジェム"><i class="ico" data-ico="gem"></i><b id="hGems">0</b></span>
       </div>
@@ -743,6 +790,12 @@ html:not(.land) #btnOnline,html:not(.land) #btnDex,html:not(.land) #btnChart,htm
   <section class="screen" id="scGuild" hidden>
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">ギルド</span><button class="btn sub" id="btnGdBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <div id="gdBody" class="gdbody"></div>
+  </section>
+
+  <!-- ランキング -->
+  <section class="screen" id="scRank" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">ランキング</span><button class="btn sub" id="btnRkBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <div id="rkBody" class="rkbody"></div>
   </section>
 
   <!-- メイキング -->
@@ -3442,10 +3495,10 @@ function setArtBg() {
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
-const TAB_OF = { scHub: 'home', scTeam: 'team', scDex: 'dex', scGuild: 'guild', scMaker: 'make' };
+const TAB_OF = { scRank: 'rank', scHub: 'home', scTeam: 'team', scDex: 'dex', scGuild: 'guild', scMaker: 'make' };
 function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
   { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); } }
-  { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
+  { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
   const p = sp.prof, evo = '';
@@ -3594,7 +3647,7 @@ function renderChests() {
   { const n = S.chests.filter(c => chestLeft(c) === 0).length, b = $('tabHomeBadge'); if (b) { b.hidden = !n; b.textContent = n || ''; } }
   $('hGems').textContent = S.gems || 0; $('hGuildBonus').hidden = !S.guildOn;
   $('hItems').textContent = Object.values(S.items || {}).reduce((a, b) => a + b, 0);
-  { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<b style="color:${t.c}">${t.n}</b> ${k.r}`; }
+  { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<i class="ico" style="background-image:url(${tierBadge(t.i)})"></i><b style="color:${t.c}">${t.n}</b><span style="grid-column:2">${k.r}</span><span class="mb"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></span>`; $('hRank').style.gridTemplateRows = 'auto auto auto'; }
   $('hTms').textContent = Object.values(S.tms || {}).reduce((a, b) => a + b, 0);
 }
 async function tapChest(i) {
@@ -5958,7 +6011,25 @@ function netGuestChoose() {
 }
 /* ---------- ランク対戦：レート（イロレーティング）・ランク・マッチング・ランキング ---------- */
 const TIERS = [[0, 'ブロンズ', '#d0905a'], [1100, 'シルバー', '#c8d0e0'], [1250, 'ゴールド', '#ffd166'], [1400, 'プラチナ', '#7af0e0'], [1550, 'ダイヤ', '#9ab8ff'], [1700, 'マスター', '#ff7ab0']];
-const tierOf = (r) => { let t = TIERS[0]; for (const x of TIERS) if (r >= x[0]) t = x; return { n: t[1], c: t[2] }; };
+const tierOf = (r) => { let i = 0; TIERS.forEach((x, j) => { if (r >= x[0]) i = j; }); const t = TIERS[i], nx = TIERS[i + 1], lo = i ? t[0] : 850, hi = nx ? nx[0] : 0;
+  return { i, n: t[1], c: t[2], lo, hi, next: nx ? nx[1] : '', p: nx ? Math.max(0, Math.min(1, (r - lo) / (hi - lo))) : 1 }; };
+// ランクの もんしょう（ドット絵）：ランクが あがるほど かざりが ふえる
+const TIER_DK = ['#7a4a22', '#6a7088', '#b07a1a', '#2a9a8a', '#3a4ab0', '#9a2a6a'];
+function tierBadge(i) {
+  const key = 'tier' + i; if (ICONS[key]) return iconURL(key);
+  const A = 'ABCDEF'[i], D = 'HIJLMN'[i]; ICO_PAL[A] = TIERS[i][2]; ICO_PAL[D] = TIER_DK[i];
+  const W = 20, H = 19, g = [...Array(H)].map(() => Array(W).fill('.')), ox = 3, oy = 4;
+  const hw = (y) => y < 8 ? 7 : Math.max(1, 14 - y), inS = (x, y) => y >= 0 && y < 15 && x >= 7 - hw(y) && x < 7 + hw(y);
+  for (let y = 0; y < 15; y++) for (let x = 0; x < 14; x++) if (inS(x, y)) g[oy + y][ox + x] = (!inS(x - 1, y) || !inS(x + 1, y) || !inS(x, y - 1) || !inS(x, y + 1)) ? D : (x === 7 - hw(y) + 1 && y < 9 ? 'w' : y > 9 || x > 9 ? D : A);
+  for (let y = 1; y < 12; y++) for (let x = 0; x < 14; x++) if (g[oy + y][ox + x] === A && (x === 7 || x === 6) && i > 0 && (y === 1 || y === 11)) g[oy + y][ox + x] = 'w';
+  const put = (rows, x0, y0) => rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') g[y0 + y][x0 + x] = ch; }));
+  const sym = [['.k.', 'kwk', '.k.'], ['..w..', '.www.', 'wwwww', '.www.', '.w.w.'], ['..r..', '.rwr.', 'rrrrr', '.rrr.', '.r.r.'], ['.ccc.', 'cwccb', 'bcccd', '.bcd.', '..d..'], ['.wcc.', 'wcccb', 'ccccb', '.cbd.', '..d..'], ['.mmm.', 'mwmmR', 'mmmmR', '.mRR.', '..R..']][i];
+  put(sym, ox + 7 - (sym[0].length >> 1), oy + 4 + (sym.length < 5 ? 1 : 0));
+  if (i >= 2) { const wc = i === 5 ? 'y' : 's', L = ['..' + wc, '.' + wc + wc, wc + wc + wc, '.' + wc + wc, '..' + wc]; put(L, 0, oy + 1); put(L.map(r => [...r].reverse().join('')), W - 3, oy + 1); }
+  if (i === 4) put(['..c..', '.cwc.', '..c..'], ox + 5, 1);
+  if (i === 5) put(['y..y..y', 'yy.y.yy', 'yyyyyyy', 'yrYyYry'], ox + 4, 0);
+  ICONS[key] = g.map(r => r.join('')); return iconURL(key);
+}
 const myRank = () => { S.rank = S.rank || { r: 1000, w: 0, l: 0 }; return S.rank; };
 const tierChip = (r) => { const t = tierOf(r); return `<span class="chip" style="background:${t.c}">${t.n}</span>`; };
 let RANKDB = null;   // { db, user, id }
@@ -5986,9 +6057,9 @@ function rankResult(win) {
   NET.rated = true;
   const k = myRank(), before = k.r, opp = typeof NET.oppR === 'number' ? NET.oppR : 1000;
   const exp = 1 / (1 + Math.pow(10, (opp - k.r) / 400)), d = Math.round(32 * ((win ? 1 : 0) - exp));
-  k.r = Math.max(0, k.r + d); k[win ? 'w' : 'l']++; save(); rankSave();
+  k.r = Math.max(0, k.r + d); k[win ? 'w' : 'l']++; k.h = (k.h || [before]).concat(k.r).slice(-30); save(); rankSave();
   const t0 = tierOf(before), t1 = tierOf(k.r);
-  return `レート ${before} → <b style="color:${d >= 0 ? '#5ee08a' : '#ff7a6a'}">${k.r}（${d >= 0 ? '+' : ''}${d}）</b>${t0.n !== t1.n ? `<br><b style="color:${t1.c}">${t1.n}に ${d > 0 ? 'ランクアップ！' : 'ランクダウン…'}</b>` : ''}`;
+  return `レート ${before} → <b style="color:${d >= 0 ? '#5ee08a' : '#ff7a6a'}">${k.r}（${d >= 0 ? '+' : ''}${d}）</b>${t0.n !== t1.n ? `<br><span class="rkup"><img src="${tierBadge(t1.i)}" alt=""><b style="color:${t1.c}">${t1.n}に ${d > 0 ? 'ランクアップ！' : 'ランクダウン…'}</b></span>` : t1.next ? `<br><span class="dim">${t1.next}まで あと ${t1.hi - k.r}</span>` : ''}`;
 }
 async function renderLeaderboard(el) {
   const R = await rankDb();
@@ -6001,6 +6072,73 @@ async function renderLeaderboard(el) {
     el.innerHTML = '<div class="lb">' + rows.map((r, i) => `<div class="${r.id === R.id ? 'me' : ''}"><b>${i + 1}</b><span class="lbn"></span>${tierChip(r.r)}<span>${r.r}</span><span class="dim">${r.w || 0}-${r.l || 0}</span></div>`).join('') + '</div>';
     el.querySelectorAll('.lbn').forEach((s, i) => { const p = ps && ps[rows[i].id]; s.textContent = (p && p.name) || 'トレーナー'; });
   } catch (e) { el.innerHTML = '<p class="dim">ランキングを よみこめませんでした</p>'; }
+}
+/* ---------- ランキング画面：じぶんの ランク・ランクの かいだん・プレイヤー / ギルドの ひょうしょうだい ---------- */
+const badgeIco = (r, cls = '') => `<i class="ico ${cls}" style="background-image:url(${tierBadge(tierOf(r).i)})"></i>`;
+function rankSpark(h) {
+  if (!h || h.length < 2) return `<svg viewBox="0 0 300 56"><text x="150" y="33" text-anchor="middle" fill="#8a80b0" font-size="12">ランク対戦を すると レートの うごきが ここに でるよ</text></svg>`;
+  const lo = Math.min(...h) - 10, hi = Math.max(...h) + 10, X = (i) => 8 + i * 284 / (h.length - 1), Y = (v) => 50 - (v - lo) / (hi - lo) * 44;
+  let lines = ''; TIERS.forEach(t => { if (t[0] > lo && t[0] < hi) lines += `<line x1="0" x2="300" y1="${Y(t[0]).toFixed(1)}" y2="${Y(t[0]).toFixed(1)}" stroke="${t[2]}" stroke-dasharray="3 3" opacity=".6"/><text x="4" y="${(Y(t[0]) - 2).toFixed(1)}" fill="${t[2]}" font-size="9">${t[1]}</text>`; });
+  const pts = h.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' '), L = h.length - 1, c = tierOf(h[L]).c;
+  return `<svg viewBox="0 0 300 56" preserveAspectRatio="none">${lines}<polyline points="${pts}" fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="${(X(L) - 3).toFixed(1)}" y="${(Y(h[L]) - 3).toFixed(1)}" width="6" height="6" fill="${c}" stroke="#0b0914"/></svg>`;
+}
+let RK_TAB = 'p';
+async function renderRank(tab) {
+  guildStop(); RK_TAB = tab || RK_TAB; show('scRank');
+  const W = $('rkBody'), k = myRank(), t = tierOf(k.r), n = k.w + k.l;
+  W.innerHTML = `<div class="card rkme"><i class="ico big" style="background-image:url(${tierBadge(t.i)})"></i>
+      <div><div class="tn" style="color:${t.c}">${t.n}</div><div class="rr">${k.r}<small>レート</small></div>
+        <div class="rkbar"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></div>
+        <div class="nx">${t.next ? `<b style="color:${TIERS[t.i + 1][2]}">${t.next}</b>まで あと <b>${t.hi - k.r}</b>` : 'さいこうランク！ どこまで のばせるか'}</div></div>
+      <div class="st"><span>${k.w}<small>勝</small> ${k.l}<small>敗</small></span><span>しょうりつ <b>${n ? Math.round(k.w / n * 100) : 0}%</b></span><span id="rkPos">じゅんい <b>-</b></span></div>
+      ${rankSpark(k.h)}</div>
+    <div class="card rkladder">${TIERS.map((x, i) => `<div class="${i === t.i ? 'on' : i > t.i ? 'lock' : ''}"><i class="ico" style="background-image:url(${tierBadge(i)})"></i><b style="color:${x[2]}">${x[1]}</b><span>${i ? x[0] : '-'}</span></div>`).join('')}</div>
+    <div class="rktabs"><button data-t="p">${icoHTML('swords')}プレイヤー</button><button data-t="g">${icoHTML('shield')}ギルド</button></div>
+    <div id="rkList" class="gdlist"><p class="dim">よみこみちゅう…</p></div>`;
+  W.querySelectorAll('.rktabs button').forEach(b => { b.classList.toggle('on', b.dataset.t === RK_TAB); b.onclick = () => { SND.se && SND.se('ok'); renderRank(b.dataset.t); }; });
+  const L = $('rkList'), R = await rankDb();
+  if (!R || !R.id) { L.innerHTML = '<p class="dim">ランキングは claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ みられます。</p>'; return; }
+  try { RK_TAB === 'g' ? await rankGuilds(R, L) : await rankPlayers(R, L); }
+  catch (e) { if (!$('scRank').hidden) L.innerHTML = '<p class="dim">ランキングを よみこめませんでした</p>'; }
+}
+function podium(items) {   // items: [{ el, name, val, me }] を 2・1・3 の じゅんに ならべる
+  const P = document.createElement('div'); P.className = 'podium';
+  [1, 0, 2].forEach(j => { const it = items[j], c = document.createElement('div'); c.className = 'pc p' + (j + 1) + (it && it.me ? ' me' : ''); if (it) { c.appendChild(it.el); c.insertAdjacentHTML('beforeend', `<span class="nm"></span><span class="v">${it.val}</span>`); c.querySelector('.nm').textContent = it.name; } c.insertAdjacentHTML('beforeend', `<div class="pl">${j + 1}</div>`); P.appendChild(c); });
+  return P;
+}
+async function rankPlayers(R, L) {
+  const q = await R.db.collection('ranks').orderBy('r', 'desc').limit(50).get();
+  const rows = q.docs.map(d => ({ id: d.id, ...(d.data() || {}) })).filter(r => typeof r.r === 'number');
+  if ($('scRank').hidden || RK_TAB !== 'p') return;
+  if (!rows.length) { L.innerHTML = '<p class="dim">まだ だれも いません。さいしょの 1にんに なろう！</p>'; return; }
+  const ps = await R.user.profiles(rows.map(r => r.id)).catch(() => ({})), nm = (id) => (ps && ps[id] && ps[id].name) || 'トレーナー';
+  const mi = rows.findIndex(r => r.id === R.id); { const el = $('rkPos'); if (el) el.innerHTML = `じゅんい <b>${mi >= 0 ? mi + 1 + 'い' : '50い いか'}</b>`; }
+  const face = (r) => { if (r.m && SPR[r.m]) return spriteCanvas(r.m, 52); const c = document.createElement('canvas'); c.width = c.height = 1; return c; };
+  L.innerHTML = '';
+  L.appendChild(podium(rows.slice(0, 3).map(r => ({ el: face(r), name: nm(r.id), val: `${badgeIco(r.r)}${r.r}`, me: r.id === R.id }))));
+  rows.slice(3).forEach((r, j) => {
+    const row = document.createElement('div'); row.className = 'gdrow card rkrow' + (r.id === R.id ? ' me' : '');
+    row.innerHTML = `<span class="rk">${j + 4}</span>${badgeIco(r.r)}<span class="nm"><b></b><small style="color:${tierOf(r.r).c}">${tierOf(r.r).n}</small></span><span class="v">${r.r}<small>${r.w || 0}勝 ${r.l || 0}敗</small></span>`;
+    row.querySelector('.nm b').textContent = nm(r.id); L.appendChild(row);
+  });
+  if (mi < 0) { const k = myRank(), row = document.createElement('div'); row.className = 'gdrow card rkrow me'; row.innerHTML = `<span class="rk">-</span>${badgeIco(k.r)}<span class="nm"><b>あなた</b><small>ランク対戦を すると のるよ</small></span><span class="v">${k.r}<small>${k.w}勝 ${k.l}敗</small></span>`; L.appendChild(row); }
+  L.insertAdjacentHTML('beforeend', `<button class="btn hcta" id="rkGo" style="margin-top:6px">${icoHTML('swords')}<span class="t">ランク対戦</span><span class="s">マッチング かいし</span></button>`);
+  $('rkGo').onclick = () => $('btnRank').click();
+}
+async function rankGuilds(R, L) {
+  const { guilds, mine, rank } = await guildData(R);
+  if ($('scRank').hidden || RK_TAB !== 'g') return;
+  const my = mine && guilds[mine.gid] ? guilds[mine.gid] : null, top = Math.max(1, ...rank.map(g => g.wpts));
+  { const el = $('rkPos'); if (el) { const gi = my ? rank.indexOf(my) + 1 : 0; el.innerHTML = `ギルド <b>${gi ? gi + 'い' : 'みしょぞく'}</b>`; } }
+  L.innerHTML = `<div class="card" style="font-size:12px;display:flex;justify-content:space-between;gap:8px;padding:6px 10px"><span>こんしゅうの ポイント</span><b style="color:var(--acc);white-space:nowrap">のこり ${daysLeft()}にち</b></div>`;
+  if (!rank.length) { L.insertAdjacentHTML('beforeend', '<p class="dim">まだ ギルドが ありません。</p>'); }
+  else L.appendChild(podium(rank.slice(0, 3).map(g => ({ el: embSpan(g, false), name: g.name, val: `${g.wpts}pt`, me: g === my }))));
+  rank.slice(3, 30).forEach((g, j) => {
+    const row = document.createElement('div'); row.className = 'gdrow card rkrow' + (g === my ? ' me' : '');
+    row.innerHTML = `<span class="rk">${j + 4}</span><i class="emb"></i><span class="nm"><b></b><span class="gbar"><i style="width:${Math.round(g.wpts / top * 100)}%;background:${g.col}"></i></span></span><span class="v">${g.wpts}pt<small>${g.mem.length}/${G_MAX}にん</small></span>`;
+    row.querySelector('.emb').replaceWith(embSpan(g, true)); row.querySelector('.nm b').textContent = g.name; L.appendChild(row);
+  });
+  const b = document.createElement('button'); b.className = 'btn' + (my ? ' sub' : ''); b.style.marginTop = '6px'; b.textContent = my ? `${my.name} を ひらく` : 'ギルドを さがす・つくる'; b.onclick = () => renderGuild(); L.appendChild(b);
 }
 /* ---------- ギルド：みんなで かって ポイントを あつめる チーム ----------
    db：guilds/{つくった人の id}（なまえ・もんしょう）・gmembers/{じぶん}（どこの ギルドか・こんしゅうの ポイント）・gchat/{じぶん}（さいきんの はつげん 10こ）
@@ -6039,22 +6177,28 @@ async function renderGuild() {
   guildStop(); show('scGuild'); const W = $('gdBody'); W.innerHTML = '<p class="dim">よみこみちゅう…</p>';
   const R = await rankDb();
   if (!R || !R.id) { W.innerHTML = '<p class="dim">ギルドは claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ つかえます。</p>'; return; }
-  let gs, ms; try { [gs, ms] = await Promise.all([R.db.collection('guilds').limit(300).get(), R.db.collection('gmembers').limit(1000).get()]); }
-  catch (e) { W.innerHTML = '<p class="dim">よみこめませんでした。あとで もういちど ためしてね。</p>'; return; }
+  let D; try { D = await guildData(R); } catch (e) { W.innerHTML = '<p class="dim">よみこめませんでした。あとで もういちど ためしてね。</p>'; return; }
+  const { guilds, mine, rank } = D;
+  if (mine && guilds[mine.gid]) { GUILD.me = mine; GUILD.gname = guilds[mine.gid].name; setGuildOn(true); guildHome(R, guilds[mine.gid], rank); }
+  else { GUILD.me = null; GUILD.gname = ''; setGuildOn(false); guildBrowse(R, rank, guilds[R.id]); }
+}
+// ギルドと メンバーを よんで、こんしゅうの ポイントで ならべる
+async function guildData(R) {
+  const [gs, ms] = await Promise.all([R.db.collection('guilds').limit(300).get(), R.db.collection('gmembers').limit(1000).get()]);
   const wk = weekNo(), guilds = {};
   for (const d of gs.docs) { const g = d.data() || {}; guilds[d.id] = { id: d.id, name: safeName(g.name, 10) || 'ギルド', emb: G_EMB.includes(g.emb) ? g.emb : '🛡', col: G_COL.includes(g.col) ? g.col : G_COL[0], msg: safeName(g.msg, 24), art: g.art && cleanArt(g.art, 16, 16, false) || null, mem: [], wpts: 0 }; }
   let mine = null;
   for (const d of ms.docs) { const m = { id: d.id, ...(d.data() || {}) }; if (d.id === R.id) mine = m; const g = guilds[m.gid]; if (g) { g.mem.push(m); if (m.wk === wk) g.wpts += Math.max(0, m.pts | 0); } }
   const rank = Object.values(guilds).filter(g => g.mem.length).sort((a, b) => b.wpts - a.wpts || b.mem.length - a.mem.length);
-  if (mine && guilds[mine.gid]) { GUILD.me = mine; GUILD.gname = guilds[mine.gid].name; setGuildOn(true); guildHome(R, guilds[mine.gid], rank); }
-  else { GUILD.me = null; GUILD.gname = ''; setGuildOn(false); guildBrowse(R, rank, guilds[R.id]); }
+  return { guilds, mine, rank };
 }
 const daysLeft = () => Math.max(1, Math.ceil(((weekNo() + 1) * 6048e5 - 3 * 864e5 - Date.now()) / 864e5));
 function guildBrowse(R, rank, own) {
   const W = $('gdBody');
   W.innerHTML = `<div class="card" style="font-size:12.5px;line-height:1.6">ギルドに はいると、かつたびに ギルドに ポイントが はいる（オンライン たいせん +3、そのほか +1）。こんしゅうの ポイントで ギルドランキングを きそおう！（のこり ${daysLeft()}にち・1ギルド ${G_MAX}にん まで）</div>
     <button class="btn" id="gdNew" style="padding:12px">${own ? 'じぶんの ギルドに もどる' : '＋ ギルドを つくる'}</button>
-    <div class="sec-title"><span>こんしゅうの ギルドランキング</span></div><div class="gdlist" id="gdList"></div>`;
+    <div class="sec-title"><span>こんしゅうの ギルドランキング</span><button class="btn sub" id="gdRkAll" style="padding:5px 10px;font-size:12px">ひょうしょうだい</button></div><div class="gdlist" id="gdList"></div>`;
+  $('gdRkAll').onclick = () => { guildStop(); renderRank('g'); };
   const L = $('gdList');
   if (!rank.length) L.innerHTML = '<p class="dim">まだ ギルドが ありません。さいしょの ギルドを つくろう！</p>';
   rank.forEach((g, i) => {
@@ -6112,7 +6256,7 @@ async function guildHome(R, g, rank) {
     <div class="sec-title"><span>メンバー（こんしゅうの ポイント）</span></div><div class="gdlist" id="gdMem"></div>
     <div class="sec-title"><span>ギルドチャット</span></div><div class="card gdchat" id="gdChat"><span class="dim">まだ だれも はなして いません</span></div>
     <div class="gdsend"><input type="text" id="gdIn" maxlength="40" placeholder="ひとこと（40もじ まで）"><button class="btn" id="gdSend" style="padding:6px 14px">おくる</button></div>
-    <div class="sec-title"><span>ギルドランキング</span></div><div class="gdlist" id="gdRank"></div>
+    <div class="sec-title"><span>ギルドランキング</span><button class="btn sub" id="gdRkAll" style="padding:5px 10px;font-size:12px">ぜんぶ みる</button></div><div class="gdlist" id="gdRank"></div>
     <button class="dim" id="gdLeave" style="text-decoration:underline;align-self:flex-start;margin-top:4px">${lead ? 'ギルドを かいさん する' : 'ギルドを ぬける'}</button>`;
   $('gdNm').textContent = g.name; $('gdMs').textContent = g.msg || ''; W.querySelector('.gdhead .emb').replaceWith(embSpan(g, false));
   if (lead) { const eb = document.createElement('button'); eb.className = 'btn sub'; eb.style.cssText = 'padding:6px 10px;font-size:12px;align-self:flex-start'; eb.textContent = '✏ もんしょうを かく';
@@ -6126,6 +6270,7 @@ async function guildHome(R, g, rank) {
     row.appendChild(lookCanvas(m.lk, 28)); row.insertAdjacentHTML('beforeend', `<span class="nm"></span><span class="pt">${m.wk === wk ? m.pts | 0 : 0}pt</span>`);
     row.querySelector('.nm').textContent = (m.id === g.id ? '👑 ' : '') + nameOf(m.id); M.appendChild(row);
   }
+  $('gdRkAll').onclick = () => { guildStop(); renderRank('g'); };
   const RK = $('gdRank');
   rank.slice(0, 10).forEach((x, i) => { const row = document.createElement('div'); row.className = 'gdrow card' + (x.id === g.id ? ' me' : ''); row.innerHTML = `<span class="rk">${i + 1}</span><i class="emb"></i><span class="nm"></span><span class="pt">${x.wpts}pt</span>`; row.querySelector('.emb').replaceWith(embSpan(x, true)); row.querySelector('.nm').textContent = x.name; RK.appendChild(row); });
   // チャット：ギルドの みんなの さいきんの はつげんを まとめて じかんじゅん に
@@ -6234,10 +6379,10 @@ function onlineMenu() {
     <p class="dim" style="margin-bottom:8px">パーティの 上から 3たいで たたかいます。あいても この ゲームの ページを claude.ai で ひらいて いる ひつようが あります。</p>
     <div class="ntabs"><button class="on" data-t="rank">ランク対戦</button><button data-t="friend">フレンド対戦</button></div>
     <div data-p="rank">
-      <div class="rankcard"><div><span class="chip" style="background:${t.c};font-size:13px;padding:2px 10px">${t.n}</span></div><div class="rr">${k.r}</div><div class="dim">${k.w}かち ${k.l}まけ</div></div>
+      <div class="rankcard"><div class="rkup"><img src="${tierBadge(t.i)}" alt=""><span class="chip" style="background:${t.c};font-size:13px;padding:2px 10px">${t.n}</span></div><div class="rr">${k.r}</div><div class="dim">${k.w}かち ${k.l}まけ</div></div>
       <button class="btn" id="mmGo" style="width:100%;margin-top:8px">マッチング かいし</button>
       <button class="btn sub" id="mmStop" style="width:100%;margin-top:8px" hidden>さがすのを やめる</button>
-      <details style="margin-top:10px"><summary>ランキング（上位20人）</summary><div id="lbBox" class="dim">よみこみちゅう…</div></details>
+      <button class="btn sub" id="mmRank" style="width:100%;margin-top:8px">ランキングを みる</button>
     </div>
     <div data-p="friend" hidden>
       <p class="dim">あいことばで ともだちと たいせん（レートは かわりません）</p>
@@ -6249,13 +6394,13 @@ function onlineMenu() {
   const stat = (h, err, done) => { const el = bg.querySelector('#nStat'); if (done) { mmStop(); bg.remove(); return; } el.innerHTML = h; el.classList.toggle('err', !!err); if (err) { bg.querySelector('#mmGo').hidden = false; bg.querySelector('#mmStop').hidden = true; } };
   const rec = S.online || { w: 0, l: 0 }; bg.querySelector('#nRec').textContent = `ぜんたいの せんせき ${rec.w}かち ${rec.l}まけ`;
   bg.querySelectorAll('.ntabs button').forEach(b => b.onclick = () => { bg.querySelectorAll('.ntabs button').forEach(x => x.classList.toggle('on', x === b)); bg.querySelectorAll('[data-p]').forEach(p => p.hidden = p.dataset.p !== b.dataset.t); });
-  bg.querySelector('details').addEventListener('toggle', (e) => { if (e.target.open) renderLeaderboard(bg.querySelector('#lbBox')); });
+  bg.querySelector('#mmRank').onclick = () => { mmStop(); if (!NET.started) netReset(); bg.remove(); renderRank('p'); };
   bg.querySelector('#nClose').onclick = () => { mmStop(); if (!NET.started) netReset(); bg.remove(); };
   bg.querySelector('#mmGo').onclick = () => { bg.querySelector('#mmGo').hidden = true; bg.querySelector('#mmStop').hidden = false; stat('あいてを さがしています…'); mmStart(stat); };
   bg.querySelector('#mmStop').onclick = () => { mmStop(); bg.querySelector('#mmGo').hidden = false; bg.querySelector('#mmStop').hidden = true; stat(''); };
   bg.querySelector('#nHost').onclick = () => { const A = 'abcdefghjkmnpqrstuvwxyz23456789'; let c = ''; for (let i = 0; i < 4; i++) c += A[Math.floor(Math.random() * A.length)]; stat('へやを つくっています…'); netOpen(true, c, stat); };
   bg.querySelector('#nJoin').onclick = () => { const c = bg.querySelector('#nCode').value.trim().toLowerCase(); if (!/^[a-z0-9]{4}$/.test(c)) { stat('あいことばは 4もじ です', true); return; } stat('へやに はいっています…'); netOpen(false, c, stat); };
-  rankDb().then(() => { const k2 = myRank(), t2 = tierOf(k2.r); const c = bg.querySelector('.rankcard'); if (c) c.innerHTML = `<div><span class="chip" style="background:${t2.c};font-size:13px;padding:2px 10px">${t2.n}</span></div><div class="rr">${k2.r}</div><div class="dim">${k2.w}かち ${k2.l}まけ</div>`; });
+  rankDb().then(() => { const k2 = myRank(), t2 = tierOf(k2.r); const c = bg.querySelector('.rankcard'); if (c) c.innerHTML = `<div class="rkup"><img src="${tierBadge(t2.i)}" alt=""><span class="chip" style="background:${t2.c};font-size:13px;padding:2px 10px">${t2.n}</span></div><div class="rr">${k2.r}</div><div class="dim">${k2.w}かち ${k2.l}まけ</div>`; });
 }
 
 /* ---------- メインループ ---------- */
@@ -7577,7 +7722,9 @@ async function mkSave() {
 $('btnMaker').onclick = () => mkOpen();
 $('btnGuild').onclick = () => renderGuild();
 $('tabHome').onclick = () => { guildStop(); renderHub(); };
-$('hStage').onclick = $('hMe').onclick = () => $('btnTeam').click();
+$('hStage').onclick = () => $('btnTeam').click();
+$('hMe').onclick = () => renderRank('p');
+$('btnRkBack').onclick = () => renderHub();
 $('btnGdBack').onclick = () => { guildStop(); renderHub(); };
 $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel && MK.opts.onCancel(); return; } MK = null; renderHub(); };
 $('btnHelp').onclick = () => {
