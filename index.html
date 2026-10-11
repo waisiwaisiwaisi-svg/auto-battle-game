@@ -312,6 +312,17 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .cmd.info{grid-column:span 2;align-items:flex-start;text-align:left;padding:4px 8px;cursor:default;min-height:52px}
 .cmd.info{cursor:pointer}.cmd.info:active{transform:translateY(2px)}
 .cmd.mv.blocked{opacity:.5}
+#tutBox{position:absolute;left:8px;right:8px;top:calc(46px + env(safe-area-inset-top));z-index:40;display:flex;justify-content:center;pointer-events:none}
+#tutBox .tb-in{pointer-events:auto;max-width:520px;width:100%;background:linear-gradient(180deg,#2f2750,#1b1530);border:3px solid #0b0914;box-shadow:inset 0 0 0 2px #ffd166,0 4px 0 rgba(0,0,0,.5);padding:10px 12px;animation:tbin .25s ease-out}
+#tutBox .tb-who{display:inline-block;background:#ffd166;color:#2a1606;font-size:11px;padding:1px 8px;margin-bottom:4px}
+#tutBox p{margin:0 0 8px;font-size:14px;line-height:1.55;color:var(--ink)}#tutBox p b{color:var(--acc)}
+#tutBox .tb-btns{display:flex;justify-content:space-between;gap:8px}#tutBox .tb-btns .btn{padding:6px 14px;font-size:13px}
+#tutBox .tb-btns .btn:only-child{margin-left:auto}
+@keyframes tbin{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
+.tut-hl{position:relative;z-index:30;outline:4px solid #ffd166!important;outline-offset:2px;animation:tuthl .8s ease-in-out infinite;filter:brightness(1.25)}
+@keyframes tuthl{0%,100%{outline-color:#ffd166;outline-offset:2px}50%{outline-color:#fff6d0;outline-offset:5px}}
+#tutHand{position:fixed;z-index:45;font-size:34px;pointer-events:none;filter:drop-shadow(0 2px 0 #000);animation:tuthand .7s ease-in-out infinite alternate;transform-origin:50% 0}
+@keyframes tuthand{from{transform:translate(-50%,6px)}to{transform:translate(-50%,-4px)}}
 #bAuto{font-weight:700;letter-spacing:.05em}
 #bTop #bAuto.on{background:linear-gradient(180deg,#ffd27a,#f2962d);color:#2a1606;box-shadow:0 0 0 2px var(--out),inset 0 1px 0 rgba(255,255,255,.6)}
 .cmd.info .d{font-size:10px;line-height:1.35;color:var(--ink);opacity:.85;white-space:normal}
@@ -882,6 +893,7 @@ h1.tlogo{filter:none}
 
   <!-- バトル -->
   <section class="screen" id="scBattle" hidden>
+    <div id="tutBox" hidden><div class="tb-in"><b class="tb-who">コーチ</b><p id="tutTx"></p><div class="tb-btns"><button class="btn sub" id="tutSkip">スキップ</button><button class="btn" id="tutNext" hidden>つぎへ</button></div></div></div><div id="tutHand" hidden>👆</div>
     <div id="bTop"><span id="bTitle"></span><span style="display:flex;gap:6px"><button id="bAuto" aria-pressed="false" title="わざを じどうで だす">AUTO</button><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="1920" height="1080"></canvas>
@@ -3594,7 +3606,7 @@ function renderStarter() {
     const d = document.createElement('div');
     const pm = newMon(id); d.innerHTML = `<div class="nm">${sp.n} ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><p>${sp.desc}</p>${sp.prof ? `<p>${profLine(sp)}</p>` : ''}<p>せいかく：${NATURES[pm.nat].n}（${ivGrade(pm)}）<br>わざ：${pm.moves.map(m => MOVES[m].n).join('・')}</p>`;
     b.appendChild(d);
-    b.onclick = () => { S = defaultSave(); pm.uid = S.uid++; S.party.push(pm); save(); renderHub(); setTimeout(() => $('btnHelp').click(), 350); };   /* はじめての ときは あそびかたを 見せる */
+    b.onclick = () => { S = defaultSave(); pm.uid = S.uid++; S.party.push(pm); save(); renderHub(); setTimeout(async () => { if (await ask('まずは チュートリアルで バトルの きほんを やってみよう！', 'はじめる', 'あとで')) startTutorial(); }, 350); };   /* はじめての ときは チュートリアル */
     L.appendChild(b);
   }
   show('scStarter');
@@ -4408,7 +4420,7 @@ function speedOf(f) {
 
 function startBattle(cfg) {
   updAutoBtn();
-  if (!S.auto && (S.mvTip || 0) < 3 && !cfg.headless) { S.mvTip = (S.mvTip || 0) + 1; setTimeout(() => { if (B && B.mode === 'fight' && !S.auto) say('わざボタンを タップして わざを だそう！（AUTO で おまかせ）'); }, 2600); }
+  if (!S.auto && (S.mvTip || 0) < 3 && !cfg.headless && !cfg.tutorial) { S.mvTip = (S.mvTip || 0) + 1; setTimeout(() => { if (B && B.mode === 'fight' && !S.auto) say('わざボタンを タップして わざを だそう！（AUTO で おまかせ）'); }, 2600); }
   const st = cfg.kind === 'wild' ? makeWild() : makeStadium(cfg.field);
   const pf = (cfg.p0 || S.party.slice(0, 3)).map(m => mkFighter(m, 0));
   const ef = cfg.enemies.map(m => mkFighter(m, 1));
@@ -4620,7 +4632,7 @@ const charging = (f) => !!(f && f.cur && (f.state === 'wind' || f.state === 'cha
 function rpsParry(att, def) {   // ✋ が ✊ を はじく
   att.cur = null; if (!att.v.rampage) att.queued = null; att.state = 'stun'; att.stT = 1.1;
   const a = Math.atan2(att.y - def.y, att.x - def.x); att.kx = Math.cos(a) * 260 * K; att.ky = Math.sin(a) * 260 * K;
-  popText(def.x, def.y - 84, 'はじいた！', '#ffd166', 'comic'); say(`${def.sp.n}は ${att.sp.n}を はじきかえした！`);
+  popText(def.x, def.y - 84, 'はじいた！', '#ffd166', 'comic'); say(`${def.sp.n}は ${att.sp.n}を はじきかえした！`); if (TUT && def.side === 0) TUT.f.parry = true;
   fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 44, col: '#ffd166', life: .35, max: .35 }); B.hitstop = Math.max(B.hitstop, .12);
 }
 function rpsBreak(def) {   // ✌️ が ✋ を くずす
@@ -5059,7 +5071,7 @@ function hit(att, def, m, ang, opt) {
     def.kx += Math.cos(ang) * 60 * K; def.ky += Math.sin(ang) * 60 * K; B.hitstop = Math.max(B.hitstop, .03);
   }
   else {
-    if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) === 'rock') popText(def.x, def.y - 84, 'わりこみ！', '#ffd166', 'comic');
+    if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) === 'rock') { popText(def.x, def.y - 84, 'わりこみ！', '#ffd166', 'comic'); if (TUT && att.side === 0) TUT.f.cut = true; }
     def.cur = null; if (!def.v.rampage) def.queued = null;
     if (!lagHit) { def.state = 'stun'; def.stT = heavy ? .45 : .25; }
     def.kx = Math.cos(ang) * (heavy ? 230 : 140) * K; def.ky = Math.sin(ang) * (heavy ? 230 : 140) * K;
@@ -5458,7 +5470,10 @@ function aiMove(f, o, dt, autoSpecial) {
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
   if (autoSpecial && o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
-  if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
+  // しじした じぶんに つかう わざ（まもる・カウンター・つみわざ・かいふく）：その場で すぐ だす（よちょうの はんいの 中でも）
+  if (f.want && f.queued === f.want.id && ['protect', 'counter', 'self', 'heal', 'sub'].includes(MOVES[f.queued].k)) { const q = f.queued; f.queued = null; beginMove(f, q); return; }
+  const rushIn = !!(f.want && f.queued === f.want.id && rpsOf(MOVES[f.queued]) === 'rock' && charging(o));   // しじした とっしんで ために わりこむ：にげずに つっこむ
+  if (!rushIn && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
     const t = threatDir(f, o); f.paceT = 1.5; return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
   }
   const per = persona(f), hurt = f.hp < f.maxHp * per.flee;
@@ -6597,6 +6612,7 @@ function onlineMenu() {
 /* ---------- メインループ ---------- */
 function bStep(dt) {
   if (B && B.remote) { netGuestStep(dt); bVisual(dt); return; }
+  if (TUT) tutTick(dt);
   if (B && B.slowT > 0) { B.slowT -= dt; dt *= B.slowK || .3; }   // スロー
   if (!B || B.paused) { if (B && B.net === 'host') netHostTick(dt); return; }
   if (sayTimer > 0) sayTimer -= dt;
@@ -6709,7 +6725,7 @@ function endBattle(res) {
   if (B.mode === 'end') return;
   SND.play(res === 'win' || res === 'caught' ? 'win' : res === 'lose' ? 'lose' : '');
   B.mode = 'end'; B.result = res; B.endT = res === 'caught' ? 1.6 : 1.4;
-  if (res === 'win' && B.kind !== 'wild') guildWin(B.kind === 'online' ? 3 : 1);   // ギルドに ポイント
+  if (res === 'win' && B.kind !== 'wild' && !B.cfg.tutorial) guildWin(B.kind === 'online' ? 3 : 1);   // ギルドに ポイント
   if (B.kind === 'online') { S.online = S.online || { w: 0, l: 0 }; S.online[res === 'win' ? 'w' : 'l']++; const rl = rankResult(res === 'win'); B.resLines = [res === 'win' ? '<b style="color:var(--acc)">オンライン対戦に かった！</b>' : 'オンライン対戦に まけた…', rl || `せんせき ${S.online.w}かち ${S.online.l}まけ`]; save(); return; }
   const lines = [];
   const caps0 = S.capsules, gems0 = S.gems || 0;
@@ -6723,7 +6739,8 @@ function endBattle(res) {
     } else if (res === 'win') { if (Math.random() < .5) S.capsules += 1; if (Math.random() < .25) S.gems = (S.gems || 0) + 1; }   // ながく あそべるように すくなめ
     else if (res === 'lose') lines.unshift('ちからつきて しまった… でも モンスターたちは すぐに げんきに なった');
     else if (res === 'run') lines.unshift('くさむらから ぶじに にげだした');
-  } else if (B.cfg.journey) journeyResult(res, lines);
+  } else if (B.cfg.tutorial) tutEnd(res, lines);
+  else if (B.cfg.journey) journeyResult(res, lines);
   else if (B.cfg.arcade) arcadeResult(res, lines);
   else {
     if (res === 'win') {
@@ -6753,6 +6770,112 @@ function showResult() {
   $('resultOv').hidden = false; $('resultOv').className = 'ov res res-' + res;
   if (res === 'win' || res === 'caught') { const ov = $('resultOv'); ov.querySelectorAll('.confetti').forEach(e => e.remove()); for (let i = 0; i < 36; i++) { const c = document.createElement('i'); c.className = 'confetti'; c.style.cssText = `left:${Math.random() * 100}%;background:${choice(['#ffd166', '#ff7ab0', '#7bd88f', '#7ab8ff', '#fff'])};animation-delay:${Math.random() * .8}s;animation-duration:${1.6 + Math.random() * 1.4}s;transform:rotate(${Math.random() * 360}deg)`; ov.appendChild(c); } }
 }
+
+/* ---------- チュートリアル：じっさいの バトルで 1つずつ やってみる ---------- */
+// ステップ：{ tx: せつめい, hl: ひからせる ボタン, wait: できたら true, pause: とめて よむ, run: まいフレーム（あいての うごきを きめる）}
+let TUT = null;
+function tutPickMoves(sid) {
+  const sp = SPECIES[sid], ok = (id, f) => MOVES[id] && f(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 90;
+  const ids = Object.keys(MOVES);
+  const rock = ids.find(id => ok(id, m => RPS_ROCK.includes(m.k) && m.k !== 'vault' && m.t === sp.type && !m.fakeout)) || 'tackle';
+  const sc = ids.find(id => ok(id, m => m.k === 'proj' && m.t === sp.type)) || ids.find(id => ok(id, m => m.k === 'proj')) ;
+  const prot = ids.find(id => MOVES[id].k === 'protect');
+  return [rock, sc, prot];
+}
+function startTutorial() {
+  if (!S || !S.party.length) return;
+  const me = S.party[0], buddy = S.party[1] || newMon(me.sid === 'a_water2' ? 'a_grass2' : 'a_water2');
+  const ids = Object.keys(MOVES), plain = (m) => !m.sucker && !m.fakeout && !m.ohko && !(m.e && (m.e.recoil || m.e.self)), pickK = (k) => ids.find(id => MOVES[id].k === k && plain(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 80 && MOVES[id].t === 'normal') || ids.find(id => MOVES[id].k === k && plain(MOVES[id]) && MOVES[id].power > 0);
+  const tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; }, myT = SPECIES[me.sid].type;
+  const dummyId = poolIds().filter(id => id !== me.sid && id !== buddy.sid && SPECIES[id].type !== myT).sort((a, b) => tot(a) - tot(b))[0] || poolIds()[0];   // れんしゅう あいて：いちばん よわい モンスター
+  TUT = { i: -1, t: 0, f: {}, auto0: S.auto, mv: tutPickMoves(me.sid), em: { strike: pickK('strike'), beam: pickK('beam'), dash: pickK('dash') } };
+  S.auto = false;
+  startBattle({ kind: 'tutorial', tutorial: true, field: 'grass', p0: [me, buddy], enemies: [newMon(dummyId)], title: 'チュートリアル', intro: 'れんしゅう あいてが あらわれた！', trainer: { name: 'コーチ', spr: trArt('boy') }, skill: 0 });
+  const f = B.sides[0].fs[0], o = B.sides[1].fs[0];
+  f.moves = TUT.mv.concat(f.moves.filter(id => !TUT.mv.includes(id))).slice(0, 4);
+  o.moves = [TUT.em.strike, TUT.em.beam, TUT.em.dash].filter(Boolean);
+  o.atk *= .35; o.spa *= .35;
+  setupCmds();
+}
+const tutF = () => B.sides[0].fs[B.sides[0].act], tutO = () => B.sides[1].fs[B.sides[1].act];
+function tutEnemy(id, hold) {   // あいてに わざを ださせる（hold びょう ためつづける）
+  const o = tutO(), f = tutF(); if (!o || !f || !id || o.state !== 'free') return false; o.cur = null;
+  o.cd[id] = 0; beginMove(o, id); if (o.cur) { o.cur.wind = Math.max(o.cur.wind, hold); o.cur.tx = f.x; o.cur.ty = f.y; } return !!o.cur;
+}
+const TUT_STEPS = [
+  { tx: 'ようこそ！ ここでは バトルの きほんを じっさいに やってみよう。モンスターは じぶんで うごくから、きみは <b>しじ</b> を だすんだ。', pause: true },
+  { tx: '<b>わざボタン</b>を タップしてみよう！ モンスターが あいてに ちかづいて その わざを だすよ。', hl: () => document.querySelector('.cmd.mv[data-mv="1"]'), wait: () => { const f = tutF(); return f.cur && isDamaging(f.cur.m); } },
+  { tx: 'いいね！ わざを 1つ つかうと、<b>ぜんぶの わざが まち時間</b>に なる。ボタンが くらい あいだは だせないよ。つよい わざほど ながく まつ。', hl: () => $('btns'), pause: true, delay: 1.2 },
+  { tx: 'あいての まわりに <b>あかい はんい</b>が でたら こうげきの あいず！ <b>かわす</b> を タップして よけよう。', hl: () => $('cDodge'), slow: true, near: 300,
+    run: (T) => { const o = tutO(); if (!T.f.zoneOn) T.f.zoneOn = tutEnemy(TUT.em.strike, 9); if (o.cur && o.cur.id === TUT.em.strike) o.cur.t = Math.min(o.cur.t, o.cur.wind * .55); },
+    wait: () => { const f = tutF(); return f.state === 'dodge' || (B.sides[0].dodgeCmd || 0) > 0; },
+    done: () => { const o = tutO(); if (o.cur && o.cur.id === TUT.em.strike) o.cur.t = o.cur.wind; } },
+  { tx: 'ナイス！ 「かわす」は つかうと 5びょう まち。ここぞ という ときに つかおう。', pause: true, delay: 1 },
+  { tx: 'あいてが <b>ひかって ためている</b>！ ためている あいだは ふつうの わざでは とまらない。<b>とっしん わざ</b>を あてて わりこもう！', hl: () => document.querySelector('.cmd.mv[data-mv="0"]'), near: 240,
+    run: (T) => { const o = tutO(), f = tutF(); if (!T.f.cdReset) { T.f.cdReset = 1; for (const k of f.moves) f.cd[k] = 0; } if (o.cur && o.cur.id === TUT.em.beam && charging(o)) o.cur.t = Math.min(o.cur.t, .5); else tutEnemy(TUT.em.beam, 99); },
+    wait: () => !!TUT.f.cut,
+    done: () => { } },
+  { tx: 'わりこみ せいこう！ こんどは あいてが <b>つっこんで くる</b>。<b>まもる</b> を タップして はじきかえそう！', hl: () => document.querySelector('.cmd.mv[data-mv="2"]'), near: 300,
+    run: (T) => { const o = tutO(), f = tutF(); if (!T.f.cdReset) { T.f.cdReset = 1; for (const k of f.moves) f.cd[k] = 0; } if (!T.f.dashOn) T.f.dashOn = tutEnemy(TUT.em.dash, 99);
+      if (o.cur && o.cur.id === TUT.em.dash && o.state === 'wind') { if (f.v.protect > 0) o.cur.t = o.cur.wind; else o.cur.t = Math.min(o.cur.t, .4); }
+      if (!(f.v.protect > 0) && !f.cur) for (const k of f.moves) if (MOVES[k].k === 'protect' && (f.cd[k] || 0) > 0) f.cd[k] = 0;   // れんしゅう：はやく おしすぎても すぐ もういちど
+      if (T.f.dashOn && o.state === 'free' && !TUT.f.parry) T.f.dashOn = false; },   // はじけなかったら もういちど
+    wait: () => !!TUT.f.parry },
+  { tx: 'はじいた！ まもりは とっしんに つよい。でも <b>弾や ビーム</b>には くずされるから きをつけて。<br>とっしん → ためを とめる／まもり → とっしんを はじく／弾・ビーム → まもりを くずす。この よみあいが カギ！', pause: true, delay: 1.2 },
+  { tx: '<b>ひかえ</b>の モンスターを タップすると こうたい できるよ。やってみよう！', hl: () => document.querySelector('#bench .bmon'), wait: () => B.sides[0].act !== 0 },
+  { tx: 'さいごに：うえの <b>AUTO</b> を おすと わざも おまかせ に なる。こまったら つかってみて。<br>では あいてを たおして しあげよう！', hl: () => $('bAuto'), pause: true, delay: 1.5 },
+  { tx: 'あいてを たおそう！', fin: true },
+];
+function tutShow(step) {
+  const box = $('tutBox'); box.hidden = false; $('tutTx').innerHTML = step.tx;
+  $('tutNext').hidden = !step.pause;
+  document.querySelectorAll('.tut-hl').forEach(e => e.classList.remove('tut-hl'));
+  const el = step.hl && step.hl(); if (el) el.classList.add('tut-hl'); TUT.hlEl = el || null;
+}
+function tutGo(i) {
+  if (!TUT) return; const prev = TUT_STEPS[TUT.i]; if (prev && prev.done) prev.done(TUT);
+  TUT.i = i; TUT.t = 0; TUT.f = {};
+  const st = TUT_STEPS[i]; if (!st) return;
+  if (st.fin) { $('tutBox').hidden = true; tutHide(); const o = tutO(); if (o) { o.hp = Math.min(o.hp, Math.ceil(o.maxHp * .3)); } B.paused = false; return; }
+  B.paused = !!st.pause; tutShow(st); if (st.pause) SND.se('ok');
+}
+function tutHide() { document.querySelectorAll('.tut-hl').forEach(e => e.classList.remove('tut-hl')); $('tutHand').hidden = true; }
+function tutTick(dt) {
+  if (!TUT || !B || !B.cfg.tutorial) return;
+  const st = TUT_STEPS[TUT.i];
+  // 指さし：ひからせて いる ボタンの うえ
+  const hand = $('tutHand'), el = TUT.hlEl && document.body.contains(TUT.hlEl) ? TUT.hlEl : (st && st.hl && st.hl());
+  if (el && st && !st.fin) { if (!el.classList.contains('tut-hl')) { el.classList.add('tut-hl'); TUT.hlEl = el; } const r = el.getBoundingClientRect(), up = r.top > 90;   // 指さし：ボタンの うえから（うえに よゆうが なければ したから）
+    hand.hidden = false; hand.textContent = up ? '👇' : '👆'; hand.style.left = (r.left + r.width / 2) + 'px'; hand.style.top = (up ? r.top - 40 : r.bottom + 2) + 'px'; }
+  else hand.hidden = true;
+  if (B.mode !== 'fight' || TUT.busy) return;
+  if (TUT.i < 0) { if (B.modeT > .4) tutGo(0); return; }
+  if (!st || st.fin) return;
+  TUT.t += dt;
+  // れんしゅうちゅうは たおれない・あいては かってに うごかない
+  const f = tutF(), o = tutO();
+  if (f) f.hp = Math.max(f.hp, f.maxHp * .45);
+  if (o) { o.hp = Math.max(o.hp, o.maxHp * .5); o.aiT = 9; if (!o.cur) o.queued = null; o.dodgeCd = 9; }
+  if (st.pause) return;
+  if (st.near && !TUT.f.placed && f && o) {   // れんしゅうしやすい きょりに よせる
+    TUT.f.placed = 1; const a = Math.atan2(o.y - f.y, o.x - f.x), d = Math.hypot(o.x - f.x, o.y - f.y);
+    if (d > st.near) { o.x = f.x + Math.cos(a) * st.near; o.y = f.y + Math.sin(a) * st.near; clampF(o); if (B.st.solid) freeSpot(o); burst(o.x, o.y, '#ffffff', 10, 90, .3); }
+  }
+  if (st.slow) { B.slowT = .2; B.slowK = .45; }
+  if (st.run) st.run(TUT);
+  if (st.wait && st.wait()) {
+    const nx = TUT_STEPS[TUT.i + 1]; SND.se('caught'); tutHide(); $('tutBox').hidden = true; B.slowT = 0;
+    if (st.done) st.done(TUT);
+    const d = nx && nx.delay || .6; TUT.busy = true; setTimeout(() => { if (TUT) { TUT.busy = false; tutGo(TUT.i + 1); } }, d * 1000);
+  }
+}
+function tutEnd(res, lines) {
+  const first = !S.tutDone; S.tutDone = true; S.auto = TUT ? TUT.auto0 : S.auto; TUT = null; tutHide(); $('tutBox').hidden = true;
+  if (res === 'win') { lines.unshift('<b style="color:var(--acc)">チュートリアル クリア！</b>'); if (first) S.gems = (S.gems || 0) + 10; /* はじめての クリアは ジェム 10こ */ lines.push('つぎは ランク対戦や アーケードに ちょうせんしよう！'); }
+  else lines.unshift('チュートリアルを おえた。ヘルプ（？）から いつでも もういちど できるよ');
+}
+$('tutNext').onclick = () => { if (!TUT) return; tutHide(); $('tutBox').hidden = true; tutGo(TUT.i + 1); };
+$('tutSkip').onclick = async () => { if (!TUT || !B) return; B.paused = true; if (await ask('チュートリアルを スキップしますか？', 'スキップ', 'つづける')) { const lines = []; tutEnd('skip', lines); B = null; renderHub(); } else if (TUT) { const st = TUT_STEPS[TUT.i]; B.paused = !!(st && st.pause); } };
 
 /* ---------- コマンド ---------- */
 const KIND_LABEL = { proj: 'とびどうぐ', beam: 'ちょくせん', aoe: 'まわり', strike: 'あしもと', dash: 'とっしん', melee: 'せっきん', swipe: 'まえ', cone: 'おうぎ', multi: 'はんい', ray: 'ほじょ', self: 'じぶん', heal: 'かいふく', protect: 'まもる', sub: 'デコイ', dbond: 'ほじょ', counter: 'カウンター', curse: 'ほじょ', field: 'ば', hazard: 'しかけ', baton: 'いれかえ' };
@@ -7965,8 +8088,9 @@ $('btnHelp').onclick = () => {
     <p><b>どうぐ</b>：ふりなおしのくすり・すべてわすれのかね・ひとつわすれのは・おなじタイプのいし。たからばこから でる。へんせい → どうぐ で つかう。</p>
     <p><b>わざのまきもの</b>で すきな わざを おぼえさせよう（てもち → わざのまきもの）。</p>
     <p class="dim">PC：Space＝かわす　X＝こうたい</p></div>
-    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="hClose">とじる</button></div>`);
+    <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn sub" id="hTut">チュートリアル</button><button class="btn" id="hClose">とじる</button></div>`);
   bg.querySelector('#hClose').onclick = () => bg.remove();
+  bg.querySelector('#hTut').onclick = () => { bg.remove(); startTutorial(); };
 };
 $('btnWild').onclick = startWild;
 $('btnCup').onclick = startCup;
@@ -8222,6 +8346,7 @@ renderTitle();
 
 // 動作確認用フック
 window.__game = {
+  tut() { return TUT; },
   get B() { return B; }, get S() { return S; }, set S(v) { S = v; },
   startWild, startCup, renderHub, SPECIES, MOVES, LEARN, save, equipped, learned,
   step(sec) { for (let t = 0; t < sec; t += 1 / 60) bStep(1 / 60); },
