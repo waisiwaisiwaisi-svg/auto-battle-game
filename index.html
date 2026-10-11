@@ -2802,9 +2802,9 @@ function cleanArt(a, maxW, maxH, frames) {
   if (frames) { const f = (Array.isArray(a.f) ? a.f : []).slice(0, 4).map(fix); if (!f[0]) return null; for (let i = 1; i < 4; i++) if (!f[i]) f[i] = f[0]; return { w, h, pal, f }; }
   const d = fix(a.d); return d ? { w, h, pal, d } : null;
 }
-function regCustomTrainer(k, a) {
+function regCustomTrainer(k, a, other) {
   const c = cleanArt(a, 48, 56, true); if (!c) return false;
-  TRAINER_ART[k] = c; delete TR_CACHE[k];
+  TRAINER_ART[k] = c; delete TR_CACHE[k]; if (other) return true;
   const nm = safeName(a.name) || 'オリジナル', i = TR_LOOKS.findIndex(x => x[0] === k);
   if (i >= 0) TR_LOOKS[i][1] = nm; else TR_LOOKS.push([k, nm]);
   return true;
@@ -5553,8 +5553,8 @@ async function netGetRoom() {
   try { if (window.claude && window.claude.use) NET.room = await window.claude.use('room'); } catch (e) { NET.room = null; }
   return NET.room;
 }
-const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0, cs: CUSTOM.mon[m.sid] || undefined }; });   // じぶんで かいた モンスターは え も おくる
-const monFrom = (o) => { if (o && typeof o.sid === 'string' && /^c_mon_[a-z0-9]+$/.test(o.sid) && o.cs && (!SPECIES[o.sid] || SPECIES[o.sid].custom)) { try { regCustomMon(o.sid, o.cs); } catch (e) { } } if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };
+const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0 }; });
+const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   // しらない 種族（え が とどかなかった など）
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
@@ -5566,12 +5566,18 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   netReset(); NET.code = code; NET.host = asHost; NET.guest = !asHost; NET.ranked = !!opts.ranked; NET.oppR = opts.oppR; NET.rated = false;
   try { NET.nr = await room.join('pma-' + code); } catch (e) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
   NET.team6 = teamOf(S.party, 6); NET.myPick = null; NET.preview = null;
-  const me = { role: asHost ? 'host' : 'guest', team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, lk: myLook() };
+  const me = { role: asHost ? 'host' : 'guest', team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, lk: myLook(), la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
+  // じぶんで かいた もの の え（la：トレーナー、ca：モンスター）。あいては はじまる まえに うけとって おぼえる。presence は 4KB まで なので 入りきらない え は おくらない
+  for (const o of NET.team6) if (CUSTOM.mon[o.sid] && !me.ca[o.sid]) me.ca[o.sid] = CUSTOM.mon[o.sid];
+  const fits = () => new Blob([JSON.stringify(me)]).size < 3900;
+  if (!fits()) delete me.la;
+  for (const sid of Object.keys(me.ca).reverse()) { if (fits()) break; if (me.team.some(o => o.sid === sid)) continue; delete me.ca[sid]; NET.team6 = me.team6 = NET.team6.filter(o => o.sid !== sid); }
   await NET.nr.presence(me).catch(() => { });
   onStatus(NET.ranked ? 'たいせんの じゅんびを しています…' : asHost ? `あいことば <b class="ncode">${code}</b> を あいてに つたえてね。<br>あいてが はいるのを まっています…` : 'ホストを さがしています…');
   if (NET.ranked) setTimeout(() => { if (!NET.started && !NET.preview && NET.ranked && NET.code === code) { onStatus('あいてと つながりませんでした。もういちど さがしてね', true); netReset(); } }, 20000);
   NET.nr.onPeers((ch) => {
     const others = ch.peers.filter(p => !p.isMe && p.presence);
+    for (const p of others) netCacheArt(p.presence);   // あいての かいた え を さきに おぼえる（チームの チェックより まえ）
     if (NET.started) { if (NET.peer && ch.left.some(p => p.peer === NET.peer)) netPeerLeft(); }
     else if (NET.preview && NET.peer && ch.left.some(p => p.peer === NET.peer)) { rankPreviewClose(); onStatus('あいてが いなくなりました。もういちど さがしてね', true); netReset(); return; }
     if (asHost) {
@@ -5608,14 +5614,21 @@ function netPeerLeft() {
 }
 /* ---------- ホスト ---------- */
 // あいての みため（presence の lk。しらない ものなら レイ）
-function oppLook() { const p = NET.nr && NET.nr.peers().find(x => !x.isMe && x.presence && x.presence.lk); const k = p && p.presence.lk; return typeof k === 'string' && TRAINER_ART[k] ? k : 'girl'; }
+function netCacheArt(pr) {
+  if (!pr || typeof pr !== 'object') return;
+  if (typeof pr.lk === 'string' && /^c_tr_[a-z0-9]+$/.test(pr.lk) && pr.la && !TRAINER_ART['o_' + pr.lk.slice(5)]) regCustomTrainer('o_' + pr.lk.slice(5), pr.la, true);
+  if (pr.ca && typeof pr.ca === 'object') for (const sid of Object.keys(pr.ca).slice(0, 6)) if (/^c_mon_[a-z0-9]+$/.test(sid) && (!SPECIES[sid] || (SPECIES[sid].custom && !CUSTOM.mon[sid]))) { try { regCustomMon(sid, pr.ca[sid]); } catch (e) { } }
+}
+function oppLook() { const p = NET.nr && NET.nr.peers().find(x => !x.isMe && x.presence && x.presence.lk); const k = p && p.presence.lk;
+  if (typeof k === 'string' && /^c_tr_[a-z0-9]+$/.test(k)) { netCacheArt(p.presence); if (TRAINER_ART['o_' + k.slice(5)]) return 'o_' + k.slice(5); }   // あいての かいた トレーナー（じぶんの みため には まぜない）
+  return typeof k === 'string' && TRAINER_ART[k] && !/^c_tr_/.test(k) ? k : 'girl'; }
 function netHostStart(gteam, mineSel) {
   NET.started = true;
   const field = choice(FIELDS), mine = mineSel || teamOf(S.party);
   startBattle({ kind: 'online', field, enemies: gteam.map(monFrom), p0: mineSel ? mine.map(monFrom) : null, trainer: { name: 'あいて', spr: trArt(oppLook()) }, title: NET.ranked ? 'ランク対戦' : 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.net = 'host';
   // 見せあい用の 6たいは もう いらない（presence は ぜんぶで 4KB まで）
-  const startP = { start: { field, h: mine, g: gteam, hr: myRank().r }, team: null, team6: null, pick: null };
+  const startP = { start: { field, h: mine, g: gteam, hr: myRank().r }, team: null, team6: null, pick: null, ca: null, la: null };   // え は もう おくった
   NET.nr.presence(startP).catch(() => { });
   NET.baseLen = JSON.stringify({ role: 'host', v: 1, r: myRank().r, rk: 1, lk: 'firefighter', start: startP.start }).length;
   if (NET.ranked) B.cfg.title = 'ランク対戦';
@@ -5660,7 +5673,7 @@ function netSnapshot() {
 /* ---------- ゲスト ---------- */
 function netGuestStart(st) {
   NET.started = true;
-  if (NET.nr) NET.nr.presence({ team6: null, pick: null }).catch(() => { });
+  if (NET.nr) NET.nr.presence({ team6: null, pick: null, ca: null, la: null }).catch(() => { });
   const host = st.h.map(monFrom), me = st.g.map(monFrom);
   startBattle({ kind: 'online', field: st.field, enemies: me, p0: host, trainer: { name: 'あなた', spr: trArt(myLook()) }, title: 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.remote = true; B.my = 1; B.mode = 'intro'; B.snapT = 0; if (NET.ranked) $('bTitle').textContent = 'ランク対戦';
