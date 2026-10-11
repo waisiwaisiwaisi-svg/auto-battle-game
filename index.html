@@ -643,6 +643,13 @@ html.land.tabs .screen:not(#scBattle){padding-bottom:12px;padding-left:calc(84px
 .gdrow .rk{width:26px;text-align:center;font-weight:700;color:var(--acc)}
 .gdrow .pt{font-variant-numeric:tabular-nums;color:var(--ink);min-width:48px;text-align:right}
 .gdrow canvas{width:28px;height:28px;image-rendering:pixelated;flex:none}
+.gdrow .btn{flex:none;white-space:nowrap}
+.gdoffer{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 10px;font-size:12.5px}
+.gdoffer.ask{border-image-source:var(--fr-gold)!important;background:rgba(255,209,102,.12)!important}
+.gdfind{display:flex;gap:8px;align-items:center}
+.gdfind input[type=search]{flex:1;min-width:0;font:inherit;font-size:14px;padding:8px 10px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)}
+.gdfind label{display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap}
+.gdsort{display:flex;gap:6px}.gdsort button{flex:1;padding:6px 4px;font-size:12px;background:#1b1530;color:var(--dim);box-shadow:inset 0 0 0 2px var(--rim2)}.gdsort button.on{background:var(--acc);color:#1a1626;font-weight:700}
 .gdrow.me{border-image-source:var(--fr-gold)!important}
 .gdchat{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto;padding:8px;font-size:12.5px;touch-action:pan-y}
 .gdchat .m{line-height:1.4;word-break:break-all} .gdchat .m b{color:var(--acc);margin-right:6px} .gdchat .m small{color:var(--dim);margin-left:6px;font-size:10px}
@@ -3502,7 +3509,7 @@ function setArtBg() {
 }
 const TAB_OF = { scRank: 'rank', scHub: 'home', scTeam: 'team', scDex: 'dex', scGuild: 'guild', scMaker: 'make' };
 function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); } }
+  { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); } }
   { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
@@ -6161,9 +6168,25 @@ function embFill(el, g) {
   el.appendChild(c);
 }
 const embSpan = (g, sm) => { const el = document.createElement('span'); el.className = 'gdemb' + (sm ? ' sm' : ''); el.style.background = g.col; embFill(el, g); return el; };
+// じぶんの ギルドが あたらしい リーダーの ところへ うつって いたら、じぶんの きろくも うつす
+async function guildMove(R, m) {
+  try {
+    const { gid0, ...rest } = m; delete rest.id; delete rest.no; GUILD.me = { ...rest, gid: m.gid };
+    await R.db.doc('gmembers/' + R.id).set(GUILD.me);
+    const c = await R.db.doc('gchat/' + R.id).get().catch(() => null); if (c && c.exists && c.data().gid === gid0) await R.db.doc('gchat/' + R.id).set({ ...c.data(), gid: m.gid });
+  } catch (e) { }
+}
+async function guildFollow(R, gid) {   // offer→from を たどって いまの ギルドを さがす
+  for (let i = 0; i < 6; i++) {
+    const a = await R.db.doc('guilds/' + gid).get().catch(() => null), g = a && a.exists ? a.data() : null; if (!g || !g.offer) break;
+    const b = await R.db.doc('guilds/' + g.offer).get().catch(() => null); if (!b || !b.exists || b.data().from !== gid) break; gid = g.offer;
+  }
+  return gid;
+}
 async function guildMe() {
   const R = await rankDb(); if (!R || !R.id) return null;
   const s_ = await R.db.doc('gmembers/' + R.id).get().catch(() => null); GUILD.me = s_ && s_.exists ? s_.data() : null;
+  if (GUILD.me && GUILD.me.gid) { const to = await guildFollow(R, GUILD.me.gid); if (to !== GUILD.me.gid) await guildMove(R, { ...GUILD.me, gid0: GUILD.me.gid, gid: to }); }
   if (GUILD.me && GUILD.me.gid) { const g = await R.db.doc('guilds/' + GUILD.me.gid).get().catch(() => null); GUILD.gname = g && g.exists ? safeName(g.data().name, 10) : ''; if (!GUILD.gname) GUILD.me = null; } else GUILD.gname = '';
   setGuildOn(!!GUILD.me); return GUILD.me;
 }
@@ -6183,16 +6206,21 @@ async function renderGuild() {
   if (!R || !R.id) { W.innerHTML = '<p class="dim">ギルドは claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ つかえます。</p>'; return; }
   let D; try { D = await guildData(R); } catch (e) { W.innerHTML = '<p class="dim">よみこめませんでした。あとで もういちど ためしてね。</p>'; return; }
   const { guilds, mine, rank } = D;
+  if (mine && mine.gid0 !== mine.gid && guilds[mine.gid]) await guildMove(R, mine);
   if (mine && guilds[mine.gid]) { GUILD.me = mine; GUILD.gname = guilds[mine.gid].name; setGuildOn(true); guildHome(R, guilds[mine.gid], rank); }
-  else { GUILD.me = null; GUILD.gname = ''; setGuildOn(false); guildBrowse(R, rank, guilds[R.id]); }
+  else { GUILD.me = null; GUILD.gname = ''; setGuildOn(false); guildBrowse(R, rank, guilds[R.id] && !guilds[R.id].offer ? guilds[R.id] : null); }
 }
 // ギルドと メンバーを よんで、こんしゅうの ポイントで ならべる
 async function guildData(R) {
   const [gs, ms] = await Promise.all([R.db.collection('guilds').limit(300).get(), R.db.collection('gmembers').limit(1000).get()]);
   const wk = weekNo(), guilds = {};
-  for (const d of gs.docs) { const g = d.data() || {}; guilds[d.id] = { id: d.id, name: safeName(g.name, 10) || 'ギルド', emb: G_EMB.includes(g.emb) ? g.emb : '🛡', col: G_COL.includes(g.col) ? g.col : G_COL[0], msg: safeName(g.msg, 24), art: g.art && cleanArt(g.art, 16, 16, false) || null, mem: [], wpts: 0 }; }
+  for (const d of gs.docs) { const g = d.data() || {}; guilds[d.id] = { id: d.id, t: +g.t || 0, name: safeName(g.name, 10) || 'ギルド', emb: G_EMB.includes(g.emb) ? g.emb : '🛡', col: G_COL.includes(g.col) ? g.col : G_COL[0], msg: safeName(g.msg, 24), art: g.art && cleanArt(g.art, 16, 16, false) || null, offer: typeof g.offer === 'string' ? g.offer : '', from: typeof g.from === 'string' ? g.from : '', mem: [], wpts: 0 }; }
+  // リーダー こうたい：X が Y に たのんで（X.offer=Y）、Y が うけた（Y.from=X）なら X の メンバーは Y の ギルドに いる
+  const alias = (gid) => { for (let i = 0; i < 6; i++) { const g = guilds[gid]; if (!g || !g.offer || !guilds[g.offer] || guilds[g.offer].from !== gid) break; gid = g.offer; } return gid; };
+  const moved = new Set(Object.keys(guilds).filter(id => alias(id) !== id));
   let mine = null;
-  for (const d of ms.docs) { const m = { id: d.id, ...(d.data() || {}) }; if (d.id === R.id) mine = m; const g = guilds[m.gid]; if (g) { g.mem.push(m); if (m.wk === wk) g.wpts += Math.max(0, m.pts | 0); } }
+  for (const d of ms.docs) { const m = { id: d.id, ...(d.data() || {}) }; m.gid0 = m.gid; m.gid = alias(m.gid); if (d.id === R.id) mine = m; const g = guilds[m.gid]; if (g) { g.mem.push(m); if (m.wk === wk) g.wpts += Math.max(0, m.pts | 0); } }
+  moved.forEach(id => delete guilds[id]);
   const rank = Object.values(guilds).filter(g => g.mem.length).sort((a, b) => b.wpts - a.wpts || b.mem.length - a.mem.length);
   return { guilds, mine, rank };
 }
@@ -6201,18 +6229,30 @@ function guildBrowse(R, rank, own) {
   const W = $('gdBody');
   W.innerHTML = `<div class="card" style="font-size:12.5px;line-height:1.6">ギルドに はいると、かつたびに ギルドに ポイントが はいる（オンライン たいせん +3、そのほか +1）。こんしゅうの ポイントで ギルドランキングを きそおう！（のこり ${daysLeft()}にち・1ギルド ${G_MAX}にん まで）</div>
     <button class="btn" id="gdNew" style="padding:12px">${own ? 'じぶんの ギルドに もどる' : '＋ ギルドを つくる'}</button>
-    <div class="sec-title"><span>こんしゅうの ギルドランキング</span><button class="btn sub" id="gdRkAll" style="padding:5px 10px;font-size:12px">ひょうしょうだい</button></div><div class="gdlist" id="gdList"></div>`;
+    <div class="sec-title"><span>ギルドを さがす</span><button class="btn sub" id="gdRkAll" style="padding:5px 10px;font-size:12px">ランキング</button></div>
+    <div class="gdfind"><input type="search" id="gdQ" maxlength="10" placeholder="ギルドの なまえ・ひとこと で さがす"><label><input type="checkbox" id="gdOpen" checked> あき あり</label></div>
+    <div class="gdsort" id="gdSort"><button data-s="pt" class="on">ポイントじゅん</button><button data-s="few">すくない じゅん</button><button data-s="new">あたらしい じゅん</button></div>
+    <div class="gdlist" id="gdList"></div>`;
   $('gdRkAll').onclick = () => { guildStop(); renderRank('g'); };
-  const L = $('gdList');
-  if (!rank.length) L.innerHTML = '<p class="dim">まだ ギルドが ありません。さいしょの ギルドを つくろう！</p>';
-  rank.forEach((g, i) => {
+  const L = $('gdList'); let sortBy = 'pt';
+  const draw = () => {
+    const q = $('gdQ').value.trim().toLowerCase(), open = $('gdOpen').checked;
+    let list = rank.map((g, i) => ({ g, i })).filter(({ g }) => (!open || g.mem.length < G_MAX) && (!q || (g.name + ' ' + (g.msg || '')).toLowerCase().includes(q)));
+    if (sortBy === 'few') list.sort((a, b) => a.g.mem.length - b.g.mem.length || a.i - b.i); else if (sortBy === 'new') list.sort((a, b) => (b.g.t || 0) - (a.g.t || 0));
+    L.innerHTML = ''; if (!rank.length) L.innerHTML = '<p class="dim">まだ ギルドが ありません。さいしょの ギルドを つくろう！</p>'; else if (!list.length) L.innerHTML = '<p class="dim">みつかりませんでした</p>';
+    list.forEach(({ g, i }) => row(g, i));
+  };
+  $('gdQ').oninput = draw; $('gdOpen').onchange = draw;
+  W.querySelectorAll('#gdSort button').forEach(b => b.onclick = () => { sortBy = b.dataset.s; W.querySelectorAll('#gdSort button').forEach(x => x.classList.toggle('on', x === b)); draw(); });
+  const row = (g, i) => {
     const row = document.createElement('div'); row.className = 'gdrow card';
     row.innerHTML = `<span class="rk">${i + 1}</span><i class="emb"></i><span class="nm"><b></b><br><small class="dim"></small></span><span class="pt">${g.wpts}pt<br><small class="dim">${g.mem.length}/${G_MAX}にん</small></span><button class="btn sub" style="padding:6px 10px;font-size:12px" ${g.mem.length >= G_MAX ? 'disabled' : ''}>はいる</button>`;
     row.querySelector('.emb').replaceWith(embSpan(g, true));
     row.querySelector('.nm b').textContent = g.name; row.querySelector('.nm small').textContent = g.msg || '';
     row.querySelector('button').onclick = () => guildJoin(R, g.id);
     L.appendChild(row);
-  });
+  };
+  draw();
   $('gdNew').onclick = () => own ? guildJoin(R, R.id) : guildCreate(R);
 }
 async function guildJoin(R, gid) {
@@ -6273,6 +6313,36 @@ async function guildHome(R, g, rank) {
     const row = document.createElement('div'); row.className = 'gdrow card' + (m.id === R.id ? ' me' : '');
     row.appendChild(lookCanvas(m.lk, 28)); row.insertAdjacentHTML('beforeend', `<span class="nm"></span><span class="pt">${m.wk === wk ? m.pts | 0 : 0}pt</span>`);
     row.querySelector('.nm').textContent = (m.id === g.id ? '👑 ' : '') + nameOf(m.id); M.appendChild(row);
+    if (lead && m.id !== R.id) {
+      const off = g.offer === m.id, b = document.createElement('button'); b.className = 'btn sub'; b.style.cssText = 'padding:4px 8px;font-size:11px';
+      b.textContent = off ? (m.no === g.id ? 'ことわられた' : 'たのみちゅう') : 'リーダーに する'; b.disabled = off && m.no !== g.id;
+      b.onclick = async () => { if (!(await ask(`${nameOf(m.id)} さんに リーダーを たのみますか？\nうけて もらえたら、ギルドの なまえ・もんしょう・メンバー・ポイントは そのまま ひきつがれ、あなたは メンバーに なります。`))) return;
+        try { await R.db.doc('guilds/' + R.id).update({ offer: m.id }); SND.se('ok'); } catch (e) { await ask('たのめませんでした', 'OK', null); } renderGuild(); };
+      row.appendChild(b);
+    }
+  }
+  if (lead && g.offer && mem.some(m => m.id === g.offer)) {   // たのんでいる あいだ
+    const m = mem.find(x => x.id === g.offer), bx = document.createElement('div'); bx.className = 'card gdoffer';
+    bx.innerHTML = `<span>👑 <b></b> さんに リーダーを ${m.no === g.id ? 'ことわられました' : 'たのんでいます'}</span><button class="btn sub" style="padding:4px 10px;font-size:12px">とりけす</button>`;
+    bx.querySelector('b').textContent = nameOf(m.id);
+    bx.querySelector('button').onclick = async () => { try { await R.db.doc('guilds/' + R.id).update({ offer: '' }); } catch (e) { } renderGuild(); };
+    W.querySelector('.gdhead').after(bx);
+  }
+  const myM = mem.find(x => x.id === R.id);
+  if (!lead && g.offer === R.id && !(myM && myM.no === g.id)) {   // たのまれた がわ
+    const bx = document.createElement('div'); bx.className = 'card gdoffer ask';
+    bx.innerHTML = `<span>👑 <b></b> さんから リーダーを たのまれました！</span><span style="display:flex;gap:6px"><button class="btn" data-a="y" style="padding:5px 12px;font-size:12px">うける</button><button class="btn sub" data-a="n" style="padding:5px 12px;font-size:12px">ことわる</button></span>`;
+    bx.querySelector('b').textContent = nameOf(g.id);
+    bx.querySelector('[data-a="y"]').onclick = async () => {
+      try {
+        const cur = await R.db.doc('guilds/' + g.id).get(), v = cur.exists ? cur.data() : null; if (!v || v.offer !== R.id) { await ask('もう たのまれて いません', 'OK', null); renderGuild(); return; }
+        await R.db.doc('guilds/' + R.id).set({ name: g.name, emb: g.emb, col: g.col, msg: g.msg || '', t: Date.now(), from: g.id, ...(v.art ? { art: v.art } : {}) });
+        await guildMove(R, { ...myM, gid0: myM.gid0 || g.id, gid: R.id }); SND.se('caught');
+      } catch (e) { await ask('うけられませんでした（' + (e && e.code || 'error') + '）', 'OK', null); }
+      renderGuild();
+    };
+    bx.querySelector('[data-a="n"]').onclick = async () => { try { const { id, gid0, ...rest } = myM; await R.db.doc('gmembers/' + R.id).set({ ...rest, gid: gid0 || g.id, no: g.id }); } catch (e) { } renderGuild(); };
+    W.querySelector('.gdhead').after(bx);
   }
   $('gdRkAll').onclick = () => { guildStop(); renderRank('g'); };
   const RK = $('gdRank');
@@ -6298,7 +6368,7 @@ async function guildHome(R, g, rank) {
   };
   $('gdSend').onclick = send; $('gdIn').onkeydown = (e) => { if (e.key === 'Enter') send(); };
   $('gdLeave').onclick = async () => {
-    if (!(await ask(lead ? 'ギルドを かいさん しますか？ メンバーも みんな ぬけた ことに なります。' : 'ギルドを ぬけますか？'))) return;
+    if (!(await ask(lead ? (g.mem.length > 1 ? 'ギルドを かいさん しますか？ メンバーも みんな ぬけた ことに なります。\n（のこしたい ときは、さきに メンバーの「リーダーに する」で リーダーを たのもう）' : 'ギルドを かいさん しますか？') : 'ギルドを ぬけますか？'))) return;
     try { if (lead) await R.db.doc('guilds/' + R.id).delete(); await R.db.doc('gmembers/' + R.id).delete(); await R.db.doc('gchat/' + R.id).delete().catch(() => { }); } catch (e) { }
     GUILD.me = null; GUILD.gname = ''; renderGuild();
   };
