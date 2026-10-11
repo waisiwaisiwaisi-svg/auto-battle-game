@@ -758,6 +758,16 @@ h1.tlogo{filter:none}
 .optrow select,.mkrow input[type=text]{-webkit-appearance:none;appearance:none;font:inherit;font-size:14px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2);border-radius:0;padding:5px 26px 5px 8px;background-image:linear-gradient(45deg,transparent 50%,var(--acc) 50%),linear-gradient(-45deg,transparent 50%,var(--acc) 50%);background-size:6px 6px;background-position:calc(100% - 14px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat}
 .mkrow input[type=text]{background-image:none;padding:6px 8px}
 @keyframes logobob{50%{transform:translateY(-3px)}}
+
+/* うごきの しじ（かくれろ・まわりこめ） */
+html #app #bpanel #mvCmds{flex:0 0 21%;display:flex;flex-direction:column;gap:4px;min-width:0}
+html #app #bpanel #mvCmds .cmd{flex:1;min-height:0;padding:2px 4px!important;background:linear-gradient(180deg,#2f4a5e,#1d2e3c);position:relative;overflow:hidden}
+html #app #bpanel #mvCmds .cmd .a{font-size:12px;color:#bfe8ff;white-space:nowrap}
+html #app #bpanel #mvCmds .cmd.on{outline:2px solid var(--acc);background:linear-gradient(180deg,#5e4a2f,#3c2e1d)}
+html #app #bpanel #mvCmds .cmd.cd{opacity:.5}
+html #app #bpanel #bbar #cDodge{flex-basis:22%}
+html.land #app #bpanel #mvCmds{flex:1 1 100%;flex-direction:row;order:1}
+html.land #app #bpanel #mvCmds .cmd{min-height:30px}
 </style>
 </head>
 <body>
@@ -908,6 +918,7 @@ h1.tlogo{filter:none}
     <div id="bpanel">
     <div id="bbar">
       <button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button>
+      <div id="mvCmds"><button class="cmd" id="cHide"><span class="a">かくれろ</span></button><button class="cmd" id="cFlank"><span class="a">まわりこめ</span></button></div>
       <div id="bench"></div>
       <button class="cmd" id="cCap"><span class="a">クリスタル</span><span class="b" id="capN"></span></button>
       <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
@@ -6232,7 +6243,7 @@ function updateFighter(f, dt) {
       break;
     case 'return':
       f.stT -= dt; f.scale = clamp(f.stT / .3, 0, 1);
-      if (f.stT <= 0) { f.state = 'bench'; f.scale = 1; f.v = {}; f.capHp = 0; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; if (f.status === 'tox') f.toxN = 1; B.pendingSend = { side: f.side, idx: B.swapTo, t: .2, pass: B.swapPass, lag: !B.swapNoLag, at: { x: f.x, y: f.y } }; B.swapPass = null; B.swapNoLag = false; }
+      if (f.stT <= 0) { f.state = 'bench'; f.scale = 1; f.v = {}; f.capHp = 0; f.order = null; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; if (f.status === 'tox') f.toxN = 1; B.pendingSend = { side: f.side, idx: B.swapTo, t: .2, pass: B.swapPass, lag: !B.swapNoLag, at: { x: f.x, y: f.y } }; B.swapPass = null; B.swapNoLag = false; }
       return;
     case 'faint': f.stT -= dt; if (f.stT <= 0) afterFaint(f); return;
     case 'free': {
@@ -6245,6 +6256,7 @@ function updateFighter(f, dt) {
       }
       aiDodgeCheck(f, o);
       if (f.state !== 'free') break;
+      if (f.order) { if (orderStep(f, o, dt)) break; }
       if (f.v.encore && f.queued !== f.v.encore.id && f.queued !== null) f.queued = null;
       // 移動は モンスター自身が おこなう。オートOFFなら わざは プレイヤーの 指示だけ
       aiMove(f, o, dt, !f.v.rampage && autoMoves(f));   // わざ：CPU と AUTO は じどう、プレイヤーは ボタン
@@ -6550,7 +6562,8 @@ function netApplyInput() {
   if (Array.isArray(inp.sw) && (inp.sw[0] | 0) > NET.done.sw) { NET.done.sw = inp.sw[0] | 0; const i = inp.sw[1] | 0, x = sd.fs[i];
     if (f && x && i !== sd.act && !x.fainted && x.hp > 0 && !(sd.swapCd > 0) && B.mode === 'fight' && ['free', 'act', 'stun'].includes(f.state)) { doSwitch(f, i); say(`あいては ${f.sp.n}を もどして ${x.sp.n}を くりだした！`); cmdPose(1); } }
   if (Array.isArray(inp.mv) && (inp.mv[0] | 0) > (NET.done.mv || 0)) { NET.done.mv = inp.mv[0] | 0; const id = f && f.moves[inp.mv[1] | 0];   // ゲストの わざボタン
-    if (id && B.mode === 'fight' && !moveBlocked(f, id)) { f.want = { id, t: B.t }; if (!((f.cd[id] || 0) > 0)) f.queued = id; f.aiT = Math.max(f.aiT || 0, .6); } }
+    if (id && B.mode === 'fight' && !moveBlocked(f, id)) { f.order = null; f.want = { id, t: B.t }; if (!((f.cd[id] || 0) > 0)) f.queued = id; f.aiT = Math.max(f.aiT || 0, .6); } }
+  if (Array.isArray(inp.od) && (inp.od[0] | 0) > (NET.done.od || 0)) { NET.done.od = inp.od[0] | 0; if (f && B.mode === 'fight' && ['hide', 'flank'].includes(inp.od[1])) giveOrder(f, inp.od[1], 1); }   // ゲストの うごきの しじ
   if (Array.isArray(inp.ch) && (inp.ch[0] | 0) > NET.done.ch) { NET.done.ch = inp.ch[0] | 0; if (B.remoteChoose) { const i = inp.ch[1] | 0, x = sd.fs[i]; if (x && !x.fainted && x.hp > 0) netResolveChoose(i); } }
 }
 function netResolveChoose(i) { B.remoteChoose = false; B.paused = false; B.choosing = false; B.pendingSend = { side: 1, idx: i, t: .2 }; }
@@ -7142,7 +7155,7 @@ function bStep(dt) {
   B.cheer = Math.max(.15, B.cheer - dt * .4);
   B.shake = Math.max(0, B.shake - dt * 20);
   if (B.trickRoom > 0) { B.trickRoom -= dt; if (B.trickRoom <= 0) say('ねじれた じくうが もとに もどった！'); }
-  for (const sd of B.sides) { sd.swapCd = Math.max(0, (sd.swapCd || 0) - dt); sd.dodgeCmd = Math.max(0, (sd.dodgeCmd || 0) - dt); }
+  for (const sd of B.sides) { sd.swapCd = Math.max(0, (sd.swapCd || 0) - dt); sd.dodgeCmd = Math.max(0, (sd.dodgeCmd || 0) - dt); sd.orderCd = Math.max(0, (sd.orderCd || 0) - dt); }
   for (const sd of B.sides) if (sd.tail > 0) { sd.tail -= dt; if (sd.tail <= 0) say('おいかぜが やんだ'); }
 
   if (B.mode === 'intro') {
@@ -7519,7 +7532,7 @@ function cmdMove(i) {
   const id = f.moves[i]; if (!id) return;
   if (B.remote) { NET.inp.mv = [((NET.inp.mv && NET.inp.mv[0]) || 0) + 1, i]; netSendInput(); NET.myQ = { id, t: performance.now() }; SND.se('click'); return; }
   const blk = moveBlocked(f, id); if (blk) { say(`${MOVES[id].n}は いま つかえない！（${blk}）`); SND.se('deny'); return; }
-  f.want = { id, t: B.t }; f.aiT = Math.max(f.aiT || 0, .6); SND.se('click');
+  f.want = { id, t: B.t }; f.aiT = Math.max(f.aiT || 0, .6); f.order = null; SND.se('click');
   if (!((f.cd[id] || 0) > 0)) f.queued = id;   // クールダウン中なら よやく（あけたら すぐ だす）
 }
 // だれの わざを じどうに するか：CPU は いつも じどう。プレイヤーは AUTO の とき だけ
@@ -7527,6 +7540,47 @@ function autoMoves(f) {
   if (B.headless || B.demo || B.autoChoose) return true;   // テスト・デモは りょうほう じどう
   if (f.side === 1) return B.net === 'host' ? !!(NET.pending && NET.pending.au) : true;
   return !!S.auto;
+}
+/* ---- うごきの しじ：かくれろ（しょうがいぶつの かげへ）・まわりこめ（かべを まわって よこ・うしろから ねらえる ところへ） ---- */
+const ORDER_T = { hide: 6, flank: 4.5 }, ORDER_CD = 2;
+function orderSpot(f, o, k) {
+  const base = Math.atan2(f.y - o.y, f.x - o.x); let best = null, bs = 1e9;
+  for (let i = 0; i < 28; i++) for (const r of [50, 100, 160, 230, 310, 400]) {
+    const a = i / 28 * Math.PI * 2, x = f.x + Math.cos(a) * r, y = f.y + Math.sin(a) * r * .8;
+    if (!spotOk(f, x, y)) continue;
+    const see = losFrom(x, y, o), dO = Math.hypot(x - o.x, y - o.y), dF = Math.hypot(x - f.x, y - f.y);
+    let sc;
+    if (k === 'hide') { if (see || [[14, 0], [-14, 0], [0, 14], [0, -14]].some(([dx, dy]) => losFrom(x + dx, y + dy, o))) continue; let deep = 0; for (const [ox, oy] of [[40, 0], [-40, 0], [0, 40], [0, -40]]) if (!losClear({ x, y }, { x: o.x + ox, y: o.y + oy })) deep++; sc = dF + (dO < 140 ? (140 - dO) * 3 : 0) - deep * 35; }   // あいてが すこし うごいても みえない ところ   // ちかくて、あいてから みえない ところ
+    else { if (!see) continue; const da = Math.abs(wrapAng(Math.atan2(y - o.y, x - o.x) - base)); sc = Math.abs(dO - 150) * .8 + dF * .25 + Math.abs(da - 1.5) * 70 + (losFrom(f.x, f.y, o) ? 0 : -dF * .15); }   // よこ・うしろ から ねらえる ところ
+    if (onFoeFloor(f, x, y)) sc += 200;
+    if (sc < bs) { bs = sc; best = { x, y }; }
+  }
+  return best;
+}
+function giveOrder(f, k, side) {
+  const sd = B.sides[side], o = opp(f);
+  if (!f || !o || (sd.orderCd || 0) > 0 || !canAct(f)) return;
+  if (f.order && f.order.k === k) { f.order = null; sd.orderCd = .5; say(`${f.sp.n}は もとの うごきに もどった`); return; }   // もういちど おすと やめる
+  const spot = orderSpot(f, o, k);
+  if (!spot) { say(k === 'hide' ? 'かくれる ばしょが ない！' : 'まわりこむ みちが ない！'); SND.se('deny'); return; }
+  f.order = { k, t: ORDER_T[k], spot, re: .5 }; f.want = null; f.queued = null; sd.orderCd = ORDER_CD; f.navT = 0;
+  popText(f.x, f.y - 96, k === 'hide' ? 'かくれろ！' : 'まわりこめ！', '#bfe8ff', 'comic'); SND.se('click'); cmdPose(side);
+}
+function cmdOrder(k) {
+  if (!canCommand()) return;
+  if (B.remote) { NET.inp.od = [((NET.inp.od && NET.inp.od[0]) || 0) + 1, k]; netSendInput(); SND.se('click'); return; }
+  giveOrder(active(0), k, 0);
+}
+// しじどおりに うごく（うごいている あいだは じぶんから わざを ださない）
+function orderStep(f, o, dt) {
+  const R = f.order; R.t -= dt; R.re -= dt;
+  if (R.t <= 0 || !targetable(o)) { f.order = null; return false; }
+  if (R.re <= 0) { R.re = .5; const sp = orderSpot(f, o, R.k); if (sp && (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o))) R.spot = sp; }   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
+  const d = Math.hypot(R.spot.x - f.x, R.spot.y - f.y);
+  if (R.k === 'flank' && (d < 50 || R.t < ORDER_T.flank - 1.2) && losFrom(f.x, f.y, o) && Math.hypot(f.x - o.x, f.y - o.y) < 330) { f.order = null; popText(f.x, f.y - 90, 'まわりこんだ！', '#bfe8ff'); f.aiT = 0; return false; }
+  if (d > 10) { f.paceT = 1.7; const nav = B.st.nav && !flies(f) && !walkClear(f, R.spot.x, R.spot.y), a = nav ? navDir(f, R.spot.x, R.spot.y) : Math.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
+  else if (R.k === 'hide' && Math.random() < dt * 2) popText(f.x, f.y - 80, 'じっ…', '#9ab0c8');
+  return true;
 }
 const DODGE_CMD_CD = 5;   // かわすの 指示は 1かい つかうと 5びょう つかえない
 function cmdDodge() {
@@ -7633,6 +7687,7 @@ function updHUD() {
   });
   $('cDodge').querySelector('.cdv').style.height = ((B.sides[my].dodgeCmd || 0) / DODGE_CMD_CD * 100) + '%';
   setText($('cDodge').querySelector('.b'), (B.sides[my].dodgeCmd || 0) > 0 ? `あと ${Math.ceil(B.sides[my].dodgeCmd)}びょう` : `じどう ${Math.round(autoDodgeP(f) * 100)}%`);
+  { const od = f.order ? f.order.k : B.remote ? B.myOrder : null; $('cHide').classList.toggle('on', od === 'hide'); $('cFlank').classList.toggle('on', od === 'flank'); const cd = (B.sides[my].orderCd || 0) > 0; $('cHide').classList.toggle('cd', cd); $('cFlank').classList.toggle('cd', cd); }
   updBench();
   setText($('capN'), `のこり ${S.capsules}`);
 }
@@ -8624,7 +8679,7 @@ function render() {
    入力（ボタン・キーボード）
    ===================================================================== */
 const tap = (el, fn) => el.addEventListener('pointerdown', (ev) => { ev.preventDefault(); fn(); });
-tap($('cDodge'), cmdDodge);
+tap($('cDodge'), cmdDodge); tap($('cHide'), () => cmdOrder('hide')); tap($('cFlank'), () => cmdOrder('flank'));
 tap($('cCap'), cmdCapsule); tap($('cRun'), cmdRun);
 document.addEventListener('keydown', (ev) => {
   const k = ev.key.toLowerCase();
