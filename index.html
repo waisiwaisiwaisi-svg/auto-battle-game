@@ -529,6 +529,58 @@ html.land #app #bpanel #bbar{flex-wrap:wrap}
 html.land #app #bpanel #bbar #cDodge{flex:1 1 100%;min-height:36px}
 html.land #app #bpanel #bench{flex:1 1 100%}
 html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #app #bpanel .bmon .bn{display:none} html.land #app #bpanel .bmon{flex-direction:column!important;gap:2px;padding:3px 8px!important} html.land #app #bpanel .bmon > span{flex:none!important;width:100%;display:block} html.land #app #bpanel .bmon .bh{margin-top:0}
+/* ===== ホーム（スマホゲームの かたち）・したの タブ・アイコン ===== */
+.ico{display:inline-block;width:28px;height:28px;background:center/contain no-repeat;image-rendering:pixelated;flex:none;vertical-align:middle}
+.ico.big{width:44px;height:44px}
+.hbar{display:flex;gap:8px;align-items:center}
+.hme{display:flex;align-items:center;gap:6px;padding:2px 8px 2px 2px;flex:none;min-height:44px}
+.hme canvas{height:40px;width:auto;image-rendering:pixelated;background:#1b1530}
+.hme #hRank{font-size:11px;line-height:1.2;text-align:left}
+#scHub .hres{flex:1;display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
+#scHub .hres > span{display:flex;align-items:center;gap:3px;padding:3px 8px 3px 4px;font-size:13px;white-space:nowrap}
+#scHub .hres .ico{width:22px;height:22px}
+#scHub .hicons{display:flex;gap:6px;justify-content:flex-end}
+#scHub .hicon{width:40px;height:40px;display:grid;place-items:center;padding:0}
+#scHub .hicon .ico{width:24px;height:24px}
+#scHub .hubgrid{gap:12px}
+.hstage{position:relative;width:100%;padding:0;background:radial-gradient(ellipse at 50% 90%,rgba(255,209,102,.18),rgba(20,16,34,.35) 70%)!important}
+.hstage canvas{width:100%;height:auto;display:block;image-rendering:pixelated;aspect-ratio:2/1}
+.hsname{position:absolute;left:8px;top:6px;font-size:13px;font-weight:700;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
+.hcta{width:100%;display:grid!important;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;padding:12px 16px!important;min-height:76px;background:linear-gradient(180deg,#ffd27a,#ffb547 55%,#f2962d)!important}
+.hcta .ico{grid-row:1/3}
+.hcta .t{font-size:21px;font-weight:700;color:#2a1606;letter-spacing:.06em}
+.hcta .s{font-size:11.5px;color:#4a2a10;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hcta .t,.hmode b{white-space:nowrap;min-width:0}
+@media (max-width:380px){.hmode b{font-size:12.5px}.hmode .ico{width:28px;height:28px}.hmode{padding:8px 7px;column-gap:6px}}
+.hmodes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hmode{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;padding:8px 10px;min-height:60px}
+.hmode .ico{grid-row:1/3;width:34px;height:34px}
+.hmode b{font-size:14px} .hmode small{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmode:active,.hstage:active,.hme:active,#tabbar button:active{transform:translateY(2px)}
+#scHub .chests .chest{min-height:88px}
+/* した の タブ */
+.hmode,.hme,.hstage{border-radius:0!important;border:4px solid transparent!important;border-image:var(--fr-win) 2 / 4px / 0 stretch!important;background-clip:padding-box!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
+.hme{background:linear-gradient(180deg,#2f2750,#1d1733)}
+.hmode{--t:#8a7cd0;background:linear-gradient(90deg,color-mix(in srgb,var(--t) 38%,#241d38),#1d1733 75%)!important;color:var(--ink)!important;text-shadow:none!important}
+#btnJourney.hmode{--t:#ff9a3d} #btnCup{--t:#ffd166} #btnWild.hmode{--t:#62d26f} #btnOnline{--t:#4aa8ff}
+#btnJourney.hmode{background:linear-gradient(90deg,color-mix(in srgb,var(--t) 38%,#241d38),#1d1733 75%)!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
+.hmode small{color:#cfc6ef}
+#tabbar{position:absolute;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;gap:4px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#2f2750,#1b1530);border-top:3px solid #0b0914;box-shadow:inset 0 2px 0 rgba(154,140,224,.45)}
+#tabbar[hidden]{display:none}
+#tabbar button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 2px;font-size:10.5px;color:var(--dim);min-height:52px;border-radius:0}
+#tabbar button .ico{width:28px;height:28px}
+#tabbar button.on{color:var(--acc);background:rgba(255,209,102,.12);box-shadow:inset 0 3px 0 var(--acc)}
+#tabbar button.home{margin-top:-18px;background:linear-gradient(180deg,#ffd27a,#f2962d);color:#2a1606;border:3px solid #0b0914;box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 3px 0 #0b0914;min-height:66px;font-weight:700}
+#tabbar button.home .ico{width:36px;height:36px}
+#tabbar button.home.on{color:#2a1606}
+#tabbar .badge{position:absolute;top:-4px;right:8px;min-width:18px;height:18px;padding:0 4px;background:#ff3a3a;color:#fff;font-style:normal;font-size:11px;line-height:18px;border:2px solid #0b0914;font-weight:700}
+#tabbar .badge[hidden]{display:none}
+html.tabs .screen:not(#scBattle){padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+html.land #tabbar{top:0;right:auto;width:calc(76px + env(safe-area-inset-left));grid-template-columns:1fr;grid-auto-rows:1fr;align-items:stretch;padding:6px 6px 6px calc(6px + env(safe-area-inset-left));border-top:0;border-right:3px solid #0b0914;box-shadow:inset -2px 0 0 rgba(154,140,224,.45);background:linear-gradient(90deg,#1b1530,#2f2750)}
+html.land #tabbar button{min-height:0;justify-content:center}
+html.land #tabbar button.home{margin:0 -6px 0 0;min-height:0}
+html.land #tabbar button.home .ico{width:30px;height:30px}
+html.land.tabs .screen:not(#scBattle){padding-bottom:12px;padding-left:calc(84px + env(safe-area-inset-left))}
 /* ===== ギルド ===== */
 .gdbody{display:flex;flex-direction:column;gap:10px}
 .gdhead{display:flex;gap:12px;align-items:center;padding:10px}
@@ -655,32 +707,34 @@ html:not(.land) #btnOnline,html:not(.land) #btnDex,html:not(.land) #btnChart,htm
 
   <!-- ハブ -->
   <section class="screen" id="scHub">
-    <div class="hubhead">
-      <h1 class="logo hlogo"><span>PIXEL MONSTER</span> ARENA</h1>
+    <!-- うえ：じぶん・しげん・こまった とき の ボタン -->
+    <div class="hbar">
+      <button class="hme" id="hMe" title="へんせい"><canvas id="hAvatar" class="pix"></canvas><span id="hRank"></span></button>
       <div class="hres">
-        <span title="トロフィー">🏆 <b id="hTrophy">0</b></span><span title="クリスタル">💠 <b id="hCaps">0</b></span><span title="ジェム">💎 <b id="hGems">0</b></span><span title="ランク" id="hRank"></span>
+        <span title="トロフィー"><i class="ico" data-ico="trophy"></i><b id="hTrophy">0</b></span><span title="クリスタル"><i class="ico" data-ico="crystal"></i><b id="hCaps">0</b></span><span title="ジェム"><i class="ico" data-ico="gem"></i><b id="hGems">0</b></span>
       </div>
-      <div class="hicons"><button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと">♪</button><button class="hicon" id="btnOpt" aria-label="せってい">⚙</button></div>
     </div>
+    <div class="hicons"><button class="hicon" id="btnHelp" title="あそびかた"><i class="ico" data-ico="help"></i></button><button class="hicon" id="btnChart" title="あいしょう表"><i class="ico" data-ico="chart"></i></button><button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと"><i class="ico" data-ico="note"></i></button><button class="hicon" id="btnOpt" aria-label="せってい"><i class="ico" data-ico="gear"></i></button></div>
     <div class="hubgrid">
       <div class="hcol">
-        <div class="card cupinfo" id="cupInfo"></div>
-        <div class="bigbtns">
-          <button class="btn" id="btnJourney" style="grid-column:1/-1;background:#ffb547;box-shadow:0 4px 0 #a86a10,0 0 0 3px #0d0b14">たびに でる<span id="jrSub">10の ジムを めぐって バッジを あつめよう</span></button>
-          <button class="btn" id="btnArcade" style="grid-column:1/-1;background:#ff7ab0;box-shadow:0 4px 0 #a03a6a,0 0 0 3px #0d0b14">アーケード<span id="acSub">10れんせんで ハイスコアを ねらえ</span></button>
-          <button class="btn" id="btnCup">フリーたいかい<span>スタジアムで しあい</span></button>
-          <button class="btn" id="btnWild" style="background:#7bd88f;box-shadow:0 4px 0 #3f8a50,0 0 0 3px #0d0b14">くさむらへ<span>モンスターを つかまえる</span></button>
-        </div>
-        <div class="sec-title chesthead"><span>たからばこ <small>かつと もらえる・4つまで</small></span></div>
-        <div id="hGuildBonus" hidden style="font-size:11.5px;color:#ffd166;margin-top:-6px">🛡 ギルド ボーナス：たからばこが 5% はやく あく</div>
-        <div class="inv"><span>わざのまきもの <b id="hTms">0</b></span><span>どうぐ <b id="hItems">0</b></span><span>つかまえた <b id="hCaught">0</b></span></div>
-        <div class="chests" id="hubChests"></div>
+        <!-- あいぼう：せんとうの モンスターと トレーナー -->
+        <button class="hstage" id="hStage" title="へんせい"><canvas id="hStageCv" class="pix"></canvas><span class="hsname" id="hStageName"></span></button>
+        <div class="card cupinfo" id="cupInfo" hidden></div>
       </div>
       <div class="hcol">
-        <div class="sec-title"><span>パーティ（上から3匹が しゅつじょう）</span><button class="dim" id="btnTeam" style="text-decoration:underline">へんせい ›</button></div>
-        <div class="partyrow" id="hubParty"></div>
-        <div class="row" style="gap:8px"><button class="btn sub" id="btnOnline" style="padding:8px;font-size:13px;flex:1;color:var(--acc)">オンライン</button><button class="btn sub" id="btnDex" style="padding:8px;font-size:13px;flex:1">ずかん</button><button class="btn sub" id="btnChart" style="padding:8px;font-size:13px;flex:1">あいしょう表</button><button class="btn sub" id="btnHelp" style="padding:8px;font-size:13px;flex:1">あそびかた</button></div>
-        <div class="row" style="gap:8px"><button class="btn sub" id="btnGuild" style="padding:10px;font-size:14px;flex:1;color:#ffd166">🛡 ギルド</button><button class="btn sub" id="btnMaker" style="padding:10px;font-size:14px;flex:1;color:#9ff0c8">✏ メイキング</button></div>
+        <button class="btn hcta" id="btnRank"><i class="ico big" data-ico="swords"></i><span class="t">ランク対戦</span><span id="rkSub" class="s">ほかの トレーナーと たいせん</span></button>
+        <div class="hmodes">
+          <button class="hmode" id="btnJourney"><i class="ico" data-ico="flag"></i><b>アーケード</b><small id="jrSub">ジムを めぐって バッジを あつめる</small></button>
+          <button class="hmode" id="btnCup"><i class="ico" data-ico="trophy"></i><b>フリーたいかい</b><small id="cupSub">スタジアムで しあい</small></button>
+          <button class="hmode" id="btnWild"><i class="ico" data-ico="bush"></i><b>くさむら</b><small>モンスターを つかまえる</small></button>
+          <button class="hmode" id="btnOnline"><i class="ico" data-ico="globe"></i><b>フレンド対戦</b><small>あいことばで たいせん</small></button>
+        </div>
+        <button id="btnArcade" hidden></button><span id="acSub" hidden></span>
+        <div class="sec-title chesthead"><span>たからばこ <small>かつと もらえる・4つまで</small></span></div>
+        <div id="hGuildBonus" hidden style="font-size:11.5px;color:#ffd166;margin-top:-6px">🛡 ギルド ボーナス：たからばこが 5% はやく あく</div>
+        <div class="chests" id="hubChests"></div>
+        <div class="inv"><span>わざのまきもの <b id="hTms">0</b></span><span>どうぐ <b id="hItems">0</b></span><span>つかまえた <b id="hCaught">0</b></span></div>
+        <div id="hubParty" hidden></div>
       </div>
     </div>
   </section>
@@ -699,7 +753,7 @@ html:not(.land) #btnOnline,html:not(.land) #btnDex,html:not(.land) #btnChart,htm
 
   <!-- たび -->
   <section class="screen" id="scJourney" hidden>
-    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">たび：バッジ <b id="jrBadges">0</b>/10</span><button class="btn sub" id="btnJrBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">アーケード：バッジ <b id="jrBadges">0</b>/10</span><button class="btn sub" id="btnJrBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <p class="dim" id="jrStory" style="margin:4px 0 10px"></p>
     <div id="jrGrid" class="jrgrid"></div>
   </section>
@@ -740,6 +794,15 @@ html:not(.land) #btnOnline,html:not(.land) #btnDex,html:not(.land) #btnChart,htm
       <div class="teamdetail card" id="tmDetail"></div>
     </div>
   </section>
+
+  <!-- した の タブ：いつでも おもな ばしょへ -->
+  <nav id="tabbar" hidden>
+    <button data-tab="team" id="btnTeam"><i class="ico" data-ico="crystal"></i><span>へんせい</span></button>
+    <button data-tab="dex" id="btnDex"><i class="ico" data-ico="book"></i><span>ずかん</span></button>
+    <button data-tab="home" id="tabHome" class="home"><i class="ico" data-ico="swords"></i><span>ホーム</span><em class="badge" id="tabHomeBadge" hidden></em></button>
+    <button data-tab="guild" id="btnGuild"><i class="ico" data-ico="shield"></i><span>ギルド</span></button>
+    <button data-tab="make" id="btnMaker"><i class="ico" data-ico="pencil"></i><span>メイキング</span></button>
+  </nav>
 
   <!-- バトル -->
   <section class="screen" id="scBattle" hidden>
@@ -2965,6 +3028,59 @@ function loadCustom() {
 }
 loadCustom();   // 絵の トレーナー（48ドット）の 倍率。ドット数が ちがう 絵は 同じ 背たけに なるよう ちょうせい
 
+// ホームの ぶたい：せんとうの モンスター（うごく）と トレーナー
+let HUB_ANIM = null;
+function hubStage() {
+  const cv = $('hStageCv'); if (!cv) return; const lead = S.party[0];
+  $('hStageName').innerHTML = lead ? `${SPECIES[lead.sid].n} ${typeChip(SPECIES[lead.sid].type)}${SPECIES[lead.sid].type2 ? typeChip(SPECIES[lead.sid].type2) : ''}` : '';
+  if (HUB_ANIM) clearInterval(HUB_ANIM);
+  let fi = 0;
+  const draw = () => {
+    if ($('scHub').hidden) { clearInterval(HUB_ANIM); HUB_ANIM = null; return; }
+    const W = 240, H = 120, z = 2; if (cv.width !== W * z) { cv.width = W * z; cv.height = H * z; }
+    const q = cv.getContext('2d'); q.imageSmoothingEnabled = false; q.clearRect(0, 0, cv.width, cv.height);
+    q.fillStyle = 'rgba(10,8,20,.35)'; q.beginPath(); q.ellipse(W * z * .5, (H - 14) * z, 80 * z, 10 * z, 0, 0, 7); q.fill();
+    const tr = trArt(myLook()), ti = tr.idle0.n, ts = 70 / (tr.h0 || ti.height); q.drawImage(ti, Math.round((W * .3 - ti.width * ts / 2) * z), Math.round((H - 14 - ti.height * ts) * z), Math.round(ti.width * ts * z), Math.round(ti.height * ts * z));
+    if (lead && SPR[lead.sid]) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, ms = Math.min(2.2, 84 / Math.max(im.width, im.height)); q.drawImage(im, Math.round((W * .64 - im.width * ms / 2) * z), Math.round((H - 14 - im.height * ms) * z), Math.round(im.width * ms * z), Math.round(im.height * ms * z)); }
+    fi++;
+  };
+  draw(); HUB_ANIM = setInterval(draw, 220);
+}
+
+// ===== ドット絵の アイコン（もじの え → 画像。くろい ふちどり つき） =====
+const ICO_PAL = { k: '#1a1626', w: '#f6f0e0', y: '#ffd166', Y: '#c8901e', o: '#ff9a3d', r: '#ff5a4a', R: '#b8302a', b: '#4aa8ff', d: '#2a4ab8', g: '#62d26f', G: '#2f9a4a', s: '#e0e4f0', S: '#8a8aa0', p: '#b86ad8', P: '#6a3a9a', n: '#a0703a', c: '#9fe8ff', m: '#ff7ab0' };
+const ICONS = {
+  swords: ['s.........s.', 'ss.......ss.', '.ss.....ss..', '..ss...ss...', '...ss.ss....', '....sss.....', '...ss.ss....', '..yy...yy...', '.yny...yny..', 'nn.......nn.', 'n.........n.'],
+  flag: ['.n..........', '.nrrrrr.....', '.nrrrrrrrr..', '.nrrwwrrrr..', '.nrrwwrrr...', '.nrrrrrrr...', '.nrrrrr.....', '.n..........', '.n..........', 'gnggg.......', 'gGgggGg.....'],
+  trophy: ['..yyyyyyyy..', 'yyywwyyyyyyy', 'y.ywyyyyyy.y', 'y.yyyyyyyy.y', '.yyyyyyyyyy.', '..yyyyyyYy..', '...yyyyYY...', '.....yY.....', '.....yY.....', '...nnnnnn...', '...nnnnnn...'],
+  arcade: ['.....rr.....', '....rrrr....', '....rwrr....', '.....rr.....', '.....SS.....', '.....SS.....', '..pppppppp..', '.pppppppppp.', '.ppyppppbpp.', '.PPPPPPPPPP.', '..PPPPPPPP..'],
+  bush: ['....g..g....', '...gGg.gg...', '..gGgg.gGg..', '.gGggGgggg..', '.gggGggGgg..', 'gGgggggggGg.', 'gggGgggGggg.', 'ggGggGgggGg.', 'GgggggGgggG.', 'GGGGGGGGGGG.'],
+  globe: ['...bbbbb....', '..bgggbbb...', '.bggggbbbb..', '.bbggbbgbb..', 'bbbbbbgggbb.', 'bbbgbbbgbbb.', 'bbggbbbbbbb.', '.bgggbbbgb..', '.bbggbbggb..', '..bbbbbbb...', '...bbbbb....'],
+  crystal: ['.....c......', '....ccc.....', '...cwccc....', '..cwccccc...', '.cccccccbc..', 'ccccccccbbc.', '.cbbccccbb..', '..bbbccbb...', '...bbbbb....', '....bbb.....', '.....b......'],
+  gem: ['............', '..mmmmmm....', '.mwmmmmmm...', 'mmmmmmmmmm..', '.mmmmmmmm...', '..mmmmmm....', '...mmmm.....', '....mm......'],
+  book: ['.rrrrrrrrr..', '.rwwwwwwwr..', '.rrrrrrrrr..', '.rrryyyrrr..', '.rrryyyrrr..', '.rrrrrrrrr..', '.rrrrrrrrr..', '.rrrrrrrrr..', '.rwwwwwwwr..', '.RRRRRRRRR..'],
+  shield: ['bbbbbbbbbbb.', 'bbbbbybbbbb.', 'bbbbyyybbbb.', 'bbbyyyyybbb.', 'bbbbyyybbbb.', 'bbbbbybbbbb.', '.bbbbbbbbb..', '.dbbbbbbbd..', '..ddbbbdd...', '...ddddd....', '....ddd.....', '.....d......'],
+  pencil: ['.........rr.', '........rrrr', '.......yyrr.', '......yyyy..', '.....yyyy...', '....yyyy....', '...yyyy.....', '..yyyy......', '.nnyy.......', '.knn........', 'kk..........'],
+  gear: ['....SS......', '.S..SS..S...', '..SSSSSS....', '..SS..SS....', 'SSS....SSS..', 'SSS....SSS..', '..SS..SS....', '..SSSSSS....', '.S..SS..S...', '....SS......'],
+  help: ['...wwwww....', '..ww...ww...', '..ww...ww...', '......ww....', '.....ww.....', '.....ww.....', '............', '.....ww.....', '.....ww.....'],
+  chart: ['rr.bb.gg....', 'rr.bb.gg....', '............', 'yy.pp.cc....', 'yy.pp.cc....', '............', 'oo.mm.ss....', 'oo.mm.ss....'],
+  note: ['....yyyyyy..', '....yyyyyy..', '....y....y..', '....y....y..', '....y....y..', '..yyy..yyy..', '.yyyy.yyyy..', '.yyyy.yyyy..', '..yy...yy...'],
+};
+const ICON_URL = {};
+function iconURL(name) {
+  if (ICON_URL[name]) return ICON_URL[name];
+  const g0 = ICONS[name]; if (!g0) return '';
+  const h = g0.length, w = Math.max(...g0.map(r => r.length)), W = w + 2, H = h + 2, c = document.createElement('canvas'); c.width = W; c.height = H; const q = c.getContext('2d');
+  const at = (x, y) => y >= 0 && y < h && x >= 0 && x < (g0[y] || '').length && g0[y][x] !== '.';
+  q.fillStyle = '#0b0914';   // ふちどり
+  for (let y = -1; y <= h; y++) for (let x = -1; x <= w; x++) if (!at(x, y) && (at(x - 1, y) || at(x + 1, y) || at(x, y - 1) || at(x, y + 1))) q.fillRect(x + 1, y + 1, 1, 1);
+  for (let y = 0; y < h; y++) for (let x = 0; x < g0[y].length; x++) { const ch = g0[y][x]; if (ch !== '.') { q.fillStyle = ICO_PAL[ch] || '#fff'; q.fillRect(x + 1, y + 1, 1, 1); } }
+  return (ICON_URL[name] = c.toDataURL());
+}
+// data-ico の ついた <i class="ico"> に え を はる
+function paintIcons(root) { for (const el of (root || document).querySelectorAll('.ico[data-ico]')) { if (el._ico === el.dataset.ico) continue; el._ico = el.dataset.ico; el.style.backgroundImage = `url(${iconURL(el.dataset.ico)})`; } }
+const icoHTML = (name, cls = '') => `<i class="ico ${cls}" data-ico="${name}" style="background-image:url(${iconURL(name)})"></i>`;
+
 function spriteCanvas(sid, size) {
   // 内部は 2〜3倍の 解像度で 整数倍に 描いて、CSS で size に する（ドットが にじまない）
   const img = SPR[sid].n, c = document.createElement('canvas'), R = size * Math.min(3, Math.max(2, Math.ceil(window.devicePixelRatio || 1)));
@@ -3326,7 +3442,9 @@ function setArtBg() {
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
+const TAB_OF = { scHub: 'home', scTeam: 'team', scDex: 'dex', scGuild: 'guild', scMaker: 'make' };
 function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
+  { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); } }
   { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
@@ -3473,6 +3591,7 @@ function renderChests() {
     h += `<button class="chest ${st}" data-i="${i}">${chestIcon(c.kind)}<span>${C.n}</span><span>${sub}</span></button>`;
   }
   if (box._h !== h) { box._h = h; box.innerHTML = h; }   // かわった ときだけ かきかえる
+  { const n = S.chests.filter(c => chestLeft(c) === 0).length, b = $('tabHomeBadge'); if (b) { b.hidden = !n; b.textContent = n || ''; } }
   $('hGems').textContent = S.gems || 0; $('hGuildBonus').hidden = !S.guildOn;
   $('hItems').textContent = Object.values(S.items || {}).reduce((a, b) => a + b, 0);
   { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<b style="color:${t.c}">${t.n}</b> ${k.r}`; }
@@ -3564,6 +3683,10 @@ function renderHub() {
   { const J = jr(); const el = $('jrSub'); if (el) el.textContent = J.champ ? `でんどういり ${J.champ}かい・バッジ ${J.badges.length}/10` : J.gym < GYMS.length ? `バッジ ${J.badges.length}/10・つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム` : 'バッジが そろった！ チャンピオンリーグへ'; }
   $('hTrophy').textContent = S.trophies; $('hCaps').textContent = S.capsules; $('hCaught').textContent = S.caught;
   const r = ROUNDS[S.round];
+  { const el = $('cupSub'); if (el) el.textContent = `${r.n} vs ${roundTrainer(S.round).n.split(' ').pop()}`; }
+  { const k = myRank(), t = tierOf(k.r), el = $('rkSub'); if (el) el.innerHTML = `<b style="color:#5a2a06">${t.n} ${k.r}</b>・${k.w}勝 ${k.l}敗`; }
+  hubStage(); paintIcons($('scHub')); paintIcons($('tabbar'));
+  { const k = myRank(); const a = $('hAvatar'), img = trArt(myLook()).idle0.n; a.width = img.width; a.height = img.height; const q = a.getContext('2d'); q.imageSmoothingEnabled = false; q.clearRect(0, 0, a.width, a.height); q.drawImage(img, 0, 0); }
   $('cupInfo').innerHTML = `<b style="color:var(--acc)">${cupName()}</b><br>つぎ：<b>${r.n}</b> vs ${roundTrainer(S.round).n}<br><span class="dim">あいて ${r.size}たい</span>` +
     `<div class="rounds">${ROUNDS.map((_, i) => `<i class="${i < S.round ? 'done' : i === S.round ? 'now' : ''}"></i>`).join('')}</div>`;
   const P = $('hubParty'); P.innerHTML = '';
@@ -7285,7 +7408,8 @@ function dexDetail(id, no) {
   bg.querySelector('#dClose').onclick = () => bg.remove();
 }
 $('btnDex').onclick = renderDex;
-$('btnOnline').onclick = onlineMenu;
+$('btnOnline').onclick = () => { onlineMenu(); const b = document.querySelector('.ntabs [data-t="friend"]'); if (b) b.click(); };
+$('btnRank').onclick = () => { onlineMenu(); const g = document.getElementById('mmGo'); if (g) g.click(); };   // メイン：すぐ マッチング
 $('btnDexBack').onclick = () => renderHub();
 $('btnTeamBack').onclick = renderHub;
 // せってい：おとの 大きさ・セーブデータ
@@ -7452,6 +7576,8 @@ async function mkSave() {
 }
 $('btnMaker').onclick = () => mkOpen();
 $('btnGuild').onclick = () => renderGuild();
+$('tabHome').onclick = () => { guildStop(); renderHub(); };
+$('hStage').onclick = $('hMe').onclick = () => $('btnTeam').click();
 $('btnGdBack').onclick = () => { guildStop(); renderHub(); };
 $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel && MK.opts.onCancel(); return; } MK = null; renderHub(); };
 $('btnHelp').onclick = () => {
