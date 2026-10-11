@@ -3590,12 +3590,12 @@ function renderStarter() {
    ===================================================================== */
 const CHEST_T = /fastchest/.test(location.search + location.hash) ? 1 / 12 : 1;   /* 本番の 時間。テストは URL の さいごに #fastchest を つけると 1/12（木5びょう〜でんせつ2ふん30びょう） */
 const CHESTS = {
-  wood:   { n: '木の たからばこ',     c: '#b07a40', d: '#6a4420', sec: 60 * CHEST_T, mon: 1, tm: 1, cr: [1, 2], rar: [80, 18, 2] },
-  silver: { n: '銀の たからばこ',     c: '#c8d0e0', d: '#6a7488', sec: 180 * CHEST_T, mon: 1, tm: 2, cr: [2, 3], rar: [70, 25, 5] },
-  gold:   { n: '金の たからばこ',     c: '#ffd166', d: '#a87a10', sec: 480 * CHEST_T, mon: 2, tm: 3, cr: [3, 5], rar: [55, 35, 10] },
-  giant:  { n: 'ジャイアントばこ',     c: '#ff9a5a', d: '#a04a20', sec: 720 * CHEST_T, mon: 4, tm: 4, cr: [8, 12], rar: [60, 30, 10] },
-  magic:  { n: 'マジックばこ',         c: '#c08aff', d: '#5a3a9a', sec: 720 * CHEST_T, mon: 2, tm: 5, cr: [4, 6], rar: [30, 45, 25] },
-  legend: { n: 'でんせつの たからばこ', c: '#7af0ff', d: '#2a7a9a', sec: 1800 * CHEST_T, mon: 2, tm: 4, cr: [6, 10], rar: [0, 40, 60] },
+  wood:   { n: '木の たからばこ',     c: '#b07a40', d: '#6a4420', sec: 60 * CHEST_T, mon: 1, tm: 1, cr: [1, 1], rar: [80, 18, 2] },
+  silver: { n: '銀の たからばこ',     c: '#c8d0e0', d: '#6a7488', sec: 180 * CHEST_T, mon: 1, tm: 2, cr: [1, 2], rar: [70, 25, 5] },
+  gold:   { n: '金の たからばこ',     c: '#ffd166', d: '#a87a10', sec: 480 * CHEST_T, mon: 2, tm: 3, cr: [2, 3], rar: [55, 35, 10] },
+  giant:  { n: 'ジャイアントばこ',     c: '#ff9a5a', d: '#a04a20', sec: 720 * CHEST_T, mon: 4, tm: 4, cr: [4, 6], rar: [60, 30, 10] },
+  magic:  { n: 'マジックばこ',         c: '#c08aff', d: '#5a3a9a', sec: 720 * CHEST_T, mon: 2, tm: 5, cr: [2, 3], rar: [30, 45, 25] },
+  legend: { n: 'でんせつの たからばこ', c: '#7af0ff', d: '#2a7a9a', sec: 1800 * CHEST_T, mon: 2, tm: 4, cr: [3, 5], rar: [0, 40, 60] },
 };
 const RARITY = [{ n: 'ノーマル', c: '#d8d0c0' }, { n: 'レア', c: '#7ab8ff' }, { n: 'エピック', c: '#d08aff' }];
 // モンスターの レア度：めずらしい種族は エピック、それ以外は 種族値の 合計で 上位10%＝エピック・つぎの30%＝レア
@@ -6610,7 +6610,7 @@ function endBattle(res) {
       if (S.party.length < 6) { S.party.push(nm); lines.unshift(`${SPECIES[nm.sid].n}が パーティに くわわった！（${NATURES[nm.nat].n}・${ivGrade(nm)}）`); }
       else { S.box.push(nm); lines.unshift(`${SPECIES[nm.sid].n}は ボックスに おくられた（${NATURES[nm.nat].n}・${ivGrade(nm)}）`); }
       const me = active(0);
-    } else if (res === 'win') { S.capsules += 1; S.gems = (S.gems || 0) + randi(1, 2); }
+    } else if (res === 'win') { if (Math.random() < .5) S.capsules += 1; if (Math.random() < .25) S.gems = (S.gems || 0) + 1; }   // ながく あそべるように すくなめ
     else if (res === 'lose') lines.unshift('ちからつきて しまった… でも モンスターたちは すぐに げんきに なった');
     else if (res === 'run') lines.unshift('くさむらから ぶじに にげだした');
   } else if (B.cfg.journey) journeyResult(res, lines);
@@ -6619,9 +6619,9 @@ function endBattle(res) {
     if (res === 'win') {
       S.wins++;
       const r = ROUNDS[S.round];
-      S.capsules += 3; S.gems = (S.gems || 0) + 3;
+      S.capsules += 1; S.gems = (S.gems || 0) + 1;
       S.round++;
-      if (S.round >= ROUNDS.length) { S.round = 0; S.trophies++; S.gems += 10; lines.unshift(`<b style="color:var(--acc)">🏆 ${cupName()} ゆうしょう！</b>`); S.tier++; lines.push(`つぎは ${cupName()} に ちょうせんできる！`); }
+      if (S.round >= ROUNDS.length) { S.round = 0; S.trophies++; S.gems += 5; lines.unshift(`<b style="color:var(--acc)">🏆 ${cupName()} ゆうしょう！</b>`); S.tier++; lines.push(`つぎは ${cupName()} に ちょうせんできる！`); }
       else lines.unshift(`${r.n} とっぱ！ つぎは ${ROUNDS[S.round].n}`);
     } else if (res === 'lose') {
       S.round = 0;
@@ -7913,18 +7913,18 @@ function startLeague() {
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
   if (c.league != null) {
-    if (res === 'win') { S.wins++; S.gems = (S.gems || 0) + 5; J.league++;
-      if (J.league >= LEAGUE.length) { J.league = 0; J.champ++; S.trophies++; S.gems += 30; lines.unshift('<b style="color:var(--acc)">👑 チャンピオンリーグ ゆうしょう！ でんどういり！</b>'); lines.push('ジムリーダーたちが さらに つよく なって まっている…'); }
+    if (res === 'win') { S.wins++; S.gems = (S.gems || 0) + 2; J.league++;
+      if (J.league >= LEAGUE.length) { J.league = 0; J.champ++; S.trophies++; S.gems += 15; lines.unshift('<b style="color:var(--acc)">👑 チャンピオンリーグ ゆうしょう！ でんどういり！</b>'); lines.push('ジムリーダーたちが さらに つよく なって まっている…'); }
       else lines.unshift(`${LEAGUE[J.league - 1][1]}に かった！ つぎは ${LEAGUE[J.league][1]}`); }
     else if (res === 'lose') { J.league = 0; lines.unshift('まけてしまった… リーグは さいしょから やりなおし'); }
     return;
   }
   const G = GYMS[c.gi];
   if (res !== 'win') { if (res === 'lose') lines.unshift('まけてしまった… モンスターを きたえて また ちょうせんしよう'); return; }
-  S.wins++; S.capsules += 2; S.gems = (S.gems || 0) + 2;
+  S.wins++; S.capsules += 1;
   if (c.step < 2) { if (c.gi === J.gym) J.step = c.step + 1; lines.unshift(`トレーナーに かった！ ${J.step >= 2 ? 'つぎは ジムリーダー！' : ''}`); return; }
   // ジムリーダーに かった
-  S.gems += 10;
+  S.gems = (S.gems || 0) + 5;
   if (!J.badges.includes(G.f)) { J.badges.push(G.f); lines.unshift(`<b style="color:var(--acc)">🏅 ${FIELD_NAMES[G.f]}バッジを てにいれた！</b>`); }
   else lines.unshift(`${G.ln}に また かった！`);
   const tms = TM_POOL().filter(id => MOVES[id].t === G.f && isDamaging(MOVES[id])); if (tms.length) { const t = choice(tms); S.tms = S.tms || {}; S.tms[t] = (S.tms[t] || 0) + 1; lines.push(`わざのまきもの「${MOVES[t].n}」を もらった`); }
@@ -7987,11 +7987,11 @@ function arcadeResult(res, lines) {
   }
   S.wins++;
   const hpPct = R.hp.reduce((a, b) => a + b, 0) / R.hp.length, tb = Math.max(0, Math.round((120 - B.t) * 10)), gain = 1000 * (R.stage + 1) + Math.round(hpPct * 1500) + tb;
-  R.score += gain; S.capsules += 1; S.gems = (S.gems || 0) + 1;
+  R.score += gain; if (R.stage % 2 === 1) S.capsules += 1;
   lines.unshift(`ステージ ${R.stage + 1} クリア！　+${gain}`, `<span class="dim">ステージ ${1000 * (R.stage + 1)}・のこりHP ${Math.round(hpPct * 1500)}・タイム ${tb}</span>`);
   R.stage++;
   if (R.stage >= AC_N) {
-    R.score += 5000; S.gems += 20; S.trophies++; A.clears++;
+    R.score += 5000; S.gems = (S.gems || 0) + 10; S.trophies++; A.clears++;
     lines.unshift(`<b style="color:var(--acc)">🏆 アーケード クリア！</b>　スコア ${R.score}`);
     if (R.score > A.best) { A.best = R.score; lines.push('<b style="color:var(--acc)">ハイスコア こうしん！</b>'); }
     A.bestStage = AC_N; A.run = null; return;
