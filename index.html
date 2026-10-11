@@ -310,7 +310,10 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 #ctrl{position:relative}
 #btns{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:auto;gap:6px;min-height:0;align-content:start}
 .cmd.info{grid-column:span 2;align-items:flex-start;text-align:left;padding:4px 8px;cursor:default;min-height:52px}
-.cmd.info:active{transform:none}
+.cmd.info{cursor:pointer}.cmd.info:active{transform:translateY(2px)}
+.cmd.mv.blocked{opacity:.5}
+#bAuto{font-weight:700;letter-spacing:.05em}
+#bTop #bAuto.on{background:linear-gradient(180deg,#ffd27a,#f2962d);color:#2a1606;box-shadow:0 0 0 2px var(--out),inset 0 1px 0 rgba(255,255,255,.6)}
 .cmd.info .d{font-size:10px;line-height:1.35;color:var(--ink);opacity:.85;white-space:normal}
 #btns button.cmd{min-height:46px}
 .cmd{
@@ -879,7 +882,7 @@ h1.tlogo{filter:none}
 
   <!-- バトル -->
   <section class="screen" id="scBattle" hidden>
-    <div id="bTop"><span id="bTitle"></span><span style="display:flex;gap:6px"><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
+    <div id="bTop"><span id="bTitle"></span><span style="display:flex;gap:6px"><button id="bAuto" aria-pressed="false" title="わざを じどうで だす">AUTO</button><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="1920" height="1080"></canvas>
       <div class="plates hudtop">
@@ -901,10 +904,10 @@ h1.tlogo{filter:none}
       <div id="banner"></div>
       <div id="ctrl">
         <div id="btns">
-          <div class="cmd mv info" data-mv="0"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
-          <div class="cmd mv info" data-mv="1"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
-          <div class="cmd mv info" data-mv="2"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
-          <div class="cmd mv info" data-mv="3"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></div>
+          <button type="button" class="cmd mv info" data-mv="0"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></button>
+          <button type="button" class="cmd mv info" data-mv="1"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></button>
+          <button type="button" class="cmd mv info" data-mv="2"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></button>
+          <button type="button" class="cmd mv info" data-mv="3"><span class="a"></span><span class="b"></span><span class="d"></span><i class="cdv"></i></button>
         </div>
       </div>
     </div>
@@ -4404,6 +4407,8 @@ function speedOf(f) {
 }
 
 function startBattle(cfg) {
+  updAutoBtn();
+  if (!S.auto && (S.mvTip || 0) < 3 && !cfg.headless) { S.mvTip = (S.mvTip || 0) + 1; setTimeout(() => { if (B && B.mode === 'fight' && !S.auto) say('わざボタンを タップして わざを だそう！（AUTO で おまかせ）'); }, 2600); }
   const st = cfg.kind === 'wild' ? makeWild() : makeStadium(cfg.field);
   const pf = (cfg.p0 || S.party.slice(0, 3)).map(m => mkFighter(m, 0));
   const ef = cfg.enemies.map(m => mkFighter(m, 1));
@@ -5413,7 +5418,7 @@ function aiMove(f, o, dt, autoSpecial) {
     }
   }
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
-  if (o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
+  if (autoSpecial && o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
   if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
     const t = threatDir(f, o); f.paceT = 1.5; return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
@@ -5729,7 +5734,7 @@ function updateFighter(f, dt) {
       if (f.state !== 'free') break;
       if (f.v.encore && f.queued !== f.v.encore.id && f.queued !== null) f.queued = null;
       // 移動は モンスター自身が おこなう。オートOFFなら わざは プレイヤーの 指示だけ
-      aiMove(f, o, dt, !f.v.rampage);   // わざは 自動（プレイヤーは かわす・交代 だけ）
+      aiMove(f, o, dt, !f.v.rampage && autoMoves(f));   // わざ：CPU と AUTO は じどう、プレイヤーは ボタン
       break;
     }
     case 'wind': {
@@ -5969,6 +5974,8 @@ function netApplyInput() {
   if ((inp.dg | 0) > NET.done.dg) { NET.done.dg = inp.dg | 0; if (f && B.mode === 'fight' && !(sd.dodgeCmd > 0) && ['free', 'act', 'wind', 'chan'].includes(f.state) && canAct(f)) { startDodge(f, null); sd.dodgeCmd = DODGE_CMD_CD; cmdPose(1); } }
   if (Array.isArray(inp.sw) && (inp.sw[0] | 0) > NET.done.sw) { NET.done.sw = inp.sw[0] | 0; const i = inp.sw[1] | 0, x = sd.fs[i];
     if (f && x && i !== sd.act && !x.fainted && x.hp > 0 && !(sd.swapCd > 0) && B.mode === 'fight' && ['free', 'act', 'stun'].includes(f.state)) { doSwitch(f, i); say(`あいては ${f.sp.n}を もどして ${x.sp.n}を くりだした！`); cmdPose(1); } }
+  if (Array.isArray(inp.mv) && (inp.mv[0] | 0) > (NET.done.mv || 0)) { NET.done.mv = inp.mv[0] | 0; const id = f && f.moves[inp.mv[1] | 0];   // ゲストの わざボタン
+    if (id && B.mode === 'fight' && !moveBlocked(f, id) && !((f.cd[id] || 0) > 0)) { f.queued = id; f.aiT = Math.max(f.aiT || 0, .6); } }
   if (Array.isArray(inp.ch) && (inp.ch[0] | 0) > NET.done.ch) { NET.done.ch = inp.ch[0] | 0; if (B.remoteChoose) { const i = inp.ch[1] | 0, x = sd.fs[i]; if (x && !x.fainted && x.hp > 0) netResolveChoose(i); } }
 }
 function netResolveChoose(i) { B.remoteChoose = false; B.paused = false; B.choosing = false; B.pendingSend = { side: 1, idx: i, t: .2 }; }
@@ -5997,7 +6004,7 @@ function netSnapshot() {
 }
 /* ---------- ゲスト ---------- */
 function netGuestStart(st) {
-  NET.started = true;
+  NET.started = true; setTimeout(netSendInput, 200);   // AUTO か どうかを ホストに つたえる
   if (NET.nr) NET.nr.presence({ team6: null, pick: null, ca: null, la: null }).catch(() => { });
   const host = st.h.map(monFrom), me = st.g.map(monFrom);
   startBattle({ kind: 'online', field: st.field, enemies: me, p0: host, trainer: { name: 'あなた', spr: trArt(myLook()) }, title: 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
@@ -6057,7 +6064,7 @@ function netGuestStep(dt) {
   for (const w of B.walls) w.life -= dt; for (const z of B.zones) z.life -= dt;
   if (B.mode === 'end') { B.endT -= dt; if (B.endT <= 0 && $('resultOv').hidden) showResult(); }
 }
-function netSendInput() { if (NET.nr) NET.nr.presence({ inp: NET.inp }).catch(() => { }); }
+function netSendInput() { if (NET.nr) NET.nr.presence({ inp: { ...NET.inp, au: !!S.auto } }).catch(() => { }); }
 function netGuestChoose() {
   const sd = B.sides[1], alive = sd.fs.map((x, i) => i).filter(i => !sd.fs[i].fainted && sd.fs[i].hp > 0), L = $('chooseList'); L.innerHTML = '';
   for (const i of alive) { const x = sd.fs[i], b = document.createElement('button'); b.appendChild(spriteCanvas(x.mon.sid, 48));
@@ -6760,13 +6767,21 @@ function setupCmds() {
   });
 }
 function canCommand() { return B && B.mode === 'fight' && !B.paused; }
+// わざボタン：おした わざを よやく → まあいに はいったら だす（うごきは じどう）
 function cmdMove(i) {
   if (!canCommand()) return;
-  const f = active(0); if (!f) return;
+  const f = active(B.my || 0); if (!f) return;
   const id = f.moves[i]; if (!id) return;
-  const blk = moveBlocked(f, id); if (blk) { say(`${MOVES[id].n}は いま つかえない！（${blk}）`); return; }
-  if ((f.cd[id] || 0) > 0) return;
-  f.queued = id;
+  if (B.remote) { NET.inp.mv = [((NET.inp.mv && NET.inp.mv[0]) || 0) + 1, i]; netSendInput(); NET.myQ = { id, t: performance.now() }; SND.se('click'); return; }
+  const blk = moveBlocked(f, id); if (blk) { say(`${MOVES[id].n}は いま つかえない！（${blk}）`); SND.se('deny'); return; }
+  if ((f.cd[id] || 0) > 0) { SND.se('deny'); return; }
+  f.queued = id; f.aiT = Math.max(f.aiT || 0, .6); SND.se('click');
+}
+// だれの わざを じどうに するか：CPU は いつも じどう。プレイヤーは AUTO の とき だけ
+function autoMoves(f) {
+  if (B.headless || B.demo || B.autoChoose) return true;   // テスト・デモは りょうほう じどう
+  if (f.side === 1) return B.net === 'host' ? !!(NET.pending && NET.pending.au) : true;
+  return !!S.auto;
 }
 const DODGE_CMD_CD = 5;   // かわすの 指示は 1かい つかうと 5びょう つかえない
 function cmdDodge() {
@@ -6825,8 +6840,8 @@ function chooseNext(f) {
   $('chooseOv').hidden = false;
 }
 function cmdRun() { if (!canCommand() || B.kind !== 'wild') return; say('うまく にげきれた！'); endBattle('run'); }
-function cmdAuto() { S.auto = !S.auto; save(); updAutoBtn(); }
-function updAutoBtn() {}
+function cmdAuto() { S.auto = !S.auto; save(); updAutoBtn(); SND.se('click'); if (B && B.remote) netSendInput(); if (B && B.mode === 'fight') say(S.auto ? 'AUTO：わざを じどうで だすよ' : 'わざボタンで しじしよう！'); }
+function updAutoBtn() { const b = $('bAuto'); if (!b) return; const on = !!(S && S.auto); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'AUTO ON' : 'AUTO'; }
 
 /* ---------- HUD ---------- */
 function setText(el, t) { if (el._t !== t) { el._t = t; el.textContent = t; } }
@@ -6861,7 +6876,7 @@ function updHUD() {
     const id = f.moves[+b.dataset.mv]; if (!id) return;
     const m = MOVES[id];
     b.querySelector('.cdv').style.height = ((f.cd[id] || 0) / ((f.cdMax && f.cdMax[id]) || m.cd) * 100) + '%';
-    b.classList.toggle('hot', f.queued === id);
+    b.classList.toggle('hot', f.queued === id || !!(B.remote && NET.myQ && NET.myQ.id === id && performance.now() - NET.myQ.t < 1500));
     b.classList.toggle('blocked', !!moveBlocked(f, id));
     // あいてへの あいしょうを ボタンに 表示
     const o = active(1); let eff = '';
@@ -7604,6 +7619,8 @@ document.addEventListener('keydown', (ev) => {
   input.keys.add(k);
   if (!B || $('scBattle').hidden) return;
   if (k === ' ') { ev.preventDefault(); cmdDodge(); }
+  if (k >= '1' && k <= '4') cmdMove(+k - 1);
+  if (k === 'a') cmdAuto();
   if (k === 'c') cmdCapsule(); if (k === 'x' && B) { const sd = B.sides[0]; const i = sd.fs.findIndex((x, j) => j !== sd.act && !x.fainted && x.hp > 0); if (i >= 0) swapTo(i); }
 });
 document.addEventListener('keyup', (ev) => input.keys.delete(ev.key.toLowerCase()));
@@ -7870,7 +7887,7 @@ $('btnGdBack').onclick = () => { guildStop(); renderHub(); };
 $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel && MK.opts.onCancel(); return; } MK = null; renderHub(); };
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
-    <p><b>モンスターは じぶんで たたかう</b>：うごきも わざも オート。きみは トレーナーとして <b>かわす</b> と <b>こうたい</b> を 指示しよう。</p>
+    <p><b>わざは ボタンで しじ</b>：わざボタンを タップすると、モンスターが まあいまで うごいて その わざを だす（うごきは じどう）。<b>AUTO</b> を おすと わざも おまかせ。<b>かわす</b> と <b>こうたい</b> も 指示しよう。キーボードは 1〜4 で わざ、A で AUTO。</p>
     <p><b>赤い はんい</b>は あいての わざの よちょう。<b>かわす</b>で 一瞬 むてきに なれる（つかうと 5びょう まち）。</p>
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
@@ -7892,6 +7909,8 @@ $('btnAcBack').onclick = () => renderHub();
 $('btnJrBack').onclick = () => renderHub();
 $('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else renderHub(); };
 
+document.querySelectorAll('.cmd.mv').forEach(b => b.addEventListener('pointerdown', (e) => { e.preventDefault(); cmdMove(+b.dataset.mv); }));
+$('bAuto').onclick = cmdAuto;
 $('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { NET.ended = true; B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rankResult(false)]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); netReset(); showResult(); } else { netReset(); endBattle('lose'); } }); return; } B.paused = true; $('pauseOv').hidden = false; };
 $('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
 $('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; B.paused = false; endBattle(B.kind === 'wild' ? 'run' : 'lose'); B.endT = 0; };
