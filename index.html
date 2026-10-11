@@ -529,6 +529,30 @@ html.land #app #bpanel #bbar{flex-wrap:wrap}
 html.land #app #bpanel #bbar #cDodge{flex:1 1 100%;min-height:36px}
 html.land #app #bpanel #bench{flex:1 1 100%}
 html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #app #bpanel .bmon .bn{display:none} html.land #app #bpanel .bmon{flex-direction:column!important;gap:2px;padding:3px 8px!important} html.land #app #bpanel .bmon > span{flex:none!important;width:100%;display:block} html.land #app #bpanel .bmon .bh{margin-top:0}
+/* ===== メイキング（ドット絵エディタ） ===== */
+.mktabs{display:flex;gap:8px}.mktabs button{flex:1;padding:8px;border-radius:4px;background:var(--panel);box-shadow:0 0 0 2px var(--edge);font-size:14px}.mktabs button.on{background:var(--acc);color:#1a1626;font-weight:700}
+.mklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.mkitem{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;border-radius:6px;background:var(--panel);box-shadow:0 0 0 2px var(--edge);font-size:11px;min-height:96px;justify-content:center}
+.mkitem.new{color:var(--acc);font-size:13px;border:2px dashed var(--rim)}
+.mkitem canvas{image-rendering:pixelated;max-width:64px;max-height:64px}
+.mked{display:flex;flex-direction:column;gap:8px}
+.mkrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.mkrow input[type=text]{flex:1;min-width:120px;font:inherit;font-size:15px;padding:6px 8px;border-radius:4px;border:2px solid var(--rim2);background:#120e1c;color:var(--ink)}
+.mkposes button,.mktools button{padding:6px 9px;border-radius:4px;background:var(--panel);box-shadow:0 0 0 2px var(--edge);font-size:12px;min-width:40px}
+.mkposes button.on,.mktools button.on{background:var(--acc);color:#1a1626;font-weight:700}
+.mkposes button.empty{opacity:.55}
+.mkcanvasw{position:relative;align-self:center;width:min(100%,420px);touch-action:none}
+.mkcanvasw canvas{width:100%;display:block;touch-action:none;image-rendering:pixelated;border-radius:4px;box-shadow:0 0 0 2px var(--out),0 0 0 4px var(--rim2)}
+.mkpal{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
+.mkpal button{aspect-ratio:1;border-radius:3px;box-shadow:0 0 0 1px #000;min-width:0}
+.mkpal button.on{box-shadow:0 0 0 2px #fff,0 0 0 4px #000}
+.mkpal label{display:flex;align-items:center;justify-content:center;aspect-ratio:1;border-radius:3px;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);position:relative;overflow:hidden}
+.mkpal label input{position:absolute;inset:0;opacity:0;width:100%;height:100%}
+.mkprev{display:flex;gap:10px;align-items:flex-end;justify-content:center;background:#1b1530;border-radius:6px;padding:8px;min-height:80px}
+.mkprev canvas{image-rendering:pixelated}
+.mkres{display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
+.mkres .sts{display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;width:100%;max-width:260px;font-size:12px;align-items:center}
+.mkres .sts i{display:block;height:6px;background:var(--good);border-radius:2px}
 </style>
 </head>
 <body>
@@ -583,8 +607,15 @@ html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #
         <div class="sec-title"><span>パーティ（上から3匹が しゅつじょう）</span><button class="dim" id="btnTeam" style="text-decoration:underline">へんせい ›</button></div>
         <div class="partyrow" id="hubParty"></div>
         <div class="row" style="gap:8px"><button class="btn sub" id="btnOnline" style="padding:8px;font-size:13px;flex:1;color:var(--acc)">オンライン</button><button class="btn sub" id="btnDex" style="padding:8px;font-size:13px;flex:1">ずかん</button><button class="btn sub" id="btnChart" style="padding:8px;font-size:13px;flex:1">あいしょう表</button><button class="btn sub" id="btnHelp" style="padding:8px;font-size:13px;flex:1">あそびかた</button></div>
+        <button class="btn sub" id="btnMaker" style="padding:10px;font-size:14px;color:#9ff0c8">✏ メイキング（トレーナー・モンスターを かく）</button>
       </div>
     </div>
+  </section>
+
+  <!-- メイキング -->
+  <section class="screen" id="scMaker" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">メイキング</span><button class="btn sub" id="btnMkBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <div id="mkBody"></div>
   </section>
 
   <!-- たび -->
@@ -2752,7 +2783,108 @@ const TR_NPC = [['researcher', 'けんきゅういん シオリ'], ['ranger', '�
 const TR_LOOKS = [['boy', 'ヒーロー'], ['girl', 'ライバル'], ...TR_NPC.map(([k, n]) => [k, n.split(' ')[0]])];
 const myLook = () => (S && TRAINER_ART[S.look]) ? S.look : 'boy';
 const TR_RIVAL = trArt('girl');
-const TR_MS = 1.3;   // 絵の トレーナー（48ドット）の 倍率。ドット数が ちがう 絵は 同じ 背たけに なるよう ちょうせい
+const TR_MS = 1.3;
+// ====== メイキング：じぶんで かいた トレーナー・モンスター（べつの 場所に ほぞん。セーブを けしても のこる） ======
+const CUSTOM_KEY = 'pma_custom_v1', CUSTOM_MAX = 20;
+const RLE_AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
+function rleEnc(idx) { let o = '', i = 0; while (i < idx.length) { const c = idx[i]; let n = 1; while (i + n < idx.length && idx[i + n] === c && n < 1295) n++; o += RLE_AL[c] + n.toString(36).padStart(2, '0'); i += n; } return o; }
+function rleDec(str, len) { const o = new Uint8Array(len); let p = 0; for (let i = 0; i + 2 < str.length + 1 && p < len; i += 3) { const c = Math.max(0, RLE_AL.indexOf(str[i])), n = parseInt(str.substr(i + 1, 2), 36) || 0; o.fill(c, p, Math.min(len, p + n)); p += n; } return o; }
+const safeName = (t, n = 8) => String(t || '').replace(/[<>&"'`\\]/g, '').trim().slice(0, n);
+const okHex = (c) => typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c);
+let CUSTOM = { tr: {}, mon: {} };
+function saveCustom() { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(CUSTOM)); } catch (e) { } }
+// え（w×h・pal・RLE）を たしかめる：へんな データは つかわない
+function cleanArt(a, maxW, maxH, frames) {
+  if (!a || typeof a !== 'object') return null;
+  const w = a.w | 0, h = a.h | 0; if (w < 4 || h < 4 || w > maxW || h > maxH) return null;
+  const pal = Array.isArray(a.pal) ? a.pal.filter(okHex).slice(0, 63) : []; if (!pal.length) return null;
+  const fix = (str) => { if (typeof str !== 'string' || str.length > 12000) return null; const idx = rleDec(str, w * h); for (let i = 0; i < idx.length; i++) if (idx[i] > pal.length) idx[i] = 0; return rleEnc(idx); };
+  if (frames) { const f = (Array.isArray(a.f) ? a.f : []).slice(0, 4).map(fix); if (!f[0]) return null; for (let i = 1; i < 4; i++) if (!f[i]) f[i] = f[0]; return { w, h, pal, f }; }
+  const d = fix(a.d); return d ? { w, h, pal, d } : null;
+}
+function regCustomTrainer(k, a) {
+  const c = cleanArt(a, 48, 56, true); if (!c) return false;
+  TRAINER_ART[k] = c; delete TR_CACHE[k];
+  const nm = safeName(a.name) || 'オリジナル', i = TR_LOOKS.findIndex(x => x[0] === k);
+  if (i >= 0) TR_LOOKS[i][1] = nm; else TR_LOOKS.push([k, nm]);
+  return true;
+}
+// じぶんの モンスター：え から きまった タイプ・のうりょく で 種族として とうろく
+const CUSTOM_REF = (() => { const ids = Object.keys(SPECIES).filter(id => SPR[id] && SPECIES[id].ext); const met = ids.map(id => Math.sqrt(SPR[id].n.width * SPR[id].n.height) * SPR[id].ms).sort((a, b) => a - b), vs = ids.map(id => SPECIES[id].vsz || 1).sort((a, b) => a - b), tot = ids.map(id => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; }).sort((a, b) => a - b); return { M: met[met.length >> 1] || 60, V: vs[vs.length >> 1] || 1, T: tot[tot.length >> 1] || 210 }; })();
+function customLearn(id, sp) {
+  let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; const r = () => ((h = (h * 16807 + 11) % 2147483647) / 2147483647);
+  const my = [sp.type, sp.type2].filter(Boolean), cov = (COVER[sp.type] || COVER.normal).slice().sort(() => r() - .5).slice(0, 3), wk = STYLE_K[sp.style] || STYLE_K.mid;
+  const atk = Object.keys(MOVES).filter(k => k !== 'tackle' && MOVES[k].cat !== 'stat' && MOVES[k].k !== 'counter' && !MOVES[k].ohko);
+  const pick = (list, n, wf) => list.map(k => [k, wf(MOVES[k]) * (.4 + r())]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, n).map(x => x[0]);
+  const out = [], add = (k) => { if (k && !out.includes(k)) out.push(k); };
+  pick(atk.filter(k => my.includes(MOVES[k].t)), 4, m => (wk[m.k] || 1) * (m.power >= 100 ? .7 : 1)).forEach(add);
+  pick(atk.filter(k => cov.includes(MOVES[k].t)), 2, m => wk[m.k] || 1).forEach(add);
+  if (!out.some(k => INDIRECT(MOVES[k]))) add(pick(atk.filter(k => INDIRECT(MOVES[k]) && (my.includes(MOVES[k].t) || cov.includes(MOVES[k].t))), 1, () => 1)[0] || pick(atk.filter(k => INDIRECT(MOVES[k])), 1, () => 1)[0]);
+  pick(Object.keys(MOVES).filter(k => MOVES[k].cat === 'stat' && !['wall', 'floor'].includes(MOVES[k].k) && (my.includes(MOVES[k].t) || MOVES[k].t === 'normal' || (MOVES[k].t === 'wind' && sp.fly))), 2, m => my.includes(m.t) ? 2 : 1).forEach(add);
+  if (!out.length) add('ember');
+  return out.map((k, i) => [i < 2 ? 1 : 1 + i * 2, k]);
+}
+function regCustomMon(id, c0) {
+  const art = cleanArt(c0, 48, 48, false); if (!art || !TYPES[c0.type]) return false;
+  const T = (t) => TYPES[t] ? t : null, b = c0.base || {}, st = (v) => clamp(Math.round(+v || 50), 25, 110);
+  const r = clamp(+c0.r || 1, .7, 1.45), style = ['melee', 'mid', 'ranged'].includes(c0.style) ? c0.style : 'mid';
+  const sp = { n: safeName(c0.name) || 'オリジナル', type: c0.type, base: { hp: st(b.hp), atk: st(b.atk), def: st(b.def), spd: st(b.spd) }, moves: [], style, catch: .5, rare: 0, custom: 1,
+    desc: 'トレーナーが じぶんで かいた オリジナルの モンスター。', prof: { h: +(r * .7).toFixed(1), wt: +(r * r * 18).toFixed(1), home: 'トレーナーの スケッチブック', trait: 'せかいに 1ぴき だけの モンスター。', evo: null }, sz: r };
+  const t2 = T(c0.type2); if (t2 && t2 !== sp.type) sp.type2 = t2;
+  if (c0.fly || sp.type === 'wind' || sp.type2 === 'wind') sp.fly = true;
+  AISpr.DATA[id] = { w: art.w, h: art.h, pal: art.pal, d: art.d };
+  const fr = bakeFrames(AISpr.framesOf(id), art.w + AISpr.PAD * 2, art.h + AISpr.PAD);
+  const met0 = Math.sqrt(fr.idle0.n.width * fr.idle0.n.height) || 1;
+  SPR[id] = { fr, n: fr.idle0.n, w: fr.idle0.w, ms: CUSTOM_REF.M * r / met0 };
+  sp.vsz = CUSTOM_REF.V * r; sp.bz = clamp((r - 1) * 1.6, -.7, .7); sp.sizeCat = r < .85 ? 's' : r > 1.2 ? 'l' : 'm';
+  SPECIES[id] = sp; try { delete _base6[id]; } catch (e) { }   // きどう ちゅうは まだ ない
+  LEARN[id] = customLearn(id, sp); sp.moves = LEARN[id].slice(0, 2).map(x => x[1]);
+  return true;
+}
+// いろ → タイプ（あか＝ほのお、あお＝みず、みどり＝くさ、きいろ＝でんき …）
+function colorType(R, G, B_) {
+  const mx = Math.max(R, G, B_) / 255, mn = Math.min(R, G, B_) / 255, l = (mx + mn) / 2, d = mx - mn, s_ = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  let h = 0; if (d) { const r = R / 255, g = G / 255, b = B_ / 255; h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; }
+  if (s_ < .14) return l > .78 ? (B_ > R + 8 ? 'ice' : 'normal') : l > .32 ? 'rock' : 'ghost';
+  if (h < 22 || h >= 345) return l < .32 ? 'fighting' : 'fire';
+  if (h < 48) return s_ < .55 && l < .62 ? 'ground' : 'fire';
+  if (h < 68) return s_ < .45 ? 'ground' : 'elec';
+  if (h < 92) return 'bug';
+  if (h < 150) return l > .78 ? 'wind' : 'grass';
+  if (h < 190) return l > .7 ? (h < 170 ? 'wind' : 'ice') : 'water';
+  if (h < 245) return l > .78 ? 'ice' : 'water';
+  if (h < 272) return 'dragon';
+  if (h < 305) return l < .38 ? 'ghost' : 'poison';
+  return 'psychic';
+}
+// え から タイプ・たたかいかた・のうりょく を きめる
+function analyzeMon(idx, pal, w, h) {
+  const rgb = pal.map(c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]);
+  const cnt = {}; let n = 0, x0 = w, x1 = -1, y0 = h, y1 = -1, sat = 0, colored = 0; const rowW = new Array(h).fill(0);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const v = idx[y * w + x]; if (!v) continue; n++; rowW[y]++; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+    const [R, G, B_] = rgb[v - 1], mx = Math.max(R, G, B_), mn = Math.min(R, G, B_), l = (mx + mn) / 510, s_ = mx === mn ? 0 : (mx - mn) / (255 - Math.abs(mx + mn - 255) || 1);
+    if (l < .17) continue;   // りんかくの くろは かぞえない
+    colored++; sat += s_;
+    const best = colorType(R, G, B_);
+    cnt[best] = (cnt[best] || 0) + 1; }
+  if (!n) return null;
+  const ord = Object.entries(cnt).sort((a, b) => b[1] - a[1]), type = ord.length ? ord[0][0] : 'normal', type2 = ord[1] && ord[1][1] >= colored * .22 ? ord[1][0] : null;
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, asp = bw / bh, fill = n / (bw * bh), sv = colored ? sat / colored : 0;
+  const style = asp > 1.25 ? 'melee' : asp < .8 ? 'ranged' : 'mid';
+  const wide = Math.max(...rowW), bottom = rowW[y1], top = rowW.slice(y0, y0 + Math.ceil(bh / 2)).reduce((a, b) => Math.max(a, b), 0);
+  const fly = type === 'wind' || type2 === 'wind' || (bottom <= wide * .25 && top >= wide * .95 && bh >= 8);
+  const r = clamp(.72 + n / (w * h) * 1.5, .72, 1.4);
+  // のうりょく：大きい→HP・ぼうぎょ、みっしり→ぼうぎょ、あざやか・ちかい→こうげき、ほそい・ちいさい→すばやさ
+  const wt = { hp: 1 + (r - 1) * 1.2, def: .8 + fill * .5 + (r - 1) * .6, atk: .85 + sv * .4 + (style === 'melee' ? .15 : 0), spd: 1 + (1 - r) * 1.1 + (asp < .9 ? .1 : 0) + (fly ? .1 : 0) };
+  const sum = wt.hp + wt.def + wt.atk + wt.spd, base = {}; for (const k in wt) base[k] = clamp(Math.round(CUSTOM_REF.T * wt[k] / sum), 30, 95);
+  return { type, type2, style, fly, r: +r.toFixed(2), base };
+}
+function loadCustom() {
+  try { const c = JSON.parse(localStorage.getItem(CUSTOM_KEY) || 'null'); if (c && typeof c === 'object') CUSTOM = { tr: c.tr || {}, mon: c.mon || {} }; } catch (e) { }
+  for (const k of Object.keys(CUSTOM.tr)) if (!/^c_tr_[a-z0-9]+$/.test(k) || !regCustomTrainer(k, CUSTOM.tr[k])) delete CUSTOM.tr[k];
+  for (const k of Object.keys(CUSTOM.mon)) { let ok = false; try { ok = /^c_mon_[a-z0-9]+$/.test(k) && regCustomMon(k, CUSTOM.mon[k]); } catch (e) { } if (!ok) delete CUSTOM.mon[k]; }
+}
+loadCustom();   // 絵の トレーナー（48ドット）の 倍率。ドット数が ちがう 絵は 同じ 背たけに なるよう ちょうせい
 
 function spriteCanvas(sid, size) {
   // 内部は 2〜3倍の 解像度で 整数倍に 描いて、CSS で size に する（ドットが にじまない）
@@ -3115,7 +3247,7 @@ function setArtBg() {
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
-function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
+function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id; if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
   const p = sp.prof, evo = '';
@@ -5421,8 +5553,9 @@ async function netGetRoom() {
   try { if (window.claude && window.claude.use) NET.room = await window.claude.use('room'); } catch (e) { NET.room = null; }
   return NET.room;
 }
-const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0 }; });
-const monFrom = (o) => { const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } return m; };
+const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0, cs: CUSTOM.mon[m.sid] || undefined }; });   // じぶんで かいた モンスターは え も おくる
+const monFrom = (o) => { if (o && typeof o.sid === 'string' && /^c_mon_[a-z0-9]+$/.test(o.sid) && o.cs && (!SPECIES[o.sid] || SPECIES[o.sid].custom)) { try { regCustomMon(o.sid, o.cs); } catch (e) { } } if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };
+  const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
 function netReset() { SND.onSe = null; NET.ranked = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false }); }
@@ -6922,6 +7055,140 @@ $('btnOpt').onclick = () => {
   bg.querySelector('#oClose').onclick = () => bg.remove();
   bg.querySelector('#oReset').onclick = async () => { bg.remove(); if (!(await ask('セーブデータを けしますか？\nもとに もどせません。'))) return; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; renderTitle(); };
 };
+// ===== メイキング：ドット絵エディタ =====
+const MK_PAL = ['#0f0e1c', '#ffffff', '#fde2c4', '#f2b98a', '#c98a5a', '#7a4a2a', '#ff5a4a', '#ff9a3a', '#ffd84a', '#fff3a0', '#7bd88f', '#2f9a4a', '#9fe8ff', '#4aa8ff', '#2a4ab8', '#b86ad8', '#ff7ab0', '#8a78c8', '#d8d0c0', '#9a94a8', '#5a5468', '#c49a6c', '#d8b060', '#1e2a4a'];
+const MK_POSES = ['たつ', 'ゆびさす', 'てを ひらく', 'かちポーズ'];
+let MK = null;   // いま かいている もの
+function mkOpen() { show('scMaker'); mkList(MK && MK.kind || 'tr'); }
+function mkList(kind) {
+  MK = { kind }; const B = $('mkBody'), store = kind === 'tr' ? CUSTOM.tr : CUSTOM.mon;
+  B.innerHTML = `<div class="mktabs"><button data-k="tr" class="${kind === 'tr' ? 'on' : ''}">トレーナー</button><button data-k="mon" class="${kind === 'mon' ? 'on' : ''}">モンスター</button></div>
+    <p class="dim" style="font-size:12px">${kind === 'tr' ? 'ドット絵で じぶんの トレーナーを かこう。4つの ポーズ（たつ・ゆびさす・てを ひらく・かちポーズ）を かける。かいた トレーナーは せってい の「トレーナーの みため」で えらべる。' : 'ドット絵で モンスターを かこう。いろ と かたち から タイプ・たたかいかた・のうりょく・わざ が きまって、なかまに なる。'}</p>
+    <div class="mklist" id="mkItems"></div>`;
+  B.querySelectorAll('.mktabs button').forEach(b => b.onclick = () => mkList(b.dataset.k));
+  const L = $('mkItems'), nb = document.createElement('button'); nb.className = 'mkitem new'; nb.innerHTML = '＋<br>あたらしく かく';
+  nb.onclick = () => { if (Object.keys(store).length >= CUSTOM_MAX) { say0 && say0(`${CUSTOM_MAX}こ まで です`); return; } mkEdit(kind, null); }; L.appendChild(nb);
+  for (const k of Object.keys(store)) {
+    const it = document.createElement('button'); it.className = 'mkitem';
+    const img = kind === 'tr' ? trArt(k).idle0.n : SPR[k] && SPR[k].n; if (img) { const c = document.createElement('canvas'), z = Math.max(1, Math.floor(56 / Math.max(img.width, img.height))); c.width = img.width * z; c.height = img.height * z; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, c.width, c.height); it.appendChild(c); }
+    it.insertAdjacentHTML('beforeend', `<span>${safeName(store[k].name) || 'オリジナル'}</span>` + (kind === 'mon' && SPECIES[k] ? `<span>${typeChip(SPECIES[k].type)}${SPECIES[k].type2 ? typeChip(SPECIES[k].type2) : ''}</span>` : ''));
+    it.onclick = () => mkEdit(kind, k); L.appendChild(it);
+  }
+}
+function mkEdit(kind, key) {
+  const W = 32, H = kind === 'tr' ? 40 : 32, src = key ? (kind === 'tr' ? CUSTOM.tr[key] : CUSTOM.mon[key]) : null;
+  const pal = MK_PAL.slice(); const toIdx = (a, str) => { const o = new Uint8Array(W * H), t = rleDec(str, a.w * a.h); for (let y = 0; y < Math.min(H, a.h); y++) for (let x = 0; x < Math.min(W, a.w); x++) { const v = t[y * a.w + x]; if (!v) continue; const c = a.pal[v - 1]; let i = pal.indexOf(c); if (i < 0 && pal.length < 63) { pal.push(c); i = pal.length - 1; } o[y * W + x] = i + 1; } return o; };
+  const frames = kind === 'tr' ? [0, 1, 2, 3].map(i => src ? toIdx(src, src.f[i]) : new Uint8Array(W * H)) : [src ? toIdx(src, src.d) : new Uint8Array(W * H)];
+  const touched = kind === 'tr' ? [0, 1, 2, 3].map(i => !!src && (i === 0 || src.f[i] !== src.f[0])) : [!!src];
+  MK = { kind, key, W, H, pal, frames, touched, cur: 0, col: 1, tool: 'pen', mirror: kind === 'mon', undo: [], name: src ? safeName(src.name) : '' };
+  const B = $('mkBody');
+  B.innerHTML = `<div class="mked">
+    <div class="mkrow"><input type="text" id="mkName" maxlength="8" placeholder="なまえ（8もじ まで）" value="${MK.name}"></div>
+    ${kind === 'tr' ? `<div class="mkrow mkposes" id="mkPoses">${MK_POSES.map((n, i) => `<button data-i="${i}">${n}</button>`).join('')}<button id="mkCopy" style="margin-left:auto">たつ を コピー</button></div>` : ''}
+    <div class="mkcanvasw"><canvas id="mkCv"></canvas></div>
+    <div class="mkrow mktools" id="mkTools"><button data-t="pen">✏ ペン</button><button data-t="erase">けしゴム</button><button data-t="fill">ぬりつぶし</button><button data-t="pick">スポイト</button><button id="mkMir">↔ たいしょう</button><button id="mkUndo">↶ もどす</button><button id="mkClear">ぜんぶ けす</button></div>
+    <div class="mkpal" id="mkPal"></div>
+    <div class="mkprev" id="mkPrev"></div>
+    <div class="mkrow" style="justify-content:space-between">${key ? '<button class="dim" id="mkDel" style="text-decoration:underline">けす</button>' : '<span></span>'}<span class="mkrow"><button class="btn sub" id="mkCancel" style="padding:8px 14px">やめる</button><button class="btn" id="mkSave" style="padding:8px 18px">${kind === 'mon' && !key ? 'できた！' : 'ほぞん'}</button></span></div>
+  </div>`;
+  const cv = $('mkCv'), CELL = 14; cv.width = W * CELL; cv.height = H * CELL; const g = cv.getContext('2d');
+  const draw = () => {
+    const f = MK.frames[MK.cur];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { g.fillStyle = (x + y) % 2 ? '#2a2440' : '#231d38'; g.fillRect(x * CELL, y * CELL, CELL, CELL); }
+    if (kind === 'tr' && MK.cur > 0) { const f0 = MK.frames[0]; g.globalAlpha = .22; for (let i = 0; i < W * H; i++) if (f0[i]) { g.fillStyle = MK.pal[f0[i] - 1]; g.fillRect((i % W) * CELL, ((i / W) | 0) * CELL, CELL, CELL); } g.globalAlpha = 1; }   // たつ の ポーズを うすく したがきに
+    for (let i = 0; i < W * H; i++) if (f[i]) { g.fillStyle = MK.pal[f[i] - 1]; g.fillRect((i % W) * CELL, ((i / W) | 0) * CELL, CELL, CELL); }
+    g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 1; g.beginPath(); for (let x = 0; x <= W; x++) { g.moveTo(x * CELL + .5, 0); g.lineTo(x * CELL + .5, H * CELL); } for (let y = 0; y <= H; y++) { g.moveTo(0, y * CELL + .5); g.lineTo(W * CELL, y * CELL + .5); } g.stroke();
+    if (MK.mirror) { g.strokeStyle = 'rgba(255,209,102,.45)'; g.beginPath(); g.moveTo(W / 2 * CELL, 0); g.lineTo(W / 2 * CELL, H * CELL); g.stroke(); }
+    if (kind === 'mon') { g.strokeStyle = 'rgba(120,200,255,.25)'; g.beginPath(); g.moveTo(0, (H - .5) * CELL); g.lineTo(W * CELL, (H - .5) * CELL); g.stroke(); }
+    prev();
+  };
+  const prev = () => {   // じっさいの 大きさ（2ばい）で みる
+    const P = $('mkPrev'); P.innerHTML = ''; const show = kind === 'tr' ? MK.frames.map((f, i) => MK.touched[i] ? f : MK.frames[0]) : MK.frames;
+    show.forEach((f, i) => { const c = document.createElement('canvas'), z = 2; c.width = W * z; c.height = H * z; const q = c.getContext('2d'); for (let j = 0; j < W * H; j++) if (f[j]) { q.fillStyle = MK.pal[f[j] - 1]; q.fillRect((j % W) * z, ((j / W) | 0) * z, z, z); } if (kind === 'tr') c.title = MK_POSES[i]; P.appendChild(c); });
+  };
+  const ui = () => {
+    B.querySelectorAll('#mkTools [data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === MK.tool));
+    $('mkMir').classList.toggle('on', MK.mirror);
+    if (kind === 'tr') B.querySelectorAll('#mkPoses [data-i]').forEach(b => { b.classList.toggle('on', +b.dataset.i === MK.cur); b.classList.toggle('empty', !MK.touched[+b.dataset.i]); });
+    const P = $('mkPal'); P.innerHTML = MK.pal.map((c, i) => `<button data-c="${i + 1}" style="background:${c}" class="${MK.col === i + 1 ? 'on' : ''}"></button>`).join('') + `<label title="いろを えらぶ">＋<input type="color" id="mkColor" value="${MK.pal[MK.col - 1] || '#ffffff'}"></label>`;
+    P.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { MK.col = +b.dataset.c; if (MK.tool === 'erase' || MK.tool === 'pick') MK.tool = 'pen'; ui(); });
+    $('mkColor').onchange = (e) => { const c = e.target.value; let i = MK.pal.indexOf(c); if (i < 0) { if (MK.pal.length >= 63) MK.pal[MK.pal.length - 1] = c, i = MK.pal.length - 1; else { MK.pal.push(c); i = MK.pal.length - 1; } } MK.col = i + 1; MK.tool = 'pen'; ui(); };
+  };
+  const at = (e) => { const x = Math.floor(e.offsetX / cv.clientWidth * W), y = Math.floor(e.offsetY / cv.clientHeight * H); return x >= 0 && y >= 0 && x < W && y < H ? [x, y] : null; };
+  const put = (x, y, v) => { const f = MK.frames[MK.cur]; f[y * W + x] = v; if (MK.mirror) f[y * W + (W - 1 - x)] = v; };
+  const flood = (x, y, v) => { const f = MK.frames[MK.cur], t = f[y * W + x]; if (t === v) return; const st = [[x, y]]; while (st.length) { const [a, b] = st.pop(); if (a < 0 || b < 0 || a >= W || b >= H || f[b * W + a] !== t) continue; f[b * W + a] = v; st.push([a + 1, b], [a - 1, b], [a, b + 1], [a, b - 1]); } };
+  let down = false, last = null;
+  const act = (e, first) => { const p = at(e); if (!p) return; const [x, y] = p;
+    if (MK.tool === 'pick') { const v = MK.frames[MK.cur][y * W + x]; if (v) { MK.col = v; MK.tool = 'pen'; ui(); } return; }
+    if (first) { MK.undo.push({ i: MK.cur, f: MK.frames[MK.cur].slice() }); if (MK.undo.length > 40) MK.undo.shift(); MK.touched[MK.cur] = true; }
+    if (MK.tool === 'fill') { if (first) { flood(x, y, MK.col); if (MK.mirror) flood(W - 1 - x, y, MK.col); } }
+    else { const v = MK.tool === 'erase' ? 0 : MK.col;   // はやく うごかしても 線が とぎれない
+      if (!first && last) { const n = Math.max(Math.abs(x - last[0]), Math.abs(y - last[1])); for (let i = 1; i <= n; i++) put(Math.round(last[0] + (x - last[0]) * i / n), Math.round(last[1] + (y - last[1]) * i / n), v); } else put(x, y, v); }
+    last = [x, y]; draw(); };
+  cv.onpointerdown = (e) => { e.preventDefault(); down = true; try { cv.setPointerCapture(e.pointerId); } catch (_) { } act(e, true); if (kind === 'tr') ui(); };
+  cv.onpointermove = (e) => { if (down && (MK.tool === 'pen' || MK.tool === 'erase')) act(e, false); };
+  cv.onpointerup = cv.onpointercancel = () => { down = false; last = null; };
+  B.querySelectorAll('#mkTools [data-t]').forEach(b => b.onclick = () => { MK.tool = b.dataset.t; ui(); });
+  $('mkMir').onclick = () => { MK.mirror = !MK.mirror; ui(); draw(); };
+  $('mkUndo').onclick = () => { const u = MK.undo.pop(); if (u) { MK.frames[u.i] = u.f; MK.cur = u.i; ui(); draw(); } };
+  $('mkClear').onclick = async () => { if (!(await ask('この え を ぜんぶ けしますか？'))) return; MK.undo.push({ i: MK.cur, f: MK.frames[MK.cur].slice() }); MK.frames[MK.cur].fill(0); draw(); };
+  if (kind === 'tr') {
+    B.querySelectorAll('#mkPoses [data-i]').forEach(b => b.onclick = () => { MK.cur = +b.dataset.i; ui(); draw(); });
+    $('mkCopy').onclick = () => { if (MK.cur === 0) return; MK.undo.push({ i: MK.cur, f: MK.frames[MK.cur].slice() }); MK.frames[MK.cur] = MK.frames[0].slice(); MK.touched[MK.cur] = true; ui(); draw(); };
+  }
+  $('mkCancel').onclick = () => mkList(kind);
+  if ($('mkDel')) $('mkDel').onclick = async () => {
+    if (kind === 'mon' && S && [...S.party, ...S.box].some(m => m.sid === key)) { await ask('この モンスターは なかまに いるので けせません。', 'OK', null); return; }
+    if (!(await ask('けしますか？ もとに もどせません。'))) return;
+    if (kind === 'tr') { delete CUSTOM.tr[key]; const i = TR_LOOKS.findIndex(x => x[0] === key); if (i >= 0) TR_LOOKS.splice(i, 1); if (S && S.look === key) { S.look = 'boy'; save(); } }
+    else delete CUSTOM.mon[key];
+    saveCustom(); mkList(kind);
+  };
+  $('mkSave').onclick = () => mkSave();
+  ui(); draw();
+}
+// つかった いろ だけの パレットに して ほぞん
+function mkPack(frames, W, H, pal) {
+  const used = []; for (const f of frames) for (const v of f) if (v && !used.includes(v)) used.push(v);
+  const map = {}; used.forEach((v, i) => map[v] = i + 1);
+  return { w: W, h: H, pal: used.map(v => pal[v - 1]), enc: frames.map(f => rleEnc(Array.from(f, v => v ? map[v] : 0))) };
+}
+async function mkSave() {
+  const name = safeName($('mkName').value); if (!name) { $('mkName').focus(); $('mkName').placeholder = 'なまえを いれてね'; return; }
+  if (!MK.frames[0].some(v => v)) { await ask('なにも かかれて いません。', 'OK', null); return; }
+  if (MK.kind === 'tr') {
+    const fr = MK.frames.map((f, i) => MK.touched[i] && f.some(v => v) ? f : MK.frames[0]);
+    const pk = mkPack(fr, MK.W, MK.H, MK.pal), key = MK.key || 'c_tr_' + Date.now().toString(36);
+    CUSTOM.tr[key] = { name, w: pk.w, h: pk.h, pal: pk.pal, f: pk.enc };
+    if (!regCustomTrainer(key, CUSTOM.tr[key])) return; saveCustom();
+    if (S && !MK.key) { S.look = key; save(); }
+    SND.se('ok'); mkList('tr'); return;
+  }
+  const pk = mkPack(MK.frames, MK.W, MK.H, MK.pal);
+  if (MK.key) {   // かきなおし：え と なまえ だけ（タイプ・のうりょくは そのまま）
+    const old = CUSTOM.mon[MK.key]; CUSTOM.mon[MK.key] = { ...old, name, w: pk.w, h: pk.h, pal: pk.pal, d: pk.enc[0] };
+    regCustomMon(MK.key, CUSTOM.mon[MK.key]); saveCustom(); SND.se('ok'); mkList('mon'); return;
+  }
+  const an = analyzeMon(MK.frames[0], MK.pal, MK.W, MK.H); if (!an) return;
+  const key = 'c_mon_' + Date.now().toString(36);
+  CUSTOM.mon[key] = { name, w: pk.w, h: pk.h, pal: pk.pal, d: pk.enc[0], ...an };
+  if (!regCustomMon(key, CUSTOM.mon[key])) { delete CUSTOM.mon[key]; return; }
+  saveCustom();
+  const sp = SPECIES[key]; let where = '';
+  if (S) { const m = newMon(key); dexMark(key, 2); where = S.party.length < 6 ? (S.party.push(m), 'パーティに くわわった！') : (S.box.push(m), 'ボックスに おくられた'); save(); }
+  const st = stats({ sid: key, iv: { hp: 15, atk: 15, def: 15, spa: 15, spd: 15, spe: 15, eva: 15 }, lvl: MON_LV }) || {};
+  const STY = { melee: 'ちかづいて たたかう', mid: 'バランスがた', ranged: 'はなれて たたかう' };
+  const bar = (k, n, v) => `<span>${n}</span><span><i style="width:${clamp(v / 160 * 100, 4, 100)}%"></i></span><b>${v || '-'}</b>`;
+  const bg = modal(`<div class="mkres"><h3>${sp.n} が うまれた！</h3><div id="mkResImg"></div><div>${typeChip(sp.type)}${sp.type2 ? ' ' + typeChip(sp.type2) : ''}</div>
+    <div class="dim" style="font-size:12px">${STY[sp.style]}${sp.fly ? '・そらを とぶ' : ''}・大きさ ${{ s: 'ちいさい', m: 'ふつう', l: 'おおきい' }[sp.sizeCat] || 'ふつう'}</div>
+    <div class="sts">${bar('hp', 'HP', st.hp)}${bar('atk', 'こうげき', st.atk)}${bar('def', 'ぼうぎょ', st.def)}${bar('spe', 'すばやさ', st.spe)}</div>
+    <div style="font-size:12px">${where}</div><button class="btn" id="mkOk" style="padding:8px 24px">OK</button></div>`);
+  bg.querySelector('#mkResImg').appendChild(spriteCanvas(key, 96));
+  bg.querySelector('#mkOk').onclick = () => { bg.remove(); mkList('mon'); };
+  SND.se('caught');
+}
+$('btnMaker').onclick = () => mkOpen();
+$('btnMkBack').onclick = () => { MK = null; renderHub(); };
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
     <p><b>モンスターは じぶんで たたかう</b>：うごきも わざも オート。きみは トレーナーとして <b>かわす</b> と <b>こうたい</b> を 指示しよう。</p>
@@ -7196,7 +7463,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, fixMon: (m, b) => fixMon(m, b) }); },
+  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b) }); },
 };
 })();
 </script>
