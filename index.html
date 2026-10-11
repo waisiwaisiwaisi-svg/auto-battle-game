@@ -4609,6 +4609,25 @@ function inZone(cur, owner, x, y, r) {
   return false;
 }
 const ZONE_KINDS = ['aoe', 'strike', 'multi', 'cone', 'swipe', 'beam', 'dash', 'vault'];
+/* ---- じゃんけん（よみあい）：ダメージは かわらない。1かいの しじで あいての こうどうを つぶす ----
+   ✊ とっしん（近接・突進）→ ためている ✌️ に あてると キャンセル（ほかの わざでは とまらない）
+   ✋ まもり（まもる・カウンター）→ つっこんできた ✊ を はじいて ひるませる
+   ✌️ しゃげき（弾・ビーム・はんい）→ かまえた ✋ を くずす（ガードブレイク） */
+const RPS_ROCK = ['melee', 'dash', 'swipe', 'vault'];
+function rpsOf(m) { if (!m) return ''; if (m.k === 'protect' || m.k === 'counter') return 'paper'; if (!isDamaging(m) || m.k === 'counter') return ''; return RPS_ROCK.includes(m.k) ? 'rock' : 'scissors'; }
+const RPS_ICON = { rock: '✊', scissors: '✌️', paper: '✋' };
+const charging = (f) => !!(f && f.cur && (f.state === 'wind' || f.state === 'chan'));
+function rpsParry(att, def) {   // ✋ が ✊ を はじく
+  att.cur = null; if (!att.v.rampage) att.queued = null; att.state = 'stun'; att.stT = 1.1;
+  const a = Math.atan2(att.y - def.y, att.x - def.x); att.kx = Math.cos(a) * 260 * K; att.ky = Math.sin(a) * 260 * K;
+  popText(def.x, def.y - 84, 'はじいた！', '#ffd166', 'comic'); say(`${def.sp.n}は ${att.sp.n}を はじきかえした！`);
+  fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 44, col: '#ffd166', life: .35, max: .35 }); B.hitstop = Math.max(B.hitstop, .12);
+}
+function rpsBreak(def) {   // ✌️ が ✋ を くずす
+  def.v.protect = 0; def.v.counter = null; def.cur = null; if (!def.v.rampage) def.queued = null; def.state = 'stun'; def.stT = .8;
+  popText(def.x, def.y - 84, 'ガードブレイク！', '#ff8a6a', 'comic'); say(`${def.sp.n}の かまえが くずれた！`);
+  burst(def.x, def.y - BODY, '#9ff0ff', 14, 140, .4); B.hitstop = Math.max(B.hitstop, .1);
+}
 // あいての わざが せまっている（ため中・うちつづけ中・空／地中に かくれている）
 const threatState = (o) => o && (o.state === 'wind' || o.state === 'chan' || o.state === 'hide');
 const inField = (x, y, r) => x >= B.st.fx0 + r && x <= B.st.fx1 - r && y >= B.st.fy0 + r && y <= B.st.fy1 - r;
@@ -4995,7 +5014,9 @@ function hit(att, def, m, ang, opt) {
   opt = opt || {};
   if (B.stats) { B.stats.tryhit[MOVE_ID.get(m)] = (B.stats.tryhit[MOVE_ID.get(m)] || 0) + 1; if (def.inv > 0) B.stats.dodged[MOVE_ID.get(m)] = (B.stats.dodged[MOVE_ID.get(m)] || 0) + 1; }
   if (def.inv > 0) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
-  if (def.v.protect > 0) { SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 }); return false; }
+  if (def.v.protect > 0) { SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 });
+    const r = rpsOf(m); if (r === 'rock' && targetable(att)) rpsParry(att, def); else if (r === 'scissors') rpsBreak(def);
+    return false; }
   if (m.cat === 'stat') return statusHit(att, def, m);
   let eff = m.t === 'normal' ? effOf('normal', def.sp.type) * (def.sp.type2 ? effOf('normal', def.sp.type2) : 1) : effVs(m.t, def.sp);
   if (m.superVsWater && hasType(def, 'water')) eff = eff / effOf('ice', 'water') * 2;
@@ -5034,7 +5055,11 @@ function hit(att, def, m, ang, opt) {
   def.hp = Math.max(0, def.hp - dmg); def.flash = .12; B.lastDmgT = B.t;
   if (B.stats) { const k = MOVE_ID.get(m); B.stats.hit[k] = (B.stats.hit[k] || 0) + 1; B.stats.dmg[k] = (B.stats.dmg[k] || 0) + dmg; B.stats.dmgPct[k] = (B.stats.dmgPct[k] || 0) + dmg / def.maxHp; }
   if (opt.tick) { def.kx += Math.cos(ang) * 45 * K; def.ky += Math.sin(ang) * 45 * K; }   // うちつづける わざ：ひるませず すこし おすだけ
+  else if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) !== 'rock') {   // ✌️ を ためている あいだは ✊ でしか とめられない
+    def.kx += Math.cos(ang) * 60 * K; def.ky += Math.sin(ang) * 60 * K; B.hitstop = Math.max(B.hitstop, .03);
+  }
   else {
+    if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) === 'rock') popText(def.x, def.y - 84, 'わりこみ！', '#ffd166', 'comic');
     def.cur = null; if (!def.v.rampage) def.queued = null;
     if (!lagHit) { def.state = 'stun'; def.stT = heavy ? .45 : .25; }
     def.kx = Math.cos(ang) * (heavy ? 230 : 140) * K; def.ky = Math.sin(ang) * (heavy ? 230 : 140) * K;
@@ -5064,8 +5089,9 @@ function hit(att, def, m, ang, opt) {
   }
   afterHitSelf(att, def, m, dmg, opt);
   // カウンター（はんしゃのまく・はがねのしかえし）
-  if (def.v.counter && def.v.counter.t > 0 && (def.v.counter.ctr === 'any' || (def.v.counter.ctr === 'spec' && m.cat === 'spec')) && def.hp > 0 && targetable(att)) {
-    const back = Math.round(dmg * def.v.counter.mult); def.v.counter = null;
+  if (def.v.counter && def.v.counter.t > 0 && rpsOf(m) === 'scissors' && def.hp > 0) rpsBreak(def);   // ✌️ には かまえが くずれる
+  if (def.v.counter && def.v.counter.t > 0 && rpsOf(m) === 'rock' && def.hp > 0 && targetable(att)) {   // ✊ を はねかえす
+    const back = Math.round(dmg * def.v.counter.mult); def.v.counter = null; if (att.hp - back > 0) rpsParry(att, def);
     att.hp = Math.max(0, att.hp - back); att.flash = .12;
     fxPush({ type: 'ray', x0: def.x, y0: def.y - BODY, x1: att.x, y1: att.y - BODY, col: '#ffffff', life: .3, max: .3 });
     popText(att.x, att.y - 66, String(back), '#ffd166', true); say(`${def.sp.n}は ダメージを はねかえした！`);
@@ -5192,14 +5218,14 @@ function aiDodgeCheck(f, o) {
     if (f.planFor !== o.cur.uid) {
       f.planFor = o.cur.uid;
       // ガード系の わざを もっていれば たまに それで うける
-      const guard = f.moves.find(id => ['protect', 'counter'].includes(MOVES[id].k) && (f.cd[id] || 0) <= 0 && !moveBlocked(f, id));
+      const guard = rpsOf(o.cur.m) === 'rock' ? f.moves.find(id => ['protect', 'counter'].includes(MOVES[id].k) && (f.cd[id] || 0) <= 0 && !moveBlocked(f, id)) : null;   // ✋ は ✊ に だけ
       f.plan = B.smartDodge && f.side === 1
         ? { will: true, at: Math.max(o.cur.wind * .62, o.cur.wind - .28), guard: guard && estDmg(o, f, o.cur.m) > f.hp * .3 ? guard : null }   // かしこい AI：ねらいが きまってから ぎりぎりで よける
         : (() => { const g = guard && Math.random() < (f.mon.nat === 'nonki' ? .9 : .4) ? guard : null; return { will: !!g && f.mon.nat === 'nonki' || Math.random() < skill, at: rand(.12, .4) * o.cur.wind / .8, guard: g }; })();   // のんき：かまえて まつ
     }
     if (f.plan.will && o.cur.t >= f.plan.at && inZone(o.cur, o, f.x, f.y, f.r)) {
       const g = f.plan.guard, gm = g && MOVES[g];
-      if (gm && (gm.k === 'protect' || gm.ctr === 'any' || o.cur.m.cat === 'spec')) { f.plan.guard = null; beginMove(f, g); return; }
+      if (gm) { f.plan.guard = null; beginMove(f, g); return; }
       startDodge(f); return;
     }
   }
@@ -5236,8 +5262,10 @@ function smartScore(f, o, id) {
     if (m.sucker && !(o.state === 'wind' && o.cur && isDamaging(o.cur.m))) return 0;
     let p = KIND_P[m.k] || .7;
     if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !losClear(f, o)) p *= .3;
-    if (o.v.protect > 0 || o.inv > .2) p *= .2;
-    if (o.v.counter && (o.v.counter.ctr === 'any' || (o.v.counter.ctr === 'spec' && m.cat === 'spec'))) p *= .1;   // かえされる
+    const rps = rpsOf(m);
+    if (o.inv > .2) p *= .2;
+    if (o.v.protect > 0 || (o.v.counter && o.v.counter.t > 0)) p *= rps === 'scissors' ? 1.3 : .1;   // かまえ：✌️ で くずす、✊ は はじかれる
+    if (charging(o) && rpsOf(o.cur.m) === 'scissors') p *= rps === 'rock' ? 1.6 : .8;   // ✌️ を ためている：✊ で わりこむ
     if (o.state === 'wind' && o.cur && o.cur.boost) p = Math.min(1, p * 1.3);   // ため中は ねらいどき
     const dmg = estDmg(f, o, m) * p, rc = moveReach(f, o, m), travel = Math.max(0, d - rc) / Math.max(40, speedOf(f));
     if (dmg >= o.hp * 1.05) return 5 - (m.wind || .3) - travel;   // とどめ：はやい わざを
@@ -6780,7 +6808,8 @@ function setupCmds() {
     b.hidden = !id;
     if (!id) return;
     const m = MOVES[id];
-    b.querySelector('.a').textContent = m.n;
+    const ic = RPS_ICON[rpsOf(m)] || '';
+    b.querySelector('.a').textContent = (ic ? ic + ' ' : '') + m.n; b.dataset.rps = rpsOf(m);
     b.querySelector('.a').style.fontSize = m.n.length > 8 ? '10.5px' : m.n.length > 6 ? '11.5px' : '';
     b.querySelector('.b').textContent = moveSub(m); b.querySelector('.b')._t = null; b.dataset.eff = '';
     b.querySelector('.d').textContent = moveDesc(m);
@@ -7909,6 +7938,7 @@ $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
     <p><b>わざは ボタンで しじ</b>：わざボタンを タップすると、モンスターが まあいまで うごいて その わざを だす（うごきは じどう）。<b>AUTO</b> を おすと わざも おまかせ。<b>かわす</b> と <b>こうたい</b> も 指示しよう。キーボードは 1〜4 で わざ、A で AUTO。</p>
+    <p><b>じゃんけん</b>：わざには ✊とっしん（近接・突進）／✌️しゃげき（弾・ビーム・はんい）／✋まもり（まもる・カウンター）が ある。<br>✊ は ためている ✌️ に わりこんで キャンセル（✌️ を ためている あいだは ほかの わざでは とまらない）。✋ は つっこんできた ✊ を はじいて ひるませる。✌️ は かまえた ✋ を ガードブレイク。ダメージは かわらない、だす タイミングの よみあい。</p>
     <p><b>まち時間</b>：わざを 1つ つかうと、<b>ぜんぶの わざ</b>が その わざの まち時間に なる。つよい わざほど ながく まつので、どれを いつ だすかが かんじん。</p>
     <p><b>赤い はんい</b>は あいての わざの よちょう。<b>かわす</b>で 一瞬 むてきに なれる（つかうと 5びょう まち）。</p>
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
@@ -8183,7 +8213,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'hinokon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b) }); },
+  run(fn) { return fn({ hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b) }); },
 };
 })();
 </script>
