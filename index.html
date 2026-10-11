@@ -1296,6 +1296,39 @@ for (const id in CHAN) if (MOVES[id]) MOVES[id].chan = CHAN[id];
 // ダメージを かえす わざ（はんしゃのまく・はがねのしかえし）：かまえは ながく（3びょう）、つかえる 回数は 1戦 2回まで
 const COUNTER_T = 3;
 for (const id in MOVES) if (MOVES[id].k === 'counter') MOVES[id].cd = 9;
+/* ---- わざの かたち（pat）：おなじ しゅるいでも わざごとに ちがう うごき・はんいに する ---- */
+const MOVE_PAT = {
+  // ねらいうち（strike）
+  thunder: 'scatter', 'bug-swarm': 'swarm', spore: 'scatter', rockfall: 'big', 'heavy-drop': 'big', geyser: 'big', 'fire-pillar': 'line', 'icicle-drop': 'row',
+  'earth-power': 'line', tornado: 'line', psychic: 'cross', poltergeist: 'double', 'rock-tomb': 'cage', 'root-snare': 'ring',
+  // まわり（aoe）
+  quake: 'donut', earthquake: 'pulse', 'sludge-wave': 'pulse', 'hyper-voice': 'pulse3', surf: 'front',
+  // ビーム（beam）
+  gust: 'split', 'freeze-dry': 'split', overheat: 'wide', 'hydro-pump': 'wide', 'stone-edge': 'erupt', fissure: 'erupt',
+  // とびどうぐ（proj）
+  ember: 'spread', 'air-slash': 'spread', bubble: 'bounce', 'energy-ball': 'bounce', leaf: 'boomerang', psyshock: 'boomerang',
+  'shadow-ball': 'homing', 'will-o-wisp': 'homing', 'draining-kiss': 'homing', 'aura-sphere': 'homing', thunderbolt: 'zigzag', 'dragon-pulse': 'wave', 'psychic-noise': 'wave', 'thunder-wave': 'wave',
+  toxic: 'lob', 'leech-seed': 'lob', 'gunk-shot': 'lob', 'sludge-bomb': 'lob', 'focus-blast': 'orb', moonblast: 'orb', 'fire-blast': 'blast', icicle: 'triple',
+  // ゆか・かべ
+  'poison-swamp': 'blob', 'fire-sea': 'strip', 'volt-floor': 'grid', quicksand: 'pull', 'ice-wall': 'arc', 'thorn-hedge': 'vee',
+  // とっしん・せっきん
+  spark: 'zigzag', 'close-combat': 'double', 'body-slam': 'leap', 'rapid-spin': 'spin', 'poison-jab': 'combo', 'play-rough': 'combo',
+};
+for (const id in MOVE_PAT) if (MOVES[id]) MOVES[id].pat = MOVE_PAT[id];
+// かたちに あわせた 数値（つよさは 1かいの わざで 1ヒットまで → ダメージは かわらない）
+for (const id in MOVES) { const m = MOVES[id];
+  if (m.pat === 'big') { m.rad = Math.round((m.rad || 40) * 1.6); m.wind = (m.wind || .5) + .25; }
+  if (m.pat === 'wide') { m.wid = Math.round((m.wid || 20) * 2.2); m.len = Math.round(m.len * .7); }
+  if (m.pat === 'split') { m.wid = Math.max(10, Math.round((m.wid || 20) * .6)); }
+  if (m.pat === 'spread') { m.cnt = 3; m.spread = m.k === 'proj' ? .32 : 0; }
+  if (m.pat === 'triple') { m.burst = [3, 3]; }
+  if (m.pat === 'orb') { m.r = Math.round((m.r || 8) * 2); m.spd = Math.round((m.spd || 300) * .55); m.life = 3; }
+  if (m.pat === 'homing') { m.homing = m.homing || 2.6; m.spd = Math.round((m.spd || 300) * .8); m.life = 2.6; }
+  if (m.pat === 'bounce') { m.life = 2.8; }
+  if (m.pat === 'boomerang') { m.life = 2.2; }
+  if (m.pat === 'donut') { m.rad = Math.round(m.rad * 1.35); }
+  if (m.pat === 'front') { m.rad = Math.round(m.rad * 1.5); }
+}
 
 // おぼえる わざ（[レベル, わざ]）。ランキング上位100のわざは すべて どれかの モンスターが おぼえる
 const LEARN = {
@@ -4059,7 +4092,8 @@ function moveDesc(m) {
   if (m.useDef) a.push('ぼうぎょで ダメージ計算'); if (m.useFoeAtk) a.push('あいての こうげきで 計算'); if (m.hitDef) a.push('あいての ぼうぎょに ダメージ');
   if (m.crit) a.push('きゅうしょに あたりやすい'); if (m.ohko) a.push('あたれば いちげき'); if (m.rampage) a.push('2〜3かい あばれて こんらん');
   if (m.fakeout) a.push('でてすぐ だけ・ひるませる'); if (m.sucker) a.push('あいてが こうげきの よちょう中だけ せいこう');
-  if (m.hits) a.push('3かい れんぞく'); if (m.burst) a.push('2〜5はつ れんしゃ'); if (m.rapidSpin) a.push('しかけ・タネを はらう');
+  if (m.pat && PAT_DESC[m.pat]) a.unshift(PAT_DESC[m.pat]);
+  if (m.hits) a.push('3かい れんぞく'); if (m.burst && m.pat !== 'triple') a.push('2〜5はつ れんしゃ'); if (m.rapidSpin) a.push('しかけ・タネを はらう');
   if (m.healBlock) a.push('6びょう かいふく ふうじ'); if (m.superVsWater) a.push('みずタイプに ばつぐん'); if (m.confuseIfBoosted) a.push('のうりょくが あがった あいてを こんらん');
   return a.join(' ／ ');
 }
@@ -4431,7 +4465,7 @@ function startBattle(cfg) {
       { fs: pf, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: { name: 'あなた', spr: trArt(myLook()), x: st.trainers[0].x, y: st.trainers[0].y, shout: 0 } },
       { fs: ef, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: cfg.trainer ? { name: cfg.trainer.name, spr: cfg.trainer.spr, x: st.trainers[1].x, y: st.trainers[1].y, shout: 0 } : null },
     ],
-    projs: [], parts: [], texts: [], fx: [], decals: [], walls: [], wallRects: [], zones: [], holes: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
+    projs: [], parts: [], texts: [], fx: [], decals: [], walls: [], wallRects: [], zones: [], holes: [], blasts: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
     cam: { x: st.W / 2, y: st.H / 2, z: Math.max(VW / st.W, VH / st.H) }, catchO: null, result: null, exp: {}, skill: cfg.skill ?? .4, sent: 0,
   };
   // AI の かしこさ：みかたの モンスターは いつも かしこく わざを えらぶ。あいては せっていの「あいての つよさ」しだい（オンラインは どちらも かしこく、よけは ふつう）
@@ -4606,12 +4640,17 @@ function inSector(x, y, ox, oy, ang, rad, half, r) {
 }
 function inZone(cur, owner, x, y, r) {
   const m = cur.m;
-  if (m.k === 'aoe') return Math.hypot(x - owner.x, y - owner.y) <= m.rad + r;
-  if (m.k === 'strike') return Math.hypot(x - cur.tx, y - cur.ty) <= m.rad + r;
+  if (m.k === 'aoe' && !m.pat) return Math.hypot(x - owner.x, y - owner.y) <= m.rad + r;
+  if (m.k === 'strike') return cur.pts ? cur.pts.some(p => { const d = Math.hypot(x - p.x, y - p.y); return d <= p.r + r && d >= p.ring - r; }) : Math.hypot(x - cur.tx, y - cur.ty) <= m.rad + r;
+  if (m.k === 'aoe' && m.pat === 'donut') { const d = Math.hypot(x - owner.x, y - owner.y); return d <= m.rad + r && d >= m.rad * .45 - r; }
+  if (m.k === 'aoe' && m.pat === 'front') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, 1.1, r);
   if (m.k === 'vault') return Math.hypot(x - cur.tx, y - cur.ty) <= m.rad + r * .5;
   if (m.k === 'multi') return cur.pts.some(p => Math.hypot(x - p.x, y - p.y) <= m.rad + r);
+  if (m.k === 'aoe') return Math.hypot(x - owner.x, y - owner.y) <= m.rad + r;   // pulse など：まずは ふつうの まる
   if (m.k === 'cone') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, m.half, r);
   if (m.k === 'swipe') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad + owner.r, .95, r);
+  if (m.k === 'beam' && m.pat === 'erupt' && cur.pts) return cur.pts.some(p => Math.hypot(x - p.x, y - p.y) <= p.r + r);
+  if (m.k === 'beam' && m.pat === 'split' && !cur.splitting) { cur.splitting = 1; const a0 = cur.ang, ok = [-.32, 0, .32].some(da => { cur.ang = a0 + da; return inZone(cur, owner, x, y, r); }); cur.ang = a0; cur.splitting = 0; return ok; }
   if (m.k === 'beam' || m.k === 'dash') {
     const len = m.k === 'beam' && cur.len != null ? cur.len : m.len, wid = m.k === 'dash' ? owner.r * 2 + 8 : m.wid;
     const c = Math.cos(cur.ang), s = Math.sin(cur.ang), dx = x - owner.x, dy = y - owner.y;
@@ -4679,6 +4718,8 @@ function beginMove(f, id) {
   const boost = m.k === 'self' || (m.k === 'curse' && !hasType(f, 'ghost'));   // のうりょくアップ：ためが ながく、そのあいだに うたれると ダメージ アップ
   const cur = { id, m, t: 0, wind: boost ? Math.max(1.4, m.wind * 3) : m.wind, ang, uid: ++B.uidc, tx, ty, hits: 0, boost };
   if (m.k === 'multi') cur.pts = multiPoints(f, { x: tx, y: ty }, m, ang);
+  if (m.k === 'strike' && m.pat) cur.pts = strikePoints(f, { x: tx, y: ty }, m, ang);
+  if (m.k === 'beam' && m.pat === 'erupt') { cur.pts = []; const L = rayLen(f, ang, m.len); for (let d = 40, i = 0; d <= L; d += 46, i++) cur.pts.push({ x: f.x + Math.cos(ang) * d, y: f.y + Math.sin(ang) * d, d: i * .06, r: 30, ring: 0 }); }   // じめんが じゅんに さけて ふきあがる
   f.cur = cur; if (f.want && f.want.id === id) f.want = null;   // ボタンの しじ：だせた
   const cdv = m.cd * cdScale(f) * CD_SHARED_K; f.cdMax = f.cdMax || {}; f.cdMax[id] = cdv;
   if (id !== 'tackle') f.cd[id] = (f.v.rampage && id === 'outrage') ? 0 : cdv; else f.cd[id] = cdv;
@@ -4693,6 +4734,23 @@ function beginMove(f, id) {
     if (B.sides[f.side].trainer) cmdPose(f.side);
   }
 }
+// ねらいうちの かたち：ばくはつ する ところ と じかんさ（d）・はんけい（r）
+function strikePoints(f, t, m, ang) {
+  const R = m.rad, P = (x, y, d = 0, r = R, ring = 0) => ({ x: clamp(x, B.st.fx0 + 10, B.st.fx1 - 10), y: clamp(y, B.st.fy0 + 10, B.st.fy1 - 10), d, r, ring });
+  const c = Math.cos(ang), s = Math.sin(ang), pts = [];
+  switch (m.pat) {
+    case 'scatter': pts.push(P(t.x, t.y, 0, R * .8)); for (let i = 0; i < 3; i++) { const a = rand(0, 7), r = rand(50, 90); pts.push(P(t.x + Math.cos(a) * r, t.y + Math.sin(a) * r * .8, .18 * (i + 1), R * .7)); } break;   // あちこちに おちる
+    case 'swarm': for (let i = 0; i < 6; i++) { const a = i / 6 * 7 + rand(-.3, .3), r = i ? rand(30, 70) : 0; pts.push(P(t.x + Math.cos(a) * r, t.y + Math.sin(a) * r * .8, i * .09, R * .55)); } break;   // むしの むれ：つぎつぎ かじる
+    case 'line': { const d0 = Math.max(40, Math.hypot(t.x - f.x, t.y - f.y) - 90); for (let i = 0; i < 4; i++) { const d = d0 + i * 60; pts.push(P(f.x + c * d, f.y + s * d, i * .12, R * .8)); } break; }   // てまえから おくへ じゅんに ふきあがる
+    case 'row': for (let i = -1; i <= 1; i++) pts.push(P(t.x - s * i * R * 1.5, t.y + c * i * R * 1.5, (i + 1) * .1, R * .85)); break;   // よこ 1れつ
+    case 'cross': pts.push(P(t.x, t.y, 0, R * .8)); for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + .785; pts.push(P(t.x + Math.cos(a) * R * 1.3, t.y + Math.sin(a) * R * 1.3 * .8, .12, R * .7)); } break;   // ✕じ
+    case 'double': pts.push(P(t.x, t.y, 0)); pts.push(P(t.x, t.y, .55, R * 1.15)); break;   // おなじ ところに 2かい（よけた あとに もう1かい）
+    case 'cage': pts.push(P(t.x, t.y, 0, R * .9)); break;   // まんなかに おちて、まわりに いわの かべ
+    case 'ring': pts.push(P(t.x, t.y, 0, R * 1.5, R * .55)); pts.push(P(t.x, t.y, .4, R * .65)); break;   // そとがわの わ → まんなかへ とじる
+    default: pts.push(P(t.x, t.y, 0, R));
+  }
+  return pts;
+}
 function multiPoints(f, o, m, ang) {
   const pts = [];
   if (m.pattern === 'fan') { // がけくずれ：むいた方向に 3つ ならべて落とす
@@ -4706,9 +4764,48 @@ function multiPoints(f, o, m, ang) {
   return pts;
 }
 function spawnProj(f, m, a) {
-  B.projs.push({ f, side: f.side, m, x: f.x + Math.cos(a) * 20, y: f.y - BODY + Math.sin(a) * 20, vx: Math.cos(a) * m.spd, vy: Math.sin(a) * m.spd, r: m.r, life: m.life || 1.8, rolled: false, rot: 0 });
+  const p = { f, side: f.side, m, x: f.x + Math.cos(a) * 20, y: f.y - BODY + Math.sin(a) * 20, vx: Math.cos(a) * m.spd, vy: Math.sin(a) * m.spd, r: m.r, life: m.life || 1.8, rolled: false, rot: 0, age: 0, pat: m.pat || '' };
+  p.bx = p.x; p.by = p.y;   // なみ・ジグザグ：まっすぐ すすむ 中心
+  if (p.pat === 'lob') {   // やまなりに なげる：障害物を こえて、ねらった ところで はじける
+    const o = opp(f), tx = o ? o.x : f.x + Math.cos(a) * 200, ty = o ? o.y : f.y + Math.sin(a) * 200, d = Math.hypot(tx - f.x, ty - f.y);
+    Object.assign(p, { sx: f.x, sy: f.y, tx, ty, T: clamp(d / 260, .55, 1.3), life: 9, h: 0 });
+  }
+  B.projs.push(p);
+}
+// とびどうぐ：ばくはつ（だいかえん・やまなり）
+function projBlast(p, R) {
+  const o = active(1 - p.side), gx = p.pat === 'lob' ? p.tx : p.x, gy = p.pat === 'lob' ? p.ty : p.y + BODY;
+  fxPush({ type: 'shock', x: gx, y: gy, rad: R, col: TYPES[p.m.t].c, life: .35, max: .35 }); sheetFx(STRIKE_FX[p.m.t] || 'boom', gx, gy - R * .6, R / 40 + .2); addDecal(gx, gy, R * .45, p.m.t === 'fire' ? 'scorch' : 'crater'); B.shake = Math.max(B.shake, 4);
+  if (!p.hitDone && targetable(o) && Math.hypot(o.x - gx, o.y - gy) <= R + o.r) { p.hitDone = true; hit(p.f, o, p.m, Math.atan2(o.y - gy, o.x - gx)); }
 }
 
+// ---- じかんさで ばくはつ する ばしょ（ねらいうち・なみ・じわれ）：おなじ わざでは 1かいしか あたらない ----
+function addBlasts(f, m, pts, grp, look) {
+  B.blasts = B.blasts || [];
+  for (const p of pts) B.blasts.push({ f, side: f.side, m, x: p.x, y: p.y, r: p.r || m.rad, ring: p.ring || 0, t: p.d || 0, t0: p.d || 0, grp, look: look || '' });
+}
+function updBlasts(dt) {
+  if (!B.blasts || !B.blasts.length) return;
+  for (const b of B.blasts) {
+    if (b.done) continue;
+    b.t -= dt; if (b.t > 0) continue; b.done = true;
+    const m = b.m, o = active(1 - b.side), col = TYPES[m.t].c;
+    if (b.look === 'wave') { fxPush({ type: 'shock', x: b.x, y: b.y, rad: b.r, col, life: .4, max: .4 }); typeFx(b.x, b.y - 10, m.t, 8, b.r * 2, .4); B.shake = Math.max(B.shake, 4); }
+    else if (b.look === 'spike') { sheetFx(STRIKE_FX[m.t] || 'boom', b.x, b.y - 22, .75); burst(b.x, b.y, col, 5, 80, .35); addDecal(b.x, b.y, 12, 'crater'); B.shake = Math.max(B.shake, 2); }
+    else { sheetFx(STRIKE_FX[m.t] || 'boom', b.x, b.y - b.r * .7, b.r / 40 + .3); burst(b.x, b.y, col, 7, 100, .4); addDecal(b.x, b.y, b.r * .5, m.t === 'elec' || m.t === 'fire' ? 'scorch' : 'crater'); B.shake = Math.max(B.shake, 4); }
+    if (!targetable(o) || B.blasts.some(x => x.grp === b.grp && x.hitDone)) continue;
+    const d = Math.hypot(o.x - b.x, o.y - b.y);
+    if (d <= b.r + o.r && d >= b.ring - o.r) { b.hitDone = true; hit(b.f, o, m, Math.atan2(o.y - b.y, o.x - b.x)); }
+  }
+  B.blasts = B.blasts.filter(b => !b.done || B.blasts.some(x => x.grp === b.grp && !x.done));   // おなじ わざの ばくはつが のこっている あいだは ヒットの きろくを のこす
+}
+// いわのおり：まわりに いわが おちて しばらく かこむ
+function cageRocks(f, m, p) {
+  const n = 7, R = p.r * 1.25, blocks = [];
+  for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; const x = p.x + Math.cos(a) * R, y = p.y + Math.sin(a) * R * .8; if (inField(x, y, 4)) blocks.push({ x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, x, y }); }
+  const w = { t: m.t, x: p.x, y: p.y, ang: 0, n, life: 3.5, max: 3.5, side: f.side, uid: ++B.uidc, blocks: blocks.filter(b => !B.sides.some(sd => { const x = sd.fs[sd.act]; return x && targetable(x) && circRect(x.x, x.y, footR(x) + 2, b); })) };
+  if (!w.blocks.length) return; B.walls.push(w); wallsChanged(); for (const b of w.blocks) sheetFx(WALL_FX[m.t] || 'slam', b.x, b.y - 14, .7);
+}
 function fireMove(f) {
   f.fireT = B.t;
   if (B.stats && f.cur) { const k = f.cur.id; B.stats.fire[k] = (B.stats.fire[k] || 0) + 1; }
@@ -4729,6 +4826,13 @@ function fireMove(f) {
   if (m.chan && (m.k === 'beam' || m.k === 'cone')) { cur.ch = 0; cur.next = 0; cur.n = Math.round(m.chan / CHAN_TICK); cur.landed = 0; f.state = 'chan'; B.shake = Math.max(B.shake, 3); return; }
   switch (m.k) {
     case 'melee':
+      if (m.pat === 'spin') {   // ぐるっと まわって まわり ぜんぶ
+        fxPush({ type: 'shock', x: f.x, y: f.y, rad: f.r + 46, col, life: .3, max: .3 }); sheetFx('claw', f.x, f.y - BODY, 1.2, cur.ang); sheetFx('claw', f.x, f.y - BODY, 1.2, cur.ang + Math.PI);
+        if (targetable(o) && dist(f, o) <= f.r + o.r + 46) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x)); endAct(f, .3); break; }
+      if (m.pat === 'combo' && (cur.hits || 0) < 2) {   // すばやく 2かい（1かい ぶんの ダメージを わけて）
+        sheetFx('slash', f.x + Math.cos(cur.ang) * (f.r + 14), f.y - BODY + Math.sin(cur.ang) * (f.r + 14), .8, cur.ang + (cur.hits ? .8 : -.8));
+        if (targetable(o) && dist(f, o) <= f.r + o.r + 22 && losClear(f, o)) hit(f, o, m, cur.ang, { mul: .55, tick: !cur.hits });
+        cur.hits = (cur.hits || 0) + 1; if (cur.hits < 2) { cur.t = cur.wind - .12; return; } endAct(f, .22); break; }
       sheetFx('slash', f.x + Math.cos(cur.ang) * (f.r + 14), f.y - BODY + Math.sin(cur.ang) * (f.r + 14), .9, cur.ang);
       if (m.lunge && o) {   // たいあたり：あいてへ むかって ふみこむ
         const gap = Math.max(0, dist(f, o) - (f.r + o.r + 6)), step = Math.min(m.lunge, gap), px = f.x, py = f.y;
@@ -4754,6 +4858,12 @@ function fireMove(f) {
       endAct(f, .25); break;
     }
     case 'beam': {
+      if (m.pat === 'erupt' && cur.pts) { addBlasts(f, m, cur.pts, cur.uid, 'spike'); B.shake = Math.max(B.shake, 4); endAct(f, .35); break; }
+      if (m.pat === 'split') {   // 3ぼんに わかれる
+        let hitOnce = false; const a0 = cur.ang;
+        for (const da of [-.32, 0, .32]) { const a = a0 + da, L = rayLen(f, a, m.len); fxPush({ type: 'beam', x: f.x, y: f.y - BODY, ang: a, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 });
+          cur.ang = a; cur.len = L; if (!hitOnce && targetable(o) && inZone({ ...cur, m: { ...m, pat: null } }, f, o.x, o.y, o.r)) { hitOnce = true; hit(f, o, m, a); } }
+        cur.ang = a0; B.shake = Math.max(B.shake, 3); endAct(f, .35); break; }
       cur.len = rayLen(f, cur.ang, m.len);   // 障害物で とまる
       const L = cur.len, ex = f.x + Math.cos(cur.ang) * L, ey = f.y + Math.sin(cur.ang) * L;
       fxPush({ type: 'beam', x: f.x, y: f.y - BODY, ang: cur.ang, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 }); for (let d = 20; d < L; d += 40) typeFx(f.x + Math.cos(cur.ang) * d, f.y - BODY + Math.sin(cur.ang) * d, m.t, 2, 70, .4);
@@ -4771,12 +4881,21 @@ function fireMove(f) {
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) { if (losClear(f, o)) hit(f, o, m, cur.ang); else blockedFx(f, o, m); }
       endAct(f, .35); break;
     case 'aoe':
+      if (m.pat === 'pulse' || m.pat === 'pulse3') {   // なみが なんども ひろがる（とおくへ いくほど あとから）
+        const n = m.pat === 'pulse3' ? 3 : 2, pts = []; for (let i = 0; i < n; i++) pts.push({ x: f.x, y: f.y, d: i * .32, r: m.rad * (1 + i * .45), ring: i ? m.rad * (1 + (i - 1) * .45) * .85 : 0 });
+        addBlasts(f, m, pts, cur.uid, 'wave'); endAct(f, .4); break; }
+      if (m.pat === 'front') {   // まえに おおきな なみ
+        fxPush({ type: 'sector', x: f.x, y: f.y, ang: cur.ang, rad: m.rad, half: 1.1, col, life: .35, max: .35 }); typeFx(f.x, f.y - BODY, m.t, 14, m.rad * 2, .5, { ang: cur.ang, spread: 1.1 });
+        for (let i = 1; i <= 3; i++) sheetFx(AOE_FX[m.t] || 'shockwave', f.x + Math.cos(cur.ang + (i - 2) * .6) * m.rad * .6, f.y - 14 + Math.sin(cur.ang + (i - 2) * .6) * m.rad * .6, .9);
+        B.shake = Math.max(B.shake, 6); if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang); endAct(f, .4); break; }
+      if (m.pat === 'donut') fxPush({ type: 'shock', x: f.x, y: f.y, rad: m.rad, col, life: .45, max: .45 });   // わ：ちかくは あんぜん
       sheetFx(AOE_FX[m.t] || 'shockwave', f.x, f.y - 14, m.rad / 55); typeFx(f.x, f.y - 10, m.t, 10, m.rad * 2, .45);
       B.shake = Math.max(B.shake, 6);
       if (m.t === 'ground' || m.t === 'rock' || m.t === 'fire') addDecal(f.x, f.y, m.rad * .4, m.t === 'fire' ? 'scorch' : 'crater');
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x));
       endAct(f, .4); break;
     case 'strike':
+      if (cur.pts) { addBlasts(f, m, cur.pts, cur.uid); if (m.pat === 'cage') cageRocks(f, m, cur.pts[0]); endAct(f, .3); break; }
       sheetFx(STRIKE_FX[m.t] || 'boom', cur.tx, cur.ty - m.rad * .7, m.rad / 40 + .3);
       B.shake = Math.max(B.shake, 5);
       burst(cur.tx, cur.ty, col, 8, 110, .45);
@@ -4850,6 +4969,13 @@ const WALL_B = 26;   // かべの ブロック 1つの 大きさ
 // かべの ブロック（ならぶ 向きは あいてへの 線と 直角）
 function wallBlocks(w) {
   const c = Math.cos(w.ang + Math.PI / 2), s = Math.sin(w.ang + Math.PI / 2), out = [];
+  const B_ = (x, y) => out.push({ x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, x, y });
+  if (w.shape === 'arc') {   // じぶんを まもる ゆみなり
+    const R = 80, cx = w.x - Math.cos(w.ang) * R, cy = w.y - Math.sin(w.ang) * R;
+    for (let i = 0; i < 7; i++) { const a = w.ang + (i - 3) * .27; B_(cx + Math.cos(a) * R, cy + Math.sin(a) * R); } return out; }
+  if (w.shape === 'vee') {   // あいてに むけた くの字（さきが とがる）
+    B_(w.x + Math.cos(w.ang) * 12, w.y + Math.sin(w.ang) * 12);
+    for (let i = 1; i <= 3; i++) for (const sg of [-1, 1]) { const a = w.ang + Math.PI + sg * .62; B_(w.x + Math.cos(w.ang) * 12 + Math.cos(a) * i * (WALL_B - 3), w.y + Math.sin(w.ang) * 12 + Math.sin(a) * i * (WALL_B - 3)); } return out; }
   for (let i = 0; i < w.n; i++) { const d = (i - (w.n - 1) / 2) * (WALL_B - 2), x = w.x + c * d, y = w.y + s * d; out.push({ x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, x, y }); }
   return out;
 }
@@ -4865,7 +4991,7 @@ function wallsChanged() {
 }
 function placeWall(f, o, m) {
   const ang = o ? Math.atan2(o.y - f.y, o.x - f.x) : (f.face > 0 ? 0 : Math.PI), d = o ? clamp(dist(f, o) * .4, 70, 160) : 90;
-  const w = { t: m.t, x: f.x + Math.cos(ang) * d, y: f.y + Math.sin(ang) * d, ang, n: 5, life: m.life, max: m.life, side: f.side, thorn: !!m.thorn, uid: ++B.uidc };
+  const w = { t: m.t, x: f.x + Math.cos(ang) * d, y: f.y + Math.sin(ang) * d, ang, n: 5, life: m.life, max: m.life, side: f.side, thorn: !!m.thorn, uid: ++B.uidc, shape: m.pat || '' };
   w.blocks = wallBlocks(w).filter(b => !B.sides.some(sd => { const x = sd.fs[sd.act]; return x && targetable(x) && circRect(x.x, x.y, footR(x) + 2, b); }) && inField(b.x, b.y, 4));
   if (!w.blocks.length) { failMove(f, 'でも かべを つくる ばしょが ない！'); return; }
   B.walls = B.walls.filter(x => x.side !== f.side || x.t !== m.t);   // おなじ わざの かべは 1つまで
@@ -4878,11 +5004,16 @@ const FLOOR_LIFE = 99999;
 function placeFloor(f, o, m) {
   const x = o ? o.x : f.x + f.face * 120, y = o ? o.y : f.y;
   B.zones = B.zones.filter(z => z.side !== f.side || z.t !== m.t);
-  B.zones.push({ id: MOVE_ID.get(m), t: m.t, x, y, rad: m.rad, life: FLOOR_LIFE, max: FLOOR_LIFE, side: f.side, tick: .5, uid: ++B.uidc, f });   // ゆかは きえない（おなじ わざを おきなおすと うつる）
+  const z = { id: MOVE_ID.get(m), t: m.t, x, y, rad: m.rad, life: FLOOR_LIFE, max: FLOOR_LIFE, side: f.side, tick: .5, uid: ++B.uidc, f, pat: m.pat || '' };   // ゆかは きえない（おなじ わざを おきなおすと うつる）
+  const a = Math.atan2(y - f.y, x - f.x), R = m.rad, P = (px, py, r) => ({ x: clamp(px, B.st.fx0, B.st.fx1), y: clamp(py, B.st.fy0, B.st.fy1), rad: r });
+  if (z.pat === 'blob') z.parts = [P(x, y, R * .8), P(x + R * .7, y - R * .25, R * .55), P(x - R * .6, y + R * .3, R * .6), P(x - R * .1, y - R * .5, R * .45)];   // ぶよぶよ ひろがる ぬま
+  if (z.pat === 'strip') z.parts = [-1.5, -.5, .5, 1.5].map(i => P(x + Math.cos(a) * i * R * .75, y + Math.sin(a) * i * R * .75 * .62, R * .5));   // あいてへ むかう ほのおの みち
+  if (z.pat === 'grid') z.parts = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].map(([i, j]) => P(x + i * R * .8, y + j * R * .8 * .62, R * .42));   // ＋の かたちの でんきの マス
+  B.zones.push(z);
   fxPush({ type: 'shock', x, y, rad: m.rad, col: TYPES[m.t].c, life: .4, max: .4 }); typeFx(x, y - 6, m.t, 18, m.rad * 2, .5);
   say(`${m.n}が ひろがった！`);
 }
-const inZoneFloor = (z, x, y) => ((x - z.x) / z.rad) ** 2 + ((y - z.y) / (z.rad * .62)) ** 2 < 1;
+const inZoneFloor = (z, x, y) => z.parts ? z.parts.some(q => ((x - q.x) / q.rad) ** 2 + ((y - q.y) / (q.rad * .62)) ** 2 < 1) : ((x - z.x) / z.rad) ** 2 + ((y - z.y) / (z.rad * .62)) ** 2 < 1;
 // あいての ゆかの 上に いるか（AI は さける）
 const onFoeFloor = (f, x, y) => !hovers(f) && B.zones.some(z => z.side !== f.side && inZoneFloor(z, x, y));
 function updatePlaced(dt) {
@@ -4895,7 +5026,9 @@ function updatePlaced(dt) {
     if (z.tick <= 0) { z.tick = .5;
       const x = active(1 - z.side); if (x && targetable(x) && !hovers(x) && inZoneFloor(z, x.x, x.y)) { floorDmg(x, z, 0); const e = MOVES[z.id].e || {}; if (e.st && x.hp > 0 && Math.random() * 100 < e.stCh) setStatus(x, e.st, z.f); }
     }
-    if (Math.random() < dt * 10) typeFx(z.x + rand(-z.rad, z.rad) * .8, z.y + rand(-z.rad, z.rad) * .45, z.t, 1, 30, .5);
+    if (Math.random() < dt * 10) { const q = z.parts ? choice(z.parts) : z; typeFx(q.x + rand(-q.rad, q.rad) * .8, q.y + rand(-q.rad, q.rad) * .45, z.t, 1, 30, .5); }
+    if (z.pat === 'pull') for (const sd of B.sides) { const x = sd.fs[sd.act]; if (sd === B.sides[z.side] || !x || !targetable(x) || hovers(x) || !inZoneFloor(z, x.x, x.y) || x.state === 'dash') continue;   // ありじごく：まんなかへ ひきこむ
+      const d = Math.hypot(z.x - x.x, z.y - x.y); if (d > 6) { x.x += (z.x - x.x) / d * 55 * dt; x.y += (z.y - x.y) / d * 55 * dt; clampF(x); } }
   }
   B.zones = B.zones.filter(z => z.life > 0);
 }
@@ -5273,7 +5406,7 @@ function smartScore(f, o, id) {
     if (m.fakeout && f.enterT > 1.8) return 0;
     if (m.sucker && !(o.state === 'wind' && o.cur && isDamaging(o.cur.m))) return 0;
     let p = KIND_P[m.k] || .7;
-    if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !losClear(f, o)) p *= .3;
+    if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat) && !losClear(f, o)) p *= .3;   // やまなり・じわれ・ジャンプは 障害物を こえる
     const rps = rpsOf(m);
     if (o.inv > .2) p *= .2;
     if (o.v.protect > 0 || (o.v.counter && o.v.counter.t > 0)) p *= rps === 'scissors' ? 1.3 : .1;   // かまえ：✌️ で くずす、✊ は はじかれる
@@ -5491,7 +5624,7 @@ function aiMove(f, o, dt, autoSpecial) {
   f.awayT = Math.max(0, (f.awayT || 0) - dt);
   let want;   // 立ち位置の ねらい：{ R: 間合い, los: 見える場所, cover: 陰に かくれる, flank: 横から }
   if (f.queued) {
-    const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k);
+    const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat);
     const see = !shot || losClear(f, o);
     const close = CLOSE_KINDS.includes(m.k);
     if (close && isDamaging(m) && !(f.want && B.t - f.want.t > 1.2) && flankStep(f, o, reach, d, per, dt)) return;   // しじが ながびいたら まっすぐ つっこむ   // まわりこみ：よこへ まわって から つっこむ
@@ -5854,13 +5987,21 @@ function updateFighter(f, dt) {
     case 'dash': {
       if (!f.cur) { f.state = 'free'; break; }
       const cur = f.cur, sp = (cur.m.prio > 0 ? 420 : 300) * K;
-      const px = f.x, py = f.y;
-      f.x += Math.cos(cur.ang) * sp * dt; f.y += Math.sin(cur.ang) * sp * dt; cur.d += sp * dt; f.moving = true; f.walk += dt * 3;
+      const px = f.x, py = f.y, pat = cur.m.pat;
+      let vx = Math.cos(cur.ang) * sp, vy = Math.sin(cur.ang) * sp;
+      if (pat === 'zigzag') { const z = Math.sign(Math.sin(cur.d / 38 * Math.PI)) || 1; vx += -Math.sin(cur.ang) * sp * .9 * z; vy += Math.cos(cur.ang) * sp * .9 * z; }   // ジグザグに はしる
+      if (pat === 'leap') { f.hop = Math.sin(clamp(cur.d / cur.m.len, 0, 1) * Math.PI) * 70; f.inv = Math.max(f.inv, .05); }   // とびあがって のしかかる（空中は むてき・障害物を こえる）
+      f.x += vx * dt; f.y += vy * dt; cur.d += sp * dt; f.moving = true; f.walk += dt * 3;
       if (Math.random() < .6) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: 0, vy: -10, life: .3, max: .3, col: id2col(cur.m), size: 3, g: 0 });
-      if (!cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; hit(f, o, cur.m, cur.ang); }
+      if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; hit(f, o, cur.m, cur.ang); }
       if (f.state !== 'dash') break;
       clampF(f);
-      const wall = Math.abs(f.x - (px + Math.cos(cur.ang) * sp * dt)) > .5 || Math.abs(f.y - (py + Math.sin(cur.ang) * sp * dt)) > .5;
+      const wall = pat !== 'leap' && (Math.abs(f.x - (px + vx * dt)) > .5 || Math.abs(f.y - (py + vy * dt)) > .5);
+      if (pat === 'leap' && cur.d >= cur.m.len) {   // ちゃくち：まわりに しょうげき
+        f.hop = 0; fxPush({ type: 'shock', x: f.x, y: f.y, rad: 62, col: id2col(cur.m), life: .35, max: .35 }); sheetFx('shockwave', f.x, f.y - 14, 1.1); addDecal(f.x, f.y, 22, 'crater'); B.shake = Math.max(B.shake, 7);
+        if (oT && dist(f, o) < 62 + o.r) hit(f, o, cur.m, Math.atan2(o.y - f.y, o.x - f.x)); endAct(f, .45); break; }
+      if (pat === 'double' && !cur.again && (cur.d >= cur.m.len || wall) && oT) {   // もういちど むきなおって つっこむ
+        cur.again = true; cur.d = cur.m.len * .35; cur.ang = Math.atan2(o.y - f.y, o.x - f.x); sheetFx('dash', f.x, f.y - BODY, 1, cur.ang); burst(f.x, f.y, '#ffffff', 6, 80, .25); break; }
       if (cur.d >= cur.m.len || wall) {
         if (wall) { B.shake = Math.max(B.shake, 4); addDecal(f.x, f.y, 14, 'crater'); burst(f.x, f.y, '#c9b8ff', 8, 70, .35); }
         endAct(f, wall ? .6 : .35);
@@ -6653,7 +6794,7 @@ function bStep(dt) {
       const d = dist(a, e), min = a.r + e.r - 2;
       if (d < min && d > .001) { const p = min - d, nx = (a.x - e.x) / d, ny = (a.y - e.y) / d; a.x += nx * p * .5; a.y += ny * p * .5; e.x -= nx * p * .5; e.y -= ny * p * .5; clampF(a); clampF(e); }
     }
-    updatePlaced(dt);
+    updatePlaced(dt); updBlasts(dt);
     for (const p of B.projs) {
       const tgt = active(1 - p.side);
       if (p.m.homing && targetable(tgt)) {
@@ -6661,13 +6802,34 @@ function bStep(dt) {
         const na = cur + clamp(wrapAng(want - cur), -p.m.homing * dt, p.m.homing * dt);
         p.vx = Math.cos(na) * sp; p.vy = Math.sin(na) * sp;
       }
-      p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; p.rot += dt * 12;
-      if (targetable(tgt) && Math.hypot(tgt.x - p.x, tgt.y - BODY - p.y) < tgt.r + p.r) {
-        p.life = 0; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx));
+      p.age += dt; p.life -= dt; p.rot += dt * 12;
+      if (p.pat === 'lob') {   // やまなり：とちゅうは あたらない・さえぎられない
+        const u = Math.min(1, p.age / p.T); p.x = p.sx + (p.tx - p.sx) * u; p.h = Math.sin(u * Math.PI) * 120; p.y = p.sy + (p.ty - p.sy) * u - BODY - p.h;
+        if (u >= 1) { p.life = 0; projBlast(p, 48); } continue;
       }
-      const st = B.st;
-      if (p.x < st.fx0 - 10 || p.x > st.fx1 + 10 || p.y < st.fy0 - 40 || p.y > st.fy1 + 4) { p.life = 0; burst(p.x, p.y, id2col(p.m), 4, 40, .25); }
-      else if (p.life > 0 && !flies(p.f) && obstacles(false).some(o => circRect(p.x, p.y + BODY, p.r, o))) { p.life = 0; burst(p.x, p.y, id2col(p.m), 6, 50, .3); }
+      if (p.pat === 'boomerang' && p.age > (p.m.life || 2.2) * .42) {   // もどってくる
+        const back = Math.atan2(p.f.y - BODY - p.y, p.f.x - p.x), cur = Math.atan2(p.vy, p.vx), sp = Math.hypot(p.vx, p.vy);
+        const na = cur + clamp(wrapAng(back - cur), -5 * dt, 5 * dt); p.vx = Math.cos(na) * sp; p.vy = Math.sin(na) * sp;
+        if (p.age > (p.m.life || 2.2) * .6 && Math.hypot(p.f.x - p.x, p.f.y - BODY - p.y) < p.f.r + 10) p.life = 0;
+      }
+      if (p.pat === 'wave' || p.pat === 'zigzag') {   // なみ／ジグザグに すすむ
+        p.bx += p.vx * dt; p.by += p.vy * dt; const sp = Math.hypot(p.vx, p.vy) || 1, nx = -p.vy / sp, ny = p.vx / sp;
+        const w = p.pat === 'wave' ? Math.sin(p.age * 9) * 34 : (2 / Math.PI) * Math.asin(Math.sin(p.age * 22)) * 26; p.x = p.bx + nx * w; p.y = p.by + ny * w;
+      } else { p.x += p.vx * dt; p.y += p.vy * dt; }
+      if (!p.hitDone && targetable(tgt) && Math.hypot(tgt.x - p.x, tgt.y - BODY - p.y) < tgt.r + p.r) {
+        if (p.pat === 'boomerang') { p.hitDone = true; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx)); }   // つきぬけて もどる
+        else if (p.pat === 'blast') { p.life = 0; projBlast(p, 60); }
+        else { p.life = 0; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx)); }
+      }
+      const st = B.st, out = p.x < st.fx0 - 10 || p.x > st.fx1 + 10 || p.y < st.fy0 - 40 || p.y > st.fy1 + 4, block = p.life > 0 && !flies(p.f) && obstacles(false).some(o => circRect(p.x, p.y + BODY, p.r, o));
+      if ((out || block) && p.pat === 'bounce' && (p.bnc || 0) < 3 && p.life > 0) {   // はねかえる（かべ・はしで 3かいまで）
+        p.bnc = (p.bnc || 0) + 1; p.x -= p.vx * dt; p.y -= p.vy * dt;
+        const tryX = obstacles(false).some(o => circRect(p.x + p.vx * dt, p.y + BODY, p.r, o)) || p.x + p.vx * dt < st.fx0 - 10 || p.x + p.vx * dt > st.fx1 + 10;
+        if (tryX) p.vx = -p.vx; else p.vy = -p.vy; burst(p.x, p.y, id2col(p.m), 3, 40, .2); SND.se('hit', 1.6);
+      }
+      else if (out) { p.life = 0; burst(p.x, p.y, id2col(p.m), 4, 40, .25); }
+      else if (block) { p.life = 0; if (p.pat === 'blast') projBlast(p, 60); else burst(p.x, p.y, id2col(p.m), 6, 50, .3); }
+      else if (p.life <= 0 && p.pat === 'blast') projBlast(p, 60);
     }
     B.projs = B.projs.filter(p => p.life > 0);
   }
@@ -6929,9 +7091,15 @@ function moveDesc(m) {
   if (healMax(m)) out.push(`1せん ${healMax(m)}かいまで`);
   return out.filter(Boolean).join('・');
 }
+const PAT_DESC = { scatter: 'あいての まわりに ばらばらに おちる', swarm: 'むれが つぎつぎ おそう', big: 'おおきな はんいに おそく おちる', line: 'てまえから あいてへ じゅんに ふきあがる', row: 'よこ 1れつに おちる', cross: '✕の かたちに おちる', double: 'おなじ ところに 2かい（よけた あとも ちゅうい）', cage: 'おちた まわりを いわで かこむ', ring: 'そとの わ → まんなかへ とじる',
+  donut: 'まわりの わ だけ（すぐ そばは あんぜん）', pulse: 'なみが 2かい ひろがる', pulse3: 'なみが 3かい ひろがる', front: 'まえに おおきな なみ', split: '3ぼんに わかれる', wide: 'ふとくて みじかい', erupt: 'じめんが じゅんに さける（障害物を こえる）',
+  spread: '3ほうこうに とぶ', bounce: 'かべで はねかえる', boomerang: 'つきぬけて もどってくる', homing: 'あいてを おいかける', zigzag: 'ジグザグに とぶ', wave: 'うねって とぶ', lob: 'やまなりに なげる（障害物を こえる）', orb: 'おおきく ゆっくり', blast: 'あたると ばくはつ', triple: '3はつ れんしゃ',
+  blob: 'いびつに ひろがる ぬま', strip: 'あいてへ のびる 1ぽんの みち', grid: '＋の かたちの ゆか', pull: 'まんなかへ ひきこむ', arc: 'じぶんを まもる ゆみなり', vee: 'あいてに むけた くの字', leap: 'とびあがって のしかかる（空中は むてき）', spin: 'まわり ぜんぶを こうげき', combo: 'すばやく 2れんげき' };
+const PAT_LABEL = { scatter: 'ばらまき', swarm: 'むれ', big: 'きょだい', line: 'れんぞく', row: 'よこならび', cross: 'クロス', double: '2れんだ', cage: 'おり', ring: 'わ→なか', donut: 'わ', pulse: 'なみ×2', pulse3: 'なみ×3', front: 'まえなみ', split: '3ぼん', wide: 'ふとい', erupt: 'じわれ',
+  spread: '3way', bounce: 'はねかえり', boomerang: 'ブーメラン', homing: 'ついび', zigzag: 'ジグザグ', wave: 'うねり', lob: 'やまなり', orb: 'おおだま', blast: 'ばくはつ', triple: '3れんしゃ', blob: 'ぬま', strip: 'みち', grid: '＋マス', pull: 'ひきこみ', arc: 'ゆみなり', vee: 'くの字', leap: 'ジャンプ', spin: 'かいてん', combo: '2れんげき' };
 function moveSub(m) {
   const aim = m.cat === 'stat' ? '' : (m.aim === 'dir' ? '◎' : '');
-  return `${TYPES[m.t].n}・${KIND_LABEL[m.k] || ''}${aim}`;
+  return `${TYPES[m.t].n}・${PAT_LABEL[m.pat] || KIND_LABEL[m.k] || ''}${aim}`;
 }
 function setupCmds() {
   const f = B && active(B.my || 0); if (!f) return;
@@ -7098,7 +7266,13 @@ function drawTele(f) {
   const sector = (ox, oy, ang, rad, half, k) => { ctx.moveTo(ox, oy); ctx.arc(ox, oy, rad * k, ang - half, ang + half); ctx.closePath(); };
   const path = (k) => {
     ctx.beginPath();
-    if (m.k === 'aoe') ctx.arc(f.x, f.y, m.rad * k, 0, Math.PI * 2);
+    const circ = (x, y, r, ring) => { ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, Math.PI * 2); if (ring > 0) { ctx.moveTo(x + ring, y); ctx.arc(x, y, ring, 0, Math.PI * 2, true); } };
+    if (cur.pts && (m.k === 'strike' || (m.k === 'beam' && m.pat === 'erupt'))) for (const p of cur.pts) circ(p.x, p.y, p.r * k, p.ring * k);
+    else if (m.k === 'aoe' && m.pat === 'donut') circ(f.x, f.y, m.rad * k, m.rad * .45 * k);
+    else if (m.k === 'aoe' && m.pat === 'front') sector(f.x, f.y, cur.ang, m.rad, 1.1, k);
+    else if (m.k === 'aoe' && (m.pat === 'pulse' || m.pat === 'pulse3')) circ(f.x, f.y, m.rad * (m.pat === 'pulse3' ? 1.9 : 1.45) * k, 0);
+    else if (m.k === 'beam' && m.pat === 'split') for (const da of [-.32, 0, .32]) { const a = cur.ang + da, c = Math.cos(a), s = Math.sin(a), L = rayLen(f, a, m.len) * k, hw = m.wid / 2; ctx.moveTo(f.x - s * hw, f.y + c * hw); ctx.lineTo(f.x + c * L - s * hw, f.y + s * L + c * hw); ctx.lineTo(f.x + c * L + s * hw, f.y + s * L - c * hw); ctx.lineTo(f.x + s * hw, f.y - c * hw); ctx.closePath(); }
+    else if (m.k === 'aoe') ctx.arc(f.x, f.y, m.rad * k, 0, Math.PI * 2);
     else if (m.k === 'strike') ctx.arc(cur.tx, cur.ty, m.rad * k, 0, Math.PI * 2);
     else if (m.k === 'multi') for (const p of cur.pts) { ctx.moveTo(p.x + m.rad * k, p.y); ctx.arc(p.x, p.y, m.rad * k, 0, Math.PI * 2); }
     else if (m.k === 'cone') sector(f.x, f.y, cur.ang, m.rad, m.half, k);
@@ -7123,8 +7297,8 @@ function drawTele(f) {
   if (!ZONE_KINDS.includes(m.k) && m.k !== 'melee') { // 補助わざ：じぶんの まわりに ひかる輪
     ctx.strokeStyle = `rgba(255,209,102,${.4 + prog * .5})`; ctx.beginPath(); ctx.ellipse(f.x, f.y, 26 + prog * 10, 12 + prog * 4, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); return;
   }
-  path(1); ctx.fillStyle = `rgba(${base},.14)`; ctx.fill(); ctx.strokeStyle = blink ? 'rgba(255,255,255,.95)' : `rgba(${base},.9)`; ctx.stroke();
-  path(prog); ctx.fillStyle = `rgba(${base},${.2 + prog * .25})`; ctx.fill();
+  path(1); ctx.fillStyle = `rgba(${base},.14)`; ctx.fill('evenodd'); ctx.strokeStyle = blink ? 'rgba(255,255,255,.95)' : `rgba(${base},.9)`; ctx.stroke();
+  path(prog); ctx.fillStyle = `rgba(${base},${.2 + prog * .25})`; ctx.fill('evenodd');
   if ((m.k === 'strike' || m.k === 'multi') && (m.t === 'rock' || m.t === 'dragon')) { // 落ちてくる影
     const pts = m.k === 'multi' ? cur.pts : [{ x: cur.tx, y: cur.ty }];
     ctx.fillStyle = 'rgba(0,0,0,.3)'; for (const p of pts) { ctx.beginPath(); ctx.ellipse(p.x, p.y, 18 * prog + 2, 9 * prog + 1, 0, 0, Math.PI * 2); ctx.fill(); }
@@ -7170,12 +7344,25 @@ function pixLayer(T, draw) {
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false; ctx.drawImage(PIXC, 0, 0, W * q, H * q); ctx.restore();
 }
 // ゆか（どくのぬま など）
+function drawPullSwirl(zn) { ctx.save(); ctx.strokeStyle = 'rgba(160,120,60,.55)'; ctx.lineWidth = 2; for (let i = 0; i < 3; i++) { const a0 = B.t * 2 + i * 2.1; ctx.beginPath(); for (let k = 0; k < 20; k++) { const u = k / 19, a = a0 + u * 3, r = zn.rad * (1 - u) * .9; const px = zn.x + Math.cos(a) * r, py = zn.y + Math.sin(a) * r * .62; k ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.stroke(); } ctx.restore(); }
+// これから ばくはつ する ところ：ちぢんでいく わ
+function drawBlasts() {
+  if (!B.blasts) return;
+  ctx.save(); ctx.lineWidth = 2;
+  for (const b of B.blasts) { if (b.done || b.t <= 0) continue;
+    const base = b.side === 1 ? '255,60,70' : '90,190,255', k = 1 - clamp(b.t / Math.max(.05, b.t0), 0, 1);
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, b.r, b.r * .8, 0, 0, 7); if (b.ring) ctx.ellipse(b.x, b.y, b.ring, b.ring * .8, 0, 7, 0, true);
+    ctx.fillStyle = `rgba(${base},${.12 + k * .25})`; ctx.fill('evenodd'); ctx.strokeStyle = `rgba(${base},.85)`; ctx.stroke(); }
+  ctx.restore();
+}
 function drawFloor(zn) {
+  if (zn.parts) { for (const q of zn.parts) drawFloor({ ...zn, x: q.x, y: q.y, rad: q.rad, parts: null }); if (zn.pat === 'pull') drawPullSwirl(zn); return; }
   const k = Math.min(1, (zn.max - zn.life) / .3) * Math.min(1, zn.life / .5), rx = zn.rad, ry = rx * .62, enemy = zn.side === 1, S = FXEL[FLOOR_FX[zn.t]];
   if (S && S.img.complete) {   // FXEL の ゆか（くりかえし）
     const n = S.n, i = Math.floor(B.t * 16 + (zn.uid || 0)) % n, sz = rx * 2.3 * (.6 + .4 * k);
     ctx.globalAlpha = k; ctx.drawImage(S.img, i * 48, 0, 48, 48, Math.round(zn.x - sz / 2), Math.round(zn.y - sz * .74), sz, sz);
   } else { ctx.globalAlpha = .45 * k; ctx.fillStyle = TYPES[zn.t].c; ctx.beginPath(); ctx.ellipse(zn.x, zn.y, rx, ry, 0, 0, 7); ctx.fill(); }
+  if (zn.pat === 'pull') drawPullSwirl(zn);
   ctx.globalAlpha = k; ctx.strokeStyle = enemy ? '#ff5a6a' : '#5ab8ff'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.lineDashOffset = -B.t * 20; ctx.beginPath(); ctx.ellipse(zn.x, zn.y, rx, ry, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]);
   ctx.globalAlpha = 1;
 }
@@ -7443,7 +7630,8 @@ function drawProj(p) {
   const x = Math.round(p.x), y = Math.round(p.y), t = p.m.t, R = p.r, S_ = FX_STYLE[t] || FX_STYLE.normal;
   glowDot(x, y, R * 2.2, S_.cols[1], .35);
   if (Math.random() < .45) B.parts.push({ x: p.x + rand(-2, 2), y: p.y + rand(-2, 2), vx: -p.vx * .15 + rand(-12, 12), vy: -p.vy * .15 + rand(-12, 12), life: .32, max: .32, col: choice(S_.cols), size: 5, g: 0, shape: S_.shape, rot: Math.random() * 6, vr: 6, glow: Math.random() < .5 });
-  ctx.fillStyle = 'rgba(10,8,18,.25)'; ctx.beginPath(); ctx.ellipse(x, y + BODY, R, R * .4, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(10,8,18,.25)'; ctx.beginPath(); ctx.ellipse(x, y + BODY + (p.h || 0), R * (p.h ? .7 : 1), R * .4, 0, 0, 7); ctx.fill();
+  if (p.pat === 'lob') { ctx.strokeStyle = p.side === 1 ? 'rgba(255,90,100,.6)' : 'rgba(90,190,255,.6)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(p.tx, p.ty, 48, 38, 0, 0, 7); ctx.stroke(); }   // おちる ばしょ
   if (t === 'fire') {
     ctx.fillStyle = '#c0281e'; ctx.beginPath(); ctx.arc(x, y, R + 2, 0, 7); ctx.fill();
     ctx.fillStyle = '#ff7a2a'; ctx.beginPath(); ctx.arc(x, y, R, 0, 7); ctx.fill();
@@ -7619,6 +7807,7 @@ function drawFighter(f) {
   if (f.state === 'dodge') alpha = .75;
   const fly = hovers(f), wing = fly && flaps(f), mv = fly && f.moving && ['free', 'act'].includes(f.state), bob = Math.sin(B.t * (mv ? (wing ? 9 : 5) : 3.2) + f.side * 1.7);
   if (fly) oy = -Math.round(26 * bodySz(f.sp) + bob * (mv ? 6 : 4));
+  if (f.hop && f.state === 'dash') oy -= Math.round(f.hop);
   if (fly && f.state === 'free' || mv) {   // はばたき：たてに すばやく のびちぢみ／ただよう：ゆっくり ゆれる
     const fl = wing ? Math.sin(B.t * (mv ? 24 : 12) + f.side) : Math.sin(B.t * 4 + f.side);
     sy *= 1 + fl * (wing ? (mv ? .07 : .035) : .03); sx *= 1 - fl * (wing ? (mv ? .04 : .02) : .015);
@@ -7741,6 +7930,7 @@ function render() {
       ctx.fillStyle = '#2a1c12'; ctx.beginPath(); ctx.ellipse(h.x, h.y + r * .12, r * .7, r * .3, 0, 0, 7); ctx.fill();
     }
     for (const f of [a, e]) if (f && f.state === 'wind' && f.cur) drawTele(f);
+    drawBlasts();
     for (const f of [a, e]) if (f && f.state === 'chan' && f.cur) drawChan(f);
     for (const f of [a, e]) if (f && f.state === 'hide' && f.cur) {   // おりてくる ばしょ
       const cur = f.cur, prog = clamp(cur.t / cur.wind, 0, 1), base = f.side === 1 ? '255,60,70' : '90,190,255', R = cur.m.rad;
