@@ -6808,8 +6808,7 @@ function setupCmds() {
     b.hidden = !id;
     if (!id) return;
     const m = MOVES[id];
-    const ic = RPS_ICON[rpsOf(m)] || '';
-    b.querySelector('.a').textContent = (ic ? ic + ' ' : '') + m.n; b.dataset.rps = rpsOf(m);
+    b.querySelector('.a').textContent = m.n; b.dataset.rps = rpsOf(m);
     b.querySelector('.a').style.fontSize = m.n.length > 8 ? '10.5px' : m.n.length > 6 ? '11.5px' : '';
     b.querySelector('.b').textContent = moveSub(m); b.querySelector('.b')._t = null; b.dataset.eff = '';
     b.querySelector('.d').textContent = moveDesc(m);
@@ -7498,8 +7497,24 @@ function drawFighter(f) {
   if (fly) { ctx.globalAlpha = .7 - bob * .08; shadow(f.x, f.y, img0.width * ms * (.22 - bob * .015)); ctx.globalAlpha = 1; }
   else shadow(f.x, f.y, img0.width * ms * .31);
   const img = (f.flash > 0 || f.state === 'enter' || f.state === 'return') ? fr.w : fr.n;
+  // ため中：あしもとの わ・あつまる ひかり・からだが ひかる・ゲージ（とっしんで キャンセルできる あいず）
+  const chg = f.cur && (f.state === 'chan' || (f.state === 'wind' && f.cur.wind >= .3)) ? f.cur : null;
+  const chgU = chg ? (f.state === 'chan' ? 1 : clamp(chg.t / chg.wind, 0, 1)) : 0, chgC = chg ? TYPES[chg.m.t].c : '';
+  if (chg) {
+    const R = img0.width * ms * .42 + 6, pul = .5 + .5 * Math.sin(B.t * 18);
+    ctx.save(); ctx.globalAlpha = .18 + .12 * chgU; ctx.fillStyle = chgC; ctx.beginPath(); ctx.ellipse(f.x, f.y, R * (1.25 - .25 * chgU), R * .42 * (1.25 - .25 * chgU), 0, 0, 7); ctx.fill();
+    ctx.globalAlpha = .55 + .4 * pul; ctx.strokeStyle = chgC; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(f.x, f.y, R * (1.6 - .6 * chgU), R * .42 * (1.6 - .6 * chgU), 0, 0, 7); ctx.stroke(); ctx.restore();
+    if (!B.headless && Math.random() < .7) { const a = rand(0, Math.PI * 2), r = rand(40, 64), cx = f.x, cy = f.y + oy - img0.height * ms * .45;
+      B.parts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * .7, vx: -Math.cos(a) * r * 3.2, vy: -Math.sin(a) * r * 2.2, life: .3, max: .3, col: Math.random() < .3 ? '#ffffff' : chgC, size: 3, g: 0 }); }
+  }
   drawSprite(img, f.x, f.y + 3 + oy, f.face, ms, alpha, sx, sy);
+  if (chg) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; drawSprite(fr.w, f.x, f.y + 3 + oy, f.face, ms, (.15 + .35 * chgU) * (.6 + .4 * Math.sin(B.t * 22)), sx, sy); ctx.restore(); }
   const top = Math.round(f.y + oy - img0.height * ms - 4);
+  if (chg && !['faint', 'enter', 'return'].includes(f.state)) {   // ため ゲージ（HPバーの すぐ 下）
+    const w = 46, x = Math.round(f.x - w / 2), y = top + 7;
+    ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 1, y - 1, w + 2, 5); ctx.fillStyle = chgC; ctx.fillRect(x, y, Math.round(w * chgU), 3);
+    if (chgU >= 1 || f.state === 'chan') { ctx.fillStyle = 'rgba(255,255,255,' + (.4 + .4 * Math.sin(B.t * 20)).toFixed(2) + ')'; ctx.fillRect(x, y, w, 3); }
+  }
   // 頭上のHPバー（参考画像のように キャラの上に うかぶ）
   if (!['faint', 'enter', 'return'].includes(f.state)) {
     const w = 46, x = Math.round(f.x - w / 2), k = f.hp / f.maxHp;
@@ -7938,7 +7953,7 @@ $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
     <p><b>わざは ボタンで しじ</b>：わざボタンを タップすると、モンスターが まあいまで うごいて その わざを だす（うごきは じどう）。<b>AUTO</b> を おすと わざも おまかせ。<b>かわす</b> と <b>こうたい</b> も 指示しよう。キーボードは 1〜4 で わざ、A で AUTO。</p>
-    <p><b>じゃんけん</b>：わざには ✊とっしん（近接・突進）／✌️しゃげき（弾・ビーム・はんい）／✋まもり（まもる・カウンター）が ある。<br>✊ は ためている ✌️ に わりこんで キャンセル（✌️ を ためている あいだは ほかの わざでは とまらない）。✋ は つっこんできた ✊ を はじいて ひるませる。✌️ は かまえた ✋ を ガードブレイク。ダメージは かわらない、だす タイミングの よみあい。</p>
+    <p><b>よみあい</b>：<b>とっしん</b>（近接・突進）は、わざを <b>ためて ひかっている</b> あいてに あてると キャンセルできる（ためている あいだは ほかの わざでは とまらない）。<b>まもる・カウンター</b>は つっこんできた とっしんを はじいて ひるませる。<b>弾・ビーム・はんい</b>は かまえた まもりを ガードブレイク。ダメージは かわらない、だす タイミングの よみあい。</p>
     <p><b>まち時間</b>：わざを 1つ つかうと、<b>ぜんぶの わざ</b>が その わざの まち時間に なる。つよい わざほど ながく まつので、どれを いつ だすかが かんじん。</p>
     <p><b>赤い はんい</b>は あいての わざの よちょう。<b>かわす</b>で 一瞬 むてきに なれる（つかうと 5びょう まち）。</p>
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
