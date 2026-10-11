@@ -1,0 +1,29 @@
+{
+  "name": "pixel-monster-arena-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "ピクセルモンスターアリーナ（iOS / Android アプリ版）",
+  "scripts": {
+    "build": "node scripts/build-web.mjs",
+    "sync": "npm run build && npx cap sync",
+    "android": "npm run sync && npx cap open android",
+    "ios": "npm run sync && npx cap open ios",
+    "assets": "npx capacitor-assets generate --iconBackgroundColor '#141022' --splashBackgroundColor '#141022'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/core": "^7.6.9",
+    "@capacitor/ios": "^7.6.9",
+    "@capacitor/splash-screen": "^7.0.5",
+    "@capacitor/status-bar": "^7.0.6",
+    "@fontsource/dotgothic16": "^5.3.1",
+    "firebase": "^11.10.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.6.9",
+    "esbuild": "^0.28.2",
+    "firebase-tools": "^15.33.0"
+  }
+}

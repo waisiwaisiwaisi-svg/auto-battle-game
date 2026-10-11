@@ -2997,7 +2997,11 @@ const CUSTOM_KEY = 'pma_custom_v1', CUSTOM_MAX = 20;
 const RLE_AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
 function rleEnc(idx) { let o = '', i = 0; while (i < idx.length) { const c = idx[i]; let n = 1; while (i + n < idx.length && idx[i + n] === c && n < 1295) n++; o += RLE_AL[c] + n.toString(36).padStart(2, '0'); i += n; } return o; }
 function rleDec(str, len) { const o = new Uint8Array(len); let p = 0; for (let i = 0; i + 2 < str.length + 1 && p < len; i += 3) { const c = Math.max(0, RLE_AL.indexOf(str[i])), n = parseInt(str.substr(i + 1, 2), 36) || 0; o.fill(c, p, Math.min(len, p + n)); p += n; } return o; }
-const safeName = (t, n = 8) => String(t || '').replace(/[<>&"'`\\]/g, '').trim().slice(0, n);
+// ふさわしくない ことばを ＊ に する（なまえ・ギルド・チャット）
+const NG_WORDS = ['しね', '死ね', '氏ね', 'ころす', '殺す', 'きえろ', '消えろ', 'きもい', 'キモい', 'キモイ', 'うざい', 'ウザい', 'ウザイ', 'ばか', 'バカ', '馬鹿', 'あほ', 'アホ', 'くず', 'クズ', 'かす', 'カス', 'ブス', 'ぶす', 'ちんこ', 'ちんぽ', 'まんこ', 'セックス', 'せっくす', 'おっぱい', 'レイプ', 'fuck', 'shit', 'bitch', 'dick', 'pussy', 'nigger', 'nigga', 'sex', 'porn', 'kill yourself', 'kys'];
+const NG_RE = new RegExp(NG_WORDS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').split('').join('[\\s・._-]*')).join('|'), 'gi');
+const ngMask = (t) => String(t == null ? '' : t).replace(NG_RE, (m) => '＊'.repeat(Math.min(6, m.replace(/[\s・._-]/g, '').length)));
+const safeName = (t, n = 8) => ngMask(String(t || '').replace(/[<>&"'`\\]/g, '').trim().slice(0, n));
 const okHex = (c) => typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c);
 let CUSTOM = { tr: {}, mon: {} };
 function saveCustom() { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(CUSTOM)); } catch (e) { } }
@@ -5833,6 +5837,8 @@ const MOVE_ID = new Map(Object.entries(MOVES).map(([k, v]) => [v, k]));
 function netEv(k, d) { NET.ev.push({ q: ++NET.q, k, d }); if (NET.ev.length > 80) NET.ev.splice(0, NET.ev.length - 80); }
 const r1 = (v) => typeof v === 'number' ? Math.round(v * 10) / 10 : v;
 function slim(o) { if (Array.isArray(o)) return o.map(slim); if (o && typeof o === 'object') { const r = {}; for (const k in o) { const v = o[k]; if (v === undefined || typeof v === 'function') continue; if (k === 'f' || k === 'sid' && false) continue; r[k] = slim(v); } return r; } return r1(o); }
+// オンラインが つかえない ときの あんない（claude.ai 版 と アプリ版 で ちがう）
+const onlineHint = (what) => window.PMA_APP ? (window.PMA_APP.online ? `${what}に つながりませんでした。つうしんを たしかめて もういちど ためしてね。` : `この アプリでは まだ ${what}が つかえません。`) : `${what}は claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ つかえます。`;
 async function netGetRoom() {
   if (NET.room) return NET.room;
   try { if (window.claude && window.claude.use) NET.room = await window.claude.use('room'); } catch (e) { NET.room = null; }
@@ -5847,7 +5853,7 @@ function netReset() { SND.onSe = null; NET.ranked = false; rankPreviewClose(); N
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
 async function netOpen(asHost, code, onStatus, opts = {}) {
   const room = await netGetRoom();
-  if (!room) { onStatus('この ばしょでは オンライン対戦が つかえません。claude.ai に サインインして、この ゲームの ページを ひらいてください。', true); return; }
+  if (!room) { onStatus(onlineHint('オンライン対戦'), true); return; }
   netReset(); NET.code = code; NET.host = asHost; NET.guest = !asHost; NET.ranked = !!opts.ranked; NET.oppR = opts.oppR; NET.rated = false;
   try { NET.nr = await room.join('pma-' + code); } catch (e) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
   await guildMe().catch(() => { });   // あいてに ギルドめいを みせる
@@ -6056,7 +6062,9 @@ async function rankDb() {
   if (RANKDB !== null) return RANKDB;
   try {
     const db = window.claude && window.claude.use ? await window.claude.use('db') : null, user = db ? await window.claude.use('user') : null;
-    RANKDB = db && user ? { db, user, id: await user.id() } : false;
+    // なまえは ここで NGワードを ふせる（ランキング・ギルド・チャット ぜんぶ）
+    const userM = user && { id: () => user.id(), profiles: async (ids) => { const r = await user.profiles(ids); const o = {}; for (const k in (r || {})) o[k] = { ...r[k], name: ngMask(r[k] && r[k].name) }; return o; } };
+    RANKDB = db && user ? { db, user: userM, id: await user.id() } : false;
     if (RANKDB && RANKDB.id) {   // サーバーに のこっている レートを つかう（ほかの 端末で あそんだ ぶん）
       const snap = await db.doc('ranks/' + RANKDB.id).get().catch(() => null);
       const d = snap && snap.exists && snap.data ? snap.data() : null;
@@ -6117,7 +6125,7 @@ async function renderRank(tab) {
   if (RK_TAB === 'g') W.querySelectorAll('.rkme,.rkladder').forEach(e => e.hidden = true);
   W.querySelectorAll('.rktabs button').forEach(b => { b.classList.toggle('on', b.dataset.t === RK_TAB); b.onclick = () => { SND.se && SND.se('ok'); renderRank(b.dataset.t); }; });
   const L = $('rkList'), R = await rankDb();
-  if (!R || !R.id) { L.innerHTML = '<p class="dim">ランキングは claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ みられます。</p>'; return; }
+  if (!R || !R.id) { L.innerHTML = `<p class="dim">${onlineHint('ランキング')}</p>`; return; }
   try { RK_TAB === 'g' ? await rankGuilds(R, L) : await rankPlayers(R, L); }
   catch (e) { if (!$('scRank').hidden) L.innerHTML = '<p class="dim">ランキングを よみこめませんでした</p>'; }
 }
@@ -6210,7 +6218,7 @@ function guildStop() { if (GUILD.unsub) { try { GUILD.unsub(); } catch (e) { } G
 async function renderGuild() {
   guildStop(); show('scGuild'); const W = $('gdBody'); W.innerHTML = '<p class="dim">よみこみちゅう…</p>';
   const R = await rankDb();
-  if (!R || !R.id) { W.innerHTML = '<p class="dim">ギルドは claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ つかえます。</p>'; return; }
+  if (!R || !R.id) { W.innerHTML = `<p class="dim">${onlineHint('ギルド')}</p>`; return; }
   let D; try { D = await guildData(R); } catch (e) { W.innerHTML = '<p class="dim">よみこめませんでした。あとで もういちど ためしてね。</p>'; return; }
   const { guilds, mine, rank } = D;
   if (mine && mine.gid0 !== mine.gid && guilds[mine.gid]) await guildMove(R, mine);
@@ -6319,7 +6327,8 @@ async function guildHome(R, g, rank) {
   for (const m of mem) {
     const row = document.createElement('div'); row.className = 'gdrow card' + (m.id === R.id ? ' me' : '');
     row.appendChild(lookCanvas(m.lk, 28)); row.insertAdjacentHTML('beforeend', `<span class="nm"></span><span class="pt">${m.wk === wk ? m.pts | 0 : 0}pt</span>`);
-    row.querySelector('.nm').textContent = (m.id === g.id ? '👑 ' : '') + nameOf(m.id); M.appendChild(row);
+    row.querySelector('.nm').textContent = (m.id === g.id ? '👑 ' : '') + nameOf(m.id) + (S.blocked && S.blocked[m.id] ? '（ブロック中）' : ''); M.appendChild(row);
+    if (m.id !== R.id) { const nm = row.querySelector('.nm'); nm.style.cursor = 'pointer'; nm.onclick = () => modUser(R, m.id, nameOf(m.id), ''); }
     if (lead && m.id !== R.id) {
       const off = g.offer === m.id, b = document.createElement('button'); b.className = 'btn sub'; b.style.cssText = 'padding:4px 8px;font-size:11px';
       b.textContent = off ? (m.no === g.id ? 'ことわられた' : 'たのみちゅう') : 'リーダーに する'; b.disabled = off && m.no !== g.id;
@@ -6357,11 +6366,11 @@ async function guildHome(R, g, rank) {
   // チャット：ギルドの みんなの さいきんの はつげんを まとめて じかんじゅん に
   const C = $('gdChat');
   GUILD.unsub = R.db.collection('gchat').where('gid', '==', g.id).limit(G_MAX + 5).onSnapshot(async (snap) => {
-    const all = []; for (const d of snap.docs) { const v = d.data() || {}; for (const m of (Array.isArray(v.msgs) ? v.msgs : []).slice(-10)) if (m && typeof m.x === 'string') all.push({ id: d.id, t: +m.t || 0, x: m.x.slice(0, 40) }); }
+    const all = []; for (const d of snap.docs) { const v = d.data() || {}; for (const m of (Array.isArray(v.msgs) ? v.msgs : []).slice(-10)) if (m && typeof m.x === 'string' && !(S.blocked && S.blocked[d.id])) all.push({ id: d.id, t: +m.t || 0, x: ngMask(m.x.slice(0, 40)) }); }
     all.sort((a, b) => a.t - b.t); const last = all.slice(-40);
     const need = [...new Set(last.map(m => m.id))].filter(id => !(ps && ps[id])); const ps2 = need.length ? await R.user.profiles(need).catch(() => ({})) : {};
     C.innerHTML = last.length ? '' : '<span class="dim">まだ だれも はなして いません</span>';
-    for (const m of last) { const el = document.createElement('div'); el.className = 'm'; const b = document.createElement('b'); b.textContent = (ps[m.id] && ps[m.id].name) || (ps2[m.id] && ps2[m.id].name) || 'トレーナー'; el.appendChild(b); el.appendChild(document.createTextNode(m.x)); const sm = document.createElement('small'); const dt = new Date(m.t); sm.textContent = `${dt.getMonth() + 1}/${dt.getDate()} ${dt.getHours()}:${String(dt.getMinutes()).padStart(2, '0')}`; el.appendChild(sm); C.appendChild(el); }
+    for (const m of last) { const el = document.createElement('div'); el.className = 'm'; const b = document.createElement('b'); b.textContent = (ps[m.id] && ps[m.id].name) || (ps2[m.id] && ps2[m.id].name) || 'トレーナー'; if (m.id !== R.id) { b.style.cursor = 'pointer'; b.title = 'つうほう・ブロック'; b.onclick = () => modUser(R, m.id, b.textContent, m.x); } el.appendChild(b); el.appendChild(document.createTextNode(m.x)); const sm = document.createElement('small'); const dt = new Date(m.t); sm.textContent = `${dt.getMonth() + 1}/${dt.getDate()} ${dt.getHours()}:${String(dt.getMinutes()).padStart(2, '0')}`; el.appendChild(sm); C.appendChild(el); }
     C.scrollTop = C.scrollHeight;
   }, () => { });
   let sending = false;
@@ -6380,12 +6389,25 @@ async function guildHome(R, g, rank) {
     GUILD.me = null; GUILD.gname = ''; renderGuild();
   };
 }
+// つうほう・ブロック（なまえ や チャットの 人を タップ）
+function modUser(R, id, name, text) {
+  const blocked = !!(S.blocked && S.blocked[id]), canReport = !!window.PMA_APP;
+  const bg = modal(`<h3 style="margin-bottom:6px" id="muN"></h3><p class="dim" style="margin-bottom:12px">いやな ことを された ときは ブロックすると、この 人の チャットが みえなく なります。${canReport ? 'ルールいはんは つうほう してください。' : ''}</p>
+    <div style="display:flex;flex-direction:column;gap:8px">${canReport ? '<button class="btn sub" id="muRep">⚠ つうほう する</button>' : ''}<button class="btn sub" id="muBlk">${blocked ? 'ブロックを やめる' : '🚫 ブロック する'}</button><button class="btn" id="muX">とじる</button></div>`);
+  bg.querySelector('#muN').textContent = name;
+  bg.querySelector('#muX').onclick = () => bg.remove();
+  bg.querySelector('#muBlk').onclick = () => { S.blocked = S.blocked || {}; if (blocked) delete S.blocked[id]; else S.blocked[id] = 1; save(); bg.remove(); renderGuild(); };
+  if (canReport) bg.querySelector('#muRep').onclick = async () => {
+    try { await R.db.doc(`reports/${R.id}_${Date.now()}`).set({ by: R.id, who: id, x: String(text || '').slice(0, 80), t: Date.now() }); bg.remove(); await ask('つうほう しました。かくにん して たいおう します。', 'OK', null); }
+    catch (e) { bg.remove(); await ask('つうほう できませんでした。もういちど ためしてね。', 'OK', null); }
+  };
+}
 // マッチング：ロビー（みんなの へや）で「さがしている」を 出し、レートが いちばん ちかい 相手と おたがいに えらびあえたら きまる
 let MM = null;
 function hash36(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36).padStart(7, '0').slice(0, 7); }
 async function mmStart(stat) {
   const room = await netGetRoom();
-  if (!room) { stat('この ばしょでは オンライン対戦が つかえません。claude.ai に サインインして、この ゲームの ページを ひらいてください。', true); return; }
+  if (!room) { stat(onlineHint('オンライン対戦'), true); return; }
   rankDb();
   mmStop();
   const r = myRank().r, t0 = Date.now();
@@ -6457,7 +6479,7 @@ function rankPreviewClose() { if (!NET.preview) return; clearInterval(NET.previe
 function onlineMenu() {
   const k = myRank(), t = tierOf(k.r);
   const bg = modal(`<h3 style="margin-bottom:8px">オンライン対戦</h3>
-    <p class="dim" style="margin-bottom:8px">パーティの 上から 3たいで たたかいます。あいても この ゲームの ページを claude.ai で ひらいて いる ひつようが あります。</p>
+    <p class="dim" style="margin-bottom:8px">パーティの 上から 3たいで たたかいます。${window.PMA_APP ? 'インターネットに つながって いる ひつようが あります。' : 'あいても この ゲームの ページを claude.ai で ひらいて いる ひつようが あります。'}</p>
     <div class="ntabs"><button class="on" data-t="rank">ランク対戦</button><button data-t="friend">フレンド対戦</button></div>
     <div data-p="rank">
       <div class="rankcard"><div class="rkup"><img src="${tierBadge(t.i)}" alt=""><span class="chip" style="background:${t.c};font-size:13px;padding:2px 10px">${t.n}</span></div><div class="rr">${k.r}</div><div class="dim">${k.w}かち ${k.l}まけ</div></div>
@@ -7646,9 +7668,15 @@ $('btnOpt').onclick = () => {
     <label class="optrow">こうかおん <input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
     <label class="optrow">あいての つよさ <select id="oAi"><option value="0">ふつう</option><option value="1">かしこい</option><option value="2">さいきょう（かならず よける）</option></select></label>
+    ${window.PMA_NAME ? `<label class="optrow">なまえ（オンライン） <span style="display:flex;gap:6px"><input type="text" id="oName" maxlength="12" style="width:9em;font:inherit;font-size:14px;padding:4px 6px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"><button class="btn sub" id="oNameSave" style="padding:4px 10px;font-size:12px">きめる</button></span></label>` : ''}
     <div style="margin-top:12px">トレーナーの みため</div><div class="looks" id="oLooks"></div>
-    <div class="row" style="margin-top:16px;justify-content:space-between"><button class="dim" id="oReset" style="text-decoration:underline">セーブデータを けす</button><button class="btn" id="oClose">とじる</button></div>`);
+    <div class="row" style="margin-top:16px;justify-content:space-between"><span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><button class="dim" id="oReset" style="text-decoration:underline">セーブデータを けす</button>${window.PMA_NAME ? '<button class="dim" id="oWipe" style="text-decoration:underline">オンラインの データを けす</button>' : ''}<a class="dim" href="https://waisiwaisiwaisi-svg.github.io/auto-battle-game/privacy.html" target="_blank" rel="noopener" style="font-size:12px">プライバシーポリシー</a></span><button class="btn" id="oClose">とじる</button></div>`);
   const m = bg.querySelector('#oMusic'), x = bg.querySelector('#oSfx'), u = bg.querySelector('#oMute');
+  if (window.PMA_NAME) {   // アプリ版：なまえ と オンラインの データ けし
+    const N = bg.querySelector('#oName'); N.value = window.PMA_NAME.get();
+    bg.querySelector('#oNameSave').onclick = async () => { const ok = await window.PMA_NAME.set(N.value).catch(() => false); if (ok) SND.se('ok'); if (ok) N.value = window.PMA_NAME.get(); };
+    bg.querySelector('#oWipe').onclick = async () => { if (!(await ask('ランキング・ギルド・なまえ など、サーバーに ある あなたの データを ぜんぶ けしますか？（この スマホの セーブデータは のこります）', 'けす', 'やめる'))) return; await window.PMA_NAME.wipe().catch(() => { }); RANKDB = null; NET.room = null; GUILD.me = null; await ask('けしました。つぎに オンラインを つかうと あたらしく はじまります。', 'OK', null); };
+  }
   m.value = SND.opt.music; x.value = SND.opt.sfx; u.checked = SND.opt.mute;
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
   const AI = bg.querySelector('#oAi'); AI.value = S ? String(S.aiLevel == null ? 0 : S.aiLevel) : '0'; AI.disabled = !S; AI.onchange = () => { if (S) { S.aiLevel = +AI.value; save(); } };

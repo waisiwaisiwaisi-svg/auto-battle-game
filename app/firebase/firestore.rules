@@ -1,0 +1,35 @@
+rules_version = '2';
+// claude.ai 版と おなじ きまり：よむのは ログインした人 みんな、かくのは じぶんの ぶん（id が じぶんの uid）だけ
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function mine(uid) { return signedIn() && request.auth.uid == uid; }
+    function small() { return request.resource == null || request.resource.size() < 64; }
+
+    match /ranks/{uid} {
+      allow read: if signedIn();
+      allow write: if mine(uid) && (request.resource == null || (request.resource.data.r is int && request.resource.data.r >= 0 && request.resource.data.r < 5000));
+    }
+    match /guilds/{uid} {
+      allow read: if signedIn();
+      allow write: if mine(uid) && (request.resource == null || request.resource.data.name is string && request.resource.data.name.size() <= 10);
+    }
+    match /gmembers/{uid} {
+      allow read: if signedIn();
+      allow write: if mine(uid);
+    }
+    match /gchat/{uid} {
+      allow read: if signedIn();
+      allow write: if mine(uid) && (request.resource == null || request.resource.data.msgs.size() <= 10);
+    }
+    // つうほう：かくだけ（よめるのは Firebase コンソールの 管理者のみ）。id は「じぶんの uid_じかん」
+    match /reports/{rid} {
+      allow read: if false;
+      allow create: if signedIn() && rid.matches(request.auth.uid + '_[0-9]+') && request.resource.data.by == request.auth.uid && request.resource.data.x.size() <= 80;
+    }
+    match /profiles/{uid} {
+      allow read: if signedIn();
+      allow write: if mine(uid) && (request.resource == null || (request.resource.data.name is string && request.resource.data.name.size() <= 12));
+    }
+  }
+}

@@ -85,6 +85,18 @@ python3 -m http.server 8000
 
 ビルドは不要です。`.nojekyll` を置いているので そのまま配信されます。
 
+## スマホアプリ版（iOS / Android）
+
+`app/` に Capacitor で つつんだ アプリ版が あります。ゲーム本体は この `index.html` を そのまま つかい、オンライン機能（ランク対戦・ランキング・ギルド）は Firebase に つなぎます。
+
+```sh
+cd app && npm install && npm run sync   # index.html → アプリに 反映
+npx cap open android                     # Android Studio
+npx cap open ios                         # Xcode（Mac）
+```
+
+Firebase の じゅんび・ストア 申請・自動ビルドの 手順は [docs/RELEASE.md](docs/RELEASE.md)。プライバシーポリシーは [docs/privacy.html](docs/privacy.html)。
+
 ## Unity 版
 
 `unity/PixelMonsterArena` に Unity 6 用のプロジェクトがあります。ひらきかた・ビルド方法は [unity/README.md](unity/README.md) を見てください。

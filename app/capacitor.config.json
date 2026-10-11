@@ -1,0 +1,12 @@
+{
+  "appId": "com.waisi.pixelmonsterarena",
+  "appName": "ピクセルモンスターアリーナ",
+  "webDir": "www",
+  "backgroundColor": "#141022",
+  "android": { "backgroundColor": "#141022" },
+  "ios": { "backgroundColor": "#141022", "contentInset": "never" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 800, "backgroundColor": "#141022", "showSpinner": false },
+    "StatusBar": { "style": "DARK", "backgroundColor": "#141022", "overlaysWebView": false }
+  }
+}
