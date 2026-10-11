@@ -4450,6 +4450,7 @@ function sendOut(side, idx, pass, lag, at) {
   f.enterT = 0; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; f.lastMove = null; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
   f.swapLag = lag ? SWAP_LAG : 0; if (lag) f.inv = 0;
+  moveLock(f, ENTER_LOCK);   // でてきた ばかりは わざを だせない
   const tr = sd.trainer;
   if (tr) { fxPush({ type: 'beamIn', x0: tr.x, y0: tr.y - 30, x1: f.x, y1: f.y - 20, life: .45, max: .45 }); tr.shout = .7; tr.pose = 'open'; }
   else burst(f.x, f.y - 4, '#3f9040', 10, 90, .5);
@@ -5402,6 +5403,10 @@ function cdScale(f) {
   return clamp(Math.pow(avgStats().spe / Math.max(10, sp), .75), .6, 1.6);
 }
 const CLOSE_KINDS = ['melee', 'swipe', 'dash'];
+// はじまり・こうたい 直後は しばらく わざを だせない（ぜんぶの わざを クールダウンに）
+const START_LOCK = 2, ENTER_LOCK = 1.5;
+function moveLock(f, t) { f.cdMax = f.cdMax || {}; for (const k of f.moves || []) if (!(MOVES[k] && MOVES[k].fakeout) && (f.cd[k] || 0) < t) {   // びっくりてうち だけは でてすぐ つかえる
+  f.cd[k] = t; f.cdMax[k] = t; } }
 let CD_SHARED_K = .5;   // ぜんぶの わざが いっしょに クールダウン する ぶん、まち時間は みじかめ
 function aiMove(f, o, dt, autoSpecial) {
   const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
@@ -5468,6 +5473,7 @@ function aiMove(f, o, dt, autoSpecial) {
       f.aiMode = 'attack'; if (close) f.paceT = 2.3 * per.rush; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
     }
     want = { R: (close ? Math.min(reach * .8, idealRange(f, m, reach, per)) : idealRange(f, m, reach, per)) * roamK, los: shot, cover: INDIRECT(m) && per.cover > .3, flank: per.flank > .25 && !shot, mode: 'attack' };   // かべごしの わざは かくれた まま
+    if (ordered) { want.R = Math.min(want.R, reach * .85); want.cover = false; want.flank = false; if (d > reach * .9) f.paceT = Math.max(f.paceT || 1, 2.2); }   // しじされた わざ：かくれず まわりこまず、はしって まあいへ
   } else {
     const dmgCd = f.moves.filter(id => isDamaging(MOVES[id])).map(id => f.cd[id] || 0), soon = dmgCd.length ? Math.min(...dmgCd) : 9;
     const oThreat = o.moves.some(id => isDamaging(MOVES[id]) && (o.cd[id] || 0) < 1);
@@ -6578,7 +6584,7 @@ function bStep(dt) {
   if (B.mode === 'intro') {
     if (B.sent === 0 && B.modeT > .8) { B.sent = 1; sendOut(1, 0); }
     if (B.sent === 1 && B.modeT > 1.7) { B.sent = 2; sendOut(0, B.sides[0].act); }
-    if (B.modeT > 2.3) { B.mode = 'fight'; B.modeT = 0; say('バトル スタート！'); }
+    if (B.modeT > 2.3) { B.mode = 'fight'; B.modeT = 0; say('バトル スタート！'); for (const sd of B.sides) { const x = sd.fs[sd.act]; if (x) { x.enterT = 0; moveLock(x, START_LOCK); } } }   // はじまって すぐは わざを だせない
   }
   // 見はり：交代の とちゅうなどで HP 0 の まま のこったら たおれた あつかいに する
   if (B.mode === 'fight' && !B.pendingSend && !B.choosing && !B.remoteChoose) for (const sd of B.sides) {
