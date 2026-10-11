@@ -529,6 +529,26 @@ html.land #app #bpanel #bbar{flex-wrap:wrap}
 html.land #app #bpanel #bbar #cDodge{flex:1 1 100%;min-height:36px}
 html.land #app #bpanel #bench{flex:1 1 100%}
 html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #app #bpanel .bmon .bn{display:none} html.land #app #bpanel .bmon{flex-direction:column!important;gap:2px;padding:3px 8px!important} html.land #app #bpanel .bmon > span{flex:none!important;width:100%;display:block} html.land #app #bpanel .bmon .bh{margin-top:0}
+/* ===== ギルド ===== */
+.gdbody{display:flex;flex-direction:column;gap:10px}
+.gdhead{display:flex;gap:12px;align-items:center;padding:10px}
+.gdemb{width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:30px;border:3px solid #0b0914;box-shadow:inset -3px -3px 0 rgba(0,0,0,.3),inset 3px 3px 0 rgba(255,255,255,.35)}
+.gdemb.sm{width:38px;height:38px;font-size:20px;border-width:2px}
+.gdinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.gdinfo b{font-size:18px;color:var(--acc)} .gdinfo small{color:var(--dim);font-size:12px}
+.gdstat{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--dim)} .gdstat b{color:var(--ink);font-size:14px}
+.gdlist{display:flex;flex-direction:column;gap:6px}
+.gdrow{display:flex;gap:10px;align-items:center;padding:6px 8px;font-size:13px}
+.gdrow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gdrow .rk{width:26px;text-align:center;font-weight:700;color:var(--acc)}
+.gdrow .pt{font-variant-numeric:tabular-nums;color:var(--ink);min-width:48px;text-align:right}
+.gdrow canvas{width:28px;height:28px;image-rendering:pixelated;flex:none}
+.gdrow.me{border-image-source:var(--fr-gold)!important}
+.gdchat{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto;padding:8px;font-size:12.5px;touch-action:pan-y}
+.gdchat .m{line-height:1.4;word-break:break-all} .gdchat .m b{color:var(--acc);margin-right:6px} .gdchat .m small{color:var(--dim);margin-left:6px;font-size:10px}
+.gdsend{display:flex;gap:6px} .gdsend input{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2);padding:6px 8px}
+.gdpick{display:flex;flex-wrap:wrap;gap:6px} .gdpick button{width:40px;height:40px;font-size:20px;border:2px solid #0b0914;background:#2a2346} .gdpick button.on{outline:3px solid var(--acc)}
+.gdpick.col button{width:32px;height:32px}
 /* ===== メイキング（ドット絵エディタ） ===== */
 .mktabs{display:flex;gap:8px}.mktabs button{flex:1;padding:8px;border-radius:4px;background:var(--panel);box-shadow:0 0 0 2px var(--edge);font-size:14px}.mktabs button.on{background:var(--acc);color:#1a1626;font-weight:700}
 .mklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
@@ -585,8 +605,6 @@ h2,h3,.sec-title > span:first-child,.plate .top b,.ov h2,.mkres h3{text-shadow:1
 /* がめんの きりかえ：ドットで パッと */
 @keyframes scrin{0%{opacity:0;transform:translateY(12px)}50%{opacity:.6;transform:translateY(4px)}100%{opacity:1;transform:none}}
 .screen.scr-in:not(#scBattle){animation:scrin .2s steps(3) both}
-/* ブラウンかん ふうの うすい しまもよう */
-#app::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:60;background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px,rgba(0,0,0,.05) 2px 3px)}
 /* タイトル：PRESS START ふうに てんめつ */
 @keyframes pressblink{0%,60%{filter:none}61%,100%{filter:brightness(1.25)}}
 .tbig{animation:pressblink 1s steps(1) infinite!important}
@@ -660,9 +678,15 @@ h1.tlogo{filter:none}
         <div class="sec-title"><span>パーティ（上から3匹が しゅつじょう）</span><button class="dim" id="btnTeam" style="text-decoration:underline">へんせい ›</button></div>
         <div class="partyrow" id="hubParty"></div>
         <div class="row" style="gap:8px"><button class="btn sub" id="btnOnline" style="padding:8px;font-size:13px;flex:1;color:var(--acc)">オンライン</button><button class="btn sub" id="btnDex" style="padding:8px;font-size:13px;flex:1">ずかん</button><button class="btn sub" id="btnChart" style="padding:8px;font-size:13px;flex:1">あいしょう表</button><button class="btn sub" id="btnHelp" style="padding:8px;font-size:13px;flex:1">あそびかた</button></div>
-        <button class="btn sub" id="btnMaker" style="padding:10px;font-size:14px;color:#9ff0c8">✏ メイキング（トレーナー・モンスターを かく）</button>
+        <div class="row" style="gap:8px"><button class="btn sub" id="btnGuild" style="padding:10px;font-size:14px;flex:1;color:#ffd166">🛡 ギルド</button><button class="btn sub" id="btnMaker" style="padding:10px;font-size:14px;flex:1;color:#9ff0c8">✏ メイキング</button></div>
       </div>
     </div>
+  </section>
+
+  <!-- ギルド -->
+  <section class="screen" id="scGuild" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">ギルド</span><button class="btn sub" id="btnGdBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <div id="gdBody" class="gdbody"></div>
   </section>
 
   <!-- メイキング -->
@@ -3301,7 +3325,7 @@ function setArtBg() {
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
 function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
+  { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
   const p = sp.prof, evo = '';
@@ -5619,8 +5643,9 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   if (!room) { onStatus('この ばしょでは オンライン対戦が つかえません。claude.ai に サインインして、この ゲームの ページを ひらいてください。', true); return; }
   netReset(); NET.code = code; NET.host = asHost; NET.guest = !asHost; NET.ranked = !!opts.ranked; NET.oppR = opts.oppR; NET.rated = false;
   try { NET.nr = await room.join('pma-' + code); } catch (e) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
+  await guildMe().catch(() => { });   // あいてに ギルドめいを みせる
   NET.team6 = teamOf(S.party, 6); NET.myPick = null; NET.preview = null;
-  const me = { role: asHost ? 'host' : 'guest', team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, lk: myLook(), la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
+  const me = { role: asHost ? 'host' : 'guest', team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
   // じぶんで かいた もの の え（la：トレーナー、ca：モンスター）。あいては はじまる まえに うけとって おぼえる。presence は 4KB まで なので 入りきらない え は おくらない
   for (const o of NET.team6) if (CUSTOM.mon[o.sid] && !me.ca[o.sid]) me.ca[o.sid] = CUSTOM.mon[o.sid];
   const fits = () => new Blob([JSON.stringify(me)]).size < 3900;
@@ -5668,6 +5693,7 @@ function netPeerLeft() {
 }
 /* ---------- ホスト ---------- */
 // あいての みため（presence の lk。しらない ものなら レイ）
+function oppName() { const p = NET.nr && NET.nr.peers().find(x => !x.isMe && x.presence && x.presence.lk); const g = p && safeName(p.presence.gn, 10); return g ? `あいて（${g}）` : 'あいて'; }
 function netCacheArt(pr) {
   if (!pr || typeof pr !== 'object') return;
   if (typeof pr.lk === 'string' && /^c_tr_[a-z0-9]+$/.test(pr.lk) && pr.la && !TRAINER_ART['o_' + pr.lk.slice(5)]) regCustomTrainer('o_' + pr.lk.slice(5), pr.la, true);
@@ -5679,7 +5705,7 @@ function oppLook() { const p = NET.nr && NET.nr.peers().find(x => !x.isMe && x.p
 function netHostStart(gteam, mineSel) {
   NET.started = true;
   const field = choice(FIELDS), mine = mineSel || teamOf(S.party);
-  startBattle({ kind: 'online', field, enemies: gteam.map(monFrom), p0: mineSel ? mine.map(monFrom) : null, trainer: { name: 'あいて', spr: trArt(oppLook()) }, title: NET.ranked ? 'ランク対戦' : 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
+  startBattle({ kind: 'online', field, enemies: gteam.map(monFrom), p0: mineSel ? mine.map(monFrom) : null, trainer: { name: oppName(), spr: trArt(oppLook()) }, title: NET.ranked ? 'ランク対戦' : 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.net = 'host';
   // 見せあい用の 6たいは もう いらない（presence は ぜんぶで 4KB まで）
   const startP = { start: { field, h: mine, g: gteam, hr: myRank().r }, team: null, team6: null, pick: null, ca: null, la: null };   // え は もう おくった
@@ -5731,7 +5757,7 @@ function netGuestStart(st) {
   const host = st.h.map(monFrom), me = st.g.map(monFrom);
   startBattle({ kind: 'online', field: st.field, enemies: me, p0: host, trainer: { name: 'あなた', spr: trArt(myLook()) }, title: 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.remote = true; B.my = 1; B.mode = 'intro'; B.snapT = 0; if (NET.ranked) $('bTitle').textContent = 'ランク対戦';
-  B.sides[0].trainer.name = 'あいて'; B.sides[0].trainer.spr = trArt(oppLook());
+  B.sides[0].trainer.name = oppName(); B.sides[0].trainer.spr = trArt(oppLook());
 }
 function netGuestSnap(sn) {
   if (!B || !B.remote || !sn || typeof sn !== 'object') return;
@@ -5759,7 +5785,7 @@ function netGuestSnap(sn) {
   if (sn.rc && $('chooseOv').hidden) netGuestChoose();
   if (!sn.rc && !$('chooseOv').hidden && B.my === 1 && !B.choosingLocal) $('chooseOv').hidden = true;
   $('banner').classList.toggle('waiting', !!sn.wc); if (sn.wc) say('あいてが つぎの モンスターを えらんでいます…');
-  if (sn.res && !NET.ended) { NET.ended = true; const r = sn.res === 'win' ? 'lose' : sn.res === 'lose' ? 'win' : sn.res; B.result = r; B.remote = false; B.mode = 'end'; B.endT = 1.2;
+  if (sn.res && !NET.ended) { NET.ended = true; const r = sn.res === 'win' ? 'lose' : sn.res === 'lose' ? 'win' : sn.res; if (r === 'win') guildWin(3); B.result = r; B.remote = false; B.mode = 'end'; B.endT = 1.2;
     S.online = S.online || { w: 0, l: 0 }; S.online[r === 'win' ? 'w' : 'l']++; const rl = rankResult(r === 'win'); B.resLines = [r === 'win' ? '<b style="color:var(--acc)">オンライン対戦に かった！</b>' : 'オンライン対戦に まけた…', rl || `せんせき ${S.online.w}かち ${S.online.l}まけ`]; save(); SND.play(r === 'win' ? 'win' : 'lose'); }
 }
 function netReplay(e) {
@@ -5840,6 +5866,138 @@ async function renderLeaderboard(el) {
     el.innerHTML = '<div class="lb">' + rows.map((r, i) => `<div class="${r.id === R.id ? 'me' : ''}"><b>${i + 1}</b><span class="lbn"></span>${tierChip(r.r)}<span>${r.r}</span><span class="dim">${r.w || 0}-${r.l || 0}</span></div>`).join('') + '</div>';
     el.querySelectorAll('.lbn').forEach((s, i) => { const p = ps && ps[rows[i].id]; s.textContent = (p && p.name) || 'トレーナー'; });
   } catch (e) { el.innerHTML = '<p class="dim">ランキングを よみこめませんでした</p>'; }
+}
+/* ---------- ギルド：みんなで かって ポイントを あつめる チーム ----------
+   db：guilds/{つくった人の id}（なまえ・もんしょう）・gmembers/{じぶん}（どこの ギルドか・こんしゅうの ポイント）・gchat/{じぶん}（さいきんの はつげん 10こ）
+   どれも じぶんの ぶん だけ かける。ポイントは 1しゅうかん ごとに リセット */
+const G_EMB = ['🛡', '⚔', '🔥', '💧', '🍃', '⚡', '❄', '🐉', '🌙', '⭐', '👑', '💀'];
+const G_COL = ['#ff8a3d', '#4aa8ff', '#62d26f', '#ffd84a', '#b86ad8', '#ff7ab0', '#9fe8ff', '#c49a6c', '#7a6aff', '#d8d0c0'];
+const G_MAX = 20;
+const weekNo = () => Math.floor((Date.now() + 3 * 864e5) / 6048e5);   // げつようび はじまり
+const GUILD = { me: null, gname: '', unsub: null };
+async function guildMe() {
+  const R = await rankDb(); if (!R || !R.id) return null;
+  const s_ = await R.db.doc('gmembers/' + R.id).get().catch(() => null); GUILD.me = s_ && s_.exists ? s_.data() : null;
+  if (GUILD.me && GUILD.me.gid) { const g = await R.db.doc('guilds/' + GUILD.me.gid).get().catch(() => null); GUILD.gname = g && g.exists ? safeName(g.data().name, 10) : ''; if (!GUILD.gname) GUILD.me = null; } else GUILD.gname = '';
+  return GUILD.me;
+}
+// かったら じぶんの ギルドに ポイント（オンライン +3、そのほか +1）
+async function guildWin(n) {
+  try {
+    const R = await rankDb(); if (!R || !R.id) return; const m = GUILD.me || await guildMe(); if (!m || !m.gid) return;
+    const wk = weekNo(); GUILD.me = { gid: m.gid, wk, pts: (m.wk === wk ? m.pts || 0 : 0) + n, tot: (m.tot || 0) + n, lk: myLook(), t: Date.now() };
+    await R.db.doc('gmembers/' + R.id).set(GUILD.me);
+  } catch (e) { }
+}
+const lookCanvas = (lk, size) => { const a = trArt(TRAINER_ART[lk] && !/^c_tr_/.test(lk) ? lk : (lk && CUSTOM.tr[lk] ? lk : 'boy')), img = a.idle0.n, c = document.createElement('canvas'), z = Math.max(1, Math.floor(size * 2 / Math.max(img.width, img.height))); c.width = img.width * z; c.height = img.height * z; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, c.width, c.height); return c; };
+function guildStop() { if (GUILD.unsub) { try { GUILD.unsub(); } catch (e) { } GUILD.unsub = null; } }
+async function renderGuild() {
+  guildStop(); show('scGuild'); const W = $('gdBody'); W.innerHTML = '<p class="dim">よみこみちゅう…</p>';
+  const R = await rankDb();
+  if (!R || !R.id) { W.innerHTML = '<p class="dim">ギルドは claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ つかえます。</p>'; return; }
+  let gs, ms; try { [gs, ms] = await Promise.all([R.db.collection('guilds').limit(300).get(), R.db.collection('gmembers').limit(1000).get()]); }
+  catch (e) { W.innerHTML = '<p class="dim">よみこめませんでした。あとで もういちど ためしてね。</p>'; return; }
+  const wk = weekNo(), guilds = {};
+  for (const d of gs.docs) { const g = d.data() || {}; guilds[d.id] = { id: d.id, name: safeName(g.name, 10) || 'ギルド', emb: G_EMB.includes(g.emb) ? g.emb : '🛡', col: G_COL.includes(g.col) ? g.col : G_COL[0], msg: safeName(g.msg, 24), mem: [], wpts: 0 }; }
+  let mine = null;
+  for (const d of ms.docs) { const m = { id: d.id, ...(d.data() || {}) }; if (d.id === R.id) mine = m; const g = guilds[m.gid]; if (g) { g.mem.push(m); if (m.wk === wk) g.wpts += Math.max(0, m.pts | 0); } }
+  const rank = Object.values(guilds).filter(g => g.mem.length).sort((a, b) => b.wpts - a.wpts || b.mem.length - a.mem.length);
+  if (mine && guilds[mine.gid]) { GUILD.me = mine; GUILD.gname = guilds[mine.gid].name; guildHome(R, guilds[mine.gid], rank); }
+  else { GUILD.me = null; GUILD.gname = ''; guildBrowse(R, rank, guilds[R.id]); }
+}
+const daysLeft = () => Math.max(1, Math.ceil(((weekNo() + 1) * 6048e5 - 3 * 864e5 - Date.now()) / 864e5));
+function guildBrowse(R, rank, own) {
+  const W = $('gdBody');
+  W.innerHTML = `<div class="card" style="font-size:12.5px;line-height:1.6">ギルドに はいると、かつたびに ギルドに ポイントが はいる（オンライン たいせん +3、そのほか +1）。こんしゅうの ポイントで ギルドランキングを きそおう！（のこり ${daysLeft()}にち・1ギルド ${G_MAX}にん まで）</div>
+    <button class="btn" id="gdNew" style="padding:12px">${own ? 'じぶんの ギルドに もどる' : '＋ ギルドを つくる'}</button>
+    <div class="sec-title"><span>こんしゅうの ギルドランキング</span></div><div class="gdlist" id="gdList"></div>`;
+  const L = $('gdList');
+  if (!rank.length) L.innerHTML = '<p class="dim">まだ ギルドが ありません。さいしょの ギルドを つくろう！</p>';
+  rank.forEach((g, i) => {
+    const row = document.createElement('div'); row.className = 'gdrow card';
+    row.innerHTML = `<span class="rk">${i + 1}</span><span class="gdemb sm" style="background:${g.col}">${g.emb}</span><span class="nm"><b></b><br><small class="dim"></small></span><span class="pt">${g.wpts}pt<br><small class="dim">${g.mem.length}/${G_MAX}にん</small></span><button class="btn sub" style="padding:6px 10px;font-size:12px" ${g.mem.length >= G_MAX ? 'disabled' : ''}>はいる</button>`;
+    row.querySelector('.nm b').textContent = g.name; row.querySelector('.nm small').textContent = g.msg || '';
+    row.querySelector('button').onclick = () => guildJoin(R, g.id);
+    L.appendChild(row);
+  });
+  $('gdNew').onclick = () => own ? guildJoin(R, R.id) : guildCreate(R);
+}
+async function guildJoin(R, gid) {
+  try {
+    const q = await R.db.collection('gmembers').where('gid', '==', gid).limit(G_MAX + 1).get();
+    if (q.size >= G_MAX && !q.docs.some(d => d.id === R.id)) { await ask('この ギルドは いっぱいです。', 'OK', null); return; }
+    GUILD.me = { gid, wk: weekNo(), pts: 0, tot: 0, lk: myLook(), t: Date.now() };
+    await R.db.doc('gmembers/' + R.id).set(GUILD.me); SND.se('ok'); renderGuild();
+  } catch (e) { await ask('ギルドに はいれませんでした（' + (e && e.code || 'error') + '）', 'OK', null); }
+}
+function guildCreate(R) {
+  let emb = G_EMB[0], col = G_COL[0];
+  const bg = modal(`<h3 style="margin-bottom:10px">ギルドを つくる</h3>
+    <div class="mkrow"><input type="text" id="gdName" maxlength="10" placeholder="ギルドの なまえ（10もじ まで）" style="flex:1;font:inherit;font-size:15px;padding:6px 8px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"></div>
+    <div style="margin:10px 0 4px">もんしょう</div><div class="gdpick" id="gdEmb">${G_EMB.map(e => `<button data-e="${e}">${e}</button>`).join('')}</div>
+    <div style="margin:10px 0 4px">いろ</div><div class="gdpick col" id="gdCol">${G_COL.map(c => `<button data-c="${c}" style="background:${c}"></button>`).join('')}</div>
+    <div style="margin:10px 0 4px">ひとこと</div><div class="mkrow"><input type="text" id="gdMsg" maxlength="24" placeholder="ぼしゅう ちゅう！ など（24もじ まで）" style="flex:1;font:inherit;font-size:14px;padding:6px 8px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"></div>
+    <div class="row" style="margin-top:14px;justify-content:flex-end;gap:8px"><button class="btn sub" id="gdCancel">やめる</button><button class="btn" id="gdMake">つくる</button></div>`);
+  const sync = () => { bg.querySelectorAll('#gdEmb button').forEach(b => b.classList.toggle('on', b.dataset.e === emb)); bg.querySelectorAll('#gdCol button').forEach(b => b.classList.toggle('on', b.dataset.c === col)); };
+  bg.querySelectorAll('#gdEmb button').forEach(b => b.onclick = () => { emb = b.dataset.e; sync(); });
+  bg.querySelectorAll('#gdCol button').forEach(b => b.onclick = () => { col = b.dataset.c; sync(); }); sync();
+  bg.querySelector('#gdCancel').onclick = () => bg.remove();
+  bg.querySelector('#gdMake').onclick = async () => {
+    const name = safeName(bg.querySelector('#gdName').value, 10); if (!name) { bg.querySelector('#gdName').focus(); return; }
+    const msg = safeName(bg.querySelector('#gdMsg').value, 24);
+    try {
+      await R.db.doc('guilds/' + R.id).set({ name, emb, col, msg, t: Date.now() });
+      GUILD.me = { gid: R.id, wk: weekNo(), pts: 0, tot: 0, lk: myLook(), t: Date.now() };
+      await R.db.doc('gmembers/' + R.id).set(GUILD.me);
+      bg.remove(); SND.se('caught'); renderGuild();
+    } catch (e) { await ask('つくれませんでした（' + (e && e.code || 'error') + '）', 'OK', null); }
+  };
+}
+async function guildHome(R, g, rank) {
+  const W = $('gdBody'), lead = g.id === R.id, ri = rank.findIndex(x => x.id === g.id) + 1, wk = weekNo();
+  W.innerHTML = `<div class="card gdhead"><span class="gdemb" style="background:${g.col}">${g.emb}</span><div class="gdinfo"><b id="gdNm"></b><small id="gdMs"></small>
+      <div class="gdstat"><span>こんしゅう <b>${g.wpts}</b>pt</span><span>ランキング <b>${ri || '-'}</b>い / ${rank.length}</span><span>メンバー <b>${g.mem.length}</b>/${G_MAX}</span><span>のこり ${daysLeft()}にち</span></div></div></div>
+    <div class="sec-title"><span>メンバー（こんしゅうの ポイント）</span></div><div class="gdlist" id="gdMem"></div>
+    <div class="sec-title"><span>ギルドチャット</span></div><div class="card gdchat" id="gdChat"><span class="dim">まだ だれも はなして いません</span></div>
+    <div class="gdsend"><input type="text" id="gdIn" maxlength="40" placeholder="ひとこと（40もじ まで）"><button class="btn" id="gdSend" style="padding:6px 14px">おくる</button></div>
+    <div class="sec-title"><span>ギルドランキング</span></div><div class="gdlist" id="gdRank"></div>
+    <button class="dim" id="gdLeave" style="text-decoration:underline;align-self:flex-start;margin-top:4px">${lead ? 'ギルドを かいさん する' : 'ギルドを ぬける'}</button>`;
+  $('gdNm').textContent = g.name; $('gdMs').textContent = g.msg || '';
+  const mem = g.mem.slice().sort((a, b) => ((b.wk === wk ? b.pts : 0) | 0) - ((a.wk === wk ? a.pts : 0) | 0));
+  const ps = await R.user.profiles(mem.map(m => m.id)).catch(() => ({})), nameOf = (id) => (ps && ps[id] && ps[id].name) || 'トレーナー';
+  const M = $('gdMem');
+  for (const m of mem) {
+    const row = document.createElement('div'); row.className = 'gdrow card' + (m.id === R.id ? ' me' : '');
+    row.appendChild(lookCanvas(m.lk, 28)); row.insertAdjacentHTML('beforeend', `<span class="nm"></span><span class="pt">${m.wk === wk ? m.pts | 0 : 0}pt</span>`);
+    row.querySelector('.nm').textContent = (m.id === g.id ? '👑 ' : '') + nameOf(m.id); M.appendChild(row);
+  }
+  const RK = $('gdRank');
+  rank.slice(0, 10).forEach((x, i) => { const row = document.createElement('div'); row.className = 'gdrow card' + (x.id === g.id ? ' me' : ''); row.innerHTML = `<span class="rk">${i + 1}</span><span class="gdemb sm" style="background:${x.col}">${x.emb}</span><span class="nm"></span><span class="pt">${x.wpts}pt</span>`; row.querySelector('.nm').textContent = x.name; RK.appendChild(row); });
+  // チャット：ギルドの みんなの さいきんの はつげんを まとめて じかんじゅん に
+  const C = $('gdChat');
+  GUILD.unsub = R.db.collection('gchat').where('gid', '==', g.id).limit(G_MAX + 5).onSnapshot(async (snap) => {
+    const all = []; for (const d of snap.docs) { const v = d.data() || {}; for (const m of (Array.isArray(v.msgs) ? v.msgs : []).slice(-10)) if (m && typeof m.x === 'string') all.push({ id: d.id, t: +m.t || 0, x: m.x.slice(0, 40) }); }
+    all.sort((a, b) => a.t - b.t); const last = all.slice(-40);
+    const need = [...new Set(last.map(m => m.id))].filter(id => !(ps && ps[id])); const ps2 = need.length ? await R.user.profiles(need).catch(() => ({})) : {};
+    C.innerHTML = last.length ? '' : '<span class="dim">まだ だれも はなして いません</span>';
+    for (const m of last) { const el = document.createElement('div'); el.className = 'm'; const b = document.createElement('b'); b.textContent = (ps[m.id] && ps[m.id].name) || (ps2[m.id] && ps2[m.id].name) || 'トレーナー'; el.appendChild(b); el.appendChild(document.createTextNode(m.x)); const sm = document.createElement('small'); const dt = new Date(m.t); sm.textContent = `${dt.getMonth() + 1}/${dt.getDate()} ${dt.getHours()}:${String(dt.getMinutes()).padStart(2, '0')}`; el.appendChild(sm); C.appendChild(el); }
+    C.scrollTop = C.scrollHeight;
+  }, () => { });
+  let sending = false;
+  const send = async () => {
+    const x = String($('gdIn').value || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 40); if (!x || sending) return; sending = true;
+    try {
+      const ref = R.db.doc('gchat/' + R.id), cur = await ref.get().catch(() => null), v = cur && cur.exists ? cur.data() : null;
+      const msgs = (v && v.gid === g.id && Array.isArray(v.msgs) ? v.msgs : []).concat([{ t: Date.now(), x }]).slice(-10);
+      await ref.set({ gid: g.id, msgs }); $('gdIn').value = ''; SND.se('ok');
+    } catch (e) { } sending = false;
+  };
+  $('gdSend').onclick = send; $('gdIn').onkeydown = (e) => { if (e.key === 'Enter') send(); };
+  $('gdLeave').onclick = async () => {
+    if (!(await ask(lead ? 'ギルドを かいさん しますか？ メンバーも みんな ぬけた ことに なります。' : 'ギルドを ぬけますか？'))) return;
+    try { if (lead) await R.db.doc('guilds/' + R.id).delete(); await R.db.doc('gmembers/' + R.id).delete(); await R.db.doc('gchat/' + R.id).delete().catch(() => { }); } catch (e) { }
+    GUILD.me = null; GUILD.gname = ''; renderGuild();
+  };
 }
 // マッチング：ロビー（みんなの へや）で「さがしている」を 出し、レートが いちばん ちかい 相手と おたがいに えらびあえたら きまる
 let MM = null;
@@ -6060,6 +6218,7 @@ function endBattle(res) {
   if (B.mode === 'end') return;
   SND.play(res === 'win' || res === 'caught' ? 'win' : res === 'lose' ? 'lose' : '');
   B.mode = 'end'; B.result = res; B.endT = res === 'caught' ? 1.6 : 1.4;
+  if (res === 'win' && B.kind !== 'wild') guildWin(B.kind === 'online' ? 3 : 1);   // ギルドに ポイント
   if (B.kind === 'online') { S.online = S.online || { w: 0, l: 0 }; S.online[res === 'win' ? 'w' : 'l']++; const rl = rankResult(res === 'win'); B.resLines = [res === 'win' ? '<b style="color:var(--acc)">オンライン対戦に かった！</b>' : 'オンライン対戦に まけた…', rl || `せんせき ${S.online.w}かち ${S.online.l}まけ`]; save(); return; }
   const lines = [];
   const caps0 = S.capsules, gems0 = S.gems || 0;
@@ -7255,6 +7414,8 @@ async function mkSave() {
   SND.se('caught');
 }
 $('btnMaker').onclick = () => mkOpen();
+$('btnGuild').onclick = () => renderGuild();
+$('btnGdBack').onclick = () => { guildStop(); renderHub(); };
 $('btnMkBack').onclick = () => { MK = null; renderHub(); };
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
