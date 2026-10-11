@@ -4762,7 +4762,9 @@ function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.r
 
 /* ---------- わざが つかえるか ---------- */
 // 回復できる わざは 1戦で 使える 回数に 上限
-function healMax(m) { const e = m.e || {}; return m.k === 'counter' ? 2 : m.k === 'heal' ? 2 : e.seed ? 2 : e.heal ? 2 : 0; }
+function healMax(m) { const e = m.e || {}; if (m.k === 'counter' || m.k === 'heal' || e.seed || e.heal) return 2; return bigMax(m); }
+// 大わざ：1せんで つかえる 回数が すくない（いりょくが たかいほど すくない）
+function bigMax(m) { if (m.ohko) return 1; if (m.cat === 'stat') return 0; const p = m.power || Math.round((m.pow || 0) * 5); return p >= 120 ? 2 : p >= 100 ? 3 : 0; }
 // すいとる こうげき：なんどでも うてる。かいふく するのは 1戦 DRAIN_MAX 回まで（それいこうは ふつうの こうげき）
 const DRAIN_MAX = 3;
 const drainLeft = (f, id) => ((MOVES[id] && MOVES[id].drainMax) || DRAIN_MAX) - ((f.drains && f.drains[id]) || 0);
@@ -4783,7 +4785,7 @@ function beginMove(f, id) {
   const o = opp(f); if (!o) return;
   const m = MOVES[id];
   if (f.v.confuse > 0 && !f.cfuse && confusedAct(f, id)) return;   // こんらん：しじと ちがう ことを する
-  if (healMax(m)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }
+  if (healMax(m) && !(m.charge2 && !f.v.charged)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }   // がりょうてんせいは ためる ときは かぞえない
   if (m.fakeout) f.v.fakeUsed = true;   // びっくりてうち：1かい でるごとに 1かい
   let ang = Math.atan2(o.y - f.y, o.x - f.x), tx = o.x, ty = o.y, decoy = null;
   if (o.clones && o.clones.length && isDamaging(m) && ['melee', 'swipe', 'dash', 'proj', 'beam', 'strike', 'multi', 'cone', 'warp', 'vault'].includes(m.k)) { const dl = o.clones.find(c => c.doll), k = dl ? o.clones.indexOf(dl) + 1 : Math.floor(Math.random() * (o.clones.length + 1)); if (k > 0) { decoy = o.clones[k - 1]; ang = Math.atan2(decoy.y - f.y, decoy.x - f.x); tx = decoy.x; ty = decoy.y; } }   // かげぶんしん：どれを ねらうかは うんしだい
@@ -5792,6 +5794,7 @@ function natPref(f, m) {
   return 1;
 }
 function aiPickMove(f, o) {
+  if (!f.moves.some(id => MOVES[id] && isDamaging(MOVES[id]) && !moveBlocked(f, id))) return (f.cd.tackle || 0) > 0 ? null : 'tackle';   // こうげきわざを つかいきった：たいあたりで ねばる
   if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
     let best = null, bv = 0;
     for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; let v = smartScore(f, o, id) * Math.pow(natPref(f, MOVES[id]), .8);
@@ -7499,7 +7502,7 @@ function moveDesc(m) {
   if (m.ramp) out.push(`あてるたびに いりょくが ${m.ramp * 100}%ずつ あがる（6かいまで）`); if (e.web) out.push(`あたると ${e.web}びょう、こうげきを うけるたびに ついかダメージ`); if (m.charge2) out.push('1かいめは ためる。2かいめは ためなしで ほそい ビームを はなつ'); if (m.bugHeal) out.push('みかたの むしタイプは うえで かいふく');
   if (m.bigKb) out.push('あたった あいてを とおくへ ふきとばす'); if (m.chain) out.push('あたると もういちど とっしん。そのあとも あたるたびに 50%で つづく');
   if (m.whip) out.push('みぎ・ひだりと 2かい ふる'); if (e.yawn) out.push('あたると しばらくして ねむる'); if (m.noKb) out.push('ふきとばさない'); if (m.blastR) out.push('ひろい はんいに おちる');
-  if (healMax(m)) out.push(`1せん ${healMax(m)}かいまで`);
+  if (healMax(m)) out.push(`${bigMax(m) && healMax(m) === bigMax(m) ? '大わざ：' : ''}1せん ${healMax(m)}かいまで`);
   return out.filter(Boolean).join('・');
 }
 const PAT_DESC = { scatter: 'あいての まわりに ばらばらに おちる', swarm: 'むれが つぎつぎ おそう', big: 'おおきな はんいに おそく おちる', line: 'てまえから あいてへ じゅんに ふきあがる', row: 'よこ 1れつに おちる', cross: '✕の かたちに おちる', double: 'おなじ ところに 2かい（よけた あとも ちゅうい）', cage: 'おちた まわりを いわで かこむ', ring: 'そとの わ → まんなかへ とじる',
