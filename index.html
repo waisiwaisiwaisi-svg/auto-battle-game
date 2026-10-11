@@ -1382,7 +1382,7 @@ const MOVE_FIX = {
   vine: { k: 'swipe', hits: 2, rad: 108, pow: 10, whip: 1, noRamp: 1, len: 0 },
   'will-o-wisp': { pat: 'wisp', homing: 1.6, spd: 110, life: 4.5 },
   yawn: { k: 'proj', sp: '', pat: 'yawnball', spd: 120, homing: 1.3, life: 4.5, r: 10, acc: 100, e: { yawn: 1 } },
-  'focus-blast': { pat: 'palm' }, moonblast: { pat: 'moon' }, gust: { look: 'blade' }, 'iron-defense': { look: 'iron' },
+  'hyper-voice': { bigKb: 1 }, 'focus-blast': { pat: 'palm' }, moonblast: { pat: 'moon' }, gust: { look: 'blade' }, 'iron-defense': { look: 'iron' },
 };
 for (const id in MOVE_FIX) if (MOVES[id]) { const fx = MOVE_FIX[id]; Object.assign(MOVES[id], fx, fx.e ? { e: Object.assign({}, MOVES[id].e, fx.e) } : {}); const e = MOVES[id].e; for (const k in e) if (e[k] == null) delete e[k]; }
 for (const id in MOVES) if (/こぶし|ナックル|パンチ/.test(MOVES[id].n) && MOVES[id].k === 'melee') MOVES[id].punch = 1;   // こぶしの わざ：グーの ヒット
@@ -5489,6 +5489,7 @@ function hit(att, def, m, ang, opt) {
     if (!lagHit) { def.state = 'stun'; def.stT = heavy ? .45 : .25; }
     def.kx = Math.cos(ang) * (heavy ? 230 : 140) * K; def.ky = Math.sin(ang) * (heavy ? 230 : 140) * K;
     if (m.noKb) def.kx = def.ky = 0;   // つららばり：ふきとばさない
+    if (m.bigKb) { def.kx = Math.cos(ang) * 1500 * K; def.ky = Math.sin(ang) * 1500 * K; popText(def.x, def.y - 100, 'ふっとんだ！', '#ffffff', 'comic'); }   // だいおんせい：とおくまで ふきとばす
     if (m.slap) { const a = ang - Math.PI / 2; def.kx = Math.cos(a) * 900 * K; def.ky = Math.sin(a) * 900 * K; def.slapT = .75; popText(def.x, def.y - 100, 'バシッ！', '#ffd166', 'comic'); }   // ひっぱたき：よこに ふきとばす（かべに あたると スタン）
     B.hitstop = Math.max(B.hitstop, tier === 2 ? .16 : tier === 1 ? .09 : .025);   // 小さい ヒットは かるく、大きい ヒットは ずしっと
   }
@@ -7474,6 +7475,7 @@ function moveDesc(m) {
   if (m.wallBreak) out.push('せっちされた かべを こわす'); if (m.slap) out.push('よこに ふきとばす。かべに ぶつかると 3びょう スタン'); if (m.confuse) out.push('こんらんさせる（しじが ちがう こうどうに なる）');
   if (m.selfConfuse) out.push(`あてると じぶんが ${m.selfConfuse}びょう こんらん`); if (m.reflect) out.push('とびどうぐを はねかえす'); if (m.multiHit) out.push(`はねかえりながら ${m.life}びょう のこる`);
   if (m.ramp) out.push(`あてるたびに いりょくが ${m.ramp * 100}%ずつ あがる（6かいまで）`); if (e.web) out.push(`あたると ${e.web}びょう、こうげきを うけるたびに ついかダメージ`); if (m.charge2) out.push('1かいめは ためる。2かいめは ためなしで ほそい ビームを はなつ'); if (m.bugHeal) out.push('みかたの むしタイプは うえで かいふく');
+  if (m.bigKb) out.push('あたった あいてを とおくへ ふきとばす');
   if (m.whip) out.push('みぎ・ひだりと 2かい ふる'); if (e.yawn) out.push('あたると しばらくして ねむる'); if (m.noKb) out.push('ふきとばさない'); if (m.blastR) out.push('ひろい はんいに おちる');
   if (healMax(m)) out.push(`1せん ${healMax(m)}かいまで`);
   return out.filter(Boolean).join('・');
