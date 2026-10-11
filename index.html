@@ -539,6 +539,7 @@ html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #
 .hme #hRank .ico{grid-row:1/3;width:26px;height:26px}
 .hme #hRank .mb{grid-column:2;display:block;width:64px;height:5px;background:#0b0914;box-shadow:0 0 0 1px #3a3060;margin-top:2px}.hme #hRank .mb i{display:block;height:100%}
 .rkbody{display:flex;flex-direction:column;gap:10px}
+.rkme[hidden],.rkladder[hidden]{display:none!important}
 .rkme{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;padding:12px 14px}
 .rkme .big{width:84px;height:84px;grid-row:1/3}
 .rkme .tn{font-size:20px;font-weight:700;letter-spacing:.08em;text-shadow:2px 2px 0 #000}
@@ -3122,7 +3123,11 @@ const ICONS = {
 const ICON_URL = {};
 function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
-  const g0 = ICONS[name]; if (!g0) return '';
+  const raw = ICONS[name]; if (!raw) return '';
+  // まわりの あき（.）を けずって、え が まんなかに くるように する
+  let x0 = 99, x1 = -1, y0 = 99, y1 = -1; raw.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } }));
+  if (x1 < 0) return '';
+  const g0 = raw.slice(y0, y1 + 1).map(r => r.padEnd(x1 + 1, '.').slice(x0, x1 + 1));
   const h = g0.length, w = Math.max(...g0.map(r => r.length)), W = w + 2, H = h + 2, c = document.createElement('canvas'); c.width = W; c.height = H; const q = c.getContext('2d');
   const at = (x, y) => y >= 0 && y < h && x >= 0 && x < (g0[y] || '').length && g0[y][x] !== '.';
   q.fillStyle = '#0b0914';   // ふちどり
@@ -6095,6 +6100,7 @@ async function renderRank(tab) {
     <div class="card rkladder">${TIERS.map((x, i) => `<div class="${i === t.i ? 'on' : i > t.i ? 'lock' : ''}"><i class="ico" style="background-image:url(${tierBadge(i)})"></i><b style="color:${x[2]}">${x[1]}</b><span>${i ? x[0] : '-'}</span></div>`).join('')}</div>
     <div class="rktabs"><button data-t="p">${icoHTML('swords')}プレイヤー</button><button data-t="g">${icoHTML('shield')}ギルド</button></div>
     <div id="rkList" class="gdlist"><p class="dim">よみこみちゅう…</p></div>`;
+  if (RK_TAB === 'g') W.querySelectorAll('.rkme,.rkladder').forEach(e => e.hidden = true);
   W.querySelectorAll('.rktabs button').forEach(b => { b.classList.toggle('on', b.dataset.t === RK_TAB); b.onclick = () => { SND.se && SND.se('ok'); renderRank(b.dataset.t); }; });
   const L = $('rkList'), R = await rankDb();
   if (!R || !R.id) { L.innerHTML = '<p class="dim">ランキングは claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ みられます。</p>'; return; }
@@ -6128,17 +6134,15 @@ async function rankPlayers(R, L) {
 async function rankGuilds(R, L) {
   const { guilds, mine, rank } = await guildData(R);
   if ($('scRank').hidden || RK_TAB !== 'g') return;
-  const my = mine && guilds[mine.gid] ? guilds[mine.gid] : null, top = Math.max(1, ...rank.map(g => g.wpts));
-  { const el = $('rkPos'); if (el) { const gi = my ? rank.indexOf(my) + 1 : 0; el.innerHTML = `ギルド <b>${gi ? gi + 'い' : 'みしょぞく'}</b>`; } }
-  L.innerHTML = `<div class="card" style="font-size:12px;display:flex;justify-content:space-between;gap:8px;padding:6px 10px"><span>こんしゅうの ポイント</span><b style="color:var(--acc);white-space:nowrap">のこり ${daysLeft()}にち</b></div>`;
+  const my = mine && guilds[mine.gid] ? guilds[mine.gid] : null;
+  L.innerHTML = '';
   if (!rank.length) { L.insertAdjacentHTML('beforeend', '<p class="dim">まだ ギルドが ありません。</p>'); }
   else L.appendChild(podium(rank.slice(0, 3).map(g => ({ el: embSpan(g, false), name: g.name, val: `${g.wpts}pt`, me: g === my }))));
   rank.slice(3, 30).forEach((g, j) => {
     const row = document.createElement('div'); row.className = 'gdrow card rkrow' + (g === my ? ' me' : '');
-    row.innerHTML = `<span class="rk">${j + 4}</span><i class="emb"></i><span class="nm"><b></b><span class="gbar"><i style="width:${Math.round(g.wpts / top * 100)}%;background:${g.col}"></i></span></span><span class="v">${g.wpts}pt<small>${g.mem.length}/${G_MAX}にん</small></span>`;
+    row.innerHTML = `<span class="rk">${j + 4}</span><i class="emb"></i><span class="nm"><b></b></span><span class="v">${g.wpts}pt</span>`;
     row.querySelector('.emb').replaceWith(embSpan(g, true)); row.querySelector('.nm b').textContent = g.name; L.appendChild(row);
   });
-  const b = document.createElement('button'); b.className = 'btn' + (my ? ' sub' : ''); b.style.marginTop = '6px'; b.textContent = my ? `${my.name} を ひらく` : 'ギルドを さがす・つくる'; b.onclick = () => renderGuild(); L.appendChild(b);
 }
 /* ---------- ギルド：みんなで かって ポイントを あつめる チーム ----------
    db：guilds/{つくった人の id}（なまえ・もんしょう）・gmembers/{じぶん}（どこの ギルドか・こんしゅうの ポイント）・gchat/{じぶん}（さいきんの はつげん 10こ）
@@ -6252,7 +6256,7 @@ function guildCreate(R) {
 async function guildHome(R, g, rank) {
   const W = $('gdBody'), lead = g.id === R.id, ri = rank.findIndex(x => x.id === g.id) + 1, wk = weekNo();
   W.innerHTML = `<div class="card gdhead"><i class="emb"></i><div class="gdinfo"><b id="gdNm"></b><small id="gdMs"></small>
-      <div class="gdstat"><span>こんしゅう <b>${g.wpts}</b>pt</span><span>ランキング <b>${ri || '-'}</b>い / ${rank.length}</span><span>メンバー <b>${g.mem.length}</b>/${G_MAX}</span><span>のこり ${daysLeft()}にち</span></div></div></div>
+      <div class="gdstat"><span>こんしゅう <b>${g.wpts}</b>pt</span><span>ランキング <b>${ri || '-'}</b>い / ${rank.length}</span></div></div></div>
     <div class="sec-title"><span>メンバー（こんしゅうの ポイント）</span></div><div class="gdlist" id="gdMem"></div>
     <div class="sec-title"><span>ギルドチャット</span></div><div class="card gdchat" id="gdChat"><span class="dim">まだ だれも はなして いません</span></div>
     <div class="gdsend"><input type="text" id="gdIn" maxlength="40" placeholder="ひとこと（40もじ まで）"><button class="btn" id="gdSend" style="padding:6px 14px">おくる</button></div>
