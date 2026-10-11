@@ -4648,8 +4648,10 @@ function beginMove(f, id) {
   const cur = { id, m, t: 0, wind: boost ? Math.max(1.4, m.wind * 3) : m.wind, ang, uid: ++B.uidc, tx, ty, hits: 0, boost };
   if (m.k === 'multi') cur.pts = multiPoints(f, { x: tx, y: ty }, m, ang);
   f.cur = cur; if (f.want && f.want.id === id) f.want = null;   // ボタンの しじ：だせた
-  const cdv = m.cd * cdScale(f); f.cdMax = f.cdMax || {}; f.cdMax[id] = cdv;
+  const cdv = m.cd * cdScale(f) * CD_SHARED_K; f.cdMax = f.cdMax || {}; f.cdMax[id] = cdv;
   if (id !== 'tackle') f.cd[id] = (f.v.rampage && id === 'outrage') ? 0 : cdv; else f.cd[id] = cdv;
+  // ひとつ つかうと ぜんぶの わざが クールダウン（つかった わざの まち時間を みんなで まつ）
+  if (f.cd[id] > 0) for (const k of f.moves) if (k !== id && (f.cd[k] || 0) < f.cd[id]) { f.cd[k] = f.cd[id]; f.cdMax[k] = f.cd[id]; }
   f.state = 'wind';
   if (isDamaging(m) && m.wind >= .5) sheetFx('charge', f.x, f.y - BODY, .9);   // ためる 光
   f.lastMove = id; B.lastMoveT = B.t;
@@ -5400,6 +5402,7 @@ function cdScale(f) {
   return clamp(Math.pow(avgStats().spe / Math.max(10, sp), .75), .6, 1.6);
 }
 const CLOSE_KINDS = ['melee', 'swipe', 'dash'];
+let CD_SHARED_K = .5;   // ぜんぶの わざが いっしょに クールダウン する ぶん、まち時間は みじかめ
 function aiMove(f, o, dt, autoSpecial) {
   const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
   f.paceT = 1;
@@ -7900,6 +7903,7 @@ $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
     <p><b>わざは ボタンで しじ</b>：わざボタンを タップすると、モンスターが まあいまで うごいて その わざを だす（うごきは じどう）。<b>AUTO</b> を おすと わざも おまかせ。<b>かわす</b> と <b>こうたい</b> も 指示しよう。キーボードは 1〜4 で わざ、A で AUTO。</p>
+    <p><b>まち時間</b>：わざを 1つ つかうと、<b>ぜんぶの わざ</b>が その わざの まち時間に なる。つよい わざほど ながく まつので、どれを いつ だすかが かんじん。</p>
     <p><b>赤い はんい</b>は あいての わざの よちょう。<b>かわす</b>で 一瞬 むてきに なれる（つかうと 5びょう まち）。</p>
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
