@@ -1295,6 +1295,7 @@ Object.assign(MOVES100, {   // あとから ふえた わざ
   intimidate: { n: 'いかく', ref: 'intimidate', t: 'normal', cat: 'stat', k: 'scare', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .35, cd: 7, pow: 0, e: {} },
   'web-net': { n: 'ほういもう', ref: 'web-net', t: 'bug', cat: 'stat', k: 'proj', pat: 'net', power: 0, acc: 100, prio: 0, aim: 'lock', wind: .4, cd: 9, pow: 0, spd: 200, r: 12, homing: .8, life: 2.4, e: { web: 12 } },
   'honey-pool': { n: 'みつだまり', ref: 'honey-pool', t: 'bug', cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .5, cd: 8.5, pow: 0, life: 5, rad: 85, slow: .5, noDmg: 1, bugHeal: 1, e: {} },
+  'dragon-rush': { n: 'ドラゴンラッシュ', ref: 'dragon-rush', t: 'dragon', cat: 'phys', k: 'dash', power: 60, acc: 100, prio: 0, aim: 'lock', wind: .4, cd: 5, pow: 12, len: 210, chain: 1, e: {} },
   garyou: { n: 'がりょうてんせい', ref: 'garyou', t: 'dragon', cat: 'spec', k: 'beam', power: 120, acc: 100, prio: 0, aim: 'lock', wind: .5, cd: 3, pow: 24, len: 540, wid: 14, charge2: 1, e: {} },
 });
 Object.assign(MOVES, MOVES100);
@@ -1326,7 +1327,7 @@ const MOVE_PAT = {
 };
 for (const id in MOVE_PAT) if (MOVES[id]) MOVES[id].pat = MOVE_PAT[id];
 setTimeout(() => { for (const sid in SPECIES) { const sp = SPECIES[sid], L = LEARN[sid]; if (!L) continue; const add = (lv, id) => { if (!L.some(([, x]) => x === id)) L.push([lv, id]); }; const ty = [sp.type, sp.type2];
-  if (ty.includes('bug')) { add(1, 'bug-bite'); add(6, 'bug-alert'); add(9, 'web-net'); add(12, 'honey-pool'); } if (ty.includes('ghost')) add(10, 'ghost-shift'); if (ty.includes('normal') || ty.includes('dark') || ty.includes('fighting')) add(5, 'intimidate'); if (ty.includes('dragon')) add(14, 'garyou'); }
+  if (ty.includes('bug')) { add(1, 'bug-bite'); add(6, 'bug-alert'); add(9, 'web-net'); add(12, 'honey-pool'); } if (ty.includes('ghost')) add(10, 'ghost-shift'); if (ty.includes('normal') || ty.includes('dark') || ty.includes('fighting')) add(5, 'intimidate'); if (ty.includes('dragon')) { add(14, 'garyou'); add(18, 'dragon-rush'); } }
   for (const sid in SPECIES) { const sp = SPECIES[sid]; if (['ghost', 'dark', 'psychic'].includes(sp.type) && LEARN[sid] && !LEARN[sid].some(([, x]) => x === 'double-team')) LEARN[sid].push([7, 'double-team']); } }, 0);   // ゴースト・あく・エスパーは しぜんに おぼえる
 // かたちに あわせた 数値（つよさは 1かいの わざで 1ヒットまで → ダメージは かわらない）
 for (const id in MOVES) { const m = MOVES[id];
@@ -6323,7 +6324,7 @@ function updateFighter(f, dt) {
       if (Math.random() < .6) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: 0, vy: -10, life: .3, max: .3, col: id2col(m), size: 3, g: 0 });
       if (m.trail && Math.random() < .8) B.parts.push({ x: f.x + rand(-8, 8), y: f.y, vx: rand(-10, 10), vy: -rand(30, 70), life: .4, max: .4, col: choice(['#ffd166', '#ff8a3d']), size: 5, g: -20, shape: 'ember' });
       if (o && o.clones && !cur.back) hitClones(o, c => Math.hypot(c.x - f.x, c.y - f.y) < f.r + o.r + 4);
-      if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; if (m.grab) { startGrab(f, o); break; } hit(f, o, m, cur.ang); }
+      if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; if (m.grab) { startGrab(f, o); break; } if (hit(f, o, m, cur.ang) && m.chain) { cur.chainGo = !cur.chainN || Math.random() < .5; cur.chainN = (cur.chainN || 0) + 1; } }
       if (f.state !== 'dash') break;
       if (m.wallBreak && B.walls.length) { const w = B.walls.find(w => w.blocks.some(b => circRect(f.x, f.y, footR(f) + 3, b))); if (w) {   // てつのずつき：せっちされた かべを こわす
         B.walls = B.walls.filter(x => x !== w); wallsChanged(); for (const b of w.blocks) { burst(b.x, b.y - 10, TYPES[w.t].c, 6, 120, .4); sheetFx('slam', b.x, b.y - 14, .7); } B.shake = Math.max(B.shake, 7); SND.se('boom'); popText(f.x, f.y - 96, 'かべを こわした！', '#ffd166', 'comic'); } }
@@ -6337,6 +6338,9 @@ function updateFighter(f, dt) {
       if (cur.d >= L || wall) {
         if (wall && !cur.back) { B.shake = Math.max(B.shake, 4); addDecal(f.x, f.y, 14, 'crater'); burst(f.x, f.y, '#c9b8ff', 8, 70, .35);
           if (m.crash && !cur.hit && f.hp > 0) { const r = Math.max(1, Math.round(estDmg(f, o || f, m) * m.crash)); f.hp = Math.max(0, f.hp - r); popText(f.x, f.y - 66, `-${r}`, '#ff9a8a'); say(`${f.sp.n}は かべに ぶつかって ダメージを うけた！`); if (f.hp <= 0) { faint(f, o); break; } } }   // すてみのはばたき：かべに ぶつかると はんどう
+        if (m.chain && cur.chainGo && oT && cur.chainN < 8) {   // ドラゴンラッシュ：あたったら もういちど つっこむ（2かいめからは 50%）
+          cur.chainGo = false; cur.hit = false; cur.d = 0; cur.ang = Math.atan2(o.y - f.y, o.x - f.x); sheetFx('dash', f.x, f.y - BODY, 1.1, cur.ang); burst(f.x, f.y, '#8a6ae8', 8, 90, .3); SND.se('dash');
+          popText(f.x, f.y - 96, `${cur.chainN + 1}れんぞく！`, '#b8a0ff', 'comic'); break; }
         if (cur.trail) { addTrail(f, m, cur.trail); cur.trail = null; }
         if (m.back && !cur.back) { cur.back = true; cur.hit = true; cur.ang = Math.atan2(cur.sy - f.y, cur.sx - f.x); cur.dlen = Math.hypot(cur.sx - f.x, cur.sy - f.y); cur.d = 0; sheetFx('dash', f.x, f.y - BODY, 1, cur.ang); if (cur.dlen > 8) break; }   // ヒットアンドアウェイ：もとの ばしょへ もどる
         endAct(f, wall ? .6 : .35);
@@ -7475,7 +7479,7 @@ function moveDesc(m) {
   if (m.wallBreak) out.push('せっちされた かべを こわす'); if (m.slap) out.push('よこに ふきとばす。かべに ぶつかると 3びょう スタン'); if (m.confuse) out.push('こんらんさせる（しじが ちがう こうどうに なる）');
   if (m.selfConfuse) out.push(`あてると じぶんが ${m.selfConfuse}びょう こんらん`); if (m.reflect) out.push('とびどうぐを はねかえす'); if (m.multiHit) out.push(`はねかえりながら ${m.life}びょう のこる`);
   if (m.ramp) out.push(`あてるたびに いりょくが ${m.ramp * 100}%ずつ あがる（6かいまで）`); if (e.web) out.push(`あたると ${e.web}びょう、こうげきを うけるたびに ついかダメージ`); if (m.charge2) out.push('1かいめは ためる。2かいめは ためなしで ほそい ビームを はなつ'); if (m.bugHeal) out.push('みかたの むしタイプは うえで かいふく');
-  if (m.bigKb) out.push('あたった あいてを とおくへ ふきとばす');
+  if (m.bigKb) out.push('あたった あいてを とおくへ ふきとばす'); if (m.chain) out.push('あたると もういちど とっしん。そのあとも あたるたびに 50%で つづく');
   if (m.whip) out.push('みぎ・ひだりと 2かい ふる'); if (e.yawn) out.push('あたると しばらくして ねむる'); if (m.noKb) out.push('ふきとばさない'); if (m.blastR) out.push('ひろい はんいに おちる');
   if (healMax(m)) out.push(`1せん ${healMax(m)}かいまで`);
   return out.filter(Boolean).join('・');
