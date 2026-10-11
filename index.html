@@ -4446,7 +4446,7 @@ function sendOut(side, idx, pass, lag, at) {
   if (at) { f.x = at.x; f.y = at.y; }   // 交代：もどった モンスターが いた 場所に 出す
   else { f.x = side ? st.fx1 - 120 : st.fx0 + 120; f.y = (st.fy0 + st.fy1) / 2 + rand(-20, 20); }   // はじめ・たおれた あと：初期位置
   clampF(f); if (st.solid) freeSpot(f);
-  f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
+  f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.want = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
   f.enterT = 0; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; f.lastMove = null; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
   f.swapLag = lag ? SWAP_LAG : 0; if (lag) f.inv = 0;
@@ -4647,7 +4647,7 @@ function beginMove(f, id) {
   const boost = m.k === 'self' || (m.k === 'curse' && !hasType(f, 'ghost'));   // のうりょくアップ：ためが ながく、そのあいだに うたれると ダメージ アップ
   const cur = { id, m, t: 0, wind: boost ? Math.max(1.4, m.wind * 3) : m.wind, ang, uid: ++B.uidc, tx, ty, hits: 0, boost };
   if (m.k === 'multi') cur.pts = multiPoints(f, { x: tx, y: ty }, m, ang);
-  f.cur = cur;
+  f.cur = cur; if (f.want && f.want.id === id) f.want = null;   // ボタンの しじ：だせた
   const cdv = m.cd * cdScale(f); f.cdMax = f.cdMax || {}; f.cdMax[id] = cdv;
   if (id !== 'tackle') f.cd[id] = (f.v.rampage && id === 'outrage') ? 0 : cdv; else f.cd[id] = cdv;
   f.state = 'wind';
@@ -5417,6 +5417,8 @@ function aiMove(f, o, dt, autoSpecial) {
       }
     }
   }
+  // ボタンで えらんだ わざは、ひるんだり かわしたり しても だせるまで ねらいつづける（8びょう まで・クールダウン中は あけたら すぐ）
+  if (f.want) { if (B.t - f.want.t > 8 || moveBlocked(f, f.want.id)) f.want = null; else if (!f.queued && !f.cur && !((f.cd[f.want.id] || 0) > 0)) f.queued = f.want.id; }
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
   if (autoSpecial && o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
@@ -5431,16 +5433,17 @@ function aiMove(f, o, dt, autoSpecial) {
     if (!B.headless) popText(f.x, f.y - 86, `むらっけ！ ${STAT_JP[up] || ''}↑↑ ${STAT_JP[dn] || ''}↓`, '#d8a0ff', true);
   }
   f.tunCd = Math.max(0, (f.tunCd || 0) - dt);
-  if (tryTunnel(f, o, hurt ? 400 : prefRange(f, per))) return;
+  const ordered = !!(f.want && f.queued === f.want.id);   // プレイヤーが ボタンで しじした わざ：せいかく より しじを ゆうせん
+  if (!ordered && tryTunnel(f, o, hurt ? 400 : prefRange(f, per))) return;
   if (per.roam) { f.roamT = (f.roamT || 0) - dt; if (f.roamT <= 0) { f.roamT = rand(2, 4.5); f.roamK = rand(.55, 1.6); } }
-  const roamK = per.roam ? (f.roamK || 1) : 1;
+  const roamK = per.roam && !ordered ? (f.roamK || 1) : 1;
   f.awayT = Math.max(0, (f.awayT || 0) - dt);
   let want;   // 立ち位置の ねらい：{ R: 間合い, los: 見える場所, cover: 陰に かくれる, flank: 横から }
   if (f.queued) {
     const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k);
     const see = !shot || losClear(f, o);
     const close = CLOSE_KINDS.includes(m.k);
-    if (close && isDamaging(m) && flankStep(f, o, reach, d, per, dt)) return;   // まわりこみ：よこへ まわって から つっこむ
+    if (close && isDamaging(m) && !(f.want && B.t - f.want.t > 1.2) && flankStep(f, o, reach, d, per, dt)) return;   // しじが ながびいたら まっすぐ つっこむ   // まわりこみ：よこへ まわって から つっこむ
     if (d <= reach && see) {
       const q = f.queued; f.queued = null; f.flFor = null;
       if (f.pace > 1.5) { burst(f.x, f.y, '#d8c8a8', 8, 80, .3); f.pace = .3; }   // ダッシュから ブレーキ：すなけむり
@@ -5449,6 +5452,15 @@ function aiMove(f, o, dt, autoSpecial) {
       return;
     }
     if (close && isDamaging(m)) f.paceT = (d > reach + 40 ? 2.3 : 1.6) * per.rush;   // 近接わざ：まあいまで いっきに かけこむ
+    if (ordered && (close || !see)) {   // しじされた 近接わざ（や 見えない 相手）：かべを よけながら まっすぐ むかう
+      f.aiMode = 'attack'; f.paceT = Math.max(f.paceT, close ? 2.3 : 1.6);
+      // ひっかかって すすめない（わざの かべ など）：しばらく よこへ すべって まわりこむ
+      const st = f.ordSt || (f.ordSt = { x: f.x, y: f.y, t: B.t, slide: 0, sgn: 1 });
+      if (B.t - st.t > .45) { if (Math.hypot(f.x - st.x, f.y - st.y) < 10 && !st.slide) { st.slide = .8; st.sgn = Math.random() < .5 ? 1 : -1; f.navT = 0; } st.x = f.x; st.y = f.y; st.t = B.t; }
+      let a = B.st.nav && !flies(f) ? navDir(f, o.x, o.y) : ang;
+      if (st.slide > 0) { st.slide = Math.max(0, st.slide - dt); a = ang + st.sgn * 1.35; }
+      return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
+    }
     if (stalled() && B.st.nav && !flies(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
       f.aiMode = 'attack'; if (close) f.paceT = 2.3 * per.rush; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
     }
@@ -5975,7 +5987,7 @@ function netApplyInput() {
   if (Array.isArray(inp.sw) && (inp.sw[0] | 0) > NET.done.sw) { NET.done.sw = inp.sw[0] | 0; const i = inp.sw[1] | 0, x = sd.fs[i];
     if (f && x && i !== sd.act && !x.fainted && x.hp > 0 && !(sd.swapCd > 0) && B.mode === 'fight' && ['free', 'act', 'stun'].includes(f.state)) { doSwitch(f, i); say(`あいては ${f.sp.n}を もどして ${x.sp.n}を くりだした！`); cmdPose(1); } }
   if (Array.isArray(inp.mv) && (inp.mv[0] | 0) > (NET.done.mv || 0)) { NET.done.mv = inp.mv[0] | 0; const id = f && f.moves[inp.mv[1] | 0];   // ゲストの わざボタン
-    if (id && B.mode === 'fight' && !moveBlocked(f, id) && !((f.cd[id] || 0) > 0)) { f.queued = id; f.aiT = Math.max(f.aiT || 0, .6); } }
+    if (id && B.mode === 'fight' && !moveBlocked(f, id)) { f.want = { id, t: B.t }; if (!((f.cd[id] || 0) > 0)) f.queued = id; f.aiT = Math.max(f.aiT || 0, .6); } }
   if (Array.isArray(inp.ch) && (inp.ch[0] | 0) > NET.done.ch) { NET.done.ch = inp.ch[0] | 0; if (B.remoteChoose) { const i = inp.ch[1] | 0, x = sd.fs[i]; if (x && !x.fainted && x.hp > 0) netResolveChoose(i); } }
 }
 function netResolveChoose(i) { B.remoteChoose = false; B.paused = false; B.choosing = false; B.pendingSend = { side: 1, idx: i, t: .2 }; }
@@ -6774,8 +6786,8 @@ function cmdMove(i) {
   const id = f.moves[i]; if (!id) return;
   if (B.remote) { NET.inp.mv = [((NET.inp.mv && NET.inp.mv[0]) || 0) + 1, i]; netSendInput(); NET.myQ = { id, t: performance.now() }; SND.se('click'); return; }
   const blk = moveBlocked(f, id); if (blk) { say(`${MOVES[id].n}は いま つかえない！（${blk}）`); SND.se('deny'); return; }
-  if ((f.cd[id] || 0) > 0) { SND.se('deny'); return; }
-  f.queued = id; f.aiT = Math.max(f.aiT || 0, .6); SND.se('click');
+  f.want = { id, t: B.t }; f.aiT = Math.max(f.aiT || 0, .6); SND.se('click');
+  if (!((f.cd[id] || 0) > 0)) f.queued = id;   // クールダウン中なら よやく（あけたら すぐ だす）
 }
 // だれの わざを じどうに するか：CPU は いつも じどう。プレイヤーは AUTO の とき だけ
 function autoMoves(f) {
@@ -6876,7 +6888,7 @@ function updHUD() {
     const id = f.moves[+b.dataset.mv]; if (!id) return;
     const m = MOVES[id];
     b.querySelector('.cdv').style.height = ((f.cd[id] || 0) / ((f.cdMax && f.cdMax[id]) || m.cd) * 100) + '%';
-    b.classList.toggle('hot', f.queued === id || !!(B.remote && NET.myQ && NET.myQ.id === id && performance.now() - NET.myQ.t < 1500));
+    b.classList.toggle('hot', f.queued === id || !!(f.want && f.want.id === id) || !!(B.remote && NET.myQ && NET.myQ.id === id && performance.now() - NET.myQ.t < 1500));
     b.classList.toggle('blocked', !!moveBlocked(f, id));
     // あいてへの あいしょうを ボタンに 表示
     const o = active(1); let eff = '';
