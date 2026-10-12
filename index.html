@@ -4445,20 +4445,25 @@ function makeArena(key) {
     if (q.length > bestN) { bestN = q.length; best = c0; }
   }
   for (let c = 0; c < nw * nh; c++) if (comp[c] !== best) walk[c] = 0;
-  st.nav = { nw, nh, walk };
+  // ゆとりの ある マス：障害物から OBST_GAP 以上 はなれた ところ（ふだんは ここを あるく）
+  const comfy = new Uint8Array(nw * nh);
+  for (let c = 0; c < nw * nh; c++) if (walk[c]) { const x = (c % nw + .5) * NAV, y = ((c / nw | 0) + .5) * NAV; comfy[c] = all.some(o => circRect(x, y, NAV_R + OBST_GAP, o)) ? 0 : 1; }
+  st.nav = { nw, nh, walk, comfy };
   return st;
 }
 const CAM_MAX = 1.6, CAM_PAD = 170;   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
+const OBST_GAP = 18;   // ふつうに あるく ときは 障害物から この きょり（ゲーム内の ドット）いじょう はなれる。せまい すきまは しかたなく とおる
 // 障害物との 当たりは 足もとだけ（当たり判定が 絵の 足もとに あわせて あるので、体の 円より 小さく）
 const footR = (f) => Math.max(10, f.r * .6);
 // f から（tx, ty）へ 向かう 次の 目じるしを 返す（はば優先で 道を さがし、まっすぐ 行ける いちばん 先の 点へ）
-function navDir(f, tx, ty) {
+function navDir(f, tx, ty, tight) {
   const st = B.st, N = st.nav; if (!N) return Math.atan2(ty - f.y, tx - f.x);
   f.navT = (f.navT || 0) - 1;
-  if (f.navT <= 0 || !f.navPath || Math.hypot(tx - f.navGoal[0], ty - f.navGoal[1]) > 40) {
-    f.navT = 12; f.navGoal = [tx, ty];
-    const { nw, nh, walk } = N, cell = (x, y) => clamp(Math.floor(y / NAV), 0, nh - 1) * nw + clamp(Math.floor(x / NAV), 0, nw - 1);
+  if (f.navT <= 0 || !f.navPath || Math.hypot(tx - f.navGoal[0], ty - f.navGoal[1]) > 40 || !!f.navTight !== !!tight) {
+    f.navT = 12; f.navGoal = [tx, ty]; f.navTight = !!tight;
+    for (const grid of tight ? [N.walk] : [N.comfy, N.walk]) {   // まずは ゆとりの ある 道、とどかなければ ぎりぎりの 道
+    const { nw, nh } = N, walk = grid, cell = (x, y) => clamp(Math.floor(y / NAV), 0, nh - 1) * nw + clamp(Math.floor(x / NAV), 0, nw - 1);
     const near = (c) => { if (walk[c]) return c; const ci = c % nw, cj = (c / nw) | 0; for (let r = 1; r < 12; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) { const i = ci + di, j = cj + dj; if (i >= 0 && j >= 0 && i < nw && j < nh && walk[j * nw + i]) return j * nw + i; } return c; };
     const s0 = near(cell(f.x, f.y)), g = near(cell(tx, ty)), prev = new Int32Array(nw * nh).fill(-1), q = [s0]; prev[s0] = s0;
     for (let h = 0; h < q.length && prev[g] < 0; h++) {
@@ -4471,19 +4476,21 @@ function navDir(f, tx, ty) {
     }
     let end = g;
     if (prev[g] < 0) { let bd = 1e9; for (const c of q) { const d = Math.hypot((c % nw + .5) * NAV - tx, ((c / nw | 0) + .5) * NAV - ty); if (d < bd) { bd = d; end = c; } } }   // とどかない ときは いちばん 近づける 場所へ
+    if (prev[g] < 0 && grid !== N.walk) continue;   // ゆとりの ある 道では とどかない：ぎりぎりの 道で さがしなおす
     const path = []; for (let c = end; c !== s0 && prev[c] >= 0; c = prev[c]) path.push(c); path.reverse();
-    f.navPath = path.map(c => [(c % nw + .5) * NAV, ((c / nw | 0) + .5) * NAV]);
+    f.navPath = path.map(c => [(c % nw + .5) * NAV, ((c / nw | 0) + .5) * NAV]); f.navGap = grid === N.comfy; break;
+    }
   }
   const P = f.navPath; if (!P.length) return Math.atan2(ty - f.y, tx - f.x);
   // まっすぐ 歩いて いける いちばん 先の 点
   let k = 0;
-  for (let i = Math.min(P.length - 1, 14); i >= 0; i--) { if (walkClear(f, P[i][0], P[i][1])) { k = i; break; } }
+  for (let i = Math.min(P.length - 1, 14); i >= 0; i--) { if (walkClear(f, P[i][0], P[i][1], f.navGap ? OBST_GAP : 0)) { k = i; break; } }
   while (P.length && Math.hypot(P[0][0] - f.x, P[0][1] - f.y) < NAV && P.length > 1) P.shift(), k = Math.max(0, k - 1);
   const w = P[Math.min(k, P.length - 1)];
   return Math.atan2(w[1] - f.y, w[0] - f.x);
 }
-function walkClear(f, x, y) {
-  const L = Math.hypot(x - f.x, y - f.y), n = Math.max(1, Math.ceil(L / 8)), all = obstacles(true), r = footR(f) * .9;
+function walkClear(f, x, y, gap = OBST_GAP) {   // gap：障害物との ゆとり
+  const L = Math.hypot(x - f.x, y - f.y), n = Math.max(1, Math.ceil(L / 8)), all = obstacles(true), r = footR(f) * .9 + gap;
   for (let i = 1; i <= n; i++) { const t = i / n, px = f.x + (x - f.x) * t, py = f.y + (y - f.y) * t; if (all.some(o => circRect(px, py, r, o))) return false; }
   return true;
 }
@@ -6238,6 +6245,11 @@ function pickSpot(f, o, w, dt) {
 }
 function moveDir(f, mx, my, dt, nav) {
   if (f.v.confuse > 0) { const a = Math.atan2(my, mx) + Math.sin(B.t * 3 + f.side) * 2.2; const L = Math.hypot(mx, my); mx = Math.cos(a) * L; my = Math.sin(a) * L; }
+  if ((mx || my) && B.st.solid && !flies(f) && !(f.order && f.order.k === 'hide')) {   // 障害物に OBST_GAP より ちかい ときは そっと はなれる むきへ
+    const R = footR(f) + OBST_GAP; let rx = 0, ry = 0;
+    for (const o of obstacles(true)) { const cx = clamp(f.x, o.x0, o.x1), cy = clamp(f.y, o.y0, o.y1), dx = f.x - cx, dy = f.y - cy, d = Math.hypot(dx, dy); if (d >= R || d < .01) continue; const w = (1 - d / R) * 1.6; rx += dx / d * w; ry += dy / d * w; }
+    if (rx || ry) { const L = Math.hypot(mx, my), nx = mx / L + rx, ny = my / L + ry, n2 = Math.hypot(nx, ny) || 1; mx = nx / n2 * L; my = ny / n2 * L; }
+  }
   let sp = speedOf(f);
   // 緩急：ダッシュ・ふつう・のんびり を なめらかに きりかえる
   const pt = f.paceT || 1; f.pace = f.pace == null ? pt : f.pace + (pt - f.pace) * Math.min(1, dt * (pt > f.pace ? 7 : 4)); sp *= f.pace;
@@ -7683,7 +7695,7 @@ function orderStep(f, o, dt) {
   if (R.re <= 0) { R.re = .5; const sp = orderSpot(f, o, R.k); if (sp && (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o))) R.spot = sp; }   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
   const d = Math.hypot(R.spot.x - f.x, R.spot.y - f.y);
   if (R.k === 'flank' && (d < 50 || R.t < ORDER_T.flank - 1.2) && losFrom(f.x, f.y, o) && Math.hypot(f.x - o.x, f.y - o.y) < 330) { f.order = null; popText(f.x, f.y - 90, 'まわりこんだ！', '#bfe8ff'); f.aiT = 0; return false; }
-  if (d > 10) { f.paceT = 1.7; const nav = B.st.nav && !flies(f) && !walkClear(f, R.spot.x, R.spot.y), a = nav ? navDir(f, R.spot.x, R.spot.y) : Math.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
+  if (d > 10) { f.paceT = 1.7; const tight = R.k === 'hide', nav = B.st.nav && !flies(f) && !walkClear(f, R.spot.x, R.spot.y, tight ? 0 : OBST_GAP), a = nav ? navDir(f, R.spot.x, R.spot.y, tight) : Math.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
   else if (R.k === 'hide' && Math.random() < dt * 2) popText(f.x, f.y - 80, 'じっ…', '#9ab0c8');
   return true;
 }
@@ -8038,6 +8050,11 @@ function drawDoll(x, y, hp) {
   ctx.imageSmoothingEnabled = false; ctx.drawImage(img, Math.round(x - w / 2), Math.round(y - h + 2 - bob), w, h);
 }
 
+function drawBug(x, y, face) {   // ちいさな むし（はねが ぱたぱた）
+  x = Math.round(x); y = Math.round(y); const up = Math.floor(B.t * 30 + x) % 2;
+  ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(x - 3, y - (up ? 4 : 2), 3, 2); ctx.fillRect(x + 1, y - (up ? 4 : 2), 3, 2);
+  ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 3, y - 1, 6, 4); ctx.fillStyle = '#9ac83a'; ctx.fillRect(x - 2, y, 4, 2); ctx.fillStyle = '#120e1c'; ctx.fillRect(x + (face > 0 ? 2 : -3), y - 1, 1, 1);
+}
 function drawObsGround() {
   if (!B.obs) return;
   for (const o of B.obs) {
