@@ -766,8 +766,22 @@ html #app #bpanel #mvCmds .cmd .a{font-size:12px;color:#bfe8ff;white-space:nowra
 html #app #bpanel #mvCmds .cmd.on{outline:2px solid var(--acc);background:linear-gradient(180deg,#5e4a2f,#3c2e1d)}
 html #app #bpanel #mvCmds .cmd.cd{opacity:.5}
 html #app #bpanel #bbar #cDodge{flex-basis:22%}
-html.land #app #bpanel #mvCmds{flex:1 1 100%;flex-direction:row;order:1}
+html.land #app #bpanel #mvCmds{flex:1 1 100%;flex-direction:row}
 html.land #app #bpanel #mvCmds .cmd{min-height:30px}
+/* ボタンの ならび：うえから「わざ」→「うごきの しじ（かわす・かくれろ・まわりこめ）」→「こうたい」 */
+html #app #bpanel #bside{order:1} html #app #bpanel #mvCmds{order:2} html #app #bpanel #bbar{order:3}
+html #app #bpanel #mvCmds,html.land #app #bpanel #mvCmds{flex:none;flex-direction:row;gap:5px;width:100%}
+html #app #bpanel #mvCmds .cmd{flex:1 1 0;min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;opacity:.94}
+html #app #bpanel #mvCmds .cmd .a{font-size:13px}
+html #app #bpanel #mvCmds .cmd .b{font-size:9px;color:#9fb8cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+html #app #bpanel #mvCmds #cDodge{flex-grow:1.15;background:linear-gradient(180deg,#4a3f86,#2d2558)}
+html #app #bpanel #mvCmds #cDodge .a{font-size:14px;color:var(--acc)}
+html.land #app #bpanel #mvCmds .cmd{min-height:38px}
+html.land #app #bpanel #mvCmds .cmd .a{font-size:11.5px}
+html.land #app #bpanel #mvCmds .cmd .b{display:none}
+/* つかえない わざは グレーに */
+html #app #bpanel .cmd.mv.blocked{opacity:.45;filter:grayscale(1) brightness(.75)}
+html #app #bpanel .cmd.mv.blocked .b{color:#c8c8c8!important}
 </style>
 </head>
 <body>
@@ -916,9 +930,8 @@ html.land #app #bpanel #mvCmds .cmd{min-height:30px}
       <div class="ov" id="resultOv" hidden><h2 id="resTitle"></h2><div class="lines" id="resLines"></div><button class="btn" id="resNext">つぎへ</button></div>
     </div>
     <div id="bpanel">
+    <div id="mvCmds"><button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button><button class="cmd" id="cHide"><span class="a">かくれろ</span><span class="b">しょうがいぶつへ</span></button><button class="cmd" id="cFlank"><span class="a">まわりこめ</span><span class="b">うしろへ</span></button></div>
     <div id="bbar">
-      <button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button>
-      <div id="mvCmds"><button class="cmd" id="cHide"><span class="a">かくれろ</span></button><button class="cmd" id="cFlank"><span class="a">まわりこめ</span></button></div>
       <div id="bench"></div>
       <button class="cmd" id="cCap"><span class="a">クリスタル</span><span class="b" id="capN"></span></button>
       <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
@@ -4800,10 +4813,11 @@ function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRec
 function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.rx, dy = (y - p.y) / p.ry; if (dx * dx + dy * dy < 1) return true; } return false; }
 
 /* ---------- わざが つかえるか ---------- */
-// 回復できる わざは 1戦で 使える 回数に 上限
-function healMax(m) { const e = m.e || {}; if (m.k === 'counter' || m.k === 'heal' || e.seed || e.heal) return 2; return bigMax(m); }
-// 大わざ：1せんで つかえる 回数が すくない（いりょくが たかいほど すくない）
-function bigMax(m) { if (m.ohko) return 1; if (m.cat === 'stat') return 0; const p = m.power || Math.round((m.pow || 0) * 5); return p >= 120 ? 2 : p >= 100 ? 3 : 0; }
+// 回復できる わざは 1戦で 使える 回数に 上限（どの わざも さいてい USE_MIN かい）
+const USE_MIN = 5;
+function healMax(m) { const e = m.e || {}; if (m.k === 'counter' || m.k === 'heal' || e.seed || e.heal) return USE_MIN; return bigMax(m); }
+// 大わざ：1せんで つかえる 回数に 上限
+function bigMax(m) { if (m.ohko) return USE_MIN; if (m.cat === 'stat') return 0; const p = m.power || Math.round((m.pow || 0) * 5); return p >= 100 ? USE_MIN : 0; }
 // すいとる こうげき：なんどでも うてる。かいふく するのは 1戦 DRAIN_MAX 回まで（それいこうは ふつうの こうげき）
 const DRAIN_MAX = 3;
 const drainLeft = (f, id) => ((MOVES[id] && MOVES[id].drainMax) || DRAIN_MAX) - ((f.drains && f.drains[id]) || 0);
@@ -5377,7 +5391,7 @@ function useStatusMove(f, o, m) {
       healHp(f, f.maxHp * (e.heal || 50) / 100); healFx(f); break;
     case 'protect':
       if (B.t - f.lastProtect < 3 && Math.random() < .5) { failMove(f, 'れんぞくでは うまく まもれなかった！'); f.lastProtect = -9; return; }
-      f.v.protect = 10; f.v.pg = m.psnGuard ? 1 : 0; f.lastProtect = B.t; sheetFx('barrier', f.x, f.y - BODY, 1.3); typeFx(f.x, f.y - BODY, m.psnGuard ? 'poison' : 'ice', 4, 110, .45); break;   // 10びょう：だげきわざを 1かい ふせぐ
+      f.v.protect = 10; f.v.pg = m.psnGuard ? 1 : 0; f.lastProtect = B.t; sheetFx('barrier', f.x, f.y - BODY, 1.3); typeFx(f.x, f.y - BODY, m.psnGuard ? 'poison' : 'ice', 4, 110, .45); break;   // 10びょう：わざを 1かい ふせぐ
     case 'sub':
       if (f.clones && f.clones.some(c => c.doll)) { failMove(f, 'デコイは もう でている！'); return; }
       if (f.hp <= f.maxHp / 4) { failMove(f, 'たいりょくが たりない！'); return; }
@@ -5490,11 +5504,11 @@ function hit(att, def, m, ang, opt) {
   if (def.st.eva > 0 && !opt.tick && !opt.sure && !opt.throw && !m.ohko && Math.random() < 1 - 1 / (1 + def.st.eva * .12)) { SND.se('dodge'); popText(def.x, def.y - 66, 'ミス！', '#7fd8ff'); fxPush({ type: 'ghost', sid: def.mon.sid, x: def.x + rand(-14, 14), y: def.y, face: def.face, life: .2, max: .2 }); return false; }   // かいひりつ
   if (def.state === 'dash' && def.cur && def.cur.m.guardDash && !opt.throw && !def.cur.hit) {   // こうらおし：まもりながら すすむ
     SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 }); return false; }
-  if (def.v.protect > 0 && !opt.throw) {   // ガードシェル：だげき（✊）を 1かい ふせぐ。しゃげき（✌️）は ふせげず くずれる
+  if (def.v.protect > 0 && !opt.throw) {   // ガードシェル：どんな わざも 1かい ふせぐ（だげき ✊ は はじきかえす）
+    if (opt.tick) { if (opt.first) { SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); } return false; }   // つづけて あたる わざ（ビーム・ゆか など）は かまえて いる あいだ ずっと ふせぐ
     const r = rpsOf(m);
-    if (r === 'rock') { SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 });
-      def.v.protect = 0; if (def.v.pg && targetable(att) && att.hp > 0) setStatus(att, 'psn', def); if (targetable(att)) rpsParry(att, def); return false; }
-    if (r === 'scissors' && !opt.tick) { def.v.protect = 0; rpsBreak(def); }
+    { SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 });
+      def.v.protect = 0; if (def.v.pg && targetable(att) && att.hp > 0 && r === 'rock') setStatus(att, 'psn', def); if (targetable(att) && r === 'rock') rpsParry(att, def); return false; }
   }
   if (m.cat === 'stat') return statusHit(att, def, m);
   let eff = m.t === 'normal' ? effOf('normal', def.sp.type) * (def.sp.type2 ? effOf('normal', def.sp.type2) : 1) : effVs(m.t, def.sp);
@@ -5767,7 +5781,8 @@ function smartScore(f, o, id) {
     if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat) && !losClear(f, o)) p *= .3;   // やまなり・じわれ・ジャンプは 障害物を こえる
     const rps = rpsOf(m);
     if (o.inv > .2) p *= .2;
-    if (o.v.protect > 0 || (o.v.counter && o.v.counter.t > 0)) p *= rps === 'scissors' ? 1.3 : .1;   // かまえ：✌️ で くずす、✊ は はじかれる
+    if (o.v.protect > 0) p *= .1;   // ガードシェル：なにを うっても ふせがれる
+    else if (o.v.counter && o.v.counter.t > 0) p *= rps === 'scissors' ? 1.3 : .1;   // かまえ：✌️ で くずす、✊ は はじかれる
     if (charging(o) && rpsOf(o.cur.m) === 'scissors') p *= rps === 'rock' ? 1.6 : .8;   // ✌️ を ためている：✊ で わりこむ
     if (o.state === 'wind' && o.cur && o.cur.boost) p = Math.min(1, p * 1.3);   // ため中は ねらいどき
     const dmg = estDmg(f, o, m) * p, rc = moveReach(f, o, m), travel = Math.max(0, d - rc) / Math.max(40, speedOf(f));
@@ -7426,14 +7441,14 @@ const TUT_STEPS = [
       if (!(f.v.protect > 0) && !f.cur) for (const k of f.moves) if (MOVES[k].k === 'protect' && (f.cd[k] || 0) > 0) f.cd[k] = 0;   // れんしゅう：はやく おしすぎても すぐ もういちど
       if (T.f.dashOn && o.state === 'free' && !TUT.f.parry) T.f.dashOn = false; },   // はじけなかったら もういちど
     wait: () => !!TUT.f.parry },
-  { tx: 'はじいた！ <b>まもり</b>は とっしんに つよい。…こんどは あいてが まもりを かためた。とっしんでは はじかれて しまう！', pause: true, delay: 1.2 },
-  { tx: 'あいての <b>まもり</b>は <b>弾・ビーム・はんい</b>（しゃげき わざ）で くずせる。しゃげき わざを タップ！', hl: () => document.querySelector('.cmd.mv[data-mv="1"]'), near: 320,
+  { tx: 'はじいた！ <b>まもり</b>は どんな わざも 1かい ふせぐ。とっしんなら はじきかえせる。…こんどは あいてが まもりを かためた！', pause: true, delay: 1.2 },
+  { tx: 'まもりは <b>1かい</b> で きえる。<b>弾</b>の わざを うって まもりを はがそう！（だげきだと はじかれて しまうよ）', hl: () => document.querySelector('.cmd.mv[data-mv="1"]'), near: 320,
     freeze: () => tutO().v.protect > 0,
     run: (T) => { const o = tutO(), f = tutF(); if (!T.f.cdReset) { T.f.cdReset = 1; for (const k of f.moves) f.cd[k] = 0; }
       if (!T.f.guardOn) { o.lastProtect = -9; T.f.guardOn = tutEnemy(TUT.em.guard, .2); }
-      if (o.v.protect > 0) o.v.protect = Math.max(o.v.protect, .8); else if (T.f.guardOn && o.state === 'free' && !TUT.f.brk) T.f.guardOn = false; },   // くずされるまで かまえつづける
+      if (o.v.protect > 0) { o.v.protect = Math.max(o.v.protect, .8); T.f.gUp = 1; } else if (T.f.gUp) TUT.f.brk = 1; else if (T.f.guardOn && o.state === 'free' && !TUT.f.brk) T.f.guardOn = false; },   // はがされるまで かまえつづける
     wait: () => !!TUT.f.brk },
-  { tx: 'ガードブレイク！ これで 3つの よみあい が そろった。<br><b>とっしん</b> → ためている あいてを とめる<br><b>まもり</b> → とっしんを はじく<br><b>しゃげき</b> → まもりを くずす<br>あいての うごきを 見て えらぼう！', pause: true, delay: 1.2 },
+  { tx: 'まもりを はがした！ これで よみあい の きほんは ばっちり。<br><b>とっしん</b> → ためている あいてを とめる<br><b>まもり</b> → どんな わざも 1かい ふせぐ（とっしんは はじく）<br><b>弾・ビーム</b> → まもりを はがす<br>あいての うごきを 見て えらぼう！', pause: true, delay: 1.2 },
   { tx: '<b>ひかえ</b>の モンスターを タップすると こうたい できるよ。やってみよう！', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 },
   { tx: 'さいごに：うえの <b>AUTO</b> を おすと わざも おまかせ に なる。こまったら つかってみて。<br>では あいてを たおして しあげよう！', hl: () => $('bAuto'), pause: true, delay: 1.5 },
   { tx: 'あいてを たおそう！', fin: true },
@@ -7525,7 +7540,7 @@ function moveDesc(m) {
   if (m.useFoeAtk) out.push('あいての こうげきで ダメージ');
   if (m.superVsWater) out.push('みずに こうかばつぐん');
   if (m.rapidSpin) out.push('しかけを はらう');
-  const K = { protect: m.psnGuard ? '10びょう だげきわざ（せっきん・とっしん）を 1かい ふせぐ。ふせいだら あいてを どくに する' : '10びょう だげきわざ（せっきん・とっしん）を 1かい ふせぐ（しゃげき・はんいは ふせげない）', counter: 'うけた ダメージを かえす', sub: 'HPを 1/4 けずって デコイにんぎょうを おく（あいての こうげきを ひきつける・2かいで こわれる）', dbond: 'たおされたら あいても たおす',
+  const K = { protect: m.psnGuard ? '10びょう どんな わざも 1かい ふせぐ。だげきを ふせいだら あいてを どくに する' : '10びょう どんな わざも 1かい ふせぐ（だげきは はじきかえす）', counter: 'うけた ダメージを かえす', sub: 'HPを 1/4 けずって デコイにんぎょうを おく（あいての こうげきを ひきつける・2かいで こわれる）', dbond: 'たおされたら あいても たおす',
     curse: 'HPを 1/4 けずって、あいての HPを 20% けずる（こうたいするまで その ぶんは かいふく できない）', baton: 'のうりょくの へんかを ひきついで こうたい',
     flip: 'じぶんの のうりょく変化を はんてん（さがった ものが あがる）', leaves: '8びょう じぶんの まわりを このはが まわって こうげき（こうたいしても のこる）',
     mines: '5この ほうしを ばらまく。ふむと ばくはつ', trap: 'あいての あしもとに みえない わな（みかたには みえる）。ふむと 2.4びょう うごけない',
@@ -7737,12 +7752,13 @@ function updHUD() {
     const m = MOVES[id];
     b.querySelector('.cdv').style.height = ((f.cd[id] || 0) / ((f.cdMax && f.cdMax[id]) || m.cd) * 100) + '%';
     b.classList.toggle('hot', f.queued === id || !!(f.want && f.want.id === id) || !!(B.remote && NET.myQ && NET.myQ.id === id && performance.now() - NET.myQ.t < 1500));
-    b.classList.toggle('blocked', !!moveBlocked(f, id));
+    b.classList.toggle('blocked', !!moveBlocked(f, id));   // つかえない わざは グレー
     // あいてへの あいしょうを ボタンに 表示
     const o = active(1); let eff = '';
     if (o && m.cat !== 'stat') { const v = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1); eff = v >= 2 ? '2' : v === 0 ? '0' : v < 1 ? '0.5' : ''; }
     if (b.dataset.eff !== eff) b.dataset.eff = eff;
     const left = healMax(m) ? `（のこり ${Math.max(0, healLeft(f, id))}）` : m.e && m.e.drain ? `（かいふく ${Math.max(0, drainLeft(f, id))}）` : '';
+    const why = moveBlocked(f, id); if (why) { setText(b.querySelector('.b'), `つかえない：${why}`); return; }
     setText(b.querySelector('.b'), (eff ? `${TYPES[m.t].n}・${eff === '2' ? 'ばつぐん！' : eff === '0' ? 'きかない' : 'いまいち'}` : moveSub(m)) + left);
   });
   $('cDodge').querySelector('.cdv').style.height = ((B.sides[my].dodgeCmd || 0) / DODGE_CMD_CD * 100) + '%';
