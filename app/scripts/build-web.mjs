@@ -23,6 +23,10 @@ await build({ entryPoints: [path.join(root, 'src/backend.js')], bundle: true, mi
 const cfgSrc = path.join(root, 'firebase-config.js');
 fs.copyFileSync(fs.existsSync(cfgSrc) ? cfgSrc : path.join(root, 'firebase-config.example.js'), path.join(www, 'firebase-config.js'));
 
+// ステージの きょく（mp3）
+fs.mkdirSync(path.join(www, 'music'), { recursive: true });
+for (const f of fs.readdirSync(path.join(root, '..', 'music')).filter((f) => f.endsWith('.mp3'))) fs.copyFileSync(path.join(root, '..', 'music', f), path.join(www, 'music', f));
+
 // ゲーム本体
 let html = fs.readFileSync(path.join(root, '..', 'index.html'), 'utf8');
 html = html.replace(/<link rel="preconnect"[^>]*>(<link rel="preconnect"[^>]*>)?\s*/g, '')
