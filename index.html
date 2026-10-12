@@ -4874,7 +4874,7 @@ function beginMove(f, id) {
   if (healMax(m) && !(m.charge2 && !f.v.charged)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }   // がりょうてんせいは ためる ときは かぞえない
   if (m.fakeout) f.v.fakeUsed = true;   // びっくりてうち：1かい でるごとに 1かい
   let ang = Math.atan2(o.y - f.y, o.x - f.x), tx = o.x, ty = o.y, decoy = null;
-  if (o.clones && o.clones.length && isDamaging(m) && ['melee', 'swipe', 'dash', 'proj', 'beam', 'strike', 'multi', 'cone', 'warp', 'vault'].includes(m.k)) { const dl = o.clones.find(c => c.doll), k = dl ? o.clones.indexOf(dl) + 1 : Math.floor(Math.random() * (o.clones.length + 1)); if (k > 0) { decoy = o.clones[k - 1]; ang = Math.atan2(decoy.y - f.y, decoy.x - f.x); tx = decoy.x; ty = decoy.y; } }   // かげぶんしん：どれを ねらうかは うんしだい
+  if (o.clones && o.clones.length && isDamaging(m) && ['melee', 'swipe', 'dash', 'proj', 'beam', 'strike', 'multi', 'cone', 'warp', 'vault'].includes(m.k)) { const dl = o.clones.find(c => c.doll && Math.hypot(c.x - f.x, c.y - f.y) <= DOLL_R), cl = o.clones.filter(c => !c.doll), k = dl ? -1 : Math.floor(Math.random() * (cl.length + 1)); decoy = dl || (k > 0 ? cl[k - 1] : null); if (decoy) { ang = Math.atan2(decoy.y - f.y, decoy.x - f.x); tx = decoy.x; ty = decoy.y; } }   // デコイにんぎょうは ゆうこうはんい（DOLL_R）の なかの あいてだけ ひきつける   // かげぶんしん：どれを ねらうかは うんしだい
   // ◎（命中100未満）の わざ：（スティック廃止のため 通常は あいての いた 方向・いちに 固定）
   if (f.side === 0 && !S.auto && m.aim === 'dir') {
     const v = playerVec();
@@ -5091,7 +5091,8 @@ function updLeaves(dt) {
     for (let i = 0; i < LEAF_N; i++) { const p = leafPos(me, L, i); if (Math.hypot(p.x - x.x, p.y - (x.y - BODY * .6)) < x.r + 14) { L.cd = .45; hit(me, x, L.m, Math.atan2(x.y - me.y, x.x - me.x), { mul: .2, tick: true, first: true, decoy: null }); break; } }
   });
 }
-// デコイにんぎょう：ほんものの よこに にんぎょうを おく（2かい こうげきを うけると こわれる）
+// デコイにんぎょう：あいての まえに にんぎょうを おく（2かい こうげきを うけると こわれる）。にんぎょうから DOLL_R いないで わざを だした あいては にんぎょうを ねらう
+const DOLL_R = 200;
 function makeDoll(f, hp) {
   const o = opp(f); let x = f.x - f.face * 52, y = f.y;
   if (o && targetable(o)) { const a = Math.atan2(f.y - o.y, f.x - o.x), d = o.r + 46; for (const da of [0, .5, -.5, 1, -1]) { const px = o.x + Math.cos(a + da) * d, py = o.y + Math.sin(a + da) * d; if (inField(px, py, 14) && !blockedAt(px, py, 10)) { x = px; y = py; break; } } }   // あいての まえに おく
@@ -5814,7 +5815,7 @@ function smartScore(f, o, id) {
     if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat) && !losClear(f, o)) p *= .3;   // やまなり・じわれ・ジャンプは 障害物を こえる
     const rps = rpsOf(m);
     if (o.inv > .2) p *= .2;
-    if (o.v.protect > 0) p *= .1;   // ガードシェル：なにを うっても ふせがれる
+    if (o.v.protect > 0) { const pw = m.power || (m.pow || 0) * 5; p *= rps === 'rock' ? .15 : pw <= 70 ? .9 : .35; }   // ガードシェル：1かいで きえるので、かるい しゃげきで はがしに いく（だげきは はじかれる）
     else if (o.v.counter && o.v.counter.t > 0) p *= rps === 'scissors' ? 1.3 : .1;   // かまえ：✌️ で くずす、✊ は はじかれる
     if (charging(o) && rpsOf(o.cur.m) === 'scissors') p *= rps === 'rock' ? 1.6 : .8;   // ✌️ を ためている：✊ で わりこむ
     if (o.state === 'wind' && o.cur && o.cur.boost) p = Math.min(1, p * 1.3);   // ため中は ねらいどき
@@ -8045,6 +8046,8 @@ function dollImg(hurt) {
   return c;
 }
 function drawDoll(x, y, hp) {
+  ctx.save(); ctx.globalAlpha = .55 + Math.sin(B.t * 4) * .15; ctx.setLineDash([8, 8]); ctx.lineDashOffset = -B.t * 12; ctx.strokeStyle = '#ffe9a8'; ctx.lineWidth = 2;   // ゆうこうはんい
+  ctx.beginPath(); ctx.arc(x, y, DOLL_R, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha *= .15; ctx.fillStyle = "#ffe9a8"; ctx.fill(); ctx.restore();
   const img = dollImg(hp <= 1 ? 1 : 0), S = img.width > 16 ? 2.2 : 2.6, w = img.width * S, h = img.height * S, bob = Math.floor(B.t * 2) % 2;
   ctx.fillStyle = 'rgba(10,8,18,.3)'; ctx.beginPath(); ctx.ellipse(x, y, 14, 4, 0, 0, 7); ctx.fill();
   ctx.imageSmoothingEnabled = false; ctx.drawImage(img, Math.round(x - w / 2), Math.round(y - h + 2 - bob), w, h);
