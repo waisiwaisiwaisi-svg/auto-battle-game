@@ -7984,15 +7984,26 @@ const DOLL_ROWS = [
   '....kkkkk....', '...kllllck...', '..kllcccck...', '..kcxcccxck..', '..kcccccccck.', '...kccdcck...', '....kkcck....', 'kk..kcclk..kk', 'klkkkcclkkklk', 'kccccclcccccd', '.kkkkrrrrkkkk', '....krrrrk...', '....kcclck...', '....kcclck...', '...kcccclck..', '...kcck.kck..', '...kcck.kcck.', '...kkk...kkk.', '.....kbbk....', '.....kbbk....', '....kkbbkk...'];
 const DOLL_PAL = { k: '#2a1a0a', c: '#d8b860', l: '#f4e0a0', d: '#a8883a', x: '#2a1a0a', r: '#c0281e', b: '#7a5a34' };
 let DOLL_IMG = {};
+// みがわり にんぎょう（ドラゴンの ぬいぐるみ・20×27 ドット）。よみこみ前は わらにんぎょうで かわりに かく
+const DOLL_PIC = new Image(); DOLL_PIC.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAbCAYAAAB836/YAAADQklEQVR42pWWTUhcVxTHf290o4zWlErImw+KPBgYSBESRXEWARFHskiEGFTopl2UohJokS7MIlkUEkKQRMEsailZDNIEpllIh4g7jdNpu7IdeGUQOh9XJEKNM4mBmNwuxnvz3tOJyVkN99z5v/PxO+c9+AAzWxrlcXd8tf74W2pUXr56TnrFjhOtr+UIhgIkJuMM1CGn7mRoi0cB2EhlPzxCgGKhBMDn33yhhbxiKhNn1PW16pRdEwRD6zz++Xdi45309AUo5HfJ22VEriI3UlmSCxcJhgK1UzZbGqVKbepOhnm7gmn56ekLMNbeD+2wVVzn4bZg1fKTXRNk18TxNTQtP+ZBVMq2iuucDJ7mZPA0bAt6+gLMz9mHymAchUTMIXbpExOAh9uCrj1JusFwCRTyu6QXN1lZ+MPQETpTdVrXnqRYKGkRrxhAKNxM3iq7uyx2XhgqdFUzJZBuMLh5IcnqUumQ2M0LSQDCkSadocZGiTrr5jSRq9RkLxRuZnSm9+imFPK7hMLNrrPvHg3q3w/mbJ2J8zxvl92Cqo55u6ydIleh6/wphlqbSDcYrC6VdFc3gMTkPQDOfXXXjY2zKSuzGWLjnYQjTQAkJpa58e89bt/6EZGr6NTSi5taxImO4RVUTiV6MBmuZilbXSqxMpvRPXBxqBkcPiu9T42NdzJQ9/bOvF3RfiVUc1K8QrrDET/R7irkXyKYSrkHQgn71KF3z43O9NLTF6gyZvmZt99iE+02+f5K9WFt8Six8U4tXO+aklRWejEJhZtJTCwzOtPLme64Pj/TDb++rjZx6NEg4UgviYll6TsqVe/4KWGvTY906OYo1HzOFFXNHszZjLX3M9bez7c//XPsu0bkKkyPdCB2XhgubLrOn9LsqfpspLK0xaOYlp/pkY7q+jqwP9dSDA7/4up0HUD55avr+8Wda89lA28k1H/8Ef/lnnLCamXgyme8kdUonohtPvVtUWfskfxhkRvLm5ywWsn/Ja4f2ofendgWjzL0dcQ14ypyL1Yrsxk3Ns6Noxym5XetrPTipsuvyBC5CsmFi+9+vZotjXL/2X1Z+ntSxobPyv1n912cKm7VPTVd7/WVcBT077L/AUdFjbTO/3jkAAAAAElFTkSuQmCC';
 function dollImg(hurt) {
   if (DOLL_IMG[hurt]) return DOLL_IMG[hurt];
+  if (DOLL_PIC.complete && DOLL_PIC.naturalWidth) {
+    const c = document.createElement('canvas'); c.width = DOLL_PIC.naturalWidth; c.height = DOLL_PIC.naturalHeight; const g = c.getContext('2d'); g.drawImage(DOLL_PIC, 0, 0);
+    if (hurt) {   // やぶれめ と つぎはぎ
+      g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(40,20,10,.28)'; g.fillRect(0, 0, c.width, c.height); g.globalCompositeOperation = 'source-over';
+      g.fillStyle = '#1a100a'; for (const [x, y] of [[11, 16], [12, 17], [11, 18], [12, 19], [5, 6], [6, 7]]) g.fillRect(x, y, 1, 1);
+      g.fillStyle = '#e8d8a0'; g.fillRect(13, 18, 1, 1); g.fillRect(10, 17, 1, 1);
+    }
+    return (DOLL_IMG[hurt] = c);
+  }
   const W = Math.max(...DOLL_ROWS.map(r => r.length)), H = DOLL_ROWS.length, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
   DOLL_ROWS.forEach((row, y) => [...row].forEach((ch, x) => { let col = DOLL_PAL[ch]; if (!col) return; if (hurt && ch === 'c' && (x * 7 + y * 3) % 5 === 0) col = '#8a6a30'; g.fillStyle = col; g.fillRect(x, y, 1, 1); }));
   if (hurt) { g.fillStyle = '#2a1a0a'; g.fillRect(6, 9, 1, 1); g.fillRect(7, 10, 1, 1); g.fillRect(6, 11, 1, 1); }   // やぶれめ
-  return (DOLL_IMG[hurt] = c);
+  return c;
 }
 function drawDoll(x, y, hp) {
-  const img = dollImg(hp <= 1 ? 1 : 0), S = 2.6, w = img.width * S, h = img.height * S, bob = Math.floor(B.t * 2) % 2;
+  const img = dollImg(hp <= 1 ? 1 : 0), S = img.width > 16 ? 2.2 : 2.6, w = img.width * S, h = img.height * S, bob = Math.floor(B.t * 2) % 2;
   ctx.fillStyle = 'rgba(10,8,18,.3)'; ctx.beginPath(); ctx.ellipse(x, y, 14, 4, 0, 0, 7); ctx.fill();
   ctx.imageSmoothingEnabled = false; ctx.drawImage(img, Math.round(x - w / 2), Math.round(y - h + 2 - bob), w, h);
 }
