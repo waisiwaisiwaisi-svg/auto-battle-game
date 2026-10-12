@@ -5007,7 +5007,9 @@ function updLeaves(dt) {
 }
 // デコイにんぎょう：ほんものの よこに にんぎょうを おく（2かい こうげきを うけると こわれる）
 function makeDoll(f, hp) {
-  const x = clamp(f.x - f.face * 52, B.st.fx0 + 14, B.st.fx1 - 14), y = f.y;
+  const o = opp(f); let x = f.x - f.face * 52, y = f.y;
+  if (o && targetable(o)) { const a = Math.atan2(f.y - o.y, f.x - o.x), d = o.r + 46; for (const da of [0, .5, -.5, 1, -1]) { const px = o.x + Math.cos(a + da) * d, py = o.y + Math.sin(a + da) * d; if (inField(px, py, 14) && !blockedAt(px, py, 10)) { x = px; y = py; break; } } }   // あいての まえに おく
+  x = clamp(x, B.st.fx0 + 14, B.st.fx1 - 14); y = clamp(y, B.st.fy0 + 14, B.st.fy1 - 14);
   f.clones = (f.clones || []).filter(c => !c.doll).concat([{ doll: true, x, y, ox: 0, oy: 0, hp: 2, life: 25, uid: ++B.uidc }]);
   sheetFx('poof', x, y - 20, 1.3); fxp({ type: 'smoke', x, y, life: .8, seed: Math.random() * 99 }); say(`${f.sp.n}は デコイにんぎょうを おいた！`);
 }
@@ -7922,25 +7924,24 @@ function drawFist(x, y, ang, col, s) {   // グーの こぶし
   const img = pixSpr(FIST_ROWS, col, 'fist'), w = img.width * PIX_D * s, h = img.height * PIX_D * s;
   ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(ang); ctx.drawImage(img, -w / 2, -h / 2, w, h); ctx.restore();
 }
-function drawDoll(x, y, hp) {   // デコイにんぎょう（わらにんぎょう）
-  const bob = Math.sin(B.t * 3) * 1;
-  ctx.fillStyle = 'rgba(10,8,18,.3)'; ctx.beginPath(); ctx.ellipse(x, y, 13, 4, 0, 0, 7); ctx.fill();
-  ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 2, y - 10, 4, 10);
-  ctx.fillStyle = '#7a5a34'; ctx.fillRect(x - 1, y - 10, 2, 10);   // ぼう
-  const by = y - 22 + bob;
-  ctx.fillStyle = '#120e1c'; ctx.beginPath(); ctx.ellipse(x, by, 11, 13, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(x, by - 16, 9, 0, 7); ctx.fill();
-  ctx.fillStyle = hp > 1 ? '#e8cf8a' : '#c8a868'; ctx.beginPath(); ctx.ellipse(x, by, 9.5, 11.5, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(x, by - 16, 7.5, 0, 7); ctx.fill();
-  ctx.fillStyle = '#e8cf8a'; ctx.fillRect(x - 16, by - 5, 32, 5); ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 17, by - 6, 1, 7); ctx.fillRect(x + 16, by - 6, 1, 7);
-  ctx.strokeStyle = '#a07a3a'; ctx.lineWidth = 1; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(x + i * 4, by - 9); ctx.lineTo(x + i * 3, by + 9); ctx.stroke(); }
-  ctx.fillStyle = '#c0281e'; ctx.fillRect(x - 6, by + 2, 12, 2);   // おび
-  ctx.strokeStyle = '#120e1c'; ctx.lineWidth = 1.5; for (const sx of [-3, 3]) { ctx.beginPath(); ctx.moveTo(x + sx - 2, by - 18); ctx.lineTo(x + sx + 2, by - 14); ctx.moveTo(x + sx + 2, by - 18); ctx.lineTo(x + sx - 2, by - 14); ctx.stroke(); }
-  if (hp <= 1) { ctx.strokeStyle = '#5a3a1a'; ctx.beginPath(); ctx.moveTo(x - 6, by - 4); ctx.lineTo(x + 2, by + 4); ctx.lineTo(x - 1, by + 8); ctx.stroke(); }
+// デコイにんぎょう（わらにんぎょうの ドット絵）
+const DOLL_ROWS = [
+  '....kkkkk....', '...kllllck...', '..kllcccck...', '..kcxcccxck..', '..kcccccccck.', '...kccdcck...', '....kkcck....', 'kk..kcclk..kk', 'klkkkcclkkklk', 'kccccclcccccd', '.kkkkrrrrkkkk', '....krrrrk...', '....kcclck...', '....kcclck...', '...kcccclck..', '...kcck.kck..', '...kcck.kcck.', '...kkk...kkk.', '.....kbbk....', '.....kbbk....', '....kkbbkk...'];
+const DOLL_PAL = { k: '#2a1a0a', c: '#d8b860', l: '#f4e0a0', d: '#a8883a', x: '#2a1a0a', r: '#c0281e', b: '#7a5a34' };
+let DOLL_IMG = {};
+function dollImg(hurt) {
+  if (DOLL_IMG[hurt]) return DOLL_IMG[hurt];
+  const W = Math.max(...DOLL_ROWS.map(r => r.length)), H = DOLL_ROWS.length, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  DOLL_ROWS.forEach((row, y) => [...row].forEach((ch, x) => { let col = DOLL_PAL[ch]; if (!col) return; if (hurt && ch === 'c' && (x * 7 + y * 3) % 5 === 0) col = '#8a6a30'; g.fillStyle = col; g.fillRect(x, y, 1, 1); }));
+  if (hurt) { g.fillStyle = '#2a1a0a'; g.fillRect(6, 9, 1, 1); g.fillRect(7, 10, 1, 1); g.fillRect(6, 11, 1, 1); }   // やぶれめ
+  return (DOLL_IMG[hurt] = c);
 }
-function drawBug(x, y, face) {   // ちいさな むし（はねが ぱたぱた）
-  x = Math.round(x); y = Math.round(y); const up = Math.floor(B.t * 30 + x) % 2;
-  ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(x - 3, y - (up ? 4 : 2), 3, 2); ctx.fillRect(x + 1, y - (up ? 4 : 2), 3, 2);
-  ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 3, y - 1, 6, 4); ctx.fillStyle = '#9ac83a'; ctx.fillRect(x - 2, y, 4, 2); ctx.fillStyle = '#120e1c'; ctx.fillRect(x + (face > 0 ? 2 : -3), y - 1, 1, 1);
+function drawDoll(x, y, hp) {
+  const img = dollImg(hp <= 1 ? 1 : 0), S = 2.6, w = img.width * S, h = img.height * S, bob = Math.floor(B.t * 2) % 2;
+  ctx.fillStyle = 'rgba(10,8,18,.3)'; ctx.beginPath(); ctx.ellipse(x, y, 14, 4, 0, 0, 7); ctx.fill();
+  ctx.imageSmoothingEnabled = false; ctx.drawImage(img, Math.round(x - w / 2), Math.round(y - h + 2 - bob), w, h);
 }
+
 function drawObsGround() {
   if (!B.obs) return;
   for (const o of B.obs) {
