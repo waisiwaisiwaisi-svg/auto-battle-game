@@ -8591,6 +8591,58 @@ function monFrame(f) {
   return 'idle' + (Math.floor(B.t * 5 + f.side * 2) % 4);
 }
 
+/* ---------- ぎじボーン：え を よこに うすく きって、だんごとに ずらす／のばす（ドットは 1マスずつ うごくので くずれない）----------
+   こし（下）を ねもとに、せぼね（上ほど よく うごく）と あたま（ばねで おくれて ついてくる）。あるき・いき・ため・うつ・くらう を ばねで つなぐ */
+let BONES = /(^|[^o])bones/.test(location.search + location.hash);   // ためしちゅう：URL の さいごに #bones を つけると オン
+function boneFrame(f) { return f.state === 'stun' ? 'hit' : (B.t + f.side * 1.7) % 3.6 < .14 ? 'blink' : 'idle0'; }
+function boneStep(f) {
+  const bn = f.bn || (f.bn = { t: B.t, lean: 0, lv: 0, head: 0, hv: 0, sq: 0, sqv: 0, ph: 0, fl: 0 });
+  const dt = clamp(B.t - bn.t, 0, .05); bn.t = B.t; if (!dt) return bn;
+  // ねらいの かたむき（＋＝まえ）と つぶれ（＋＝ぺしゃんこ）
+  let lean = 0, sq = 0; const st = f.state, u = f.cur && f.cur.wind ? clamp(f.cur.t / f.cur.wind, 0, 1) : 0;
+  if (st === 'wind' && f.cur && f.cur.m.cat !== 'stat') { lean = -2.5 - 2 * u; sq = .05 + .05 * u; }   // ため：うしろに そって ちぢむ
+  else if (['act', 'dash', 'chan', 'rage', 'grab'].includes(st)) { lean = 4; sq = -.06; }   // うつ：まえに のびる
+  else if (st === 'stun') { lean = -3; sq = .04; }
+  else if (st === 'stance') { lean = -1; sq = .08; }
+  else if (f.moving) { lean = 1.6; }   // あるき：すこし まえのめり
+  if (f.flash > 0 && !(bn.fl > 0)) { bn.lv -= 70; bn.sqv += 3.5; }   // くらった しゅんかん：はじかれる
+  bn.fl = f.flash;
+  const spring = (x, v, tgt, k, c) => { v += ((tgt - x) * k - v * c) * dt; return [x + v * dt, v]; };
+  [bn.lean, bn.lv] = spring(bn.lean, bn.lv, lean, 120, 12);
+  [bn.head, bn.hv] = spring(bn.head, bn.hv, bn.lean, 55, 6);   // あたまは おくれて ついてくる（ゆれが のこる）
+  [bn.sq, bn.sqv] = spring(bn.sq, bn.sqv, sq, 160, 11);
+  bn.ph = f.moving && st === 'free' ? f.walk * 9 * Math.PI / 2 : bn.ph * Math.max(0, 1 - dt * 6);
+  return bn;
+}
+function drawBoned(img, f, x, y, face, scale, alpha, sx, sy, fly) {
+  const bn = boneStep(f), W = img.width, H = img.height, w = W * scale * (sx || 1);
+  if (w < 1) return;
+  const walk = f.moving && f.state === 'free' && !fly, br = Math.sin(B.t * 2.6 + f.side * 1.3);   // いき
+  // しゅうへんの よはく（PAD）を のぞいた からだの たかさで わりあいを きめる
+  let top = 0; { const c = boneTop[f.mon.sid] != null ? boneTop[f.mon.sid] : (boneTop[f.mon.sid] = topRow(img)); top = c; }
+  const bodyH = Math.max(4, H - top), rows = [];
+  let tot = 0;
+  for (let j = 0; j < H; j++) {
+    const v = j < top ? 0 : (j - top) / bodyH;   // 0＝あたまの てっぺん、1＝あしもと
+    const up = 1 - v;
+    let dx = bn.lean * Math.pow(up, 1.4) + (bn.head - bn.lean) * Math.max(0, 1 - v / .38) * 1.4;   // せぼね＋あたまの おくれ
+    if (walk) { const ph = bn.ph; dx += (v > .72 ? Math.sin(ph) * 1.6 * (v - .72) / .28 : 0) + Math.sin(ph * 2) * .4 * up; }   // あし：まえうしろ・からだ：ゆらゆら
+    let hS = 1 + bn.sq * (v > .25 && v < .85 ? -1.6 : -.4);   // つぶれる ときは どうたいが ちぢむ
+    if (!walk && f.state === 'free') hS *= 1 + (v > .3 && v < .8 ? br * .035 : 0);   // いき：むねが ふくらむ
+    if (walk) hS *= 1 + Math.abs(Math.sin(bn.ph)) * .03 * (v < .7 ? 1 : 0);
+    const h = scale * (sy || 1) * hS; rows.push([Math.round(dx), h]); tot += h;
+  }
+  ctx.save(); if (alpha != null) ctx.globalAlpha = alpha;
+  ctx.translate(Math.round(x), Math.round(y)); ctx.scale(face < 0 ? -1 : 1, 1);
+  const wx = Math.round(-w / 2), ws = (sx || 1) * scale; let yy = 0;
+  for (let j = H - 1; j >= 0; j--) {   // あしもとから うえへ つみあげる（あしは じめんに ついた まま）
+    const [dx, h] = rows[j]; yy -= h; const y0 = Math.round(yy), y1 = Math.round(yy + h); if (y1 <= y0) continue;
+    ctx.drawImage(img, 0, j, W, 1, wx + Math.round(dx * ws), y0, Math.round(w), y1 - y0);
+  }
+  ctx.restore();
+}
+const boneTop = {};
+function topRow(img) { try { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); const d = g.getImageData(0, 0, img.width, img.height).data; for (let y = 0; y < img.height; y++) for (let x = 0; x < img.width; x++) if (d[(y * img.width + x) * 4 + 3] > 0) return y; } catch (e) { } return 0; }
 function drawFighter(f) {
   if (f && f.clones && !f.isClone) for (const c of f.clones) { if (c.doll) { drawDoll(c.x, c.y, c.hp); continue; } const g = Object.create(f); g.isClone = true; g.x = c.x; g.y = c.y; g.clones = null; drawFighter(g); }   // ぶんしん（ほんものと おなじ みため）
   if (!f || f.state === 'bench' || f.state === 'capt') return;
@@ -8618,7 +8670,8 @@ function drawFighter(f) {
     sy *= 1 + fl * (wing ? (mv ? .07 : .035) : .03); sx *= 1 - fl * (wing ? (mv ? .04 : .02) : .015);
     if (mv && Math.random() < (wing ? .25 : .15)) B.parts.push({ x: f.x + rand(-10, 10) - f.face * 14, y: f.y + oy - rand(10, 30), vx: -f.face * rand(10, 30), vy: wing ? rand(10, 30) : -rand(5, 15), life: .5, max: .5, col: wing ? '#ffffff' : (FX_STYLE[f.sp.type] || FX_STYLE.normal).cols[1], size: 3, g: wing ? 30 : -10, shape: wing ? 'leaf' : 'wisp', rot: Math.random() * 6, vr: rand(-4, 4) });
   }
-  const fr = SPR[f.mon.sid].fr[monFrame(f)], img0 = SPR[f.mon.sid].n;
+  const bone = BONES && !['faint', 'enter', 'return', 'hide'].includes(f.state) && !f.isClone;   // ぎじボーン：ベースの え 1まいを だんごとに ゆがめて うごかす
+  const fr = SPR[f.mon.sid].fr[bone ? boneFrame(f) : monFrame(f)], img0 = SPR[f.mon.sid].n;
   const ms = SPR[f.mon.sid].ms;
   if (fly) { ctx.globalAlpha = .7 - bob * .08; shadow(f.x, f.y, img0.width * ms * (.22 - bob * .015)); ctx.globalAlpha = 1; }
   else shadow(f.x, f.y, img0.width * ms * .31);
@@ -8634,7 +8687,8 @@ function drawFighter(f) {
       B.parts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * .7, vx: -Math.cos(a) * r * 3.2, vy: -Math.sin(a) * r * 2.2, life: .3, max: .3, col: Math.random() < .3 ? '#ffffff' : chgC, size: 3, g: 0 }); }
   }
   const spin = f.cur && f.cur.m.spinSelf && ['wind', 'act'].includes(f.state), fface = spin ? (Math.sin(B.t * 40) > 0 ? 1 : -1) : f.face;   // さんれんスピン：くるくる まわる
-  drawSprite(img, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy);
+  if (bone) drawBoned(img, f, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy, fly);
+  else drawSprite(img, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy);
   if ((f.v.protect > 0 || (f.state === 'dash' && f.cur && f.cur.m.guardDash)) && !['faint', 'enter', 'return'].includes(f.state)) {   // まもりの かまえ：からだを つつむ バリア
     const R = img0.width * ms * .5 + 10, cy = f.y + oy - img0.height * ms * .45, k = .5 + .5 * Math.sin(B.t * 10);
     const pc = f.v.pg ? ['#c88ae8', '#f0d8ff'] : ['#9ff0ff', '#d8faff'];
@@ -8642,7 +8696,7 @@ function drawFighter(f) {
     ctx.globalAlpha = .7 + .25 * k; ctx.strokeStyle = pc[1]; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
     if (f.v.protect > 0 && f.v.protect < 2 && Math.floor(B.t * 8) % 2) { ctx.save(); ctx.globalAlpha = .5; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(f.x, cy, R + 3, R * 1.05 + 3, 0, 0, 7); ctx.stroke(); ctx.restore(); }
   }
-  if (chg) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; drawSprite(fr.w, f.x, f.y + 3 + oy, f.face, ms, (.15 + .35 * chgU) * (.6 + .4 * Math.sin(B.t * 22)), sx, sy); ctx.restore(); }
+  if (chg) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const ga = (.15 + .35 * chgU) * (.6 + .4 * Math.sin(B.t * 22)); if (bone) drawBoned(fr.w, f, f.x, f.y + 3 + oy + warpU * 10, fface, ms, ga, sx, sy, fly); else drawSprite(fr.w, f.x, f.y + 3 + oy, f.face, ms, ga, sx, sy); ctx.restore(); }
   const top = Math.round(f.y + oy - img0.height * ms - 4);
   if (chg && !['faint', 'enter', 'return'].includes(f.state)) {   // ため ゲージ（HPバーの すぐ 下）
     const w = 46, x = Math.round(f.x - w / 2), y = top + 7;
