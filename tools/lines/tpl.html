@@ -1,0 +1,99 @@
+<title>バトルのセリフ断捨離</title>
+<style>
+:root{color-scheme:dark;--bg:#15111f;--panel:#1e1830;--panel2:#272040;--line:#352c52;--ink:#ece6ff;--dim:#9f97bd;--acc:#ffd166;--keep:#7bd88f;--del:#ff6b6b;--chg:#7ad8ff;--b:#4aa8ff;--p:#ff9a3d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 "Hiragino Maru Gothic ProN","M PLUS Rounded 1c",system-ui,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding-inline:16px;padding-block:18px 60px}
+h1{font-size:21px;margin:0 0 4px;text-wrap:balance}
+.lead{color:var(--dim);font-size:13px;margin:0 0 14px;max-width:66ch}
+.lead b{color:var(--ink)}
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:var(--panel);color:var(--dim);border:0;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.seg button.on{background:var(--panel2);color:var(--ink)}
+.count{margin-left:auto;font-size:12.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.count b{color:var(--del)} .count i{font-style:normal;color:var(--chg)}
+#save{font-size:12px;color:var(--dim)}
+section{margin-top:18px}
+h2{font-size:15px;margin:0 0 6px;display:flex;align-items:baseline;gap:8px}
+h2 small{color:var(--dim);font-weight:400;font-size:12px}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--panel);margin-top:6px;border:1px solid transparent}
+.row.del{opacity:.55;border-color:#5a2a3a}.row.del .t{text-decoration:line-through;text-decoration-color:var(--del)}
+.row.chg{border-color:#2a4a62}
+.w{font-size:10.5px;padding:1px 6px;border-radius:4px;color:#10101a;font-weight:700;white-space:nowrap}
+.w.b{background:var(--b)} .w.p{background:var(--p)}
+.t{min-width:0;overflow-wrap:anywhere}
+.t em{font-style:normal;color:var(--acc)}
+.wh{grid-column:2;font-size:11.5px;color:var(--dim)}
+.ops{grid-row:1/span 2;grid-column:3;display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.ops button{background:var(--panel2);color:var(--dim);border:0;padding:6px 9px;font:inherit;font-size:12px;cursor:pointer;min-width:3.6em}
+.ops button.on[data-v="keep"]{background:#1f3a2a;color:var(--keep)}
+.ops button.on[data-v="del"]{background:#4a1f2a;color:var(--del)}
+.ops button.on[data-v="chg"]{background:#1f3448;color:var(--chg)}
+.memo{grid-column:2/4;display:none}
+.row.chg .memo{display:block}
+.memo input{width:100%;background:#120e1c;color:var(--ink);border:1px solid #2a4a62;border-radius:6px;padding:6px 8px;font:inherit;font-size:13px}
+.empty{color:var(--dim);padding:20px 0}
+@media (max-width:520px){.row{grid-template-columns:auto minmax(0,1fr)}.ops{grid-row:auto;grid-column:1/3;justify-self:end}.memo{grid-column:1/3}}
+</style>
+<div class="wrap">
+  <h1>バトルのセリフ断捨離</h1>
+  <p class="lead">バトル中に でる もじを ぜんぶ ならべました。<b>した</b>＝したの メッセージらん、<b>うえ</b>＝モンスターの うえに でる もじ。いらない ものは <b>けす</b>、ことばを かえたい ものは <b>かえる</b> で あたらしい ことばを かいてください。えらんだ ものは じどうで ほぞんされます。おわったら Claude に「えらんだから へらして」と いってください。</p>
+  <div class="sticky">
+    <div class="bar">
+      <div class="seg" id="fw"><button data-v="" class="on">ぜんぶ</button><button data-v="b">した</button><button data-v="p">うえ</button></div>
+      <div class="seg" id="fs"><button data-v="" class="on">すべて</button><button data-v="del">けす もの</button><button data-v="chg">かえる もの</button><button data-v="keep">のこす もの</button></div>
+      <span class="count">けす <b id="nDel">0</b>・かえる <i id="nChg">0</i>／<span id="nAll"></span></span>
+      <span id="save">よみこみちゅう…</span>
+    </div>
+  </div>
+  <div id="list"></div>
+</div>
+<script>
+const CATS = __DATA__;
+const ALL = CATS.flatMap(c => c.items), PICK = {};   // id -> { v: 'keep'|'del'|'chg', memo }
+const $ = (id) => document.getElementById(id);
+let fw = '', fs = '', col = null;
+$('nAll').textContent = ALL.length;
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = (s) => esc(s).replace(/〈([^〉]*)〉/g, '<em>〈$1〉</em>');
+function render() {
+  const L = $('list'); L.innerHTML = ''; let shown = 0;
+  for (const c of CATS) {
+    const items = c.items.filter(it => (!fw || it.id[0] === fw) && (!fs || (PICK[it.id] ? PICK[it.id].v : 'keep') === fs));
+    if (!items.length) continue; shown += items.length;
+    const sec = document.createElement('section'); sec.innerHTML = `<h2>${esc(c.cat)} <small>${items.length}こ</small></h2>`;
+    for (const it of items) {
+      const p = PICK[it.id] || { v: 'keep' }, row = document.createElement('div'); row.className = 'row ' + (p.v === 'del' ? 'del' : p.v === 'chg' ? 'chg' : ''); row.dataset.id = it.id;
+      row.innerHTML = `<span class="w ${it.id[0]}">${it.where}</span><span class="t">${fmt(it.txt)}</span><span class="ops">${[['keep', 'のこす'], ['del', 'けす'], ['chg', 'かえる']].map(([v, n]) => `<button data-v="${v}" class="${p.v === v ? 'on' : ''}">${n}</button>`).join('')}</span><span class="wh">${esc(it.when)}</span><span class="memo"><input placeholder="あたらしい ことば（〈モンスター〉 など つかえます）"></span>`;
+      row.querySelector('input').value = p.memo || '';
+      sec.appendChild(row);
+    }
+    L.appendChild(sec);
+  }
+  if (!shown) L.innerHTML = '<p class="empty">あてはまる ものが ありません</p>';
+  $('nDel').textContent = ALL.filter(it => PICK[it.id] && PICK[it.id].v === 'del').length;
+  $('nChg').textContent = ALL.filter(it => PICK[it.id] && PICK[it.id].v === 'chg').length;
+}
+const timers = {};
+function save(id) {
+  clearTimeout(timers[id]); $('save').textContent = 'ほぞん まち…';
+  timers[id] = setTimeout(async () => { delete timers[id]; const p = PICK[id] || { v: 'keep' }, it = ALL.find(x => x.id === id);
+    try { if (col) await col.doc(id).set({ v: p.v, memo: p.memo || '', txt: it.txt }); else localStorage.setItem('picks', JSON.stringify(PICK)); $('save').textContent = col ? 'ほぞん ずみ ✓' : 'この ブラウザに だけ ほぞん'; }
+    catch (e) { $('save').textContent = 'ほぞん できなかった（' + (e && e.code || 'error') + '）'; } }, 400);
+}
+$('list').addEventListener('click', (e) => { const b = e.target.closest('.ops button'); if (!b) return; const id = b.closest('.row').dataset.id; PICK[id] = Object.assign({}, PICK[id] || {}, { v: b.dataset.v }); render(); save(id); if (b.dataset.v === 'chg') { const r = document.querySelector(`.row[data-id="${id}"] input`); if (r) r.focus(); } });
+$('list').addEventListener('input', (e) => { if (e.target.tagName !== 'INPUT') return; const id = e.target.closest('.row').dataset.id; PICK[id] = Object.assign({ v: 'chg' }, PICK[id] || {}, { memo: e.target.value }); save(id); });
+for (const [gid, set] of [['fw', (v) => fw = v], ['fs', (v) => fs = v]]) $(gid).addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; set(b.dataset.v); $(gid).querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); render(); });
+try { Object.assign(PICK, JSON.parse(localStorage.getItem('picks') || '{}')); } catch (e) { }
+render();
+(async () => {
+  let db = null; try { db = window.claude && await window.claude.use('db'); } catch (e) { }
+  if (!db) { $('save').textContent = 'この ブラウザに だけ ほぞん'; return; }
+  col = db.collection('picks');
+  col.onSnapshot((snap) => { for (const d of snap.docs) { if (timers[d.id]) continue; const v = d.data(); if (v && v.v) PICK[d.id] = { v: v.v, memo: v.memo || '' }; }
+    $('save').textContent = 'ほぞん ずみ ✓'; if (!document.activeElement || document.activeElement.tagName !== 'INPUT') render(); },
+    (e) => { $('save').textContent = 'よみこめなかった（' + (e && e.code || 'error') + '）'; });
+})();
+</script>
