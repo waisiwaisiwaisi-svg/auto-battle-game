@@ -4847,7 +4847,7 @@ const charging = (f) => !!(f && f.cur && (f.state === 'wind' || f.state === 'cha
 function rpsParry(att, def) {   // ✋ が ✊ を はじく
   att.cur = null; if (!att.v.rampage) att.queued = null; att.state = 'stun'; att.stT = 1.1;
   const a = Math.atan2(att.y - def.y, att.x - def.x); att.kx = Math.cos(a) * 260 * K; att.ky = Math.sin(a) * 260 * K;
-  popText(def.x, def.y - 84, 'はじいた！', '#ffd166', 'comic'); say(`${def.sp.n}は ${att.sp.n}を はじきかえした！`); if (TUT && def.side === 0) TUT.f.parry = true;
+  say(`${def.sp.n}は ${att.sp.n}を はじきかえした！`); if (TUT && def.side === 0) TUT.f.parry = true;
   fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 44, col: '#ffd166', life: .35, max: .35 }); B.hitstop = Math.max(B.hitstop, .12);
 }
 function rpsBreak(def) {   // ✌️ が ✋ を くずす
@@ -4989,9 +4989,9 @@ function updClones(f, dt) {
 }
 function popClone(f, c) {
   if (!f.clones) return;
-  if (c.doll && --c.hp > 0) { burst(c.x, c.y - 20, '#e8d8a8', 8, 80, .3); popText(c.x, c.y - 60, 'デコイ！', '#e8e0cc'); fxPush({ type: 'impact', x: c.x, y: c.y - 20, rad: 20, rot: Math.random(), life: .25, max: .25 }); SND.se('hit', 1.3); return; }
+  if (c.doll && --c.hp > 0) { burst(c.x, c.y - 20, '#e8d8a8', 8, 80, .3); fxPush({ type: 'impact', x: c.x, y: c.y - 20, rad: 20, rot: Math.random(), life: .25, max: .25 }); SND.se('hit', 1.3); return; }
   if (c.doll) { f.clones = f.clones.filter(x => x !== c); if (!f.clones.length) f.clones = null; burst(c.x, c.y - 20, '#e8d8a8', 16, 120, .5); sheetFx('poof', c.x, c.y - 20, 1.2); say(`${f.sp.n}の デコイにんぎょうは こわれた！`); return; } f.clones = f.clones.filter(x => x !== c); if (!f.clones.length) f.clones = null;
-  burst(c.x, c.y - 20, '#d8d0f0', 14, 110, .4); popText(c.x, c.y - 70, 'ぶんしんだった！', '#d8d0f0'); SND.se('dodge');
+  burst(c.x, c.y - 20, '#d8d0f0', 14, 110, .4); SND.se('dodge');
 }
 // ぶんしんに あたったか：あたった ぶんしんは きえる
 function hitClones(def, test) { if (!def || !def.clones) return; for (const c of def.clones.slice()) if (test(c)) popClone(def, c); }
@@ -5145,7 +5145,7 @@ function warpStrike(f, o, m, dc) {
 function startGrab(f, o) {
   const cur = f.cur; cur.hit = true; cur.gn = 0; cur.gt = .05; f.state = 'grab'; f.kx = f.ky = 0;
   o.cur = null; o.queued = null; o.state = 'stun'; o.stT = 1.2; o.kx = o.ky = 0;
-  popText(o.x, o.y - 96, 'つかんだ！', '#ffd166', 'comic'); SND.se('hit', .8); B.hitstop = Math.max(B.hitstop, .05);
+  SND.se('hit', .8); B.hitstop = Math.max(B.hitstop, .05);
 }
 // ほのお・みずの みち の あとを のこす とっしん
 function dashTrailPt(f, cur) { if (!cur.trail) return; const l = cur.trail[cur.trail.length - 1]; if (!l || Math.hypot(l.x - f.x, l.y - f.y) > 20) cur.trail.push({ x: f.x, y: f.y }); }
@@ -5164,7 +5164,7 @@ function confusedAct(f, id) {
 const gshiftOn = (f) => !!(f && f.v && f.v.gshift);   // ゴーストシフト：つかった じぶんだけ（こうたいすると きれる）
 function scareAway(f, o) {   // いかく：あいてを あとずさりさせる
   for (let i = 0; i < 3; i++) fxp({ type: 'shock', x: f.x, y: f.y - BODY, rad: 70 + i * 45, col: '#ff9a8a', life: .3 + i * .1 }); B.shake = Math.max(B.shake, 5); SND.se('boom', 1.3);
-  popText(f.x, f.y - 100, 'ガオーッ！', '#ff6b5b', 'comic');
+  
   if (!o || !targetable(o)) return;
   const need = 260 - dist(f, o), a = Math.atan2(o.y - f.y, o.x - f.x);
   o.cur = null; o.queued = null; o.state = 'stun'; o.stT = .55; popText(o.x, o.y - 90, 'ビクッ！', '#ffffff', 'comic');
@@ -5194,7 +5194,7 @@ function fireMove(f) {
   if (m.charge2) f.v.charged = 0;
   if (m.k === 'warp') { warpStrike(f, o, m, dc); return; }
   if (m.k === 'rage') { cur.rt = 0; cur.next = 0; cur.landed = 0; f.state = 'rage'; sheetFx('buff', f.x, f.y - BODY, 1.3); say(`${f.sp.n}は あばれだした！`); return; }
-  if (m.k === 'stance') { f.state = 'stance'; f.stT = 3; popText(f.x, f.y - 96, 'まちぶせ！', '#ffd166', 'comic'); fxp({ type: 'glint', x: f.x + f.face * 10, y: f.y - BODY - 10, col: '#ffd166', life: .5 }); return; }
+  if (m.k === 'stance') { f.state = 'stance'; f.stT = 3; fxp({ type: 'glint', x: f.x + f.face * 10, y: f.y - BODY - 10, col: '#ffd166', life: .5 }); return; }
   if (m.k === 'wave') { spawnWave(f, m, cur.ang); say(`おおきな なみが おしよせる！`); endAct(f, .35); return; }
   switch (m.k) {
     case 'melee':
@@ -5298,7 +5298,7 @@ function fireMove(f) {
 // 障害物に さえぎられた：ぶつかった 場所で はじける
 function blockedFx(f, o, m) {
   const a = Math.atan2(o.y - f.y, o.x - f.x), L = rayLen(f, a, dist(f, o)), x = f.x + Math.cos(a) * L, y = f.y + Math.sin(a) * L;
-  impactFx(x, y - BODY * .5, m.t, .45); popText(x, y - 50, 'さえぎられた', '#c8c0e0');
+  impactFx(x, y - BODY * .5, m.t, .45); 
 }
 const id2col = (m) => m.t === 'normal' ? '#ffffff' : TYPES[m.t].c;
 function endAct(f, t) { if (['wind', 'chan', 'dash', 'rage', 'grab', 'stance'].includes(f.state)) { f.state = 'act'; f.stT = t; } afterMoveUsed(f); }
@@ -5419,7 +5419,7 @@ function floorDmg(x, src, frac) {
   const eff = effVs(src.t, x.sp); if (eff === 0) return;
   const dmg = frac ? Math.max(1, Math.round(x.maxHp * frac * Math.min(eff, 2))) : 1;   // frac 0：ゆか（いつも 1）
   x.hp = Math.max(0, x.hp - dmg); x.flash = .1; B.lastDmgT = B.t;
-  popText(x.x + rand(-6, 6), x.y - 60, String(dmg), eff > 1 ? '#ffd166' : '#ff9a8a');
+  
   typeFx(x.x, x.y - 8, src.t, 5, 60, .35);
   if (x.hp <= 0) faint(x, active(src.side));
 }
@@ -5488,7 +5488,7 @@ function useStatusMove(f, o, m) {
 }
 function rayEffect(f, o, m) {
   switch (m.sp) {
-    case 'taunt': o.v.taunt = 6; popText(o.x, o.y - 96, 'ムカッ！', '#ff6b5b', 'comic'); impactFx(o.x, o.y - BODY, 'fighting', .5); say(`${o.sp.n}は ちょうはつに のってしまった！ ほじょわざが だせない！`); break;
+    case 'taunt': o.v.taunt = 6; impactFx(o.x, o.y - BODY, 'fighting', .5); say(`${o.sp.n}は ちょうはつに のってしまった！ ほじょわざが だせない！`); break;
     case 'encore':
       if (!o.lastMove || o.lastMove === 'tackle') { say('でも うまく きまらなかった！'); return; }
       o.v.encore = { id: o.lastMove, t: 5 }; o.queued = null; popText(o.x, o.y - 96, 'アンコール！', '#ffd166', 'comic'); typeFx(o.x, o.y - BODY - 20, 'normal', 20, 120, .8); say(`${o.sp.n}は ${MOVES[o.lastMove].n}しか だせなくなった！`); break;
@@ -5499,7 +5499,7 @@ function rayEffect(f, o, m) {
     case 'roar':
       for (let i = 0; i < 4; i++) fxp({ type: 'shock', x: f.x, y: f.y - BODY, rad: 80 + i * 50, col: '#ffffff', life: .3 + i * .12 }); B.shake = Math.max(B.shake, 6);
       if (B.kind === 'wild') { say(`${o.sp.n}は おどろいて にげだした！`); endBattle(o.side === 1 ? 'run' : 'lose'); return; }
-      { const idx = benchIdx(o.side, true); if (idx < 0) { say('でも かわりが いない！'); return; } popText(o.x, o.y - 100, 'ふきとばし！', '#ffffff', 'comic'); fxp({ type: 'swap', x: o.x, y: o.y - BODY, col: '#ffffff', life: .7 }); doSwitch(o, idx, null, true); }
+      { const idx = benchIdx(o.side, true); if (idx < 0) { say('でも かわりが いない！'); return; } fxp({ type: 'swap', x: o.x, y: o.y - BODY, col: '#ffffff', life: .7 }); doSwitch(o, idx, null, true); }
       break;
   }
 }
@@ -5550,9 +5550,9 @@ function hit(att, def, m, ang, opt) {
   if (B.stats) { B.stats.tryhit[MOVE_ID.get(m)] = (B.stats.tryhit[MOVE_ID.get(m)] || 0) + 1; if (def.inv > 0) B.stats.dodged[MOVE_ID.get(m)] = (B.stats.dodged[MOVE_ID.get(m)] || 0) + 1; }
   if ('decoy' in opt ? opt.decoy : att.cur && att.cur.decoy) return false;
   if (def.hurtInv > 0 && !opt.tick && !(def.hurtBy && def.hurtBy.att === att && def.hurtBy.m === m)) {   // むてき じかん（くらった あと・たおれた あとの こうたい）
-    if (B.t - (def.invPopT || -9) > .35) { def.invPopT = B.t; popText(def.x, def.y - 66, 'むてき', '#e8e4ff'); } return false; }   // かげぶんしん：ぶんしんを ねらった こうげきは ほんものに ダメージなし
+    return false; }
   if (def.inv > 0 && !opt.sure && !opt.throw) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
-  if (rpsOf(m) === 'rock' && (gshiftOn(def) || gshiftOn(att))) { popText(def.x, def.y - 66, 'すりぬけた！', '#c8b8ff'); burst(def.x, def.y - BODY, '#8a78c8', 6, 50, .3); return false; }   // ゴーストシフト
+  if (rpsOf(m) === 'rock' && (gshiftOn(def) || gshiftOn(att))) { burst(def.x, def.y - BODY, '#8a78c8', 6, 50, .3); return false; }   // ゴーストシフト
   if (def.st.eva > 0 && !opt.tick && !opt.sure && !opt.throw && !m.ohko && Math.random() < 1 - 1 / (1 + def.st.eva * .12)) { SND.se('dodge'); popText(def.x, def.y - 66, 'ミス！', '#7fd8ff'); fxPush({ type: 'ghost', sid: def.mon.sid, x: def.x + rand(-14, 14), y: def.y, face: def.face, life: .2, max: .2 }); return false; }   // かいひりつ
   if (def.state === 'dash' && def.cur && def.cur.m.guardDash && !opt.throw && !def.cur.hit) {   // こうらおし：まもりながら すすむ
     SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 }); return false; }
@@ -5565,7 +5565,7 @@ function hit(att, def, m, ang, opt) {
   if (m.cat === 'stat') return statusHit(att, def, m);
   let eff = m.t === 'normal' ? effOf('normal', def.sp.type) * (def.sp.type2 ? effOf('normal', def.sp.type2) : 1) : effVs(m.t, def.sp);
   if (m.superVsWater && hasType(def, 'water')) eff = eff / effOf('ice', 'water') * 2;
-  if (eff === 0 && desperate(att, def)) { eff = .25; popText(def.x, def.y - 80, 'むりやり！', '#c8b8e8'); }
+  if (eff === 0 && desperate(att, def)) { eff = .25; }
   if (eff === 0) { popText(def.x, def.y - 66, 'こうかなし', '#a49ac0'); say(`${def.sp.n}には こうかが ないようだ…`); return false; }
   if (m.ohko) { // だいちのさけめ：あたれば いちげき（レベルが上の あいてには きかない）
     if (def.lvl > att.lvl) { say('でも あいてには きかなかった！'); return false; }
@@ -5587,7 +5587,6 @@ function hit(att, def, m, ang, opt) {
   // ポケモンの ダメージ式：((2×Lv÷5＋2)×いりょく×A÷D÷50＋2)×タイプ一致×あいしょう×きゅうしょ×乱数(0.85〜1.00)。リアルタイム用に DMG_K を かける
   const P = pow * 5 * (KIND_DMG[m.k] || 1), base = Math.floor(Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D) / 50) + 2;
   let dmg = Math.max(1, Math.round(DMG_K * base * (opt.mul || 1) * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
-  if (lagHit) popText(def.x, def.y - 118, 'スキあり！', '#ff9a8a', true);
   const heavy = !opt.tick && pow >= 19, big = !opt.tick || opt.first;
   const tier = opt.tick ? 0 : (crit && (heavy || eff > 1)) || (heavy && eff > 1) ? 2 : heavy || eff > 1 || crit ? 1 : 0;   // ヒットの 大きさ 3だんかい   // うちつづける わざは 1回ごとは かるい
   // デコイ（みがわり）
@@ -5611,13 +5610,13 @@ function hit(att, def, m, ang, opt) {
     def.kx += Math.cos(ang) * 60 * K; def.ky += Math.sin(ang) * 60 * K; B.hitstop = Math.max(B.hitstop, .03);
   }
   else {
-    if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) === 'rock') { popText(def.x, def.y - 84, 'わりこみ！', '#ffd166', 'comic'); if (TUT && att.side === 0) TUT.f.cut = true; }
+    if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) === 'rock') { if (TUT && att.side === 0) TUT.f.cut = true; }
     def.cur = null; if (!def.v.rampage) def.queued = null;
     if (!lagHit) { def.state = 'stun'; def.stT = heavy ? .45 : .25; }
     def.kx = Math.cos(ang) * (heavy ? 230 : 140) * K; def.ky = Math.sin(ang) * (heavy ? 230 : 140) * K;
     if (m.noKb) def.kx = def.ky = 0;   // つららばり：ふきとばさない
-    if (m.bigKb) { def.kx = Math.cos(ang) * 1500 * K; def.ky = Math.sin(ang) * 1500 * K; popText(def.x, def.y - 100, 'ふっとんだ！', '#ffffff', 'comic'); }   // だいおんせい：とおくまで ふきとばす
-    if (m.slap) { const a = ang - Math.PI / 2; def.kx = Math.cos(a) * 900 * K; def.ky = Math.sin(a) * 900 * K; def.slapT = .75; popText(def.x, def.y - 100, 'バシッ！', '#ffd166', 'comic'); }   // ひっぱたき：よこに ふきとばす（かべに あたると スタン）
+    if (m.bigKb) { def.kx = Math.cos(ang) * 1500 * K; def.ky = Math.sin(ang) * 1500 * K; }   // だいおんせい：とおくまで ふきとばす
+    if (m.slap) { const a = ang - Math.PI / 2; def.kx = Math.cos(a) * 900 * K; def.ky = Math.sin(a) * 900 * K; def.slapT = .75; }   // ひっぱたき：よこに ふきとばす（かべに あたると スタン）
     B.hitstop = Math.max(B.hitstop, tier === 2 ? .16 : tier === 1 ? .09 : .025);   // 小さい ヒットは かるく、大きい ヒットは ずしっと
   }
   SND.se(crit ? 'crit' : 'hit', heavy ? .8 : opt.tick ? 1.5 : 1.2); if (big) { if (eff > 1) SND.se('super'); else if (eff < 1) SND.se('weak'); }
@@ -5630,7 +5629,7 @@ function hit(att, def, m, ang, opt) {
   impactFx(def.x, def.y - BODY, m.t, clamp((heavy ? .6 : .25) + (eff > 1 ? .3 : 0) + (crit ? .2 : 0), 0, 1));
   if (m.punch || opt.throw) fxp({ type: 'fist', x: def.x - Math.cos(ang) * 8, y: def.y - BODY - Math.sin(ang) * 8, ang, col: TYPES[m.t].c, life: .35, big: heavy });   // こぶし：グーの ヒット
   if (crit) { popText(def.x, def.y - 104, 'きゅうしょ！', '#ff9ad0', true); sheetFx('crit', def.x, def.y - BODY, 1.3); }
-  if (big && (heavy || eff > 1 || crit)) { popText(def.x + rand(-10, 10), def.y - 92, choice(['BONK!', 'POW!', 'WHAM!', 'SMASH!']), '#ffd84a', 'comic'); def.dizzy = 1.0; }
+  if (big && (heavy || eff > 1 || crit)) { def.dizzy = 1.0; }
   if (big && eff > 1) say('ばつぐんの いりょくだ！');
   else if (big && eff < 1) say('あまり きいていない ようだ…');
   if (def.status === 'frz' && m.t === 'fire') { def.status = ''; say(`${def.sp.n}の こおりが とけた！`); }
@@ -5677,7 +5676,7 @@ function afterHitSelf(att, def, m, dmg, opt) {
 // どくどく・おにび など「あたれば状態異常」の弾
 function statusHit(att, def, m) {
   const e = m.e || {};
-  if (e.web) { def.v.web = e.web; fxp({ type: 'webhit', x: def.x, y: def.y - BODY, life: .6 }); popText(def.x, def.y - 96, 'あみに かかった！', '#e8f0c0', 'comic'); say(`${def.sp.n}は ほういもうに からめとられた！ こうげきを うけると ダメージが ふえる！`); return true; }
+  if (e.web) { def.v.web = e.web; fxp({ type: 'webhit', x: def.x, y: def.y - BODY, life: .6 }); say(`${def.sp.n}は ほういもうに からめとられた！ こうげきを うけると ダメージが ふえる！`); return true; }
   if (e.yawn) {   // ねむけさそい：あたると ねむけ
     if (def.status || def.v.yawn) { say('でも うまく きまらなかった！'); return false; }
     def.v.yawn = 2.5; popText(def.x, def.y - 96, 'ふぁ〜', '#cfd8ff', 'comic'); say(`${def.sp.n}は ねむけを さそわれた！`); return true;
@@ -6356,12 +6355,12 @@ function updateFighter(f, dt) {
       f.stT -= dt; f.scale = clamp(1 - f.stT / .5, 0, 1);
       if (f.stT <= 0) {
         f.scale = 1;
-        if (f.swapLag > 0) { f.state = 'lag'; f.stT = f.swapLag; f.lagMax = f.swapLag; f.swapLag = 0; popText(f.x, f.y - 80, 'スキ！', '#ff9a8a', true); }
+        if (f.swapLag > 0) { f.state = 'lag'; f.stT = f.swapLag; f.lagMax = f.swapLag; f.swapLag = 0; }
         else f.state = 'free';
       }
       break;
     case 'lag': // 交代直後：うごけない（かわす も だめ）
-      f.stT -= dt; if (f.stT <= 0) { f.state = 'free'; popText(f.x, f.y - 80, 'じゅんびOK', '#7bd88f'); }
+      f.stT -= dt; if (f.stT <= 0) { f.state = 'free'; }
       break;
     case 'return':
       f.stT -= dt; f.scale = clamp(f.stT / .3, 0, 1);
@@ -6464,7 +6463,7 @@ function updateFighter(f, dt) {
       if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; if (m.grab) { startGrab(f, o); break; } if (hit(f, o, m, cur.ang) && m.chain) { cur.chainGo = !cur.chainN || Math.random() < .5; cur.chainN = (cur.chainN || 0) + 1; } }
       if (f.state !== 'dash') break;
       if (m.wallBreak && B.walls.length) { const w = B.walls.find(w => w.blocks.some(b => circRect(f.x, f.y, footR(f) + 3, b))); if (w) {   // てつのずつき：せっちされた かべを こわす
-        B.walls = B.walls.filter(x => x !== w); wallsChanged(); for (const b of w.blocks) { burst(b.x, b.y - 10, TYPES[w.t].c, 6, 120, .4); sheetFx('slam', b.x, b.y - 14, .7); } B.shake = Math.max(B.shake, 7); SND.se('boom'); popText(f.x, f.y - 96, 'かべを こわした！', '#ffd166', 'comic'); } }
+        B.walls = B.walls.filter(x => x !== w); wallsChanged(); for (const b of w.blocks) { burst(b.x, b.y - 10, TYPES[w.t].c, 6, 120, .4); sheetFx('slam', b.x, b.y - 14, .7); } B.shake = Math.max(B.shake, 7); SND.se('boom'); } }
       clampF(f);
       const wall = pat !== 'leap' && (Math.abs(f.x - (px + vx * dt)) > .5 || Math.abs(f.y - (py + vy * dt)) > .5);
       if (pat === 'leap' && cur.d >= L) {   // ちゃくち：まわりに しょうげき
@@ -6477,7 +6476,7 @@ function updateFighter(f, dt) {
           if (m.crash && !cur.hit && f.hp > 0) { const r = Math.max(1, Math.round(estDmg(f, o || f, m) * m.crash)); f.hp = Math.max(0, f.hp - r); popText(f.x, f.y - 66, `-${r}`, '#ff9a8a'); say(`${f.sp.n}は かべに ぶつかって ダメージを うけた！`); if (f.hp <= 0) { faint(f, o); break; } } }   // すてみのはばたき：かべに ぶつかると はんどう
         if (m.chain && cur.chainGo && oT && cur.chainN < 8) {   // ドラゴンラッシュ：あたったら もういちど つっこむ（2かいめからは 50%）
           cur.chainGo = false; cur.ang = Math.atan2(o.y - f.y, o.x - f.x); cur.t = 0; cur.wind = .32; f.state = 'wind'; burst(f.x, f.y, '#8a6ae8', 8, 90, .3);   // いっかい ずつ はんいを みせてから つっこむ
-          popText(f.x, f.y - 96, `${cur.chainN + 1}れんぞく！`, '#b8a0ff', 'comic'); break; }
+          break; }
         if (cur.trail) { addTrail(f, m, cur.trail); cur.trail = null; }
         if (m.back && !cur.back) { cur.back = true; cur.hit = true; cur.ang = Math.atan2(cur.sy - f.y, cur.sx - f.x); cur.dlen = Math.hypot(cur.sx - f.x, cur.sy - f.y); cur.d = 0; sheetFx('dash', f.x, f.y - BODY, 1, cur.ang); if (cur.dlen > 8) break; }   // ヒットアンドアウェイ：もとの ばしょへ もどる
         endAct(f, wall ? .6 : .35);
@@ -7705,7 +7704,7 @@ function orderStep(f, o, dt) {
     const cur = Math.atan2(f.y - o.y, f.x - o.x), diff = wrapAng(R.goal - cur);
     R.ck -= dt; if (R.ck <= 0) { R.stuck = Math.hypot(f.x - R.lx, f.y - R.ly) < 12 ? R.stuck + 1 : 0; R.ck = .4; R.lx = f.x; R.ly = f.y; }
     if (R.stuck >= 2 && !R.flip) { R.flip = true; R.sg = -R.sg; R.goal = cur + R.sg * 2.5; R.stuck = 0; }   // つかえたら はんたいまわり
-    if (Math.abs(diff) < .3) { f.order = null; popText(f.x, f.y - 90, 'まわりこんだ！', '#bfe8ff'); f.aiT = 0; return false; }
+    if (Math.abs(diff) < .3) { f.order = null; f.aiT = 0; return false; }
     const as = cur + Math.sign(diff) * Math.min(.75, Math.abs(diff)); let wx = o.x + Math.cos(as) * R.R, wy = o.y + Math.sin(as) * R.R;
     if (!spotOk(f, wx, wy)) { wx = o.x + Math.cos(as) * R.R * .7; wy = o.y + Math.sin(as) * R.R * .7; }
     f.paceT = 1.9; const nav = B.st.nav && !flies(f) && !walkClear(f, wx, wy), a = nav ? navDir(f, wx, wy) : Math.atan2(wy - f.y, wx - f.x);
@@ -7714,9 +7713,8 @@ function orderStep(f, o, dt) {
   if (R.k === 'hide' && Math.hypot(o.x - R.ox, o.y - R.oy) > 60) { R.re = 0; R.ox = o.x; R.oy = o.y; }   // あいてが うごいたら すぐ みなおす
   if (R.re <= 0) { R.re = .5; const sp = orderSpot(f, o, R.k); if (sp && (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o))) R.spot = sp; }   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
   const d = Math.hypot(R.spot.x - f.x, R.spot.y - f.y);
-  if (R.k === 'flank' && (d < 50 || R.t < ORDER_T.flank - 1.2) && losFrom(f.x, f.y, o) && Math.hypot(f.x - o.x, f.y - o.y) < 330) { f.order = null; popText(f.x, f.y - 90, 'まわりこんだ！', '#bfe8ff'); f.aiT = 0; return false; }
+  if (R.k === 'flank' && (d < 50 || R.t < ORDER_T.flank - 1.2) && losFrom(f.x, f.y, o) && Math.hypot(f.x - o.x, f.y - o.y) < 330) { f.order = null; f.aiT = 0; return false; }
   if (d > 10) { f.paceT = 1.7; const tight = R.k === 'hide', nav = B.st.nav && !flies(f) && !walkClear(f, R.spot.x, R.spot.y, tight ? 0 : OBST_GAP), a = nav ? navDir(f, R.spot.x, R.spot.y, tight) : Math.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
-  else if (R.k === 'hide' && Math.random() < dt * 2) popText(f.x, f.y - 80, 'じっ…', '#9ab0c8');
   return true;
 }
 const DODGE_CMD_CD = 5;   // かわすの 指示は 1かい つかうと 5びょう つかえない
