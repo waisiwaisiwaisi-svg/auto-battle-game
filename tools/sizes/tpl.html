@@ -1,0 +1,169 @@
+<title>モンスター身長くらべ</title>
+<style>
+:root{color-scheme:dark;--bg:#14101f;--panel:#1f1830;--panel2:#2a2142;--line:#3a3058;--grid:#2c2446;--ink:#ece6ff;--dim:#a79fc4;--acc:#ffd166;--sel:#7ad8ff;--chg:#ff9a6a;--ok:#7bd88f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif}
+.wrap{padding-inline:16px;padding-block:12px 140px;max-width:100%}
+h1{font-size:20px;margin:0;letter-spacing:.04em;text-wrap:balance}
+.sub{color:var(--dim);font-size:12.5px;margin:2px 0 10px;max-width:68ch}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.bar input[type=search],.bar select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit;min-width:0}
+.bar input[type=search]{width:160px}
+.bar label{display:flex;align-items:center;gap:6px;color:var(--dim);font-size:12.5px}
+.bar input[type=range]{width:120px;accent-color:var(--acc)}
+.pill{background:var(--panel);border:1px solid var(--line);color:var(--dim);border-radius:999px;padding:3px 10px;font-size:12px;font-variant-numeric:tabular-nums}
+.pill b{color:var(--acc)}
+#save{margin-left:auto}
+.stagebox{position:relative;overflow:auto;border:1px solid var(--line);border-radius:10px;background:linear-gradient(#1a1429,#120e1c);max-height:calc(100vh - 230px);min-height:260px}
+#stage{position:relative;display:flex;align-items:flex-end;gap:14px;padding:0 24px 0 56px;min-width:max-content}
+.ruler{position:absolute;left:0;right:0;pointer-events:none}
+.ruler .ln{position:absolute;left:0;right:0;border-top:1px solid var(--grid)}
+.ruler .ln.major{border-top-color:#41366a}
+.ruler .lb{position:absolute;left:6px;transform:translateY(-50%);font-size:10.5px;color:var(--dim);background:#14101fcc;padding:0 3px;font-variant-numeric:tabular-nums}
+.ground{position:absolute;left:0;right:0;border-top:2px solid #6b5aa0;pointer-events:none}
+.mon{position:relative;display:flex;flex-direction:column;align-items:center;cursor:ns-resize;user-select:none;touch-action:none;flex:none;min-width:72px}
+.mon img{image-rendering:pixelated;display:block;pointer-events:none}
+.mon .cap{position:absolute;top:100%;margin-top:6px;text-align:center;white-space:nowrap;font-size:11.5px;line-height:1.35}
+.mon .cap .nm{color:var(--ink)}
+.mon .cap .v{color:var(--dim);font-variant-numeric:tabular-nums}
+.mon.chg .cap .v{color:var(--chg)}
+.mon .hd{position:absolute;left:50%;transform:translateX(-50%);width:26px;height:6px;border-radius:3px;background:var(--sel);opacity:0;top:-10px}
+.mon:hover .hd,.mon.sel .hd{opacity:.9}
+.mon.sel img{filter:drop-shadow(0 0 0 var(--sel)) drop-shadow(0 0 3px var(--sel))}
+.mon .dots{position:absolute;top:-22px;display:flex;gap:2px}
+.mon .dots i{width:8px;height:8px;border-radius:2px;display:block}
+.panel{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.panel .who{display:flex;align-items:center;gap:10px;min-width:0}
+.panel .who img{image-rendering:pixelated;height:40px;width:auto}
+.panel .who b{font-size:15px}
+.panel .who span{color:var(--dim);font-size:12px}
+.panel .ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel input[type=range]{width:min(260px,60vw);accent-color:var(--sel)}
+button{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover{border-color:var(--sel)}
+.num{font-variant-numeric:tabular-nums;min-width:5.5em;display:inline-block;text-align:right;color:var(--acc);font-weight:700}
+.hint{color:var(--dim);font-size:12px}
+.empty{color:var(--dim);padding:40px}
+</style>
+<div class="wrap">
+  <h1>モンスター身長くらべ</h1>
+  <p class="sub">ゲームの中と おなじ 大きさで ならべています。モンスターの うえで <b>マウスホイール</b>（Shift で こまかく）か、<b>うえ・したに ドラッグ</b>で 大きさを かえられます。スマホは タップして したの スライダーで。かえた 大きさは じどうで ほぞんされ、ゲームに はんえいできます。</p>
+  <div class="bar">
+    <input type="search" id="q" placeholder="なまえで さがす">
+    <select id="type"><option value="">ぜんぶの タイプ</option></select>
+    <select id="sort"><option value="size">ちいさい じゅん</option><option value="dex">ずかん じゅん</option><option value="chg">かえた ものを まえに</option></select>
+    <label><input type="checkbox" id="onlyChg">かえた ものだけ</label>
+    <label>ひょうじ <input type="range" id="zoom" min="0.6" max="3" step="0.1" value="1.6"></label>
+    <span class="pill">かえた <b id="nChg">0</b> / <span id="nAll">0</span></span>
+    <span class="pill" id="save">よみこみちゅう…</span>
+  </div>
+  <div class="stagebox" id="box"><div class="ruler" id="ruler"></div><div id="stage"></div></div>
+</div>
+<div class="panel" id="panel">
+  <div class="who" id="who"><span>モンスターを えらんでください</span></div>
+  <div class="ctl" id="ctl" hidden>
+    <button id="dn" aria-label="ちいさく">−</button>
+    <input type="range" id="k" min="0.4" max="2.5" step="0.01">
+    <button id="up" aria-label="おおきく">＋</button>
+    <span class="num" id="kv"></span>
+    <button id="rs">もとに もどす</button>
+  </div>
+</div>
+<script>
+const DATA = __DATA__;
+const MONS = DATA.mons, TYPES = DATA.types, BY = Object.fromEntries(MONS.map(m => [m.id, m]));
+const K = {};            // id -> 倍率（1 = いまの ゲーム）
+let Z = 1.6, sel = null, db = null, col = null, local = false;
+const $ = (id) => document.getElementById(id);
+const dispH = (m) => m.h * m.ms * (K[m.id] || 1);
+const fmt = (k) => Math.round(k * 100) + '%';
+for (const [k, v] of Object.entries(TYPES)) { const o = document.createElement('option'); o.value = k; o.textContent = v.n; $('type').appendChild(o); }
+$('nAll').textContent = MONS.length;
+function list() {
+  const q = $('q').value.trim(), ty = $('type').value, only = $('onlyChg').checked, so = $('sort').value;
+  let L = MONS.filter(m => (!q || m.n.includes(q)) && (!ty || m.t.includes(ty)) && (!only || (K[m.id] && Math.abs(K[m.id] - 1) > .001)));
+  if (so === 'size') L.sort((a, b) => dispH(a) - dispH(b));
+  if (so === 'chg') L.sort((a, b) => (Math.abs((K[b.id] || 1) - 1) > .001) - (Math.abs((K[a.id] || 1) - 1) > .001) || dispH(a) - dispH(b));
+  return L;
+}
+let order = [];
+function render(keepOrder) {
+  const st = $('stage'); if (!keepOrder) order = list().map(m => m.id);
+  const L = order.map(id => BY[id]);
+  const maxH = Math.max(120, ...L.map(m => dispH(m) * Z)), top = 40, H = maxH + top, capH = 62;
+  st.style.height = (H + capH) + 'px'; st.style.paddingBottom = capH + 'px';
+  st.innerHTML = L.length ? '' : '<div class="empty">あてはまる モンスターが いません</div>';
+  for (const m of L) {
+    const el = document.createElement('div'); el.className = 'mon' + (m.id === sel ? ' sel' : '') + (Math.abs((K[m.id] || 1) - 1) > .001 ? ' chg' : ''); el.dataset.id = m.id;
+    const s = m.ms * (K[m.id] || 1) * Z, img = new Image(); img.src = m.img; img.width = Math.round(m.w * s); img.height = Math.round(m.h * s); img.alt = m.n;
+    el.innerHTML = `<div class="dots">${m.t.map(t => `<i style="background:${TYPES[t].c}"></i>`).join('')}</div><div class="hd"></div>`;
+    el.appendChild(img);
+    const cap = document.createElement('div'); cap.className = 'cap'; cap.innerHTML = `<div class="nm"></div><div class="v">${Math.round(dispH(m))}ドット<br>${fmt(K[m.id] || 1)}</div>`; cap.firstChild.textContent = m.n; el.appendChild(cap);
+    st.appendChild(el);
+  }
+  // めもり（ゲーム内の ドット）：25ごと、100ごとに こく
+  const R = $('ruler'); R.innerHTML = ''; R.style.top = '0'; R.style.height = H + 'px';
+  for (let v = 0; v * Z <= maxH + 1; v += 25) { const y = H - v * Z; const d = document.createElement('div'); d.className = 'ln' + (v % 100 === 0 ? ' major' : ''); d.style.top = y + 'px'; R.appendChild(d); if (v % 50 === 0) { const lb = document.createElement('div'); lb.className = 'lb'; lb.style.top = y + 'px'; lb.textContent = v; R.appendChild(lb); } }
+  const g = document.createElement('div'); g.className = 'ground'; g.style.top = H + 'px'; R.appendChild(g);
+  $('nChg').textContent = Object.keys(K).filter(id => Math.abs(K[id] - 1) > .001).length;
+  panel();
+}
+function panel() {
+  const m = sel && BY[sel]; $('ctl').hidden = !m;
+  if (!m) { $('who').innerHTML = '<span>モンスターを えらんでください</span>'; return; }
+  $('who').innerHTML = `<img src="${m.img}" alt=""><div><b></b><br><span>${m.t.map(t => TYPES[t].n).join('・')}${m.dexH ? '・ずかん ' + m.dexH + 'm' : ''}</span></div>`; $('who').querySelector('b').textContent = m.n;
+  const k = K[m.id] || 1; $('k').value = k; $('kv').textContent = `${fmt(k)}（${Math.round(dispH(m))}ドット）`;
+}
+// ひとつだけ かきなおす（ドラッグ中に かるく）
+function refreshOne(id) {
+  const el = document.querySelector(`.mon[data-id="${id}"]`), m = BY[id]; if (!el) return render(true);
+  const s = m.ms * (K[id] || 1) * Z, img = el.querySelector('img'); img.width = Math.round(m.w * s); img.height = Math.round(m.h * s);
+  el.classList.toggle('chg', Math.abs((K[id] || 1) - 1) > .001); el.querySelector('.v').innerHTML = `${Math.round(dispH(m))}ドット<br>${fmt(K[id] || 1)}`;
+  const st = $('stage'), maxH = Math.max(120, ...order.map(i => dispH(BY[i]) * Z)); if (Math.abs(parseFloat(st.style.height) - (maxH + 40 + 62)) > 2) render(true);
+  if (id === sel) panel();
+  $('nChg').textContent = Object.keys(K).filter(i => Math.abs(K[i] - 1) > .001).length;
+}
+function setK(id, k) { K[id] = Math.round(Math.min(2.5, Math.max(.4, k)) * 1000) / 1000; refreshOne(id); queueSave(id); }
+// ほぞん（1たいずつ、うごかし おわって すこし してから）
+const pend = {}; let saving = 0;
+function queueSave(id) { clearTimeout(pend[id]); $('save').textContent = 'ほぞん まち…'; pend[id] = setTimeout(() => save(id), 600); }
+async function save(id) {
+  delete pend[id]; saving++;
+  try {
+    if (col) await col.doc(id).set({ k: K[id], n: BY[id].n });
+    else { try { localStorage.setItem('sizes', JSON.stringify(K)); } catch (e) { } }
+    $('save').textContent = col ? 'ほぞん ずみ ✓' : 'この ブラウザに だけ ほぞん';
+  } catch (e) { $('save').textContent = 'ほぞん できなかった（' + (e && e.code || 'error') + '）'; }
+  saving--;
+}
+// そうさ：ホイール・ドラッグ・タップ
+const stage = $('stage');
+stage.addEventListener('wheel', (e) => { const el = e.target.closest('.mon'); if (!el) return; e.preventDefault(); const id = el.dataset.id; if (sel !== id) { sel = id; document.querySelectorAll('.mon.sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); }
+  const step = e.shiftKey ? 1.01 : 1.04; setK(id, (K[id] || 1) * (e.deltaY < 0 ? step : 1 / step)); }, { passive: false });
+let drag = null;
+stage.addEventListener('pointerdown', (e) => { const el = e.target.closest('.mon'); if (!el) return; const id = el.dataset.id; sel = id; document.querySelectorAll('.mon.sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); panel();
+  drag = { id, y: e.clientY, k: K[id] || 1, h: dispH(BY[id]) * Z, moved: false }; el.setPointerCapture(e.pointerId); });
+stage.addEventListener('pointermove', (e) => { if (!drag) return; const dy = drag.y - e.clientY; if (Math.abs(dy) > 3) drag.moved = true; if (!drag.moved) return; setK(drag.id, drag.k * Math.max(.2, (drag.h + dy) / drag.h)); });
+const endDrag = () => { if (drag && drag.moved) render(true); drag = null; };
+stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
+$('k').addEventListener('input', () => sel && setK(sel, +$('k').value));
+$('dn').onclick = () => sel && setK(sel, (K[sel] || 1) / 1.03);
+$('up').onclick = () => sel && setK(sel, (K[sel] || 1) * 1.03);
+$('rs').onclick = () => sel && setK(sel, 1);
+document.addEventListener('keydown', (e) => { if (!sel || e.target.tagName === 'INPUT') return; if (e.key === 'ArrowUp') { e.preventDefault(); setK(sel, (K[sel] || 1) * 1.02); } if (e.key === 'ArrowDown') { e.preventDefault(); setK(sel, (K[sel] || 1) / 1.02); } });
+for (const id of ['q', 'type', 'sort', 'onlyChg']) $(id).addEventListener('input', () => render());
+$('zoom').addEventListener('input', () => { Z = +$('zoom').value; render(true); });
+try { const s = JSON.parse(localStorage.getItem('sizes') || 'null'); if (s) Object.assign(K, s); } catch (e) { }
+render();
+// みんなで おなじ 大きさを みる：db の sizes コレクション
+(async () => {
+  try { db = window.claude && await window.claude.use('db'); } catch (e) { db = null; }
+  if (!db) { local = true; $('save').textContent = 'この ブラウザに だけ ほぞん'; return; }
+  col = db.collection('sizes'); let first = true;
+  col.onSnapshot((snap) => {
+    for (const d of snap.docs) { const v = d.data(); if (pend[d.id]) continue; if (v && typeof v.k === 'number') K[d.id] = v.k; }
+    $('save').textContent = 'ほぞん ずみ ✓';
+    if (first) { first = false; render(); } else if (!drag) render(true);
+  }, (e) => { $('save').textContent = 'よみこめなかった（' + (e && e.code || 'error') + '）'; });
+})();
+</script>
