@@ -102,6 +102,9 @@ h1.tlogo{font-size:clamp(30px,6vw,60px);line-height:1;display:flex;flex-directio
 .tbtns{display:flex;flex-direction:column;gap:12px;width:min(280px,80vw)}
 .tbtns .btn{width:100%}
 .tbig{font-size:19px;padding:15px;animation:tglow 1.6s ease-in-out infinite}
+.tapstart{font-family:inherit;font-weight:700;font-size:clamp(16px,4.6vw,22px);letter-spacing:.12em;color:#ffd166;text-align:center;padding:14px 0;text-shadow:2px 0 0 #0b0914,-2px 0 0 #0b0914,0 2px 0 #0b0914,0 -2px 0 #0b0914,3px 3px 0 #0b0914;animation:tapblink 1.1s steps(1) infinite;cursor:pointer;user-select:none}
+@keyframes tapblink{0%,55%{opacity:1}56%,100%{opacity:0}}
+#scTitle{cursor:pointer}
 @keyframes tglow{50%{box-shadow:0 4px 0 #b8892a,0 0 0 3px #0d0b14,0 0 22px 4px rgba(255,209,102,.55)}}
 .tfoot{position:absolute;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom));text-align:center;font-size:10px;color:rgba(255,255,255,.55);z-index:1;text-shadow:1px 1px 0 #000}
 .sndbtn{position:absolute;right:calc(12px + env(safe-area-inset-right));top:calc(12px + env(safe-area-inset-top));z-index:2;width:40px;height:40px;background:rgba(20,16,34,.75);box-shadow:0 0 0 2px var(--edge);font-size:18px;color:var(--acc)}
@@ -801,8 +804,7 @@ html #app #bpanel .cmd.mv.blocked .b{color:#c8c8c8!important}
       <h1 class="logo tlogo"><span class="l1">PIXEL MONSTER</span><span class="l2">ARENA</span><small>ピクセル モンスター アリーナ</small></h1>
       <p class="lead tlead">つかまえて、そだてて、スタジアムで ぶつかりあえ！<br>リアルタイム モンスターバトル</p>
       <div class="tbtns">
-        <button class="btn tbig" id="btnContinue" hidden>つづきから</button>
-        <button class="btn sub" id="btnNew">はじめから</button>
+        <div class="tapstart" id="tapStart">TAP TO START</div>
       </div>
       <div id="titleMons" hidden></div>
     </div>
@@ -3718,7 +3720,7 @@ function setArtBg() {
 const TAB_OF = { scRank: 'rank', scHub: 'home', scTeam: 'team', scDex: 'dex', scGuild: 'guild', scMaker: 'make' };
 function show(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
   { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); } }
-  { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play(id === 'scTitle' ? 'title' : 'hub'); }
+  { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play('hub'); /* タイトルも ホームと おなじ きょく（つながって ながれる） */ }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
   const p = sp.prof, evo = '';
@@ -3728,7 +3730,6 @@ function profLine(sp) {
 const typeChip = (t) => `<span class="chip" style="background:${TYPES[t].c}">${TYPES[t].n}</span>`;
 
 function renderTitle() {
-  const has = !!loadSave(); $('btnContinue').hidden = !has; $('btnNew').classList.toggle('sub', has); $('btnNew').classList.toggle('tbig', !has);
   show('scTitle');
   startTitleAnim();
 }
@@ -8896,7 +8897,8 @@ document.addEventListener('gesturestart', (ev) => ev.preventDefault());
 /* =====================================================================
    画面遷移ボタン
    ===================================================================== */
-$('btnNew').onclick = async () => { if (loadSave() && !(await ask('セーブデータを けして はじめから あそびますか？'))) return; renderStarter(); };
+// TAP TO START：がめんの どこを タップしても はじまる（セーブが あれば つづきから、なければ あいぼう えらび）。はじめからは せってい の しょきか で
+$('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') || $('scTitle').hidden) return; SND.se('ok'); S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else renderStarter(); });
 /* ---------- 画面の 向き：横長なら 横レイアウト。スマホを たてに もった ままでも「横画面」で 90度 回して あそべる ---------- */
 let LAND_PREF = (() => { try { return localStorage.getItem('pma_land') === '1'; } catch (e) { return false; } })();
 function layout() {
@@ -8925,7 +8927,7 @@ layout();
 const updSnd = () => { for (const id of ['titleSnd', 'hubSnd', 'bSnd']) { const b = $(id); if (b) b.classList.toggle('off', SND.opt.mute); } };
 for (const id of ['titleSnd', 'hubSnd', 'bSnd']) { const b = $(id); if (b) b.onclick = (ev) => { ev.stopPropagation(); SND.init(); SND.toggle(); updSnd(); }; }
 updSnd();
-$('btnContinue').onclick = () => { S = loadSave(); if (S) { updAutoBtn(); renderHub(); } };
+
 $('btnTeam').onclick = () => renderTeam();
 $('btnChart').onclick = renderChart;
 $('hubChests').addEventListener('click', (e) => { const b = e.target.closest('.chest[data-i]'); if (b) tapChest(+b.dataset.i); });
@@ -8985,7 +8987,7 @@ $('btnOpt').onclick = () => {
     <label class="optrow">あいての つよさ <select id="oAi"><option value="0">ふつう</option><option value="1">かしこい</option><option value="2">さいきょう（かならず よける）</option></select></label>
     ${window.PMA_NAME ? `<label class="optrow">なまえ（オンライン） <span style="display:flex;gap:6px"><input type="text" id="oName" maxlength="12" style="width:9em;font:inherit;font-size:14px;padding:4px 6px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"><button class="btn sub" id="oNameSave" style="padding:4px 10px;font-size:12px">きめる</button></span></label>` : ''}
     <div style="margin-top:12px">トレーナーの みため</div><div class="looks" id="oLooks"></div>
-    <div class="row" style="margin-top:16px;justify-content:space-between"><span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><button class="dim" id="oReset" style="text-decoration:underline">セーブデータを けす</button>${window.PMA_NAME ? '<button class="dim" id="oWipe" style="text-decoration:underline">オンラインの データを けす</button>' : ''}<a class="dim" href="https://waisiwaisiwaisi-svg.github.io/auto-battle-game/privacy.html" target="_blank" rel="noopener" style="font-size:12px">プライバシーポリシー</a></span><button class="btn" id="oClose">とじる</button></div>`);
+    <div class="row" style="margin-top:16px;justify-content:space-between"><span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><button class="dim" id="oReset" style="text-decoration:underline">データを しょきか（はじめから あそぶ）</button>${window.PMA_NAME ? '<button class="dim" id="oWipe" style="text-decoration:underline">オンラインの データを けす</button>' : ''}<a class="dim" href="https://waisiwaisiwaisi-svg.github.io/auto-battle-game/privacy.html" target="_blank" rel="noopener" style="font-size:12px">プライバシーポリシー</a></span><button class="btn" id="oClose">とじる</button></div>`);
   const m = bg.querySelector('#oMusic'), x = bg.querySelector('#oSfx'), u = bg.querySelector('#oMute');
   if (window.PMA_NAME) {   // アプリ版：なまえ と オンラインの データ けし
     const N = bg.querySelector('#oName'); N.value = window.PMA_NAME.get();
@@ -9004,7 +9006,7 @@ $('btnOpt').onclick = () => {
     LK.appendChild(b); } };
   if (S) drawLooks(); else LK.previousElementSibling.hidden = true;
   bg.querySelector('#oClose').onclick = () => bg.remove();
-  bg.querySelector('#oReset').onclick = async () => { bg.remove(); if (!(await ask('セーブデータを けしますか？\nもとに もどせません。'))) return; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; renderTitle(); };
+  bg.querySelector('#oReset').onclick = async () => { bg.remove(); if (!(await ask('データを しょきか して はじめから あそびますか？\nいまの セーブデータは きえて もとに もどせません。', 'しょきか', 'やめる'))) return; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; renderTitle(); };
 };
 // ===== メイキング：ドット絵エディタ =====
 const MK_PAL = ['#0f0e1c', '#ffffff', '#fde2c4', '#f2b98a', '#c98a5a', '#7a4a2a', '#ff5a4a', '#ff9a3a', '#ffd84a', '#fff3a0', '#7bd88f', '#2f9a4a', '#9fe8ff', '#4aa8ff', '#2a4ab8', '#b86ad8', '#ff7ab0', '#8a78c8', '#d8d0c0', '#9a94a8', '#5a5468', '#c49a6c', '#d8b060', '#1e2a4a'];
