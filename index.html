@@ -17,6 +17,7 @@ html.rot{--sat:env(safe-area-inset-right);--sar:env(safe-area-inset-bottom);--sa
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--ink)}
+html.iosapp,html.iosapp body{height:calc(100 * var(--vh));min-height:100%}
 body{
   font-family:"DotGothic16",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Hiragino Kaku Gothic ProN","Noto Sans JP",monospace;
   display:flex;justify-content:center;overflow:hidden;touch-action:none;
@@ -8920,14 +8921,17 @@ $('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') 
 /* ---------- 画面の 向き：横長なら 横レイアウト。スマホを たてに もった ままでも「横画面」で 90度 回して あそべる ---------- */
 let LAND_PREF = (() => { try { return localStorage.getItem('pma_land') === '1'; } catch (e) { return false; } })();
 function layout() {
-  const vv = window.visualViewport, iw = Math.round(vv ? Math.min(vv.width, window.innerWidth) : window.innerWidth), ih = Math.round(vv ? Math.min(vv.height, window.innerHeight) : window.innerHeight), rot = LAND_PREF && ih > iw;
+  // iPhoneの ホーム画面アプリは 画面の 高さが 時計の ぶん みじかく 報告される ことが あるので、画面 そのものの 大きさを つかう
+  const vv = window.visualViewport, iosApp = !!navigator.standalone && screen.width > 0, port = window.innerHeight >= window.innerWidth;
+  const sA = Math.min(screen.width, screen.height), sB = Math.max(screen.width, screen.height);
+  const iw = iosApp ? (port ? sA : sB) : Math.round(vv ? Math.min(vv.width, window.innerWidth) : window.innerWidth), ih = iosApp ? (port ? sB : sA) : Math.round(vv ? Math.min(vv.height, window.innerHeight) : window.innerHeight), rot = LAND_PREF && ih > iw;
   const W = rot ? ih : iw, H = rot ? iw : ih, r = document.documentElement, app = $('app');
-  r.classList.toggle('rot', rot); r.classList.toggle('land', W / H >= 1.25); r.classList.toggle('short', W / H >= 1.25 && H < 560); r.classList.toggle('vshort', H <= 400); r.classList.toggle('vnarrow', W <= 380);
+  r.classList.toggle('rot', rot); r.classList.toggle('land', W / H >= 1.25); r.classList.toggle('short', W / H >= 1.25 && H < 560); r.classList.toggle('vshort', H <= 400); r.classList.toggle('vnarrow', W <= 380); r.classList.toggle('iosapp', iosApp);
   r.style.setProperty('--appW', W + 'px'); r.style.setProperty('--appH', H + 'px');
-  if (rot) { r.style.setProperty('--vw', W / 100 + 'px'); r.style.setProperty('--vh', H / 100 + 'px'); } else { r.style.removeProperty('--vw'); r.style.removeProperty('--vh'); }
+  if (rot || iosApp) { r.style.setProperty('--vw', W / 100 + 'px'); r.style.setProperty('--vh', H / 100 + 'px'); } else { r.style.removeProperty('--vw'); r.style.removeProperty('--vh'); }
     VH = Math.round(480 * clamp(H / W, .3, 2.4));   // 戦場は 画面 ぜんたい
   updPad();
-  app.style.width = rot ? W + 'px' : ''; app.style.height = rot ? H + 'px' : '';
+  app.style.width = rot ? W + 'px' : ''; app.style.height = rot || iosApp ? H + 'px' : '';
   for (const id of ['titleRot', 'hubRot', 'bRot']) { const b = $(id); if (b) b.classList.toggle('on', LAND_PREF); }
 }
 // 画面の 座標 → 回した #app の 中の 座標
