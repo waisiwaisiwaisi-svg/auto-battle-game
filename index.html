@@ -355,7 +355,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 /* 横長の 画面（1920×1080 など）：戦闘は 左に 16:9 の 画面、右に 情報と ボタン */
 html.land #app{max-width:none}
 html.land #scDex{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px}
-html.land .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scDex):not(#scTeam){left:0;right:0;margin:0 auto;max-width:560px}
+html.land .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scDex):not(#scTeam){left:0;right:0;margin:0 auto;max-width:820px}
 html.land #scHub{left:0;right:0;margin:0 auto;max-width:1100px;padding:18px 24px}
 html.land .hubgrid{grid-template-columns:1.1fr 1fr;gap:22px}
 html.land .bigbtns .btn{padding:20px 8px;font-size:19px}
@@ -645,7 +645,7 @@ html.vnarrow .hmode b{font-size:12.5px}html.vnarrow .hmode .ico{width:28px;heigh
 .hme{background:linear-gradient(180deg,#2f2750,#1d1733)}
 .hmode{--t:#8a7cd0;background:linear-gradient(90deg,color-mix(in srgb,var(--t) 38%,#241d38),#1d1733 75%)!important;color:var(--ink)!important;text-shadow:none!important}
 #btnJourney.hmode{--t:#ff9a3d} #btnCup{--t:#ffd166} #btnWild.hmode{--t:#62d26f} #btnOnline{--t:#4aa8ff}
-#btnJourney.hmode{background:linear-gradient(90deg,color-mix(in srgb,var(--t) 38%,#241d38),#1d1733 75%)!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
+#btnJourney.hmode,#btnWild.hmode{background:linear-gradient(90deg,color-mix(in srgb,var(--t) 38%,#241d38),#1d1733 75%)!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}   /* くさむら だけ 古い 緑の ボタンの いろが のこって いた */
 .hmode small{color:#cfc6ef}
 #tabbar{position:absolute;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;gap:4px;padding:6px 6px calc(6px + var(--sab));background:linear-gradient(180deg,#2f2750,#1b1530);border-top:3px solid #0b0914;box-shadow:inset 0 2px 0 rgba(154,140,224,.45)}
 #tabbar[hidden]{display:none}
@@ -802,6 +802,19 @@ html.land #app #scBattle #bTop{padding-left:calc(8px + var(--sal));padding-right
 html.land #app #cvWrap .hudtop{left:calc(8px + var(--sal));right:calc(min(200px,calc(26 * var(--vw))) + 18px + var(--sar))}
 html.land #bpanel{right:calc(8px + var(--sar))}
 html.land #app #bpanel #banner{right:calc(min(200px,calc(26 * var(--vw))) + 120px + var(--sar))}
+
+/* よこ画面の ホーム：スクロール なしで 1画面に（たからばこは あいぼうの 下、アイコンは うえの 列に） */
+html.land #scHub .hubgrid{grid-template-columns:1.1fr 1fr;grid-template-areas:"st bt" "ch bt";align-items:start;row-gap:10px}
+html.land #scHub .hubgrid>.hcol:nth-child(1){grid-area:st} html.land #scHub .hubgrid>.hcol:nth-child(2){grid-area:bt} html.land #scHub .hchest{grid-area:ch;gap:6px}
+html.land #scHub .chests .chest{min-height:0}
+html.land #scHub .hbar .hicons{margin-left:auto} html.land #scHub .hbar .hres{flex:0 0 auto}
+html.land #scHub .hmode b{font-size:clamp(11px,1.6vw,14px)} html.land #scHub .hmode{column-gap:6px;padding:8px 8px}
+html.land #scHub .hubgrid{grid-template-rows:auto 1fr} html.land #scHub .hubgrid>.hcol:nth-child(2){align-self:stretch;height:100%} html.land #scHub .hmodes{flex:1;grid-auto-rows:1fr}
+html.land #scHub .hmode b{font-size:clamp(11px,1.5vw,13.5px)}
+/* よこ画面：ふつうの 画面は 左の メニューを のぞいた ところの まんなかに、はばも ひろく */
+html.land.tabs .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scDex):not(#scTeam){left:calc(76px + var(--sal));right:0;max-width:820px;padding-left:16px;padding-right:calc(16px + var(--sar))}
+/* ホームの ボタン：ほかの 画面に いる ときは オレンジに しない（いま いる 画面が 2つ ある ように 見えた） */
+#tabbar button.home:not(.on){background:linear-gradient(180deg,#4a3c22,#2e2414);color:#ffd27a}
 </style>
 </head>
 <body>
@@ -854,11 +867,14 @@ html.land #app #bpanel #banner{right:calc(min(200px,calc(26 * var(--vw))) + 120p
           <button class="hmode" id="btnOnline"><i class="ico" data-ico="globe"></i><b>フレンド対戦</b><small>あいことばで たいせん</small></button>
         </div>
         <button id="btnArcade" hidden></button><span id="acSub" hidden></span>
+        <div id="hubParty" hidden></div>
+      </div>
+      <!-- たからばこ（たて画面：ボタンの 下／よこ画面：トレーナーと モンスターの 下） -->
+      <div class="hcol hchest">
         <div class="sec-title chesthead"><span>たからばこ <small>かつと もらえる・4つまで</small></span></div>
         <div id="hGuildBonus" hidden style="font-size:11.5px;color:#ffd166;margin-top:-6px">🛡 ギルド ボーナス：たからばこが 5% はやく あく</div>
         <div class="chests" id="hubChests"></div>
         <div class="inv"><span>わざのまきもの <b id="hTms">0</b></span><span>どうぐ <b id="hItems">0</b></span><span>つかまえた <b id="hCaught">0</b></span></div>
-        <div id="hubParty" hidden></div>
       </div>
     </div>
   </section>
@@ -8950,6 +8966,8 @@ function layout() {
   updPad();
   app.style.width = rot ? W + 'px' : ''; app.style.height = rot || iosApp ? H + 'px' : '';
   for (const id of ['titleRot', 'hubRot', 'bRot']) { const b = $(id); if (b) b.classList.toggle('on', LAND_PREF); }
+  // ホームの アイコン：よこ画面は うえの 列（しげんの となり）に よせて、たてに 1列 ぶん あける
+  { const ic = document.querySelector('#scHub .hicons'), hb = document.querySelector('#scHub .hbar'); if (ic && hb) { if (r.classList.contains('land')) { if (ic.parentNode !== hb) hb.insertBefore(ic, hb.querySelector('.hres')); } else if (ic.parentNode === hb) hb.after(ic); } }
 }
 // 画面の 座標 → 回した #app の 中の 座標
 function toApp(cx, cy) { return document.documentElement.classList.contains('rot') ? { x: cy, y: window.innerWidth - cx } : { x: cx, y: cy }; }
