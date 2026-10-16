@@ -1,7 +1,7 @@
 # PixelLab の /vfx で わざの エフェクトを つくる（いまの FXEL の かわり）
 # usage: PIXELLAB_API_TOKEN=... python3 tools/anim/pixellab_vfx.py OUTDIR key1 key2 ...   （key は vfx_prompts.json の キー、all で ぜんぶ）
 #   OUTDIR に <key>.gif / <key>.png / <key>.json（スプライトシートと コマ情報）と <key>_job.json を おく
-import sys, os, json, time, urllib.request
+import sys, os, json, time, urllib.request, urllib.error
 
 API = 'https://api.pixellab.ai/v2'
 TOKEN = os.environ.get('PIXELLAB_API_TOKEN')
@@ -27,9 +27,16 @@ jobs = {}
 for k in KEYS:   # まとめて なげてから まつ
     if os.path.exists(f'{OUT}/{k}.png'): print(k, 'skip'); continue
     desc = P['_common'].replace('{n}', str(N.get(k, 16))) + ' Effect: ' + P[k] + '.'
-    r = call('POST', '/vfx', {'description': desc, 'artist': 'lite', 'name': 'pma_' + k})
-    jobs[k] = r['background_job_id']; print(k, 'job', jobs[k], 'quote', r.get('quoted_generations'))
-    time.sleep(1)
+    jf = f'{OUT}/{k}.jobid'   # 429 などで とちゅうで とまっても、なげた ジョブは つかいまわす（二重に つかわない）
+    if os.path.exists(jf): jobs[k] = open(jf).read().strip(); print(k, 'reuse job', jobs[k]); continue
+    for _try in range(6):
+        try:
+            r = call('POST', '/vfx', {'description': desc, 'artist': 'lite', 'name': 'pma_' + k}); break
+        except urllib.error.HTTPError as e:
+            if e.code != 429 or _try == 5: raise
+            print(k, '429, wait'); time.sleep(30)
+    jobs[k] = r['background_job_id']; open(jf, 'w').write(jobs[k]); print(k, 'job', jobs[k], 'quote', r.get('quoted_generations'))
+    time.sleep(15)
 for k, jid in jobs.items():
     for _ in range(90):
         j = call('GET', f'/background-jobs/{jid}')
