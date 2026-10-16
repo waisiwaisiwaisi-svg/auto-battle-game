@@ -1,0 +1,50 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "552f6bdf-7514-4ba3-85c7-c9410828676a",
+ "status": "completed",
+ "created_at": "2026-10-16T11:53:54.546884+00:00",
+ "last_response": {
+  "fps": 14,
+  "kind": "new",
+  "loop": false,
+  "name": "pma_aoe_water",
+  "files": {
+   "pma-aoe-water.gif": "https://api.pixellab.ai/mcp/pixel-tools/da95465b-654b-49fd-be60-34e191f4c592/pma-aoe-water.gif",
+   "pma-aoe-water.png": "https://api.pixellab.ai/mcp/pixel-tools/da95465b-654b-49fd-be60-34e191f4c592/pma-aoe-water.png",
+   "pma-aoe-water.json": "https://api.pixellab.ai/mcp/pixel-tools/da95465b-654b-49fd-be60-34e191f4c592/pma-aoe-water.json"
+  },
+  "parts": [
+   "water_splash"
+  ],
+  "anchor": {
+   "x": 137,
+   "y": 130,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 48,
+   "w": 48
+  },
+  "frames": 16,
+  "message": "A 48x48 one-shot water geyser over 16 frames: a ring of water ripples blooms out from a central spout, droplets splash up and fall back, and everything fades to nothing by the last frame. I shrank and nudged it so nothing touches the canvas edge. Try the size and colour sliders if you want it bigger or a different water tone.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=60f16257-a30e-441b-b193-fba7701e38ac",
+  "effect_id": "60f16257-a30e-441b-b193-fba7701e38ac",
+  "gif_exact": true,
+  "result_id": "da95465b-654b-49fd-be60-34e191f4c592",
+  "conversation": "EmJLO2pEMEen3ee4GWvMkQ.dc1d044d830e863bee69204367ba19c7e686bc89505f52d026d921832c566a81",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "326686c2-70fc-4e70-8982-188462f93d90",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}

@@ -1,0 +1,50 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "061970c3-7a87-4cc5-8422-965ee56a0eba",
+ "status": "completed",
+ "created_at": "2026-10-16T11:54:47.827173+00:00",
+ "last_response": {
+  "fps": 14,
+  "kind": "new",
+  "loop": false,
+  "name": "pma_heal",
+  "files": {
+   "pma-heal.gif": "https://api.pixellab.ai/mcp/pixel-tools/003bde5d-8a5b-47f8-93b4-d9e503a796ad/pma-heal.gif",
+   "pma-heal.png": "https://api.pixellab.ai/mcp/pixel-tools/003bde5d-8a5b-47f8-93b4-d9e503a796ad/pma-heal.png",
+   "pma-heal.json": "https://api.pixellab.ai/mcp/pixel-tools/003bde5d-8a5b-47f8-93b4-d9e503a796ad/pma-heal.json"
+  },
+  "parts": [
+   "heal_plus"
+  ],
+  "anchor": {
+   "x": 118,
+   "y": 131,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 48,
+   "w": 48
+  },
+  "frames": 14,
+  "message": "A 48x48 one-shot healing effect: a soft green glow blooms at the centre, then bright plus signs and small sparkles rise and fade out by the last frames. Try the colour, amount and outline-glow sliders to adjust the green and the glow.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=acfb5d25-9974-4a57-87d7-50eda429dd56",
+  "effect_id": "acfb5d25-9974-4a57-87d7-50eda429dd56",
+  "gif_exact": true,
+  "result_id": "003bde5d-8a5b-47f8-93b4-d9e503a796ad",
+  "conversation": "yW18rnImTCoWllRsxN6rbg.6422dad9ace92f63867183477ddef5b90c415074a92326b45eca4d6585dcbf1a",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "47c370a2-58e7-4664-a8c1-9bf94059391d",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}
