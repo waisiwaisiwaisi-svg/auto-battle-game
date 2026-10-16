@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "6aca04bd-c883-4feb-92e7-77bcc4f8ec46",
+ "status": "completed",
+ "created_at": "2026-10-16T12:10:51.300704+00:00",
+ "last_response": {
+  "fps": 10,
+  "kind": "new",
+  "loop": true,
+  "name": "pma_p_fire",
+  "files": {
+   "pma-p-fire.gif": "https://api.pixellab.ai/mcp/pixel-tools/9bb9ad9c-da5d-4445-bce3-bf9da693fb1b/pma-p-fire.gif",
+   "pma-p-fire.png": "https://api.pixellab.ai/mcp/pixel-tools/9bb9ad9c-da5d-4445-bce3-bf9da693fb1b/pma-p-fire.png",
+   "pma-p-fire.json": "https://api.pixellab.ai/mcp/pixel-tools/9bb9ad9c-da5d-4445-bce3-bf9da693fb1b/pma-p-fire.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 12,
+   "y": 12,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 24,
+   "w": 24
+  },
+  "frames": 6,
+  "message": "A 24x24 fireball: a round orange-yellow flame ball on the right with a flickering flame tail trailing left, flying right and staying centred. It loops seamlessly over 6 frames at 10 fps, with a 1px dark outline and a five-colour fire palette. To tune it, the ball's size wobble and the tail's length are the main levers.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=31f43b83-e410-4af5-b0d3-633f4f598ea1",
+  "effect_id": "31f43b83-e410-4af5-b0d3-633f4f598ea1",
+  "gif_exact": true,
+  "result_id": "9bb9ad9c-da5d-4445-bce3-bf9da693fb1b",
+  "conversation": "8NjnYKI3Tc1dquTe-PfNgQ.f7fe1162416f9feb9a4f28184f726d1031740d94e846013840f5460641cc0535",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "43f45e9a-0b44-4bf2-8130-ddbd48fd2f61",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}

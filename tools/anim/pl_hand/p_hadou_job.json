@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "3a974e39-d0b5-4403-a462-280171a8c62c",
+ "status": "completed",
+ "created_at": "2026-10-16T12:28:49.072021+00:00",
+ "last_response": {
+  "fps": 10,
+  "kind": "new",
+  "loop": true,
+  "name": "pma_p_hadou",
+  "files": {
+   "pma-p-hadou.gif": "https://api.pixellab.ai/mcp/pixel-tools/8291ffef-24f6-4dca-bc5f-e70f5f9b6726/pma-p-hadou.gif",
+   "pma-p-hadou.png": "https://api.pixellab.ai/mcp/pixel-tools/8291ffef-24f6-4dca-bc5f-e70f5f9b6726/pma-p-hadou.png",
+   "pma-p-hadou.json": "https://api.pixellab.ai/mcp/pixel-tools/8291ffef-24f6-4dca-bc5f-e70f5f9b6726/pma-p-hadou.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 16,
+   "y": 16,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 32,
+   "w": 32
+  },
+  "frames": 6,
+  "message": "Here's a 32x32 looping aura sphere: a bright blue glowing orb with a dark 1px outline, a white highlight, a soft halo and a few orbiting sparks, six frames at 10 fps, centred and facing right in place. The swirl in the core is faint at this size; raising the swirl intensity or width in the sliders makes it read more, though it will start to muddy the sphere.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=4ba6962f-9ac0-4204-9af7-41ec84c20a17",
+  "effect_id": "4ba6962f-9ac0-4204-9af7-41ec84c20a17",
+  "gif_exact": true,
+  "result_id": "8291ffef-24f6-4dca-bc5f-e70f5f9b6726",
+  "conversation": "GZtAsMdR3n090NjX23jh-A.68b539bdfae0ea4739b8c799630b6a77db823e358dd6919502cb4b4e6bdd7731",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "b46c20f1-ae22-4aa2-b5e1-3b3639b8299c",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}
