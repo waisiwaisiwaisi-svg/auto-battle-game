@@ -8278,7 +8278,7 @@ function drawObsGround() {
     if (o.k === 'mine') {   // ほうしの たま：ふくらむ きのこ
       const arm = !(o.arm > 0), p = .85 + Math.sin(B.t * 5 + o.uid) * .1;
       ctx.fillStyle = 'rgba(10,8,18,.3)'; ctx.beginPath(); ctx.ellipse(o.x, o.y + 2, 11, 4, 0, 0, 7); ctx.fill();
-      if (PLFX.mine && PLFX.mine.img.complete) { ctx.globalAlpha = arm ? 1 : .55; plDraw('mine', arm ? plLoop('mine', B.t + o.uid) : 0, o.x, o.y + 3, .85 * p / .85, 0); ctx.globalAlpha = 1; }
+      if (PLFX.mine && PLFX.mine.img.complete) { ctx.globalAlpha = arm ? 1 : .55; plDraw('mine', arm ? plLoop('mine', B.t + o.uid) : 0, o.x, o.y + 4, 1.4 * p / .85, 0); ctx.globalAlpha = 1; }
       else { ctx.fillStyle = '#120e1c'; ctx.beginPath(); ctx.arc(o.x, o.y - 6, 9 * p + 1, Math.PI, 0); ctx.fill(); ctx.fillRect(o.x - 4, o.y - 7, 8, 7);
       ctx.fillStyle = '#f0e8d0'; ctx.fillRect(o.x - 3, o.y - 7, 6, 6);
       ctx.fillStyle = arm ? (Math.floor(B.t * 4 + o.uid) % 2 ? '#d84a6a' : '#b8305a') : '#a08a9a'; ctx.beginPath(); ctx.arc(o.x, o.y - 6, 9 * p, Math.PI, 0); ctx.fill();
@@ -9008,6 +9008,15 @@ function drawStageLayers(st, cx, cy) {
 }
 // しあい まえの 演出：VS カード → （くりだす）→ レディ… → ファイト！
 const VS_T = 1.9;
+// トレーナーの 絵から かお（あたま）の ところを きりだす
+function trainerFace(spr) {
+  if (spr.face !== undefined) return spr.face; const c = spr.idle0.n; spr.face = null;
+  try { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let x0 = c.width, x1 = -1, y0 = c.height, y1 = -1;
+    for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return null; const bh = y1 - y0 + 1, fh = Math.max(4, Math.round(bh * .47)), fw = Math.min(x1 - x0 + 1, Math.round(fh * 1.15)), cx = (x0 + x1) / 2;
+    spr.face = { x: Math.max(0, Math.round(cx - fw / 2)), y: y0, w: fw, h: fh }; } catch (e) { spr.face = null; }
+  return spr.face;
+}
 // VS の とちゅうで タップしたら とばす
 document.addEventListener('pointerdown', (e) => { if (B && !B.remote && B.mode === 'intro' && B.vsT && B.modeT < B.vsT - .35 && e.target.closest && e.target.closest('#cvWrap')) B.modeT = B.vsT - .35; }, true);
 function drawIntroOverlay() {
@@ -9026,8 +9035,10 @@ function drawIntroOverlay() {
       const g = ctx.createLinearGradient(0, y, W, y + bh); g.addColorStop(0, sd ? 'rgba(120,20,30,.0)' : 'rgba(20,60,150,.95)'); g.addColorStop(.5, sd ? 'rgba(200,40,50,.92)' : 'rgba(40,110,220,.92)'); g.addColorStop(1, sd ? 'rgba(230,60,60,.95)' : 'rgba(20,60,150,0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(0, y + 18); ctx.lineTo(W, y); ctx.lineTo(W, y + bh - 18); ctx.lineTo(0, y + bh); ctx.closePath(); ctx.fill();
       ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(0, sd ? y + bh - 3 : y + 15, W, 3);
-      if (f && SPR[f.mon.sid]) { const im = SPR[f.mon.sid].n, s = Math.min(bh * 1.25 / im.height, 4.5, W * .2 / im.width), w = im.width * s, h = im.height * s, x = sd ? W * .8 - w / 2 : W * .2 - w / 2;
-        ctx.imageSmoothingEnabled = false; ctx.save(); if (!sd) { ctx.translate(x + w, 0); ctx.scale(-1, 1); ctx.drawImage(im, 0, y + bh - h + 4, w, h); } else ctx.drawImage(im, x, y + bh - h + 4, w, h); ctx.restore(); }
+      { const tr = side.trainer, im = tr && tr.spr && tr.spr.idle0 && tr.spr.idle0.n, fc = im && trainerFace(tr.spr);   // トレーナーの かお
+        if (fc) { const s = Math.min(bh * 1.3 / fc.h, W * .22 / fc.w), w = fc.w * s, h = fc.h * s, x = sd ? W * .8 - w / 2 : W * .2 - w / 2;
+          ctx.imageSmoothingEnabled = false; ctx.save(); ctx.beginPath(); ctx.rect(x - 4, y - h * .3, w + 8, bh + h * .3); ctx.clip();
+          if (sd) { ctx.translate(x + w, 0); ctx.scale(-1, 1); ctx.drawImage(im, fc.x, fc.y, fc.w, fc.h, 0, y + bh - h + 2, w, h); } else ctx.drawImage(im, fc.x, fc.y, fc.w, fc.h, x, y + bh - h + 2, w, h); ctx.restore(); } }
       const nm = (side.trainer && side.trainer.name) || (sd ? 'あいて' : 'あなた'), mn = f ? f.sp.n : '';
       ctx.font = `900 ${Math.round(bh * .17)}px "DotGothic16",system-ui,sans-serif`; ctx.textBaseline = 'middle'; ctx.textAlign = sd ? 'right' : 'left'; ctx.lineWidth = 5; ctx.strokeStyle = '#0b0914';
       const tx = sd ? W * .66 : W * .34; ctx.strokeText(nm, tx, y + bh * .42); ctx.fillStyle = '#ffffff'; ctx.fillText(nm, tx, y + bh * .42);
