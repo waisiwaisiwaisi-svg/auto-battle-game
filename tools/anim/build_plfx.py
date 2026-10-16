@@ -4,8 +4,9 @@ import json, base64, io, os, re
 from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 D = os.path.join(ROOT, 'tools/anim/pl_hand')
-USE = ['p_fire', 'p_water', 'p_elec', 'p_ice', 'p_grass', 'p_poison', 'p_psychic', 'p_ghost', 'p_dragon', 'p_fighting', 'p_normal', 'p_bug', 'p_wind', 'p_rock',
+USE_PIXELLAB = ['p_fire', 'p_water', 'p_elec', 'p_ice', 'p_grass', 'p_poison', 'p_psychic', 'p_ghost', 'p_dragon', 'p_fighting', 'p_normal', 'p_bug', 'p_wind', 'p_rock',
        'p_hadou', 'p_moon', 'tornado', 'whirl', 'mine', 'web']
+USE = []   # PixelLab 版は しつが ひくいので いまは つかわない（てがきに もどす）
 out = {}
 for k in USE:
     js = json.load(open(f'{D}/{k}.json')); fr = js['frames']; im = Image.open(f'{D}/{k}.png').convert('RGBA')
