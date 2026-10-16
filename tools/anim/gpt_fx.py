@@ -6,11 +6,19 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__)); D = os.path.join(HERE, 'gpt_fx')
 SHEETS = {'E1': ['p_fire', 'p_water', 'p_elec', 'p_ice'], 'E2': ['p_grass', 'p_poison', 'p_psychic', 'p_ghost'],
           'E3': ['p_dragon', 'p_fighting', 'p_normal', 'p_bug'], 'E4': ['p_wind', 'p_rock', 'p_hadou', 'p_moon'],
-          'E5': ['wave', 'whirl', 'tornado', 'mine'], 'E6': ['fist', 'nail', 'skull', 'web']}
-ONCE = {'fist', 'nail', 'skull', 'web'}
-BOTTOM = {'tornado', 'mine'}   # 足もとが きじゅん
+          'E5': ['wave', 'whirl', 'tornado', 'mine'], 'E6': ['fist', 'nail', 'skull', 'web'],
+          # じめん・かべ
+          'E7': ['fl_poison', 'fl_fire', 'fl_elec', 'fl_honey'], 'E8': ['wall_rock', 'wall_ice', 'wall_thorn', 'pit'],
+          'E9': ['hz_rocks', 'hz_spikes', 'hz_tspikes', 'snare'], 'E10': ['hole', 'crater', 'scorch', 'trail'],
+          'E11': ['brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror'], 'E12': ['pit2', 'dirt', 'spark', 'reflect']}
+ONCE = {'fist', 'nail', 'skull', 'web', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'dirt', 'spark', 'reflect', 'wall_rock', 'wall_ice', 'wall_thorn'}
+VAR = {'hole', 'crater', 'scorch'}   # アニメではなく 形ちがい
+BOTTOM = {'tornado', 'mine', 'wall_rock', 'wall_ice', 'wall_thorn', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'hz_rocks', 'hz_spikes', 'hz_tspikes', 'trail', 'dirt'}   # 足もとが きじゅん
 # 1つの エフェクトを なんドットに するか（いちばん ながい へん）。ゲームでは 1ドット＝PIX_D で かく
-TARGET = {'p_hadou': 22, 'p_moon': 22, 'wave': 40, 'whirl': 36, 'tornado': 30, 'mine': 16, 'fist': 28, 'nail': 24, 'skull': 20, 'web': 30}
+TARGET = {'p_hadou': 22, 'p_moon': 22, 'wave': 40, 'whirl': 36, 'tornado': 30, 'mine': 16, 'fist': 28, 'nail': 24, 'skull': 20, 'web': 30,
+          'fl_poison': 48, 'fl_fire': 48, 'fl_elec': 48, 'fl_honey': 48, 'pit': 48, 'pit2': 48, 'snare': 32, 'hole': 30, 'crater': 30, 'scorch': 30,
+          'wall_rock': 18, 'wall_ice': 18, 'wall_thorn': 18, 'brk_rock': 18, 'brk_ice': 18, 'brk_thorn': 18, 'brk_mirror': 18,
+          'hz_rocks': 14, 'hz_spikes': 14, 'hz_tspikes': 14, 'trail': 14, 'dirt': 24, 'spark': 22, 'reflect': 24}
 TDEF = 20
 COLS, ROWS = 6, 4
 
@@ -58,7 +66,7 @@ for sh, keys in SHEETS.items():
         # いろを へらす（32しょく）
         q = strip.convert('RGB').quantize(32, method=Image.Quantize.MEDIANCUT).convert('RGB'); q.putalpha(strip.getchannel('A'))
         q.save(f'{D}/{k}.png')
-        meta[k] = {'n': COLS, 'w': w, 'h': h, 'ms': 70 if k in ONCE else 100, 'loop': k not in ONCE,
+        meta[k] = {'n': COLS, 'w': w, 'h': h, 'ms': 70 if k in ONCE else 100, 'loop': k not in ONCE and k not in VAR, 'var': k in VAR,
                    'ax': w / 2, 'ay': h - 1 if k in BOTTOM else h / 2}
         print(sh, k, w, h, 'pitch', PITCH)
 json.dump(meta, open(f'{D}/meta.json', 'w'), indent=1)
