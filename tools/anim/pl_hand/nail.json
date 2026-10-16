@@ -1,0 +1,287 @@
+{
+ "frames": [
+  {
+   "filename": "pma-nail 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 1.png",
+   "frame": {
+    "x": 24,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 2.png",
+   "frame": {
+    "x": 48,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 3.png",
+   "frame": {
+    "x": 72,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 4.png",
+   "frame": {
+    "x": 0,
+    "y": 48,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 5.png",
+   "frame": {
+    "x": 24,
+    "y": 48,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 6.png",
+   "frame": {
+    "x": 48,
+    "y": 48,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 7.png",
+   "frame": {
+    "x": 72,
+    "y": 48,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 8.png",
+   "frame": {
+    "x": 0,
+    "y": 96,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  },
+  {
+   "filename": "pma-nail 9.png",
+   "frame": {
+    "x": 24,
+    "y": 96,
+    "w": 24,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 48
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5
+   },
+   "duration": 83
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "pma-nail.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 96,
+   "h": 144
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 12,
+   "y": 24
+  },
+  "frameTags": [
+   {
+    "name": "pma-nail",
+    "from": 0,
+    "to": 9,
+    "direction": "forward"
+   }
+  ]
+ }
+}

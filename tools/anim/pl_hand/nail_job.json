@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "f4bbeba7-6fab-4358-9fba-fc7645f210c1",
+ "status": "completed",
+ "created_at": "2026-10-16T12:38:12.890890+00:00",
+ "last_response": {
+  "fps": 12,
+  "kind": "new",
+  "loop": false,
+  "name": "pma_nail",
+  "files": {
+   "pma-nail.gif": "https://api.pixellab.ai/mcp/pixel-tools/5cf682fc-17c7-485f-a367-c3e138bdedbc/pma-nail.gif",
+   "pma-nail.png": "https://api.pixellab.ai/mcp/pixel-tools/5cf682fc-17c7-485f-a367-c3e138bdedbc/pma-nail.png",
+   "pma-nail.json": "https://api.pixellab.ai/mcp/pixel-tools/5cf682fc-17c7-485f-a367-c3e138bdedbc/pma-nail.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 12,
+   "y": 24,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 48,
+   "w": 24
+  },
+  "frames": 10,
+  "message": "A 24x48 one-shot, 10 frames: a pink-purple nail drops from above, slams onto the ground, and throws a short ring of light and a few sparks, then the nail and ring fade out. The fall speed and the ring size are the things to tweak; the glow and the ring are set to stay inside the small canvas.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=fa5a298c-a1fd-4ecd-85c0-73676d374f36",
+  "effect_id": "fa5a298c-a1fd-4ecd-85c0-73676d374f36",
+  "gif_exact": true,
+  "result_id": "5cf682fc-17c7-485f-a367-c3e138bdedbc",
+  "conversation": "vXEawEBEeoI9e5l6qhLjrA.d996dbf57710bff32ecbc22eee82be7aca71e2973bc4fa8c3604b528e7bcba7c",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "87a47fd3-bae6-4c27-8d60-eb588053892d",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}
