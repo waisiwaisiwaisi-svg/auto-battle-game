@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "422a639a-2226-487b-ba46-f50c6d9d49a2",
+ "status": "completed",
+ "created_at": "2026-10-16T12:27:52.425728+00:00",
+ "last_response": {
+  "fps": 10,
+  "kind": "new",
+  "loop": true,
+  "name": "pma_p_rock",
+  "files": {
+   "pma-p-rock.gif": "https://api.pixellab.ai/mcp/pixel-tools/15fab3d8-6b9b-4f3d-83fb-59411ddfe6f3/pma-p-rock.gif",
+   "pma-p-rock.png": "https://api.pixellab.ai/mcp/pixel-tools/15fab3d8-6b9b-4f3d-83fb-59411ddfe6f3/pma-p-rock.png",
+   "pma-p-rock.json": "https://api.pixellab.ai/mcp/pixel-tools/15fab3d8-6b9b-4f3d-83fb-59411ddfe6f3/pma-p-rock.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 12,
+   "y": 12,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 24,
+   "w": 24
+  },
+  "frames": 6,
+  "message": "A 24x24 tumbling grey-brown rock chunk with a dark 1px outline, looping over 6 frames at 10 fps, with the lit facet rolling round between frames. It stays centred and faces right in place, so your game can move and rotate it. The frame rate slider on the page sets how fast it tumbles.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=382c6181-ac39-414b-a2e0-cdf22e32d659",
+  "effect_id": "382c6181-ac39-414b-a2e0-cdf22e32d659",
+  "gif_exact": true,
+  "result_id": "15fab3d8-6b9b-4f3d-83fb-59411ddfe6f3",
+  "conversation": "ylFlE888iCtvPCK51GDbHw.a9cfac82aadf0a99e4ac32c9d901af0dc887a6e09e4efe49f02525e1f4613956",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "fbbace3c-a06b-422c-a1ac-c35d6505ef5d",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}

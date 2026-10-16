@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "a0b5d3a8-e59e-4c5c-b0af-ba712ce3e2ca",
+ "status": "completed",
+ "created_at": "2026-10-16T12:24:52.529205+00:00",
+ "last_response": {
+  "fps": 10,
+  "kind": "new",
+  "loop": true,
+  "name": "pma_p_normal",
+  "files": {
+   "pma-p-normal.gif": "https://api.pixellab.ai/mcp/pixel-tools/c3161035-1737-4c1c-9aa1-06542abe74c2/pma-p-normal.gif",
+   "pma-p-normal.png": "https://api.pixellab.ai/mcp/pixel-tools/c3161035-1737-4c1c-9aa1-06542abe74c2/pma-p-normal.png",
+   "pma-p-normal.json": "https://api.pixellab.ai/mcp/pixel-tools/c3161035-1737-4c1c-9aa1-06542abe74c2/pma-p-normal.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 12,
+   "y": 12,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 24,
+   "w": 24
+  },
+  "frames": 6,
+  "message": "A 24x24 looping energy pellet: a cream-white star with a golden glow, a dark 1px outline, a gentle pulse, and a small twinkle, six frames at 10 fps. It stays centred and has no motion of its own, so the game can move it, and it is drawn to be read as the projectile. Try the star's size or the halo to make it bigger or softer.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=5e1385af-f594-400c-8e5c-831fe2ae66b0",
+  "effect_id": "5e1385af-f594-400c-8e5c-831fe2ae66b0",
+  "gif_exact": true,
+  "result_id": "c3161035-1737-4c1c-9aa1-06542abe74c2",
+  "conversation": "4BW8h0HhBcQHuq6kalOv6g.7c33916d1b63f752054d60f4783e79d8004816f849b968264fb4621554a2e13d",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "c7ad4e03-534f-45d2-9a52-b6e0648f21c6",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}

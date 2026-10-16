@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "cc5ff4d5-c12d-4687-9bfc-985df7443f94",
+ "status": "completed",
+ "created_at": "2026-10-16T12:29:37.720746+00:00",
+ "last_response": {
+  "fps": 8,
+  "kind": "new",
+  "loop": true,
+  "name": "pma_p_moon",
+  "files": {
+   "pma-p-moon.gif": "https://api.pixellab.ai/mcp/pixel-tools/783bd864-add2-4030-9ee7-7670164055ec/pma-p-moon.gif",
+   "pma-p-moon.png": "https://api.pixellab.ai/mcp/pixel-tools/783bd864-add2-4030-9ee7-7670164055ec/pma-p-moon.png",
+   "pma-p-moon.json": "https://api.pixellab.ai/mcp/pixel-tools/783bd864-add2-4030-9ee7-7670164055ec/pma-p-moon.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 16,
+   "y": 16,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 32,
+   "w": 32
+  },
+  "frames": 6,
+  "message": "Here's a 32x32 moonblast: a pale-pink crescent moon with a dark outline, facing right, with a soft pink glow that pulses and sparkles that twinkle. It is a 6-frame seamless loop that stays centred, so the game can move it. The halo and sparkles are the easiest things to tune if you want it brighter or calmer.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=5fba084b-9c55-4b51-ae4b-656b83016da2",
+  "effect_id": "5fba084b-9c55-4b51-ae4b-656b83016da2",
+  "gif_exact": true,
+  "result_id": "783bd864-add2-4030-9ee7-7670164055ec",
+  "conversation": "XUyDPVIxLrOOUZVhBNVgzQ.7d1b911344ed08ef4703c4b04d5781323b1c5c38e247f7b195c4cf535e66571f",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "0113a139-e5ed-4033-a877-36932729bea7",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}
