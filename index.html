@@ -7627,7 +7627,8 @@ function showResult() {
   $('resTitle').className = 'res-' + res;
   $('resLines').innerHTML = (B.resLines.length ? B.resLines : ['…']).map((l, i) => `<div class="rl" style="animation-delay:${.25 + i * .18}s">${l}</div>`).join('');
   $('resultOv').hidden = false; $('resultOv').className = 'ov res res-' + res;
-  if (res === 'win' || res === 'caught') { const ov = $('resultOv'); ov.querySelectorAll('.confetti').forEach(e => e.remove()); for (let i = 0; i < 36; i++) { const c = document.createElement('i'); c.className = 'confetti'; c.style.cssText = `left:${Math.random() * 100}%;background:${choice(['#ffd166', '#ff7ab0', '#7bd88f', '#7ab8ff', '#fff'])};animation-delay:${Math.random() * .8}s;animation-duration:${1.6 + Math.random() * 1.4}s;transform:rotate(${Math.random() * 360}deg)`; ov.appendChild(c); } }
+  $('resultOv').querySelectorAll('.confetti').forEach(e => e.remove());   // まえの かちの かみふぶきを のこさない（まけたときに また ふってしまう）
+  if (res === 'win' || res === 'caught') { const ov = $('resultOv'); for (let i = 0; i < 36; i++) { const c = document.createElement('i'); c.className = 'confetti'; c.style.cssText = `left:${Math.random() * 100}%;background:${choice(['#ffd166', '#ff7ab0', '#7bd88f', '#7ab8ff', '#fff'])};animation-delay:${Math.random() * .8}s;animation-duration:${1.6 + Math.random() * 1.4}s;transform:rotate(${Math.random() * 360}deg)`; ov.appendChild(c); } }
 }
 
 /* ---------- チュートリアル：じっさいの バトルで 1つずつ やってみる ---------- */
