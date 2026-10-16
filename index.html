@@ -9008,12 +9008,12 @@ function drawStageLayers(st, cx, cy) {
 }
 // しあい まえの 演出：VS カード → （くりだす）→ レディ… → ファイト！
 const VS_T = 1.9;
-// トレーナーの 絵から かお（あたま）の ところを きりだす
+// トレーナーの 絵から むねから うえ（チェストアップ）を きりだす
 function trainerFace(spr) {
   if (spr.face !== undefined) return spr.face; const c = spr.idle0.n; spr.face = null;
   try { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let x0 = c.width, x1 = -1, y0 = c.height, y1 = -1;
     for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-    if (x1 < 0) return null; const bh = y1 - y0 + 1, fh = Math.max(4, Math.round(bh * .47)), fw = Math.min(x1 - x0 + 1, Math.round(fh * 1.15)), cx = (x0 + x1) / 2;
+    if (x1 < 0) return null; const bh = y1 - y0 + 1, fh = Math.max(4, Math.round(bh * .62)), fw = Math.min(x1 - x0 + 1, Math.round(fh * 1.05)), cx = (x0 + x1) / 2;
     spr.face = { x: Math.max(0, Math.round(cx - fw / 2)), y: y0, w: fw, h: fh }; } catch (e) { spr.face = null; }
   return spr.face;
 }
