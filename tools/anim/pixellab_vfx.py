@@ -9,7 +9,7 @@ if not TOKEN: sys.exit('PIXELLAB_API_TOKEN が ありません')
 OUT, KEYS = sys.argv[1], sys.argv[2:]
 os.makedirs(OUT, exist_ok=True)
 HERE = os.path.dirname(os.path.abspath(__file__))
-P = json.load(open(os.path.join(HERE, 'vfx_prompts.json')))
+P = json.load(open(os.environ.get('PROMPTS') or os.path.join(HERE, 'vfx_prompts.json')))   # PROMPTS=… で べつの 一覧（vfx_prompts_hand.json など）
 # いまの コマ数（だいたい これくらいの ながさに する）
 N = {'slash': 9, 'claw': 9, 'poof': 9, 'fighting': 13, 'fire': 13}
 if KEYS == ['all']: KEYS = [k for k in P if not k.startswith('_')]
@@ -26,7 +26,9 @@ print('balance', call('GET', '/balance'))
 jobs = {}
 for k in KEYS:   # まとめて なげてから まつ
     if os.path.exists(f'{OUT}/{k}.png'): print(k, 'skip'); continue
-    desc = P['_common'].replace('{n}', str(N.get(k, 16))) + ' Effect: ' + P[k] + '.'
+    e = P[k] if isinstance(P[k], dict) else {'d': P[k]}   # {d: せつめい, loop: くりかえし, size: '24x24', n: コマ数}
+    com = P['_loop'] if e.get('loop') and '_loop' in P else P['_common']
+    desc = com.replace('{n}', str(e.get('n') or N.get(k, 16))).replace('{size}', e.get('size', '48x48')) + ' Effect: ' + e['d'] + '.'
     jf = f'{OUT}/{k}.jobid'   # 429 などで とちゅうで とまっても、なげた ジョブは つかいまわす（二重に つかわない）
     if os.path.exists(jf): jobs[k] = open(jf).read().strip(); print(k, 'reuse job', jobs[k]); continue
     for _try in range(6):
