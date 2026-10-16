@@ -840,6 +840,27 @@ html.land #app #bpanel #banner{position:fixed!important;left:50%!important;right
 html.land #app #cvWrap .hudtop{right:calc(8px + var(--sar))!important}
 html.land #app #bpanel .bmon{min-height:0!important;padding:3px 6px!important;gap:6px;flex-direction:row!important;text-align:left} html.land #app #bpanel .bmon canvas{width:24px!important;height:24px!important}
 html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
+
+/* ===== バトル画面：わくを なくして すけさせる（ステージに なじむ HUD） ===== */
+#scBattle .plate,#scBattle #banner,#scBattle .cmd,#scBattle .bmon,#scBattle #bTop button{
+  border:0!important;border-image:none!important;border-radius:6px!important;background-clip:border-box!important;
+  box-shadow:none!important;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
+#scBattle .plate{background:linear-gradient(90deg,rgba(10,8,20,.62),rgba(10,8,20,.38) 70%,rgba(10,8,20,0))!important;padding:5px 10px!important}
+#scBattle #plE{background:linear-gradient(270deg,rgba(10,8,20,.62),rgba(10,8,20,.38) 70%,rgba(10,8,20,0))!important}
+#scBattle .plate .hp{box-shadow:0 0 0 1px rgba(0,0,0,.7)!important;background:rgba(0,0,0,.55)!important}
+#scBattle .plate .bot{color:#d8d0f0}
+#scBattle #banner{background:linear-gradient(90deg,rgba(10,8,20,0),rgba(10,8,20,.58) 18%,rgba(10,8,20,.58) 82%,rgba(10,8,20,0))!important;border-radius:0!important}
+#scBattle #banner:empty{background:none!important}
+#scBattle .cmd,#scBattle .bmon{background:rgba(14,11,28,.5)!important;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#scBattle .cmd .b,#scBattle .bmon .bs{color:#cfc6ef}
+#scBattle .cmd.mv{box-shadow:inset 4px 0 0 var(--c)!important;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 26%,transparent),rgba(14,11,28,.45) 60%)!important}
+#scBattle .cmd.hot{box-shadow:inset 0 0 0 2px rgba(255,209,102,.85),0 0 10px rgba(255,209,102,.35)!important}
+#scBattle .cmd.mv.hot{box-shadow:inset 4px 0 0 var(--c),inset 0 0 0 2px rgba(255,209,102,.85),0 0 10px rgba(255,209,102,.35)!important}
+#scBattle .cmd.mv[data-eff="2"]{box-shadow:inset 4px 0 0 var(--c),inset 0 0 0 2px rgba(255,138,106,.8)!important}
+#scBattle .cmd.on{background:rgba(40,90,60,.55)!important;box-shadow:inset 0 0 0 2px rgba(110,220,140,.85)!important}
+#scBattle .cmd:active{background:rgba(255,255,255,.18)!important}
+#scBattle #bTop button{background:rgba(14,11,28,.45)!important;color:#e6e0fa!important}
+#scBattle #bTop #bAuto.on{background:linear-gradient(180deg,rgba(255,210,122,.92),rgba(242,150,45,.92))!important;color:#2a1606!important;text-shadow:none}
 </style>
 </head>
 <body>
@@ -5618,7 +5639,7 @@ function hit(att, def, m, ang, opt) {
   opt = opt || {};
   if (B.stats) { B.stats.tryhit[MOVE_ID.get(m)] = (B.stats.tryhit[MOVE_ID.get(m)] || 0) + 1; if (def.inv > 0) B.stats.dodged[MOVE_ID.get(m)] = (B.stats.dodged[MOVE_ID.get(m)] || 0) + 1; }
   if ('decoy' in opt ? opt.decoy : att.cur && att.cur.decoy) return false;
-  if (def.hurtInv > 0 && !opt.tick && !(def.hurtBy && def.hurtBy.att === att && def.hurtBy.m === m)) {   // むてき じかん（くらった あと・たおれた あとの こうたい）
+  if (def.hurtInv > 0 && def.state !== 'stun' && !opt.tick && !(def.hurtBy && def.hurtBy.att === att && def.hurtBy.m === m)) {   // むてき じかん（くらった あと・たおれた あとの こうたい）
     return false; }
   if (def.inv > 0 && !opt.sure && !opt.throw) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
   if (rpsOf(m) === 'rock' && (gshiftOn(def) || gshiftOn(att))) { burst(def.x, def.y - BODY, '#8a78c8', 6, 50, .3); return false; }   // ゴーストシフト
@@ -5901,7 +5922,7 @@ function smartScore(f, o, id) {
     let p = KIND_P[m.k] || .7;
     if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat) && !losClear(f, o)) p *= .3;   // やまなり・じわれ・ジャンプは 障害物を こえる
     const rps = rpsOf(m);
-    if (o.inv > .2 || o.hurtInv > .3) p *= .2;
+    if (o.inv > .2 || (o.hurtInv > .3 && o.state !== 'stun')) p *= .2;
     if (o.v.protect > 0) { const pw = m.power || (m.pow || 0) * 5; p *= rps === 'rock' ? .15 : pw <= 70 ? .9 : .35; }   // ガードシェル：1かいで きえるので、かるい しゃげきで はがしに いく（だげきは はじかれる）
     else if (o.v.counter && o.v.counter.t > 0) p *= rps === 'scissors' ? 1.3 : .1;   // かまえ：✌️ で くずす、✊ は はじかれる
     if (charging(o) && rpsOf(o.cur.m) === 'scissors') p *= rps === 'rock' ? 1.6 : .8;   // ✌️ を ためている：✊ で わりこむ
@@ -8744,7 +8765,7 @@ function drawFighter(f) {
   if (f.state === 'enter' || f.state === 'return') { sx = sy = Math.max(.05, f.scale); }
   if (f.state === 'lag') { sy = 1 + Math.sin(B.t * 14) * .03; sx = 2 - sy; }
   if (f.state === 'dodge') alpha = .75;
-  if (f.hurtInv > 0 && !['faint', 'enter', 'return'].includes(f.state)) alpha = (alpha == null ? 1 : alpha) * (Math.floor(B.t * 14) % 2 ? .4 : 1);   // むてき：ちかちか
+  if (f.hurtInv > 0 && !['faint', 'enter', 'return', 'stun'].includes(f.state)) alpha = (alpha == null ? 1 : alpha) * (Math.floor(B.t * 14) % 2 ? .4 : 1);   // むてき：ちかちか
   if ((f.clones && f.clones.some(c => !c.doll)) || f.isClone) alpha = (alpha == null ? 1 : alpha) * (.8 + .2 * Math.sin(B.t * 9 + (f.isClone ? f.x : 0)));   // ぶんしんちゅうは ぜんいん すこし ゆらぐ
   const warpU = f.state === 'wind' && f.cur && f.cur.m.k === 'warp' ? clamp(f.cur.t / f.cur.wind, 0, 1) : 0;   // かげに しずむ
   if (warpU) { ctx.fillStyle = 'rgba(40,20,60,.7)'; ctx.beginPath(); ctx.ellipse(f.x, f.y, 18 + warpU * 10, 7 + warpU * 3, 0, 0, 7); ctx.fill(); alpha = (alpha == null ? 1 : alpha) * (1 - warpU * .85); sy *= 1 - warpU * .6; }
