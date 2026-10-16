@@ -825,6 +825,21 @@ html.land #bpanel{width:min(220px,calc(30 * var(--vw)))}
 html.land #app #cvWrap .hudtop{right:calc(min(220px,calc(30 * var(--vw))) + 18px + var(--sar))}
 html.land #app #bpanel #banner{right:calc(min(220px,calc(30 * var(--vw))) + 120px + var(--sar))}
 html.land #app #bpanel #mvCmds .cmd .a{font-size:min(12.5px,calc(min(220px,calc(30 * var(--vw))) / 16.5))}
+/* ===== よこ画面バトル：こうどうの しじは 左下、わざは 右下（右がわの たてながの パネルを やめて まんなかを ひろく）===== */
+html.land #app #scBattle #bpanel{top:auto!important;left:calc(8px + var(--sal))!important;right:calc(8px + var(--sar))!important;bottom:calc(6px + var(--sab))!important;width:auto!important;
+  display:grid!important;grid-template-columns:minmax(0,min(260px,calc(32 * var(--vw)))) 1fr minmax(0,min(340px,calc(42 * var(--vw))));grid-template-areas:"bench . moves" "cmds . moves";align-items:end;gap:5px 10px;padding:0;background:none}
+html.land #app #bpanel #bside{grid-area:moves;width:100%} html.land #app #bpanel #mvCmds{grid-area:cmds;width:100%} html.land #app #bpanel #bbar{grid-area:bench;width:100%}
+html.land #app #bpanel #btns{grid-template-columns:1fr 1fr!important;gap:5px}
+html.land #app #bpanel .cmd.info{min-height:34px!important;padding:2px 6px 2px 9px}
+html.land #app #bpanel .cmd.info .a{font-size:12px} html.land #app #bpanel .cmd.info .b{font-size:9px}
+html.land #app #bpanel #mvCmds .cmd{min-height:34px} html.land #app #bpanel .bmon{min-height:34px!important}
+html.land #app #bpanel .bmon canvas{width:24px;height:24px}
+html.land #app #bpanel #mvCmds .cmd .a{font-size:min(13px,calc(min(260px,calc(32 * var(--vw))) / 15))}
+/* メッセージは うえの まんなか（HPの 下） */
+html.land #app #bpanel #banner{position:fixed!important;left:50%!important;right:auto!important;bottom:auto!important;top:calc(92px + var(--sat));transform:translateX(-50%);width:min(440px,calc(56 * var(--vw)));text-align:center;justify-content:center}
+html.land #app #cvWrap .hudtop{right:calc(8px + var(--sar))!important}
+html.land #app #bpanel .bmon{min-height:0!important;padding:3px 6px!important;gap:6px;flex-direction:row!important;text-align:left} html.land #app #bpanel .bmon canvas{width:24px!important;height:24px!important}
+html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 </style>
 </head>
 <body>
@@ -1342,7 +1357,7 @@ Object.assign(MOVES100, {
   'fire-sea':     { n: 'ひのうみ',       ref: 'fire-sea',     t: 'fire',   cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8.5, pow: 0, life: 5, rad: 60, e: { st: 'brn', stCh: 15 } },
   'volt-floor':   { n: 'でんきのゆか',   ref: 'volt-floor',   t: 'elec',   cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .5,  cd: 8,   pow: 0, life: 5, rad: 58, e: { st: 'par', stCh: 15 } },
   'fly':          { n: 'そらをとぶ',     ref: 'fly',          t: 'wind',   cat: 'phys', k: 'vault', power: 90, acc: 100, prio: 0, aim: 'lock', wind: .35, cd: 7,   pow: 18, rad: 36, hide: 'fly', e: {} },
-  'dig':          { n: 'あなをほる',     ref: 'dig',          t: 'ground', cat: 'phys', k: 'vault', power: 80, acc: 100, prio: 0, aim: 'lock', wind: .35, cd: 6.5, pow: 16, rad: 38, hide: 'dig', e: {} },
+  'dig':          { n: 'あなをほる',     ref: 'dig',          t: 'ground', cat: 'phys', k: 'vault', power: 70, acc: 100, prio: 0, aim: 'lock', wind: .35, cd: 8.5, pow: 14, rad: 32, hide: 'dig', track: .35, e: {} },   // つよすぎた：おいかける じかん・はんい・いりょくを へらし、まちじかんを ながく
   // かべごしに とどく わざ（あいての あしもとに おとす）：かくれながら うてる
   'fire-pillar':  { n: 'ひばしら',       ref: 'fire-pillar',  t: 'fire',     cat: 'spec', k: 'strike', power: 80, acc: 100, prio: 0, aim: 'lock', wind: .75, cd: 4.1, pow: 16, rad: 50, e: { st: 'brn', stCh: 10 } },
   'geyser':       { n: 'みずばしら',     ref: 'geyser',       t: 'water',    cat: 'spec', k: 'strike', power: 80, acc: 100, prio: 0, aim: 'lock', wind: .75, cd: 4.1, pow: 16, rad: 52, e: {} },
@@ -6426,7 +6441,7 @@ function updateFighter(f, dt) {
       if (!oT) {
         // あいてが 空／地中に いる：おりてくる ばしょから にげる
         if (o && o.state === 'hide' && o.cur && f.hideFor !== o.cur.uid) { f.hideFor = o.cur.uid; f.hideFlee = Math.random() < (f.side === 1 ? .35 + B.skill * .4 : .5); }   // にげるか どうかは 1回ごとに きめる
-        if (o && o.state === 'hide' && o.cur && f.hideFlee && o.cur.t > o.cur.wind * .35 && inZone(o.cur, o, f.x, f.y, f.r + 10)) { const t = threatDir(f, o); f.paceT = 1.5; moveDir(f, Math.cos(t.base), Math.sin(t.base), dt); }
+        if (o && o.state === 'hide' && o.cur && f.hideFlee && o.cur.t > o.cur.wind * Math.min(.35, o.cur.m.track || .5) && inZone(o.cur, o, f.x, f.y, f.r + 10)) { const t = threatDir(f, o); f.paceT = 1.5; moveDir(f, Math.cos(t.base), Math.sin(t.base), dt); }
         break;
       }
       aiDodgeCheck(f, o);
@@ -6466,7 +6481,7 @@ function updateFighter(f, dt) {
     case 'hide': {   // 空／地中：はじめは あいてを おいかけ、さいごの 半分は おりる ばしょが きまる（よけられる）
       const cur = f.cur; if (!cur) { f.state = 'free'; break; }
       cur.t += dt;
-      if (oT && cur.t < cur.wind * .5) { cur.tx += (o.x - cur.tx) * Math.min(1, dt * 5); cur.ty += (o.y - cur.ty) * Math.min(1, dt * 5); }
+      if (oT && cur.t < cur.wind * (cur.m.track || .5)) { cur.tx += (o.x - cur.tx) * Math.min(1, dt * 5); cur.ty += (o.y - cur.ty) * Math.min(1, dt * 5); }
       f.x += (cur.tx - f.x) * Math.min(1, dt * 4); f.y += (cur.ty - f.y) * Math.min(1, dt * 4);
       if (cur.m.hide === 'dig' && Math.random() < dt * 20) B.parts.push({ x: f.x + rand(-10, 10), y: f.y, vx: rand(-40, 40), vy: -rand(40, 90), life: .4, max: .4, col: choice(['#d8b060', '#8a6a3a', '#f0d8a0']), size: 3, g: 300, shape: 'chunk' });
       if (cur.t >= cur.wind) {
@@ -9479,7 +9494,8 @@ function updPad() {
   const wr = $('cvWrap'); if (!wr || !wr.offsetWidth) return false;
   const u = VW / wr.offsetWidth, ht = wr.querySelector('.hudtop'), bp = $('bpanel'), land = document.documentElement.classList.contains('land');
   const t = ht ? (ht.offsetTop + ht.offsetHeight + 4) * u : 0;
-  VPAD = land ? { l: 0, t, r: bp ? (bp.offsetWidth + 16) * u : 0, b: 0 } : { l: 0, t, r: 0, b: bp ? (bp.offsetHeight + 4) * u : 0 };
+  // よこ画面：そうさは 左下（こうどう）と 右下（わざ）に わかれたので、下の ぶんだけ あける
+  VPAD = land ? { l: 0, t, r: 0, b: bp ? Math.max(0, bp.offsetHeight - 6) * u : 0 } : { l: 0, t, r: 0, b: bp ? (bp.offsetHeight + 4) * u : 0 };
   return !!(bp && bp.offsetWidth);
 }
 function fitCanvas() {
