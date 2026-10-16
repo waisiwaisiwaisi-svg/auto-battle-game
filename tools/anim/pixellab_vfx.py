@@ -1,0 +1,49 @@
+# PixelLab の /vfx で わざの エフェクトを つくる（いまの FXEL の かわり）
+# usage: PIXELLAB_API_TOKEN=... python3 tools/anim/pixellab_vfx.py OUTDIR key1 key2 ...   （key は vfx_prompts.json の キー、all で ぜんぶ）
+#   OUTDIR に <key>.gif / <key>.png / <key>.json（スプライトシートと コマ情報）と <key>_job.json を おく
+import sys, os, json, time, urllib.request
+
+API = 'https://api.pixellab.ai/v2'
+TOKEN = os.environ.get('PIXELLAB_API_TOKEN')
+if not TOKEN: sys.exit('PIXELLAB_API_TOKEN が ありません')
+OUT, KEYS = sys.argv[1], sys.argv[2:]
+os.makedirs(OUT, exist_ok=True)
+HERE = os.path.dirname(os.path.abspath(__file__))
+P = json.load(open(os.path.join(HERE, 'vfx_prompts.json')))
+# いまの コマ数（だいたい これくらいの ながさに する）
+N = {'slash': 9, 'claw': 9, 'poof': 9, 'fighting': 13, 'fire': 13}
+if KEYS == ['all']: KEYS = [k for k in P if not k.startswith('_')]
+
+def call(method, path, body=None):
+    req = urllib.request.Request(API + path, method=method, data=json.dumps(body).encode() if body else None,
+                                 headers={'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json'})
+    with urllib.request.urlopen(req, timeout=120) as r: return json.loads(r.read())
+
+def get(url, path):
+    with urllib.request.urlopen(url, timeout=120) as r: open(path, 'wb').write(r.read())
+
+print('balance', call('GET', '/balance'))
+jobs = {}
+for k in KEYS:   # まとめて なげてから まつ
+    if os.path.exists(f'{OUT}/{k}.png'): print(k, 'skip'); continue
+    desc = P['_common'].replace('{n}', str(N.get(k, 16))) + ' Effect: ' + P[k] + '.'
+    r = call('POST', '/vfx', {'description': desc, 'artist': 'lite', 'name': 'pma_' + k})
+    jobs[k] = r['background_job_id']; print(k, 'job', jobs[k], 'quote', r.get('quoted_generations'))
+    time.sleep(1)
+for k, jid in jobs.items():
+    for _ in range(90):
+        j = call('GET', f'/background-jobs/{jid}')
+        if j.get('status') in ('completed', 'failed'): break
+        time.sleep(8)
+    json.dump(j, open(f'{OUT}/{k}_job.json', 'w'), ensure_ascii=False, indent=1)
+    print(k, j.get('status'), j.get('usage'))
+    lr = j.get('last_response') or {}
+    files = lr.get('files') or {}
+    items = files.items() if isinstance(files, dict) else [(f.get('name') or f.get('url', '').split('?')[0].split('/')[-1], f.get('url')) for f in files]
+    for name, url in items:
+        if isinstance(url, dict): url = url.get('url')
+        if not url: continue
+        ext = os.path.splitext(name.split('?')[0])[1] or '.bin'
+        if 'normals' in name or 'game' in name: continue
+        get(url, f'{OUT}/{k}{ext}')
+print('balance', call('GET', '/balance'))
