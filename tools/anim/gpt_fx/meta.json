@@ -478,5 +478,365 @@
   "var": false,
   "ax": 12.0,
   "ay": 11.0
+ },
+ "hit_normal": {
+  "n": 6,
+  "w": 27,
+  "h": 25,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.5,
+  "ay": 12.5
+ },
+ "hit_fighting": {
+  "n": 6,
+  "w": 26,
+  "h": 25,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 12.5
+ },
+ "hit_fire": {
+  "n": 6,
+  "w": 26,
+  "h": 25,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 12.5
+ },
+ "hit_water": {
+  "n": 6,
+  "w": 26,
+  "h": 22,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 11.0
+ },
+ "hit_elec": {
+  "n": 6,
+  "w": 28,
+  "h": 26,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 14.0,
+  "ay": 13.0
+ },
+ "hit_grass": {
+  "n": 6,
+  "w": 25,
+  "h": 28,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 12.5,
+  "ay": 14.0
+ },
+ "hit_ice": {
+  "n": 6,
+  "w": 26,
+  "h": 23,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 11.5
+ },
+ "hit_poison": {
+  "n": 6,
+  "w": 26,
+  "h": 24,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 12.0
+ },
+ "hit_ground": {
+  "n": 6,
+  "w": 26,
+  "h": 19,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 9.5
+ },
+ "hit_rock": {
+  "n": 6,
+  "w": 25,
+  "h": 26,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 12.5,
+  "ay": 13.0
+ },
+ "hit_wind": {
+  "n": 6,
+  "w": 26,
+  "h": 24,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 12.0
+ },
+ "hit_bug": {
+  "n": 6,
+  "w": 26,
+  "h": 22,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 11.0
+ },
+ "hit_psychic": {
+  "n": 6,
+  "w": 26,
+  "h": 23,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 11.5
+ },
+ "hit_ghost": {
+  "n": 6,
+  "w": 26,
+  "h": 26,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 13.0
+ },
+ "hit_dragon": {
+  "n": 6,
+  "w": 26,
+  "h": 26,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.0,
+  "ay": 13.0
+ },
+ "hit_crit": {
+  "n": 6,
+  "w": 32,
+  "h": 29,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 16.0,
+  "ay": 14.5
+ },
+ "sum_circle": {
+  "n": 6,
+  "w": 43,
+  "h": 29,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 21.5,
+  "ay": 14.5
+ },
+ "sum_pillar": {
+  "n": 6,
+  "w": 40,
+  "h": 43,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 20.0,
+  "ay": 42
+ },
+ "sum_return": {
+  "n": 6,
+  "w": 28,
+  "h": 29,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 14.0,
+  "ay": 14.5
+ },
+ "sum_swap": {
+  "n": 6,
+  "w": 30,
+  "h": 26,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 15.0,
+  "ay": 13.0
+ },
+ "seed_proj": {
+  "n": 6,
+  "w": 13,
+  "h": 12,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 6.5,
+  "ay": 6.0
+ },
+ "seed_root": {
+  "n": 6,
+  "w": 22,
+  "h": 22,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 11.0,
+  "ay": 21
+ },
+ "seed_vine": {
+  "n": 6,
+  "w": 29,
+  "h": 29,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 14.5,
+  "ay": 14.5
+ },
+ "seed_drain": {
+  "n": 6,
+  "w": 22,
+  "h": 22,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 11.0,
+  "ay": 11.0
+ },
+ "g_open": {
+  "n": 6,
+  "w": 34,
+  "h": 33,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 17.0,
+  "ay": 16.5
+ },
+ "g_hold": {
+  "n": 6,
+  "w": 36,
+  "h": 33,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 18.0,
+  "ay": 16.5
+ },
+ "g_hit": {
+  "n": 6,
+  "w": 39,
+  "h": 32,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 19.5,
+  "ay": 16.0
+ },
+ "g_break": {
+  "n": 6,
+  "w": 37,
+  "h": 35,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 18.5,
+  "ay": 17.5
+ },
+ "ctr_aura": {
+  "n": 6,
+  "w": 39,
+  "h": 38,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 19.5,
+  "ay": 37
+ },
+ "ctr_strike": {
+  "n": 6,
+  "w": 32,
+  "h": 32,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 16.0,
+  "ay": 16.0
+ },
+ "mirror": {
+  "n": 6,
+  "w": 36,
+  "h": 28,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 18.0,
+  "ay": 14.0
+ },
+ "psn_barrier": {
+  "n": 6,
+  "w": 37,
+  "h": 30,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 18.5,
+  "ay": 15.0
+ },
+ "dodge": {
+  "n": 6,
+  "w": 30,
+  "h": 21,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 15.0,
+  "ay": 10.5
+ },
+ "parry": {
+  "n": 6,
+  "w": 29,
+  "h": 28,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 14.5,
+  "ay": 14.0
+ },
+ "iron": {
+  "n": 6,
+  "w": 38,
+  "h": 37,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 19.0,
+  "ay": 36
+ },
+ "shellpush": {
+  "n": 6,
+  "w": 29,
+  "h": 28,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 14.5,
+  "ay": 27
  }
 }
