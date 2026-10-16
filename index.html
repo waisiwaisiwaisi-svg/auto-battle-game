@@ -9070,7 +9070,7 @@ function render() {
   const lx = (BX - VPAD.l) / z, rx = st.W - (VW - VPAD.r - BX) / z, ty_ = BY / z, by_ = st.H - (VH - BY) / z;
   const cx = lx <= rx ? clamp(px, lx, rx) : st.W > hw * 2 ? clamp(px, hw, st.W - hw) : st.W / 2;
   const cy = ty_ <= by_ ? clamp(py, ty_, by_) : st.H > hh * 2 ? clamp(py, hh, st.H - hh) : st.H / 2;
-  const sh = B.shake > 0 ? [rand(-B.shake, B.shake), rand(-B.shake, B.shake)] : [0, 0];
+  const sh = [0, 0];   // がめんは ゆらさない
   ctx.setTransform(z * RS, 0, 0, z * RS, Math.round((BX - cx * z + sh[0]) * RS), Math.round((BY - cy * z + sh[1]) * RS));
   ctx.imageSmoothingEnabled = false;
   { // ステージの そと：ステージの 絵を かがみうつしに して うすぐらく しきつめる（まっくらな すきまを ださない）
