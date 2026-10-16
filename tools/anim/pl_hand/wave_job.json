@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "032cde36-c887-4b7a-aabc-eac700370201",
+ "status": "completed",
+ "created_at": "2026-10-16T12:09:26.205655+00:00",
+ "last_response": {
+  "fps": 10,
+  "kind": "new",
+  "loop": true,
+  "name": "pma_wave",
+  "files": {
+   "pma-wave.gif": "https://api.pixellab.ai/mcp/pixel-tools/ab7702d7-fb05-4f81-8329-c04ad432a4dc/pma-wave.gif",
+   "pma-wave.png": "https://api.pixellab.ai/mcp/pixel-tools/ab7702d7-fb05-4f81-8329-c04ad432a4dc/pma-wave.png",
+   "pma-wave.json": "https://api.pixellab.ai/mcp/pixel-tools/ab7702d7-fb05-4f81-8329-c04ad432a4dc/pma-wave.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 32,
+   "y": 24,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 40,
+   "w": 64
+  },
+  "frames": 8,
+  "message": "A 64x40 looping wave crest: a rolling blue wall rising to the right with a white foam lip that ripples along its top, plus a few white spray dots flicking off the crest. It loops seamlessly over 8 frames at 10 fps and stays in place for the game to move. If you want a stronger curl, try raising the crest's height or making the foam lip thicker.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=c934e2a5-7512-4abf-8dda-aaf075333eb8",
+  "effect_id": "c934e2a5-7512-4abf-8dda-aaf075333eb8",
+  "gif_exact": true,
+  "result_id": "ab7702d7-fb05-4f81-8329-c04ad432a4dc",
+  "conversation": "L52jjkmK0Q2l9KOYYo455Q.e92ee6411f414a856a7a613e04f53a824d61c8c59ad73b9f02ccdbd934ff8968",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "788163c7-c2d7-44b9-9592-5b8e3fa188a3",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}

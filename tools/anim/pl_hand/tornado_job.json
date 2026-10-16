@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "96809476-dee0-4d56-9c43-a3bee3c57ab5",
+ "status": "completed",
+ "created_at": "2026-10-16T12:30:26.333480+00:00",
+ "last_response": {
+  "fps": 10,
+  "kind": "new",
+  "loop": true,
+  "name": "pma_tornado",
+  "files": {
+   "pma-tornado.gif": "https://api.pixellab.ai/mcp/pixel-tools/8e260a57-3281-425d-8b70-42e4871ab469/pma-tornado.gif",
+   "pma-tornado.png": "https://api.pixellab.ai/mcp/pixel-tools/8e260a57-3281-425d-8b70-42e4871ab469/pma-tornado.png",
+   "pma-tornado.json": "https://api.pixellab.ai/mcp/pixel-tools/8e260a57-3281-425d-8b70-42e4871ab469/pma-tornado.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 16,
+   "y": 42,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 48,
+   "w": 32
+  },
+  "frames": 8,
+  "message": "A 32x48 looping tornado: a grey-white smoke funnel with two twisting wind bands spiralling up it, standing on a brown dust ring with dust motes swirling at the base. It stays in place, loops seamlessly over 8 frames at 10 fps, and has a dark 1px outline. The colours are muted grey-white as you described, so I did not push them to bright saturation.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=b06b2a62-50a4-4c0b-b583-aa82eb133db8",
+  "effect_id": "b06b2a62-50a4-4c0b-b583-aa82eb133db8",
+  "gif_exact": true,
+  "result_id": "8e260a57-3281-425d-8b70-42e4871ab469",
+  "conversation": "7wPjr-caKBBQnAA6GlaWAQ.0aca1cc1441ede58a94c00185d9d1eccc4c0a42af6161b9acfaf631438d5078d",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "212c08fb-2b41-4fd2-a9bb-db3cc8fbb1fa",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}
