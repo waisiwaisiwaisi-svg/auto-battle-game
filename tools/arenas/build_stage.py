@@ -108,7 +108,21 @@ for j in range(5):
             x0, y0, x1, y1 = min(s[0] for s in rs), min(s[1] for s in rs), max(s[2] for s in rs), max(s[3] for s in rs)
             im = crop_alpha(pc[rr][q]); dw = (x1 - x0) * 1.12; dh = dw * im.height / im.width
             sv = im.resize((max(1, round(dw * .8)), max(1, round(dh * .8))), Image.LANCZOS)   # 表示の 0.8 倍で 保存
-            out.append({'src': enc(sv, 'PNG'), 'x': round((x0 + x1) / 2), 'y': y1 + 6, 'w': round(dw), 'h': round(dh)})
+            # あたりはんてい：絵の 列ごとに、した 55% を 足もととして 通れなく する（CELL ごとの 四角に まとめる）
+            A = np.array(im.resize((max(1, round(dw)), max(1, round(dh))), Image.LANCZOS))[:, :, 3] > 100
+            px0, py0 = (x0 + x1) / 2 - dw / 2, y1 + 6 - dh; CELL = 12; rects = []
+            for cx in range(0, A.shape[1], CELL):
+                col = A[:, cx:cx + CELL].any(1); ys_ = np.where(col)[0]
+                if len(ys_) < 4: continue
+                top, bot = ys_.min(), ys_.max(); fy0 = bot - (bot - top) * .55
+                if A[:, cx:cx + CELL].sum() < CELL * 3: continue
+                rects.append([round(px0 + cx), round(py0 + fy0), round(px0 + min(cx + CELL, A.shape[1])), round(py0 + bot - 4)])
+            # となりの 列と おなじ 高さなら つなげる
+            mg = []
+            for r_ in rects:
+                if mg and abs(mg[-1][1] - r_[1]) < 10 and abs(mg[-1][3] - r_[3]) < 10 and mg[-1][2] >= r_[0] - 1: mg[-1] = [mg[-1][0], min(mg[-1][1], r_[1]), r_[2], max(mg[-1][3], r_[3])]
+                else: mg.append(r_)
+            out.append({'src': enc(sv, 'PNG'), 'x': round((x0 + x1) / 2), 'y': y1 + 6, 'w': round(dw), 'h': round(dh), 'solid': mg})
         props[k] = out
 
 # ---- 観客の 席（上の 観客席）----
