@@ -1,0 +1,50 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "d5dd1bbd-0aa1-43fe-9bff-ab80f0e3a5f7",
+ "status": "completed",
+ "created_at": "2026-10-16T11:51:11.526475+00:00",
+ "last_response": {
+  "fps": 14,
+  "kind": "new",
+  "loop": false,
+  "name": "pma_fire",
+  "files": {
+   "pma-fire.gif": "https://api.pixellab.ai/mcp/pixel-tools/2214295f-8439-4220-b9c3-4f74275f38c4/pma-fire.gif",
+   "pma-fire.png": "https://api.pixellab.ai/mcp/pixel-tools/2214295f-8439-4220-b9c3-4f74275f38c4/pma-fire.png",
+   "pma-fire.json": "https://api.pixellab.ai/mcp/pixel-tools/2214295f-8439-4220-b9c3-4f74275f38c4/pma-fire.json"
+  },
+  "parts": [
+   "fire_blast"
+  ],
+  "anchor": {
+   "x": 24,
+   "y": 24,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 48,
+   "w": 48
+  },
+  "frames": 13,
+  "message": "A 48x48 one-shot fire hit, 13 frames: a white-hot flash blooms into orange and yellow flames that flare, flicker, then break into grey smoke and a few embers, fully faded on the last frame. I dropped the shockwave ring so it reads as a clean hit rather than an explosion. Try the colour and smoke sliders to change the fire tones or how much smoke it leaves.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=7861e752-d964-400b-b9c0-31b5f69733e5",
+  "effect_id": "7861e752-d964-400b-b9c0-31b5f69733e5",
+  "gif_exact": true,
+  "result_id": "2214295f-8439-4220-b9c3-4f74275f38c4",
+  "conversation": "QylgGOMJ-4bb6aGDbeg11g.2b442c7e1265eeee0e3cb346ad38f757fdbcfd9a0be3b4bdf2400e67a3e170b7",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "8dd4c6af-b9d1-4ab9-b566-cb6736662633",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}

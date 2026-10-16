@@ -1,0 +1,48 @@
+{
+ "usage": {
+  "type": "generations",
+  "generations": 1.0
+ },
+ "id": "1b7a4446-abff-4ac4-b75e-67a3656b817e",
+ "status": "completed",
+ "created_at": "2026-10-16T11:52:11.900037+00:00",
+ "last_response": {
+  "fps": 14,
+  "kind": "new",
+  "loop": false,
+  "name": "pma_elec",
+  "files": {
+   "pma-elec.gif": "https://api.pixellab.ai/mcp/pixel-tools/e88f64c3-3a88-44c3-b6c8-dd7846172f5d/pma-elec.gif",
+   "pma-elec.png": "https://api.pixellab.ai/mcp/pixel-tools/e88f64c3-3a88-44c3-b6c8-dd7846172f5d/pma-elec.png",
+   "pma-elec.json": "https://api.pixellab.ai/mcp/pixel-tools/e88f64c3-3a88-44c3-b6c8-dd7846172f5d/pma-elec.json"
+  },
+  "parts": [],
+  "anchor": {
+   "x": 24,
+   "y": 24,
+   "kind": "origin"
+  },
+  "artist": "lite",
+  "canvas": {
+   "h": 48,
+   "w": 48
+  },
+  "frames": 16,
+  "message": "A 48x48 electric hit: a white core flashes at the centre, then six yellow lightning bolts zigzag outward with small branches, flickering as they fade. A faint ring expands behind them and a few sparks burst out. It is 16 frames, one-shot, and fully gone by the last frames. Try the Frames or Outline sliders if you want a different length or edge.",
+  "edit_url": "https://pixellab.ai/create-vfx?effect=9991923c-9abf-45b0-b59d-75508f936c99",
+  "effect_id": "9991923c-9abf-45b0-b59d-75508f936c99",
+  "gif_exact": true,
+  "result_id": "e88f64c3-3a88-44c3-b6c8-dd7846172f5d",
+  "conversation": "wMZpOeZ8GaW4YSkZUde-6w.d48d13e172d3008f8dec645652069c588878b7859ca1c4e212458aa90fdde147",
+  "billing_usage": {
+   "usd": 0.0,
+   "type": "generations",
+   "generations": 1.0
+  },
+  "generation_id": "9bbcf105-ec82-4068-9a86-41babdb65f22",
+  "billing_charged": true,
+  "generation_mode": "vfx",
+  "pixel_tools_image": true,
+  "quoted_generations": 1
+ }
+}
