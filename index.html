@@ -3370,7 +3370,7 @@ function hubStage() {
     const q = cv.getContext('2d'); q.imageSmoothingEnabled = false; q.clearRect(0, 0, cv.width, cv.height);
     q.fillStyle = 'rgba(10,8,20,.35)'; q.beginPath(); q.ellipse(W * z * .5, (H - 14) * z, 80 * z, 10 * z, 0, 0, 7); q.fill();
     const tr = trArt(myLook()), ti = tr.idle0.n, ts = 70 / (tr.h0 || ti.height); q.drawImage(ti, Math.round((W * .3 - ti.width * ts / 2) * z), Math.round((H - 14 - ti.height * ts) * z), Math.round(ti.width * ts * z), Math.round(ti.height * ts * z));
-    if (lead && SPR[lead.sid]) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, ms = Math.min(2.2, 84 / Math.max(im.width, im.height)); q.drawImage(im, Math.round((W * .64 - im.width * ms / 2) * z), Math.round((H - 14 - im.height * ms) * z), Math.round(im.width * ms * z), Math.round(im.height * ms * z)); }
+    if (lead && SPR[lead.sid]) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, [bx, by, bw, bh] = sprBox(lead.sid), ms = Math.min(2.2, 84 / Math.max(bw, bh)); q.drawImage(im, Math.round((W * .64 - (bx + bw / 2) * ms) * z), Math.round((H - 14 - (by + bh) * ms) * z), Math.round(im.width * ms * z), Math.round(im.height * ms * z)); }
     fi++;
   };
   draw(); HUB_ANIM = setInterval(draw, 220);
@@ -3460,13 +3460,22 @@ function iconURL(name) {
 function paintIcons(root) { for (const el of (root || document).querySelectorAll('.ico[data-ico]')) { if (el._ico === el.dataset.ico) continue; el._ico = el.dataset.ico; el.style.backgroundImage = `url(${iconURL(el.dataset.ico)})`; } }
 const icoHTML = (name, cls = '') => `<i class="ico ${cls}" data-ico="${name}" style="background-image:url(${iconURL(name)})"></i>`;
 
+// 絵の 中身（すけて いない ところ）の わく [x, y, w, h]：わくの すきまで 大きさが ばらばらに ならない ように
+const SBOX = {};
+function sprBox(sid, img) {
+  img = img || SPR[sid].n; if (SBOX[sid] && SBOX[sid].img === img) return SBOX[sid].b; let b = [0, 0, img.width, img.height];
+  try { const q = img.getContext('2d'), d = q.getImageData(0, 0, img.width, img.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+    for (let y = 0; y < img.height; y++) for (let x = 0; x < img.width; x++) if (d[(y * img.width + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 >= 0) b = [x0, y0, x1 - x0 + 1, y1 - y0 + 1]; } catch (e) {}
+  SBOX[sid] = { img, b }; return b;
+}
 function spriteCanvas(sid, size) {
-  // 内部は 2〜3倍の 解像度で 整数倍に 描いて、CSS で size に する（ドットが にじまない）
+  // 内部は 2〜3倍の 解像度で 描いて、CSS で size に する。絵の 中身を わくの 9わりに そろえる（どの こも おなじ 大きさに 見える）
   const img = SPR[sid].n, c = document.createElement('canvas'), R = size * Math.min(3, Math.max(2, Math.ceil(window.devicePixelRatio || 1)));
   c.width = R; c.height = R; c.className = 'pix'; c.style.width = c.style.height = size + 'px';
   const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
-  const s = Math.max(1, Math.floor(R / Math.max(img.width, img.height)));
-  g.drawImage(img, Math.floor((R - img.width * s) / 2), Math.floor((R - img.height * s) / 2), img.width * s, img.height * s);
+  const [bx, by, bw, bh] = sprBox(sid, img), s = R * .9 / Math.max(bw, bh), w = Math.round(bw * s), h = Math.round(bh * s);
+  g.drawImage(img, bx, by, bw, bh, Math.floor((R - w) / 2), Math.floor((R - h) / 2), w, h);
   return c;
 }
 
