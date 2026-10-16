@@ -124,7 +124,8 @@ def main():
             solid = [sc(r) for r in a['solid'][:2]] + [sc(foot(r)) for r in a['solid'][2:]]; low = [sc(r) for r in a['low']]
         out[name] = {'name': a['name'], 'W': W, 'H': H, 'floor': sc(a['floor']), 'trainers': [sc(t) for t in a['trainers']],
                      'solid': solid, 'low': low,
-                     'img': 'data:image/webp;base64,' + base64.b64encode(buf.getvalue()).decode()}
+                     # かさねる ステージ（build_stage.py）が あるときは 1まい絵は いれない（サムネは ゲームが つくる）
+                     'img': '' if os.path.exists(os.path.join(HERE, 'stage_src', 'F1.png')) else 'data:image/webp;base64,' + base64.b64encode(buf.getvalue()).decode()}
         print(name, W, H, len(buf.getvalue()) // 1024, 'KB')
     js = BEGIN + '\n// 大会の 闘技場の 絵と 当たり判定（solid＝通れない・弾も 止まる、low＝通れないが 弾は 飛ぶ）。座標は ゲームの 世界座標\n'
     js += 'const ARENAS = %s;\n' % json.dumps(out, ensure_ascii=False, separators=(',', ':'))
