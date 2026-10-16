@@ -1053,7 +1053,8 @@ const dist = (a, b) => Math.hypot(b.x - a.x, b.y - a.y);
 const choice = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const wrapAng = (d) => { while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return d; };
 const QS = new URLSearchParams(location.search);
-const TIME_SCALE = clamp(+(QS.get('speed') || 1), 0.1, 10);
+const GAME_SPEED = .8;   // バトルの はやさ（1＝もとの はやさ）。すこし ゆっくりに して 見やすく する
+const TIME_SCALE = clamp(+(QS.get('speed') || 1), 0.1, 10) * GAME_SPEED;
 
 /* =====================================================================
    タイプ・わざ・モンスター（すべてオリジナル）
