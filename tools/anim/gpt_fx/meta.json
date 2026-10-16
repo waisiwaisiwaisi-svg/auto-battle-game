@@ -838,5 +838,85 @@
   "var": false,
   "ax": 14.5,
   "ay": 27
+ },
+ "st_sleep": {
+  "n": 6,
+  "w": 14,
+  "h": 17,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 7.0,
+  "ay": 8.5
+ },
+ "st_yawn": {
+  "n": 6,
+  "w": 15,
+  "h": 17,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 7.5,
+  "ay": 8.5
+ },
+ "st_dbond": {
+  "n": 6,
+  "w": 25,
+  "h": 22,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 12.5,
+  "ay": 11.0
+ },
+ "st_gravity": {
+  "n": 6,
+  "w": 38,
+  "h": 28,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 19.0,
+  "ay": 27
+ },
+ "cap_throw": {
+  "n": 6,
+  "w": 19,
+  "h": 14,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 9.5,
+  "ay": 7.0
+ },
+ "cap_shake": {
+  "n": 6,
+  "w": 17,
+  "h": 18,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 8.5,
+  "ay": 9.0
+ },
+ "cap_caught": {
+  "n": 6,
+  "w": 23,
+  "h": 20,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 11.5,
+  "ay": 10.0
+ },
+ "cap_break": {
+  "n": 6,
+  "w": 21,
+  "h": 17,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 10.5,
+  "ay": 8.5
  }
 }

@@ -16,12 +16,14 @@ SHEETS = {'E1': ['p_fire', 'p_water', 'p_elec', 'p_ice'], 'E2': ['p_grass', 'p_p
           'H3': ['hit_ground', 'hit_rock', 'hit_wind', 'hit_bug'], 'H4': ['hit_psychic', 'hit_ghost', 'hit_dragon', 'hit_crit'],
           'X1': ['sum_circle', 'sum_pillar', 'sum_return', 'sum_swap'], 'X2': ['seed_proj', 'seed_root', 'seed_vine', 'seed_drain'],
           'G1': ['g_open', 'g_hold', 'g_hit', 'g_break'], 'G2': ['ctr_aura', 'ctr_strike', 'mirror', 'psn_barrier'],
-          'G3': ['dodge', 'parry', 'iron', 'shellpush']}
+          'G3': ['dodge', 'parry', 'iron', 'shellpush'],
+          # じょうたいの しるし・クリスタル
+          'U4': ['st_sleep', 'st_yawn', 'st_dbond', 'st_gravity'], 'U5': ['cap_throw', 'cap_shake', 'cap_caught', 'cap_break']}
 HITS = {'hit_' + t for t in ['normal', 'fighting', 'fire', 'water', 'elec', 'grass', 'ice', 'poison', 'ground', 'rock', 'wind', 'bug', 'psychic', 'ghost', 'dragon', 'crit']}
 ONCE = {'fist', 'nail', 'skull', 'web', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'dirt', 'spark', 'reflect', 'wall_rock', 'wall_ice', 'wall_thorn',
-        'sum_circle', 'sum_pillar', 'sum_return', 'sum_swap', 'seed_root', 'g_open', 'g_hit', 'g_break', 'ctr_strike', 'dodge', 'parry', 'iron'} | HITS
+        'sum_circle', 'sum_pillar', 'sum_return', 'sum_swap', 'seed_root', 'g_open', 'g_hit', 'g_break', 'ctr_strike', 'dodge', 'parry', 'iron', 'cap_caught', 'cap_break'} | HITS
 VAR = {'hole', 'crater', 'scorch'}   # アニメではなく 形ちがい
-BOTTOM = {'tornado', 'mine', 'wall_rock', 'wall_ice', 'wall_thorn', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'hz_rocks', 'hz_spikes', 'hz_tspikes', 'trail', 'dirt', 'sum_pillar', 'seed_root', 'shellpush', 'ctr_aura', 'iron'}   # 足もとが きじゅん
+BOTTOM = {'tornado', 'mine', 'wall_rock', 'wall_ice', 'wall_thorn', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'hz_rocks', 'hz_spikes', 'hz_tspikes', 'trail', 'dirt', 'sum_pillar', 'seed_root', 'shellpush', 'ctr_aura', 'iron', 'st_gravity'}   # 足もとが きじゅん
 # 1つの エフェクトを なんドットに するか（いちばん ながい へん）。ゲームでは 1ドット＝PIX_D で かく
 TARGET = {'p_hadou': 22, 'p_moon': 22, 'wave': 40, 'whirl': 36, 'tornado': 30, 'mine': 16, 'fist': 28, 'nail': 24, 'skull': 20, 'web': 30,
           'fl_poison': 48, 'fl_fire': 48, 'fl_elec': 48, 'fl_honey': 48, 'pit': 48, 'pit2': 48, 'snare': 32, 'hole': 30, 'crater': 30, 'scorch': 30,
@@ -29,7 +31,8 @@ TARGET = {'p_hadou': 22, 'p_moon': 22, 'wave': 40, 'whirl': 36, 'tornado': 30, '
           'hz_rocks': 14, 'hz_spikes': 14, 'hz_tspikes': 14, 'trail': 14, 'dirt': 24, 'spark': 22, 'reflect': 24,
           **{k: 26 for k in HITS}, 'hit_crit': 32, 'sum_circle': 40, 'sum_pillar': 40, 'sum_return': 30, 'sum_swap': 28,
           'seed_proj': 12, 'seed_root': 22, 'seed_vine': 30, 'seed_drain': 22, 'g_open': 34, 'g_hold': 34, 'g_hit': 36, 'g_break': 36,
-          'ctr_aura': 36, 'ctr_strike': 34, 'mirror': 36, 'psn_barrier': 36, 'dodge': 30, 'parry': 28, 'iron': 36, 'shellpush': 30}
+          'ctr_aura': 36, 'ctr_strike': 34, 'mirror': 36, 'psn_barrier': 36, 'dodge': 30, 'parry': 28, 'iron': 36, 'shellpush': 30,
+          'st_sleep': 16, 'st_yawn': 16, 'st_dbond': 24, 'st_gravity': 40, 'cap_throw': 18, 'cap_shake': 18, 'cap_caught': 22, 'cap_break': 20}
 TDEF = 20
 COLS, ROWS = 6, 4
 
