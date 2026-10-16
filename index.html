@@ -4896,7 +4896,6 @@ function impactFx(x, y, t, k) {
   fxPush({ type: 'flash', x, y, rad: 12 + 14 * k, col, life: .12, max: .12 });
   sheetFx(FXEL[t] ? t : 'normal', x, y, .9 + k * .6);   // FXEL の ドットの ヒット
   typeFx(x, y, t, Math.round(10 + 16 * k), 110 + 90 * k, .55);
-  if (k > .6) B.scrFlash = Math.max(B.scrFlash || 0, .12 * k);
 }
 // ---- ほじょわざの エフェクト ----
 function fxPush(...a) { for (const o of a) { B.fx.push(o); if (NET.host) netEv('fx', o); } }
@@ -5793,7 +5792,7 @@ function hit(att, def, m, ang, opt) {
   }
   SND.se(crit ? 'crit' : 'hit', heavy ? .8 : opt.tick ? 1.5 : 1.2); if (big) { if (eff > 1) SND.se('super'); else if (eff < 1) SND.se('weak'); }
   B.shake = Math.max(B.shake, tier === 2 ? 11 : tier === 1 ? 6 : 1.5);
-  if (tier === 2) { impactBeat(def.x, def.y - BODY, .55, .28); B.scrFlash = Math.max(B.scrFlash || 0, .06); } else if (tier === 1) impactBeat(def.x, def.y - BODY, .25, 0);
+  if (tier === 2) { impactBeat(def.x, def.y - BODY, .55, .28); }   // ばつぐんでも がめんは ひからせない else if (tier === 1) impactBeat(def.x, def.y - BODY, .25, 0);
   B.cheer = Math.min(1, B.cheer + (heavy ? .7 : .3));
   popText(def.x + rand(-6, 6), def.y - 66, String(dmg), eff > 1 ? '#ffd166' : eff < 1 ? '#a49ac0' : '#ffffff', eff > 1 || heavy);
   burst(def.x, def.y - BODY, id2col(m), heavy ? 16 : 8, 110, .4);
