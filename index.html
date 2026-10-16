@@ -8103,10 +8103,10 @@ function drawBlasts() {
 }
 function drawFloor(zn) {
   { const pk = zn.id === 'quicksand' ? 'pit' : zn.id === 'honey-pool' ? 'fl_honey' : !zn.parts && { fire: 'fl_fire', poison: 'fl_poison', elec: 'fl_elec' }[zn.t];
-    if (pk && plOk(pk)) { const k = Math.min(1, (zn.max - zn.life) / .3) * Math.min(1, zn.life / .5), S = PLFX[pk], sc = zn.rad * (pk === 'fl_fire' ? 1.75 : 2.25) * (.6 + .4 * k) / (S.w * PIX_D);
-      ctx.globalAlpha = Math.max(.2, k); plDraw(pk, plLoop(pk, B.t + (zn.uid || 0) * .37), zn.x, zn.y, sc, 0); ctx.globalAlpha = 1;
+    if (pk && plOk(pk)) { const k = Math.min(1, (zn.max - zn.life) / .3) * Math.min(1, zn.life / .5), S = PLFX[pk], sc = zn.rad * (pk === 'fl_fire' ? 2 : 2.15) * (.6 + .4 * k) / (S.w * PIX_D);
+      ctx.globalAlpha = Math.max(.1, k) * (pk === 'pit' ? .55 : pk === 'fl_fire' ? .3 : .36); ctx.save(); ctx.translate(zn.x, zn.y); ctx.scale(1, pk === 'fl_fire' ? .55 : .85); plDraw(pk, plLoop(pk, B.t + (zn.uid || 0) * .37), 0, 0, sc, 0); ctx.restore(); ctx.globalAlpha = 1;   // ゆかは うすく ひらたく（めだちすぎない）
       if (zn.pat === 'pull' && pk !== 'pit') drawPullSwirl(zn);
-      ctx.strokeStyle = zn.side === 1 ? '#ff5a6a' : '#5ab8ff'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.lineDashOffset = -B.t * 20; ctx.globalAlpha = .7; ctx.beginPath(); ctx.ellipse(zn.x, zn.y, zn.rad, zn.rad * .62, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; return; } }
+      ctx.strokeStyle = zn.side === 1 ? '#ff5a6a' : '#5ab8ff'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.lineDashOffset = -B.t * 20; ctx.globalAlpha = .4; ctx.beginPath(); ctx.ellipse(zn.x, zn.y, zn.rad, zn.rad * .62, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; return; } }
   if (zn.id === 'quicksand') { drawAntlion(zn); return; }
   if (zn.id === 'honey-pool') {   // みつだまり：とろっと ひかる はちみつ
     const k = Math.min(1, (zn.max - zn.life) / .3), R = zn.rad * (.6 + .4 * k), r = srng(zn.uid || 3);
