@@ -8,7 +8,11 @@ USE_PIXELLAB = ['p_fire', 'p_water', 'p_elec', 'p_ice', 'p_grass', 'p_poison', '
        'p_hadou', 'p_moon', 'tornado', 'whirl', 'mine', 'web']
 USE = []   # PixelLab 版は しつが ひくいので いまは つかわない（てがきに もどす）
 out = {}
-for k in USE:
+G = os.path.join(ROOT, 'tools/anim/gpt_fx'); META = json.load(open(f'{G}/meta.json'))   # ChatGPT 版（tools/anim/gpt_fx.py で つくる）
+for k, m in META.items():
+    b = io.BytesIO(); Image.open(f'{G}/{k}.png').save(b, 'PNG', optimize=True)
+    out[k] = {'n': m['n'], 'w': m['w'], 'h': m['h'], 'ms': m['ms'], 'ax': m['ax'], 'ay': m['ay'], 'src': 'data:image/png;base64,' + base64.b64encode(b.getvalue()).decode()}
+for k in USE:   # PixelLab 版（いまは つかわない）
     js = json.load(open(f'{D}/{k}.json')); fr = js['frames']; im = Image.open(f'{D}/{k}.png').convert('RGBA')
     w, h = fr[0]['frame']['w'], fr[0]['frame']['h']
     st = Image.new('RGBA', (w * len(fr), h))
@@ -16,7 +20,7 @@ for k in USE:
     b = io.BytesIO(); st.save(b, 'PNG', optimize=True)
     out[k] = {'n': len(fr), 'w': w, 'h': h, 'ms': fr[0]['duration'], 'src': 'data:image/png;base64,' + base64.b64encode(b.getvalue()).decode()}
 p = os.path.join(ROOT, 'index.html'); s = open(p, encoding='utf-8').read()
-block = '// ====== PLFX（PixelLab の エフェクト：tools/anim/build_plfx.py）======\nconst PLFX = ' + json.dumps(out, separators=(',', ':')) + ';\n// ====== ここまで PLFX ======'
+block = '// ====== PLFX（ChatGPT／PixelLab の エフェクト：tools/anim/build_plfx.py）======\nconst PLFX = ' + json.dumps(out, separators=(',', ':')) + ';\n// ====== ここまで PLFX ======'
 if '// ====== PLFX' in s: s = re.sub(r'// ====== PLFX.*?// ====== ここまで PLFX ======', lambda m: block, s, flags=re.S)
 else: s = s.replace('// ====== ここまで FXEL ======', '// ====== ここまで FXEL ======\n' + block, 1)
 open(p, 'w', encoding='utf-8').write(s); print(len(block), 'bytes')
