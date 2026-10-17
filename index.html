@@ -235,6 +235,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .evb{color:var(--acc);font-weight:400;margin-left:2px;font-size:9.5px}
 .itlist{display:flex;flex-direction:column;gap:6px}.it{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;background:#15112a;border-radius:4px;padding:6px 8px;text-align:left}.it .iic{font-size:24px}.it small{display:block;color:var(--dim);font-size:10.5px;line-height:1.4}.it .btn{font-size:12px;padding:6px 10px}
 .bsum{display:flex;justify-content:space-between;margin:8px 0;font-size:13px}
+.ico.ico-s{width:1.25em;height:1.25em;margin-right:3px;vertical-align:-.25em}
 .bdot{position:absolute;top:4px;right:4px;width:12px;height:12px;background:#ff3a3a;border:2px solid #0b0914;border-radius:50%;box-shadow:0 0 0 1px #ffd0d0 inset;pointer-events:none;z-index:2}
 #scTeam .slot{position:relative}
 .bgrid{display:flex;flex-direction:column;gap:4px}
@@ -937,7 +938,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
         <div class="sec-title chesthead"><span>たからばこ <small>かつと もらえる・4つまで</small></span></div>
         <div id="hGuildBonus" hidden style="font-size:11.5px;color:#ffd166;margin-top:-6px">🛡 ギルド ボーナス：たからばこが 5% はやく あく</div>
         <div class="chests" id="hubChests"></div>
-        <div class="inv"><span>わざのまきもの <b id="hTms">0</b></span><span>どうぐ <b id="hItems">0</b></span><span>つかまえた <b id="hCaught">0</b></span></div>
+        <div class="inv"><span><i class="ico ico-s" data-ico="scroll"></i>スクロール <b id="hTms">0</b></span><span>どうぐ <b id="hItems">0</b></span><span>つかまえた <b id="hCaught">0</b></span></div>
       </div>
     </div>
   </section>
@@ -1564,7 +1565,7 @@ function fixMon(m, bias) {
   const L = learned(m);
   if (Array.isArray(m.moves) && m.moves.some(id => MOVES[id] && MOVES[id].cat === 'stat' && !canLearn(m.sid, id))) m.moves = m.moves.filter(id => !(MOVES[id] && MOVES[id].cat === 'stat' && !canLearn(m.sid, id))).concat(['tackle']);   // おぼえられない ほじょわざは おきかえ（下で うめる）
   if (Array.isArray(m.moves) && m.moves.includes('tackle')) { m.moves = m.moves.filter(id => id !== 'tackle'); for (const id of pickMoves(m)) if (m.moves.length < 4 && !m.moves.includes(id)) m.moves.push(id); }   // むかしの たいあたりは わざに おきかえ
-  if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // わざのまきものの わざも そのまま
+  if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // スクロールの わざも そのまま
   return m;
 }
 
@@ -3421,7 +3422,7 @@ function emoSwap(root) {
   for (const n of ns) { const sp = document.createElement('span'); sp.innerHTML = n.data.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(UI_EMO_RE, (_, e) => uiImg(UI_EMO[e])); const fr = document.createDocumentFragment(); while (sp.firstChild) fr.appendChild(sp.firstChild); n.parentNode.replaceChild(fr, n); }
 }
 if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
-  let emoQ = false; const run = () => { emoQ = false; emoSwap(document.body); };
+  let emoQ = false; const run = () => { emoQ = false; emoSwap(document.body); if (typeof paintIcons === 'function') paintIcons(document.body); };
   new MutationObserver(() => { if (!emoQ) { emoQ = true; Promise.resolve().then(run); } }).observe(document.documentElement, { childList: true, subtree: true, characterData: true });
   document.addEventListener('DOMContentLoaded', run);
   const lg = () => { const im = document.getElementById('tlogoImg'); if (im && UIA.logo) { im.src = UIA.logo.src; im.hidden = false; im.parentNode.classList.add('img'); } };   // タイトルの ロゴ（ドットの 絵）
@@ -3442,6 +3443,7 @@ const ICONS = {
   globe: ['...bbbbb....', '..bgggbbb...', '.bggggbbbb..', '.bbggbbgbb..', 'bbbbbbgggbb.', 'bbbgbbbgbbb.', 'bbggbbbbbbb.', '.bgggbbbgb..', '.bbggbbggb..', '..bbbbbbb...', '...bbbbb....'],
   crystal: ['.....c......', '....ccc.....', '...cwccc....', '..cwccccc...', '.cccccccbc..', 'ccccccccbbc.', '.cbbccccbb..', '..bbbccbb...', '...bbbbb....', '....bbb.....', '.....b......'],
   gem: ['............', '..mmmmmm....', '.mwmmmmmm...', 'mmmmmmmmmm..', '.mmmmmmmm...', '..mmmmmm....', '...mmmm.....', '....mm......'],
+  scroll: ['..............', '.nnnnnnnnnnnn.', 'nYnnnnnnnnnnYn', '.nnnnnnnnnnnn.', '..wwwwwwwwww..', '..wSSSSSSSSw..', '..wwwwwwwwww..', '..wSSSSSrrww..', '..wwwwwrrrrw..', '..wSSSSSrrww..', '..wwwwwwwwww..', '.nnnnnnnnnnnn.', 'nYnnnnnnnnnnYn', '.nnnnnnnnnnnn.'],   // スクロール（まきもの）
   book: ['.rrrrrrrrr..', '.rwwwwwwwr..', '.rrrrrrrrr..', '.rrryyyrrr..', '.rrryyyrrr..', '.rrrrrrrrr..', '.rrrrrrrrr..', '.rrrrrrrrr..', '.rwwwwwwwr..', '.RRRRRRRRR..'],
   shield: ['bbbbbbbbbbb.', 'bbbbbybbbbb.', 'bbbbyyybbbb.', 'bbbyyyyybbb.', 'bbbbyyybbbb.', 'bbbbbybbbbb.', '.bbbbbbbbb..', '.dbbbbbbbd..', '..ddbbbdd...', '...ddddd....', '....ddd.....', '.....d......'],
   pencil: ['.........rr.', '........rrrr', '.......yyrr.', '......yyyy..', '.....yyyy...', '....yyyy....', '...yyyy.....', '..yyyy......', '.nnyy.......', '.knn........', 'kk..........'],
@@ -4016,7 +4018,7 @@ function monRarity(sid) {
   return _monRank[sid] || 0;
 }
 const tmRarity = (id) => { const m = MOVES[id]; if (!MOVES100[id]) return 0; const p = m.power || 0; return p >= 100 || (m.cat === 'stat' && ['field', 'baton', 'dbond', 'curse'].includes(m.k)) ? 2 : p >= 75 || m.cat === 'stat' ? 1 : 0; };
-// わざのまきもので おぼえられるか：もともと おぼえる わざ・同じ タイプ・ノーマル・見た目（せつめいの ことば）で にあう タイプ
+// スクロールで おぼえられるか：もともと おぼえる わざ・同じ タイプ・ノーマル・見た目（せつめいの ことば）で にあう タイプ
 const LOOK_KW = { fire: /火|炎|燃|熱|溶岩|マグマ|灯/, water: /水|海|川|泳|波|雨|貝|魚|泡|しずく/, grass: /草|葉|花|木|森|種|実|苔|根|つる|キノコ/, elec: /電|雷|稲妻|ビリ|磁/,
   ice: /氷|雪|冷|凍|つらら/, fighting: /拳|格闘|筋|蹴|武|けんか|パンチ|鍛/, poison: /毒|ヘドロ|沼|腐/, ground: /土|砂|地面|掘|泥|地中/, wind: /風|空|翼|鳥|羽|飛|雲/,
   psychic: /念|夢|不思議|星|月|心|予知|瞑想/, bug: /虫|甲殻|糸|さなぎ|羽音/, rock: /岩|石|鉱|宝石|結晶/, ghost: /霊|幽|お化け|おばけ|影|魂|骨|呪/, dragon: /竜|龍|ドラゴン|鱗/ };
@@ -4133,7 +4135,7 @@ function openChest(i) {
   const cards = [`<div class="reward"><div class="chbox">${chestIcon(c.kind, false, 4)}</div><div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
     ...monCards, `<div class="reward"><div class="big">クリスタル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
   for (const k of R.items || []) cards.push(`<div class="reward"><div style="font-size:46px">${ITEMS[k].ic}</div><div class="big">${ITEMS[k].n}</div><div class="dim">${ITEMS[k].d}</div></div>`);
-  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="chip" style="background:${TYPES[m.t].c};font-size:13px;padding:2px 10px">${TYPES[m.t].n}</span><div class="big">わざのまきもの：${m.n}</div><span style="color:${r.c};font-size:11px;opacity:.8">${r.n}</span><div class="dim">${moveDesc(m)}</div></div>`); }
+  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="chip" style="background:${TYPES[m.t].c};font-size:13px;padding:2px 10px">${TYPES[m.t].n}</span><div class="big"><i class="ico ico-s" data-ico="scroll"></i>スクロール：${m.n}</div><span style="color:${r.c};font-size:11px;opacity:.8">${r.n}</span><div class="dim">${moveDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
   bg.innerHTML = `<div class="askbox"><div id="rwBody"></div><div class="dim" id="rwCount" style="margin-top:6px"></div><button class="btn" id="rwNext" style="margin-top:10px;width:100%">つぎへ</button></div>`;
   $('app').appendChild(bg);
@@ -4153,10 +4155,10 @@ function openChest(i) {
 setInterval(() => { if (S && !$('scHub').hidden) renderChests(); }, 1000);
 document.addEventListener('pointerdown', (ev) => { const b = ev.target.closest && ev.target.closest('button'); if (b && !b.disabled && !b.closest('#btns')) SND.se(/もどる|やめる|とじる/.test(b.textContent) ? 'back' : 'click'); }, true);
 
-/* ---------- わざのまきもの：もっている わざを 好きな モンスターに おぼえさせる ---------- */
+/* ---------- スクロール：もっている わざを 好きな モンスターに おぼえさせる ---------- */
 function useTM(m) {
   const ids = Object.keys(S.tms || {}).filter(id => S.tms[id] > 0 && MOVES[id]);
-  if (!ids.length) { say0('わざのまきものを もっていません。たからばこから でます'); return; }
+  if (!ids.length) { say0('スクロールを もっていません。たからばこから でます'); return; }
   ids.sort((a, b) => MOVES[a].t.localeCompare(MOVES[b].t) || tmRarity(b) - tmRarity(a));   // タイプごとに ならべる
   const bg = document.createElement('div'); bg.className = 'askbg';
   const close = () => bg.remove();
@@ -4285,7 +4287,7 @@ function renderTeamDetail() {
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span><div class="dim" style="font-size:11px">${natRelText(m.nat)}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
-    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm">わざのまきもの</button><button class="btn sub" data-a="item">どうぐ</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
+    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
@@ -4459,7 +4461,7 @@ function moveDesc(m) {
 }
 function moveEditor(m) {   // おぼえている わざ（獲得した ときに 確定・変えられない）と その 効果
   const box = document.createElement('div'); box.className = 'medit';
-  box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります。わざのまきもので いれかえられます</div>` + equipped(m).map(id => {
+  box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります。スクロールで いれかえられます</div>` + equipped(m).map(id => {
     const mv = MOVES[id];
     return `<div class="mrow on" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${CAT_NAMES[mv.cat]}</span><div class="desc">${moveDesc(mv)}</div></div>`;
   }).join('');
@@ -4495,9 +4497,9 @@ function monCard(m, where, i, openUid) {
   el.appendChild(info);
   const a = document.createElement('div'); a.className = 'macts';
   if (where === 'party') {
-    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm">わざのまきもの</button><button data-a="up" ${i === 0 ? 'disabled' : ''}>▲ うえへ</button><button data-a="down" ${i === S.party.length - 1 ? 'disabled' : ''}>▼ したへ</button><button data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>`;
+    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button data-a="up" ${i === 0 ? 'disabled' : ''}>▲ うえへ</button><button data-a="down" ${i === S.party.length - 1 ? 'disabled' : ''}>▼ したへ</button><button data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>`;
   } else {
-    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm">わざのまきもの</button><button data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>つれていく</button><button data-a="release">にがす</button>`;
+    a.innerHTML = `<button data-a="moves">わざ</button><button data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>つれていく</button><button data-a="release">にがす</button>`;
   }
   if (openUid === m.uid) wrap.appendChild(moveEditor(m));
   a.onclick = (ev) => {
@@ -9700,11 +9702,11 @@ $('btnHelp').onclick = () => {
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
     <p><b>くさむら</b>で よわらせて <b>ふういんクリスタル</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
-    <p><b>たからばこ</b>は 勝つと もらえる（しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・クリスタル・わざのまきものが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
+    <p><b>たからばこ</b>は 勝つと もらえる（しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・クリスタル・スクロールが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
     <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ・かいひ の 7つ。すばやさが 高いほど わざを はやく くりだし、かいひが 高いほど 指示なしで よける。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。ぶつりわざは こうげき→ぼうぎょ、とくしゅわざは とくこう→とくぼう で ダメージが きまる。</p>
     <p><b>きょうか</b>：へんせい → きょうか で ほかの モンスターを つかうと ポイントが ふえる（1たい +1、おなじ しゅるいなら +3。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりなおしのくすり）。</p>
     <p><b>どうぐ</b>：ふりなおしのくすり・すべてわすれのかね・ひとつわすれのは・おなじタイプのいし。たからばこから でる。へんせい → どうぐ で つかう。</p>
-    <p><b>わざのまきもの</b>で すきな わざを おぼえさせよう（てもち → わざのまきもの）。</p>
+    <p><b>スクロール</b>で すきな わざを おぼえさせよう（てもち → スクロール）。</p>
     <p class="dim">PC：Space＝かわす　X＝こうたい</p></div>
     <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn sub" id="hTut">チュートリアル</button><button class="btn" id="hClose">とじる</button></div>`);
   bg.querySelector('#hClose').onclick = () => bg.remove();
@@ -9752,7 +9754,7 @@ function startWild() {
 }
 /* =====================================================================
    たび：10の ジムを めぐって バッジを あつめ、チャンピオンリーグへ
-   各ジム：トレーナー 2人 → ジムリーダー。リーダーに かつと バッジ・ジェム・タイプの わざのまきもの
+   各ジム：トレーナー 2人 → ジムリーダー。リーダーに かつと バッジ・ジェム・タイプの スクロール
    ===================================================================== */
 const GYMS = [
   { f: 'grass', lead: 'florist', ln: 'ジムリーダー コハル', say: 'はなと みどりの ちから、うけとめてね！' },
@@ -9809,14 +9811,14 @@ function journeyResult(res, lines) {
     return;
   }
   const G = GYMS[c.gi];
-  if (res !== 'win') { if (res === 'lose') lines.unshift('まけてしまった… また ちょうせんしよう', `<span class="dim">ヒント：${FIELD_NAMES[G.f]}ジムには ${strongVs(G.f).map(t => TYPES[t].n).join('・')}タイプが つよい。アーケードの「へんせい」ボタンや、きょうか・わざのまきもので つよく しよう</span>`); return; }
+  if (res !== 'win') { if (res === 'lose') lines.unshift('まけてしまった… また ちょうせんしよう', `<span class="dim">ヒント：${FIELD_NAMES[G.f]}ジムには ${strongVs(G.f).map(t => TYPES[t].n).join('・')}タイプが つよい。アーケードの「へんせい」ボタンや、きょうか・スクロールで つよく しよう</span>`); return; }
   S.wins++; S.capsules += 1;
   if (c.step < 2) { if (c.gi === J.gym) J.step = c.step + 1; lines.unshift(`トレーナーに かった！ ${J.step >= 2 ? 'つぎは ジムリーダー！' : ''}`); return; }
   // ジムリーダーに かった
   S.gems = (S.gems || 0) + 5;
   if (!J.badges.includes(G.f)) { J.badges.push(G.f); lines.unshift(`<b style="color:var(--acc)">🏅 ${FIELD_NAMES[G.f]}バッジを てにいれた！</b>`); }
   else lines.unshift(`${G.ln}に また かった！`);
-  const tms = TM_POOL().filter(id => MOVES[id].t === G.f && isDamaging(MOVES[id])); if (tms.length) { const t = choice(tms); S.tms = S.tms || {}; S.tms[t] = (S.tms[t] || 0) + 1; lines.push(`わざのまきもの「${MOVES[t].n}」を もらった`); }
+  const tms = TM_POOL().filter(id => MOVES[id].t === G.f && isDamaging(MOVES[id])); if (tms.length) { const t = choice(tms); S.tms = S.tms || {}; S.tms[t] = (S.tms[t] || 0) + 1; lines.push(`スクロール「${MOVES[t].n}」を もらった`); }
   if (c.gi === J.gym && J.gym < GYMS.length) { J.gym++; J.step = 0; if (J.gym < GYMS.length) lines.push(`つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム！`); else lines.push('<b>バッジが 10こ そろった！ チャンピオンリーグへ いこう！</b>'); }
 }
 // その タイプに つよい タイプ（こうかばつぐんを とれる）
