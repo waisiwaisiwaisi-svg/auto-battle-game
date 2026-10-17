@@ -6742,8 +6742,7 @@ function updateFighter(f, dt) {
       if (pat === 'zigzag') { const z = Math.sign(Math.sin(cur.d / 55 * Math.PI)) || 1; vx += -Math.sin(cur.ang) * sp * 1.15 * z; vy += Math.cos(cur.ang) * sp * 1.15 * z; }   // ジグザグに はしる
       if (pat === 'leap') { f.hop = Math.sin(clamp(cur.d / L, 0, 1) * Math.PI) * 70; f.inv = Math.max(f.inv, .05); }   // とびあがって のしかかる（空中は むてき・障害物を こえる）
       f.x += vx * dt; f.y += vy * dt; cur.d += sp * dt; f.moving = true; f.walk += dt * 3; dashTrailPt(f, cur);
-      if (PLFX.d_dust && pat !== 'leap' && (cur.dustT = (cur.dustT || 0) - dt) <= 0) { cur.dustT = .14; const a = Math.atan2(vy, vx); fxp({ type: 'pl', k: 'd_dust', x: f.x - Math.cos(a) * f.r, y: f.y - 4, s: .7, ang: a, fy: Math.cos(a) < 0, life: .45 }); }   // あしもとの すなけむり
-      if (Math.random() < .6) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: 0, vy: -10, life: .3, max: .3, col: id2col(m), size: 3, g: 0 });
+      if (PLFX.d_dust && pat !== 'leap' && (cur.dustT = (cur.dustT || 0) - dt) <= 0) { cur.dustT = .3; const a = Math.atan2(vy, vx); fxp({ type: 'pl', k: 'd_dust', x: f.x - Math.cos(a) * f.r, y: f.y - 4, s: .7, ang: a, fy: Math.cos(a) < 0, life: .45 }); }   // あしもとの すなけむり
       if (m.trail && Math.random() < .8) B.parts.push({ x: f.x + rand(-8, 8), y: f.y, vx: rand(-10, 10), vy: -rand(30, 70), life: .4, max: .4, col: choice(['#ffd166', '#ff8a3d']), size: 5, g: -20, shape: 'ember' });
       if (o && o.clones && !cur.back) hitClones(o, c => Math.hypot(c.x - f.x, c.y - f.y) < f.r + o.r + 4);
       if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; if (PLFX.d_hit) plFx('d_hit', (f.x + o.x) / 2, (f.y + o.y) / 2 - BODY, 1.3); if (m.grab) { startGrab(f, o); break; } if (hit(f, o, m, cur.ang) && m.chain) { cur.chainGo = !cur.chainN || Math.random() < .5; cur.chainN = (cur.chainN || 0) + 1; } }
@@ -9087,14 +9086,15 @@ function drawFighter(f) {
       B.parts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * .7, vx: -Math.cos(a) * r * 3.2, vy: -Math.sin(a) * r * 2.2, life: .3, max: .3, col: Math.random() < .3 ? '#ffffff' : chgC, size: 3, g: 0 }); }
   }
   const spin = f.cur && f.cur.m.spinSelf && ['wind', 'act'].includes(f.state), fface = spin ? (Math.sin(B.t * 40) > 0 ? 1 : -1) : f.face;   // さんれんスピン：くるくる まわる
+  const dAk = f.state === 'dash' && f.cur ? { fire: 'd_fire', elec: 'd_elec', water: 'd_water', dragon: 'd_dragon' }[f.cur.m.t] : null;   // タイプの オーラが ある わざは オーラ だけ、ない わざは まえの しょうげき だけ
   const dsh = f.state === 'dash' && f.cur && f.cur.m.k === 'dash' && f.cur.m.pat !== 'orbit' && !f.cur.back && plOk('d_front'), dA = dsh ? f.cur.ang : 0, dFy = Math.cos(dA) < 0, dCy = f.y + oy - img0.height * ms * .45, dR = img0.width * ms * .5;
   if (dsh) {   // とっしん：うしろに スピード線・からだに タイプの オーラ
-    ctx.save(); ctx.globalAlpha = .7; plDraw('d_lines', plLoop('d_lines', B.t), f.x - Math.cos(dA) * (dR + 22), dCy - Math.sin(dA) * (dR + 22), Math.max(.7, dR / 50), dA, null, null, dFy); ctx.restore();
+    // スピード線は なし（エフェクトが おおすぎる ため）
     const ak = { fire: 'd_fire', elec: 'd_elec', water: 'd_water', dragon: 'd_dragon' }[f.cur.m.t];
     if (ak && plOk(ak)) plDraw(ak, plLoop(ak, B.t), f.x - Math.cos(dA) * 6, dCy - Math.sin(dA) * 6, (dR * 2 + 20) / (PLFX[ak].w * PIX_D) * 1.1, dA, null, null, dFy); }
   if (bone) drawBoned(img, f, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy, fly);
   else drawSprite(img, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy);
-  if (dsh) plDraw('d_front', plLoop('d_front', B.t), f.x + Math.cos(dA) * (dR + 10), dCy + Math.sin(dA) * (dR + 10), Math.max(.7, dR / 42), dA + Math.PI, null, null, !dFy);   // まえの しょうげき（絵は 左むきの 弓）
+  if (dsh && !(dAk && plOk(dAk))) plDraw('d_front', plLoop('d_front', B.t), f.x + Math.cos(dA) * (dR + 10), dCy + Math.sin(dA) * (dR + 10), Math.max(.7, dR / 42), dA + Math.PI, null, null, !dFy);   // まえの しょうげき（絵は 左むきの 弓）
   if ((f.v.protect > 0 || (f.state === 'dash' && f.cur && f.cur.m.guardDash)) && !['faint', 'enter', 'return'].includes(f.state)) {   // まもりの かまえ：からだを つつむ バリア
     const R = img0.width * ms * .5 + 10, cy = f.y + oy - img0.height * ms * .45, k = .5 + .5 * Math.sin(B.t * 10);
     const gd = !(f.v.protect > 0), gk = gd ? 'shellpush' : f.v.pg ? 'psn_barrier' : 'g_hold';
