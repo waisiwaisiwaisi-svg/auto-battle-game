@@ -2408,12 +2408,12 @@ const AUDIO_BGM = {
   lose: { file: 'music/lose.mp3', g: 0.5, once: 1 }   // まけた とき（1かい だけ）
 };
 // こうかおん：もとの おおきさ（うるさい・よく なる ものは ひかえめ）と、高さの ゆらし、せっていの なまえ
-const SE_BASE = { click: .7, tick: .6, beam: .8, status: .8, ko: .85, up: .8, down: .75, swing: .9, dash: .85, hit: .95, boom: .9 };
+const SE_BASE = { click: .7, beam: .8, status: .8, ko: .85, up: .8, down: .75, swing: .9, dash: .85, hit: .95, boom: .9 };
 const SE_JIT = { hit: .12, swing: .14, shoot: .1, dash: .12, crit: .06, click: .05 };
 const SE_LIST = [['hit', 'こうげきが あたる'], ['crit', 'きゅうしょ'], ['super', 'こうかばつぐん'], ['weak', 'いまひとつ'], ['swing', 'ふりかぶる'], ['shoot', 'たまを うつ'], ['beam', 'ビーム'], ['boom', 'ばくはつ・ちゃくち'], ['dash', 'とっしん'], ['charge', 'ためる'],
   ['guard', 'ふせぐ'], ['dodge', 'よける'], ['ko', 'たおれる'], ['up', 'のうりょく アップ'], ['down', 'のうりょく ダウン'], ['status', 'じょうたい いじょう'], ['heal', 'かいふく'], ['hazard', 'しかけ'], ['swapOut', 'こうたい（もどる）'], ['swapIn', 'こうたい（でる）'],
-  ['throw', 'オーブを なげる'], ['shake', 'オーブが ゆれる'], ['caught', 'つかまえた'], ['escape', 'にげられた'], ['chest', 'たからばこ'], ['open', 'たからばこを あける'], ['card', 'カード'], ['epic', 'レア'], ['coin', 'コイン'],
-  ['click', 'ボタン'], ['ok', 'けってい'], ['back', 'もどる'], ['deny', 'できない'], ['tick', 'カウント'], ['beat', 'こどう']];
+  ['throw', 'オーブを なげる'], ['shake', 'オーブが ゆれる'], ['caught', 'つかまえた'], ['escape', 'にげられた'], ['chest', 'たからばこ'], ['open', 'たからばこを あける'], ['card', 'カード'], ['epic', 'レア'],
+  ['click', 'ボタン'], ['ok', 'けってい'], ['back', 'もどる'], ['deny', 'できない'], ['beat', 'こどう']];
 const SND = (() => {
   let ac = null, master, musicG, sfxG, song = null, songName = '', next = 0, step = 0, timer = 0, noiseBuf = null;
   let aG = null, aSrc = null, aCur = '';   // ろくおん した きょく（mp3）
@@ -2669,8 +2669,6 @@ const SND = (() => {
       case 'open': noise(D, t, .3, .2, 4000, 'highpass'); [523, 659, 784, 1047, 1319].forEach((f, i) => tone(D, t + .05 + i * .05, f, .2, 'square', .12)); break;
       case 'card': tone(D, t, 1047, .08, 'square', .12); tone(D, t + .06, 1568, .12, 'triangle', .14); break;
       case 'epic': [523, 659, 784, 1047, 784, 1047, 1319, 1568].forEach((f, i) => tone(D, t + i * .07, f, .22, 'square', .13)); break;
-      case 'coin': tone(D, t, 988, .06, 'square', .14); tone(D, t + .06, 1319, .16, 'square', .14); break;
-      case 'tick': tone(D, t, 1200, .03, 'square', .06); break;
     }
   }
   // さいしょの タップで 音を 有効に（ブラウザの きまり）
