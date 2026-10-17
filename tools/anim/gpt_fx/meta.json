@@ -1400,5 +1400,425 @@
   "var": true,
   "ax": 12.0,
   "ay": 6
+ },
+ "b_upring": {
+  "n": 6,
+  "w": 44,
+  "h": 44,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 22.0,
+  "ay": 43
+ },
+ "b_downring": {
+  "n": 6,
+  "w": 44,
+  "h": 42,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 22.0,
+  "ay": 41
+ },
+ "b_uparrow": {
+  "n": 6,
+  "w": 16,
+  "h": 20,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 8.0,
+  "ay": 10.0
+ },
+ "b_downarrow": {
+  "n": 6,
+  "w": 16,
+  "h": 21,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 8.0,
+  "ay": 10.5
+ },
+ "fx_flash": {
+  "n": 6,
+  "w": 30,
+  "h": 28,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 15.0,
+  "ay": 14.0
+ },
+ "fx_impact": {
+  "n": 6,
+  "w": 34,
+  "h": 32,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 17.0,
+  "ay": 16.0
+ },
+ "fx_ring": {
+  "n": 6,
+  "w": 37,
+  "h": 33,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 18.5,
+  "ay": 16.5
+ },
+ "fx_shock": {
+  "n": 6,
+  "w": 48,
+  "h": 15,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 24.0,
+  "ay": 7.5
+ },
+ "fx_pillar": {
+  "n": 6,
+  "w": 27,
+  "h": 42,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 13.5,
+  "ay": 41
+ },
+ "fx_beam": {
+  "n": 6,
+  "w": 61,
+  "h": 30,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 30.5,
+  "ay": 15.0
+ },
+ "fx_beamIn": {
+  "n": 6,
+  "w": 58,
+  "h": 10,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 29.0,
+  "ay": 5.0
+ },
+ "fx_ray": {
+  "n": 6,
+  "w": 54,
+  "h": 37,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 27.0,
+  "ay": 18.5
+ },
+ "fx_blade": {
+  "n": 6,
+  "w": 23,
+  "h": 16,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 11.5,
+  "ay": 8.0
+ },
+ "fx_whip": {
+  "n": 6,
+  "w": 36,
+  "h": 31,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 18.0,
+  "ay": 15.5
+ },
+ "fx_shield": {
+  "n": 6,
+  "w": 40,
+  "h": 35,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 20.0,
+  "ay": 17.5
+ },
+ "fx_glint": {
+  "n": 6,
+  "w": 24,
+  "h": 23,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 12.0,
+  "ay": 11.5
+ },
+ "fx_smoke": {
+  "n": 6,
+  "w": 31,
+  "h": 28,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 15.5,
+  "ay": 14.0
+ },
+ "fx_vortex": {
+  "n": 6,
+  "w": 31,
+  "h": 30,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 15.5,
+  "ay": 15.0
+ },
+ "fx_nail": {
+  "n": 6,
+  "w": 24,
+  "h": 26,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 12.0,
+  "ay": 13.0
+ },
+ "fx_drain": {
+  "n": 6,
+  "w": 61,
+  "h": 45,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 30.5,
+  "ay": 22.5
+ },
+ "fx_sound": {
+  "n": 6,
+  "w": 33,
+  "h": 22,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 16.5,
+  "ay": 11.0
+ },
+ "fx_swap": {
+  "n": 6,
+  "w": 32,
+  "h": 31,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 16.0,
+  "ay": 15.5
+ },
+ "fx_gust": {
+  "n": 6,
+  "w": 42,
+  "h": 24,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 21.0,
+  "ay": 12.0
+ },
+ "fx_room": {
+  "n": 6,
+  "w": 59,
+  "h": 44,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 29.5,
+  "ay": 22.0
+ },
+ "fx_roots": {
+  "n": 6,
+  "w": 38,
+  "h": 39,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 19.0,
+  "ay": 38
+ },
+ "fx_toss": {
+  "n": 6,
+  "w": 53,
+  "h": 46,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 26.5,
+  "ay": 23.0
+ },
+ "fx_rockIn": {
+  "n": 6,
+  "w": 32,
+  "h": 31,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 16.0,
+  "ay": 30
+ },
+ "tp_normal": {
+  "n": 6,
+  "w": 19,
+  "h": 18,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 9.5,
+  "ay": 9.0
+ },
+ "tp_fire": {
+  "n": 6,
+  "w": 18,
+  "h": 19,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 9.0,
+  "ay": 9.5
+ },
+ "tp_water": {
+  "n": 6,
+  "w": 18,
+  "h": 19,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 9.0,
+  "ay": 9.5
+ },
+ "tp_grass": {
+  "n": 5,
+  "w": 18,
+  "h": 18,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 9.0,
+  "ay": 9.0
+ },
+ "tp_elec": {
+  "n": 6,
+  "w": 20,
+  "h": 19,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 10.0,
+  "ay": 9.5
+ },
+ "tp_ice": {
+  "n": 6,
+  "w": 21,
+  "h": 16,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 10.5,
+  "ay": 8.0
+ },
+ "tp_fighting": {
+  "n": 6,
+  "w": 20,
+  "h": 17,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 10.0,
+  "ay": 8.5
+ },
+ "tp_poison": {
+  "n": 6,
+  "w": 19,
+  "h": 15,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 9.5,
+  "ay": 7.5
+ },
+ "tp_ground": {
+  "n": 6,
+  "w": 20,
+  "h": 14,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 10.0,
+  "ay": 7.0
+ },
+ "tp_wind": {
+  "n": 6,
+  "w": 22,
+  "h": 18,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 11.0,
+  "ay": 9.0
+ },
+ "tp_psychic": {
+  "n": 6,
+  "w": 19,
+  "h": 17,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 9.5,
+  "ay": 8.5
+ },
+ "tp_bug": {
+  "n": 6,
+  "w": 18,
+  "h": 14,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 9.0,
+  "ay": 7.0
+ },
+ "tp_rock": {
+  "n": 6,
+  "w": 29,
+  "h": 19,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 14.5,
+  "ay": 9.5
+ },
+ "tp_ghost": {
+  "n": 6,
+  "w": 28,
+  "h": 20,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 14.0,
+  "ay": 10.0
+ },
+ "tp_dragon": {
+  "n": 6,
+  "w": 29,
+  "h": 17,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 14.5,
+  "ay": 8.5
  }
 }

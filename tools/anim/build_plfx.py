@@ -10,6 +10,7 @@ USE = []   # PixelLab 版は しつが ひくいので いまは つかわない
 out = {}
 G = os.path.join(ROOT, 'tools/anim/gpt_fx'); META = json.load(open(f'{G}/meta.json'))   # ChatGPT 版（tools/anim/gpt_fx.py で つくる）
 for k, m in META.items():
+    if k == 'fx_ghost': continue   # のこりかげは モンスターの 形で かく（人の 形の 絵は つかわない）
     b = io.BytesIO(); Image.open(f'{G}/{k}.png').save(b, 'PNG', optimize=True)
     out[k] = {'n': m['n'], 'w': m['w'], 'h': m['h'], 'ms': m['ms'], 'ax': m['ax'], 'ay': m['ay'], **({'fb': m['fb']} if 'fb' in m else {}), 'src': 'data:image/png;base64,' + base64.b64encode(b.getvalue()).decode()}
 for k in USE:   # PixelLab 版（いまは つかわない）
