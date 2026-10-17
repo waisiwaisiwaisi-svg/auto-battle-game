@@ -976,7 +976,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
     <div class="hbar">
       <button class="hme" id="hMe" title="ランキング"><canvas id="hAvatar" class="pix"></canvas><span id="hRank"></span></button>
       <div class="hres">
-        <span class="hres1" data-res="trophy" title="トロフィー"><i class="ico" data-ico="trophy"></i><span class="hrv"><b id="hTrophy">0</b><small>トロフィー</small></span></span><span class="hres1" data-res="crystal" title="クリスタル"><i class="ico" data-ico="capcr"></i><span class="hrv"><b id="hCaps">0</b><small>クリスタル</small></span></span><span class="hres1" data-res="gem" title="ジェム"><i class="ico" data-ico="gem"></i><span class="hrv"><b id="hGems">0</b><small>ジェム</small></span></span>
+        <span class="hres1" data-res="trophy" title="トロフィー"><i class="ico" data-ico="trophy"></i><span class="hrv"><b id="hTrophy">0</b><small>トロフィー</small></span></span><span class="hres1" data-res="crystal" title="オーブ"><i class="ico" data-ico="capcr"></i><span class="hrv"><b id="hCaps">0</b><small>オーブ</small></span></span><span class="hres1" data-res="gem" title="ジェム"><i class="ico" data-ico="gem"></i><span class="hrv"><b id="hGems">0</b><small>ジェム</small></span></span>
       </div>
     </div>
     <div class="hicons"><button class="hicon" id="btnHelp" title="あそびかた"><i class="ico" data-ico="help"></i></button><button class="hicon" id="btnChart" title="あいしょう表"><i class="ico" data-ico="chart"></i></button><button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと"><i class="ico" data-ico="note"></i></button><button class="hicon" id="btnOpt" aria-label="せってい"><i class="ico" data-ico="gear"></i></button></div>
@@ -1096,7 +1096,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
     <div id="mvCmds"><button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button><button class="cmd" id="cHide"><span class="a">かくれろ</span><span class="b">しょうがいぶつへ</span></button><button class="cmd" id="cFlank"><span class="a">まわりこめ</span><span class="b">うしろへ</span></button></div>
     <div id="bbar">
       <div id="bench"></div>
-      <button class="cmd" id="cCap"><span class="a">クリスタル</span><span class="b" id="capN"></span></button>
+      <button class="cmd" id="cCap"><span class="a">オーブ</span><span class="b" id="capN"></span></button>
       <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
     </div>
     <div id="bside">
@@ -2227,7 +2227,7 @@ const ICONS = {
 const ICON_URL = {};
 function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
-  if (name === 'capcr' && typeof UIA !== 'undefined' && UIA.crystal) return (ICON_URL[name] = UIA.crystal.src);   // ふういんクリスタル（リザルトと おなじ 絵）
+  if (name === 'capcr' && typeof UIA !== 'undefined' && UIA.crystal) return (ICON_URL[name] = UIA.crystal.src);   // ふういんオーブ（リザルトと おなじ 絵）
   if (typeof UIA !== 'undefined' && UIA['ic_' + name]) return (ICON_URL[name] = UIA['ic_' + name].src);   // ChatGPT の アイコン（I1）
   const raw = ICONS[name]; if (!raw) return '';
   // まわりの あき（.）を けずって、え が まんなかに くるように する
@@ -2400,7 +2400,7 @@ const SE_BASE = { click: .7, tick: .6, beam: .8, status: .8, ko: .85, up: .8, do
 const SE_JIT = { hit: .12, swing: .14, shoot: .1, dash: .12, crit: .06, click: .05 };
 const SE_LIST = [['hit', 'こうげきが あたる'], ['crit', 'きゅうしょ'], ['super', 'こうかばつぐん'], ['weak', 'いまひとつ'], ['swing', 'ふりかぶる'], ['shoot', 'たまを うつ'], ['beam', 'ビーム'], ['boom', 'ばくはつ・ちゃくち'], ['dash', 'とっしん'], ['charge', 'ためる'],
   ['guard', 'ふせぐ'], ['dodge', 'よける'], ['ko', 'たおれる'], ['up', 'のうりょく アップ'], ['down', 'のうりょく ダウン'], ['status', 'じょうたい いじょう'], ['heal', 'かいふく'], ['hazard', 'しかけ'], ['swapOut', 'こうたい（もどる）'], ['swapIn', 'こうたい（でる）'],
-  ['throw', 'クリスタルを なげる'], ['shake', 'クリスタルが ゆれる'], ['caught', 'つかまえた'], ['escape', 'にげられた'], ['chest', 'たからばこ'], ['open', 'たからばこを あける'], ['card', 'カード'], ['epic', 'レア'], ['coin', 'コイン'],
+  ['throw', 'オーブを なげる'], ['shake', 'オーブが ゆれる'], ['caught', 'つかまえた'], ['escape', 'にげられた'], ['chest', 'たからばこ'], ['open', 'たからばこを あける'], ['card', 'カード'], ['epic', 'レア'], ['coin', 'コイン'],
   ['click', 'ボタン'], ['ok', 'けってい'], ['back', 'もどる'], ['deny', 'できない'], ['tick', 'カウント'], ['beat', 'こどう']];
 const SND = (() => {
   let ac = null, master, musicG, sfxG, song = null, songName = '', next = 0, step = 0, timer = 0, noiseBuf = null;
@@ -2949,7 +2949,7 @@ function openChest(i) {
   });
   save();
   const cards = [`<div class="reward"><div class="chbox">${chestIcon(c.kind, false, 4)}</div><div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
-    ...monCards, `<div class="reward"><div class="big">クリスタル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
+    ...monCards, `<div class="reward"><div class="big">オーブ ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
   for (const k of R.items || []) cards.push(`<div class="reward"><div style="font-size:46px">${ITEMS[k].ic}</div><div class="big">${ITEMS[k].n}</div><div class="dim">${ITEMS[k].d}</div></div>`);
   for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="chip" style="background:${TYPES[m.t].c};font-size:13px;padding:2px 10px">${TYPES[m.t].n}</span><div class="big"><i class="ico ico-s" data-ico="scroll"></i>スクロール：${m.n}</div><span style="color:${r.c};font-size:11px;opacity:.8">${r.n}</span><div class="dim">${moveDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
@@ -5644,13 +5644,13 @@ function updateFighter(f, dt) {
 function catchProb(e) { return clamp(e.sp.catch * (1.6 - 1.3 * e.hp / e.maxHp) * (e.state === 'stun' ? 1.15 : 1) * (e.status === 'slp' || e.status === 'frz' ? 2 : e.status ? 1.5 : 1), .04, .95); }
 function cmdCapsule() {
   if (!B || B.kind !== 'wild' || B.mode !== 'fight' || B.catchO || B.paused) return;
-  if (S.capsules <= 0) { say('クリスタルが もう ない！'); return; }
+  if (S.capsules <= 0) { say('オーブが もう ない！'); return; }
   const e = active(1); if (!targetable(e)) return;
   S.capsules--; save(); SND.se('throw');
   const tr = B.sides[0].trainer; tr.shout = .6; tr.pose = 'open';
   B.mode = 'catch';
   B.catchO = { phase: 'throw', t: 0, sx: tr.x, sy: tr.y - 30, tx: e.x, ty: e.y - 12, shakes: 0, p: catchProb(e), x: tr.x, y: tr.y };
-  say('いけっ！ ふういんクリスタル！');
+  say('いけっ！ ふういんオーブ！');
 }
 function updateCatch(dt) {
   const c = B.catchO, e = active(1); c.t += dt;
@@ -5677,7 +5677,7 @@ function updateCatch(dt) {
         c.phase = 'fail'; SND.se('escape'); if (plOk('cap_break')) plFx('cap_break', c.x, c.y, 1.3); else sheetFx('poof', c.x, c.y, 1.3);
         e.state = 'stun'; e.stT = .4; e.inv = .4;
         burst(c.x, c.y, '#ffffff', 20, 120, .5);
-        say(choice(['ああっ！ クリスタルから でてしまった！', 'おしい！ もうすこしだったのに！', 'だめだ！ にげだした！']));
+        say(choice(['ああっ！ オーブから でてしまった！', 'おしい！ もうすこしだったのに！', 'だめだ！ にげだした！']));
         B.catchO = null; B.mode = 'fight';
       }
     }
@@ -6571,7 +6571,7 @@ function showResult() {
   $('resTitle').className = 'res-' + res;
   { const L = B.resLines.length ? B.resLines.slice() : [], head = L.length ? L.shift() : '', R = B.rewards || {}, sd = B.sides[B.my || 0];
     const tile = (k, n, lab, d) => UIA[k] ? `<div class="rtile" style="animation-delay:${d}s">${uiImg(k, 'rti')}<b>${n}</b><small>${lab}</small></div>` : '';
-    const tiles = [R.cr > 0 ? tile('crystal', '+' + R.cr, 'クリスタル', .5) : '', R.gem > 0 ? tile('gem', '+' + R.gem, 'ジェム', .62) : '', R.chest ? tile('chest', '+1', CHESTS[R.chest].n, .74) : ''].join('');
+    const tiles = [R.cr > 0 ? tile('crystal', '+' + R.cr, 'オーブ', .5) : '', R.gem > 0 ? tile('gem', '+' + R.gem, 'ジェム', .62) : '', R.chest ? tile('chest', '+1', CHESTS[R.chest].n, .74) : ''].join('');
     $('resLines').innerHTML = `${head ? `<div class="rhead">${head}</div>` : ''}<div class="rteam" id="resTeam"></div>${tiles ? `<div class="rtiles">${tiles}</div>` : ''}${L.map((l, i) => `<div class="rl" style="animation-delay:${.85 + i * .15}s">${l}</div>`).join('')}`;
     const tm = $('resTeam'); for (const f of (sd && sd.fs) || []) { if (!f || !SPR[f.mon.sid]) continue; const d = document.createElement('div'); d.className = 'rmon' + (f.hp <= 0 ? ' ko' : ''); d.appendChild(spriteCanvas(f.mon.sid, 52)); const k = Math.max(0, f.hp / f.maxHp);
       d.insertAdjacentHTML('beforeend', `<small>${f.sp.n}</small><i><u style="width:${k * 100}%;background:${k > .5 ? '#7bd88f' : k > .2 ? '#ffd166' : '#ff6b5b'}"></u></i>`); tm.appendChild(d); }
@@ -8006,7 +8006,7 @@ function drawFighter(f) {
   }
 }
 
-// 指示を だすと 指を さす（召喚・クリスタルは 手を ひろげる）
+// 指示を だすと 指を さす（召喚・オーブは 手を ひろげる）
 function cmdPose(side) { const t = B.sides[side].trainer; if (t && !(t.shout > .3 && t.pose === 'open')) { t.shout = .6; t.pose = 'point'; } }
 function drawTrainer(sd) {
   const t = sd.trainer; if (!t) return;
@@ -8202,12 +8202,12 @@ function render() {
     for (const q of B.parts) drawPart(q);
   });
 
-  // ふういんクリスタル
+  // ふういんオーブ
   if (B.catchO) {
     const c = B.catchO; let ox = 0;
     if (c.phase === 'shake') ox = Math.round(Math.sin(c.t / .6 * Math.PI * 2) * 2 * (c.t < .35 ? 1 : 0));
     const x = Math.round(c.x) + ox, y = Math.round(c.y);
-    // ふういんクリスタル（ChatGPT の 絵）：なげる → ゆれる → つかまえた
+    // ふういんオーブ（ChatGPT の 絵）：なげる → ゆれる → つかまえた
     const ck = c.phase === 'throw' ? 'cap_throw' : c.phase === 'done' ? 'cap_caught' : 'cap_shake';
     if (plOk(ck)) { plDraw(ck, ck === 'cap_caught' ? plOnce(ck, Math.min(1, c.t / .6)) : c.phase === 'shake' && c.t >= .35 ? 0 : plLoop(ck, B.t), x, y, 1.1);
       if (c.phase === 'shake') for (let i = 0; i < c.shakes; i++) drawStar(x - 12 + i * 12, y - 24, 4, '#ffd84a'); }
@@ -8366,10 +8366,10 @@ function dexDetail(id, no) {
   bg.querySelector('#dClose').onclick = () => bg.remove();
 }
 $('btnDex').onclick = renderDex;
-// もちもの（トロフィー・クリスタル・ジェム）を タップ：なにか せつめい
+// もちもの（トロフィー・オーブ・ジェム）を タップ：なにか せつめい
 const RES_HELP = {
   trophy: 'トロフィー\nたいかいで ゆうしょうしたり、アーケードを クリアしたり、チャンピオンリーグで かつと もらえる。これまでの きろく です。',
-  crystal: 'クリスタル（ふういんクリスタル）\nくさむらで よわらせた モンスターに なげると つかまえられる。バトルに かったり、たからばこから でる。',
+  crystal: 'ふういんオーブ\nくさむらで よわらせた モンスターに なげると つかまえられる。バトルに かったり、たからばこから でる。',
   gem: 'ジェム\nたからばこを まち時間なしで すぐ あけられる。バトルに かったり、たいかいで ゆうしょうすると もらえる。',
 };
 document.querySelectorAll('#scHub .hres1').forEach(el => el.addEventListener('click', () => { SND.se('click'); say0(RES_HELP[el.dataset.res]); }));
@@ -8581,8 +8581,8 @@ $('btnHelp').onclick = () => {
     <p><b>赤い はんい</b>は あいての わざの よちょう。<b>かわす</b>で 一瞬 むてきに なれる（つかうと 5びょう まち）。</p>
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
-    <p><b>くさむら</b>で よわらせて <b>ふういんクリスタル</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
-    <p><b>たからばこ</b>は 勝つと もらえる（しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・クリスタル・スクロールが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
+    <p><b>くさむら</b>で よわらせて <b>ふういんオーブ</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
+    <p><b>たからばこ</b>は 勝つと もらえる（しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・オーブ・スクロールが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
     <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ・かいひ の 7つ。すばやさが 高いほど わざを はやく くりだし、かいひが 高いほど 指示なしで よける。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。ぶつりわざは こうげき→ぼうぎょ、とくしゅわざは とくこう→とくぼう で ダメージが きまる。</p>
     <p><b>きょうか</b>：へんせい → きょうか で ほかの モンスターを つかうと ポイントが ふえる（1たい +1、おなじ しゅるいなら +3。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりなおしのくすり）。</p>
     <p><b>どうぐ</b>：ふりなおしのくすり・すべてわすれのかね・ひとつわすれのは・おなじタイプのいし。たからばこから でる。へんせい → どうぐ で つかう。</p>
