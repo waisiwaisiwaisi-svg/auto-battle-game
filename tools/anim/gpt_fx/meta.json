@@ -998,5 +998,45 @@
   "var": true,
   "ax": 31.5,
   "ay": 30
+ },
+ "palm_fly": {
+  "n": 6,
+  "w": 34,
+  "h": 21,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 17.0,
+  "ay": 10.5
+ },
+ "palm_hit": {
+  "n": 6,
+  "w": 36,
+  "h": 35,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 18.0,
+  "ay": 17.5
+ },
+ "palm_charge": {
+  "n": 6,
+  "w": 29,
+  "h": 27,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 14.5,
+  "ay": 13.5
+ },
+ "palm_trail": {
+  "n": 6,
+  "w": 33,
+  "h": 19,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 16.5,
+  "ay": 9.5
  }
 }

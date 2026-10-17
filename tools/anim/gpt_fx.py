@@ -20,10 +20,11 @@ SHEETS = {'E1': ['p_fire', 'p_water', 'p_elec', 'p_ice'], 'E2': ['p_grass', 'p_p
           # じょうたいの しるし・クリスタル
           'U4': ['st_sleep', 'st_yawn', 'st_dbond', 'st_gravity'], 'U5': ['cap_throw', 'cap_shake', 'cap_caught', 'cap_break'],
           # わざの かべ（ブロック：せりあがり3・完成・ヒビ2）・ステージの 障害物が こわれる
-          'W1': ['wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror'], 'W2': ['pb_stone', 'pb_bush', 'pb_tree', 'rubble']}
+          'W1': ['wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror'], 'W2': ['pb_stone', 'pb_bush', 'pb_tree', 'rubble'],
+          'W3': ['palm_fly', 'palm_hit', 'palm_charge', 'palm_trail']}
 HITS = {'hit_' + t for t in ['normal', 'fighting', 'fire', 'water', 'elec', 'grass', 'ice', 'poison', 'ground', 'rock', 'wind', 'bug', 'psychic', 'ghost', 'dragon', 'crit']}
 ONCE = {'fist', 'nail', 'skull', 'web', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'dirt', 'spark', 'reflect', 'wall_rock', 'wall_ice', 'wall_thorn',
-        'sum_circle', 'sum_pillar', 'sum_return', 'sum_swap', 'seed_root', 'g_open', 'g_hit', 'g_break', 'ctr_strike', 'dodge', 'parry', 'iron', 'cap_caught', 'cap_break', 'pb_stone', 'pb_bush', 'pb_tree'} | HITS
+        'sum_circle', 'sum_pillar', 'sum_return', 'sum_swap', 'seed_root', 'g_open', 'g_hit', 'g_break', 'ctr_strike', 'dodge', 'parry', 'iron', 'cap_caught', 'cap_break', 'pb_stone', 'pb_bush', 'pb_tree', 'palm_hit', 'palm_trail'} | HITS
 VAR = {'hole', 'crater', 'scorch', 'rubble', 'wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror'}   # アニメではなく 形ちがい
 BOTTOM = {'tornado', 'mine', 'wall_rock', 'wall_ice', 'wall_thorn', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'hz_rocks', 'hz_spikes', 'hz_tspikes', 'trail', 'dirt', 'sum_pillar', 'seed_root', 'shellpush', 'ctr_aura', 'iron', 'st_gravity', 'wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror', 'pb_stone', 'pb_bush', 'pb_tree', 'rubble'}   # 足もとが きじゅん
 # 1つの エフェクトを なんドットに するか（いちばん ながい へん）。ゲームでは 1ドット＝PIX_D で かく
@@ -35,7 +36,7 @@ TARGET = {'p_hadou': 22, 'p_moon': 22, 'wave': 40, 'whirl': 36, 'tornado': 30, '
           'seed_proj': 12, 'seed_root': 22, 'seed_vine': 30, 'seed_drain': 22, 'g_open': 34, 'g_hold': 34, 'g_hit': 36, 'g_break': 36,
           'ctr_aura': 36, 'ctr_strike': 34, 'mirror': 36, 'psn_barrier': 36, 'dodge': 30, 'parry': 28, 'iron': 36, 'shellpush': 30,
           'st_sleep': 16, 'st_yawn': 16, 'st_dbond': 24, 'st_gravity': 40, 'cap_throw': 18, 'cap_shake': 18, 'cap_caught': 22, 'cap_break': 20,
-          'wb_rock': 24, 'wb_ice': 24, 'wb_thorn': 24, 'wb_mirror': 24, 'pb_stone': 64, 'pb_bush': 64, 'pb_tree': 64, 'rubble': 56}
+          'wb_rock': 24, 'wb_ice': 24, 'wb_thorn': 24, 'wb_mirror': 24, 'pb_stone': 64, 'pb_bush': 64, 'pb_tree': 64, 'rubble': 56, 'palm_fly': 34, 'palm_hit': 34, 'palm_charge': 30, 'palm_trail': 34}
 TDEF = 20
 COLS, ROWS = 6, 4
 GRID = {'G3'}   # マスめの 線が 描かれて いる シート
@@ -88,7 +89,7 @@ for sh, keys in SHEETS.items():
     if sh not in GRID: op[:] = False   # マスめの 線が ある シート だけ（ほかは 草むらなどを 線と まちがえる）
     for x in np.where(op.sum(0) > H_ * .9)[0]: a[:, max(0, x - 1):x + 2, 3] = 0
     for y in np.where(op.sum(1) > W_ * .9)[0]: a[max(0, y - 1):y + 2, :, 3] = 0
-    xs, ys = comp_cells(a) if sh.startswith('E') or sh in ('W1', 'W2') else ([a.shape[1] * i // COLS for i in range(COLS + 1)], [a.shape[0] * i // ROWS for i in range(ROWS + 1)])
+    xs, ys = comp_cells(a) if sh.startswith('E') or sh in ('W1', 'W2', 'W3') else ([a.shape[1] * i // COLS for i in range(COLS + 1)], [a.shape[0] * i // ROWS for i in range(ROWS + 1)])
     for r, k in enumerate(keys):
         cells = [a[ys[r]:ys[r + 1], xs[c]:xs[c + 1]] for c in range(COLS)]
         # 6コマ ぶんの 絵の はんいを あわせる（コマごとに ずれない ように）
