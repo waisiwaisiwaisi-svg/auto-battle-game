@@ -633,6 +633,12 @@ html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #
 #scHub .hres{flex:1;display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
 #scHub .hres > span{display:flex;align-items:center;justify-content:center;gap:4px;padding:3px 8px 3px 4px;font-size:13px;white-space:nowrap}
 #scHub .hres .ico{width:22px;height:22px}
+/* もちものの なまえを 数字の 下に・タップで せつめい */
+#scHub .hres1{cursor:pointer}
+#scHub .hrv{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05}
+#scHub .hrv small{font-size:9px;color:#cfc6ef;letter-spacing:0}
+#scHub .hres1:active{transform:translateY(1px)}
+html:not(.land) #scHub .hbar{flex-wrap:wrap;row-gap:8px} html:not(.land) #scHub .hbar .hres{flex:1 1 100%;order:3} html:not(.land) #scHub .hbar .hres > span{flex:1 1 0}   /* たて画面：なまえを つけたら はみでたので 2だんに */
 #scHub .hicons{display:flex;gap:6px;justify-content:flex-end}
 #scHub .hicon{width:40px;height:40px;display:grid;place-items:center;padding:0}
 #scHub .hicon .ico{width:24px;height:24px}
@@ -970,7 +976,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
     <div class="hbar">
       <button class="hme" id="hMe" title="ランキング"><canvas id="hAvatar" class="pix"></canvas><span id="hRank"></span></button>
       <div class="hres">
-        <span title="トロフィー"><i class="ico" data-ico="trophy"></i><b id="hTrophy">0</b></span><span title="クリスタル"><i class="ico" data-ico="crystal"></i><b id="hCaps">0</b></span><span title="ジェム"><i class="ico" data-ico="gem"></i><b id="hGems">0</b></span>
+        <span class="hres1" data-res="trophy" title="トロフィー"><i class="ico" data-ico="trophy"></i><span class="hrv"><b id="hTrophy">0</b><small>トロフィー</small></span></span><span class="hres1" data-res="crystal" title="クリスタル"><i class="ico" data-ico="crystal"></i><span class="hrv"><b id="hCaps">0</b><small>クリスタル</small></span></span><span class="hres1" data-res="gem" title="ジェム"><i class="ico" data-ico="gem"></i><span class="hrv"><b id="hGems">0</b><small>ジェム</small></span></span>
       </div>
     </div>
     <div class="hicons"><button class="hicon" id="btnHelp" title="あそびかた"><i class="ico" data-ico="help"></i></button><button class="hicon" id="btnChart" title="あいしょう表"><i class="ico" data-ico="chart"></i></button><button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと"><i class="ico" data-ico="note"></i></button><button class="hicon" id="btnOpt" aria-label="せってい"><i class="ico" data-ico="gear"></i></button></div>
@@ -8359,6 +8365,13 @@ function dexDetail(id, no) {
   bg.querySelector('#dClose').onclick = () => bg.remove();
 }
 $('btnDex').onclick = renderDex;
+// もちもの（トロフィー・クリスタル・ジェム）を タップ：なにか せつめい
+const RES_HELP = {
+  trophy: 'トロフィー\nたいかいで ゆうしょうしたり、アーケードを クリアしたり、チャンピオンリーグで かつと もらえる。これまでの きろく です。',
+  crystal: 'クリスタル（ふういんクリスタル）\nくさむらで よわらせた モンスターに なげると つかまえられる。バトルに かったり、たからばこから でる。',
+  gem: 'ジェム\nたからばこを まち時間なしで すぐ あけられる。バトルに かったり、たいかいで ゆうしょうすると もらえる。',
+};
+document.querySelectorAll('#scHub .hres1').forEach(el => el.addEventListener('click', () => { SND.se('click'); say0(RES_HELP[el.dataset.res]); }));
 $('btnOnline').onclick = () => { onlineMenu(); const b = document.querySelector('.ntabs [data-t="friend"]'); if (b) b.click(); };
 $('btnRank').onclick = () => { onlineMenu(); const g = document.getElementById('mmGo'); if (g) g.click(); };   // メイン：すぐ マッチング
 $('btnDexBack').onclick = () => renderHub();
