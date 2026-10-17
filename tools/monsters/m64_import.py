@@ -45,11 +45,18 @@ def reduce(a, oy, ox):
 
 
 out = {}
+# ChatGPT の 1まい（2たい・4だん）を 上下に 2つに わけた ファイル：わけめを またいだ 絵（下の だんの 足・上の だんの 耳）が あるので、そろって いる ときは くっつけて から きる
+cards = {}
 for f in sorted(glob.glob(os.path.join(SRC, 'M*_*.png'))):
-    m = re.match(r'M(\d+)_(\d)\.png', os.path.basename(f)); card, k = int(m.group(1)), int(m.group(2))
-    sid = L[(card - 1) * 2 + (k - 1)]['id']
-    a = np.array(Image.open(f).convert('RGBA'))
-    H, W = a.shape[:2]; cw, ch = W // 6, H // 2
+    m = re.match(r'M(\d+)_(\d)\.png', os.path.basename(f)); cards.setdefault(int(m.group(1)), {})[int(m.group(2))] = f
+jobs = []
+for card, ks in sorted(cards.items()):
+    if 1 in ks and 2 in ks: jobs.append((card, [1, 2], np.concatenate([np.array(Image.open(ks[1]).convert('RGBA')), np.array(Image.open(ks[2]).convert('RGBA'))], 0)))
+    else:
+        for k in ks: jobs.append((card, [k], np.array(Image.open(ks[k]).convert('RGBA'))))
+for card, kk, a in jobs:
+    R = 2 * len(kk)
+    H, W = a.shape[:2]; cw, ch = W // 6, H // R
     oy, ox = phase(a[:ch, :cw])
     g = reduce(a, oy, ox); gh, gw = g.shape[:2]; CW, CH = cw // P, ch // P   # ドットの マス目（1コマ＝64×64）
     # はみ出した 絵：マス目で きらず、つながった かたまりごとに「まんなかが ある コマ」に いれる（となりの コマの きれはしは のぞく）
@@ -57,7 +64,7 @@ for f in sorted(glob.glob(os.path.join(SRC, 'M*_*.png'))):
     sizes = ndimage.sum(np.ones_like(lab), lab, range(1, nl + 1)); cms = ndimage.center_of_mass(np.ones_like(lab), lab, range(1, nl + 1))
     owner = {}
     for n, ((cy, cx), sz) in enumerate(zip(cms, sizes), 1):
-        r, c = min(1, int(cy // CH)), min(5, int(cx // CW)); owner[n] = (r * 6 + c, sz)
+        r, c = min(R - 1, int(cy // CH)), min(5, int(cx // CW)); owner[n] = (r * 6 + c, sz)
     # 小さい かたまりは「いちばん ちかい コマの 本体」に つける（となりの コマの しっぽ・つの などが まぎれこまない ように）
     main = {}
     for n, (k2, sz) in owner.items():
@@ -66,36 +73,47 @@ for f in sorted(glob.glob(os.path.join(SRC, 'M*_*.png'))):
     for n, (k2, sz) in list(owner.items()):
         if main.get(k2) == n: continue
         m = lab == n; ys, xs = np.where(m)
-        edge = min(np.abs(((xs + CW / 2) % CW) - CW / 2).min(), np.abs(ys - CH).min())   # コマの さかいめまでの きょり
+        edge = min(np.abs(((xs + CW / 2) % CW) - CW / 2).min(), np.abs(((ys + CH / 2) % CH) - CH / 2).min(), ys.min(), gh - 1 - ys.max())   # コマの さかいめ・シートの 上下はし までの きょり
         if edge <= 6: owner[n] = (-1, sz); continue   # さかいめ ちかくの はなれた かけら＝となりの コマから はみ出した きれはし → すてる
-        best = min(dist, key=lambda kk: dist[kk][m].min()); dd = dist[best][m].min()
+        best = min(dist, key=lambda kk2: dist[kk2][m].min()); dd = dist[best][m].min()
         owner[n] = (best if dd <= 14 else -1, sz)
-    biggest = {k2: owner[n][1] for k2, n in main.items()}
-    fr = []; M = 16   # となりへ はみ出して よい はば（ドット）
-    for k2 in range(12):
-        r, c = divmod(k2, 6); y0, x0 = r * CH - M, c * CW - M
+    # 本体が ない コマ（たおれる 絵が 下の だんに はみ出した など）：まわりの ほかの コマの 本体では ない 大きな かたまりを もらう
+    mains = set(main.values()); med = np.median([owner[n][1] for n in mains]) if mains else 0
+    for r in range(R):
+        for c in range(6):
+            k2 = r * 6 + c
+            if k2 in main: continue
+            cand = [n for n, (kq, sz) in owner.items() if n not in mains and sz >= med * .25]
+            def ov(n):
+                ys, xs = np.where(lab == n); return abs(ys.mean() - (r + .5) * CH) + abs(xs.mean() - (c + .5) * CW)
+            cand = [n for n in cand if ov(n) < CH * .9]
+            if cand: n = min(cand, key=ov); owner[n] = (k2, owner[n][1]); main[k2] = n; mains.add(n)
+    for mi, k in enumerate(kk):
+      sid = L[(card - 1) * 2 + (k - 1)]['id']
+      fr = []; M = 16   # となりへ はみ出して よい はば（ドット）
+      for k2 in range(12):
+        r, c = divmod(k2, 6); r += mi * 2; y0, x0 = r * CH - M, c * CW - M
         cell = np.zeros((CH + 2 * M, CW + 2 * M, 4), np.uint8)
-        keep = [n for n, (kk, sz) in owner.items() if kk == k2 and sz >= 2]
-        mask = np.isin(lab, keep)
-        ys, xs = np.where(mask)
+        keep = [n for n, (kq, sz) in owner.items() if kq == r * 6 + c and sz >= 2]
+        ys, xs = np.where(np.isin(lab, keep))
         for yy, xx in zip(ys, xs):
             ty, tx = yy - y0, xx - x0
             if 0 <= ty < cell.shape[0] and 0 <= tx < cell.shape[1]: cell[ty, tx] = g[yy, xx]
         fr.append(cell)
-    # 12コマ ぜんぶ おなじ わくで きる（コマどうしの いちを たもつ）
-    al = np.any([x[..., 3] > 0 for x in fr], axis=0); yy, xx = np.where(al)
-    y0, y1, x0, x1 = yy.min(), yy.max() + 1, xx.min(), xx.max() + 1
-    fr = [x[y0:y1, x0:x1] for x in fr]
-    strip = np.concatenate(fr, axis=1)
-    q = Image.fromarray(strip[..., :3]).quantize(63, method=Image.Quantize.MEDIANCUT, dither=0)
-    pal = q.getpalette()[:63 * 3]; qi = np.array(q) + 1; qi[strip[..., 3] == 0] = 0
-    used = sorted(set(qi.ravel()) - {0}); remap = {o: n + 1 for n, o in enumerate(used)}
-    qi = np.vectorize(lambda v: remap.get(v, 0))(qi)
-    palhex = ['#%02x%02x%02x' % tuple(pal[(o - 1) * 3:(o - 1) * 3 + 3]) for o in used]
-    w = x1 - x0; F = []
-    for i in range(12):
-        F.append(dict(w=int(w), h=int(y1 - y0), x=0, d=rle(qi[:, i * w:(i + 1) * w])))
-    out[sid] = dict(pal=palhex, f=F, full=1)
-    print(sid, L[(card - 1) * 2 + (k - 1)]['n'], w, y1 - y0, len(palhex))
+      # 12コマ ぜんぶ おなじ わくで きる（コマどうしの いちを たもつ）
+      al = np.any([x[..., 3] > 0 for x in fr], axis=0); yy, xx = np.where(al)
+      y0, y1, x0, x1 = yy.min(), yy.max() + 1, xx.min(), xx.max() + 1
+      fr = [x[y0:y1, x0:x1] for x in fr]
+      strip = np.concatenate(fr, axis=1)
+      q = Image.fromarray(strip[..., :3]).quantize(63, method=Image.Quantize.MEDIANCUT, dither=0)
+      pal = q.getpalette()[:63 * 3]; qi = np.array(q) + 1; qi[strip[..., 3] == 0] = 0
+      used = sorted(set(qi.ravel()) - {0}); remap = {o: n + 1 for n, o in enumerate(used)}
+      qi = np.vectorize(lambda v: remap.get(v, 0))(qi)
+      palhex = ['#%02x%02x%02x' % tuple(pal[(o - 1) * 3:(o - 1) * 3 + 3]) for o in used]
+      w = x1 - x0; F = []
+      for i in range(12):
+          F.append(dict(w=int(w), h=int(y1 - y0), x=0, d=rle(qi[:, i * w:(i + 1) * w])))
+      out[sid] = dict(pal=palhex, f=F, full=1)
+      print(sid, L[(card - 1) * 2 + (k - 1)]['n'], w, y1 - y0, len(palhex))
 json.dump(out, open(OUT, 'w'), separators=(',', ':'))
 print(len(out), os.path.getsize(OUT) // 1024, 'KB')
