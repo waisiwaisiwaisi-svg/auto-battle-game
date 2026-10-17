@@ -918,5 +918,85 @@
   "var": false,
   "ax": 10.5,
   "ay": 8.5
+ },
+ "wb_rock": {
+  "n": 6,
+  "w": 23,
+  "h": 24,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 11.5,
+  "ay": 23
+ },
+ "wb_ice": {
+  "n": 6,
+  "w": 24,
+  "h": 25,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 12.0,
+  "ay": 24
+ },
+ "wb_thorn": {
+  "n": 6,
+  "w": 23,
+  "h": 24,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 11.5,
+  "ay": 23
+ },
+ "wb_mirror": {
+  "n": 6,
+  "w": 16,
+  "h": 25,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 8.0,
+  "ay": 24
+ },
+ "pb_stone": {
+  "n": 6,
+  "w": 69,
+  "h": 64,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 34.5,
+  "ay": 63
+ },
+ "pb_bush": {
+  "n": 6,
+  "w": 66,
+  "h": 58,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 33.0,
+  "ay": 57
+ },
+ "pb_tree": {
+  "n": 6,
+  "w": 65,
+  "h": 63,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 32.5,
+  "ay": 62
+ },
+ "rubble": {
+  "n": 6,
+  "w": 63,
+  "h": 31,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 31.5,
+  "ay": 30
  }
 }
