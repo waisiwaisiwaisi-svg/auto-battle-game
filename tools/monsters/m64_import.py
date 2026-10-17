@@ -5,6 +5,7 @@
 import sys, os, json, glob, re
 import numpy as np
 from PIL import Image
+from scipy import ndimage
 SRC, MONS, OUT = sys.argv[1:4]
 L = json.load(open(MONS))
 AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-'
@@ -49,9 +50,38 @@ for f in sorted(glob.glob(os.path.join(SRC, 'M*_*.png'))):
     sid = L[(card - 1) * 2 + (k - 1)]['id']
     a = np.array(Image.open(f).convert('RGBA'))
     H, W = a.shape[:2]; cw, ch = W // 6, H // 2
-    cells = [a[r * ch:(r + 1) * ch, c * cw:(c + 1) * cw] for r in range(2) for c in range(6)]
-    oy, ox = phase(cells[0])
-    fr = [reduce(c, oy, ox) for c in cells]
+    oy, ox = phase(a[:ch, :cw])
+    g = reduce(a, oy, ox); gh, gw = g.shape[:2]; CW, CH = cw // P, ch // P   # ドットの マス目（1コマ＝64×64）
+    # はみ出した 絵：マス目で きらず、つながった かたまりごとに「まんなかが ある コマ」に いれる（となりの コマの きれはしは のぞく）
+    lab, nl = ndimage.label(g[..., 3] > 0, structure=np.ones((3, 3)))
+    sizes = ndimage.sum(np.ones_like(lab), lab, range(1, nl + 1)); cms = ndimage.center_of_mass(np.ones_like(lab), lab, range(1, nl + 1))
+    owner = {}
+    for n, ((cy, cx), sz) in enumerate(zip(cms, sizes), 1):
+        r, c = min(1, int(cy // CH)), min(5, int(cx // CW)); owner[n] = (r * 6 + c, sz)
+    # 小さい かたまりは「いちばん ちかい コマの 本体」に つける（となりの コマの しっぽ・つの などが まぎれこまない ように）
+    main = {}
+    for n, (k2, sz) in owner.items():
+        if k2 not in main or sz > owner[main[k2]][1]: main[k2] = n
+    dist = {k2: ndimage.distance_transform_edt(lab != n) for k2, n in main.items()}
+    for n, (k2, sz) in list(owner.items()):
+        if main.get(k2) == n: continue
+        m = lab == n; ys, xs = np.where(m)
+        edge = min(np.abs(((xs + CW / 2) % CW) - CW / 2).min(), np.abs(ys - CH).min())   # コマの さかいめまでの きょり
+        if edge <= 6: owner[n] = (-1, sz); continue   # さかいめ ちかくの はなれた かけら＝となりの コマから はみ出した きれはし → すてる
+        best = min(dist, key=lambda kk: dist[kk][m].min()); dd = dist[best][m].min()
+        owner[n] = (best if dd <= 14 else -1, sz)
+    biggest = {k2: owner[n][1] for k2, n in main.items()}
+    fr = []; M = 16   # となりへ はみ出して よい はば（ドット）
+    for k2 in range(12):
+        r, c = divmod(k2, 6); y0, x0 = r * CH - M, c * CW - M
+        cell = np.zeros((CH + 2 * M, CW + 2 * M, 4), np.uint8)
+        keep = [n for n, (kk, sz) in owner.items() if kk == k2 and sz >= 2]
+        mask = np.isin(lab, keep)
+        ys, xs = np.where(mask)
+        for yy, xx in zip(ys, xs):
+            ty, tx = yy - y0, xx - x0
+            if 0 <= ty < cell.shape[0] and 0 <= tx < cell.shape[1]: cell[ty, tx] = g[yy, xx]
+        fr.append(cell)
     # 12コマ ぜんぶ おなじ わくで きる（コマどうしの いちを たもつ）
     al = np.any([x[..., 3] > 0 for x in fr], axis=0); yy, xx = np.where(al)
     y0, y1, x0, x1 = yy.min(), yy.max() + 1, xx.min(), xx.max() + 1
