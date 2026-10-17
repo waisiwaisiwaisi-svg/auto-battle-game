@@ -781,6 +781,17 @@ html.land.short .tlogoimg{width:clamp(200px,calc(40 * var(--vw)),420px)}
 .optrow select,.mkrow input[type=text]{-webkit-appearance:none;appearance:none;font:inherit;font-size:14px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2);border-radius:0;padding:5px 26px 5px 8px;background-image:linear-gradient(45deg,transparent 50%,var(--acc) 50%),linear-gradient(-45deg,transparent 50%,var(--acc) 50%);background-size:6px 6px;background-position:calc(100% - 14px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat}
 .mkrow input[type=text]{background-image:none;padding:6px 8px}
 @keyframes logobob{50%{transform:translateY(-3px)}}
+/* タイトル：ロゴに ひかりが はしる・TAP TO START は 金の おび */
+.tlwrap{position:relative;display:inline-block;line-height:0;animation:logobob 1.4s steps(2) infinite;filter:drop-shadow(0 0 18px rgba(255,190,80,.35))}
+.tlwrap .tlogoimg{animation:none}
+h1.tlogo:not(.img) .tlwrap{display:none}
+.tshine{position:absolute;inset:0;pointer-events:none;-webkit-mask:var(--logo) center/100% 100% no-repeat;mask:var(--logo) center/100% 100% no-repeat;background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.85) 50%,transparent 58%) no-repeat;background-size:250% 100%;animation:tshine 3.2s ease-in-out infinite;mix-blend-mode:screen}
+@keyframes tshine{0%{background-position:130% 0}45%,100%{background-position:-30% 0}}
+.tapstart{position:relative;margin:6px auto 0;padding:10px 34px;background:linear-gradient(90deg,rgba(11,9,20,0),rgba(11,9,20,.82) 18%,rgba(11,9,20,.82) 82%,rgba(11,9,20,0));animation:tapblink2 1.6s ease-in-out infinite}
+.tapstart::before,.tapstart::after{content:"";position:absolute;left:8%;right:8%;height:2px;background:linear-gradient(90deg,transparent,#ffd166 30%,#fff3c4 50%,#ffd166 70%,transparent)}
+.tapstart::before{top:0}.tapstart::after{bottom:0}
+@keyframes tapblink2{50%{opacity:.55;transform:scale(.97)}}
+.tlead{color:#f4ecff}
 
 /* うごきの しじ（かくれろ・まわりこめ） */
 html #app #bpanel #mvCmds{flex:0 0 21%;display:flex;flex-direction:column;gap:4px;min-width:0}
@@ -830,7 +841,16 @@ html.land #scHub .hmode b{font-size:clamp(11px,1.5vw,13.5px)}
 /* よこ画面：ふつうの 画面は 左の メニューを のぞいた ところの まんなかに、はばも ひろく */
 html.land.tabs .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scDex):not(#scTeam){left:calc(76px + var(--sal));right:0;max-width:820px;padding-left:16px;padding-right:calc(16px + var(--sar))}
 /* ホームの ボタン：ほかの 画面に いる ときは オレンジに しない（いま いる 画面が 2つ ある ように 見えた） */
-#tabbar button.home:not(.on){background:linear-gradient(180deg,#4a3c22,#2e2414);color:#ffd27a}
+#tabbar button{border-radius:6px}
+#tabbar button.on{background:linear-gradient(180deg,rgba(255,209,102,.2),rgba(255,209,102,.06));box-shadow:inset 0 3px 0 var(--acc)}
+html.land #tabbar button.on{box-shadow:inset 3px 0 0 var(--acc)}
+/* ホームの ボタン：箱を やめて まるい メダル（えらんでいる ときは 金、ほかは こん色＋金の ふち） */
+#tabbar button.home,#tabbar button.home:not(.on),html.land #tabbar button.home{margin:-18px 0 0;background:none;border:0;box-shadow:none;color:#ffd27a;min-height:66px;justify-content:flex-end}
+html.land #tabbar button.home,html.land #tabbar button.home:not(.on){margin:0;justify-content:center}
+#tabbar button.home .ico,html.land #tabbar button.home .ico{width:50px;height:50px;padding:9px;box-sizing:border-box;background-origin:content-box;background-color:#2a2148;border-radius:50%;box-shadow:0 0 0 3px #0b0914,inset 0 0 0 3px #c9902c,inset 0 5px 0 rgba(255,255,255,.12);transition:transform .15s}
+#tabbar button.home.on .ico,html.land #tabbar button.home.on .ico{background-color:#f2a83a;box-shadow:0 0 0 3px #0b0914,inset 0 0 0 3px #ffe39a,inset 0 -5px 0 rgba(0,0,0,.22),0 0 14px 2px rgba(255,200,90,.55);transform:scale(1.08)}
+#tabbar button.home.on{background:none;box-shadow:none;color:#ffd27a}
+html.land #tabbar button.home.on{box-shadow:none}
 /* よこ画面バトル：ひかえの ボタンが 細く つぶれて いたので パネルの はば いっぱいに、まわりこめ の 文字も おさめる */
 html.land #app #bpanel #bbar{width:100%;flex-wrap:nowrap} html.land #app #bpanel #bench{flex:1 1 auto;min-width:0}
 html.land #app #bpanel .bmon{min-width:0} html.land #app #bpanel .bmon .bn{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -889,7 +909,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
     <canvas id="titleCv"></canvas>
     <button class="sndbtn" id="titleSnd" aria-label="おと">♪</button><button class="sndbtn rotbtn" id="titleRot" aria-label="よこがめん">⟳</button>
     <div class="center tcenter">
-      <h1 class="logo tlogo"><img id="tlogoImg" class="tlogoimg" alt="PIXEL MONSTER ARENA" hidden><span class="l1">PIXEL MONSTER</span><span class="l2">ARENA</span><small>ピクセル モンスター アリーナ</small></h1>
+      <h1 class="logo tlogo"><span class="tlwrap"><img id="tlogoImg" class="tlogoimg" alt="PIXEL MONSTER ARENA" hidden><i class="tshine"></i></span><span class="l1">PIXEL MONSTER</span><span class="l2">ARENA</span><small>ピクセル モンスター アリーナ</small></h1>
       <p class="lead tlead">つかまえて、そだてて、スタジアムで ぶつかりあえ！<br>リアルタイム モンスターバトル</p>
       <div class="tbtns">
         <div class="tapstart" id="tapStart">TAP TO START</div>
@@ -991,7 +1011,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 
   <section class="screen" id="scTeam">
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">へんせい</span><button class="btn sub" id="btnTeamBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
-    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>して いれかえ　／　<b>タップ</b>で えらんで、いれたい わくを <b>タップ</b></p>
+    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>して いれかえ　／　<b>タップ</b>で くわしく みる</p>
     <div class="teamwrap">
       <div class="teamleft">
         <div class="slotlabel"><b>しゅつじょう</b> <span class="dim">— たたかいに でる 3たい（1ばんめから とうじょう）</span></div>
@@ -3425,7 +3445,7 @@ if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') 
   let emoQ = false; const run = () => { emoQ = false; emoSwap(document.body); if (typeof paintIcons === 'function') paintIcons(document.body); };
   new MutationObserver(() => { if (!emoQ) { emoQ = true; Promise.resolve().then(run); } }).observe(document.documentElement, { childList: true, subtree: true, characterData: true });
   document.addEventListener('DOMContentLoaded', run);
-  const lg = () => { const im = document.getElementById('tlogoImg'); if (im && UIA.logo) { im.src = UIA.logo.src; im.hidden = false; im.parentNode.classList.add('img'); } };   // タイトルの ロゴ（ドットの 絵）
+  const lg = () => { const im = document.getElementById('tlogoImg'); if (im && UIA.logo) { im.src = UIA.logo.src; im.hidden = false; im.closest('h1').classList.add('img'); im.parentNode.style.setProperty('--logo', `url(${UIA.logo.src})`); } };   // タイトルの ロゴ（ドットの 絵）
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', lg); else lg();
   const st = document.createElement('style');   // CSS の えもじ（👑）も 絵に
   st.textContent = `.acstages i.boss::after{content:'';width:14px;height:14px;background:url(${UIA.crown.src}) center/contain no-repeat;image-rendering:pixelated}
@@ -3926,45 +3946,76 @@ function renderTitle() {
   show('scTitle');
   startTitleAnim();
 }
-// タイトルの うしろ：闘技場を ゆっくり ながめ、モンスターが 行進する
+// タイトルの うしろ：闘技場を ゆっくり ながめ、つよそうな 2たいが にらみあう（スポットライト・火の粉・ひかり）
 let titleRAF = 0;
+const titleBg = {};   // 闘技場の 1まい絵（ステージの 部品が よみこめたら つくる）
+function titleArena(k) {
+  if (titleBg[k]) return titleBg[k];
+  if (!STG || !STG.floors[k] || ![STG.frame, STG.floors[k], STG.banners[k]].every(im => !im || imgOk(im))) return null;
+  const A = ARENAS[k], c = document.createElement('canvas'), z = .7; c.width = Math.round(A.W * z); c.height = Math.round(A.H * z);
+  const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.scale(z, z); stageComposite(k, g, A.W, A.H, true);
+  return (titleBg[k] = c);
+}
 function startTitleAnim() {
   cancelAnimationFrame(titleRAF);
-  const cv = $('titleCv'), g = cv.getContext('2d'), keys = Object.keys(ARENAS);
-  let ar = ARENAS[choice(keys)], t0 = performance.now(), parade = [], nextMon = 0, swapAt = 9;
-  const pool = poolIds().filter(id => SPR[id] && SPR[id].fr && SPR[id].fr.walk0);
+  const cv = $('titleCv'), g = cv.getContext('2d'), keys = FIELDS.filter(k => STG && STG.floors[k]);
+  const tot = (x) => { const b = SPECIES[x].base; return b.hp + b.atk + b.def + b.spd; };
+  const pool = poolIds().filter(id => SPR[id] && SPR[id].fr && SPR[id].fr.idle0).sort((a, b) => tot(b) - tot(a));
+  const strong = pool.slice(0, Math.max(8, Math.round(pool.length * .45)));
+  let t0 = performance.now(), ak = choice(keys.length ? keys : ['ice']), akT = 0, pair = [], pairT = -99, embers = [], last = t0;
+  const newPair = (t) => { const a = choice(strong); let b = choice(strong); for (let n = 0; n < 9 && (b === a || SPECIES[b].type === SPECIES[a].type); n++) b = choice(strong); pair = [a, b]; pairT = t; };
+  const drawMon = (id, cx, gy, hgt, flip, t, ph, enter) => {
+    const S_ = SPR[id], fr = (S_.fr['idle' + (Math.floor(t * 5 + ph) % 4)] || S_.fr.idle0).n, [bx, by, bw, bh] = sprBox(id);
+    const k = hgt / Math.max(bh, bw * .8), fly = SPECIES[id].fly ? Math.sin(t * 2.4 + ph) * hgt * .04 - hgt * .12 : 0;
+    const col = TYPES[SPECIES[id].type].c, ox = (1 - enter) * (flip ? 1 : -1) * hgt * 1.4;
+    g.save(); g.globalCompositeOperation = 'lighter'; const r = hgt * .85, rg = g.createRadialGradient(cx + ox, gy - hgt * .5, 0, cx + ox, gy - hgt * .5, r);
+    rg.addColorStop(0, col + '66'); rg.addColorStop(.5, col + '22'); rg.addColorStop(1, col + '00'); g.fillStyle = rg; g.globalAlpha = enter; g.fillRect(cx + ox - r, gy - hgt * .5 - r, r * 2, r * 2); g.restore();
+    g.fillStyle = `rgba(0,0,0,${.45 * enter})`; g.beginPath(); g.ellipse(cx + ox, gy, bw * k * .42, hgt * .07, 0, 0, 7); g.fill();
+    g.save(); g.globalAlpha = enter; g.translate(Math.round(cx + ox), Math.round(gy + fly)); if (flip) g.scale(-1, 1);
+    g.drawImage(fr, Math.round(-(bx + bw / 2) * k), Math.round(-(by + bh) * k), Math.round(fr.width * k), Math.round(fr.height * k)); g.restore();
+  };
   const loop = (now) => {
     if ($('scTitle').hidden) return;
     titleRAF = requestAnimationFrame(loop);
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight, dt = Math.min(.05, (now - last) / 1000); last = now;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     const t = (now - t0) / 1000; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.imageSmoothingEnabled = false;
-    if (t > swapAt) { swapAt = t + 9; ar = ARENAS[choice(keys)]; }
-    const im = ar.image;
-    g.fillStyle = '#141022'; g.fillRect(0, 0, W, H);
-    if (im.complete && im.naturalWidth) {   // ゆっくり パン＆ズーム
-      const k = Math.max(W / im.naturalWidth, H / im.naturalHeight) * (1.25 + Math.sin(t * .07) * .05), iw = im.naturalWidth * k, ih = im.naturalHeight * k;
+    if (t - akT > 12 && keys.length > 1) { let n = ak; while (n === ak) n = choice(keys); ak = n; akT = t; }
+    g.fillStyle = '#100c1e'; g.fillRect(0, 0, W, H);
+    const bg = titleArena(ak);
+    if (bg) {   // ゆっくり パン＆ズーム（きりかわりは フェード）
+      const k = Math.max(W / bg.width, H / bg.height) * (1.18 + Math.sin(t * .07) * .05), iw = bg.width * k, ih = bg.height * k;
       const ox = (W - iw) / 2 + Math.sin(t * .11) * (iw - W) * .35, oy = (H - ih) / 2 + Math.cos(t * .09) * (ih - H) * .3;
-      const fade = Math.min(1, (t - (swapAt - 9)) / 1.2, (swapAt - t) / 1.2);
-      g.globalAlpha = Math.max(0, fade); g.drawImage(im, ox, oy, iw, ih); g.globalAlpha = 1;
+      const lt = t - akT, fade = Math.min(1, lt / 1.2, (12 - lt) / 1.2);
+      g.globalAlpha = Math.max(0, akT === 0 ? Math.min(1, lt / 1.2) : fade); g.drawImage(bg, ox, oy, iw, ih); g.globalAlpha = 1;
     }
-    const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(20,16,34,.55)'); gr.addColorStop(.45, 'rgba(20,16,34,.35)'); gr.addColorStop(1, 'rgba(20,16,34,.92)');
+    let gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(16,12,30,.72)'); gr.addColorStop(.5, 'rgba(16,12,30,.38)'); gr.addColorStop(1, 'rgba(16,12,30,.9)');
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
-    // 行進
-    const gy = H - 46, sc = Math.max(1.1, Math.min(1.7, H / 480));
-    const last = parade[parade.length - 1];
-    if (t > nextMon && pool.length && (!last || last.x > 110 * sc)) { nextMon = t + rand(1.4, 2.6); const id = choice(pool); parade.push({ id, x: -60, sp: last ? Math.min(last.sp, rand(40, 55)) : rand(40, 55), fly: !!(SPECIES[id].fly), ph: Math.random() * 6 }); }
-    g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, gy + 2, W, 1);
-    for (const m of parade) {
-      m.x += m.sp / 60;
-      const fr = SPR[m.id].fr['walk' + (Math.floor(t * 8 + m.ph) % 4)].n, w = fr.width * sc * (SPR[m.id].ms || 1) / 1.6, h = fr.height * sc * (SPR[m.id].ms || 1) / 1.6;
-      const y = gy - h - (m.fly ? 18 + Math.sin(t * 3 + m.ph) * 5 : 0);
-      g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(m.x, gy, w * .3, 4, 0, 0, 7); g.fill();
-      g.drawImage(fr, Math.round(m.x - w / 2), Math.round(y), Math.round(w), Math.round(h));
+    // スポットライト（上から ゆれる 2本）
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 2; i++) {
+      const sx = W * (i ? .88 : .12), ang = (i ? -1 : 1) * (.42 + Math.sin(t * .5 + i * 2) * .22), len = Math.hypot(W, H) * 1.1, hw = len * .16;
+      g.save(); g.translate(sx, -20); g.rotate(ang); const lg = g.createLinearGradient(0, 0, 0, len); lg.addColorStop(0, 'rgba(255,236,170,.32)'); lg.addColorStop(1, 'rgba(255,236,170,0)');
+      g.fillStyle = lg; g.beginPath(); g.moveTo(-6, 0); g.lineTo(6, 0); g.lineTo(hw, len); g.lineTo(-hw, len); g.closePath(); g.fill(); g.restore();
     }
-    parade = parade.filter(m => m.x < W + 80);
-    // きらきら
-    for (let i = 0; i < 30; i++) { const x = (i * 97.3 + t * (8 + i % 5 * 3)) % W, y = (i * 53.7 + Math.sin(t + i) * 20) % (H * .7), a = .3 + .3 * Math.sin(t * 3 + i); g.fillStyle = `rgba(255,240,200,${a})`; g.fillRect(x, y, 2, 2); }
+    g.restore();
+    // にらみあう 2たい
+    const land = W > H, gy = land ? H * .86 : H * .8, hgt = land ? H * .42 : Math.min(H * .2, W * .36);
+    if (pool.length && t - pairT > 7) newPair(t);
+    if (pair.length) {
+      const lt = t - pairT, enter = Math.min(1, lt / .45), out = Math.min(1, (7 - lt) / .35), e = Math.max(0, Math.min(enter, out)), ee = 1 - Math.pow(1 - e, 3);
+      drawMon(pair[0], W * (land ? .17 : .27), gy, hgt, false, t, 0, ee);
+      drawMon(pair[1], W * (land ? .83 : .73), gy, hgt, true, t, 2, ee);
+      if (lt < .25) { g.fillStyle = `rgba(255,255,255,${.5 * (1 - lt / .25)})`; g.fillRect(0, 0, W, H); }
+    }
+    // 火の粉（下から のぼる）
+    if (embers.length < 70) embers.push({ x: Math.random() * W, y: H + 5, vy: 20 + Math.random() * 45, ph: Math.random() * 6, s: Math.random() < .25 ? 3 : 2, c: Math.random() < .5 ? '255,200,90' : '255,140,60' });
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for (const p of embers) { p.y -= p.vy * dt; p.x += Math.sin(t * 1.5 + p.ph) * 12 * dt; const a = Math.min(1, p.y / H * 1.6) * (.55 + .45 * Math.sin(t * 6 + p.ph)); g.fillStyle = `rgba(${p.c},${Math.max(0, a)})`; g.fillRect(Math.round(p.x), Math.round(p.y), p.s, p.s); }
+    g.restore(); embers = embers.filter(p => p.y > -10);
+    // ふちを くらく（ビネット）
+    gr = g.createRadialGradient(W / 2, H * .45, Math.min(W, H) * .35, W / 2, H * .45, Math.hypot(W, H) * .62); gr.addColorStop(0, 'rgba(8,6,16,0)'); gr.addColorStop(1, 'rgba(8,6,16,.75)');
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
   };
   titleRAF = requestAnimationFrame(loop);
 }
@@ -4237,7 +4288,7 @@ function statBars(vals, avg, maxes, m) {
   const tot = STAT6.reduce((a, k) => a + Math.round(vals[k]), 0);
   return rows + `<div class="dim" style="font-size:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>ごうけい ${tot}${m ? `　こたいち ${ivTotal(m)}/${31 * STAT6.length}　きょうか ${evFed(m)}/${EV_MAX}` : ''}</span><span>｜＝へいきん <span style="color:#5ee08a">▲たかい</span> <span style="color:#ff7a6a">▼ひくい</span>${m ? ' <span style="color:#ff8a7a">↑</span><span style="color:#7ab8ff">↓</span>＝せいかく' : ''}</span></div>`;
 }
-// へんせい：しゅつじょう3・ひかえ3・ボックス。ドラッグ／タップ→タップで いれかえ
+// へんせい：しゅつじょう3・ひかえ3・ボックス。ドラッグで いれかえ（タップは しょうさい）
 let teamSel = null, teamView = null;
 function teamMon(r) { return r.w === 'p' ? S.party[r.i] : r.w === 'b' ? S.box[r.i] : null; }
 function teamMove(a, b) {
@@ -4418,10 +4469,7 @@ function openBoost(m) {
   document.addEventListener('click', (ev) => {
     if ($('scTeam').hidden || performance.now() - justDragged < 300) return; const r = refOf(ev.target); if (!r) return;
     const m = teamMon(r);
-    if (teamSel) {
-      const s0 = teamSel; teamSel = null;
-      if (!(s0.w === r.w && s0.i === r.i)) { teamMove(s0, r); }
-    } else if (m) { teamSel = { w: r.w, i: r.i }; teamView = m.uid; SND.se('click'); }
+    if (m) { teamSel = { w: r.w, i: r.i }; teamView = m.uid; SND.se('click'); }   // タップは しょうさいを みるだけ（いれかえは ドラッグのみ）
     renderTeam();
   });
 })();
