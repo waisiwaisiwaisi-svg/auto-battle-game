@@ -67,6 +67,21 @@ for sh, (C, R, names, T) in SHEETS.items():
         UIA[n] = {'w': q.width, 'h': q.height, 'src': 'data:image/png;base64,' + base64.b64encode(bio.getvalue()).decode()}
         print(sh, n, q.width, q.height, 'pitch', p)
 
+# いろちがいの ボタン（青い ボタンの 絵から つくる）：こん＝ふつうの ボタン、みどり＝けってい
+import colorsys
+def recolor(src, hue, sat, val):
+    a = np.array(Image.open(f'{OUT}/{src}.png').convert('RGBA')).astype(float); o = a.copy()
+    for y in range(a.shape[0]):
+        for x in range(a.shape[1]):
+            if a[y, x, 3] == 0: continue
+            h, s_, v = colorsys.rgb_to_hsv(*(a[y, x, :3] / 255))
+            if s_ < .25: o[y, x, :3] = a[y, x, :3] * (val if v > .2 else 1); continue   # くろい ふち・しろい ひかりは そのまま
+            r, g, b = colorsys.hsv_to_rgb(hue, min(1, s_ * sat), min(1, v * val)); o[y, x, :3] = (r * 255, g * 255, b * 255)
+    return o.astype(np.uint8)
+for n, src, hue, sat, val in [('btn_navy', 'btn_blue', .70, .55, .62), ('btn_green', 'btn_blue', .36, .9, .82)]:
+    q = Image.fromarray(recolor(src, hue, sat, val), 'RGBA'); q.save(f'{OUT}/{n}.png'); bio = io.BytesIO(); q.save(bio, 'PNG', optimize=True)
+    UIA[n] = {'w': q.width, 'h': q.height, 'src': 'data:image/png;base64,' + base64.b64encode(bio.getvalue()).decode()}; print('derived', n)
+
 H0, H1 = '// ====== UIA（ChatGPT の UI の 絵：tools/ui/build_ui.py）======', '// ====== ここまで UIA ======'
 f = os.path.join(ROOT, 'index.html'); s = open(f, encoding='utf-8').read()
 blk = f'{H0}\nconst UIA = {json.dumps(UIA, separators=(",", ":"))};\n{H1}'
