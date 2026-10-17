@@ -9211,8 +9211,20 @@ function render() {
   // 奥→手前の順
   const list = [];
   for (const sd of B.sides) if (sd.trainer) list.push({ y: sd.trainer.y, d: () => drawTrainer(sd) });
-  if (st.layered) for (const p of st.props) if (imgOk(p.img)) list.push({ y: p.y - 4, d: () => ctx.drawImage(p.img, p.x - p.w / 2, p.y - p.h, p.w, p.h) });   // おきもの：あしもとで まえうしろ
-  for (const f of [a, e]) if (f) list.push({ y: f.y, d: () => drawFighter(f) });
+  // モンスターの からだの はんい（絵の 大きさ）
+  const body = (f) => { const S = SPR[f.mon.sid], w = S.n.width * S.ms, h = S.n.height * S.ms; return [f.x - w * .4, f.y - h, f.x + w * .4, f.y]; };
+  const over = (b, p) => b[2] > p.x - p.w / 2 && b[0] < p.x + p.w / 2 && b[3] > p.y - p.h && b[1] < p.y;
+  const fs_ = [a, e].filter(f => f && f.state !== 'bench' && SPR[f.mon.sid]);
+  if (st.layered) for (const p of st.props) if (imgOk(p.img)) {
+    // うしろに いる こ（あるいて いる こ）に かさなったら すける
+    const hid = fs_.some(f => !hovers(f) && f.y < p.y - 4 && over(body(f), p));
+    p.fade = (p.fade || 0) + ((hid ? 1 : 0) - (p.fade || 0)) * .18;   // 1フレームごとに すこしずつ
+    list.push({ y: p.y - 4, d: () => { const al = 1 - .55 * p.fade; if (al < 1) { ctx.save(); ctx.globalAlpha = al; } ctx.drawImage(p.img, p.x - p.w / 2, p.y - p.h, p.w, p.h); if (al < 1) ctx.restore(); } });   // おきもの：あしもとで まえうしろ
+  }
+  for (const f of fs_) {   // うかんで いる こは、かさなった おきものより てまえに かく（うえを とんで いる）
+    let y = f.y; if (hovers(f) && st.layered) for (const p of st.props) if (over(body(f), p)) y = Math.max(y, p.y - 3);
+    list.push({ y, d: () => drawFighter(f) }); }
+  for (const f of [a, e]) if (f && !fs_.includes(f)) list.push({ y: f.y, d: () => drawFighter(f) });
   for (const w of B.walls) for (const b of w.blocks) if (!b.gone) list.push({ y: b.y + WALL_B / 2, d: () => { drawWallBlock(w, b); drawWallDmg(w, b); } });
   list.sort((p, q) => p.y - q.y).forEach(o => o.d());
 
