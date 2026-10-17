@@ -976,7 +976,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
     <div class="hbar">
       <button class="hme" id="hMe" title="ランキング"><canvas id="hAvatar" class="pix"></canvas><span id="hRank"></span></button>
       <div class="hres">
-        <span class="hres1" data-res="trophy" title="トロフィー"><i class="ico" data-ico="trophy"></i><span class="hrv"><b id="hTrophy">0</b><small>トロフィー</small></span></span><span class="hres1" data-res="crystal" title="クリスタル"><i class="ico" data-ico="crystal"></i><span class="hrv"><b id="hCaps">0</b><small>クリスタル</small></span></span><span class="hres1" data-res="gem" title="ジェム"><i class="ico" data-ico="gem"></i><span class="hrv"><b id="hGems">0</b><small>ジェム</small></span></span>
+        <span class="hres1" data-res="trophy" title="トロフィー"><i class="ico" data-ico="trophy"></i><span class="hrv"><b id="hTrophy">0</b><small>トロフィー</small></span></span><span class="hres1" data-res="crystal" title="クリスタル"><i class="ico" data-ico="capcr"></i><span class="hrv"><b id="hCaps">0</b><small>クリスタル</small></span></span><span class="hres1" data-res="gem" title="ジェム"><i class="ico" data-ico="gem"></i><span class="hrv"><b id="hGems">0</b><small>ジェム</small></span></span>
       </div>
     </div>
     <div class="hicons"><button class="hicon" id="btnHelp" title="あそびかた"><i class="ico" data-ico="help"></i></button><button class="hicon" id="btnChart" title="あいしょう表"><i class="ico" data-ico="chart"></i></button><button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと"><i class="ico" data-ico="note"></i></button><button class="hicon" id="btnOpt" aria-label="せってい"><i class="ico" data-ico="gear"></i></button></div>
@@ -2227,6 +2227,7 @@ const ICONS = {
 const ICON_URL = {};
 function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
+  if (name === 'capcr' && typeof UIA !== 'undefined' && UIA.crystal) return (ICON_URL[name] = UIA.crystal.src);   // ふういんクリスタル（リザルトと おなじ 絵）
   if (typeof UIA !== 'undefined' && UIA['ic_' + name]) return (ICON_URL[name] = UIA['ic_' + name].src);   // ChatGPT の アイコン（I1）
   const raw = ICONS[name]; if (!raw) return '';
   // まわりの あき（.）を けずって、え が まんなかに くるように する
