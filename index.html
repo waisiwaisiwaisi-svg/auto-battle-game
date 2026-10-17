@@ -9089,12 +9089,12 @@ function drawFighter(f) {
   const dAk = f.state === 'dash' && f.cur ? { fire: 'd_fire', elec: 'd_elec', water: 'd_water', dragon: 'd_dragon' }[f.cur.m.t] : null;   // タイプの オーラが ある わざは オーラ だけ、ない わざは まえの しょうげき だけ
   const dsh = f.state === 'dash' && f.cur && f.cur.m.k === 'dash' && f.cur.m.pat !== 'orbit' && !f.cur.back && plOk('d_front'), dA = dsh ? f.cur.ang : 0, dFy = Math.cos(dA) < 0, dCy = f.y + oy - img0.height * ms * .45, dR = img0.width * ms * .5;
   if (dsh) {   // とっしん：うしろに スピード線・からだに タイプの オーラ
-    // スピード線は なし（エフェクトが おおすぎる ため）
+    ctx.save(); ctx.globalAlpha = .7; plDraw('d_lines', plLoop('d_lines', B.t), f.x - Math.cos(dA) * (dR + 22), dCy - Math.sin(dA) * (dR + 22), Math.max(.7, dR / 50), dA, null, null, dFy); ctx.restore();
     const ak = { fire: 'd_fire', elec: 'd_elec', water: 'd_water', dragon: 'd_dragon' }[f.cur.m.t];
     if (ak && plOk(ak)) plDraw(ak, plLoop(ak, B.t), f.x - Math.cos(dA) * 6, dCy - Math.sin(dA) * 6, (dR * 2 + 20) / (PLFX[ak].w * PIX_D) * 1.1, dA, null, null, dFy); }
   if (bone) drawBoned(img, f, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy, fly);
   else drawSprite(img, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy);
-  if (dsh && !(dAk && plOk(dAk))) plDraw('d_front', plLoop('d_front', B.t), f.x + Math.cos(dA) * (dR + 10), dCy + Math.sin(dA) * (dR + 10), Math.max(.7, dR / 42), dA + Math.PI, null, null, !dFy);   // まえの しょうげき（絵は 左むきの 弓）
+  // まえの しょうげき（弓なりの 絵）は つかわない
   if ((f.v.protect > 0 || (f.state === 'dash' && f.cur && f.cur.m.guardDash)) && !['faint', 'enter', 'return'].includes(f.state)) {   // まもりの かまえ：からだを つつむ バリア
     const R = img0.width * ms * .5 + 10, cy = f.y + oy - img0.height * ms * .45, k = .5 + .5 * Math.sin(B.t * 10);
     const gd = !(f.v.protect > 0), gk = gd ? 'shellpush' : f.v.pg ? 'psn_barrier' : 'g_hold';
