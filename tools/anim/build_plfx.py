@@ -11,7 +11,7 @@ out = {}
 G = os.path.join(ROOT, 'tools/anim/gpt_fx'); META = json.load(open(f'{G}/meta.json'))   # ChatGPT 版（tools/anim/gpt_fx.py で つくる）
 for k, m in META.items():
     b = io.BytesIO(); Image.open(f'{G}/{k}.png').save(b, 'PNG', optimize=True)
-    out[k] = {'n': m['n'], 'w': m['w'], 'h': m['h'], 'ms': m['ms'], 'ax': m['ax'], 'ay': m['ay'], 'src': 'data:image/png;base64,' + base64.b64encode(b.getvalue()).decode()}
+    out[k] = {'n': m['n'], 'w': m['w'], 'h': m['h'], 'ms': m['ms'], 'ax': m['ax'], 'ay': m['ay'], **({'fb': m['fb']} if 'fb' in m else {}), 'src': 'data:image/png;base64,' + base64.b64encode(b.getvalue()).decode()}
 for k in USE:   # PixelLab 版（いまは つかわない）
     js = json.load(open(f'{D}/{k}.json')); fr = js['frames']; im = Image.open(f'{D}/{k}.png').convert('RGBA')
     w, h = fr[0]['frame']['w'], fr[0]['frame']['h']
