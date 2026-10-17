@@ -77,7 +77,7 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
   background:var(--acc);color:#1a1626;font-weight:700;font-size:16px;padding:12px 18px;
   box-shadow:0 4px 0 #b8892a,0 0 0 3px #0d0b14;
 }
-.btn.sub{background:var(--panel2);color:var(--ink);box-shadow:0 4px 0 #0d0b14,0 0 0 2px var(--edge)}
+.btn.sub{background:var(--panel2);color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914;box-shadow:0 4px 0 #0d0b14,0 0 0 2px var(--edge)}
 .btn:active:not(:disabled){transform:translateY(3px)}
 h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);text-shadow:3px 3px 0 #000;text-align:center}
 .logo small{display:block;font-size:13px;color:var(--ink);letter-spacing:.3em;margin-top:6px}
@@ -305,9 +305,17 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .ov.res h2{font-size:clamp(34px,calc(6 * var(--vw)),64px);animation:respop .5s cubic-bezier(.2,1.6,.4,1) both}
 .ov.res h2.res-win,.ov.res h2.res-caught{text-shadow:0 0 18px rgba(255,209,102,.8),4px 4px 0 #000}
 @keyframes respop{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
-.ov .rl{opacity:0;animation:rlin .35s ease-out forwards;padding:2px 0;font-size:13px}
+.ov .rl{opacity:0;animation:rlin .35s ease-out forwards;padding:2px 0;font-size:14px;color:#f2ecfa;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
 @keyframes rlin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.ov.res .lines{max-height:55%;background:rgba(13,11,20,.6);padding:8px 14px;box-shadow:0 0 0 1px var(--edge)}
+.ov.res .lines{max-height:62%;overflow:auto;background:transparent;padding:14px 20px;border:14px solid transparent;image-rendering:pixelated;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:min(420px,90%)}
+.ov .rhead{font-size:clamp(15px,calc(2.6 * var(--vw)),19px);color:#fff;text-shadow:2px 0 0 #0b0914,-2px 0 0 #0b0914,0 2px 0 #0b0914,0 -2px 0 #0b0914;animation:rlin .35s .2s ease-out both}
+.ov .rteam{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ov .rmon{display:flex;flex-direction:column;align-items:center;gap:2px;width:64px;animation:rlin .35s .35s ease-out both}.ov .rmon.ko canvas{filter:grayscale(1) brightness(.6)}
+.ov .rmon small{font-size:10px;color:#e8e0f4;white-space:nowrap}.ov .rmon i{width:52px;height:5px;background:#0b0914;box-shadow:0 0 0 1px #3a3050}.ov .rmon u{display:block;height:100%}
+.ov .rtiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.ov .rtile{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;align-items:center;column-gap:6px;padding:6px 10px;background:rgba(11,9,20,.55);box-shadow:inset 0 0 0 2px #3a3050;opacity:0;animation:rtpop .35s cubic-bezier(.2,1.6,.4,1) forwards}
+.ov .rtile .rti{grid-row:1/3;height:30px;width:auto;vertical-align:middle}.ov .rtile b{font-size:18px;color:#ffd166;text-shadow:2px 2px 0 #0b0914}.ov .rtile small{font-size:10px;color:#cfc4e0}
+@keyframes rtpop{0%{opacity:0;transform:scale(.4)}100%{opacity:1;transform:none}}
 .confetti{position:absolute;top:-10px;width:7px;height:11px;animation:conf 2s linear forwards;pointer-events:none}
 @keyframes conf{to{top:105%;transform:rotate(720deg) translateX(30px)}}
 .ov .lines{font-size:12px;max-height:45%;overflow:auto}
@@ -5244,7 +5252,7 @@ function cageRocks(f, m, p) {
   const n = 7, R = p.r * 1.25, blocks = [];
   for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; const x = p.x + Math.cos(a) * R, y = p.y + Math.sin(a) * R * .8; if (inField(x, y, 4)) blocks.push({ x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, x, y }); }
   const w = { t: m.t, x: p.x, y: p.y, ang: 0, n, life: 3.5, max: 3.5, side: f.side, uid: ++B.uidc, blocks: blocks.filter(b => !B.sides.some(sd => { const x = sd.fs[sd.act]; return x && targetable(x) && circRect(x.x, x.y, footR(x) + 2, b); })) };
-  if (!w.blocks.length) return; B.walls.push(w); wallsChanged(); for (const b of w.blocks) sheetFx(WALL_FX[m.t] || 'slam', b.x, b.y - 14, .7);
+  w.born = B.t; if (!w.blocks.length) return; B.walls.push(w); wallsChanged(); for (const b of w.blocks) sheetFx(WALL_FX[m.t] || 'slam', b.x, b.y - 14, .7);
 }
 /* ======== メモで ふえた わざの しくみ（じらい・わな・ほのおの みち・すいりゅう・なみ・このは・にんぎょう） ======== */
 const OB = () => (B.obs = B.obs || []);
@@ -5617,8 +5625,9 @@ function damageProp(i, m, n) {
 }
 function damageWall(b, m, n) {
   if (!b || b.gone) return; const w = wallOf(b); if (!w) return;
+  if (w.born != null && B.t - w.born < .6) return;   // できた ばかりの かべ（いわのおり：おちてきた いわ じしん）は けずらない
   if (m && !breaksWall(m, w)) {   // きかない わざ：はじかれる
-    if (!(B.t - (b.noT || -9) < .5)) { b.noT = B.t; burst(b.x, b.y - 14, '#ffffff', 3, 50, .2); SND.se('weak', 1.2); popText(b.x, b.y - 40, 'きかない', '#a49ac0'); } return; }
+    if (!(B.t - (w.noT || -9) < .8)) { w.noT = B.t; burst(b.x, b.y - 14, '#ffffff', 3, 50, .2); SND.se('weak', 1.2); popText(b.x, b.y - 40, 'きかない', '#a49ac0'); } return; }   // かべ ごとに 1かい（いわのおり など ブロックが おおい かべで 何こも 出ない ように）
   if (w.one) {   // 1まいの かべ：ぜんたいで たいりょく 1つ。0 で いっきに くずれる
     w.hp -= n == null ? wallDmgOf(m) : n; w.hitT = B.t; burst(b.x, b.y - 14, TYPES[w.t] ? TYPES[w.t].c : '#cccccc', 4, 60, .25); SND.se('hit', 1.5);
     if (w.hp > 0) return;
@@ -7727,9 +7736,8 @@ function endBattle(res) {
       lines.unshift('まけてしまった… たいかいは 1かいせんから やりなおし');
     }
   }
-  if (S.capsules > caps0) lines.push(`クリスタルを ${S.capsules - caps0}こ てにいれた`);
-  if ((S.gems || 0) > gems0) lines.push(`💎 ジェムを ${S.gems - gems0}こ てにいれた`);
-  if (res === 'win') { const ck = giveChest(); if (ck) lines.push(`<b style="color:var(--acc)">${CHESTS[ck].n}を てにいれた！</b>`); else { S.gems = (S.gems || 0) + 2; lines.push('たからばこが いっぱい… かわりに 💎 ジェムを 2こ もらった'); } }   // いっぱいの ときも むだに しない
+  let ck = null; if (res === 'win') { ck = giveChest(); if (!ck) { S.gems = (S.gems || 0) + 2; lines.push('たからばこが いっぱい… かわりに ジェムを 2こ もらった'); } }   // いっぱいの ときも むだに しない
+  B.rewards = { cr: S.capsules - caps0, gem: (S.gems || 0) - gems0, chest: ck };   // リザルトで アイコンつきで ならべる
   B.resLines = lines;
   save();
 }
@@ -7738,7 +7746,13 @@ function showResult() {
   const T = { win: ['WIN!', 'var(--acc)'], lose: ['LOSE…', 'var(--bad)'], caught: ['GET!', 'var(--good)'], run: ['にげた', 'var(--dim)'] }[res];
   $('resTitle').textContent = T[0]; $('resTitle').style.color = T[1];
   $('resTitle').className = 'res-' + res;
-  $('resLines').innerHTML = (B.resLines.length ? B.resLines : ['…']).map((l, i) => `<div class="rl" style="animation-delay:${.25 + i * .18}s">${l}</div>`).join('');
+  { const L = B.resLines.length ? B.resLines.slice() : [], head = L.length ? L.shift() : '', R = B.rewards || {}, sd = B.sides[B.my || 0];
+    const tile = (k, n, lab, d) => UIA[k] ? `<div class="rtile" style="animation-delay:${d}s">${uiImg(k, 'rti')}<b>${n}</b><small>${lab}</small></div>` : '';
+    const tiles = [R.cr > 0 ? tile('crystal', '+' + R.cr, 'クリスタル', .5) : '', R.gem > 0 ? tile('gem', '+' + R.gem, 'ジェム', .62) : '', R.chest ? tile('chest', '+1', CHESTS[R.chest].n, .74) : ''].join('');
+    $('resLines').innerHTML = `${head ? `<div class="rhead">${head}</div>` : ''}<div class="rteam" id="resTeam"></div>${tiles ? `<div class="rtiles">${tiles}</div>` : ''}${L.map((l, i) => `<div class="rl" style="animation-delay:${.85 + i * .15}s">${l}</div>`).join('')}`;
+    const tm = $('resTeam'); for (const f of (sd && sd.fs) || []) { if (!f || !SPR[f.mon.sid]) continue; const d = document.createElement('div'); d.className = 'rmon' + (f.hp <= 0 ? ' ko' : ''); d.appendChild(spriteCanvas(f.mon.sid, 52)); const k = Math.max(0, f.hp / f.maxHp);
+      d.insertAdjacentHTML('beforeend', `<small>${f.sp.n}</small><i><u style="width:${k * 100}%;background:${k > .5 ? '#7bd88f' : k > .2 ? '#ffd166' : '#ff6b5b'}"></u></i>`); tm.appendChild(d); }
+    $('resLines').style.borderImage = UIA.pnl_navy ? `url(${UIA.pnl_navy.src}) 7 fill / 14px / 0 stretch` : ''; }
   $('resultOv').hidden = false; $('resultOv').className = 'ov res res-' + res;
   $('resultOv').querySelectorAll('.confetti').forEach(e => e.remove());   // まえの かちの かみふぶきを のこさない（まけたときに また ふってしまう）
   if (res === 'win' || res === 'caught') { const ov = $('resultOv'); for (let i = 0; i < 36; i++) { const c = document.createElement('i'); c.className = 'confetti'; c.style.cssText = `left:${Math.random() * 100}%;background:${choice(['#ffd166', '#ff7ab0', '#7bd88f', '#7ab8ff', '#fff'])};animation-delay:${Math.random() * .8}s;animation-duration:${1.6 + Math.random() * 1.4}s;transform:rotate(${Math.random() * 360}deg)`; ov.appendChild(c); } }
@@ -8315,12 +8329,9 @@ function wallSprite(t) {
 }
 // かべの ブロック：下から せりあがり、きえる ときは しずむ
 // かべの きず：けずれた ぶんだけ ひびが はいり、うけた しゅんかん しろく ひかる
-// おきものの ひび（けずれた ぶん）と あたった ときの しろい ひかり
+// おきものに あたった ときの しろい ひかり
 function drawPropDmg(st, p, i) {
-  if (!st.propHp || st.propHp[i] == null) return; const mx = propHpMax(p), k = 1 - st.propHp[i] / mx, sb = st.propSol[i]; if (!sb || !sb.length) return;
-  const x0 = Math.min(...sb.map(o => o.x0)), x1 = Math.max(...sb.map(o => o.x1)), top = p.y - p.h * .75, bot = p.y - 4;
-  if (k > 0) { const r = srng(Math.round(p.x * 7 + p.y)); ctx.strokeStyle = 'rgba(20,12,20,.85)'; ctx.lineWidth = 2;
-    for (let n = 0; n < Math.ceil(k * 7); n++) { let x = x0 + 6 + r() * (x1 - x0 - 12), y = top + r() * (bot - top) * .6; ctx.beginPath(); ctx.moveTo(x, y); for (let j = 0; j < 4; j++) { x += (r() - .5) * 14; y += 5 + r() * 7; ctx.lineTo(x, y); } ctx.stroke(); } }
+  if (!st.propHp || st.propHp[i] == null) return;   // ひびの 線は かかない（あたった ときの ひかり だけ）
   if (st.propHit[i] != null && B.t - st.propHit[i] < .1) { ctx.save(); ctx.globalAlpha = .4; ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(p.img, p.x - p.w / 2, p.y - p.h, p.w, p.h); ctx.restore(); }
 }
 function drawWallDmg(w, b) {
