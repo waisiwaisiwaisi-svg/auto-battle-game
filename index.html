@@ -5446,7 +5446,7 @@ function updLeaves(dt) {
   });
 }
 // デコイにんぎょう：あいての まえに にんぎょうを おく（2かい こうげきを うけると こわれる）。にんぎょうから DOLL_R いないで わざを だした あいては にんぎょうを ねらう
-const DOLL_R = 200;
+const DOLL_R = 120;   // せまく（200 → 120）
 function makeDoll(f, hp) {
   const o = opp(f); let x = f.x - f.face * 52, y = f.y;
   if (o && targetable(o)) { const a = Math.atan2(f.y - o.y, f.x - o.x), d = o.r + 46; for (const da of [0, .5, -.5, 1, -1]) { const px = o.x + Math.cos(a + da) * d, py = o.y + Math.sin(a + da) * d; if (inField(px, py, 14) && !blockedAt(px, py, 10)) { x = px; y = py; break; } } }   // あいての まえに おく
@@ -5735,7 +5735,7 @@ function damageWall(b, m, n) {
   if (!b || b.gone) return; const w = wallOf(b); if (!w) return;
   if (w.born != null && B.t - w.born < .6) return;   // できた ばかりの かべ（いわのおり：おちてきた いわ じしん）は けずらない
   if (m && !breaksWall(m, w)) {   // きかない わざ：はじかれる
-    if (!(B.t - (w.noT || -9) < .8)) { w.noT = B.t; burst(b.x, b.y - 14, '#ffffff', 3, 50, .2); SND.se('weak', 1.2); popText(b.x, b.y - 40, 'きかない', '#a49ac0'); } return; }   // かべ ごとに 1かい（いわのおり など ブロックが おおい かべで 何こも 出ない ように）
+    if (!(B.t - (w.noT || -9) < .8)) { w.noT = B.t; burst(b.x, b.y - 14, '#ffffff', 3, 50, .2); SND.se('weak', 1.2); } return; }   // かべ ごとに 1かい（いわのおり など ブロックが おおい かべで 何こも 出ない ように）
   if (w.one) {   // 1まいの かべ：ぜんたいで たいりょく 1つ。0 で いっきに くずれる
     w.hp -= n == null ? wallDmgOf(m) : n; w.hitT = B.t; burst(b.x, b.y - 14, TYPES[w.t] ? TYPES[w.t].c : '#cccccc', 4, 60, .25); SND.se('hit', 1.5);
     if (w.hp > 0) return;
