@@ -235,6 +235,8 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .evb{color:var(--acc);font-weight:400;margin-left:2px;font-size:9.5px}
 .itlist{display:flex;flex-direction:column;gap:6px}.it{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;background:#15112a;border-radius:4px;padding:6px 8px;text-align:left}.it .iic{font-size:24px}.it small{display:block;color:var(--dim);font-size:10.5px;line-height:1.4}.it .btn{font-size:12px;padding:6px 10px}
 .bsum{display:flex;justify-content:space-between;margin:8px 0;font-size:13px}
+.bdot{position:absolute;top:4px;right:4px;width:12px;height:12px;background:#ff3a3a;border:2px solid #0b0914;border-radius:50%;box-shadow:0 0 0 1px #ffd0d0 inset;pointer-events:none;z-index:2}
+#scTeam .slot{position:relative}
 .bgrid{display:flex;flex-direction:column;gap:4px}
 .brow{display:grid;grid-template-columns:62px 34px 30px 1fr 42px 30px 30px;gap:5px;align-items:center;font-size:12px}
 .brow i{height:7px;background:#0d0b14;border-radius:2px}.brow i u{display:block;height:100%;background:var(--acc);border-radius:2px}
@@ -4250,6 +4252,7 @@ function renderTeam(openUid) {
       const st = stats(m), sp = SPECIES[m.sid];
       d.appendChild(spriteCanvas(m.sid, r.w === 'b' ? 44 : 64));
       d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div>${r.w === 'p' ? `<div class="hpw">${(() => { const A = avgStats(); return STAT6.map(k => `<span style="color:${statTone(st[k], A[k]).c}">${STAT6_S[k]}${Math.round(st[k])}</span>`).join(' '); })()}</div>` : ''}`);
+      if (canBoost(m)) d.insertAdjacentHTML('beforeend', '<i class="bdot" title="きょうか できる"></i>');   // おなじ しゅるいが いて きょうか できる：あかい まる
       if (teamSel && teamSel.w === r.w && teamSel.i === r.i) d.classList.add('sel');
       if (teamView === m.uid) d.classList.add('view');
     } else d.insertAdjacentHTML('beforeend', `<div style="font-size:22px;opacity:.5">＋</div><div>${r.w === 'p' && r.i < 3 ? 'しゅつじょう わく' : 'あき'}</div>`);
@@ -4274,7 +4277,7 @@ function renderTeamDetail() {
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span><div class="dim" style="font-size:11px">${natRelText(m.nat)}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
-    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc)">きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm">わざのまきもの</button><button class="btn sub" data-a="item">どうぐ</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
+    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm">わざのまきもの</button><button class="btn sub" data-a="item">どうぐ</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn sub" data-a="release" style="color:var(--bad)">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
@@ -4333,6 +4336,8 @@ function itemMenu(m) {
   draw();
 }
 // 強化：おなじ モンスターを つかって ポイントを ふやし、のうりょくに ふりわける
+// きょうか できる：おなじ しゅるいの モンスターが ほかに いて、まだ さいだいまで あつめて いない
+const canBoost = (m) => (m.fed || 0) < EV_MAX && [...S.party, ...S.box].some(x => x !== m && x.sid === m.sid);
 function openBoost(m) {
   m.ev = m.ev || {}; for (const k of STAT6) m.ev[k] = m.ev[k] || 0; m.fed = m.fed || 0;
   const sp = SPECIES[m.sid];
