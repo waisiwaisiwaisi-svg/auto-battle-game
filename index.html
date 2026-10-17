@@ -861,17 +861,19 @@ html.land.tabs .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scDex):not(
 #tabbar button.on{background:linear-gradient(180deg,rgba(255,209,102,.2),rgba(255,209,102,.06));box-shadow:inset 0 3px 0 var(--acc)}
 html.land #tabbar button.on{box-shadow:inset 3px 0 0 var(--acc)}
 /* ホームの ボタン：箱を やめて まるい メダル（えらんでいる ときは 金、ほかは こん色＋金の ふち） */
-#tabbar button.home,#tabbar button.home:not(.on),html.land #tabbar button.home{margin:-18px 0 0;background:none;border:0;box-shadow:none;color:#ffd27a;min-height:66px;justify-content:flex-end}
+#tabbar button.home,#tabbar button.home:not(.on),html.land #tabbar button.home{margin:-18px 0 0;background:none;border:0;box-shadow:none;color:var(--dim);min-height:66px;justify-content:flex-end}
 html.land #tabbar button.home,html.land #tabbar button.home:not(.on){margin:0;justify-content:center}
 #tabbar .medal{position:relative;display:grid;place-items:center;width:52px;height:52px;background:center/contain no-repeat;image-rendering:pixelated;transition:transform .15s;filter:drop-shadow(0 3px 0 #0b0914)}
 #tabbar button.home .ico,html.land #tabbar button.home .ico{width:28px;height:28px}
-#tabbar button.home.on .medal{transform:scale(1.08)}
-#tabbar .medal::after{content:'';position:absolute;inset:-5px;background:center/contain no-repeat;image-rendering:pixelated;pointer-events:none;animation:medglow 1.6s ease-in-out infinite}
+#tabbar button.home.on .medal{transform:none}
+#tabbar .medal::after{content:none}
 @keyframes medglow{0%,100%{opacity:.35}50%{opacity:1}}
 #tabbar button.home{z-index:1} #tabbar button.home > span:not(.medal){position:relative;z-index:2}
 #tabbar button.home.on .ico,html.land #tabbar button.home.on .ico{transform:none}
-#tabbar button.home.on{background:none;box-shadow:none;color:#ffd27a}
-html.land #tabbar button.home.on{box-shadow:none}
+/* ホームも ほかの タブと おなじ「えらんでいる」しるし（金の わく＋うすい 金の はいけい）。メダルは いつも 出す */
+#tabbar button.home.on{background:linear-gradient(180deg,rgba(255,209,102,.2),rgba(255,209,102,.06))!important;box-shadow:inset 0 3px 0 var(--acc)!important;color:var(--acc)!important}
+html.land #tabbar button.home.on{box-shadow:inset 3px 0 0 var(--acc)!important}
+#tabbar .medal{border-radius:50%;background-color:#2a2148}   /* 絵が まだ よめて いない ときも まるく 見える */
 /* よこ画面バトル：ひかえの ボタンが 細く つぶれて いたので パネルの はば いっぱいに、まわりこめ の 文字も おさめる */
 html.land #app #bpanel #bbar{width:100%;flex-wrap:nowrap} html.land #app #bpanel #bench{flex:1 1 auto;min-width:0}
 html.land #app #bpanel .bmon{min-width:0} html.land #app #bpanel .bmon .bn{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
