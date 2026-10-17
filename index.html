@@ -18,7 +18,7 @@ html.rot{--sat:env(safe-area-inset-right);--sar:env(safe-area-inset-bottom);--sa
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--ink)}
 html.iosapp,html.iosapp body{height:calc(100 * var(--vh));min-height:100%}
-body{
+body{word-break:keep-all;overflow-wrap:anywhere;line-break:strict;
   font-family:"DotGothic16",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Hiragino Kaku Gothic ProN","Noto Sans JP",monospace;
   display:flex;justify-content:center;overflow:hidden;touch-action:none;
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
@@ -930,7 +930,9 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .serow input{width:100%;accent-color:#ffd166}
 /* ホーム：モードの カードと 小さい アイコンも「おせる」かたちに（したに あつみ・おすと しずむ・▶） */
 #scHub .hmode,#scHub .hicon{box-shadow:inset 0 -4px 0 rgba(0,0,0,.32),inset 0 2px 0 rgba(255,255,255,.1),0 3px 0 #0b0914!important;transition:transform .08s,filter .08s}
-#scHub .hmode{position:relative}
+#scHub .hmode{position:relative;padding-right:18px!important}   /* ▶ に 文字が かさならない ように（▶ は 右下へ） */
+#scHub .hmode b{min-width:0;white-space:nowrap;letter-spacing:-.02em}
+.askbox .btn,.askbg .btn{white-space:nowrap}
 #scHub .hmode::after{content:'';position:absolute;right:12px;top:50%;margin-top:-7px;border-left:8px solid rgba(255,255,255,.75);border-top:7px solid transparent;border-bottom:7px solid transparent;filter:drop-shadow(1px 1px 0 #0b0914);transition:transform .12s}
 @media (hover:hover){#scHub .hmode:hover,#scHub .hicon:hover{filter:brightness(1.12);transform:translateY(-2px)} #scHub .hmode:hover::after{transform:translateX(3px)}}
 #scHub .hmode:active,#scHub .hicon:active{transform:translateY(3px)!important;box-shadow:inset 0 2px 0 rgba(0,0,0,.35),0 0 0 #0b0914!important;filter:brightness(.92)}
@@ -2193,7 +2195,7 @@ if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') 
 .btn:disabled{border-image-source:url(${UIA.b8_off.src})!important}
 #tabbar .medal{background-image:url(${UIA.med_off.src})}#tabbar button.home.on .medal{background-image:url(${UIA.med_on.src})}#tabbar button.home:active .medal{background-image:url(${UIA.med_dn.src})}
 #tabbar button.home.on .medal::after{background-image:url(${UIA.med_ring.src})}
-#scHub .hmode::after{border:0!important;width:12px;height:17px;margin-top:-8px;background:url(${UIA.arrow_r.src}) center/contain no-repeat;image-rendering:pixelated}
+#scHub .hmode::after{border:0!important;width:9px;height:13px;margin-top:0;top:auto!important;bottom:7px;right:7px!important;background:url(${UIA.arrow_r.src}) center/contain no-repeat;image-rendering:pixelated}
 .serow .seplay{font-size:0!important;background:url(${UIA.play.src}) center/26px no-repeat!important;box-shadow:none!important}
 .sndbtn:not(.rotbtn){font-size:0!important;background-image:url(${UIA.spk_on.src})!important;background-position:center!important;background-size:24px!important;background-repeat:no-repeat!important;image-rendering:pixelated}.sndbtn.off:not(.rotbtn){background-image:url(${UIA.spk_off.src})!important}`;   // ボタンも ドットの 絵（U6）
   document.head.appendChild(st);
@@ -3173,10 +3175,10 @@ function openBoost(m) {
       <p class="dim" style="font-size:12px">おなじ しゅるいの モンスターを 1たい つかうと きょうかポイント +${BOOST_SAME}（さいだい ${EV_MAX}）。ポイントを すきな のうりょくに ふりわけて「確定する」で きまる（1つ ${EV_STAT_MAX} まで・1ポイントで +${EV_K}）。</p>
       <div class="bsum"><span>あつめた <b>${m.fed}</b>/${EV_MAX}</span><span>のこり ポイント <b style="color:var(--acc)">${free}</b></span></div>
       <div class="bgrid">${STAT6.map(k => `<div class="brow"><span>${STAT6_N[k]}</span><b style="${pend[k] ? 'color:var(--acc)' : ''}">${st[k]}</b><span class="dim">+${evBonus(pv, k)}</span><i><u style="width:${pv.ev[k] / EV_STAT_MAX * 100}%"></u></i><span style="${pend[k] ? 'color:var(--acc)' : ''}">${pv.ev[k]}/${EV_STAT_MAX}</span><button data-k="${k}" data-d="-1" ${pend[k] ? '' : 'disabled'}>－</button><button data-k="${k}" data-d="1" ${free > 0 && pv.ev[k] < EV_STAT_MAX ? '' : 'disabled'}>＋</button></div>`).join('')}</div>
-      <div class="row" style="justify-content:space-between;gap:6px;margin-top:6px"><span class="dim" style="font-size:11px">確定した ポイントは もどせません（${ITEMS.respec.ic}${ITEMS.respec.n}で ふりなおし）</span><span style="display:flex;gap:6px"><button class="btn ok" id="bOk" style="font-size:13px;padding:6px 14px;white-space:nowrap" ${pendN() ? '' : 'disabled'}>確定する${pendN() ? `（${pendN()}）` : ''}</button><button class="btn sub" id="bReset" style="font-size:12px;padding:6px 10px;white-space:nowrap" ${evUsed(m) && itemN('respec') ? '' : 'disabled'}>${ITEMS.respec.ic} ふりなおす ×${itemN('respec')}</button></span></div>
+      <div class="row" style="justify-content:space-between;gap:6px;margin-top:6px;flex-wrap:wrap"><span class="dim" style="font-size:11px;flex:1 1 180px;min-width:0">確定した ポイントは もどせません（${ITEMS.respec.ic}${ITEMS.respec.n}で ふりなおし）</span><span style="display:flex;gap:6px"><button class="btn ok" id="bOk" style="font-size:13px;padding:6px 14px;white-space:nowrap" ${pendN() ? '' : 'disabled'}>確定する${pendN() ? `（${pendN()}）` : ''}</button><button class="btn sub" id="bReset" style="font-size:12px;padding:6px 10px;white-space:nowrap" ${evUsed(m) && itemN('respec') ? '' : 'disabled'}>${ITEMS.respec.ic} ふりなおす ×${itemN('respec')}</button></span></div>
       <div class="sec-title" style="margin-top:10px"><span>つかう モンスター</span><span class="dim">${dups.length}たい</span></div>
       ${dups.length ? `<div class="bdups">${dups.map((o, j) => `<button class="bdup ${pick.has(j) ? 'on' : ''}" data-j="${j}"><i data-sid="${o.x.sid}"></i><small>${o.w === 'p' ? 'パーティ' : 'ボックス'}</small><small>${o.x.nat && NATURES[o.x.nat] ? NATURES[o.x.nat].n : '－'}</small><small style="color:${o.x.fed ? 'var(--acc)' : 'var(--dim)'}">+${o.x.fed || 0}</small></button>`).join('')}</div>` : `<p class="dim">${sp.n}が ほかに いません（おなじ しゅるいを くさむら・たからばこで あつめよう）</p>`}
-      <div class="row" style="justify-content:space-between;margin-top:12px;gap:8px"><button class="btn" id="bFeed" ${pick.size && room > 0 ? '' : 'disabled'}>えらんだ ${pick.size}たいを つかう（+${gainOf(pick)}）</button><button class="btn sub" id="bClose">とじる</button></div>`;
+      <div class="row" style="justify-content:space-between;margin-top:12px;gap:8px"><button class="btn" id="bFeed" style="font-size:14px;padding:8px 10px;flex:1;min-width:0;white-space:normal!important;line-height:1.25" ${pick.size && room > 0 ? '' : 'disabled'}>えらんだ ${pick.size}たいを つかう（+${gainOf(pick)}）</button><button class="btn sub" id="bClose">とじる</button></div>`;
     bg.querySelectorAll('i[data-sid]').forEach(el => el.replaceWith(spriteCanvas(el.dataset.sid, 40)));
     bg.querySelectorAll('.brow button').forEach(b => b.onclick = () => { const k = b.dataset.k;
       if (+b.dataset.d < 0) { if (pend[k]) pend[k]--; } else if (m.fed - evUsed(m) - pendN() > 0 && m.ev[k] + (pend[k] || 0) < EV_STAT_MAX) pend[k] = (pend[k] || 0) + 1;
@@ -6751,7 +6753,7 @@ const PAT_LABEL = { scatter: 'ばらまき', swarm: 'むれ', big: 'きょだい
   spread: '3way', bounce: 'はねかえり', boomerang: 'ブーメラン', homing: 'ついび', zigzag: 'ジグザグ', wave: 'うねり', lob: 'やまなり', orb: 'おおだま', blast: 'ばくはつ', triple: '3れんしゃ', blob: 'ぬま', strip: 'みち', grid: '＋マス', pull: 'ひきこみ', arc: 'ゆみなり', vee: 'くの字', leap: 'ジャンプ', spin: 'かいてん', combo: '2れんげき' };
 function moveSub(m) {
   const aim = m.cat === 'stat' ? '' : (m.aim === 'dir' ? '◎' : '');
-  return `${TYPES[m.t].n}・${PAT_LABEL[m.pat] || KIND_LABEL[m.k] || ''}${aim}`;
+  const k = (PAT_LABEL[m.pat] || KIND_LABEL[m.k] || '') + aim; return k ? `${TYPES[m.t].n}・${k}` : TYPES[m.t].n;   // ラベルが ない ときに「いわ・」と なっていた
 }
 function setupCmds() {
   const f = B && active(B.my || 0); if (!f) return;
@@ -8058,7 +8060,7 @@ function trainerFace(spr) {
 document.addEventListener('pointerdown', (e) => { if (B && !B.remote && B.mode === 'intro' && B.vsT && B.modeT < B.vsT - .35 && e.target.closest && e.target.closest('#cvWrap')) B.modeT = B.vsT - .35; }, true);
 function drawIntroOverlay() {
   if (B.mode !== 'intro' && B.wasIntro) B.fightAt = B.t; B.wasIntro = B.mode === 'intro';
-  { const on = B.mode === 'intro' && !!B.vsT && B.modeT < B.vsT - .2; if (on !== !!B.vsOn) { B.vsOn = on; $('scBattle').classList.toggle('vsOn', on); } }   // VS の あいだは HP・ボタンを かくす   // オンラインの あいても おなじ タイミングで
+  { const on = B.mode === 'intro' && !!B.vsT && B.modeT < B.vsT - .2; const sc = $('scBattle'); if (on !== sc.classList.contains('vsOn')) { B.vsOn = on; sc.classList.toggle('vsOn', on); } }   // VS の あいだは HP・ボタンを かくす   // オンラインの あいても おなじ タイミングで
   const t = B.modeT, v = B.vsT || 0, W = VW, H = VH, cxs = W / 2, cys = VPAD.t + (H - VPAD.t - VPAD.b) / 2;
   const big = (txt, x, y, sz, col, sc, a) => { ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.scale(sc, sc); ctx.font = `900 ${sz}px "DotGothic16",system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.lineJoin = 'round'; ctx.lineWidth = sz * .22; ctx.strokeStyle = '#0b0914'; ctx.strokeText(txt, 0, 0); ctx.fillStyle = col; ctx.fillText(txt, 0, 0); ctx.restore(); };
