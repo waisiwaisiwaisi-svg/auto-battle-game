@@ -97,15 +97,6 @@ npx cap open ios                         # Xcode（Mac）
 
 Firebase の じゅんび・ストア 申請・自動ビルドの 手順は [docs/RELEASE.md](docs/RELEASE.md)。プライバシーポリシーは [docs/privacy.html](docs/privacy.html)。
 
-## Unity 版
-
-`unity/PixelMonsterArena` に Unity 6 用のプロジェクトがあります。ひらきかた・ビルド方法は [unity/README.md](unity/README.md) を見てください。
-ブラウザ版と同じデータ（`index.html` から自動生成）で動きます。
-
-## 前作
-
-`duel.html` は 前のバージョン（スタンスだけを切り替える オート対戦「Pixel Stance Duel」）です。
-
-## 手打ちモンスター（tools/monsters）
-- `tools/monsters/<id>/mon.py` が 1体ずつの 手打ちドット絵（14コマ）。`python3 tools/monsters/build.py` で 絵を 作り、`python3 tools/monsters/catalog.py` で 図鑑ページ（採用／不採用の 判定つき）を 作る
-- 図鑑で 採用した モンスターは `tools/monsters/ADOPTED.json` に 入れて `python3 tools/monsters/export_game.py` を 実行すると、index.html の 「HANDMON」区間に 絵・種族値・タイプ・おぼえる わざ が 書きこまれ、くさむらや たいかいに 出てくる
+## モンスターの 絵（tools/monsters）
+- ChatGPT に 64×64 で 描いて もらった シート（`monsters64/Mxx_k.png`：1まい 12コマ）を `python3 tools/monsters/m64_import.py monsters64 tools/monsters/m64_order.json <out.json>` で ゲームの データに する
+- 元の 絵で まっすぐ 切れて いる はし は ふちどりで とじて おぎなう
