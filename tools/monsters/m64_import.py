@@ -44,6 +44,45 @@ def reduce(a, oy, ox):
     return out
 
 
+def complete(fr, M, CW, CH, sid):
+    # 元の 絵で まっすぐ 切れて いる コマを おぎなう
+    #   見つけかた：3コマ いじょうが ぴったり おなじ 列（行）で おわって いて、その 列に 絵が 3ドット いじょう ある → そこが 切れめ
+    #   おぎないかた：切り口の そとに 1れつ のばして、ふちどりで まるく とじる
+    from collections import Counter
+    out = [x.copy() for x in fr]; ops = [x[..., 3] > 0 for x in fr]
+    ext = []
+    for o in ops:
+        if not o.any(): ext.append(None); continue
+        ys, xs = np.where(o); ext.append({'r': xs.max(), 'l': xs.min(), 't': ys.min()})
+    for side in ('r', 'l', 't'):
+        line = lambda i, v: ops[i][:, v] if side in 'rl' else ops[i][v]
+        cand = Counter(e[side] for i, e in enumerate(ext) if e is not None and line(i, e[side]).sum() >= 3)
+        for v, n in cand.items():
+            if n < 3: continue
+            for i, e in enumerate(ext):
+                if e is None or e[side] != v or line(i, v).sum() < 3: continue
+                c = out[i]; o = c[..., 3] > 0
+                lum = c[..., :3].astype(int) @ np.array([3, 6, 1])
+                dark = c[o][lum[o] == lum[o].min()][0]   # いちばん くらい いろ＝ふちどり
+                lv = lum[:, v][o[:, v]] if side in 'rl' else lum[v][o[v]]
+                if (lv <= np.percentile(lum[o], 20)).mean() > .35: continue   # 切り口に ふちどりが ある＝しぜんな はし
+                d = {'r': 1, 'l': -1, 't': -1}[side]
+                rows = np.where(line(i, v))[0]
+                runs = np.split(rows, np.where(np.diff(rows) > 1)[0] + 1)
+                k = 0
+                for r in runs:
+                    for j, y in enumerate(r):
+                        edge = j == 0 or j == len(r) - 1
+                        p0 = (y, v) if side in 'rl' else (v, y)
+                        p1 = (y, v + d) if side in 'rl' else (v + d, y)
+                        p2 = (y, v + 2 * d) if side in 'rl' else (v + 2 * d, y)
+                        if not (0 <= p2[0] < c.shape[0] and 0 <= p2[1] < c.shape[1]): continue
+                        if edge: c[p1] = dark; k += 1
+                        else: c[p1] = c[p0]; c[p2] = dark; k += 2
+                print('  おぎなう', sid, i, side, v, k)
+    return out
+
+
 out = {}
 # ChatGPT の 1まい（2たい・4だん）を 上下に 2つに わけた ファイル：わけめを またいだ 絵（下の だんの 足・上の だんの 耳）が あるので、そろって いる ときは くっつけて から きる
 cards = {}
@@ -73,9 +112,12 @@ for card, kk, a in jobs:
     for n, (k2, sz) in list(owner.items()):
         if main.get(k2) == n: continue
         m = lab == n; ys, xs = np.where(m)
-        edge = min(np.abs(((xs + CW / 2) % CW) - CW / 2).min(), np.abs(((ys + CH / 2) % CH) - CH / 2).min(), ys.min(), gh - 1 - ys.max())   # コマの さかいめ・シートの 上下はし までの きょり
-        if edge <= 6: owner[n] = (-1, sz); continue   # さかいめ ちかくの はなれた かけら＝となりの コマから はみ出した きれはし → すてる
+        edgeS = min(ys.min(), gh - 1 - ys.max())   # シートの 上下はし までの きょり
+        edgeC = min(np.abs(((xs + CW / 2) % CW) - CW / 2).min(), np.abs(((ys + CH / 2) % CH) - CH / 2).min())   # コマの さかいめ までの きょり
+        if edgeS <= 6: owner[n] = (-1, sz); continue   # シートの はしの かけら＝となりの 絵から はみ出した きれはし → すてる
         best = min(dist, key=lambda kk2: dist[kk2][m].min()); dd = dist[best][m].min()
+        if edgeC <= 6:   # コマの さかいめ ちかくの かけら：さかいめを またがず、じぶんの コマの 本体の すぐ そば（口・きば・ひげ）なら のこす。ほかは となりの きれはし
+            owner[n] = (k2 if edgeC >= 1 and best == k2 and dd <= 4 else -1, sz); continue
         owner[n] = (best if dd <= 14 else -1, sz)
     # 本体が ない コマ（たおれる 絵が 下の だんに はみ出した など）：まわりの ほかの コマの 本体では ない 大きな かたまりを もらう
     mains = set(main.values()); med = np.median([owner[n][1] for n in mains]) if mains else 0
@@ -100,6 +142,7 @@ for card, kk, a in jobs:
             ty, tx = yy - y0, xx - x0
             if 0 <= ty < cell.shape[0] and 0 <= tx < cell.shape[1]: cell[ty, tx] = g[yy, xx]
         fr.append(cell)
+      fr = complete(fr, M, CW, CH, sid)
       # 12コマ ぜんぶ おなじ わくで きる（コマどうしの いちを たもつ）
       al = np.any([x[..., 3] > 0 for x in fr], axis=0); yy, xx = np.where(al)
       y0, y1, x0, x1 = yy.min(), yy.max() + 1, xx.min(), xx.max() + 1
