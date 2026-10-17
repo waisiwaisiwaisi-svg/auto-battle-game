@@ -1496,7 +1496,7 @@ const MOVE_PAT = {
   'shadow-ball': 'homing', 'will-o-wisp': 'homing', 'draining-kiss': 'homing', 'aura-sphere': 'homing', thunderbolt: 'zigzag', 'dragon-pulse': 'wave', 'psychic-noise': 'wave', 'thunder-wave': 'wave',
   toxic: 'lob', 'leech-seed': 'lob', 'gunk-shot': 'lob', 'sludge-bomb': 'lob', 'focus-blast': 'orb', moonblast: 'orb', 'fire-blast': 'blast', icicle: 'triple',
   // ゆか・かべ
-  'poison-swamp': 'blob', 'fire-sea': 'strip', 'volt-floor': 'grid', quicksand: 'pull', 'ice-wall': 'arc', 'thorn-hedge': 'vee',
+  'poison-swamp': 'blob', 'fire-sea': 'strip', 'volt-floor': 'grid', quicksand: 'pull', 'thorn-hedge': 'vee',
   // とっしん・せっきん
   spark: 'zigzag', 'close-combat': 'double', 'body-slam': 'leap', 'rapid-spin': 'spin', 'poison-jab': 'combo', 'play-rough': 'combo',
 };
@@ -7715,8 +7715,10 @@ function bStep(dt) {
         p.vx = Math.cos(na) * sp; p.vy = Math.sin(na) * sp;
       }
       p.age += dt; p.life -= dt; p.rot += dt * 12; if (p.hitCd > 0) p.hitCd -= dt;
-      if (p.pat === 'lob') {   // やまなり：とちゅうは あたらない・さえぎられない
+      if (p.pat === 'lob') {   // やまなり：とちゅうは あたらない・ステージの 障害物は こえる（わざの かべは たかいので とまる）
         const u = Math.min(1, p.age / p.T); p.x = p.sx + (p.tx - p.sx) * u; p.h = Math.sin(u * Math.PI) * 120; p.y = p.sy + (p.ty - p.sy) * u - BODY - p.h;
+        { const wb = wallBlocksAt(p.sx + (p.tx - p.sx) * u, p.sy + (p.ty - p.sy) * u, 6).find(b => { const w = wallOf(b); return w && w.side !== p.side; });
+          if (wb) { p.life = 0; burst(p.x, p.y, TYPES[p.m.t] ? TYPES[p.m.t].c : '#ffffff', 8, 90, .35); damageWall(wb, p.m); continue; } }
         if (u >= 1) { p.life = 0; projBlast(p, p.m.blastR || 48); } continue;
       }
       if (p.pat === 'boomerang' && p.age > (p.m.life || 2.2) * .42) {   // もどってくる
@@ -7984,7 +7986,7 @@ function moveDesc(m) {
   if (m.k === 'counter') out.push(`${COUNTER_T}びょう かまえて うけた ダメージを ${m.mult}ばいで かえす（1戦 ${healMax(m)}回まで）`);
   if (m.cat !== 'stat' && KIND_HIT[m.k]) out.push(`あたりやすさ${KIND_HIT[m.k]}`);
   if (m.chan) out.push(`${m.chan}びょう うちつづける`);
-  if (m.k === 'wall') out.push(`あいてとの あいだに かべを つくる（${m.life}びょう）。わざも とおさない${m.thorn ? '・さわると ダメージ' : ''}。こわせるのは ${wallBreakers({ t: m.t, reflect: m.reflect }).map(t => TYPES[t].n).join('・')} の わざ だけ`);
+  if (m.k === 'wall') out.push(`あいてとの あいだに かべを つくる（${m.life}びょう）。わざも とおさない${m.thorn ? '・さわると ダメージ' : ''}。そらから ふる わざ・じわれは とめられない。こわせるのは ${wallBreakers({ t: m.t, reflect: m.reflect }).map(t => TYPES[t].n).join('・')} の わざ だけ`);
   if (m.k === 'vault') out.push(m.hide === 'fly' ? 'そらへ とびあがり、あいての ところへ おりて こうげき（とんでいる あいだは うたれない）' : 'じめんに もぐり、あいての 足もとから こうげき（もぐっている あいだは うたれない）。ほった 穴は のこり、じぶんより 大きくない モンスターは 穴から 穴へ くぐれる');
   if (m.k === 'floor') out.push(`あいての 足もとに ${m.n}（きえない）。${m.noDmg ? '' : 'ふむと 1ダメージ'}${m.slow ? (m.noDmg ? '' : '・') + 'あしが おそくなる' : ''}`);
   if (m.cnt > 1) out.push(`${m.cnt}はつ`);
