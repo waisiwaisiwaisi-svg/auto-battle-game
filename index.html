@@ -3803,13 +3803,10 @@ function impactFx(x, y, t, k) {
 function fxPush(...a) { for (const o of a) { B.fx.push(o); if (NET.host) netEv('fx', o); } }
 const fxp = (o) => fxPush(Object.assign({ max: o.life }, o));
 function pillarFx(f, col, life = .7) { fxp({ type: 'pillar', x: f.x, y: f.y, col, w: 22 + f.r * .6, life }); fxp({ type: 'shock', x: f.x, y: f.y, rad: 40, col, life: .4 }); }
-function statFx(f, up, light) {
+function statFx(f, up, light) {   // のうりょく アップ／ダウン：ひと目で わかる 矢印（アップ＝赤い 上むき、ダウン＝青い 下むき）
   SND.se(up ? 'up' : 'down');
-  if (light) { fxp({ type: 'arrows', x: f.x, y: f.y, up, col: '#6aa8ff', hi: '#d8ecff', seed: Math.random() * 99, life: .5 }); return; }   // じぶんの わざの はんどうで さがる：くさりの 絵は ださない（かけられた ように 見えた）
-  const col = up ? '#ff9a5a' : '#6aa8ff';
-  fxp({ type: 'arrows', x: f.x, y: f.y, up, col, hi: up ? '#fff0b0' : '#d8ecff', seed: Math.random() * 99, life: .7 });
-  sheetFx(up ? 'buff' : 'debuff', f.x, f.y - BODY, 1.2);
-  for (let i = 0; i < 14; i++) B.parts.push({ x: f.x + rand(-18, 18), y: f.y - rand(0, 40), vx: 0, vy: up ? -rand(60, 120) : rand(30, 80), life: .6, max: .6, col: choice(up ? ['#ffd166', '#ff9a5a', '#ffffff'] : ['#7fb2ff', '#3a6ad8', '#ffffff']), size: 3, g: 0, shape: 'star', glow: i % 2 === 0 });
+  const col = up ? '#ff6a4a' : '#4a8cff', hi = up ? '#fff0b0' : '#d8ecff';
+  fxp({ type: 'arrows', x: f.x, y: f.y, up, col, hi, seed: Math.random() * 99, life: light ? .6 : .9, big: !light, h: (f.r || 20) * 2 + 20 });
 }
 function healFx(f) {
   SND.se('heal'); sheetFx('heal', f.x, f.y - BODY, 1.3);
@@ -7481,13 +7478,19 @@ function drawFxList() {
       ctx.fillStyle = g; ctx.fillRect(fx.x - w, fx.y - h, w * 2, h); ctx.globalAlpha = k * .8; ctx.fillRect(fx.x - w * .3, fx.y - h, w * .6, h); ctx.restore();
       ctx.globalAlpha = k; ctx.strokeStyle = fx.col; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(fx.x, fx.y, w * 1.4, w * .5, 0, 0, 7); ctx.stroke();
     }
-    else if (fx.type === 'arrows') {  // のうりょく アップ／ダウンの 矢印
-      const r = srng(fx.seed | 0);
-      for (let i = 0; i < 5; i++) {
-        const ox = (r() - .5) * 50, ph = r() * .5, u = clamp((1 - k) * 1.6 - ph, 0, 1), dy = fx.up ? -u * 70 : u * 50 - 60;
+    else if (fx.type === 'arrows') {  // のうりょく アップ／ダウンの 矢印：足もとの 輪＋体の まわりを 矢印が のぼる／おりる＋頭の 上に 大きな 矢印
+      const r = srng(fx.seed | 0), t = 1 - k, H = fx.h || 60, n = fx.big ? 7 : 4;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, k * 2) * .55; ctx.strokeStyle = fx.col; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(fx.x, fx.y, 26 + t * 14, (26 + t * 14) * .38, 0, 0, 7); ctx.stroke(); ctx.restore();   // 足もとの 輪
+      for (let i = 0; i < n; i++) {
+        const ox = (i / (n - 1) - .5) * 70 + (r() - .5) * 8, ph = r() * .35, u = clamp(t * 1.5 - ph, 0, 1);
         if (u <= 0 || u >= 1) continue;
-        ctx.globalAlpha = Math.sin(u * Math.PI); drawArrow(fx.x + ox, fx.y - 30 + dy, fx.up, fx.col, fx.hi);
+        const yy = fx.up ? fx.y - u * (H + 20) : fx.y - H - 10 + u * (H + 10);
+        ctx.globalAlpha = Math.sin(u * Math.PI); drawArrow(fx.x + ox, yy, fx.up, fx.col, fx.hi, Math.abs(ox) < 12 ? 1.7 : 1.35);
       }
+      if (fx.big) { const pop = Math.min(1, t * 6), bob = Math.sin(t * 18) * 2 * (1 - t);   // 頭の 上の 大きな 矢印（ぽんと でて ゆっくり きえる）
+        ctx.globalAlpha = Math.min(1, k * 2.5); drawArrow(fx.x + 34, fx.y - H * .6 + (fx.up ? -t * 14 : t * 14) + bob, fx.up, fx.col, fx.hi, 2.6 * (.6 + .4 * pop)); }   // 体の よこに（HPバーと かさならない）
+      ctx.globalAlpha = 1;
     }
     else if (fx.type === 'shieldUp') {  // まもる：六角の バリアが ひろがる
       const r = fx.rad * (1.2 - k * .4);
@@ -7733,7 +7736,8 @@ function drawSpike(x, y, r, col) {
   ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x - r, y + r * .6); ctx.lineTo(x, y - r * 1.3); ctx.lineTo(x + r, y + r * .6); ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.moveTo(x - r * .2, y + r * .4); ctx.lineTo(x, y - r * 1.1); ctx.lineTo(x - r * .6, y + r * .5); ctx.fill();
 }
-function drawArrow(x, y, up, col, hi) {
+function drawArrow(x, y, up, col, hi, sc) {
+  if (sc && sc !== 1) { ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc); drawArrow(0, 0, up, col, hi); ctx.restore(); return; }
   const s = up ? -1 : 1;
   ctx.fillStyle = '#120e1c'; ctx.beginPath(); ctx.moveTo(x, y + s * 12); ctx.lineTo(x + 9, y + s * 2); ctx.lineTo(x + 4, y + s * 2); ctx.lineTo(x + 4, y - s * 10); ctx.lineTo(x - 4, y - s * 10); ctx.lineTo(x - 4, y + s * 2); ctx.lineTo(x - 9, y + s * 2); ctx.closePath(); ctx.fill();
   ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, y + s * 10); ctx.lineTo(x + 7, y + s * 3); ctx.lineTo(x + 3, y + s * 3); ctx.lineTo(x + 3, y - s * 9); ctx.lineTo(x - 3, y - s * 9); ctx.lineTo(x - 3, y + s * 3); ctx.lineTo(x - 7, y + s * 3); ctx.closePath(); ctx.fill();
@@ -8868,7 +8872,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc }); },
+  run(fn) { return fn({ hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 })();
 </script>
