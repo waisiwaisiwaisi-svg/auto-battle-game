@@ -4631,7 +4631,8 @@ function makeArena(key) {
   if (STG && STG.floors[key]) {   // かさねる ステージ：床・枠・観客・旗・置きもの を べつべつに かく
     st.layered = true; st.props = STG.props[key] || [];
     // 障害物の あたりはんていは 置きものの 絵の 足もとから（さいしょの 10こは 枠の 台・管・柱）
-    if (st.props.some(p => p.solid)) st.solid = st.solid.slice(0, 10).concat(st.props.flatMap(p => (p.solid || []).map(r => ({ x0: r[0], y0: r[1], x1: r[2], y1: r[3] }))));
+    st.propSol = st.props.map(p => (p.solid || []).map(r => ({ x0: r[0], y0: r[1], x1: r[2], y1: r[3] }))); st.propHp = []; st.propGone = []; st.propHit = [];   // おきものは こわせる（たいりょく・こわれた か）
+    if (st.props.some(p => p.solid)) st.solid = st.solid.slice(0, 10).concat(st.propSol.flat());
     const paint = () => { g.clearRect(0, 0, a.W, a.H); stageComposite(key, g, a.W, a.H, true); };
     paint(); const all_ = [STG.frame, STG.floors[key], STG.banners[key], ...st.props.map(p => p.img)]; for (const im of all_) if (im && !imgOk(im)) im.addEventListener('load', paint, { once: true });
     const r = srng(key.length * 13 + 5); st.seats = STAGE.seats.map(([x, y, t]) => ({ x, y, t, ph: r() * 6, lag: r() * .5 }));
@@ -4640,8 +4641,13 @@ function makeArena(key) {
     if (a.image.complete && a.image.naturalWidth) paint(); else { g.fillStyle = '#2a2438'; g.fillRect(0, 0, a.W, a.H); a.image.addEventListener('load', paint, { once: true }); }
   }
   st.bg = c;
+  buildNav(st);
+  return st;
+}
+// 道さがしの マス目を つくる（ステージの 障害物が こわれた ときも つくりなおす）
+function buildNav(st) {
   // 道さがし用の マス目（NAV ごと）：体の 半径 NAV_R で 通れる マス
-  const nw = Math.ceil(a.W / NAV), nh = Math.ceil(a.H / NAV), walk = new Uint8Array(nw * nh), all = st.solid.concat(st.low);
+  const { fx0, fy0, fx1, fy1 } = st, nw = Math.ceil(st.W / NAV), nh = Math.ceil(st.H / NAV), walk = new Uint8Array(nw * nh), all = st.solid.concat(st.low);
   for (let j = 0; j < nh; j++) for (let i = 0; i < nw; i++) {
     const x = (i + .5) * NAV, y = (j + .5) * NAV;
     walk[j * nw + i] = x > fx0 + NAV_R && x < fx1 - NAV_R && y > fy0 + NAV_R && y < fy1 - NAV_R && !all.some(o => circRect(x, y, NAV_R, o)) ? 1 : 0;
@@ -4659,7 +4665,6 @@ function makeArena(key) {
   const comfy = new Uint8Array(nw * nh);
   for (let c = 0; c < nw * nh; c++) if (walk[c]) { const x = (c % nw + .5) * NAV, y = ((c / nw | 0) + .5) * NAV; comfy[c] = all.some(o => circRect(x, y, NAV_R + OBST_GAP, o)) ? 0 : 1; }
   st.nav = { nw, nh, walk, comfy };
-  return st;
 }
 const CAM_MAX = 1.6, CAM_PAD = 170;   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
@@ -5456,12 +5461,12 @@ function fireMove(f) {
       if (m.pat === 'erupt' && cur.pts) { addBlasts(f, m, cur.pts, cur.uid, 'spike'); B.shake = Math.max(B.shake, 4); endAct(f, .35); break; }
       if (m.pat === 'split') {   // 3ぼんに わかれる
         let hitOnce = false; const a0 = cur.ang;
-        for (const da of [-.32, 0, .32]) { const a = a0 + da, L = rayLen(f, a, m.len); if (L < m.len - 2) { const wb = wallBlocksAt(f.x + Math.cos(a) * (L + 6), f.y + Math.sin(a) * (L + 6), 8)[0]; if (wb) damageWall(wb, m); } fxPush(m.look === 'blade' ? { type: 'blade', x: f.x, y: f.y - BODY, ang: a, len: L, col: '#e8ffff', life: .32, max: .32 } : { type: 'beam', x: f.x, y: f.y - BODY, ang: a, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 });
+        for (const da of [-.32, 0, .32]) { const a = a0 + da, L = rayLen(f, a, m.len); if (L < m.len - 2) { const hx = f.x + Math.cos(a) * (L + 6), hy = f.y + Math.sin(a) * (L + 6), wb = wallBlocksAt(hx, hy, 8)[0]; if (wb) damageWall(wb, m); else damageProp(propsAt(hx, hy, 8)[0], m); } fxPush(m.look === 'blade' ? { type: 'blade', x: f.x, y: f.y - BODY, ang: a, len: L, col: '#e8ffff', life: .32, max: .32 } : { type: 'beam', x: f.x, y: f.y - BODY, ang: a, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 });
           cur.ang = a; cur.len = L; if (!hitOnce && targetable(o) && inZone({ ...cur, m: { ...m, pat: null } }, f, o.x, o.y, o.r)) { hitOnce = true; hit(f, o, m, a); } }
         cur.ang = a0; B.shake = Math.max(B.shake, 3); endAct(f, .35); break; }
       cur.len = rayLen(f, cur.ang, m.len);   // 障害物で とまる
       const L = cur.len, ex = f.x + Math.cos(cur.ang) * L, ey = f.y + Math.sin(cur.ang) * L;
-      if (L < m.len - 2) { const wb = wallBlocksAt(f.x + Math.cos(cur.ang) * (L + 6), f.y + Math.sin(cur.ang) * (L + 6), 8)[0]; if (wb) damageWall(wb, m); }
+      if (L < m.len - 2) { const hx = f.x + Math.cos(cur.ang) * (L + 6), hy = f.y + Math.sin(cur.ang) * (L + 6), wb = wallBlocksAt(hx, hy, 8)[0]; if (wb) damageWall(wb, m); else damageProp(propsAt(hx, hy, 8)[0], m); }
       fxPush({ type: 'beam', x: f.x, y: f.y - BODY, ang: cur.ang, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 }); for (let d = 20; d < L; d += 40) typeFx(f.x + Math.cos(cur.ang) * d, f.y - BODY + Math.sin(cur.ang) * d, m.t, 2, 70, .4);
       B.shake = Math.max(B.shake, 3);
       if (L < m.len) { impactFx(ex, ey - BODY * .5, m.t, .6); addDecal(ex, ey, 14, m.t === 'fire' || m.t === 'elec' ? 'scorch' : 'crater'); }
@@ -5586,8 +5591,28 @@ const WALL_HP = { rock: 5, ice: 3, grass: 4, reflect: 3 };
 const wallHp = (w) => WALL_HP[w.reflect ? 'reflect' : w.t] || 4;
 const wallDmgOf = (m) => { const p = m ? (m.power || (m.pow || 0) * 5) : 60; return p >= 100 ? 3 : p >= 75 ? 2 : 1; };
 function wallOf(b) { return B.walls.find(w => w.blocks.includes(b)); }
+// わざの かべを こわせるのは、かべの タイプに「こうかばつぐん」の わざ だけ（いわの かべ ← かくとう・じめん・みず・くさ など）
+const wallType = (w) => w.reflect ? 'psychic' : w.t;
+const breaksWall = (m, w) => !!m && m.t && ((CHART[m.t] || {})[wallType(w)] || 1) > 1;
+function wallBreakers(w) { return Object.keys(TYPES).filter(t => ((CHART[t] || {})[wallType(w)] || 1) > 1); }
+// ステージの おきもの：どんな こうげきでも けずれて、0 で こわれる（その ばしょが とおれる ように なる）
+const propHpMax = (p) => clamp(Math.round(p.w * p.h / 5000), 6, 12);
+function propsAt(x, y, r) { const st = B.st, out = []; if (!st.propSol) return out; st.props.forEach((p, i) => { if (!st.propGone[i] && st.propSol[i].some(o => circRect(x, y, r, o))) out.push(i); }); return out; }
+function damageProp(i, m, n) {
+  const st = B.st; if (i == null || i < 0 || !st.propSol || st.propGone[i] || !st.propSol[i].length) return; const p = st.props[i];
+  if (st.propHp[i] == null) st.propHp[i] = propHpMax(p);
+  st.propHp[i] -= n == null ? wallDmgOf(m) : n; st.propHit[i] = B.t;
+  const s0 = st.propSol[i][0]; burst((s0.x0 + s0.x1) / 2, s0.y0 - 6, '#c8b89a', 5, 70, .3); SND.se('hit', 1.4);
+  if (st.propHp[i] > 0) return;
+  st.propGone[i] = true; const rs = new Set(st.propSol[i]); st.solid = st.solid.filter(o => !rs.has(o));
+  for (let k = 0; k < 4; k++) { const x = p.x + (k - 1.5) * p.w * .22, y = p.y - 6; if (PLFX.brk_rock) plFx('brk_rock', x, y + 4, p.w / 4 / (PLFX.brk_rock.w * PIX_D) * 1.6); burst(x, y - p.h * .3, '#b8a888', 10, 140, .6); }
+  plFx('dirt', p.x, p.y, 1.6); addDecal(p.x, p.y - 8, Math.min(40, p.w * .25), 'crater'); B.shake = Math.max(B.shake, 6); SND.se('boom'); B.cheerT = Math.max(B.cheerT || 0, 1.5);
+  say('しょうがいぶつが こわれた！'); buildNav(st); wallsChanged();
+}
 function damageWall(b, m, n) {
   if (!b || b.gone) return; const w = wallOf(b); if (!w) return;
+  if (m && !breaksWall(m, w)) {   // きかない わざ：はじかれる
+    if (!(B.t - (b.noT || -9) < .5)) { b.noT = B.t; burst(b.x, b.y - 14, '#ffffff', 3, 50, .2); SND.se('weak', 1.2); popText(b.x, b.y - 40, 'きかない', '#a49ac0'); } return; }
   if (b.hp == null) b.hp = wallHp(w);
   b.hp -= n == null ? wallDmgOf(m) : n; b.hitT = B.t;
   burst(b.x, b.y - 14, TYPES[w.t] ? TYPES[w.t].c : '#cccccc', 4, 60, .25); SND.se('hit', 1.5);
@@ -5600,10 +5625,10 @@ function wallBreakFx(w, b) { const k = w.reflect ? 'brk_mirror' : 'brk_' + ({ ic
 // いち（x, y）の まわり r に ある かべの ブロック
 const wallBlocksAt = (x, y, r) => B.wallRects ? B.wallRects.filter(b => circRect(x, y, r, b)) : [];
 // あいてとの あいだを ふさいでいるのが わざの かべ だけ か（ステージの 障害物では ない）
-function losWallOnly(f, o) { if (!B.walls || !B.walls.length || flies(f)) return false; const a = Math.atan2(o.y - f.y, o.x - f.x), d = dist(f, o), L = rayLen(f, a, d); if (L >= d - 2) return false;
-  if (!wallBlocksAt(f.x + Math.cos(a) * (L + 6), f.y + Math.sin(a) * (L + 6), 8).length) return false;
+function losWallOnly(f, o, m) { if (!B.walls || !B.walls.length || flies(f)) return false; const a = Math.atan2(o.y - f.y, o.x - f.x), d = dist(f, o), L = rayLen(f, a, d); if (L >= d - 2) return false;
+  const wb = wallBlocksAt(f.x + Math.cos(a) * (L + 6), f.y + Math.sin(a) * (L + 6), 8); if (!wb.length || (m && !breaksWall(m, wallOf(wb[0])))) return false;   // きかない わざでは うたない
   const sv = B.wallRects; B.wallRects = []; const ok = rayLen(f, a, d) >= d - 2; B.wallRects = sv; return ok; }
-function wallsInArea(x, y, r, m) { if (!B.walls || !B.walls.length) return; for (const b of wallBlocksAt(x, y, r)) damageWall(b, m); }
+function wallsInArea(x, y, r, m) { for (const i of propsAt(x, y, r)) damageProp(i, m); if (!B.walls || !B.walls.length) return; for (const b of wallBlocksAt(x, y, r)) damageWall(b, m); }
 function wallsChanged() {
   B.wallRects = []; for (const w of B.walls) for (const b of w.blocks) if (!b.gone) B.wallRects.push(b);
   // 道さがしの マス目にも はんえい（もとの マスを おぼえておいて 毎回 つくりなおす）
@@ -6313,7 +6338,7 @@ function aiMove(f, o, dt, autoSpecial) {
   if (f.queued) {
     const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat);
     const close = CLOSE_KINDS.includes(m.k);
-    const see = !shot || losClear(f, o) || (!close && isDamaging(m) && losWallOnly(f, o));   // わざの かべ だけが じゃま：かべごと うって こわす
+    const see = !shot || losClear(f, o) || (!close && isDamaging(m) && losWallOnly(f, o, m));   // わざの かべ だけが じゃま：かべごと うって こわす
     if (close && isDamaging(m) && !(f.want && B.t - f.want.t > 1.2) && flankStep(f, o, reach, d, per, dt)) return;   // しじが ながびいたら まっすぐ つっこむ   // まわりこみ：よこへ まわって から つっこむ
     if (d <= reach && see) {
       const q = f.queued; f.queued = null; f.flFor = null;
@@ -6951,7 +6976,7 @@ function netSnapshot() {
   const sides = B.sides.map(sd => ({ a: sd.act, hp: sd.fs.map(x => r1(x.hp)), fa: sd.fs.map(x => x.fainted ? 1 : 0), st: sd.fs.map(x => x.status || ''), cd: r1(sd.swapCd), dc: r1(sd.dodgeCmd || 0), hz: sd.hz, tl: r1(sd.tail), tr: sd.trainer ? [r1(sd.trainer.shout), sd.trainer.pose || ''] : 0 }));
   const snap = { n: ++NET.snapN, t: r1(B.t), mt: r1(B.modeT), m: B.mode, sh: r1(B.shake), fl: r1(B.scrFlash || 0), ch: r1(B.cheer), tr: r1(B.trickRoom),
     f: [F(active(0)), F(active(1))], s: sides, p: B.projs.map(p => [r1(p.x), r1(p.y), r1(p.vx), r1(p.vy), MOVE_ID.get(p.m), r1(p.rot), p.side, p.pat || '']),
-    ho: B.holes.map(h => [r1(h.x), r1(h.y), r1(h.sz)]),
+    ho: B.holes.map(h => [r1(h.x), r1(h.y), r1(h.sz)]), pr: B.st.propSol ? B.st.props.map((p, i) => B.st.propGone[i] ? -1 : (B.st.propHp[i] == null ? 99 : B.st.propHp[i])) : null,
     wl: B.walls.map(w => [w.t, r1(w.life), r1(w.max), w.side, w.uid, w.blocks.map(b => [r1(b.x), r1(b.y), b.gone ? -1 : (b.hp == null ? 9 : b.hp)]), w.reflect ? 1 : 0]), zn: B.zones.map(z => [z.id, r1(z.x), r1(z.y), z.rad, r1(z.life), r1(z.max), z.side, z.uid]),
     cl: [active(0), active(1)].map(f => f && f.clones ? f.clones.map(c => [r1(c.x), r1(c.y), c.doll ? c.hp : 0]) : 0), bl: (B.blasts || []).filter(b => !b.done && b.t > 0).slice(0, 12).map(b => [r1(b.x), r1(b.y), r1(b.r), r1(b.ring), r1(b.t), r1(b.t0), b.side, b.look || '']),
     ob: (B.obs || []).slice(0, 16).map(o => o.k === 'trail' ? [o.k, o.side, r1(o.life), o.uid, o.pts.filter((p, i) => i % 2 === 0).slice(0, 14).map(p => [r1(p.x), r1(p.y)])] : o.k === 'wave' ? [o.k, o.side, r1(o.life), o.uid, r1(o.x0), r1(o.y0), r1(o.ang), r1(o.d), o.len, o.w] : [o.k, o.side, r1(o.life), o.uid, r1(o.x), r1(o.y), r1(o.R || o.r), o.arm > 0 ? 1 : 0]),
@@ -6994,6 +7019,7 @@ function netGuestSnap(sn) {
     f.inv = a[12]; f.flash = a[13]; f.fireT = B.t - a[14]; STAGE_KEYS.forEach((k, i) => f.st[k] = (a[15] || [])[i] || 0); f.lagMax = a[16]; f.swapLag = a[17]; f.hurtInv = a[18] || 0;
   }
   B.holes = (sn.ho || []).map(h => ({ x: h[0], y: h[1], sz: h[2] }));
+  if (sn.pr && B.st.propSol) sn.pr.forEach((h, i) => { if (h === -1) { if (!B.st.propGone[i]) { B.st.propGone[i] = true; const rs = new Set(B.st.propSol[i]); B.st.solid = B.st.solid.filter(o => !rs.has(o)); } } else if (h !== 99) { if (B.st.propHp[i] !== h) B.st.propHit[i] = B.t; B.st.propHp[i] = h; } });   // おきものの こわれぐあい
   B.walls = (sn.wl || []).map(w => ({ t: w[0], life: w[1], max: w[2], side: w[3], uid: w[4], reflect: !!w[6], blocks: w[5].map(([x, y, h]) => ({ x, y, x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, gone: h === -1, hp: h == null || h === 9 || h === -1 ? null : h })) })); B.wallRects = []; for (const w of B.walls) for (const b of w.blocks) if (!b.gone) B.wallRects.push(b);
   B.zones = (sn.zn || []).filter(z => MOVES[z[0]]).map(z => ({ id: z[0], t: MOVES[z[0]].t, x: z[1], y: z[2], rad: z[3], life: z[4], max: z[5], side: z[6], uid: z[7] }));
   B.projs = (sn.p || []).filter(p => MOVES[p[4]]).map(p => ({ x: p[0], y: p[1], vx: p[2], vy: p[3], m: MOVES[p[4]], r: MOVES[p[4]].r || 6, rot: p[5], side: p[6], pat: p[7] || '', life: 1 }));
@@ -7592,7 +7618,7 @@ function bStep(dt) {
         else { p.life = 0; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx), { decoy: null }); }
       }
       const st = B.st, out = p.x < st.fx0 - 10 || p.x > st.fx1 + 10 || p.y < st.fy0 - 40 || p.y > st.fy1 + 4, block = p.life > 0 && !flies(p.f) && obstacles(false).some(o => circRect(p.x, p.y + BODY, p.r, o));
-      if (block) { const wb = wallBlocksAt(p.x, p.y + BODY, p.r)[0]; if (wb) damageWall(wb, p.m); }   // かべを けずる
+      if (block) { const wb = wallBlocksAt(p.x, p.y + BODY, p.r)[0]; if (wb) damageWall(wb, p.m); else damageProp(propsAt(p.x, p.y + BODY, p.r + 2)[0], p.m); }   // かべ・おきものを けずる
       if ((out || block) && p.pat === 'bounce' && (p.bnc || 0) < (p.m.bounces || 3) && p.life > 0) {   // はねかえる（かべ・はしで 3かいまで）
         p.bnc = (p.bnc || 0) + 1; p.x -= p.vx * dt; p.y -= p.vy * dt;
         const tryX = obstacles(false).some(o => circRect(p.x + p.vx * dt, p.y + BODY, p.r, o)) || p.x + p.vx * dt < st.fx0 - 10 || p.x + p.vx * dt > st.fx1 + 10;
@@ -7833,7 +7859,7 @@ function moveDesc(m) {
   if (m.k === 'counter') out.push(`${COUNTER_T}びょう かまえて うけた ダメージを ${m.mult}ばいで かえす（1戦 ${healMax(m)}回まで）`);
   if (m.cat !== 'stat' && KIND_HIT[m.k]) out.push(`あたりやすさ${KIND_HIT[m.k]}`);
   if (m.chan) out.push(`${m.chan}びょう うちつづける`);
-  if (m.k === 'wall') out.push(`あいてとの あいだに かべを つくる（${m.life}びょう）。わざも とおさない${m.thorn ? '・さわると ダメージ' : ''}`);
+  if (m.k === 'wall') out.push(`あいてとの あいだに かべを つくる（${m.life}びょう）。わざも とおさない${m.thorn ? '・さわると ダメージ' : ''}。こわせるのは ${wallBreakers({ t: m.t, reflect: m.reflect }).map(t => TYPES[t].n).join('・')} の わざ だけ`);
   if (m.k === 'vault') out.push(m.hide === 'fly' ? 'そらへ とびあがり、あいての ところへ おりて こうげき（とんでいる あいだは うたれない）' : 'じめんに もぐり、あいての 足もとから こうげき（もぐっている あいだは うたれない）。ほった 穴は のこり、じぶんより 大きくない モンスターは 穴から 穴へ くぐれる');
   if (m.k === 'floor') out.push(`あいての 足もとに ${m.n}（きえない）。${m.noDmg ? '' : 'ふむと 1ダメージ'}${m.slow ? (m.noDmg ? '' : '・') + 'あしが おそくなる' : ''}`);
   if (m.cnt > 1) out.push(`${m.cnt}はつ`);
@@ -8276,6 +8302,14 @@ function wallSprite(t) {
 }
 // かべの ブロック：下から せりあがり、きえる ときは しずむ
 // かべの きず：けずれた ぶんだけ ひびが はいり、うけた しゅんかん しろく ひかる
+// おきものの ひび（けずれた ぶん）と あたった ときの しろい ひかり
+function drawPropDmg(st, p, i) {
+  if (!st.propHp || st.propHp[i] == null) return; const mx = propHpMax(p), k = 1 - st.propHp[i] / mx, sb = st.propSol[i]; if (!sb || !sb.length) return;
+  const x0 = Math.min(...sb.map(o => o.x0)), x1 = Math.max(...sb.map(o => o.x1)), top = p.y - p.h * .75, bot = p.y - 4;
+  if (k > 0) { const r = srng(Math.round(p.x * 7 + p.y)); ctx.strokeStyle = 'rgba(20,12,20,.85)'; ctx.lineWidth = 2;
+    for (let n = 0; n < Math.ceil(k * 7); n++) { let x = x0 + 6 + r() * (x1 - x0 - 12), y = top + r() * (bot - top) * .6; ctx.beginPath(); ctx.moveTo(x, y); for (let j = 0; j < 4; j++) { x += (r() - .5) * 14; y += 5 + r() * 7; ctx.lineTo(x, y); } ctx.stroke(); } }
+  if (st.propHit[i] != null && B.t - st.propHit[i] < .1) { ctx.save(); ctx.globalAlpha = .4; ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(p.img, p.x - p.w / 2, p.y - p.h, p.w, p.h); ctx.restore(); }
+}
 function drawWallDmg(w, b) {
   const mx = wallHp(w), hp = b.hp == null ? mx : b.hp, k = 1 - hp / mx, top = b.y + WALL_B / 2 - (w.reflect ? 40 : 35), x0 = b.x - WALL_B / 2;
   if (k > 0) { const r = srng(Math.round(b.x * 7 + b.y)); ctx.strokeStyle = w.reflect ? 'rgba(255,255,255,.9)' : 'rgba(20,12,20,.85)'; ctx.lineWidth = 2;
@@ -9215,12 +9249,13 @@ function render() {
   const body = (f) => { const S = SPR[f.mon.sid], w = S.n.width * S.ms, h = S.n.height * S.ms; return [f.x - w * .4, f.y - h, f.x + w * .4, f.y]; };
   const over = (b, p) => b[2] > p.x - p.w / 2 && b[0] < p.x + p.w / 2 && b[3] > p.y - p.h && b[1] < p.y;
   const fs_ = [a, e].filter(f => f && f.state !== 'bench' && SPR[f.mon.sid]);
-  if (st.layered) for (const p of st.props) if (imgOk(p.img)) {
+  if (st.layered) st.props.forEach((p, pi) => { if (!imgOk(p.img) || (st.propGone && st.propGone[pi])) return;
     // うしろに いる こ（あるいて いる こ）に かさなったら すける
     const hf = fs_.find(f => !hovers(f) && f.y < p.y - 4 && over(body(f), p));
     if (hf) { const b = body(hf); p.hx = (b[0] + b[2]) / 2; p.hy = (b[1] + b[3]) / 2; p.hr = Math.max(b[2] - b[0], b[3] - b[1]) * .62 + 10; }
     p.fade = (p.fade || 0) + ((hf ? 1 : 0) - (p.fade || 0)) * .18;   // 1フレームごとに すこしずつ
-    list.push({ y: p.y - 4, d: () => {   // おきもの：あしもとで まえうしろ。うしろの こが いる ときは その まわり だけ すける
+    const pd = {   // おきもの：あしもとで まえうしろ。うしろの こが いる ときは その まわり だけ すける
+      d0: () => {
       const X = p.x - p.w / 2, Y = p.y - p.h;
       if (p.fade < .02) { ctx.drawImage(p.img, X, Y, p.w, p.h); return; }
       const ring = (r) => { ctx.beginPath(); ctx.ellipse(p.hx, p.hy, r, r * 1.05, 0, 0, 7); };
@@ -9228,10 +9263,10 @@ function render() {
       ctx.save(); ctx.beginPath(); ctx.rect(X, Y, p.w, p.h); ctx.ellipse(p.hx, p.hy, R1, R1 * 1.05, 0, 0, 7); ctx.clip('evenodd'); ctx.drawImage(p.img, X, Y, p.w, p.h); ctx.restore();   // そと：ふつう
       ctx.save(); ctx.beginPath(); ctx.ellipse(p.hx, p.hy, R1, R1 * 1.05, 0, 0, 7); ctx.ellipse(p.hx, p.hy, R0, R0 * 1.05, 0, 0, 7); ctx.clip('evenodd'); ctx.globalAlpha = 1 - .35 * p.fade; ctx.drawImage(p.img, X, Y, p.w, p.h); ctx.restore();   // ふち：すこし すける
       ctx.save(); ring(R0); ctx.clip(); ctx.globalAlpha = 1 - .72 * p.fade; ctx.drawImage(p.img, X, Y, p.w, p.h); ctx.restore();   // まんなか：よく すける
-    } });
-  }
+    } }; list.push({ y: p.y - 4, d: () => { pd.d0(); drawPropDmg(st, p, pi); } });
+  });
   for (const f of fs_) {   // うかんで いる こは、かさなった おきものより てまえに かく（うえを とんで いる）
-    let y = f.y; if (hovers(f) && st.layered) for (const p of st.props) if (over(body(f), p)) y = Math.max(y, p.y - 3);
+    let y = f.y; if (hovers(f) && st.layered) st.props.forEach((p, pi) => { if (!(st.propGone && st.propGone[pi]) && over(body(f), p)) y = Math.max(y, p.y - 3); });
     list.push({ y, d: () => drawFighter(f) }); }
   for (const f of [a, e]) if (f && !fs_.includes(f)) list.push({ y: f.y, d: () => drawFighter(f) });
   for (const w of B.walls) for (const b of w.blocks) if (!b.gone) list.push({ y: b.y + WALL_B / 2, d: () => { drawWallBlock(w, b); drawWallDmg(w, b); } });
