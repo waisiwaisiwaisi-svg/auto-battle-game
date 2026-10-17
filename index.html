@@ -9415,7 +9415,11 @@ document.addEventListener('gesturestart', (ev) => ev.preventDefault());
    画面遷移ボタン
    ===================================================================== */
 // TAP TO START：がめんの どこを タップしても はじまる（セーブが あれば つづきから、なければ あいぼう えらび）。はじめからは せってい の しょきか で
-$('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') || $('scTitle').hidden) return; SND.se('ok'); S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else renderStarter(); });
+// タイトル：ブラウザは さいしょの タップまで 音を だせないので、1かいめの タップで BGM を ならし、2かいめで はじめる
+let titleArmed = false;
+$('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') || $('scTitle').hidden) return;
+  if (!titleArmed && !SND.opt.mute) { titleArmed = true; SND.init(); SND.play('hub'); const t = $('tapStart'); if (t) { t.textContent = 'TAP TO START'; t.classList.add('armed'); } return; }
+  titleArmed = true; SND.se('ok'); S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else renderStarter(); });
 /* ---------- 画面の 向き：横長なら 横レイアウト。スマホを たてに もった ままでも「横画面」で 90度 回して あそべる ---------- */
 let LAND_PREF = (() => { try { return localStorage.getItem('pma_land') === '1'; } catch (e) { return false; } })();
 function layout() {
