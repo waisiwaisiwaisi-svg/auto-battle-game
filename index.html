@@ -955,6 +955,26 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 @media (hover:hover){#scHub .hmode:hover,#scHub .hicon:hover{filter:brightness(1.12);transform:translateY(-2px)} #scHub .hmode:hover::after{transform:translateX(3px)}}
 #scHub .hmode:active,#scHub .hicon:active{transform:translateY(3px)!important;box-shadow:inset 0 2px 0 rgba(0,0,0,.35),0 0 0 #0b0914!important;filter:brightness(.92)}
 
+
+/* くんれん */
+#scBattle.watch #mvCmds,#scBattle.watch #bAuto{display:none!important}
+#scBattle.watch .cmd.mv,#scBattle.watch #bench{pointer-events:none}
+#scBattle.watch .cmd.mv{filter:saturate(.85)}
+.trmode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px}
+.trmode button.on{color:#1a1222;background:var(--acc)}
+.trbox{max-width:560px!important;text-align:left!important}
+.trbox h3{margin:10px 0 4px;font-size:14px;color:var(--acc)}
+.trbox .dim{font-size:11px}
+.trmv{display:flex;flex-wrap:wrap;gap:4px}
+.trmv button{font:inherit;font-size:12px;padding:3px 8px;border-radius:4px;border:2px solid var(--c);background:transparent;color:var(--ink);opacity:.55}
+.trmv button.on{opacity:1;background:color-mix(in srgb,var(--c) 35%,transparent)}
+.truse{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.truse>div{border-left:4px solid var(--c);padding:4px 6px;background:rgba(255,255,255,.04);display:flex;flex-direction:column;gap:3px;min-width:0}
+.trseg{display:flex;flex-wrap:wrap;gap:3px}
+.trseg button{font:inherit;font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid var(--edge);background:transparent;color:var(--ink)}
+.trseg button.on{background:var(--acc);color:#1a1222;border-color:var(--acc)}
+.trrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:3px 0}
+.trrow>b{width:7.5em;font-size:12px}
 </style>
 </head>
 <body>
@@ -1068,6 +1088,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
   <section class="screen" id="scTeam">
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">へんせい</span><button class="btn sub" id="btnTeamBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>して いれかえ　／　<b>タップ</b>で くわしく みる</p>
+    <div class="trmode"><button class="btn sub" id="btnTrain" style="padding:4px 12px;font-size:13px">くんれんモード：OFF</button><span class="dim" id="trHint" style="font-size:11px"></span></div>
     <div class="teamwrap">
       <div class="teamleft">
         <div class="slotlabel"><b>しゅつじょう</b> <span class="dim">— たたかいに でる 3たい（1ばんめから とうじょう）</span></div>
@@ -3112,7 +3133,7 @@ function renderTeam(openUid) {
   const drop = document.createElement('div'); drop.className = 'slot drop'; drop.dataset.w = 'drop'; drop.dataset.i = 0; drop.innerHTML = '<div style="font-size:18px">⬇</div><div>ここに<br>あずける</div>'; X.appendChild(drop);
   S.box.forEach((m, i) => X.appendChild(slot(m, { w: 'b', i }, '')));
   $('boxCount').textContent = `${S.box.length}たい`;
-  renderTeamDetail();
+  updTrainBtn(); renderTeamDetail();
   show('scTeam');
 }
 function renderTeamDetail() {
@@ -3126,13 +3147,14 @@ function renderTeamDetail() {
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span><div class="dim" style="font-size:11px">${natRelText(m.nat)}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
-    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn danger" data-a="release">にがす</button>`}</div>`;
+    <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button><button class="btn sub" data-a="train" style="color:var(--acc)">くんれん</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn danger" data-a="release">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
     if (act === 'tm') return useTM(m);
     if (act === 'boost') return openBoost(m);
     if (act === 'item') return itemMenu(m);
+    if (act === 'train') return trainEditor(m);
     if (act === 'box') teamMove({ w: 'p', i: pi }, { w: 'drop', i: 0 });
     if (act === 'party') teamMove({ w: 'b', i: bi }, { w: 'p', i: S.party.length });
     if (act === 'release') { ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; save(); renderTeam(); }); return; }
@@ -3154,6 +3176,36 @@ function rerollPool(m, idx, sameType) {
   const ids = sameType ? Object.keys(MOVES).filter(id => id !== 'tackle' && MOVES[id].t === old.t && canLearn(m.sid, id)) : learned(m);
   return ids.filter(id => MOVES[id] && !cur.includes(id));
 }
+// くんれん：わざ 4つ・わざの つかいかた・うごきかた を きめる（くんれんモードの しあいで つかう）
+function trainEditor(m) {
+  const sp = SPECIES[m.sid], all = learned(m), nat = NATURES[natOf({ mon: m, sp })];
+  const T = m.tr = m.tr || {}; T.use = T.use || {}; T.style = T.style || {};
+  if (!trMoves(m)) T.moves = equipped(m).filter(id => all.includes(id)).slice(0, 4);
+  const bg = document.createElement('div'); bg.className = 'askbg';
+  const seg = (opts, cur, key) => `<div class="trseg" data-k="${key}">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+  const draw = () => {
+    const mv = T.moves;
+    bg.innerHTML = `<div class="askbox trbox"><div><b>${sp.n}</b> の くんれん</div>
+      <div class="dim">くんれんモードを ON に すると、しあい中は しじが できず、ここで きめた とおりに たたかいます。</div>
+      <h3>わざ（${mv.length}/4）</h3><div class="dim">おぼえられる わざから 4つ えらぶ</div>
+      <div class="trmv">${all.map(id => `<button data-id="${id}" style="--c:${TYPES[MOVES[id].t].c}" class="${mv.includes(id) ? 'on' : ''}" title="${moveDesc(MOVES[id])}">${MOVES[id].n}</button>`).join('')}</div>
+      <h3>わざの つかいかた</h3><div class="truse">${mv.map(id => { const u = T.use[id] || {}; return `<div style="--c:${TYPES[MOVES[id].t].c}" data-id="${id}"><b>${MOVES[id].n} <span class="dim">${moveSub(MOVES[id])}</span></b>
+        ${seg(TR_USE.map((x, i) => [i, x.n]), u.w ?? 2, 'w')}${seg(Object.entries(TR_WHEN), u.c || 'any', 'c')}</div>`; }).join('')}</div>
+      <h3>うごきかた</h3><div class="dim">「せいかく」は いまの せいかく（${nat ? nat.n : ''}）まかせ</div>
+      ${Object.entries(TR_STYLE).map(([k, d]) => `<div class="trrow"><b>${d.n}</b>${seg([['', 'せいかく'], ...d.o.map((n, i) => [i, n])], T.style[k] ?? '', 's:' + k)}</div>`).join('')}
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px"><button class="btn sub" data-a="reset">はじめに もどす</button><button class="btn" data-a="close">OK</button></div></div>`;
+    bg.querySelectorAll('.trmv button').forEach(b => b.onclick = () => { const id = b.dataset.id, i = mv.indexOf(id); if (i >= 0) { if (mv.length > 1) mv.splice(i, 1); } else if (mv.length < 4) mv.push(id); else { SND.se('deny'); return; } SND.se('click'); save(); draw(); });
+    bg.querySelectorAll('.trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b) return; const k = g.dataset.k, v = b.dataset.v;
+      if (k.startsWith('s:')) { if (v === '') delete T.style[k.slice(2)]; else T.style[k.slice(2)] = +v; }
+      else { const id = g.parentNode.dataset.id, u = T.use[id] = T.use[id] || {}; if (k === 'w') u.w = +v; else u.c = v; }
+      SND.se('click'); save(); draw(); });
+    bg.querySelector('[data-a="close"]').onclick = () => { bg.remove(); renderTeam(); };
+    bg.querySelector('[data-a="reset"]').onclick = () => { m.tr = { moves: equipped(m).slice(), use: {}, style: {} }; bg.remove(); trainEditor(m); };
+  };
+  draw(); document.body.appendChild(bg);
+}
+function updTrainBtn() { const b = $('btnTrain'); if (!b) return; b.textContent = 'くんれんモード：' + (S.train ? 'ON' : 'OFF'); b.classList.toggle('on', !!S.train);
+  $('trHint').textContent = S.train ? 'しあい中は みるだけ。くんれん どおりに たたかう（オンラインは のぞく）' : 'ON に すると しあい中は みるだけ。モンスターを タップ →「くんれん」で きめる'; }
 function itemMenu(m) {
   const sp = SPECIES[m.sid];
   const bg = modal('<div id="itm"></div>');
@@ -3690,13 +3742,17 @@ function startBattle(cfg) {
   };
   // AI の かしこさ：みかたの モンスターは いつも かしこく わざを えらぶ。あいては せっていの「あいての つよさ」しだい（オンラインは どちらも かしこく、よけは ふつう）
   { const lv = S.aiLevel == null ? 0 : S.aiLevel; B.smart = [true, cfg.kind === 'online' || lv >= 1]; B.smartDodge = cfg.kind !== 'online' && cfg.kind !== 'wild' && lv >= 2; }
+  // くんれんモード：みかたは くんれん どおりに うごく（しあい中の しじは なし）。オンライン・チュートリアルでは つかわない
+  B.train = !!S.train && cfg.kind !== 'online' && !cfg.tut && !TUT && !cfg.headless;
+  if (B.train) for (const f of pf) { const t = trMoves(f.mon); if (t) f.moves = t; }
+  $('scBattle').classList.toggle('watch', B.train);
   if (cfg.eMul) for (const f of B.sides[1].fs) { const k = cfg.eMul; f.maxHp = f.hp = Math.round(f.maxHp * k); f.atk *= k; f.spa *= k; f.def *= Math.sqrt(k); f.sdef *= Math.sqrt(k); }   // アーケード：はじめの 敵は よわめ
   if (cfg.hpCarry) {   // アーケード：まえの たたかいの HP を ひきつぐ
     pf.forEach((f, i) => { const k = cfg.hpCarry[i]; if (k == null) return; f.hp = Math.round(f.maxHp * k); if (f.hp <= 0) { f.hp = 0; f.fainted = true; } });
     B.sides[0].act = Math.max(0, pf.findIndex(f => !f.fainted));
   }
   $('resultOv').hidden = true; $('chooseOv').hidden = true; $('pauseOv').hidden = true;
-  $('bTitle').textContent = cfg.title;
+  $('bTitle').textContent = cfg.title + (B.train ? '（くんれん：みるだけ）' : '');
   for (const id of ['cCap', 'cRun']) $(id).hidden = cfg.kind !== 'wild';
 
   say(cfg.intro);
@@ -4860,7 +4916,7 @@ function afterFaint(f) {
   f.fainted = true; f.state = 'bench';
   const next = benchIdx(f.side);
   if (next < 0) { endBattle(f.side === 0 ? 'lose' : 'win'); return; }
-  if (f.side === 0 && !B.autoChoose) { chooseNext(f); return; }
+  if (f.side === 0 && !B.autoChoose && !B.train) { chooseNext(f); return; }
   if (f.side === 1 && B.net === 'host') {   // オンライン：あいてが えらぶのを まつ（15びょうで じどう）
     const sd = B.sides[1], alive = sd.fs.filter(x => !x.fainted && x.hp > 0).length;
     if (alive > 1) { B.remoteChoose = true; B.remoteChooseT = 15; B.paused = true; say('あいてが つぎの モンスターを えらんでいます…'); return; }
@@ -4921,7 +4977,8 @@ function autoDodgeP(f) {
   let p = .02 + (f.eva || 70) / 520;   // かいひ 平均（約70）で 15%、さいだい 50%
   if (f.status === 'par') p *= .5;
   if (B.sides[f.side].tail > 0) p *= 1.2;
-  return clamp(p, 0, .5);
+  if (trOf(f) && trOf(f).style) p *= [.3, 1, 1.9][trOf(f).style.dodge ?? 1];   // くんれん：よける かどうか
+  return clamp(p, 0, .6);
 }
 function aiDodgeCheck(f, o) {
   const isP = f.side === 0 || B.kind === 'online';
@@ -5033,6 +5090,27 @@ const realAtks = (f, o) => f.moves.filter(id => MOVES[id] && isDamaging(MOVES[id
 const desperate = (f, o) => f.moves.some(id => MOVES[id] && isDamaging(MOVES[id])) && !realAtks(f, o).length;
 // 性格ごとの わざの このみ
 const STAT_JP = { atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう', spd: 'とくぼう', spe: 'すばやさ' };
+// ===== くんれん：わざ・わざの つかいかた・うごきかたを まえもって きめておく（くんれんモードでは しあい中は みるだけ） =====
+const TR_USE = [{ n: 'つかわない', k: 0 }, { n: 'ひかえめ', k: .35 }, { n: 'ふつう', k: 1 }, { n: 'よくつかう', k: 2.6 }];
+const TR_WHEN = { any: 'いつでも', open: 'でてすぐ（10びょう）', high: 'HPが はんぶん いじょう', low: 'HPが はんぶん いか', near: 'あいてが ちかい', far: 'あいてが とおい' };
+const TR_STYLE = {
+  range: { n: 'まあい', o: ['ちかづく', 'ふつう', 'はなれる'], v: [.6, 1, 1.45] },
+  rush:  { n: 'いきおい', o: ['じっくり', 'ふつう', 'ガンガン'], v: [.85, 1, 1.2] },
+  dodge: { n: 'よける', o: ['うけとめる', 'ふつう', 'よく よける'], v: [-.15, .05, .3] },
+  cover: { n: 'かくれる', o: ['かくれない', 'ときどき', 'よく かくれる'], v: [.05, .45, 1] },
+  flank: { n: 'まわりこむ', o: ['しょうめんから', 'ときどき', 'よく まわる'], v: [0, .4, 1] },
+  flee:  { n: 'HPが へったら', o: ['にげない', 'すこし はなれる', 'にげる'], v: [0, .3, .7] },
+};
+const trOf = (f) => f.side === 0 && B && B.train ? f.mon.tr || null : null;
+// わざの ねうちに かける かず（0＝つかわない・じょうけんに あわない）
+function trW(f, o, id) {
+  const u = (trOf(f).use || {})[id] || {}, lv = u.w ?? 2, c = u.c || 'any';
+  if (!lv) return 0;
+  const d = o ? dist(f, o) : 200, hp = f.hp / f.maxHp;
+  if ((c === 'open' && f.enterT > 10) || (c === 'high' && hp < .5) || (c === 'low' && hp >= .5) || (c === 'near' && d > 170) || (c === 'far' && d < 240)) return 0;
+  return TR_USE[lv].k;
+}
+const trMoves = (m) => { const t = m.tr && m.tr.moves, ok = t && t.length && t.every(id => MOVES[id] && learned(m).includes(id)); return ok ? t.slice(0, 4) : null; };
 function natPref(f, m) {
   const nat = f.mon.nat, e = m.e || {}, dmg = isDamaging(m), close = ['melee', 'swipe', 'dash', 'vault'].includes(m.k), boost = m.k === 'self' || m.k === 'curse';
   const guardy = ['heal', 'wall', 'floor', 'hazard', 'sub', 'protect', 'counter', 'field'].includes(m.k), status = !dmg && !boost && !guardy, drain = !!e.drain || m.k === 'heal';
@@ -5052,10 +5130,10 @@ function aiPickMove(f, o) {
   if (!f.moves.some(id => MOVES[id] && isDamaging(MOVES[id]) && !moveBlocked(f, id))) return (f.cd.tackle || 0) > 0 ? null : 'tackle';   // こうげきわざを つかいきった：たいあたりで ねばる
   if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
     let best = null, bv = 0;
-    for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; let v = smartScore(f, o, id) * Math.pow(natPref(f, MOVES[id]), .8);
+    for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; let v = smartScore(f, o, id) * (trOf(f) ? trW(f, o, id) : Math.pow(natPref(f, MOVES[id]), .8));
       if (v <= 0 && isDamaging(MOVES[id]) && estDmg(f, o, MOVES[id]) > 0) v = 1e-4 * estDmg(f, o, MOVES[id]);   // とおくても きく わざは うつ（まちぼうけ しない）
       if (v > bv) { bv = v; best = id; } }
-    if (!best && desperate(f, o)) best = f.moves.find(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id)) || null;
+    if (!best && desperate(f, o)) best = f.moves.find(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id) && !(trOf(f) && (((trOf(f).use || {})[id] || {}).w === 0))) || null;
     return best;
   }
   const opts = [];
@@ -5105,7 +5183,7 @@ function aiPickMove(f, o) {
         if (e.seed) w = !o.v.seed && !hasType(o, 'grass') ? 1.6 : 0;
         else w = !o.status ? 1.8 : 0;
     }
-    w *= natPref(f, m);
+    w *= trOf(f) ? trW(f, o, id) : natPref(f, m);
     if (w > 0) opts.push([id, w]);
   }
   if (!opts.length) return null;
@@ -5365,6 +5443,11 @@ function persona(f) {
   }
   if (fun) { per.react *= .6; per.rush *= 1.3; per.dodge += .1; per.flee = 0; per.hold = 1; if (!(f.perFor || '').endsWith('!')) f.moodPop = { n: 'ふんばる！', col: '#ff8a3d' }; }   // ねばりづよい：おいつめられて ほんき
   if (nat === 'kimagure' && o && o.mon && f.moodyFor !== o.mon.uid + ':' + o.mon.sid) { f.moodyFor = o.mon.uid + ':' + o.mon.sid; f.moodyNow = true; }
+  const T = trOf(f);
+  if (T && T.style) {   // くんれん：うごきかたは きめた とおり（性格・きもちより つよい）
+    for (const k in TR_STYLE) { const i = T.style[k]; if (i != null) per[k] = TR_STYLE[k].v[i]; }
+    per.react = 1 / per.rush; per.idle = per.rush > 1 ? .45 : per.rush < 1 ? .9 : .6; per.hold = T.style.rush === 2 ? 1 : 0; f.moodPop = null;
+  }
   per.mood = md; f.perFor = key;
   return (f.per = per);
 }
@@ -6813,7 +6896,7 @@ function setupCmds() {
     b.style.setProperty('--c', TYPES[m.t].c);
   });
 }
-function canCommand() { if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; B.paused = false; return true; } return B && B.mode === 'fight' && !B.paused; }   // チュートリアル：とまっている ときに しじ → うごきだす
+function canCommand() { if (B && B.train) return false; if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; B.paused = false; return true; } return B && B.mode === 'fight' && !B.paused; }   // チュートリアル：とまっている ときに しじ → うごきだす
 // わざボタン：おした わざを よやく → まあいに はいったら だす（うごきは じどう）
 function cmdMove(i) {
   if (!canCommand()) return;
@@ -6828,7 +6911,7 @@ function cmdMove(i) {
 function autoMoves(f) {
   if (B.headless || B.demo || B.autoChoose) return true;   // テスト・デモは りょうほう じどう
   if (f.side === 1) return B.net === 'host' ? !!(NET.pending && NET.pending.au) : true;
-  return !!S.auto;
+  return !!S.auto || !!B.train;
 }
 /* ---- うごきの しじ：かくれろ（しょうがいぶつの かげへ）・まわりこめ（かべを まわって よこ・うしろから ねらえる ところへ） ---- */
 const ORDER_T = { hide: 6, flank: 4.5 }, ORDER_CD = 2;
@@ -8468,6 +8551,7 @@ $('btnOnline').onclick = () => { onlineMenu(); const b = document.querySelector(
 $('btnRank').onclick = () => { onlineMenu(); const g = document.getElementById('mmGo'); if (g) g.click(); };   // メイン：すぐ マッチング
 $('btnDexBack').onclick = () => renderHub();
 $('btnTeamBack').onclick = renderHub;
+$('btnTrain').onclick = () => { S.train = !S.train; save(); updTrainBtn(); SND.se('click'); };
 // せってい：おとの 大きさ・セーブデータ
 function modal(html) { const bg = document.createElement('div'); bg.className = 'askbg'; bg.innerHTML = `<div class="askbox" style="max-width:440px;text-align:left">${html}</div>`; $('app').appendChild(bg); bg.addEventListener('pointerdown', (e) => { if (e.target === bg) bg.remove(); }); return bg; }
 $('btnOpt').onclick = () => {
