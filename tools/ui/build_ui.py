@@ -1,4 +1,4 @@
-# ChatGPT に つくってもらった UI の シート（U1〜U3・U6・U7）を ドットに もどして index.html に うめこむ
+# ChatGPT に つくってもらった UI の シート（U1〜U3・U6〜U9・R1・I1）を ドットに もどして index.html に うめこむ
 # usage: python3 tools/ui/build_ui.py   → index.html の「UIA」ブロックを かきかえる（プレビュー：tools/ui/out/*.png）
 # U4・U5（アニメ）は tools/anim/gpt_fx.py で つくる
 import base64, io, json, os, re
@@ -19,9 +19,15 @@ SHEETS = {
     'U6': (4, 3, ['btn_blue', 'btn_gold', 'btn_red', 'btn_grey', 'pnl_navy', 'pnl_gold', 'pinch', 'frame',
                   'band_blue', 'band_red', 'vs', 'shadow'], 40),
     'U7': (1, 1, ['logo'], 150),
+    'U8': (4, 4, ['b8_navy', 'b8_navy_h', 'b8_navy_d', 'b8_off', 'b8_gold', 'b8_gold_h', 'b8_gold_d', None,
+                  'b8_green', 'b8_green_h', 'b8_green_d', None, 'b8_red', 'b8_red_h', 'b8_red_d', None], 32),
+    'U9': (4, 2, ['med_on', 'med_off', 'med_dn', 'med_ring', 'arrow_r', 'play', 'spk_on', 'spk_off'], 20),
+    'R1': (6, 2, ['rk0', 'rk1', 'rk2', 'rk3', 'rk4', 'rk5', 'rkb0', 'rkb1', 'rkb2', 'rkb3', 'rkb4', 'rkb5'], 48),
+    'I1': (4, 4, ['ic_swords', 'ic_flag', 'ic_trophy', 'ic_arcade', 'ic_bush', 'ic_globe', 'ic_crystal', 'ic_gem',
+                  'ic_scroll', 'ic_book', 'ic_shield', 'ic_pencil', 'ic_gear', 'ic_help', 'ic_chart', 'ic_note'], 16),
 }
 # もとの 絵の 1ドットの 大きさ（画素）：いろが おなじ はばの でやすい 長さから はかった
-NATIVE = {'U1': 10.7, 'U2': 8, 'U3': 14.5, 'U6': 11, 'U7': 14.7}
+NATIVE = {'U1': 10.7, 'U2': 8, 'U3': 14.5, 'U6': 11, 'U7': 14.7, 'U8': 10, 'U9': 12, 'R1': 6, 'I1': 12.5}
 
 def bbox(c):
     p = np.argwhere(c[:, :, 3] > 40)
@@ -66,21 +72,6 @@ for sh, (C, R, names, T) in SHEETS.items():
         q.save(f'{OUT}/{n}.png'); bio = io.BytesIO(); q.save(bio, 'PNG', optimize=True)
         UIA[n] = {'w': q.width, 'h': q.height, 'src': 'data:image/png;base64,' + base64.b64encode(bio.getvalue()).decode()}
         print(sh, n, q.width, q.height, 'pitch', p)
-
-# いろちがいの ボタン（青い ボタンの 絵から つくる）：こん＝ふつうの ボタン、みどり＝けってい
-import colorsys
-def recolor(src, hue, sat, val):
-    a = np.array(Image.open(f'{OUT}/{src}.png').convert('RGBA')).astype(float); o = a.copy()
-    for y in range(a.shape[0]):
-        for x in range(a.shape[1]):
-            if a[y, x, 3] == 0: continue
-            h, s_, v = colorsys.rgb_to_hsv(*(a[y, x, :3] / 255))
-            if s_ < .25: o[y, x, :3] = a[y, x, :3] * (val if v > .2 else 1); continue   # くろい ふち・しろい ひかりは そのまま
-            r, g, b = colorsys.hsv_to_rgb(hue, min(1, s_ * sat), min(1, v * val)); o[y, x, :3] = (r * 255, g * 255, b * 255)
-    return o.astype(np.uint8)
-for n, src, hue, sat, val in [('btn_navy', 'btn_blue', .70, .55, .62), ('btn_green', 'btn_blue', .36, .9, .82)]:
-    q = Image.fromarray(recolor(src, hue, sat, val), 'RGBA'); q.save(f'{OUT}/{n}.png'); bio = io.BytesIO(); q.save(bio, 'PNG', optimize=True)
-    UIA[n] = {'w': q.width, 'h': q.height, 'src': 'data:image/png;base64,' + base64.b64encode(bio.getvalue()).decode()}; print('derived', n)
 
 H0, H1 = '// ====== UIA（ChatGPT の UI の 絵：tools/ui/build_ui.py）======', '// ====== ここまで UIA ======'
 f = os.path.join(ROOT, 'index.html'); s = open(f, encoding='utf-8').read()

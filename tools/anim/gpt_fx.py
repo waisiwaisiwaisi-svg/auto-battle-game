@@ -23,12 +23,13 @@ SHEETS = {'E1': ['p_fire', 'p_water', 'p_elec', 'p_ice'], 'E2': ['p_grass', 'p_p
           'W1b': ['wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror'], 'W2': ['pb_stone', 'pb_bush', 'pb_tree', 'rubble'],
           'W3': ['palm_fly', 'palm_hit', 'palm_charge', 'palm_trail'],
           # とっしん・くさの ヒット（作りなおし：1段目を つかう）
-          'D1': ['d_front', 'd_dust', 'd_hit', 'd_lines'], 'D2': ['d_fire', 'd_elec', 'd_water', 'd_dragon'], 'H5': ['hit_grass5', 'hit_grass6', 'hit_grass7', 'hit_grass8']}
+          'D1': ['d_front', 'd_dust', 'd_hit', 'd_lines'], 'D2': ['d_fire', 'd_elec', 'd_water', 'd_dragon'], 'H5': ['hit_grass5', 'hit_grass6', 'hit_grass7', 'hit_grass8'],
+          'D3': ['dig_in', 'dig_mound', 'dig_out', 'dig_trail']}
 HITS = {'hit_' + t for t in ['normal', 'fighting', 'fire', 'water', 'elec', 'grass', 'ice', 'poison', 'ground', 'rock', 'wind', 'bug', 'psychic', 'ghost', 'dragon', 'crit']}
 ONCE = {'fist', 'nail', 'skull', 'web', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'dirt', 'spark', 'reflect', 'wall_rock', 'wall_ice', 'wall_thorn',
-        'sum_circle', 'sum_pillar', 'sum_return', 'sum_swap', 'seed_root', 'g_open', 'g_hit', 'g_break', 'ctr_strike', 'dodge', 'parry', 'iron', 'cap_caught', 'cap_break', 'pb_stone', 'pb_bush', 'pb_tree', 'palm_hit', 'palm_trail', 'd_dust', 'd_hit', 'hit_grass5', 'hit_grass6', 'hit_grass7', 'hit_grass8', 'hit_grass_old'} | HITS
-VAR = {'hole', 'crater', 'scorch', 'rubble', 'wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror'}   # アニメではなく 形ちがい
-BOTTOM = {'tornado', 'mine', 'wall_rock', 'wall_ice', 'wall_thorn', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'hz_rocks', 'hz_spikes', 'hz_tspikes', 'trail', 'dirt', 'sum_pillar', 'seed_root', 'shellpush', 'ctr_aura', 'iron', 'st_gravity', 'wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror', 'pb_stone', 'pb_bush', 'pb_tree', 'rubble'}   # 足もとが きじゅん
+        'sum_circle', 'sum_pillar', 'sum_return', 'sum_swap', 'seed_root', 'g_open', 'g_hit', 'g_break', 'ctr_strike', 'dodge', 'parry', 'iron', 'cap_caught', 'cap_break', 'pb_stone', 'pb_bush', 'pb_tree', 'palm_hit', 'palm_trail', 'd_dust', 'd_hit', 'hit_grass5', 'hit_grass6', 'hit_grass7', 'hit_grass8', 'hit_grass_old', 'dig_in', 'dig_out'} | HITS
+VAR = {'hole', 'crater', 'scorch', 'rubble', 'dig_trail', 'wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror'}   # アニメではなく 形ちがい
+BOTTOM = {'tornado', 'mine', 'wall_rock', 'wall_ice', 'wall_thorn', 'brk_rock', 'brk_ice', 'brk_thorn', 'brk_mirror', 'hz_rocks', 'hz_spikes', 'hz_tspikes', 'trail', 'dirt', 'sum_pillar', 'seed_root', 'shellpush', 'ctr_aura', 'iron', 'st_gravity', 'wb_rock', 'wb_ice', 'wb_thorn', 'wb_mirror', 'pb_stone', 'pb_bush', 'pb_tree', 'rubble', 'dig_in', 'dig_mound', 'dig_out', 'dig_trail'}   # 足もとが きじゅん
 # 1つの エフェクトを なんドットに するか（いちばん ながい へん）。ゲームでは 1ドット＝PIX_D で かく
 TARGET = {'p_hadou': 22, 'p_moon': 22, 'wave': 40, 'whirl': 36, 'tornado': 30, 'mine': 16, 'fist': 28, 'nail': 24, 'skull': 20, 'web': 30,
           'fl_poison': 48, 'fl_fire': 48, 'fl_elec': 48, 'fl_honey': 48, 'pit': 48, 'pit2': 48, 'snare': 32, 'hole': 30, 'crater': 30, 'scorch': 30,
@@ -40,10 +41,12 @@ TARGET = {'p_hadou': 22, 'p_moon': 22, 'wave': 40, 'whirl': 36, 'tornado': 30, '
           'st_sleep': 16, 'st_yawn': 16, 'st_dbond': 24, 'st_gravity': 40, 'cap_throw': 18, 'cap_shake': 18, 'cap_caught': 22, 'cap_break': 20,
           'wb_rock': 24, 'wb_ice': 24, 'wb_thorn': 24, 'wb_mirror': 24, 'pb_stone': 64, 'pb_bush': 64, 'pb_tree': 64, 'rubble': 56, 'palm_fly': 34, 'palm_hit': 34, 'palm_charge': 30, 'palm_trail': 34,
           'd_front': 30, 'd_dust': 34, 'd_hit': 36, 'd_lines': 40, 'd_fire': 40, 'd_elec': 40, 'd_water': 40, 'd_dragon': 40,
-          'hit_grass5': 26, 'hit_grass6': 26, 'hit_grass7': 26, 'hit_grass8': 26}
+          'hit_grass5': 26, 'hit_grass6': 26, 'hit_grass7': 26, 'hit_grass8': 26,
+          'dig_in': 30, 'dig_mound': 26, 'dig_out': 32, 'dig_trail': 24}
 TDEF = 20
 COLS, ROWS = 6, 4
-GRID = {'G3'}   # マスめの 線が 描かれて いる シート
+GRID = {'G3'}
+ROWY = {'D3': [0, 412, 569, 854, 1024]}   # 段の さかいめ（すきまの まんなか）   # マスめの 線が 描かれて いる シート
 
 def comp_cells(a):
     # マスわり：絵が ない 列・行の すきまで きる（なければ 等分）
@@ -94,6 +97,7 @@ for sh, keys in SHEETS.items():
     for x in np.where(op.sum(0) > H_ * .9)[0]: a[:, max(0, x - 1):x + 2, 3] = 0
     for y in np.where(op.sum(1) > W_ * .9)[0]: a[max(0, y - 1):y + 2, :, 3] = 0
     xs, ys = comp_cells(a) if sh.startswith('E') or sh in ('W1b', 'W2', 'W3', 'D1', 'D2', 'H5') else ([a.shape[1] * i // COLS for i in range(COLS + 1)], [a.shape[0] * i // ROWS for i in range(ROWS + 1)])
+    if sh in ROWY: ys = ROWY[sh]   # 段の 高さが そろって いない シート
     for r, k in enumerate(keys):
         cells = [a[ys[r]:ys[r + 1], xs[c]:xs[c + 1]] for c in range(COLS)]
         # 6コマ ぶんの 絵の はんいを あわせる（コマごとに ずれない ように）

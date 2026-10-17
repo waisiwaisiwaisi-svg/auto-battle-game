@@ -1360,5 +1360,45 @@
     60
    ]
   ]
+ },
+ "dig_in": {
+  "n": 6,
+  "w": 29,
+  "h": 27,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 14.5,
+  "ay": 26
+ },
+ "dig_mound": {
+  "n": 6,
+  "w": 28,
+  "h": 12,
+  "ms": 100,
+  "loop": true,
+  "var": false,
+  "ax": 14.0,
+  "ay": 11
+ },
+ "dig_out": {
+  "n": 6,
+  "w": 31,
+  "h": 32,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 15.5,
+  "ay": 31
+ },
+ "dig_trail": {
+  "n": 6,
+  "w": 24,
+  "h": 7,
+  "ms": 100,
+  "loop": false,
+  "var": true,
+  "ax": 12.0,
+  "ay": 6
  }
 }
