@@ -380,6 +380,9 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 @keyframes dbBlink{50%{opacity:.45}}
 #bTop{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dim)}
 #bTop button.off{text-decoration:line-through}
+#bTimer{font-weight:400;color:var(--ink);font-variant-numeric:tabular-nums;background:rgba(11,9,20,.55);padding:0 6px;font-size:12px}
+#bTimer:empty{display:none}
+#bTimer.hurry{color:var(--bad);animation:pressblink .5s steps(1) infinite}
 #bTop button{font-size:11px;color:var(--dim);background:var(--panel);box-shadow:0 0 0 1px var(--edge);padding:2px 8px}
 
 /* 横長の 画面（1920×1080 など）：戦闘は 左に 16:9 の 画面、右に 情報と ボタン */
@@ -1230,7 +1233,7 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}.trhelp{font-size
   <!-- バトル -->
   <section class="screen" id="scBattle" hidden>
     <div id="tutBox" hidden><div class="tb-in"><b class="tb-who">コーチ</b><p id="tutTx"></p><div class="tb-btns"><button class="btn sub" id="tutSkip">スキップ</button><button class="btn" id="tutNext" hidden>つぎへ</button></div></div></div><div id="tutHand" hidden>👆</div>
-    <div id="bTop"><span id="bTitle"></span><span style="display:flex;gap:6px"><button id="bAuto" aria-pressed="false" title="わざを じどうで だす">AUTO</button><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
+    <div id="bTop"><span style="display:flex;gap:8px;align-items:center;min-width:0"><span id="bTitle"></span><b id="bTimer"></b></span><span style="display:flex;gap:6px"><button id="bAuto" aria-pressed="false" title="わざを じどうで だす">AUTO</button><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="1920" height="1080"></canvas>
       <div class="plates hudtop">
@@ -3480,7 +3483,7 @@ function renderTrain(uid) {
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
   const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技を 1→4 の順に撃つ。条件が合う技がないときは通常のAIが相性などを見て選ぶ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
     <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">他からコピー</button><button class="btn sub" data-a="revert">保存時に戻す</button><button class="btn sub" data-a="clr">リセット</button></div>
-    <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
+    <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${!S.train ? '使わない（訓練モードがOFF）' : T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
   const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
   let ins = '';
@@ -3988,6 +3991,7 @@ function buildNav(st) {
   for (let c = 0; c < nw * nh; c++) if (walk[c]) { const x = (c % nw + .5) * NAV, y = ((c / nw | 0) + .5) * NAV; comfy[c] = all.some(o => circRect(x, y, NAV_R + OBST_GAP, o)) ? 0 : 1; }
   st.nav = { nw, nh, walk, comfy };
 }
+const MATCH_T = 180;   // 1しあいの じかん（びょう）。すぎたら タイムアップで はんてい
 const CAM_MAX = 1.6, CAM_PAD = 170, CAM_TALL_LO = .44, CAM_TALL_UP = .28;   // たて画面：みえる よこはばは フィールドの 44%〜28%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
 const OBST_GAP = 18;   // ふつうに あるく ときは 障害物から この きょり（ゲーム内の ドット）いじょう はなれる。せまい すきまは しかたなく とおる
@@ -4481,6 +4485,7 @@ function beginMove(f, id) {
   if (B.log) B.log.push(id); if (B.logS) B.logS.push([f.side, id]);
   if (m.k !== 'melee' || id !== 'tackle') {
     say(`${prefix(f)}${f.sp.n}の ${m.n}！`);
+    if (f.trTag === id) { f.trTag = null; if (!B.headless) popText(f.x, f.y - 104, '条件', '#7be0a8'); }   // 訓練の 条件で えらんだ 技
     if (B.sides[f.side].trainer) cmdPose(f.side);
   }
 }
@@ -5606,12 +5611,13 @@ function runRules(f, o) {
     f.trSkip = { id: f.queued, until: B.t + 4 }; f.queued = null; f.trQ = null;
   }
   const skip = (id) => f.trSkip && f.trSkip.id === id && B.t < f.trSkip.until;
-  const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id) && !skip(r.id);
+  const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id) && !skip(r.id) && !moveUseless(f, o, r.id);
   const lineHit = (r, ev) => trLines(r.c).some(l => l.length && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
   const hit = rows.filter(r => lineHit(r, 1)).concat(rows.filter(r => !lineHit(r, 1) && lineHit(r))), order = hit.concat(rows.filter(r => !hit.includes(r)));   // きっかけの 条件（出場時・交代時）が 合う 技が いちばん 先
   const pr = f.trPrep && rows.find(r => r.id === f.trPrep.id && ok(r));   // うごきはじめた 技は 撃つまで かえない（条件の ちらつきで やりなおさない）
   // 条件が 合う 技は 1→4 の順。合う技が 撃てない／条件なし の ときは 通常の AI が 相性などで えらぶ
   const ai = !pr && !hit.some(ok) && rows.some(ok) ? (() => { const id = aiPickMove(f, o); return rows.find(x => x.id === id && ok(x)); })() : null;
+  if (!rows.some(r => !moveBlocked(f, r.id) && !moveUseless(f, o, r.id))) { f.trPrep = null; if (f.state === 'free' && !f.queued) { const id = aiPickMove(f, o); if (id) { f.queued = id; f.trQ = { id, t: B.t }; } } return; }   // 撃てる 技が もう ない（つかいきった・いまは きかない）：通常の AI（たいあたり）で ねばる
   const r = pr || hit.find(ok) || ai || order.find(ok) || order[0]; if (!r) return;   // 撃てる技が ない ときは 次に撃つ技の 立ち回りを する
   const g = r.go || 'auto'; f.trAt = 'm:' + r.id + (hit.includes(r) ? ' c' : '') + ' g:' + g;
   if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g) && ok(r) && !(f.trPrep && f.trPrep.id === r.id && f.trPrep.ord) && !(B.t - (f.trOrdT || -9) < 2.5)) { f.trOrdT = B.t; giveOrder(f, g, f.side, true); if (f.order) { f.order.tr = 1; if (f.trPrep) f.trPrep.ord = 1; } }
@@ -5622,8 +5628,14 @@ function runRules(f, o) {
     f.trPrep.t += .25; const d = dist(f, o), rd = g === 'near' ? d < 150 : g === 'far' ? d >= 260 : f.trPrep.t >= 1.5;
     if (!rd && f.trPrep.t < 3) return;
   }
-  f.trPrep = null; f.trGo = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t }; f.trAt += ' q';
+  f.trPrep = null; f.trGo = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t }; f.trAt += ' q'; f.trTag = hit.includes(r) ? r.id : null;   // 条件で えらんだ 技：うつ ときに しるし
 }
+// いま つかっても いみが ない 技（ゴーストシフト中の かけなおし・ゴーストシフト中の だげき・まったく きかない タイプ）
+function moveUseless(f, o, id) { const m = MOVES[id]; if (!m || !o) return false;
+  if (m.k === 'gshift' && gshiftOn(f)) return true;
+  if (isDamaging(m) && rpsOf(m) === 'rock' && (gshiftOn(f) || gshiftOn(o))) return true;
+  if (isDamaging(m) && !m.ohko && effVs(m.t, o.sp) === 0 && !(m.superVsWater && hasType(o, 'water'))) return true;
+  return false; }
 function chipTick(f, o, dt) { f.trT = (f.trT || 0) - dt; if (f.trT <= 0) { f.trT = .25; runRules(f, o); } return trProg(f).mv.length > 0; }
 function natPref(f, m) {
   const nat = f.mon.nat, e = m.e || {}, dmg = isDamaging(m), close = ['melee', 'swipe', 'dash', 'vault'].includes(m.k), boost = m.k === 'self' || m.k === 'curse';
@@ -5644,7 +5656,7 @@ function aiPickMove(f, o) {
   if (!f.moves.some(id => MOVES[id] && isDamaging(MOVES[id]) && !moveBlocked(f, id))) return (f.cd.tackle || 0) > 0 ? null : 'tackle';   // こうげきわざを つかいきった：たいあたりで ねばる
   if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
     let best = null, bv = 0;
-    for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue; const tw = trOf(f) ? trW(f, o, id) : -1; if (!tw) continue;   // くんれん：つかわない・じょうけんに あわない わざは だささない
+    for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id) || moveUseless(f, o, id)) continue; const tw = trOf(f) ? trW(f, o, id) : -1; if (!tw) continue;   // くんれん：つかわない・じょうけんに あわない わざは だささない
       let v = smartScore(f, o, id) * (tw >= 0 ? tw : Math.pow(natPref(f, MOVES[id]), .8));
       if (v <= 0 && isDamaging(MOVES[id]) && estDmg(f, o, MOVES[id]) > 0) v = 1e-4 * estDmg(f, o, MOVES[id]);   // とおくても きく わざは うつ（まちぼうけ しない）
       if (v > bv) { bv = v; best = id; } }
@@ -5653,7 +5665,7 @@ function aiPickMove(f, o) {
   }
   const opts = [];
   for (const id of f.moves) {
-    if ((f.cd[id] || 0) > 0 || moveBlocked(f, id)) continue;
+    if ((f.cd[id] || 0) > 0 || moveBlocked(f, id) || (moveUseless(f, o, id) && !desperate(f, o))) continue;
     const m = MOVES[id], e = m.e || {};
     let w = 0;
     if (isDamaging(m)) {
@@ -7068,6 +7080,15 @@ function bStep(dt) {
     if (f.hp <= 0 && !f.fainted && !['faint', 'return', 'enter'].includes(f.state)) { f.state = 'faint'; f.stT = .6; f.cur = null; }
     else if (f.fainted && f.state === 'bench') afterFaint(f);
   }
+  // せいげんじかん：MATCH_T びょう たったら タイムアップ。のこり HP（チーム ぜんたいの わりあい）が おおい ほうの かち
+  if (B.mode === 'fight' && !B.remote && !TUT && !B.cfg.tutorial) {
+    B.fightT = (B.fightT || 0) + dt;
+    if (B.fightT >= MATCH_T && !B.timeUp) { B.timeUp = true;
+      const sc = (sd) => sd.fs.reduce((t, x) => t + (x.fainted ? 0 : Math.max(0, x.hp) / x.maxHp), 0), s0 = sc(B.sides[0]), s1 = sc(B.sides[1]);
+      B.timeUpLine = `タイムアップ！ のこりHPで はんてい（${Math.round(s0 * 100)}% 対 ${Math.round(s1 * 100)}%）`;
+      say('タイムアップ！'); SND.se('crit');
+      endBattle(s0 > s1 ? 'win' : 'lose'); }
+  }
   // ラストスパート：どちらかが のこり 1たいに なったら 曲が ボス版に。じぶんが ピンチなら こどう
   if (B.mode === 'fight' && !B.lastStand && B.kind !== 'wild' && B.sides.some(sd => sd.fs.length > 1 && sd.fs.filter(x => !x.fainted && x.hp > 0).length === 1)) {   // 1たいだけの チームは さいしょから のこり1たい：だれかが たおれて へった ときだけ
     B.lastStand = true; if (!B.cfg.boss) SND.play('st_' + B.st.field + '_boss'); say('ラストスパート！'); B.cheer = 1;
@@ -7160,14 +7181,14 @@ function bVisual(dt) {
   if (vis.length === 2 && B.mode !== 'intro') {
     const pts = vis.map(f => [f.x, f.y - BODY]); if (B.catchO) pts.push([B.catchO.x, B.catchO.y]);
     const x0 = Math.min(...pts.map(p => p[0])), x1 = Math.max(...pts.map(p => p[0])), y0 = Math.min(...pts.map(p => p[1])), y1 = Math.max(...pts.map(p => p[1]));
-    const bw = x1 - x0 + CAM_PAD * 2, bh = y1 - y0 + CAM_PAD * 1.6 + 60;
+    const rr = Math.max(...vis.map(f => f.r || 20)), pad = CAM_PAD + Math.max(0, rr - 24) * 2.2, bw = x1 - x0 + pad * 2, bh = y1 - y0 + pad * 1.6 + 60;   // おおきい モンスターほど まわりを ひろく
     const lo = Math.max(fit, tall ? aw / (fw * LO_W) : Math.min(ah / st.H, aw / (fw * LO_W)));   // ひきすぎない（よこ 88%・たて画面は もっと せまく）
     tz = clamp(Math.min(aw / bw, ah / bh), lo, Math.max(lo, up));
     // よった ぶん だけ ふたりの まんなかへ
     const k = Math.max(.35, (tz - fit) / (up - fit || 1));
     tx += ((x0 + x1) / 2 - tx) * Math.min(1, k * 1.5); ty += ((y0 + y1) / 2 - ty) * Math.min(1, k * 1.5);
     // ふたりが はいりきらない ときは じぶんの モンスターを かならず うつす（あいては ミニマップと はしの やじるしで）
-    const me = active(B.my || 0); if (me && me.state !== 'bench') { const hw = aw / 2 / tz - 70, hh = ah / 2 / tz - 90; if (hw > 0) tx = clamp(tx, me.x - hw, me.x + hw); if (hh > 0) ty = clamp(ty, me.y - BODY - hh, me.y - BODY + hh); }
+    const me = active(B.my || 0); if (me && me.state !== 'bench') { const hw = aw / 2 / tz - 70 - (me.r || 20), hh = ah / 2 / tz - 90 - (me.r || 20); if (hw > 0) tx = clamp(tx, me.x - hw, me.x + hw); if (hh > 0) ty = clamp(ty, me.y - BODY - hh, me.y - BODY + hh); }
   }
   if (B.mode === 'intro') { const z0 = Math.max(aw / st.W, ah / st.H), z1 = Math.max(fit, tall ? aw / (fw * LO_W) : Math.min(ah / st.H, aw / (fw * LO_W))), t = B.modeT - (B.vsT || 0); tz = t < .6 ? z0 : z0 + Math.min(1, (t - .6) / 1.6) * (z1 - z0); if (t < 0) { tx = st.W / 2 + Math.sin(B.modeT * 1.1) * 40; ty = st.H * .42; } }
   B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 1.6);
@@ -7228,7 +7249,9 @@ function showResult() {
   const T = { win: ['WIN!', 'var(--acc)'], lose: ['LOSE…', 'var(--bad)'], caught: ['GET!', 'var(--good)'], run: ['にげた', 'var(--dim)'] }[res];
   $('resTitle').textContent = T[0]; $('resTitle').style.color = T[1];
   $('resTitle').className = 'res-' + res;
-  { const L = B.resLines.length ? B.resLines.slice() : [], head = L.length ? L.shift() : '', R = B.rewards || {}, sd = B.sides[B.my || 0];
+  { const L = B.resLines.length ? B.resLines.slice() : [], head0 = L.length ? L.shift() : '', head = B.timeUp && res !== 'caught' ? (res === 'win' ? 'じかんぎれ！ はんていで かち！' : 'じかんぎれ… はんていで まけ') : head0;   // タイムアップの ときは さいしょに その いちぎょう
+    if (B.timeUpLine) L.unshift(B.timeUpLine);
+    const R = B.rewards || {}, sd = B.sides[B.my || 0];
     const tile = (k, n, lab, d) => UIA[k] ? `<div class="rtile" style="animation-delay:${d}s">${uiImg(k, 'rti')}<b>${n}</b><small>${lab}</small></div>` : '';
     const tiles = [R.cr > 0 ? tile('crystal', '+' + R.cr, 'オーブ', .5) : '', R.gem > 0 ? tile('gem', '+' + R.gem, 'ジェム', .62) : '', R.chest ? tile('chest', '+1', CHESTS[R.chest].n, .74) : ''].join('');
     $('resLines').innerHTML = `${head ? `<div class="rhead">${head}</div>` : ''}<div class="rteam" id="resTeam"></div>${tiles ? `<div class="rtiles">${tiles}</div>` : ''}${L.map((l, i) => `<div class="rl" style="animation-delay:${.85 + i * .15}s">${l}</div>`).join('')}`;
@@ -7562,6 +7585,11 @@ function chooseNext(f) {
     L.appendChild(b);
   }
   $('chooseOv').hidden = false;
+  if (B.train || S.auto) {   // 訓練（見るだけ）・AUTO：3びょう まって えらばなければ じどうで だす
+    const myB = B, o = active(1), score = (i) => { const x = sd.fs[i]; return Math.max(...x.moves.map(id => MOVES[id] && isDamaging(MOVES[id]) && o ? effVs(MOVES[id].t, o.sp) : 0), .1) * (x.hp / x.maxHp + .2); };
+    const best = alive.slice().sort((a, b) => score(b) - score(a))[0]; let n = 3; const tip = document.createElement('div'); tip.className = 'dim'; tip.style.cssText = 'font-size:12px;margin-top:6px;text-align:center'; L.appendChild(tip);
+    const tick = () => { if (B !== myB || !B.choosing) return; if (n <= 0) { L.querySelectorAll('button')[alive.indexOf(best)].click(); return; } tip.textContent = `${n}びょうで ${sd.fs[best].sp.n}を じどうで だします`; n--; setTimeout(tick, 1000); }; tick();
+  }
 }
 function cmdRun() { if (!canCommand() || B.kind !== 'wild') return; say('うまく にげきれた！'); endBattle('run'); }
 function cmdAuto() { S.auto = !S.auto; save(); updAutoBtn(); SND.se('click'); if (B && B.remote) netSendInput(); if (B && B.mode === 'fight') say(S.auto ? 'AUTO：わざを じどうで だすよ' : 'わざボタンで しじしよう！'); }
@@ -7633,6 +7661,7 @@ function updPlate(id, side) {
 }
 function updHUD() {
   if (!B) return;
+  { const el = $('bTimer'), on = !TUT && !B.cfg.tutorial && !B.remote; if (el) { const sec = Math.ceil(Math.max(0, MATCH_T - (B.fightT || 0))); setText(el, on ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : ''); el.classList.toggle('hurry', on && sec <= 30); } }   // のこり じかん（オンラインの ゲストは ださない）
   const my = B.my || 0;
   updPlate('plP', my); updPlate('plE', 1 - my);
   const f = active(my); if (!f) return;
