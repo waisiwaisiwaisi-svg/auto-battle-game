@@ -2182,8 +2182,14 @@ function hubStage() {
     const W = 240, H = 120, z = 2; if (cv.width !== W * z) { cv.width = W * z; cv.height = H * z; }
     const q = cv.getContext('2d'); q.imageSmoothingEnabled = false; q.clearRect(0, 0, cv.width, cv.height);
     q.fillStyle = 'rgba(10,8,20,.35)'; q.beginPath(); q.ellipse(W * z * .5, (H - 14) * z, 80 * z, 10 * z, 0, 0, 7); q.fill();
-    const tr = trArt(myLook()), ti = tr.idle0.n, ts = 70 / (tr.h0 || ti.height); q.drawImage(ti, Math.round((W * .3 - ti.width * ts / 2) * z), Math.round((H - 14 - ti.height * ts) * z), Math.round(ti.width * ts * z), Math.round(ti.height * ts * z));
-    if (lead && SPR[lead.sid]) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, [bx, by, bw, bh] = sprBox(lead.sid), ms = Math.min(2.2, 84 / Math.max(bw, bh)); q.drawImage(im, Math.round((W * .64 - (bx + bw / 2) * ms) * z), Math.round((H - 14 - (by + bh) * ms) * z), Math.round(im.width * ms * z), Math.round(im.height * ms * z)); }
+    // バトル（だいかいの ステージ）と おなじ 大きさの ひりつで ならべる：トレーナーの 1ドット＝TR_MS×1.3×48/h0、モンスターは SPR の ms。わくに はいらない ときは ふたり いっしょに ちぢめる
+    const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, trW = TR_MS * 1.3 * 48 / h0, f = 70 / (h0 * trW);   // f：ワールド → ホームの がめん
+    let g = 1, mon = null;
+    if (lead && SPR[lead.sid]) { const [bx, by, bw, bh] = sprBox(lead.sid), ms = SPR[lead.sid].ms * f; mon = { bx, by, bw, bh, ms }; g = Math.min(1, (H - 22) / (bh * ms), W * .62 / (bw * ms)); }
+    const ts = 70 / h0 * g;
+    q.drawImage(ti, Math.round((W * .3 - ti.width * ts / 2) * z), Math.round((H - 14 - ti.height * ts) * z), Math.round(ti.width * ts * z), Math.round(ti.height * ts * z));
+    if (mon) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, ms = mon.ms * g, cx = Math.max(W * .64, W * .3 + ti.width * ts / 2 + mon.bw * ms / 2 + 6);
+      q.drawImage(im, Math.round((cx - (mon.bx + mon.bw / 2) * ms) * z), Math.round((H - 14 - (mon.by + mon.bh) * ms) * z), Math.round(im.width * ms * z), Math.round(im.height * ms * z)); }
     fi++;
   };
   draw(); HUB_ANIM = setInterval(draw, 220);
