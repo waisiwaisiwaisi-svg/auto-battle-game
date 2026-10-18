@@ -7314,7 +7314,7 @@ const TUT_STEPS = [
   { tx: 'あいてを たおそう！', fin: true },
 ];
 function tutShow(step) {
-  const box = $('tutBox'); box.hidden = false; $('tutTx').innerHTML = step.tx;
+  const box = $('tutBox'); box.hidden = false; $('tutTx').innerHTML = step.tx; if (B) B.padT = 0;   // カメラの あきを はかりなおす
   { const pl = $('plP'), app = $('app'); box.style.top = ''; if (pl && app && !document.documentElement.classList.contains('land')) { const r = pl.getBoundingClientRect(), a = app.getBoundingClientRect(); if (r.height) box.style.top = (r.bottom - a.top + 6) + 'px'; } }   // HP の ひょうじの したに だす（かくさない）
   $('tutNext').hidden = !step.pause;
   document.querySelectorAll('.tut-hl').forEach(e => e.classList.remove('tut-hl'));
@@ -7339,7 +7339,7 @@ function tutTick(dt) {
   if (B.mode !== 'fight') return;
   { const o = tutO(); if (o && st && !st.fin) { o.aiT = 9; if (!o.cur) o.queued = null; o.dodgeCd = 9; } }   // れんしゅうちゅうは あいては かってに こうげき しない（ステップの あいだも）
   if (TUT.busy) return;
-  if (TUT.i < 0) { if (B.modeT > .4) tutGo(0); return; }
+  if (TUT.i < 0) { if (B.modeT > .85) tutGo(0); return; }   // 「ファイト！」が きえてから はじめる
   if (!st || st.fin) return;
   TUT.t += dt;
   // れんしゅうちゅうは たおれない・あいては かってに うごかない
@@ -7364,7 +7364,7 @@ function tutEnd(res, lines) {
   if (res === 'win') { lines.unshift('<b style="color:var(--acc)">チュートリアル クリア！</b>'); if (first) S.gems = (S.gems || 0) + 10; /* はじめての クリアは ジェム 10こ */ lines.push('つぎは ランク対戦や アーケードに ちょうせんしよう！'); }
   else lines.unshift('チュートリアルを おえた。ヘルプ（？）から いつでも もういちど できるよ');
 }
-$('tutNext').onclick = () => { if (!TUT) return; tutHide(); $('tutBox').hidden = true; tutGo(TUT.i + 1); };
+$('tutNext').onclick = () => { if (!TUT) return; tutHide(); $('tutBox').hidden = true; if (B) B.padT = 0; tutGo(TUT.i + 1); };
 $('tutSkip').onclick = async () => { if (!TUT || !B) return; B.paused = true; if (await ask('チュートリアルを スキップしますか？', 'スキップ', 'つづける')) { const lines = []; tutEnd('skip', lines); B = null; renderHub(); } else if (TUT) { const st = TUT_STEPS[TUT.i]; B.paused = !!(st && st.pause) || !!TUT.frozen; } };
 
 /* ---------- コマンド ---------- */
@@ -9616,7 +9616,8 @@ let VPAD = { l: 0, t: 0, r: 0, b: 0 };
 function updPad() {
   const wr = $('cvWrap'); if (!wr || !wr.offsetWidth) return false;
   const u = VW / wr.offsetWidth, ht = wr.querySelector('.hudtop'), bp = $('bpanel'), land = document.documentElement.classList.contains('land');
-  const t = ht ? (ht.offsetTop + ht.offsetHeight + 4) * u : 0;
+  let t = ht ? (ht.offsetTop + ht.offsetHeight + 4) * u : 0;
+  { const tb = $('tutBox'); if (tb && !tb.hidden && !land) { const r = tb.getBoundingClientRect(), w = wr.getBoundingClientRect(); if (r.height) t = Math.max(t, (r.bottom - w.top + 6) * u); } }   // チュートリアルの ふきだしの したを つかう（モンスターを かくさない）
   // よこ画面：そうさは 左下（こうどう）と 右下（わざ）に わかれたので、下の ぶんだけ あける
   VPAD = land ? { l: 0, t, r: 0, b: bp ? Math.max(0, bp.offsetHeight - 6) * u : 0 } : { l: 0, t, r: 0, b: bp ? (bp.offsetHeight + 4) * u : 0 };
   return !!(bp && bp.offsetWidth);
