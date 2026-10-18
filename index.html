@@ -995,7 +995,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 
 /* くんれん */
 #scBattle.watch #mvCmds,#scBattle.watch #bAuto{display:none!important}
-#scBattle.watch .cmd.mv,#scBattle.watch #bench{pointer-events:none}
+#scBattle.watch .cmd.mv{pointer-events:none}
 #scBattle.watch .cmd.mv{filter:saturate(.85)}
 .trmode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px}
 .trmode button.on{color:#1a1222;background:var(--acc)}
@@ -1449,7 +1449,7 @@ Object.assign(MOVES100, {
   'bug-swarm':    { n: 'むしのむれ',     ref: 'bug-swarm',    t: 'bug',      cat: 'phys', k: 'strike', power: 65, acc: 100, prio: 0, aim: 'lock', wind: .65, cd: 3.4, pow: 13, rad: 50, e: {} },
   'far-strike':   { n: 'とおあて',       ref: 'far-strike',   t: 'fighting', cat: 'spec', k: 'strike', power: 70, acc: 100, prio: 0, aim: 'lock', wind: .7,  cd: 3.7, pow: 14, rad: 44, e: {} },
   'heavy-drop':   { n: 'ドスンおとし',   ref: 'heavy-drop',   t: 'normal',   cat: 'phys', k: 'strike', power: 80, acc: 95, prio: 0, aim: 'dir',  wind: .8,  cd: 4.2, pow: 16, rad: 50, e: {} },
-  'quicksand':    { n: 'ありじごく',     ref: 'quicksand',    t: 'ground', cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8.5, pow: 0, life: 6, rad: 62, slow: .45, e: {} },
+  'quicksand':    { n: 'ありじごく',     ref: 'quicksand',    t: 'ground', cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8.5, pow: 0, life: 6, rad: 62, slow: .8, pull: 10, e: {} },   // ひきこみは あるいて ぬけだせる つよさ
 });
 MOVES100['double-team'] = { n: 'かげぶんしん', ref: 'double-team', t: 'normal', cat: 'stat', k: 'clone', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .35, cd: 9, pow: 0, e: {} };   // ぶんしんを 2たい：あいての ねらいを まどわす
 Object.assign(MOVES100, {   // あとから ふえた わざ
@@ -5226,7 +5226,7 @@ function afterFaint(f) {
   f.fainted = true; f.state = 'bench';
   const next = benchIdx(f.side);
   if (next < 0) { endBattle(f.side === 0 ? 'lose' : 'win'); return; }
-  if (f.side === 0 && !B.autoChoose && !B.train) { chooseNext(f); return; }
+  if (f.side === 0 && !B.autoChoose) { chooseNext(f); return; }   // 訓練でも つぎの モンスターは じぶんで えらぶ
   if (f.side === 1 && B.net === 'host') {   // オンライン：あいてが えらぶのを まつ（15びょうで じどう）
     const sd = B.sides[1], alive = sd.fs.filter(x => !x.fainted && x.hp > 0).length;
     if (alive > 1) { B.remoteChoose = true; B.remoteChooseT = 15; B.paused = true; say('あいてが つぎの モンスターを えらんでいます…'); return; }
@@ -5667,6 +5667,8 @@ function aiMove(f, o, dt, autoSpecial) {
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
   // しじした じぶんに つかう わざ（まもる・カウンター・つみわざ・かいふく）：その場で すぐ だす（よちょうの はんいの 中でも）
   if (f.want && f.queued === f.want.id && ['protect', 'counter', 'self', 'heal', 'sub'].includes(MOVES[f.queued].k)) { const q = f.queued; f.queued = null; beginMove(f, q); return; }
+  { const z = !hovers(f) && B.zones.find(z => z.side !== f.side && inZoneFloor({ ...z, rad: z.rad * 1.15, parts: z.parts && z.parts.map(q => ({ ...q, rad: q.rad * 1.15 })) }, f.x, f.y));   // あいての ゆか（ありじごく など）に いる：まず そとへ でる
+    if (z) { let ax = f.x - z.x, ay = (f.y - z.y) / .62; if (Math.hypot(ax, ay) < 4) { ax = Math.cos(ang + Math.PI / 2); ay = Math.sin(ang + Math.PI / 2); } const a = Math.atan2(ay * .62, ax); f.paceT = Math.max(f.paceT || 1, 1.8); f.aiMode = 'rest'; return moveDir(f, Math.cos(a), Math.sin(a), dt, true); } }
   const rushIn = !!(f.want && f.queued === f.want.id && rpsOf(MOVES[f.queued]) === 'rock' && charging(o));   // しじした とっしんで ために わりこむ：にげずに つっこむ
   if (!rushIn && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
     const t = threatDir(f, o); f.paceT = 1.5; return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
@@ -7388,7 +7390,7 @@ function renderBench() {
   });
 }
 function swapTo(i) {
-  if (!canCommand()) return;
+  if (!canCommand() && !(B && B.train && B.mode === 'fight' && !B.paused)) return;   // 訓練でも こうたいは じぶんで できる
   if (B.remote) { const sd = B.sides[1], x = sd.fs[i]; if (!x || i === sd.act || x.fainted || x.hp <= 0) return; if (sd.swapCd > 0) { say(`まだ こうたい できない！（あと ${Math.ceil(sd.swapCd)}びょう）`); SND.se('deny'); return; } NET.inp.sw = [NET.inp.sw[0] + 1, i]; netSendInput(); SND.se('click'); return; }
   const sd = B.sides[0], cur = active(0), x = sd.fs[i];
   if (!x || i === sd.act || x.fainted || x.hp <= 0) return;
