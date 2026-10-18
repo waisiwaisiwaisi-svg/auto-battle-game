@@ -2775,9 +2775,11 @@ function startTitleAnim() {
   const strong = pool.slice(0, Math.max(8, Math.round(pool.length * .45)));
   let t0 = performance.now(), ak = choice(keys.length ? keys : ['ice']), akT = 0, pair = [], pairT = -99, embers = [], last = t0;
   const newPair = (t) => { const a = choice(strong); let b = choice(strong); for (let n = 0; n < 9 && (b === a || SPECIES[b].type === SPECIES[a].type); n++) b = choice(strong); pair = [a, b]; pairT = t; };
-  const drawMon = (id, cx, gy, hgt, flip, t, ph, enter) => {
+  // 2たいの 大きさは バトルと おなじ ひりつ：大きい ほうが hgt に なる ように そろえる
+  const worldH = (id) => { const [, , bw, bh] = sprBox(id); return Math.max(bh, bw * .8) * SPR[id].ms; };
+  const drawMon = (id, cx, gy, hgt0, flip, t, ph, enter, wk) => {
     const S_ = SPR[id], fr = (S_.fr['idle' + (Math.floor(t * 5 + ph) % 4)] || S_.fr.idle0).n, [bx, by, bw, bh] = sprBox(id);
-    const k = hgt / Math.max(bh, bw * .8), fly = SPECIES[id].fly ? Math.sin(t * 2.4 + ph) * hgt * .04 - hgt * .12 : 0;
+    const k = wk * S_.ms, hgt = Math.max(bh, bw * .8) * k, fly = SPECIES[id].fly ? Math.sin(t * 2.4 + ph) * hgt * .04 - hgt * .12 : 0;
     const col = TYPES[SPECIES[id].type].c, ox = (1 - enter) * (flip ? 1 : -1) * hgt * 1.4;
     g.save(); g.globalCompositeOperation = 'lighter'; const r = hgt * .85, rg = g.createRadialGradient(cx + ox, gy - hgt * .5, 0, cx + ox, gy - hgt * .5, r);
     rg.addColorStop(0, col + '66'); rg.addColorStop(.5, col + '22'); rg.addColorStop(1, col + '00'); g.fillStyle = rg; g.globalAlpha = enter; g.fillRect(cx + ox - r, gy - hgt * .5 - r, r * 2, r * 2); g.restore();
@@ -2815,8 +2817,9 @@ function startTitleAnim() {
     if (pool.length && t - pairT > 7) newPair(t);
     if (pair.length) {
       const lt = t - pairT, enter = Math.min(1, lt / .45), out = Math.min(1, (7 - lt) / .35), e = Math.max(0, Math.min(enter, out)), ee = 1 - Math.pow(1 - e, 3);
-      drawMon(pair[0], W * (land ? .17 : .27), gy, hgt, false, t, 0, ee);
-      drawMon(pair[1], W * (land ? .83 : .73), gy, hgt, true, t, 2, ee);
+      const wk = hgt / Math.max(worldH(pair[0]), worldH(pair[1]));
+      drawMon(pair[0], W * (land ? .17 : .27), gy, hgt, false, t, 0, ee, wk);
+      drawMon(pair[1], W * (land ? .83 : .73), gy, hgt, true, t, 2, ee, wk);
       if (lt < .25) { g.fillStyle = `rgba(255,255,255,${.5 * (1 - lt / .25)})`; g.fillRect(0, 0, W, H); }
     }
     // 火の粉（下から のぼる）
