@@ -2887,45 +2887,52 @@ function tabMotion(t) {
   const po = pb && pb.querySelector('.ico'); if (po && po.animate) po.animate([{ transform: 'translateY(-3px) scale(1.18)' }, { transform: 'translateY(0) scale(1)' }], { duration: D * .7, easing: 'cubic-bezier(.3,.7,.2,1)' });
 }
 addEventListener('resize', () => { clearTimeout(tabMotion.rt); tabMotion.rt = setTimeout(() => { if (!TAB_CUR) return; const t = TAB_CUR; TAB_CUR = null; const tb = $('tabbar'), ind = tb && tb.querySelector('.tabind'); if (ind) ind.classList.remove('show'); tabMotion(t); }, 80); });   // 向き・大きさが かわったら いちから おきなおす
-// ばめんの きりかえ：ピクセルディゾルブ（まえの 画面の うつしを ドットの マスごとに ランダムに けして、つぎの 画面を みせる）
-const DSV = { cell: 10, ms: 420, steps: 10 };
+// バトルへ いく ときの きりかえ：ピクセルディゾルブ アウト（まえの 画面が ドットの マスごとに 黒く なる）→ 黒 → ディゾルブ イン（マスが ぬけて バトル画面）
+//   きりかえの あいだは バトルの 時間を とめる（VS の えんしゅつを さいしょから みせる）
+const DSV = { cell: 10, out: 380, hold: 160, in: 380, steps: 10, col: '#000' };
 let dsvNow = null;
-function dsvKill() { if (dsvNow) { cancelAnimationFrame(dsvNow.raf); dsvNow.el.remove(); dsvNow = null; } }
+function dsvKill() { if (dsvNow) { cancelAnimationFrame(dsvNow.raf); dsvNow.cv.remove(); if (dsvNow.cl) dsvNow.cl.remove(); dsvNow = null; } }
 function pixDissolve(old) {
   dsvKill();
-  if (!old || old.hidden || !old.isConnected) return false;
-  const W = old.clientWidth, H = old.clientHeight; if (!W || !H) return false;
+  const app = $('app'); if (!app || !old || old.hidden || !old.isConnected) return false;
+  const W = app.clientWidth, H = app.clientHeight; if (!W || !H) return false;
+  // まえの 画面の うつし（つぎの 画面の うえに かさねて、黒く なるまで みせる）
   const cl = old.cloneNode(true); cl.classList.remove('scr-in'); cl.dataset.dsv = '1'; cl.setAttribute('aria-hidden', 'true');
   Object.assign(cl.style, { pointerEvents: 'none', zIndex: 15, animation: 'none' });
-  { const os = getComputedStyle(old); if (os.backgroundImage === 'none' && /rgba\(.*,\s*0\)$|transparent/.test(os.backgroundColor)) {   // すけた 画面：うしろの かべがみごと うつす（つぎの 画面と かさならない）
+  { const os = getComputedStyle(old); if (os.backgroundImage === 'none' && /rgba\(.*,\s*0\)$|transparent/.test(os.backgroundColor)) {   // すけた 画面：うしろの かべがみごと うつす
     const bs = getComputedStyle(document.body); Object.assign(cl.style, { backgroundColor: bs.backgroundColor, backgroundImage: bs.backgroundImage, backgroundSize: bs.backgroundSize, backgroundPosition: bs.backgroundPosition, backgroundAttachment: bs.backgroundAttachment, backgroundRepeat: bs.backgroundRepeat }); } }
   old.after(cl);   // うつしは あとに おく（getElementById は もとの ほうを みつける）
   try { const oc = old.querySelectorAll('canvas'), cc = cl.querySelectorAll('canvas'); oc.forEach((c, i) => { const d = cc[i]; if (d && c.width && c.height) { d.width = c.width; d.height = c.height; d.getContext('2d').drawImage(c, 0, 0); } }); } catch (e) { }
   cl.scrollTop = old.scrollTop; cl.scrollLeft = old.scrollLeft;
   { const os = old.querySelectorAll('*'), cs = cl.querySelectorAll('*'); for (let i = 0; i < os.length; i++) if (os[i].scrollTop || os[i].scrollLeft) { cs[i].scrollTop = os[i].scrollTop; cs[i].scrollLeft = os[i].scrollLeft; } }
-  const C = DSV.cell, nx = Math.ceil(W / C), ny = Math.ceil(H / C), N = nx * ny, ord = new Float32Array(N);
-  for (let i = 0; i < N; i++) ord[i] = Math.random();
-  const st = { el: cl, raf: 0, t0: performance.now(), lv: -1 };
-  const paint = (k) => {   // k：けす わりあい。のこった マスを 横に つなげて path に する
-    let d = '';
-    for (let y = 0; y < ny; y++) { let x0 = -1;
-      for (let x = 0; x <= nx; x++) { const on = x < nx && ord[y * nx + x] >= k;
-        if (on && x0 < 0) x0 = x; else if (!on && x0 >= 0) { d += `M${x0 * C} ${y * C}h${(x - x0) * C}v${C}h${-(x - x0) * C}z`; x0 = -1; } } }
-    cl.style.clipPath = d ? `path('${d}')` : 'inset(50%)';
-  };
+  // 黒い マス：1マス＝キャンバスの 1ドット（ひきのばして くっきり）
+  const C = DSV.cell, nx = Math.ceil(W / C), ny = Math.ceil(H / C), N = nx * ny;
+  const cv = document.createElement('canvas'); cv.width = nx; cv.height = ny; cv.className = 'pix';
+  Object.assign(cv.style, { position: 'absolute', left: 0, top: 0, width: nx * C + 'px', height: ny * C + 'px', zIndex: 60, pointerEvents: 'auto', imageRendering: 'pixelated' });
+  app.appendChild(cv);
+  const g = cv.getContext('2d'), ord = new Float32Array(N); for (let i = 0; i < N; i++) ord[i] = Math.random();
+  const paint = (k, inv) => { g.clearRect(0, 0, nx, ny); g.fillStyle = DSV.col; for (let i = 0; i < N; i++) if (inv ? ord[i] >= k : ord[i] < k) g.fillRect(i % nx, (i / nx) | 0, 1, 1); };
+  const st = { cv, cl, raf: 0, t0: performance.now(), lv: -1 };
+  const T1 = DSV.out, T2 = T1 + DSV.hold, T3 = T2 + DSV.in, step = (t, T) => Math.min(DSV.steps, Math.floor(t / T * DSV.steps));
   const tick = (now) => {
-    const lv = Math.min(DSV.steps, Math.floor((now - st.t0) / DSV.ms * DSV.steps));
-    if (lv >= DSV.steps) { dsvKill(); return; }
-    if (lv !== st.lv) { st.lv = lv; paint((lv + 1) / (DSV.steps + 1)); }
+    const t = now - st.t0;
+    if (t >= T3) { dsvKill(); return; }
+    let lv;
+    if (t < T1) lv = step(t, T1);   // アウト：黒い マスが ふえる
+    else if (t < T2) { lv = 100; if (st.cl) { st.cl.remove(); st.cl = null; } }   // まっくろ
+    else lv = 200 + step(t - T2, DSV.in);   // イン：黒い マスが ぬける
+    if (lv !== st.lv) { st.lv = lv;
+      if (lv < 100) paint((lv + 1) / (DSV.steps + 1), false); else if (lv === 100) { g.fillStyle = DSV.col; g.fillRect(0, 0, nx, ny); } else paint((lv - 200 + 1) / (DSV.steps + 1), true); }
     st.raf = requestAnimationFrame(tick);
   };
-  paint(0); dsvNow = st; st.raf = requestAnimationFrame(tick);
+  paint(1 / (DSV.steps + 1), false); dsvNow = st; st.raf = requestAnimationFrame(tick);
   return true;
 }
 function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && !$('scTrain').hidden) TRN = null;   /* くんれんを はなれた：ほぞん して いない へんこうは すてる（もどったら ほぞんした ものを ひらく） */
   const same = (() => { const e = document.getElementById(id); return !!(e && !e.hidden); })();   // おなじ 画面の かきなおし：フェードも BGM の はじめなおしも しない
-  const prev = same ? null : [...document.querySelectorAll('.screen')].find(s => !s.hidden && !s.dataset.dsv);
-  const dsv = !same && pixDissolve(prev);
+  const prev = same || id !== 'scBattle' ? null : [...document.querySelectorAll('.screen')].find(s => !s.hidden && !s.dataset.dsv);
+  if (!same && id !== 'scBattle') dsvKill();
+  const dsv = id === 'scBattle' && !same && pixDissolve(prev);   // ディゾルブは バトルへ いく ときだけ
   for (const s of document.querySelectorAll('.screen')) if (!s.dataset.dsv) s.hidden = s.id !== id;
   { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); if (!tb.hidden) tabMotion(t); } }
   if (same) return;
@@ -9518,6 +9525,7 @@ function frame(now) {
   let dt = Math.min(.05, (now - last) / 1000) * TIME_SCALE; last = now;
   if (B && !$('scBattle').hidden) {
     // 速度倍率が大きいときは細かく刻む
+    if (dsvNow) dt = 0;   // きりかえの あいだは とめる
     while (dt > 0) { const s = Math.min(dt, 1 / 30); bStep(s); dt -= s; }
     render(); updHUD();
   }
