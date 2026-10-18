@@ -1003,7 +1003,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .trnat .ntr{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px}.trnat .ntr span{display:flex;align-items:center;gap:5px}.trnat .ntr em{font-style:normal;opacity:.8;min-width:4em}
 .trnat .pp{font-style:normal;letter-spacing:1px;color:var(--acc);font-size:11px}.trnat .pp s{text-decoration:none;opacity:.2}.trnat small{opacity:.75}
 .trnat .nft{font-size:11px;opacity:.75}
-.trr .no{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;white-space:nowrap}.rh{touch-action:none;cursor:grab}
+.trr[data-row]{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}.trr .no,.trr .rh{touch-action:none}.trr .no{white-space:nowrap}
 .rc i{font-style:normal;font-size:10px;opacity:.7}.rc .any{font-size:11px;opacity:.7}.rc .any small{font-size:9px}
 .cnd{white-space:nowrap;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:3px 7px;border-radius:5px;border:2px solid;color:var(--ink)}
 .cnd.not{background:#4a2c5a;border-color:#c07aff}.cnd b{color:#ffb0ff}
@@ -3258,10 +3258,8 @@ const TR_NAT = { yuukan: ['勇敢', '前へ前へ。ほとんど隠れない'], 
 const TR_STAT = { atk: '攻撃', def: '防御', spa: '特攻', spd: '特防', spe: '素早さ' };
 function trNatCard(k) {
   const N = NATURES[k], T = TR_NAT[k]; if (!N || !T) return '';
-  const pip = (v, lo, hi) => { const n = Math.round(clamp((v - lo) / (hi - lo), 0, 1) * 4) + 1; return '<i class="pp">' + '■'.repeat(n) + '<s>' + '■'.repeat(5 - n) + '</s></i>'; };
-  const tr = [['間合い', pip(N.range, .6, 1.45), N.range > 1.15 ? '遠め' : N.range < .85 ? '近め' : '普通'], ['隠れる', pip(N.cover, 0, 1), ''], ['回り込む', pip(N.flank, 0, 1), ''], ['回避', pip(N.dodge, -.15, .25), ''], ['反応', pip(-N.react, -1.3, -.55), '']];
   return `<div class="trnat"><div class="nh"><span class="nl">性格</span><b>${T[0]}</b>${N.up ? `<span class="nu">${TR_STAT[N.up]}↑</span><span class="nd">${TR_STAT[N.down]}↓</span>` : ''}</div>
-    <div class="ndsc">${T[1]}</div><div class="ntr">${tr.map(([n, p, x]) => `<span><em>${n}</em>${p}${x ? `<small>${x}</small>` : ''}</span>`).join('')}</div>
+    <div class="ndsc">${T[1]}</div>
     <div class="nft">普段の立ち回りはこの性格で決まります。撃ち方が「お任せ」の技はこの動きのまま撃ちます</div></div>`;
 }
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
@@ -3290,7 +3288,7 @@ function renderTrain(uid) {
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
   const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え">≡${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
-  const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。条件が合う技を先に撃ち、合う技が撃てなければ 1→4 の順に撃つ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
+  const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技、どれも撃てなければ 1→4 の順に撃つ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
     <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">呼び出す</button><button class="btn sub" data-a="revert">元に戻す</button><button class="btn sub" data-a="clr">リセット</button></div>
     <div class="dim" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? 'この設定' : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
@@ -3338,8 +3336,8 @@ function renderTrain(uid) {
     TRN.pick = null; SND.se('ok'); touch();
   };
   const zoneAt = (x, y) => { const t = document.elementFromPoint(x, y); return t && (t.closest('#trBody [data-drop]') || t.closest('#trBody .trr[data-row]')); };
-  const drag = (el, pl, tapFn) => el.addEventListener('pointerdown', (ev) => {
-    if (ev.button > 0) return; const sx = ev.clientX, sy = ev.clientY; let g = null;
+  const drag = (el, pl, tapFn, okAt) => el.addEventListener('pointerdown', (ev) => {
+    if (ev.button > 0 || (okAt && !okAt(ev.target))) return; const sx = ev.clientX, sy = ev.clientY; let g = null;
     const mv = (e) => { if (!g && Math.hypot(e.clientX - sx, e.clientY - sy) > 6) { g = el.cloneNode(true); g.classList.add('trghost'); g.style.width = el.offsetWidth + 'px'; document.body.appendChild(g); }
       if (g) { e.preventDefault(); g.style.left = (e.clientX - el.offsetWidth / 2) + 'px'; g.style.top = (e.clientY - el.offsetHeight / 2) + 'px'; B.querySelectorAll('.hov').forEach(x => x.classList.remove('hov')); const z = zoneAt(e.clientX, e.clientY); if (z) z.classList.add('hov'); } };
     const up = (e) => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
@@ -3349,9 +3347,9 @@ function renderTrain(uid) {
   B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
   B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.l}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.l, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); TRN.sel = TRN.sel === k ? null : k; SND.se('click'); redo(); }); });
   B.querySelectorAll('.gs.on').forEach(e => drag(e, { gFrom: +e.dataset.i }, () => { if (TRN.pick) drop(TRN.pick, e); }));
-  B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on') && !z.classList.contains('rh')) z.addEventListener('click', (ev) => { if (TRN.pick && !ev.target.closest('.cnd')) drop(TRN.pick, z); }); });
+  B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (TRN.pick && !ev.target.closest('.cnd')) drop(TRN.pick, z); }); });
   // 技の 優先度：番号 か 技名を ドラッグして ほかの 行へ（その位置に 入れる）
-  B.querySelectorAll('.trr .no, .trr .rh').forEach(e => drag(e, { rowEl: 1, i: +(e.dataset.row ?? e.dataset.i) }, () => { if (TRN.pick) drop(TRN.pick, e.closest('[data-drop]') || e); }));
+  B.querySelectorAll('.trr[data-row]').forEach(e => drag(e, { rowEl: 1, i: +e.dataset.row }, () => { }, (t) => !t.closest('.cnd, .gs.on, .rb, button')));
   B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { W.mv.splice(+b.dataset.rm, 1); TRN.sel = null; SND.se('back'); touch(); });
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
@@ -3956,7 +3954,7 @@ function sendOut(side, idx, pass, lag, at, ko) {
   clampF(f); if (st.solid) freeSpot(f);
   f.hurtInv = ko ? KO_INV : 0; f.hurtBy = null;
   f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.want = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
-  f.enterT = 0; f.swIn = B.mode === 'fight'; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.usedAt = {}; f.shots = [];
+  f.enterT = 0; f.swIn = B.mode === 'fight'; f.inAt = B.t; f.v = {}; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.usedAt = {}; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
   f.swapLag = lag ? SWAP_LAG : 0; if (lag) f.inv = 0;
   moveLock(f, ENTER_LOCK);   // でてきた ばかりは わざを だせない
@@ -5307,12 +5305,12 @@ const CONDS = {
   see:   { n: '相手が見える' },
   after: { n: '技を撃った後', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']] },   // 直前に 撃った 技が その技
   off:   { n: '技の効果が切れた', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']] },   // その技を 撃ったことが あって、効果が もう ない
-  enter: { n: '出場時' },   // 自分が 出てから 3びょう
-  swap:  { n: '交代時' },   // 相手が 交代して 出てきてから 3びょう
+  enter: { n: '出場時' },   // 出てから この技を まだ 撃っていない
+  swap:  { n: '交代時' },   // 相手が 交代して 出てきてから この技を まだ 撃っていない（10びょう まで）
 };
 const TR_GO = { auto: 'お任せ', near: '近づいて', far: '離れて', hide: '隠れて', flank: '回り込んで' };   // よける のは いつもの AI が じぶんで する
 const trProg = (f) => { const T = trOf(f); return T && T.mode === 'chip' && T.prog && T.prog.mv ? T.prog : null; };
-function condOk(f, o, c) {
+function condOk(f, o, c, id0) {
   const hpk = (x) => x.hp / x.maxHp * 100, d = dist(f, o);
   switch (c.t) {
     case 'dist': return c.p === 'near' ? d < 150 : c.p === 'mid' ? d >= 150 && d < 290 : d >= 290;
@@ -5322,8 +5320,8 @@ function condOk(f, o, c) {
     case 'opsts': return !!o.status && (c.p === 'any' || o.status === c.p || (c.p === 'psn' && o.status === 'tox'));
     case 'foe': return !!(threatState(o) && o.cur && isDamaging(o.cur.m));
     case 'see': return losClear(f, o);
-    case 'enter': return f.enterT < 3;
-    case 'swap': return !!o.swIn && o.enterT < 3;
+    case 'enter': return !!id0 && !(f.usedAt && f.usedAt[id0] != null);
+    case 'swap': return !!id0 && !!o.swIn && B.t - (o.inAt || 0) < 10 && !(f.usedAt && f.usedAt[id0] >= (o.inAt || 0));
     case 'after': { const id = trSlot(f, c.p); return !!id && f.lastMove === id; }
     case 'off': { const id = trSlot(f, c.p); return !!id && f.usedAt && f.usedAt[id] != null && !mvLasting(f, o, id); }
   }
@@ -5350,23 +5348,24 @@ function mvLasting(f, o, id) {
 const typeAff = (a, b) => { const hit = (x, y) => Math.max(effVs(x.type, y), x.type2 ? effVs(x.type2, y) : 0), u = hit(a, b), t = hit(b, a); return u > t ? 'adv' : u < t ? 'dis' : 'even'; };
 // 条件の行：1行の中は「かつ」、行どうしは「または」（むかしの データは 1行）
 function trLines(c) { return Array.isArray(c) && c.length && !Array.isArray(c[0]) ? [c] : (c || []); }
-const TR_OR_MAX = 3;
-const condsOk = (f, o, cs) => (cs || []).every(c => condOk(f, o, c));
+const TR_OR_MAX = 3, TR_EV = ['enter', 'swap'];
+const condsOk = (f, o, cs, id) => (cs || []).every(c => condOk(f, o, c, id));
 function runRules(f, o) {
   const P = trProg(f); f.trGo = null; f.trAt = '';
   const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id);
-  const hit = rows.filter(r => trLines(r.c).some(l => l.length && condsOk(f, o, l))), order = hit.concat(rows.filter(r => !hit.includes(r)));
+  const lineHit = (r, ev) => trLines(r.c).some(l => l.length && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
+  const hit = rows.filter(r => lineHit(r, 1)).concat(rows.filter(r => !lineHit(r, 1) && lineHit(r))), order = hit.concat(rows.filter(r => !hit.includes(r)));   // きっかけの 条件（出場時・交代時）が 合う 技が いちばん 先
   const r = order.find(ok) || order[0]; if (!r) return;   // 撃てる技が ない ときは 次に撃つ技の 立ち回りを する
   const g = r.go || 'auto'; f.trAt = 'm:' + r.id + (hit.includes(r) ? ' c' : '') + ' g:' + g;
-  if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g)) giveOrder(f, g, f.side);
+  if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g) && ok(r)) { giveOrder(f, g, f.side); if (f.order) f.order.tr = 1; }
   if (!ok(r)) { f.trPrep = null; return; }
-  if (f.cur || f.queued) return;
+  if (f.queued || f.state !== 'free') return;
   if (g !== 'auto') {   // 近づいて／離れて／隠れて／回り込んで から 撃つ（3びょう たったら 撃つ）
     if (!f.trPrep || f.trPrep.id !== r.id) f.trPrep = { id: r.id, t: 0 };
     f.trPrep.t += .25; const d = dist(f, o), rd = g === 'near' ? d < 150 : g === 'far' ? d >= 260 : f.trPrep.t >= 1.5;
     if (!rd && f.trPrep.t < 3) return;
   }
-  f.trPrep = null; f.queued = r.id; f.trAt += ' q';
+  f.trPrep = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trAt += ' q';
 }
 function chipTick(f, o, dt) { f.trT = (f.trT || 0) - dt; if (f.trT <= 0) { f.trT = .25; runRules(f, o); } return trProg(f).mv.length > 0; }
 function natPref(f, m) {
@@ -5870,7 +5869,7 @@ function updateFighter(f, dt) {
       }
       aiDodgeCheck(f, o);
       if (f.state !== 'free') break;
-      if (f.order) { if (orderStep(f, o, dt)) break; }
+      if (f.order) { if (orderStep(f, o, dt)) { if (f.order && f.order.tr && autoMoves(f) && trProg(f)) chipTick(f, o, dt); break; } }   // 訓練の 隠れて／回り込んで：うごきながら 撃つ タイミングを みる
       if (f.v.encore && f.queued !== f.v.encore.id && f.queued !== null) f.queued = null;
       // 移動は モンスター自身が おこなう。オートOFFなら わざは プレイヤーの 指示だけ
       aiMove(f, o, dt, !f.v.rampage && autoMoves(f));   // わざ：CPU と AUTO は じどう、プレイヤーは ボタン
