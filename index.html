@@ -2872,7 +2872,7 @@ function tabMotion(t) {
   const po = pb && pb.querySelector('.ico'); if (po && po.animate) po.animate([{ transform: 'translateY(-3px) scale(1.18)' }, { transform: 'translateY(0) scale(1)' }], { duration: D * .7, easing: 'cubic-bezier(.3,.7,.2,1)' });
 }
 addEventListener('resize', () => { clearTimeout(tabMotion.rt); tabMotion.rt = setTimeout(() => { if (!TAB_CUR) return; const t = TAB_CUR; TAB_CUR = null; const tb = $('tabbar'), ind = tb && tb.querySelector('.tabind'); if (ind) ind.classList.remove('show'); tabMotion(t); }, 80); });   // 向き・大きさが かわったら いちから おきなおす
-function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && TRN.dirty) trDraft();   /* くんれんの とちゅうで ほかへ：かりほぞん */
+function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && !$('scTrain').hidden) TRN = null;   /* くんれんを はなれた：ほぞん して いない へんこうは すてる（もどったら ほぞんした ものを ひらく） */
   const same = (() => { const e = document.getElementById(id); return !!(e && !e.hidden); })();   // おなじ 画面の かきなおし：フェードも BGM の はじめなおしも しない
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
   { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); if (!tb.hidden) tabMotion(t); } }
@@ -3365,7 +3365,10 @@ const trMvIds = (W) => [...new Set(W.mv.map(r => r.id).filter(id => MOVES[id]))]
 const trCondNew = (t) => ({ t, p: CONDS[t].ps ? CONDS[t].ps[0][0] : undefined });
 const trCondTx = (c) => { const K = CONDS[c.t]; if (!K) return '？'; const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '：' + p : ''); };
 function trDraft() { const m = trMon(TRN.uid); if (!m) return; m.tr = m.tr || {}; m.tr.draft = trClone(TRN.W, m); TRN.dirty = false; save(); }
-function trLeave(go) { if (!TRN || !TRN.dirty) return go(); ask('今の設定を仮保存しますか？', '仮保存', 'しない').then(y => { if (y) trDraft(); TRN.dirty = false; go(); }); }
+function trLeave(go) { if (!TRN || !TRN.dirty) return go(); ask('変更が保存されていません。\n仮保存してから移動しますか？', '仮保存', '保存しない').then(y => { if (y) trDraft(); TRN.dirty = false; go(); }); }
+// 訓練の とちゅうで 下の タブを おした：ほぞん して いなければ きいてから うつる
+document.addEventListener('click', (ev) => { const b = ev.target.closest && ev.target.closest('#tabbar button'); if (!b || b.dataset.tab === 'train' || !TRN || !TRN.dirty || $('scTrain').hidden) return;
+  ev.stopPropagation(); ev.preventDefault(); trLeave(() => b.click()); }, true);
 function renderTrain(uid) {
   if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { ask('今の設定を仮保存しますか？', '仮保存', 'しない').then(y => { if (y) trDraft(); TRN.dirty = false; renderTrain(uid); }); return; }
   const all = [...S.party, ...S.box];
