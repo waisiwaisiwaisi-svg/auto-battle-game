@@ -1068,6 +1068,9 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .pal.on{outline:3px solid var(--acc);outline-offset:1px}
 .trghost{position:fixed!important;pointer-events:none;z-index:9999;opacity:.85;transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.5);margin:0}
 @media (max-width:860px){.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;bottom:0;z-index:5;max-height:32vh;overflow:auto;padding:4px 8px;border-radius:10px;background:rgba(22,18,40,.96);border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}
+.trmini{align-self:flex-end;font-size:11px;color:var(--dim);padding:2px 6px;margin:-2px -4px 0 0}
+.trside.mini{padding:2px 8px}
+.trside.mini > :not(.trmini){display:none}
 html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
 .chipg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px auto;max-width:420px}
 .chipg button{position:relative;aspect-ratio:1.15;min-width:0;font:inherit;font-size:10px;line-height:1.2;padding:2px;border-radius:5px;border:1px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.03);color:var(--ink);overflow:visible;word-break:keep-all;overflow-wrap:anywhere}
@@ -2467,7 +2470,13 @@ function loadSave() {
 }
 // ずかん：1＝みつけた・2＝つかまえた（てもちに いる ものは かならず 2）
 function dexMark(sid, lv) { if (!S) return; S.dex = S.dex || {}; if ((S.dex[sid] || 0) < lv) S.dex[sid] = lv; }
-function save() { if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+// べつの タブで おなじ ゲームが セーブしたら、この タブの ふるい データで うわがき しない（よみこみなおしを あんない）
+let SAVE_STALE = false;
+window.addEventListener('storage', (e) => { if (e.key !== SAVE_KEY || SAVE_STALE || !S) return; SAVE_STALE = true;
+  const bg = document.createElement('div'); bg.className = 'askbg'; bg.style.zIndex = 300;
+  bg.innerHTML = '<div class="askbox"><div style="margin-bottom:12px">べつの タブ（または まど）で この ゲームが うごいて データが かわりました。<br>この がめんは よみこみなおします。</div><div class="row"><button class="btn">よみこみなおす</button></div></div>';
+  bg.querySelector('button').onclick = () => location.reload(); $('app').appendChild(bg); });
+function save() { if (SAVE_STALE) return; if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
 /* ===== ステータス（ポケモンと おなじ しくみ） =====
    6つの のうりょく：HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ
@@ -3054,7 +3063,7 @@ function renderStarter() {
     b.appendChild(d);
     b.onclick = () => { S = defaultSave(); pm.uid = S.uid++; S.party.push(pm);
       const bd = buddyFor(id); if (bd) { const bm = newMon(bd.sid); S.party.push(bm); dexMark(bd.sid, 2); }   // 2たいめ：あいぼうの にがてな ジムに つよい なかま
-      save(); renderHub(); setTimeout(async () => { if (await ask((bd ? `コーチから ${SPECIES[bd.sid].n}を もらった！\n（${FIELD_NAMES[bd.gym]}ジムで たよりに なるよ）\n\n` : '') + 'まずは チュートリアルで バトルの きほんを やってみよう！', 'はじめる', 'あとで')) startTutorial(); }, 350); };   /* はじめての ときは チュートリアル */
+      save(); renderHub(); setTimeout(async () => { if (!S.pname && !window.PMA_NAME) await askName(true); if (await ask((bd ? `コーチから ${SPECIES[bd.sid].n}を もらった！\n（${FIELD_NAMES[bd.gym]}ジムで たよりに なるよ）\n\n` : '') + 'まずは チュートリアルで バトルの きほんを やってみよう！', 'はじめる', 'あとで')) startTutorial(); }, 350); };   /* はじめての ときは チュートリアル */
     L.appendChild(b);
   }
   show('scStarter');
@@ -3432,6 +3441,7 @@ const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trBlank = (m) => ({ mv: equipped(m).map(id => ({ id, go: 'auto', c: [] })) });
 const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ mv: p.mv.map(r => ({ id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: trLines(r.c).map(l => l.filter(c => CONDS[c.t]).map(c => ({ t: c.t, p: c.p }))).filter(l => l.length) })) })) : trBlank(m);
 // 使える技：覚えている4つ ＋ 持っているスクロールで覚えられる技
+let TR_MINI = false;   // くんれんの パレットを たたんで いるか
 function trMoves(m) { const eq = equipped(m).slice(), tm = Object.keys(S.tms || {}).filter(id => S.tms[id] > 0 && MOVES[id] && id !== 'tackle' && !eq.includes(id) && canLearn(m.sid, id)); return { eq, tm }; }
 const trMvIds = (W) => [...new Set(W.mv.map(r => r.id).filter(id => MOVES[id]))];
 const trCondNew = (t) => ({ t, p: CONDS[t].ps ? CONDS[t].ps[0][0] : undefined });
@@ -3459,7 +3469,7 @@ function renderTrain(uid) {
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
   const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技を 1→4 の順に撃つ。条件が合う技がないときは通常のAIが相性などを見て選ぶ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
     <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">呼び出す</button><button class="btn sub" data-a="revert">元に戻す</button><button class="btn sub" data-a="clr">リセット</button></div>
-    <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? 'この設定' : '通常のAI'}</div>`;
+    <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
   const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
   let ins = '';
@@ -3476,8 +3486,9 @@ function renderTrain(uid) {
   $('trBody').innerHTML = `<div class="trtop"><button class="btn sub${S.train ? ' on' : ''}" id="trMode" style="padding:6px 14px;font-size:13px">訓練モード：${S.train ? 'ON' : 'OFF'}</button><span class="dim">${S.train ? '試合中は見るだけ。訓練の設定どおりに戦う' : 'ONにすると試合中は見るだけになる'}</span></div>
     <div class="trpage"><div class="trmons">${all.map(x => `<button data-u="${x.uid}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
       <div class="trmain"><div class="trhead"><b>${sp.n}</b></div>${trNatCard(nk)}${main}</div>
-      <div class="trside">${side}</div></div>`;
+      <div class="trside${TR_MINI ? ' mini' : ''}"><button class="trmini" type="button">${TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'}</button>${side}</div></div>`;
   const B = $('trBody');
+  { const sd = B.querySelector('.trside'), mb = sd && sd.querySelector('.trmini'); if (mb) mb.onclick = () => { TR_MINI = !TR_MINI; sd.classList.toggle('mini', TR_MINI); mb.textContent = TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'; SND.se('click'); }; }   // パレットを たたんで したの らんを ひろく みる
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
   $('trMode').onclick = () => { S.train = !S.train; save(); SND.se('click'); renderTrain(uid); };
@@ -3745,7 +3756,8 @@ function askName(first) {
       if (!v) { bg.querySelector('#nmErr').textContent = 'なまえを いれてね'; inp.focus(); return; }
       if (v !== raw.replace(/[<>&"'`\\]/g, '').slice(0, NAME_MAX)) { bg.querySelector('#nmErr').textContent = 'つかえない ことばが はいっています'; inp.focus(); return; }
       S.pname = v; save(); SND.se('ok'); syncName(); done(v); };
-    okb.onclick = go; inp.onkeydown = (e) => { if (e.key === 'Enter') go(); };
+    okb.onclick = go; inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } };
+    inp.onkeyup = (e) => { if (e.key === 'Enter') e.preventDefault(); };
     if (!first) bs[0].onclick = () => done(null);
     $('app').appendChild(bg); setTimeout(() => inp.focus(), 50);
   });
@@ -7576,7 +7588,7 @@ function updCond(el, f) {
   const a = condList(f), sig = a.map(x => x.k + x.n + (x.t == null ? '' : 't')).join('|');
   if (el._sig !== sig) {
     el._sig = sig;
-    el.innerHTML = a.map(x => `<span class="db${x.bad ? ' bad' : ''}${x.t == null ? '' : ' tm'}" style="--c:${x.c}"><b>${x.n}</b>${x.t == null ? '' : '<em></em><i></i>'}</span>`).join('');
+    el.innerHTML = a.map(x => `<span class="db${x.bad ? ' bad' : ''}${x.t == null ? '' : ' tm'}" style="--c:${x.c}"><b>${x.n}</b>${x.t == null ? (x.k === 'st' ? '<em class="inf" title="なおるまで つづく">∞</em>' : '') : '<em></em><i></i>'}</span>`).join('');
   }
   a.forEach((x, i) => { if (x.t == null) return; const c = el.children[i]; if (!c) return; const t = x.t < 10 ? x.t.toFixed(1) : String(Math.ceil(x.t)); const em = c.children[1], bar = c.children[2];
     if (em._t !== t) { em._t = t; em.textContent = t; } bar.style.transform = `scaleX(${x.max ? clamp(x.t / x.max, 0, 1) : 0})`; c.classList.toggle('end', x.t < 1); });
@@ -9010,7 +9022,7 @@ function dotPulse(A, cx, cy, done) {
   requestAnimationFrame(step);
 }
 $('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') || $('scTitle').hidden) return;
-  if (!titleArmed && !SND.opt.mute) { titleArmed = true; SND.init(); SND.play('hub'); const t = $('tapStart'); if (t) { t.textContent = 'TAP TO START'; t.classList.add('armed'); } return; }
+  if (!titleArmed && !SND.opt.mute) { titleArmed = true; SND.init(); SND.play('hub'); const t = $('tapStart'); if (t) t.classList.add('armed'); }   // 1かいの タップで おとも ならして そのまま すすむ
   if (titleGo) return; titleGo = true; titleArmed = true; SND.se('ok');
   // 金色の パルス：TAP TO START から わっと ひろがってから ホームへ
   const A = $('app'), ar = A.getBoundingClientRect(), t = $('tapStart'), tr = t ? t.getBoundingClientRect() : null, cx = tr ? tr.left + tr.width / 2 - ar.left : e.clientX - ar.left, cy = tr ? tr.top + tr.height / 2 - ar.top : e.clientY - ar.top;
