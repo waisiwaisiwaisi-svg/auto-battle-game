@@ -2887,12 +2887,49 @@ function tabMotion(t) {
   const po = pb && pb.querySelector('.ico'); if (po && po.animate) po.animate([{ transform: 'translateY(-3px) scale(1.18)' }, { transform: 'translateY(0) scale(1)' }], { duration: D * .7, easing: 'cubic-bezier(.3,.7,.2,1)' });
 }
 addEventListener('resize', () => { clearTimeout(tabMotion.rt); tabMotion.rt = setTimeout(() => { if (!TAB_CUR) return; const t = TAB_CUR; TAB_CUR = null; const tb = $('tabbar'), ind = tb && tb.querySelector('.tabind'); if (ind) ind.classList.remove('show'); tabMotion(t); }, 80); });   // 向き・大きさが かわったら いちから おきなおす
+// ばめんの きりかえ：ピクセルディゾルブ（まえの 画面の うつしを ドットの マスごとに ランダムに けして、つぎの 画面を みせる）
+const DSV = { cell: 10, ms: 420, steps: 10 };
+let dsvNow = null;
+function dsvKill() { if (dsvNow) { cancelAnimationFrame(dsvNow.raf); dsvNow.el.remove(); dsvNow = null; } }
+function pixDissolve(old) {
+  dsvKill();
+  if (!old || old.hidden || !old.isConnected) return false;
+  const W = old.clientWidth, H = old.clientHeight; if (!W || !H) return false;
+  const cl = old.cloneNode(true); cl.classList.remove('scr-in'); cl.dataset.dsv = '1'; cl.setAttribute('aria-hidden', 'true');
+  Object.assign(cl.style, { pointerEvents: 'none', zIndex: 15, animation: 'none' });
+  { const os = getComputedStyle(old); if (os.backgroundImage === 'none' && /rgba\(.*,\s*0\)$|transparent/.test(os.backgroundColor)) {   // すけた 画面：うしろの かべがみごと うつす（つぎの 画面と かさならない）
+    const bs = getComputedStyle(document.body); Object.assign(cl.style, { backgroundColor: bs.backgroundColor, backgroundImage: bs.backgroundImage, backgroundSize: bs.backgroundSize, backgroundPosition: bs.backgroundPosition, backgroundAttachment: bs.backgroundAttachment, backgroundRepeat: bs.backgroundRepeat }); } }
+  old.after(cl);   // うつしは あとに おく（getElementById は もとの ほうを みつける）
+  try { const oc = old.querySelectorAll('canvas'), cc = cl.querySelectorAll('canvas'); oc.forEach((c, i) => { const d = cc[i]; if (d && c.width && c.height) { d.width = c.width; d.height = c.height; d.getContext('2d').drawImage(c, 0, 0); } }); } catch (e) { }
+  cl.scrollTop = old.scrollTop; cl.scrollLeft = old.scrollLeft;
+  { const os = old.querySelectorAll('*'), cs = cl.querySelectorAll('*'); for (let i = 0; i < os.length; i++) if (os[i].scrollTop || os[i].scrollLeft) { cs[i].scrollTop = os[i].scrollTop; cs[i].scrollLeft = os[i].scrollLeft; } }
+  const C = DSV.cell, nx = Math.ceil(W / C), ny = Math.ceil(H / C), N = nx * ny, ord = new Float32Array(N);
+  for (let i = 0; i < N; i++) ord[i] = Math.random();
+  const st = { el: cl, raf: 0, t0: performance.now(), lv: -1 };
+  const paint = (k) => {   // k：けす わりあい。のこった マスを 横に つなげて path に する
+    let d = '';
+    for (let y = 0; y < ny; y++) { let x0 = -1;
+      for (let x = 0; x <= nx; x++) { const on = x < nx && ord[y * nx + x] >= k;
+        if (on && x0 < 0) x0 = x; else if (!on && x0 >= 0) { d += `M${x0 * C} ${y * C}h${(x - x0) * C}v${C}h${-(x - x0) * C}z`; x0 = -1; } } }
+    cl.style.clipPath = d ? `path('${d}')` : 'inset(50%)';
+  };
+  const tick = (now) => {
+    const lv = Math.min(DSV.steps, Math.floor((now - st.t0) / DSV.ms * DSV.steps));
+    if (lv >= DSV.steps) { dsvKill(); return; }
+    if (lv !== st.lv) { st.lv = lv; paint((lv + 1) / (DSV.steps + 1)); }
+    st.raf = requestAnimationFrame(tick);
+  };
+  paint(0); dsvNow = st; st.raf = requestAnimationFrame(tick);
+  return true;
+}
 function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && !$('scTrain').hidden) TRN = null;   /* くんれんを はなれた：ほぞん して いない へんこうは すてる（もどったら ほぞんした ものを ひらく） */
   const same = (() => { const e = document.getElementById(id); return !!(e && !e.hidden); })();   // おなじ 画面の かきなおし：フェードも BGM の はじめなおしも しない
-  for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
+  const prev = same ? null : [...document.querySelectorAll('.screen')].find(s => !s.hidden && !s.dataset.dsv);
+  const dsv = !same && pixDissolve(prev);
+  for (const s of document.querySelectorAll('.screen')) if (!s.dataset.dsv) s.hidden = s.id !== id;
   { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); if (!tb.hidden) tabMotion(t); } }
   if (same) return;
-  { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank', 'scTrain'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play('hub'); /* タイトルも ホームと おなじ きょく（つながって ながれる） */ }
+  { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); if (!dsv) { void el.offsetWidth; el.classList.add('scr-in'); } } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank', 'scTrain'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play('hub'); /* タイトルも ホームと おなじ きょく（つながって ながれる） */ }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
   const p = sp.prof, evo = '';
