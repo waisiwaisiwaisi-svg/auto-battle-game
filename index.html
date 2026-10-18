@@ -996,6 +996,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .rh.tmv::after,.pal.tmv::after{content:'★';position:absolute;top:-6px;right:-4px;font-size:11px;color:#ffd84a;text-shadow:0 0 2px #000}
 .rh.bad{background:#5a1a22;border-color:#ff4a4a}.rh.bad::after{content:'×';position:absolute;top:-7px;right:-4px;color:#ff6a6a;font-weight:700;text-shadow:0 0 2px #000}
 .rc{flex:1 1 100%;order:5;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:32px;padding:3px 5px;border-radius:6px;border:1px dashed rgba(255,255,255,.22)}
+.rc.or{border-color:rgba(255,200,90,.35)}.rc .orl{font-size:10px;color:var(--acc);margin-right:2px}.trnat{font-size:12px}.trnat>b{color:var(--acc)}
 .rc i{font-style:normal;font-size:10px;opacity:.7}.rc .any{font-size:11px;opacity:.7}.rc .any small{font-size:9px}
 .cnd{white-space:nowrap;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:3px 7px;border-radius:5px;border:2px solid;color:var(--ink)}
 .cnd.not{background:#4a2c5a;border-color:#c07aff}.cnd b{color:#ffb0ff}
@@ -3244,9 +3245,12 @@ function rerollPool(m, idx, sameType) {
 }
 // ===== 訓練ページ：技1〜4（優先度順）ごとに 撃ち方（立ち回り）と 優先して撃つ条件 を ドラッグで決める =====
 let TRN = null;   // { uid, W: 作業中の設定 { mv:[{id,go,c:[]}] }, dirty, sel, pick }
+// 性格（訓練ページの 表記）
+const TR_NAT = { yuukan: ['勇敢', '前へ前へ。ほとんど隠れない'], okubyou: ['臆病', 'すぐ陰に隠れる。遠くから狙う'], reisei: ['冷静', '間合いを守り、暇なときは陰で待つ'], sekkachi: ['せっかち', '早撃ちの手数型。溜める技は使わない'],
+  zurugashikoi: ['ずる賢い', '横から回り込み、当てたらすぐ陰へ'], nonki: ['のんき', 'どっしり型。壁・回復・カウンターで待ち構える'], kimagure: ['むらっけ', '相手が出るたび能力が大きく上下する'], nebarizuyoi: ['粘り強い', '踏ん張り型。HPが減るほど速く激しくなる'] };
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trBlank = (m) => ({ mv: equipped(m).map(id => ({ id, go: 'auto', c: [] })) });
-const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ mv: p.mv.map(r => ({ id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: (r.c || []).filter(c => CONDS[c.t]).map(c => ({ t: c.t, p: c.p })) })) })) : trBlank(m);
+const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ mv: p.mv.map(r => ({ id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: trLines(r.c).map(l => l.filter(c => CONDS[c.t]).map(c => ({ t: c.t, p: c.p }))).filter(l => l.length) })) })) : trBlank(m);
 // 使える技：覚えている4つ ＋ 持っているスクロールで覚えられる技
 function trMoves(m) { const eq = equipped(m).slice(), tm = Object.keys(S.tms || {}).filter(id => S.tms[id] > 0 && MOVES[id] && id !== 'tackle' && !eq.includes(id) && canLearn(m.sid, id)); return { eq, tm }; }
 const trMvIds = (W) => [...new Set(W.mv.map(r => r.id).filter(id => MOVES[id]))];
@@ -3261,19 +3265,20 @@ function renderTrain(uid) {
   const m = trMon(uid); if (!m) return;
   const T = m.tr = m.tr || {};
   if (!TRN || TRN.uid !== uid) TRN = { uid, W: trClone(T.draft || T.prog, m), dirty: false, sel: null, pick: null };
-  const W = TRN.W, sp = SPECIES[m.sid], { eq, tm } = trMoves(m);
+  const W = TRN.W, sp = SPECIES[m.sid], { eq, tm } = trMoves(m), nk = natOf({ mon: m, sp });
   const mvn = (id) => id && MOVES[id] ? MOVES[id].n : '？', tcol = (id) => MOVES[id] ? TYPES[MOVES[id].t].c : '#888';
   const mvCls = (id) => eq.includes(id) ? '' : tm.includes(id) ? ' tmv' : ' bad';
   const where = (x) => (x.tr && x.tr.prog && x.tr.prog.mv && x.tr.mode === 'chip' ? '<em class="ok">設定済み</em>' : '') + (x.tr && x.tr.draft && x.tr.draft.mv ? '<em class="dr">仮</em>' : '');
-  const conds = (i, cs) => `<div class="rc" data-drop="c" data-i="${i}">${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${j}` ? ' sel' : ''}" data-i="${i}" data-j="${j}">${trCondTx(c)}</span>`).join('<i>かつ</i>') : '<span class="any">条件なし <small>（条件をここへ）</small></span>'}</div>`;
+  // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
+  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : ''}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}">${trCondTx(c)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '' : '条件なし '}<small>（${l ? '別の条件をここへ' : '条件をここへ'}）</small></span>`}</div>`).join('');
   const btns = (i, n) => `<div class="rb"><button data-mv="${i}:-1" ${i ? '' : 'disabled'}>▲</button><button data-mv="${i}:1" ${i < n - 1 ? '' : 'disabled'}>▼</button><button data-rm="${i}">×</button></div>`;
   const rows = W.mv.map((r, i) => `<div class="trr"><span class="no">${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>${conds(i, r.c)}${btns(i, W.mv.length)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
-  const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。条件が合う技を先に撃ち、合う技が撃てなければ 1→4 の順に撃つ。回避はいつも自動</span></h3>${rows}</div>
+  const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。条件が合う技を先に撃ち、合う技が撃てなければ 1→4 の順に撃つ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
     <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">呼び出す</button><button class="btn sub" data-a="revert">元に戻す</button><button class="btn sub" data-a="clr">リセット</button></div>
     <div class="dim" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? 'この設定' : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
-  const sel = TRN.sel && TRN.sel.split(':'), sc = sel && (W.mv[+sel[0]] || { c: [] }).c[+sel[1]];
+  const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
   let ins = '';
   if (sc) { const K = CONDS[sc.t], seg = (opts, cur) => `<div class="trseg" data-k="cp">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
     ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(K.ps, sc.p ?? K.ps[0][0])}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
@@ -3283,23 +3288,25 @@ function renderTrain(uid) {
     <h3>立ち回り</h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
     <h3>条件</h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
     <div class="trins">${ins}</div>`;
+  const scr = $('scTrain'), keep = !scr.hidden && [scr, ...['.trside', '.trmons'].map(q => $('trBody').querySelector(q))].map(e => e ? [e.scrollTop, e.scrollLeft] : [0, 0]);   // いまの スクロールを おぼえておく
   $('trBody').innerHTML = `<div class="trtop"><button class="btn sub${S.train ? ' on' : ''}" id="trMode" style="padding:6px 14px;font-size:13px">訓練モード：${S.train ? 'ON' : 'OFF'}</button><span class="dim">${S.train ? '試合中は見るだけ。訓練の設定どおりに戦う' : 'ONにすると試合中は見るだけになる'}</span></div>
     <div class="trpage"><div class="trmons">${all.map(x => `<button data-u="${x.uid}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
-      <div class="trmain"><div class="trhead"><b>${sp.n}</b></div>${main}</div>
+      <div class="trmain"><div class="trhead"><b>${sp.n}</b><span class="trnat">性格：<b>${TR_NAT[nk] ? TR_NAT[nk][0] : ''}</b> <span class="dim">${TR_NAT[nk] ? TR_NAT[nk][1] : ''}</span></span></div><div class="dim" style="font-size:11px">普段の立ち回りは性格で決まります。撃ち方が「お任せ」の技はこの動きのまま撃ちます</div>${main}</div>
       <div class="trside">${side}</div></div>`;
   const B = $('trBody');
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
   $('trMode').onclick = () => { S.train = !S.train; save(); SND.se('click'); renderTrain(uid); };
   const act = (a, f) => { const e = B.querySelector(`[data-a="${a}"]`); if (e) e.onclick = f; };
-  const redo = () => renderTrain(uid), touch = () => { TRN.dirty = true; redo(); };
+  const redo = () => renderTrain(uid), touch = () => { for (const r of W.mv) r.c = r.c.filter(l => l.length); TRN.dirty = true; redo(); };   // からの行は つめる
   // 置く：pl = { k:'mv'|'go'|'c', v } 新しく ／ { from:[i,j] } 置いてある条件 ／ { gFrom:i } 置いてある立ち回り。z = 落とした枠
   const drop = (pl, z) => {
     const d = z && z.dataset.drop, i = z ? +z.dataset.i : -1;
-    if (pl.from) { const [fi, fj] = pl.from, c = W.mv[fi].c[fj];
-      if (!z) { W.mv[fi].c.splice(fj, 1); TRN.sel = null; SND.se('back'); touch(); return; }   // 枠の外へ：削除
-      if (d !== 'c' || i === fi) return;
-      W.mv[fi].c.splice(fj, 1); W.mv[i].c.push(c); TRN.sel = null; SND.se('click'); touch(); return; }
+    const L = z ? +z.dataset.l || 0 : 0, line = (r, l) => r.c[l] || (r.c[l] = []);
+    if (pl.from) { const [fi, fl, fj] = pl.from, c = W.mv[fi].c[fl][fj];
+      if (!z) { W.mv[fi].c[fl].splice(fj, 1); TRN.sel = null; SND.se('back'); touch(); return; }   // 枠の外へ：削除
+      if (d !== 'c' || (i === fi && L === fl)) return;
+      line(W.mv[i], L).push(c); W.mv[fi].c[fl].splice(fj, 1); TRN.sel = null; SND.se('click'); touch(); return; }
     if (pl.gFrom != null) { const r = W.mv[pl.gFrom], g = r.go;
       if (!z) { r.go = 'auto'; SND.se('back'); touch(); return; }
       if (d !== 'g' || i === pl.gFrom) return; r.go = 'auto'; W.mv[i].go = g; SND.se('click'); touch(); return; }
@@ -3309,7 +3316,7 @@ function renderTrain(uid) {
       else if (d === 'h') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; }
       else return; }
     else if (pl.k === 'go') { if (d !== 'g') return; W.mv[i].go = pl.v; }
-    else if (pl.k === 'c') { if (d !== 'c') return; W.mv[i].c.push(trCondNew(pl.v)); TRN.sel = `${i}:${W.mv[i].c.length - 1}`; }
+    else if (pl.k === 'c') { if (d !== 'c') return; line(W.mv[i], L).push(trCondNew(pl.v)); TRN.sel = `${i}:${L}:${W.mv[i].c[L].length - 1}`; }
     TRN.pick = null; SND.se('ok'); touch();
   };
   const zoneAt = (x, y) => { const t = document.elementFromPoint(x, y); return t && t.closest('#trBody [data-drop]'); };
@@ -3322,20 +3329,21 @@ function renderTrain(uid) {
     window.addEventListener('pointermove', mv, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
   });
   B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
-  B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); TRN.sel = TRN.sel === k ? null : k; SND.se('click'); redo(); }); });
+  B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.l}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.l, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); TRN.sel = TRN.sel === k ? null : k; SND.se('click'); redo(); }); });
   B.querySelectorAll('.gs.on').forEach(e => drag(e, { gFrom: +e.dataset.i }, () => { if (TRN.pick) drop(TRN.pick, e); }));
   B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (TRN.pick && !ev.target.closest('.cnd')) drop(TRN.pick, z); }); });
   B.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const [i, d] = b.dataset.mv.split(':'), a = +i, t = a + +d; [W.mv[a], W.mv[t]] = [W.mv[t], W.mv[a]]; TRN.sel = null; SND.se('click'); touch(); });
   B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { W.mv.splice(+b.dataset.rm, 1); TRN.sel = null; SND.se('back'); touch(); });
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
-  act('cdel', () => { W.mv[+sel[0]].c.splice(+sel[1], 1); TRN.sel = null; SND.se('back'); touch(); });
+  act('cdel', () => { W.mv[+sel[0]].c[+sel[1]].splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
   act('draft', () => { trDraft(); SND.se('ok'); say0('仮保存しました（試合ではまだ使いません）').then(redo); });
   act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; TRN.dirty = false; save(); SND.se('ok'); redo(); }));
   act('revert', () => { TRN.W = trClone(T.draft || T.prog, m); TRN.dirty = false; TRN.sel = null; redo(); });
   act('clr', () => { TRN.W = trBlank(m); TRN.sel = null; touch(); });
   act('load', () => trLoadFrom(m));
-  show('scTrain');
+  if (keep) [scr, B.querySelector('.trside'), B.querySelector('.trmons')].forEach((e, i) => { if (e) [e.scrollTop, e.scrollLeft] = keep[i]; });   // そうさ しても 画面は そのまま（出しなおさない）
+  else show('scTrain');
 }
 // 確定：今覚えていない技は スクロールを使う（必ず確認）
 async function trConfirm(m) {
@@ -5300,11 +5308,14 @@ function condOk(f, o, c) {
 }
 // タイプ相性：自分のタイプで 相手を うつ ばいりつ と、相手のタイプで 自分を うつ ばいりつ を くらべる
 const typeAff = (a, b) => { const hit = (x, y) => Math.max(effVs(x.type, y), x.type2 ? effVs(x.type2, y) : 0), u = hit(a, b), t = hit(b, a); return u > t ? 'adv' : u < t ? 'dis' : 'even'; };
+// 条件の行：1行の中は「かつ」、行どうしは「または」（むかしの データは 1行）
+function trLines(c) { return Array.isArray(c) && c.length && !Array.isArray(c[0]) ? [c] : (c || []); }
+const TR_OR_MAX = 3;
 const condsOk = (f, o, cs) => (cs || []).every(c => condOk(f, o, c));
 function runRules(f, o) {
   const P = trProg(f); f.trGo = null; f.trAt = '';
   const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id);
-  const hit = rows.filter(r => r.c && r.c.length && condsOk(f, o, r.c)), order = hit.concat(rows.filter(r => !hit.includes(r)));
+  const hit = rows.filter(r => trLines(r.c).some(l => l.length && condsOk(f, o, l))), order = hit.concat(rows.filter(r => !hit.includes(r)));
   const r = order.find(ok) || order[0]; if (!r) return;   // 撃てる技が ない ときは 次に撃つ技の 立ち回りを する
   const g = r.go || 'auto'; f.trAt = 'm:' + r.id + (hit.includes(r) ? ' c' : '') + ' g:' + g;
   if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g)) giveOrder(f, g, f.side);
