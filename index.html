@@ -6279,6 +6279,17 @@ const r1 = (v) => typeof v === 'number' ? Math.round(v * 10) / 10 : v;
 function slim(o) { if (Array.isArray(o)) return o.map(slim); if (o && typeof o === 'object') { const r = {}; for (const k in o) { const v = o[k]; if (v === undefined || typeof v === 'function') continue; if (k === 'f' || k === 'sid' && false) continue; r[k] = slim(v); } return r; } return r1(o); }
 // オンラインが つかえない ときの あんない（claude.ai 版 と アプリ版 で ちがう）
 const onlineHint = (what) => window.PMA_APP ? (window.PMA_APP.online ? `${what}に つながりませんでした。つうしんを たしかめて もういちど ためしてね。` : `この アプリでは まだ ${what}が つかえません。`) : `${what}は claude.ai に サインインして、この ゲームの ページを ひらいた ときだけ つかえます。`;
+// へやの なかま：じぶんの ほかの タブ・ほかの たんまつ も あいてに なれる（ひとりで ためせる）。この タブと Claude の セッションは のぞく
+const isOther = (p) => p && !(p.isMe && p.sameTab) && p.kind !== 'agent';
+// presence の きまり：もじれつ 1つ 1KB まで・ぜんぶで 4KB まで（こえると とどかない）
+const utf8Len = (t) => new Blob([t]).size;
+// ながい もじれつ（じぶんで かいた え）は 300もじ ずつに わけて おくり、うけとったら つなぎなおす
+const chunkS = (v) => typeof v === 'string' ? (utf8Len(v) > 1000 ? { _c: v.match(/[\s\S]{1,300}/g) } : v) : Array.isArray(v) ? v.map(chunkS) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, chunkS(x)])) : v;
+const unchunkS = (v) => v && typeof v === 'object' ? (Array.isArray(v._c) ? v._c.join('') : Array.isArray(v) ? v.map(unchunkS) : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, unchunkS(x)]))) : v;
+function presOk(o) {
+  let ok = true; const walk = (v) => { if (!ok) return; if (typeof v === 'string') { if (utf8Len(v) > 1000) ok = false; } else if (v && typeof v === 'object') for (const k in v) walk(v[k]); };
+  walk(o); return ok && utf8Len(JSON.stringify(o)) < 3900;
+}
 async function netGetRoom() {
   if (NET.room) return NET.room;
   try { if (window.claude && window.claude.use) NET.room = await window.claude.use('room'); } catch (e) { NET.room = null; }
@@ -6287,8 +6298,8 @@ async function netGetRoom() {
 const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0 }; });
 const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   // しらない 種族（え が とどかなかった など）
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } return m; };
-const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
-const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
+const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
+const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
 function netReset() { SND.onSe = null; NET.ranked = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false }); }
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
 async function netOpen(asHost, code, onStatus, opts = {}) {
@@ -6301,14 +6312,16 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   const me = { role: asHost ? 'host' : 'guest', team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
   // じぶんで かいた もの の え（la：トレーナー、ca：モンスター）。あいては はじまる まえに うけとって おぼえる。presence は 4KB まで なので 入りきらない え は おくらない
   for (const o of NET.team6) if (CUSTOM.mon[o.sid] && !me.ca[o.sid]) me.ca[o.sid] = CUSTOM.mon[o.sid];
-  const fits = () => new Blob([JSON.stringify(me)]).size < 3900;
+  const fits = () => presOk(me);
+  if (me.la) me.la = chunkS(me.la); for (const k in me.ca) me.ca[k] = chunkS(me.ca[k]);
   if (!fits()) delete me.la;
   for (const sid of Object.keys(me.ca).reverse()) { if (fits()) break; if (me.team.some(o => o.sid === sid)) continue; delete me.ca[sid]; NET.team6 = me.team6 = NET.team6.filter(o => o.sid !== sid); }
-  await NET.nr.presence(me).catch(() => { });
+  if (!fits()) me.ca = {};   // それでも はいらない：え は おくらない（あいてには かわりの すがたで みえる）
+  try { await NET.nr.presence(me); } catch (e) { onStatus('あいてに じぶんの チームを おくれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
   onStatus(NET.ranked ? 'たいせんの じゅんびを しています…' : asHost ? `あいことば <b class="ncode">${code}</b> を あいてに つたえてね。<br>あいてが はいるのを まっています…` : 'ホストを さがしています…');
   if (NET.ranked) setTimeout(() => { if (!NET.started && !NET.preview && NET.ranked && NET.code === code) { onStatus('あいてと つながりませんでした。もういちど さがしてね', true); netReset(); } }, 20000);
   NET.nr.onPeers((ch) => {
-    const others = ch.peers.filter(p => !p.isMe && p.presence);
+    const others = ch.peers.filter(p => isOther(p) && p.presence);
     for (const p of others) netCacheArt(p.presence);   // あいての かいた え を さきに おぼえる（チームの チェックより まえ）
     if (NET.started) { if (NET.peer && ch.left.some(p => p.peer === NET.peer)) netPeerLeft(); }
     else if (NET.preview && NET.peer && ch.left.some(p => p.peer === NET.peer)) { rankPreviewClose(); onStatus('あいてが いなくなりました。もういちど さがしてね', true); netReset(); return; }
@@ -6346,13 +6359,14 @@ function netPeerLeft() {
 }
 /* ---------- ホスト ---------- */
 // あいての みため（presence の lk。しらない ものなら レイ）
-function oppName() { const p = NET.nr && NET.nr.peers().find(x => !x.isMe && x.presence && x.presence.lk); const g = p && safeName(p.presence.gn, 10); return g ? `あいて（${g}）` : 'あいて'; }
+function oppName() { const p = NET.nr && NET.nr.peers().find(x => isOther(x) && x.presence && x.presence.lk); const g = p && safeName(p.presence.gn, 10); return g ? `あいて（${g}）` : 'あいて'; }
 function netCacheArt(pr) {
   if (!pr || typeof pr !== 'object') return;
+  if (pr.la || pr.ca) pr = { ...pr, la: unchunkS(pr.la), ca: unchunkS(pr.ca) };
   if (typeof pr.lk === 'string' && /^c_tr_[a-z0-9]+$/.test(pr.lk) && pr.la && !TRAINER_ART['o_' + pr.lk.slice(5)]) regCustomTrainer('o_' + pr.lk.slice(5), pr.la, true);
   if (pr.ca && typeof pr.ca === 'object') for (const sid of Object.keys(pr.ca).slice(0, 6)) if (/^c_mon_[a-z0-9]+$/.test(sid) && (!SPECIES[sid] || (SPECIES[sid].custom && !CUSTOM.mon[sid]))) { try { regCustomMon(sid, pr.ca[sid]); } catch (e) { } }
 }
-function oppLook() { const p = NET.nr && NET.nr.peers().find(x => !x.isMe && x.presence && x.presence.lk); const k = p && p.presence.lk;
+function oppLook() { const p = NET.nr && NET.nr.peers().find(x => isOther(x) && x.presence && x.presence.lk); const k = p && p.presence.lk;
   if (typeof k === 'string' && /^c_tr_[a-z0-9]+$/.test(k)) { netCacheArt(p.presence); if (TRAINER_ART['o_' + k.slice(5)]) return 'o_' + k.slice(5); }   // あいての かいた トレーナー（じぶんの みため には まぜない）
   return typeof k === 'string' && TRAINER_ART[k] && !/^c_tr_/.test(k) ? k : 'girl'; }
 function netHostStart(gteam, mineSel) {
@@ -6924,7 +6938,7 @@ function rankPreview(oppTeam, oppR) {
     }
   };
   const confirm = () => { if (NET.myPick) return; for (let i = 0; sel.length < need && i < mine.length; i++) if (!sel.includes(i)) sel.push(i); NET.myPick = sel.slice(); SND.se('ok');
-    if (NET.nr) NET.nr.presence({ pick: NET.myPick }).catch(() => { }); draw(); if (NET.host && NET.nr) { const g = NET.nr.peers().find(p => !p.isMe && p.presence && p.presence.role === 'guest'); if (g) { const gp = rankPickOk(g.presence.pick, (g.presence.team6 || []).length); if (gp) { rankPreviewClose(); netHostStart(gp.map(i => g.presence.team6[i]), NET.myPick.map(i => NET.team6[i])); } } } };
+    if (NET.nr) NET.nr.presence({ pick: NET.myPick }).catch(() => { }); draw(); if (NET.host && NET.nr) { const g = NET.nr.peers().find(p => isOther(p) && p.presence && p.presence.role === 'guest'); if (g) { const gp = rankPickOk(g.presence.pick, (g.presence.team6 || []).length); if (gp) { rankPreviewClose(); netHostStart(gp.map(i => g.presence.team6[i]), NET.myPick.map(i => NET.team6[i])); } } } };
   NET.preview.iv = setInterval(() => { left--; const el = ov.querySelector('.pvt'); if (el) el.textContent = Math.max(0, left); if (left <= 0 && !NET.myPick) confirm(); }, 1000);
   NET.preview.draw = draw; draw();
 }
