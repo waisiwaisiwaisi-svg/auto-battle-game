@@ -5276,7 +5276,8 @@ const CONDS = {
   myhp:  { n: 'じぶんHP', ps: CHIP_PCT.map(([v, n]) => [v, n + 'みまん']) },
   ophp:  { n: 'あいてHP', ps: CHIP_PCT.map(([v, n]) => [v, n + 'みまん']) },
   foe:   { n: 'あいてが ためてる' },
-  eff:   { n: 'ばつぐん', mv: 1 },   // わざの ルール だけ（その わざが ばつぐん）
+  aff:   { n: 'あいしょう', ps: [['adv', 'ゆうり'], ['even', 'ごかく'], ['dis', 'ふり']] },   // じぶんの タイプ と あいての タイプ を くらべる
+  mvaff: { n: 'わざの あいしょう', mv: 1, ps: [['adv', 'ゆうり'], ['even', 'ふつう'], ['dis', 'ふり']] },   // わざの ルール だけ（その わざの タイプ → あいて）
   mysts: { n: 'じぶんが じょうたいいじょう' },
   opsts: { n: 'あいてが じょうたいいじょう' },
   see:   { n: 'あいてが みえる' },
@@ -5291,7 +5292,8 @@ function condOk(f, o, c, mv) {
     case 'myhp': v = hpk(f) < (c.p || 50); break;
     case 'ophp': v = hpk(o) < (c.p || 50); break;
     case 'foe': v = !!(threatState(o) && o.cur && isDamaging(o.cur.m)); break;
-    case 'eff': v = !!(mv && isDamaging(MOVES[mv]) && effVs(MOVES[mv].t, o.sp) >= 2); break;
+    case 'aff': v = typeAff(f.sp, o.sp) === c.p; break;
+    case 'mvaff': { const e = mv ? effVs(MOVES[mv].t, o.sp) : 1; v = (e > 1 ? 'adv' : e < 1 ? 'dis' : 'even') === c.p; break; }
     case 'mysts': v = !!f.status; break;
     case 'opsts': v = !!o.status; break;
     case 'see': v = losClear(f, o); break;
@@ -5299,6 +5301,8 @@ function condOk(f, o, c, mv) {
   }
   return c.not ? !v : v;
 }
+// タイプあいしょう：じぶんの タイプで あいてを うつ ばいりつ と、あいての タイプで じぶんを うつ ばいりつ を くらべる
+const typeAff = (a, b) => { const hit = (x, y) => Math.max(effVs(x.type, y), x.type2 ? effVs(x.type2, y) : 0), u = hit(a, b), t = hit(b, a); return u > t ? 'adv' : u < t ? 'dis' : 'even'; };
 const condsOk = (f, o, cs, mv) => (cs || []).every(c => condOk(f, o, c, mv));
 // うえから じゅんに しらべる：わざは じょうけんが ぜんぶ あう さいしょの わざを つかう（リストに ない わざは つかわない）。たちまわりは あう ものが なければ いつもの うごき
 function runRules(f, o) {
