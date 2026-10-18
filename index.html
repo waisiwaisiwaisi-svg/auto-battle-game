@@ -2852,6 +2852,7 @@ function tabMotion(t) {
   const land = document.documentElement.classList.contains('land'), btn = tb.querySelector(`button[data-tab="${t}"]`), prev = TAB_CUR; TAB_CUR = t;
   const rect = (b) => { const r = b.getBoundingClientRect(), R = tb.getBoundingClientRect(); return land ? { a: r.top - R.top, s: r.height } : { a: r.left - R.left, s: r.width }; };
   const set = (o) => land ? { top: o.a + 'px', height: o.s + 'px' } : { left: o.a + 'px', width: o.s + 'px' };
+  if (ind._land !== land) { ind._land = land; ind.getAnimations && ind.getAnimations().forEach(a => a.cancel()); ind.style.left = ind.style.width = ind.style.top = ind.style.height = ''; }   // 向きが かわった：のこった 位置を けす
   if (!btn) { ind.classList.remove('show'); return; }
   const to = rect(btn), pb = prev && tb.querySelector(`button[data-tab="${prev}"]`), from = pb && ind.classList.contains('show') ? rect(pb) : null;
   Object.assign(ind.style, set(to)); ind.classList.add('show');
@@ -2861,10 +2862,12 @@ function tabMotion(t) {
   const ico = btn.querySelector('.ico'); if (ico && ico.animate) ico.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-3px) scale(1.18)' }], { duration: D, easing: E });
   const po = pb && pb.querySelector('.ico'); if (po && po.animate) po.animate([{ transform: 'translateY(-3px) scale(1.18)' }, { transform: 'translateY(0) scale(1)' }], { duration: D * .7, easing: 'cubic-bezier(.3,.7,.2,1)' });
 }
-addEventListener('resize', () => { if (TAB_CUR) { const t = TAB_CUR; TAB_CUR = null; requestAnimationFrame(() => { TAB_CUR = t; const tb = $('tabbar'), b = tb && tb.querySelector(`button[data-tab="${t}"]`), ind = tb && tb.querySelector('.tabind'); if (b && ind) { const R = tb.getBoundingClientRect(), r = b.getBoundingClientRect(), land = document.documentElement.classList.contains('land'); Object.assign(ind.style, land ? { top: r.top - R.top + 'px', height: r.height + 'px' } : { left: r.left - R.left + 'px', width: r.width + 'px' }); } }); } });
+addEventListener('resize', () => { clearTimeout(tabMotion.rt); tabMotion.rt = setTimeout(() => { if (!TAB_CUR) return; const t = TAB_CUR; TAB_CUR = null; const tb = $('tabbar'), ind = tb && tb.querySelector('.tabind'); if (ind) ind.classList.remove('show'); tabMotion(t); }, 80); });   // 向き・大きさが かわったら いちから おきなおす
 function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && TRN.dirty) trDraft();   /* くんれんの とちゅうで ほかへ：かりほぞん */
+  const same = (() => { const e = document.getElementById(id); return !!(e && !e.hidden); })();   // おなじ 画面の かきなおし：フェードも BGM の はじめなおしも しない
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
   { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); if (!tb.hidden) tabMotion(t); } }
+  if (same) return;
   { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank', 'scTrain'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play('hub'); /* タイトルも ホームと おなじ きょく（つながって ながれる） */ }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
