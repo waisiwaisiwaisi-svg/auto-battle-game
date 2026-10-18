@@ -2847,7 +2847,7 @@ function startTitleAnim() {
   const worldH = (id) => { const [, , bw, bh] = sprBox(id); return Math.max(bh, bw * .8) * SPR[id].ms; };
   const drawMon = (id, cx, gy, hgt0, flip, t, ph, enter, wk) => {
     const S_ = SPR[id], fr = (S_.fr['idle' + (Math.floor(t * 5 + ph) % 4)] || S_.fr.idle0).n, [bx, by, bw, bh] = sprBox(id);
-    const k = wk * S_.ms, hgt = Math.max(bh, bw * .8) * k, fly = SPECIES[id].fly ? Math.sin(t * 2.4 + ph) * hgt * .04 - hgt * .12 : 0;
+    const k = wk * S_.ms, hgt = Math.max(bh, bw * .8) * k, fly = floats(id) ? Math.sin(t * 2.4 + ph) * hgt * .04 - hgt * .12 : 0;
     const col = TYPES[SPECIES[id].type].c, ox = (1 - enter) * (flip ? 1 : -1) * hgt * 1.4;
     g.save(); g.globalCompositeOperation = 'lighter'; const r = hgt * .85, rg = g.createRadialGradient(cx + ox, gy - hgt * .5, 0, cx + ox, gy - hgt * .5, r);
     rg.addColorStop(0, col + '66'); rg.addColorStop(.5, col + '22'); rg.addColorStop(1, col + '00'); g.fillStyle = rg; g.globalAlpha = enter; g.fillRect(cx + ox - r, gy - hgt * .5 - r, r * 2, r * 2); g.restore();
@@ -2959,7 +2959,7 @@ function canLearn(sid, id) {
   const sp = SPECIES[sid], m = MOVES[id]; if (!sp || !m) return false;
   if (LEARN[sid] && LEARN[sid].some(([, x]) => x === id)) return true;
   if (m.t === sp.type || m.t === sp.type2 || m.t === 'normal') return true;
-  if (m.t === 'wind' && (sp.fly || FLYING.includes(sid))) return true;
+  if (m.t === 'wind' && (sp.fly || floats(sid))) return true;
   const txt = sp.n + (sp.desc || '') + (sp.prof ? (sp.prof.home || '') + (sp.prof.trait || '') : '');
   return !!(LOOK_KW[m.t] && LOOK_KW[m.t].test(txt));
 }
@@ -3288,7 +3288,7 @@ function renderTrain(uid) {
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
   const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え">≡${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
-  const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技、どれも撃てなければ 1→4 の順に撃つ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
+  const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技を 1→4 の順に撃つ。条件が合う技がないときは通常のAIが相性などを見て選ぶ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
     <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">呼び出す</button><button class="btn sub" data-a="revert">元に戻す</button><button class="btn sub" data-a="clr">リセット</button></div>
     <div class="dim" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? 'この設定' : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
@@ -5362,7 +5362,9 @@ function runRules(f, o) {
   const lineHit = (r, ev) => trLines(r.c).some(l => l.length && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
   const hit = rows.filter(r => lineHit(r, 1)).concat(rows.filter(r => !lineHit(r, 1) && lineHit(r))), order = hit.concat(rows.filter(r => !hit.includes(r)));   // きっかけの 条件（出場時・交代時）が 合う 技が いちばん 先
   const pr = f.trPrep && rows.find(r => r.id === f.trPrep.id && ok(r));   // うごきはじめた 技は 撃つまで かえない（条件の ちらつきで やりなおさない）
-  const r = pr || order.find(ok) || order[0]; if (!r) return;   // 撃てる技が ない ときは 次に撃つ技の 立ち回りを する
+  // 条件が 合う 技は 1→4 の順。合う技が 撃てない／条件なし の ときは 通常の AI が 相性などで えらぶ
+  const ai = !pr && !hit.some(ok) && rows.some(ok) ? (() => { const id = aiPickMove(f, o); return rows.find(x => x.id === id && ok(x)); })() : null;
+  const r = pr || hit.find(ok) || ai || order.find(ok) || order[0]; if (!r) return;   // 撃てる技が ない ときは 次に撃つ技の 立ち回りを する
   const g = r.go || 'auto'; f.trAt = 'm:' + r.id + (hit.includes(r) ? ' c' : '') + ' g:' + g;
   if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g) && ok(r) && !(f.trPrep && f.trPrep.id === r.id && f.trPrep.ord) && !(B.t - (f.trOrdT || -9) < 2.5)) { f.trOrdT = B.t; giveOrder(f, g, f.side, true); if (f.order) { f.order.tr = 1; if (f.trPrep) f.trPrep.ord = 1; } }
   if (!ok(r)) { f.trPrep = null; return; }
@@ -8138,12 +8140,12 @@ function drawStar(x, y, r, col) {
   ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); ctx.fill();
 }
 
-const FLYING = [];
-// 飛ぶ モンスター：浮いて 見え、障害物の 上を 飛びこえる（弾も 上から うつので 障害物に 止められない）
-const flies = (f) => !!(f && f.sp && (f.sp.fly || FLYING.includes(f.mon.sid)));
-// 見た目だけ 浮かぶ（羽が ある・ただよう）モンスター：歩かずに はばたいて／ふわふわ 移動する
-const HOVER_LOOK = new Set(['a_water4', 'a_ice10', 'a_poison4', 'b_fire7', 'b_water7', 'g1', 'g2', 'g10', 'c_fire5', 'c_elec1', 'c_elec5', 'c_elec7', 'b_dragon5', 'b_dragon7', 'b_poison7', 'b_poison10', 'b_fighting5', 'b_fighting3', 'c_dragon8']);
-const hovers = (f) => !(f && f.state === 'wind' && f.cur && f.cur.id === 'roost') && (flies(f) || !!(f && f.mon && HOVER_LOOK.has(f.mon.sid)));   // はねやすめ中は じめんに おりる
+// 浮かぶ モンスター（いまの 64ドットの え に あわせる：はねを ひろげて とぶ・ただよう・からだが 宙に ある もの）
+// 浮かんで 見え、障害物の 上を 飛びこえる（弾も 上から うつので 障害物に 止められない）。オリジナルは かいた え から きまる sp.fly
+const FLOAT_LOOK = new Set(['a_fire10', 'a_water4', 'a_water10', 'a_elec5', 'a_poison4', 'a_poison5', 'a_poison9', 'a_wind6', 'a_wind8', 'a_wind10', 'a_dragon4', 'a_dragon10', 'b_fire4', 'b_fire7', 'b_fire8', 'b_water4', 'b_water6', 'b_ice8', 'b_poison7', 'b_wind4', 'b_wind6', 'b_wind8', 'sorabune', 'b_wind10', 'b_dragon5', 'g1', 'g2', 'kitsunemen', 'medamasho', 'g9', 'g10', 'c_fire5', 'c_water1', 'c_water5', 'c_elec1', 'c_elec4', 'c_elec5', 'c_elec8', 'c_ground9', 'c_wind6', 'c_dragon10', 'd_bug1', 'd_bug5', 'd_bug7', 'd_bug9', 'd_bug12', 'd_bug17']);
+const floats = (sid) => SPECIES[sid] && SPECIES[sid].custom ? !!SPECIES[sid].fly : FLOAT_LOOK.has(sid);
+const flies = (f) => !!(f && f.sp && f.mon && floats(f.mon.sid));
+const hovers = (f) => !(f && f.state === 'wind' && f.cur && f.cur.id === 'roost') && flies(f);   // はねやすめ中は じめんに おりる
 // はばたく か ただよう か（羽の ある もの・鳥・竜は はばたき、ゴースト・くも・あわ などは ただよう）
 const WING_RX = /翼|羽|はね|つばさ|鳥|ドリ|バット|コウモリ|竜|リュウ|チョウ|ガーゴイ|グリフィ|ピクシー|ヒヨ|ガラス|ツル/;
 const flaps = (f) => WING_RX.test(f.sp.n + (f.sp.desc || ''));
