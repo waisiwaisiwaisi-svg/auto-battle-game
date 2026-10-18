@@ -662,6 +662,13 @@ html:not(.land) #scHub .hbar{flex-wrap:wrap;row-gap:8px} html:not(.land) #scHub 
 .hsname{position:absolute;left:8px;top:6px;font-size:13px;font-weight:700;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
 .hcta{width:100%;display:grid!important;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;padding:12px 16px!important;min-height:76px;background:linear-gradient(180deg,#ffd27a,#ffb547 55%,#f2962d)!important}
 .hcta .ico{grid-row:1/3}
+/* ホーム：ランク対戦ボタンに ときどき ひかりが はしる（ドットらしく ふちの くっきりした ななめの おび） */
+.hcta{position:relative;overflow:hidden}
+.hcta::after{content:'';position:absolute;top:-20%;bottom:-20%;left:0;width:26px;background:rgba(255,255,255,.38);box-shadow:10px 0 0 rgba(255,255,255,.18);transform:translateX(-80px) skewX(-20deg);pointer-events:none;animation:ctaShine 4.6s steps(24,end) 1.2s infinite}
+@keyframes ctaShine{0%{transform:translateX(-80px) skewX(-20deg)}22%,100%{transform:translateX(560px) skewX(-20deg)}}
+.hmode{transition:transform .14s cubic-bezier(.3,1.4,.6,1)} .hmode:hover{transform:translateY(-2px)} .hmode .ico{transition:transform .2s cubic-bezier(.3,1.6,.6,1)} .hmode:hover .ico{transform:translateY(-2px) rotate(-6deg) scale(1.08)}
+.hrv b{display:inline-block} .hrv b.up{color:#ffd166!important}
+@media (prefers-reduced-motion:reduce){.hcta::after{animation:none;display:none}}
 .hcta .t{font-size:21px;font-weight:700;color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;letter-spacing:.06em}
 .hcta .s{font-size:11.5px;color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .hcta .t,.hmode b{white-space:nowrap;min-width:0}
@@ -1032,7 +1039,9 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .cnd.not{background:#4a2c5a;border-color:#c07aff}.cnd b{color:#ffb0ff}
 .cnd.sel{outline:3px solid var(--acc);outline-offset:1px}
 .rb{display:flex;gap:3px;margin-left:auto}.rb button{font:inherit;font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid var(--edge);background:transparent;color:var(--ink)}.rb button:disabled{opacity:.3}
-.hov{outline:3px dashed #7bff8a!important;outline-offset:1px}
+.can{outline:2px solid rgba(255,209,102,.35)!important;outline-offset:1px}
+.hov{outline:3px solid #ffd166!important;outline-offset:1px;box-shadow:0 0 10px rgba(255,209,102,.45)!important}
+.trghost.snap{opacity:1;transform:scale(1.04);box-shadow:0 0 0 2px #ffd166,0 6px 16px rgba(0,0,0,.5)}
 .trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.trbtns .btn{padding:6px 12px;font-size:13px}
 .trside h3{font-size:13px;margin:4px 0 0}
 .trins{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--edge);font-size:12px;min-height:60px}
@@ -3177,7 +3186,8 @@ function renderHub() {
   if (!GUILD.checked) { GUILD.checked = true; setTimeout(() => guildMe().catch(() => { }), 0); }   // ギルドに いるか（たからばこ ボーナス）
   { const A = ac(), el = $('acSub'); if (el) el.textContent = A.run ? `ステージ ${A.run.stage + 1}/10 から つづける・スコア ${A.run.score}` : `10れんせん・ハイスコア ${A.best}`; }
   { const J = jr(); const el = $('jrSub'); if (el) el.textContent = J.champ ? `でんどういり ${J.champ}かい・バッジ ${J.badges.length}/10` : J.gym < GYMS.length ? `バッジ ${J.badges.length}/10・つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム` : 'バッジが そろった！ チャンピオンリーグへ'; }
-  $('hTrophy').textContent = S.trophies; $('hCaps').textContent = S.capsules; $('hCaught').textContent = S.caught;
+  const hubFirst = $('scHub').hidden;
+  rollNum($('hTrophy'), S.trophies); rollNum($('hCaps'), S.capsules); rollNum($('hCaught'), S.caught);
   const r = ROUNDS[S.round];
   { const el = $('cupSub'); if (el) el.textContent = `${r.n} vs ${roundTrainer(S.round).n.split(' ').pop()}`; }
   { const k = myRank(), t = tierOf(k.r), el = $('rkSub'); if (el) el.innerHTML = `<b style="color:#fff4c8">${t.n} ${k.r}</b>・${k.w}勝 ${k.l}敗`; }
@@ -3196,6 +3206,15 @@ function renderHub() {
   for (let i = S.party.length; i < 6; i++) P.insertAdjacentHTML('beforeend', `<div class="pm empty"><div style="height:48px;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.4">＋</div><div class="dim">${i < 3 ? 'しゅつじょう わく' : 'あき'}</div></div>`);
   renderChests();
   show('scHub');
+  if (hubFirst) { const H = $('scHub'); MO.stagger([...H.querySelectorAll('.hbar, .hicons, .hstage, .hcta, .hmode, .chesthead, .chest')], 32, 10); }   // ホームに きた：うえから じゅんに
+}
+// かずが かわったら くるくる ふえる（スコア ロールアップ）
+function rollNum(el, to) {
+  if (!el) return; to = +to || 0; const from = el.dataset.v == null ? to : +el.dataset.v; el.dataset.v = to;
+  if (from === to || !MO.ok()) { el.textContent = to; return; }
+  const t0 = performance.now(), D = Math.min(900, 300 + Math.abs(to - from) * 20); el.classList.add('up');
+  const st = (now) => { const u = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - u, 3); el.textContent = Math.round(from + (to - from) * e); if (u < 1) requestAnimationFrame(st); else { el.textContent = to; el.classList.remove('up'); MO.pop(el); } };
+  requestAnimationFrame(st);
 }
 const TYPE_SHORT = { normal: 'ノ', fire: '炎', water: '水', grass: '草', elec: '電', ice: '氷', fighting: '闘', poison: '毒', ground: '地', wind: '風', psychic: '超', bug: '虫', rock: '岩', ghost: '霊', dragon: '竜', dark: '悪', steel: '鋼', fairy: '妖' };
 function renderChart() {
@@ -3411,13 +3430,31 @@ function renderTrain(uid) {
     else if (pl.k === 'c') { if (d !== 'c') return; line(W.mv[i], L).push(trCondNew(pl.v)); TRN.sel = `${i}:${L}:${W.mv[i].c[L].length - 1}`; }
     TRN.pick = null; SND.se('ok'); touch();
   };
-  const zoneAt = (x, y) => { const t = document.elementFromPoint(x, y); return t && (t.closest('#trBody [data-drop]') || t.closest('#trBody .trr[data-row]')); };
+  // おける ばしょ だけ：はこぶ ものごとに おける わくを きめる（おけない わくは ひからない）
+  const zonesFor = (pl) => {
+    const q = (sel) => [...B.querySelectorAll(sel)];
+    if (pl.rowEl) return q('.trr[data-row]').filter(z => +z.dataset.row !== pl.i);
+    if (pl.gFrom != null) return q('.trmain [data-drop="g"]').filter(z => +z.dataset.i !== pl.gFrom);
+    if (pl.from) return q('.trmain [data-drop="c"]').filter(z => !(+z.dataset.i === pl.from[0] && +(z.dataset.l || 0) === pl.from[1]));
+    if (pl.k === 'mv') return q('.trmain [data-drop="mvnew"], .trmain [data-drop="h"]').filter(z => z.dataset.drop === 'mvnew' ? !W.mv.some(r => r.id === pl.v) : W.mv[+z.dataset.i].id !== pl.v);
+    if (pl.k === 'go') return q('.trmain [data-drop="g"]');
+    if (pl.k === 'c') return q('.trmain [data-drop="c"]');
+    return [];
+  };
+  // いちばん ちかい おける わく（ゆびの したに あれば それ、なければ 56px いないの いちばん ちかい もの＝マグネット）
+  const MAG = 56, nearest = (zs, x, y) => { let best = null, bd = MAG; for (const z of zs) { const r = z.getBoundingClientRect(), dx = Math.max(r.left - x, 0, x - r.right), dy = Math.max(r.top - y, 0, y - r.bottom), d = Math.hypot(dx, dy); if (d < bd || (d === 0 && bd > 0)) { bd = d; best = z; } } return best; };
   const drag = (el, pl, tapFn, okAt) => el.addEventListener('pointerdown', (ev) => {
-    if (ev.button > 0 || (okAt && !okAt(ev.target))) return; const sx = ev.clientX, sy = ev.clientY; let g = null;
-    const mv = (e) => { if (!g && Math.hypot(e.clientX - sx, e.clientY - sy) > 6) { g = el.cloneNode(true); g.classList.add('trghost'); g.style.width = el.offsetWidth + 'px'; document.body.appendChild(g); }
-      if (g) { e.preventDefault(); g.style.left = (e.clientX - el.offsetWidth / 2) + 'px'; g.style.top = (e.clientY - el.offsetHeight / 2) + 'px'; B.querySelectorAll('.hov').forEach(x => x.classList.remove('hov')); const z = zoneAt(e.clientX, e.clientY); if (z) z.classList.add('hov'); } };
+    if (ev.button > 0 || (okAt && !okAt(ev.target))) return; const sx = ev.clientX, sy = ev.clientY; let g = null, zs = [], tgt = null;
+    const clear = () => { zs.forEach(z => z.classList.remove('can', 'hov')); };
+    const mv = (e) => { if (!g && Math.hypot(e.clientX - sx, e.clientY - sy) > 6) { g = el.cloneNode(true); g.classList.add('trghost'); g.style.width = el.offsetWidth + 'px'; document.body.appendChild(g); zs = zonesFor(pl); zs.forEach(z => z.classList.add('can')); }
+      if (!g) return; e.preventDefault();
+      const z = nearest(zs, e.clientX, e.clientY);
+      if (z !== tgt) { if (tgt) tgt.classList.remove('hov'); tgt = z; if (z) { z.classList.add('hov'); MO.ok() && z.animate && z.animate([{ transform: 'scale(1.03)' }, { transform: 'none' }], { duration: 140 }); } }
+      // すいつく：ちかくの わくへ かげを すこし よせる
+      let gx = e.clientX, gy = e.clientY; if (z) { const r = z.getBoundingClientRect(), cx = clamp(gx, r.left + 8, r.right - 8), cy = clamp(gy, r.top + 6, r.bottom - 6); gx += (cx - gx) * .45; gy += (cy - gy) * .45; }
+      g.style.left = Math.round(gx - el.offsetWidth / 2) + 'px'; g.style.top = Math.round(gy - el.offsetHeight / 2) + 'px'; g.classList.toggle('snap', !!z); };
     const up = (e) => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
-      B.querySelectorAll('.hov').forEach(x => x.classList.remove('hov')); if (!g) { tapFn(); return; } g.remove(); drop(pl, zoneAt(e.clientX, e.clientY)); };
+      clear(); if (!g) { tapFn(); return; } g.remove(); drop(pl, tgt); };
     window.addEventListener('pointermove', mv, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
   });
   B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
