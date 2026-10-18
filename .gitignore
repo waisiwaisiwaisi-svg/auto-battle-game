@@ -1,3 +1,4 @@
 tools/arenas/hit/*.png
 __pycache__/
 tools/promo/frames/
+tools/sizes/sizes/
