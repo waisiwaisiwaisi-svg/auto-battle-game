@@ -201,6 +201,13 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .teamdetail .dh{display:flex;gap:10px;align-items:center}
 .teamdetail .dh canvas{width:96px;height:96px;background:#1b1530;border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2);flex:none}
 .teamdetail .acts{display:flex;gap:6px;flex-wrap:wrap}
+.teamdetail .shx,.teamdetail .shc{display:none}
+/* たて画面：くわしくは 下から せりあがる シート（ボックスの 下に うもれない） */
+html:not(.land) #tmDetail{position:fixed;z-index:30;left:50%;bottom:calc(74px + var(--sab));width:min(100%,520px);max-height:64%;overflow:auto;margin:0;border-radius:10px 10px 0 0;
+  transform:translate(-50%,110%);visibility:hidden;transition:transform .34s cubic-bezier(.3,1.2,.5,1),visibility 0s .34s;box-shadow:0 -6px 18px rgba(0,0,0,.55),inset 0 0 0 2px #0b0914;padding-top:22px}
+html:not(.land) #tmDetail.open{transform:translate(-50%,0);visibility:visible;transition:transform .34s cubic-bezier(.3,1.2,.5,1),visibility 0s}
+html:not(.land) #tmDetail .shx{display:block;position:absolute;top:4px;left:50%;width:44px;height:6px;margin-left:-22px;border-radius:0;background:#6a5ea0;box-shadow:0 0 0 2px #0b0914;border:0;padding:0;cursor:pointer}
+html:not(.land) #tmDetail .shc{position:absolute;top:6px;right:8px;width:28px;height:28px;font-size:16px;line-height:24px;color:var(--ink);background:#2c2350;box-shadow:inset 0 0 0 2px #0b0914;display:block}
 .teamdetail .acts .btn{font-size:13px;padding:8px 12px}
 .mvl{display:flex;flex-direction:column;gap:4px}
 .mvl div{background:#15112a;border-radius:3px;padding:4px 7px;box-shadow:inset 4px 0 0 var(--c)}
@@ -3278,7 +3285,8 @@ const MO = {
   stamp(e) { if (MO.ok() && e && e.animate) e.animate([{ transform: 'scale(1.8) rotate(-8deg)', opacity: 0 }, { transform: 'scale(.92) rotate(-2deg)', opacity: 1, offset: .5 }, { transform: 'none' }], { duration: 320, easing: 'steps(8, end)' }); },
 };
 function renderTeam(openUid) {
-  if (openUid != null) teamView = openUid;
+  if (openUid != null) { teamView = openUid; teamSheet = true; }
+  else if ($('scTeam').hidden) teamSheet = false;
   const slot = (m, r, cls) => {
     const d = document.createElement('div'); d.className = 'slot ' + cls + (m ? '' : ' empty'); d.dataset.w = r.w; d.dataset.i = r.i; if (m) d.dataset.key = m.uid;
     if (r.w === 'p' && r.i < 3) d.insertAdjacentHTML('beforeend', `<span class="no">${r.i + 1}</span>`);
@@ -3302,21 +3310,22 @@ function renderTeam(openUid) {
   if (opened) MO.flip(T, '.slot[data-key]', before); else MO.stagger(T.querySelectorAll('.slot'), 18, 6);   // いれかえは まえの 位置から すべる／ひらいた ときは じゅんばんに
   if (teamDrop != null) { MO.settle(T.querySelector(`.slot[data-key="${teamDrop}"]`)); teamDrop = null; }
 }
-let teamDrop = null;
+let teamDrop = null, teamSheet = false;
 function renderTeamDetail() {
   const D = $('tmDetail'), all = [...S.party, ...S.box], m = all.find(x => x.uid === teamView) || S.party[0];
   if (!m) { D.innerHTML = ''; return; }
   teamView = m.uid;
   const sp = SPECIES[m.sid], st = stats(m), inParty = S.party.includes(m), pi = S.party.indexOf(m), bi = S.box.indexOf(m);
   const STN = [['HP', st.hp, 260], ['こうげき', Math.round(st.atk), 110], ['ぼうぎょ', Math.round(st.def), 110], ['すばやさ', st.spd, 130]];
-  D.innerHTML = `<div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
+  D.innerHTML = `<button class="shx" data-a="close" title="とじる"></button><button class="shc" data-a="close" title="とじる">×</button><div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
       <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'ボックス'}　${ivGrade(m)}</div>
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span><div class="dim" style="font-size:11px">${natRelText(m.nat)}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button><button class="btn sub" data-a="train" style="color:var(--acc)">訓練</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn danger" data-a="release">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
-  if (D._uid !== m.uid) { const dir = D._uid == null ? 0 : 1; D._uid = m.uid; if (dir) MO.swapIn(D, dir); MO.bars(D); }   // ちがう モンスター：よこから はいって のうりょくバーが のびる
+  D.classList.toggle('open', teamSheet); D.querySelectorAll('[data-a="close"]').forEach(b => b.onclick = () => { teamSheet = false; D.classList.remove('open'); SND.se('back'); });
+  if (D._uid !== m.uid) { const dir = D._uid == null ? 0 : 1; D._uid = m.uid; if (dir) [...D.children].forEach(c => MO.swapIn(c, dir)); MO.bars(D); }   // ちがう モンスター：よこから はいって のうりょくバーが のびる
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
     if (act === 'tm') return useTM(m);
@@ -3611,7 +3620,7 @@ function openBoost(m) {
   document.addEventListener('click', (ev) => {
     if ($('scTeam').hidden || performance.now() - justDragged < 300) return; const r = refOf(ev.target); if (!r) return;
     const m = teamMon(r);
-    if (m) { teamSel = { w: r.w, i: r.i }; teamView = m.uid; SND.se('click'); }   // タップは しょうさいを みるだけ（いれかえは ドラッグのみ）
+    if (m) { teamSel = { w: r.w, i: r.i }; teamView = m.uid; teamSheet = true; SND.se('click'); }   // タップは しょうさいを みるだけ（いれかえは ドラッグのみ）
     renderTeam();
   });
 })();
