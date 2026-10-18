@@ -290,7 +290,8 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .plate .top{display:flex;justify-content:space-between;gap:4px;white-space:nowrap}
 .plate .top b{font-size:13px;overflow:hidden;text-overflow:ellipsis}
 .plate .hp{height:8px;background:#0d0b14;margin:4px 0 3px;box-shadow:0 0 0 1px #0d0b14}
-.plate .hp i{display:block;height:100%;background:var(--good);transform-origin:left;transition:background .2s}
+.plate .hp i{display:block;height:100%;background:var(--good);transform-origin:left;transition:background .2s;position:relative}
+.plate .hp{position:relative}.plate .hp .g{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:left;background:#fff1b8;box-shadow:inset 0 -2px 0 rgba(255,120,80,.55)}
 .plate .bot{display:flex;justify-content:space-between;align-items:center;color:var(--dim)}
 .balls{display:flex;gap:3px}
 .balls i{width:7px;height:7px;background:var(--acc);box-shadow:0 0 0 1px #0d0b14}
@@ -7325,12 +7326,23 @@ function condText(f) {
   if (f.v.seed) a.push('タネ'); if (f.v.confuse > 0) a.push('こんらん'); if (f.v.healBlock > 0) a.push('かいふくふうじ'); if (f.v.yawn > 0) a.push('ねむけ');
   return a.join(' ');
 }
+// ゴーストバー：ダメージを うけたら ほんとうの HP は すぐ へり、へった ぶんの バーが すこし おくれて おいかける
+function hpGhost(f) {
+  const k = Math.max(0, f.hp / f.maxHp), t = B ? B.t : 0;
+  if (f.hpG == null || k >= f.hpG) { f.hpG = k; f.hpGd = t; f.hpGt = t; return k; }   // かいふくは すぐ
+  if (f.hpGk !== k) { if (f.hpGk != null && k < f.hpGk) f.hpGd = t; f.hpGk = k; }   // あたらしく へった：まち時間を やりなおす
+  const dt = Math.max(0, t - (f.hpGt || t)); f.hpGt = t;
+  if (t - f.hpGd > .45) f.hpG = Math.max(k, f.hpG - dt * Math.max(.35, (f.hpG - k) * 2.2));   // 0.45びょう まってから するする へる
+  return f.hpG;
+}
 function updPlate(id, side) {
   const root = $(id), f = active(side); if (!f) return;
   setText(root.querySelector('.nm'), f.sp.n);
   const tsig = f.sp.type + (f.sp.type2 || '');
   const tEl = root.querySelector('.types'); if (tEl._t !== tsig) { tEl._t = tsig; tEl.innerHTML = typeChip(f.sp.type) + (f.sp.type2 ? typeChip(f.sp.type2) : ''); }
-  const k = f.hp / f.maxHp, bar = root.querySelector('.hp i');
+  const k = f.hp / f.maxHp, bar = root.querySelector('.hp i'), hpEl = root.querySelector('.hp');
+  let gb = hpEl.querySelector('.g'); if (!gb) { gb = document.createElement('b'); gb.className = 'g'; hpEl.insertBefore(gb, bar); }
+  gb.style.transform = `scaleX(${hpGhost(f)})`;
   bar.style.transform = `scaleX(${k})`;
   bar.style.background = k > .5 ? 'var(--good)' : k > .2 ? 'var(--mid)' : 'var(--bad)';
   setText(root.querySelector('.hpn'), `${Math.ceil(f.hp)}/${f.maxHp}`);
@@ -8437,6 +8449,7 @@ function drawFighter(f) {
     const w = 46, x = Math.round(f.x - w / 2), k = f.hp / f.maxHp;
     ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 1, top - 1, w + 2, 7);
     ctx.fillStyle = '#3a3350'; ctx.fillRect(x, top, w, 5);
+    const gk = hpGhost(f); if (gk > k) { ctx.fillStyle = '#fff1b8'; ctx.fillRect(x, top, Math.round(w * gk), 5); }   // ゴーストバー
     ctx.fillStyle = k > .5 ? (f.side ? '#ff7a6a' : '#5ab8ff') : k > .2 ? '#ffd166' : '#ff4a4a';
     ctx.fillRect(x, top, Math.round(w * k), 5);
     ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(x, top, Math.round(w * k), 1);
