@@ -3977,7 +3977,7 @@ function buildNav(st) {
   for (let c = 0; c < nw * nh; c++) if (walk[c]) { const x = (c % nw + .5) * NAV, y = ((c / nw | 0) + .5) * NAV; comfy[c] = all.some(o => circRect(x, y, NAV_R + OBST_GAP, o)) ? 0 : 1; }
   st.nav = { nw, nh, walk, comfy };
 }
-const CAM_MAX = 1.6, CAM_PAD = 170;   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
+const CAM_MAX = 1.6, CAM_PAD = 170, CAM_TALL_LO = .44, CAM_TALL_UP = .28;   // たて画面：みえる よこはばは フィールドの 44%〜28%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
 const OBST_GAP = 18;   // ふつうに あるく ときは 障害物から この きょり（ゲーム内の ドット）いじょう はなれる。せまい すきまは しかたなく とおる
 // 障害物との 当たりは 足もとだけ（当たり判定が 絵の 足もとに あわせて あるので、体の 円より 小さく）
@@ -7143,19 +7143,22 @@ function bVisual(dt) {
   const vis = [a, e].filter(f => f && f.state !== 'bench');
   // ふたりの きょりに あわせて ズーム：はなれると ひいて 全体、ちかいと よる（ただし CAM_MAX ばい まで）
   const aw = Math.max(80, VW - VPAD.l - VPAD.r), ah = Math.max(60, VH - VPAD.t - VPAD.b), fw = st.fx1 - st.fx0 + 60, fh = st.fy1 - st.fy0 + 60;
-  const fit = Math.min(aw / fw, ah / fh), up = Math.max(fit * CAM_MAX, Math.min(ah / st.H, aw / (fw * .6)));   // up：たてに ながい 画面では もっと よれる
+  const tall = VH > VW * 1.2, LO_W = tall ? CAM_TALL_LO : .88, UP_W = tall ? CAM_TALL_UP : .6;   // たて画面：もっと よる（みえる はばを せまく）
+  const fit = Math.min(aw / fw, ah / fh), up = Math.max(fit * CAM_MAX, tall ? aw / (fw * UP_W) : Math.min(ah / st.H, aw / (fw * UP_W)));   // up：たてに ながい 画面では もっと よれる
   tx = (st.fx0 + st.fx1) / 2; ty = (st.fy0 + st.fy1) / 2 - 10; tz = Math.min(up, Math.max(fit, Math.min(ah / st.H, aw / st.W)));
   if (vis.length === 2 && B.mode !== 'intro') {
     const pts = vis.map(f => [f.x, f.y - BODY]); if (B.catchO) pts.push([B.catchO.x, B.catchO.y]);
     const x0 = Math.min(...pts.map(p => p[0])), x1 = Math.max(...pts.map(p => p[0])), y0 = Math.min(...pts.map(p => p[1])), y1 = Math.max(...pts.map(p => p[1]));
     const bw = x1 - x0 + CAM_PAD * 2, bh = y1 - y0 + CAM_PAD * 1.6 + 60;
-    const lo = Math.max(fit, Math.min(ah / st.H, aw / (fw * .88)));   // たて画面で ひきすぎない（よこ 88% くらいまで）
+    const lo = Math.max(fit, tall ? aw / (fw * LO_W) : Math.min(ah / st.H, aw / (fw * LO_W)));   // ひきすぎない（よこ 88%・たて画面は もっと せまく）
     tz = clamp(Math.min(aw / bw, ah / bh), lo, Math.max(lo, up));
     // よった ぶん だけ ふたりの まんなかへ
     const k = Math.max(.35, (tz - fit) / (up - fit || 1));
     tx += ((x0 + x1) / 2 - tx) * Math.min(1, k * 1.5); ty += ((y0 + y1) / 2 - ty) * Math.min(1, k * 1.5);
+    // ふたりが はいりきらない ときは じぶんの モンスターを かならず うつす（あいては ミニマップと はしの やじるしで）
+    const me = active(B.my || 0); if (me && me.state !== 'bench') { const hw = aw / 2 / tz - 70, hh = ah / 2 / tz - 90; if (hw > 0) tx = clamp(tx, me.x - hw, me.x + hw); if (hh > 0) ty = clamp(ty, me.y - BODY - hh, me.y - BODY + hh); }
   }
-  if (B.mode === 'intro') { const z0 = Math.max(aw / st.W, ah / st.H), z1 = Math.max(fit, Math.min(ah / st.H, aw / (fw * .88))), t = B.modeT - (B.vsT || 0); tz = t < .6 ? z0 : z0 + Math.min(1, (t - .6) / 1.6) * (z1 - z0); if (t < 0) { tx = st.W / 2 + Math.sin(B.modeT * 1.1) * 40; ty = st.H * .42; } }
+  if (B.mode === 'intro') { const z0 = Math.max(aw / st.W, ah / st.H), z1 = Math.max(fit, tall ? aw / (fw * LO_W) : Math.min(ah / st.H, aw / (fw * LO_W))), t = B.modeT - (B.vsT || 0); tz = t < .6 ? z0 : z0 + Math.min(1, (t - .6) / 1.6) * (z1 - z0); if (t < 0) { tx = st.W / 2 + Math.sin(B.modeT * 1.1) * 40; ty = st.H * .42; } }
   B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 1.6);
   B.cam.x += (tx - B.cam.x) * Math.min(1, dt * 4);
   B.cam.y += (ty - B.cam.y) * Math.min(1, dt * 4);
@@ -8981,6 +8984,18 @@ function render() {
   for (const f of [a, e]) if (f && f.state !== 'bench') {
     const px = mx + (f.x - st.fx0) / (st.fx1 - st.fx0) * mw, py = my + (f.y - st.fy0) / (st.fy1 - st.fy0) * mh;
     ctx.fillStyle = f.side ? '#ff6b5b' : '#4aa8ff'; ctx.fillRect(Math.round(px) - 1, Math.round(py) - 1, 3, 3);
+  }
+  { // あいてが がめんの そとに いる：はしに やじるし（たて画面で よった とき）
+    const o = active(1 - (B.my || 0)); if (o && o.state !== 'bench' && o.hp > 0 && B.mode === 'fight' && VH > VW * 1.2) {
+      const sx = BX + (o.x - cx) * z, sy = BY + (o.y - BODY - cy) * z, m = 18, L0 = VPAD.l + m, R0 = VW - VPAD.r - m, T0 = VPAD.t + m, B0 = VH - VPAD.b - m;
+      if (sx < L0 || sx > R0 || sy < T0 || sy > B0) {
+        const qx = clamp(sx, L0, R0), qy = clamp(sy, T0, B0), ang = Math.atan2(sy - qy, sx - qx), pul = 1 + Math.sin(B.t * 8) * .12;
+        ctx.save(); ctx.translate(Math.round(qx), Math.round(qy)); ctx.rotate(ang); ctx.scale(pul, pul);
+        ctx.fillStyle = '#0b0914'; ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(-7, -10); ctx.lineTo(-7, 10); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#ff6b5b'; ctx.beginPath(); ctx.moveTo(9, 0); ctx.lineTo(-5, -7); ctx.lineTo(-5, 7); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+    }
   }
   drawIntroOverlay();   // しあい まえの 演出（ミニマップより 上）
 }
