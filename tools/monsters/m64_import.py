@@ -132,6 +132,7 @@ for card, kk, a in jobs:
             if cand: n = min(cand, key=ov); owner[n] = (k2, owner[n][1]); main[k2] = n; mains.add(n)
     for mi, k in enumerate(kk):
       sid = L[(card - 1) * 2 + (k - 1)]['id']
+      if not sid: continue   # じゅんばんの ひょうに ない シート
       fr = []; M = 16   # となりへ はみ出して よい はば（ドット）
       for k2 in range(12):
         r, c = divmod(k2, 6); r += mi * 2; y0, x0 = r * CH - M, c * CW - M
