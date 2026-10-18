@@ -1449,7 +1449,7 @@ Object.assign(MOVES100, {
   'bug-swarm':    { n: 'むしのむれ',     ref: 'bug-swarm',    t: 'bug',      cat: 'phys', k: 'strike', power: 65, acc: 100, prio: 0, aim: 'lock', wind: .65, cd: 3.4, pow: 13, rad: 50, e: {} },
   'far-strike':   { n: 'とおあて',       ref: 'far-strike',   t: 'fighting', cat: 'spec', k: 'strike', power: 70, acc: 100, prio: 0, aim: 'lock', wind: .7,  cd: 3.7, pow: 14, rad: 44, e: {} },
   'heavy-drop':   { n: 'ドスンおとし',   ref: 'heavy-drop',   t: 'normal',   cat: 'phys', k: 'strike', power: 80, acc: 95, prio: 0, aim: 'dir',  wind: .8,  cd: 4.2, pow: 16, rad: 50, e: {} },
-  'quicksand':    { n: 'ありじごく',     ref: 'quicksand',    t: 'ground', cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8.5, pow: 0, life: 6, rad: 62, slow: .8, pull: 10, e: {} },   // ひきこみは あるいて ぬけだせる つよさ
+  'quicksand':    { n: 'ありじごく',     ref: 'quicksand',    t: 'ground', cat: 'stat', k: 'floor', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .55, cd: 8.5, pow: 0, life: 6, rad: 46, slow: .8, pull: 10, e: {} },   // ひきこみは あるいて ぬけだせる つよさ
 });
 MOVES100['double-team'] = { n: 'かげぶんしん', ref: 'double-team', t: 'normal', cat: 'stat', k: 'clone', power: 0, acc: 0, prio: 0, aim: 'lock', wind: .35, cd: 9, pow: 0, e: {} };   // ぶんしんを 2たい：あいての ねらいを まどわす
 Object.assign(MOVES100, {   // あとから ふえた わざ
@@ -4313,7 +4313,8 @@ function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.r
 const USE_MIN = 5;
 function healMax(m) { const e = m.e || {}; if (m.k === 'counter' || m.k === 'heal' || e.seed || e.heal) return USE_MIN; return bigMax(m); }
 // 大わざ：1せんで つかえる 回数に 上限
-function bigMax(m) { if (m.ohko) return USE_MIN; if (m.cat === 'stat') return 0; const p = m.power || Math.round((m.pow || 0) * 5); return p >= 100 ? USE_MIN : 0; }
+const SPECIAL_MAX = 3;   // とくべつな こうか（ゆか・かべ・わな・のうりょく・じょうたい など）の わざは 1せん 3かいまで（まもりは 5かい）
+function bigMax(m) { if (m.ohko) return USE_MIN; if (m.cat === 'stat') return m.k === 'protect' || m.k === 'stance' ? USE_MIN : SPECIAL_MAX; const p = m.power || Math.round((m.pow || 0) * 5); return p >= 100 ? USE_MIN : 0; }
 // すいとる こうげき：なんどでも うてる。かいふく するのは 1戦 DRAIN_MAX 回まで（それいこうは ふつうの こうげき）
 const DRAIN_MAX = 3;
 const drainLeft = (f, id) => ((MOVES[id] && MOVES[id].drainMax) || DRAIN_MAX) - ((f.drains && f.drains[id]) || 0);
@@ -7270,7 +7271,7 @@ function moveDesc(m) {
   if (m.ramp) out.push(`あてるたびに いりょくが ${m.ramp * 100}%ずつ あがる（6かいまで）`); if (e.web) out.push(`あたると ${e.web}びょう、こうげきを うけるたびに ついかダメージ`); if (m.charge2) out.push('1かいめは ためる。2かいめは ためなしで ほそい ビームを はなつ'); if (m.bugHeal) out.push('みかたの むしタイプは うえで かいふく');
   if (m.bigKb) out.push('あたった あいてを とおくへ ふきとばす'); if (m.chain) out.push('あたると もういちど とっしん。そのあとも あたるたびに 50%で つづく');
   if (m.whip) out.push('みぎ・ひだりと 2かい ふる'); if (e.yawn) out.push('あたると しばらくして ねむる'); if (m.noKb) out.push('ふきとばさない'); if (m.blastR) out.push('ひろい はんいに おちる');
-  if (healMax(m)) out.push(`${bigMax(m) && healMax(m) === bigMax(m) ? '大わざ：' : ''}1せん ${healMax(m)}かいまで`);
+  if (healMax(m)) out.push(`${bigMax(m) && healMax(m) === bigMax(m) ? (m.cat === 'stat' ? 'とくしゅこうか：' : '大わざ：') : ''}1せん ${healMax(m)}かいまで`);
   return out.filter(Boolean).join('・');
 }
 const PAT_DESC = { scatter: 'あいての まわりに ばらばらに おちる', swarm: 'むれが つぎつぎ おそう', big: 'おおきな はんいに おそく おちる', line: 'てまえから あいてへ じゅんに ふきあがる', row: 'よこ 1れつに おちる', cross: '✕の かたちに おちる', double: 'おなじ ところに 2かい（よけた あとも ちゅうい）', cage: 'おちた まわりを いわで かこむ', ring: 'そとの わ → まんなかへ とじる',
