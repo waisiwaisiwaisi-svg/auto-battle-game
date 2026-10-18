@@ -1067,7 +1067,8 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .pal[style*="--c"]{border-left:6px solid var(--c)!important}
 .pal.on{outline:3px solid var(--acc);outline-offset:1px}
 .trghost{position:fixed!important;pointer-events:none;z-index:9999;opacity:.85;transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.5);margin:0}
-@media (max-width:860px){.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;bottom:calc(78px + var(--sab));z-index:5;max-height:32vh;overflow:auto;padding:4px 8px;border-radius:10px;background:rgba(22,18,40,.96);border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
+@media (max-width:860px){.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;bottom:0;z-index:5;max-height:32vh;overflow:auto;padding:4px 8px;border-radius:10px;background:rgba(22,18,40,.96);border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}
+html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
 .chipg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px auto;max-width:420px}
 .chipg button{position:relative;aspect-ratio:1.15;min-width:0;font:inherit;font-size:10px;line-height:1.2;padding:2px;border-radius:5px;border:1px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.03);color:var(--ink);overflow:visible;word-break:keep-all;overflow-wrap:anywhere}
 .chipg button.k-if{background:#2c4a7a;border:2px solid #6aa0ff}
@@ -3156,7 +3157,9 @@ function renderChests() {
   $('hGems').textContent = S.gems || 0; $('hGuildBonus').hidden = !S.guildOn;
   $('hItems').textContent = Object.values(S.items || {}).reduce((a, b) => a + b, 0);
   { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<b class="hnm"></b><i class="ico" style="background-image:url(${tierBadge(t.i)})"></i><b style="color:${t.c}">${t.n}</b><span style="grid-column:2">${k.r}</span><span class="mb"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></span>`; $('hRank').style.gridTemplateRows = 'auto auto auto auto'; $('hRank').querySelector('.hnm').textContent = myName(); }
-  if (!S.pname && !window.PMA_NAME && !TUT && !renderHub.asked) { renderHub.asked = true; setTimeout(() => { if (!S.pname && !$('scHub').hidden && !document.querySelector('.askbg')) askName(true); }, 700); }   // なまえが まだ：いちど だけ きく
+  if (!S.pname && !window.PMA_NAME && !TUT && !renderHub.asked) { renderHub.asked = true;   // なまえが まだ：ほかの まど（コーチの おはなし など）が とじてから いちど だけ きく
+    const tryAsk = () => { if (S.pname || TUT || B) { renderHub.asked = false; return; } if ($('scHub').hidden || document.querySelector('.askbg')) { setTimeout(tryAsk, 800); return; } askName(true); };
+    setTimeout(tryAsk, 700); }
   $('hTms').textContent = Object.values(S.tms || {}).reduce((a, b) => a + b, 0);
 }
 async function tapChest(i) {
@@ -4428,7 +4431,7 @@ function beginMove(f, id) {
   const o = opp(f); if (!o || B.mode === 'intro') return;   // ファイト！ まえは うたない
   const m = MOVES[id];
   if (f.v.confuse > 0 && !f.cfuse && confusedAct(f, id)) return;   // こんらん：しじと ちがう ことを する
-  if (healMax(m) && !(m.charge2 && !f.v.charged)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }   // がりょうてんせいは ためる ときは かぞえない
+  if (healMax(m) && !TUT && !(m.charge2 && !f.v.charged)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }   // がりょうてんせいは ためる ときは かぞえない
   if (m.fakeout) f.v.fakeUsed = true;   // びっくりてうち：1かい でるごとに 1かい
   let ang = Math.atan2(o.y - f.y, o.x - f.x), tx = o.x, ty = o.y, decoy = null;
   if (o.clones && o.clones.length && isDamaging(m) && ['melee', 'swipe', 'dash', 'proj', 'beam', 'strike', 'multi', 'cone', 'warp', 'vault'].includes(m.k)) { const dl = o.clones.find(c => c.doll && Math.hypot(c.x - f.x, c.y - f.y) <= DOLL_R), cl = o.clones.filter(c => !c.doll), k = dl ? -1 : Math.floor(Math.random() * (cl.length + 1)); decoy = dl || (k > 0 ? cl[k - 1] : null); if (decoy) { ang = Math.atan2(decoy.y - f.y, decoy.x - f.x); tx = decoy.x; ty = decoy.y; } }   // デコイにんぎょうは ゆうこうはんい（DOLL_R）の なかの あいてだけ ひきつける   // かげぶんしん：どれを ねらうかは うんしだい
@@ -7043,7 +7046,7 @@ function bStep(dt) {
     else if (f.fainted && f.state === 'bench') afterFaint(f);
   }
   // ラストスパート：どちらかが のこり 1たいに なったら 曲が ボス版に。じぶんが ピンチなら こどう
-  if (B.mode === 'fight' && !B.lastStand && B.kind !== 'wild' && B.sides.some(sd => sd.fs.filter(x => !x.fainted && x.hp > 0).length === 1)) {
+  if (B.mode === 'fight' && !B.lastStand && B.kind !== 'wild' && B.sides.some(sd => sd.fs.length > 1 && sd.fs.filter(x => !x.fainted && x.hp > 0).length === 1)) {   // 1たいだけの チームは さいしょから のこり1たい：だれかが たおれて へった ときだけ
     B.lastStand = true; if (!B.cfg.boss) SND.play('st_' + B.st.field + '_boss'); say('ラストスパート！'); B.cheer = 1;
   }
   { const me = active(B.my || 0), pin = me && B.mode === 'fight' && me.hp > 0 && me.hp < me.maxHp * .3 && !B.sides[B.my || 0].fs.some(x => x !== me && !x.fainted && x.hp > 0);
@@ -7276,6 +7279,7 @@ const TUT_STEPS = [
 ];
 function tutShow(step) {
   const box = $('tutBox'); box.hidden = false; $('tutTx').innerHTML = step.tx;
+  { const pl = $('plP'), app = $('app'); box.style.top = ''; if (pl && app && !document.documentElement.classList.contains('land')) { const r = pl.getBoundingClientRect(), a = app.getBoundingClientRect(); if (r.height) box.style.top = (r.bottom - a.top + 6) + 'px'; } }   // HP の ひょうじの したに だす（かくさない）
   $('tutNext').hidden = !step.pause;
   document.querySelectorAll('.tut-hl').forEach(e => e.classList.remove('tut-hl'));
   const el = step.hl && step.hl(); if (el) el.classList.add('tut-hl'); TUT.hlEl = el || null;
@@ -7588,7 +7592,7 @@ function hpGhost(f) {
 }
 function updPlate(id, side) {
   const root = $(id), f = active(side); if (!f) return;
-  setText(root.querySelector('.nm'), f.sp.n);
+  { const nm = root.querySelector('.nm'); setText(nm, f.sp.n); if (nm._fit !== f.sp.n) { nm._fit = f.sp.n; nm.style.fontSize = ''; } if (nm.clientWidth && nm.scrollWidth > nm.clientWidth + 1) { let fs = parseFloat(getComputedStyle(nm).fontSize); while (nm.scrollWidth > nm.clientWidth + 1 && fs > 8) { fs -= 1; nm.style.fontSize = fs + 'px'; } } }   // ながい なまえは わくに はいるまで ちいさく（タイプと ならんでも きれない）
   const tsig = f.sp.type + (f.sp.type2 || '');
   const tEl = root.querySelector('.types'); if (tEl._t !== tsig) { tEl._t = tsig; tEl.innerHTML = typeChip(f.sp.type) + (f.sp.type2 ? typeChip(f.sp.type2) : ''); }
   const k = f.hp / f.maxHp, bar = root.querySelector('.hp i'), hpEl = root.querySelector('.hp');
