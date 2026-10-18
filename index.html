@@ -2016,7 +2016,19 @@ function rgbaCanvas(px, W, H, white, box) {
   g.putImageData(img, 0, 0);
   return c;
 }
+// 走りの コマを 地面に あわせる：走り 4コマの いちばん 下を まちの 足もとに そろえる（はねる うごきは そのまま）
+function alignWalk(fr, W, H) {
+  const low = (px) => { for (let y = H - 1; y >= 0; y--) for (let x = 0; x < W; x++) if (px[(y * W + x) * 4 + 3]) return y; return -1; };
+  const ik = ['idle0', 'idle1', 'idle2', 'idle3'].filter(k => fr[k]), wk = ['walk0', 'walk1', 'walk2', 'walk3'].filter(k => fr[k]);
+  if (!ik.length || !wk.length) return fr;
+  const d = Math.max(...ik.map(k => low(fr[k]))) - Math.max(...wk.map(k => low(fr[k])));
+  if (!d) return fr;
+  const o = { ...fr };
+  for (const k of wk) { const src = fr[k], dst = new Uint8ClampedArray(src.length); for (let y = 0; y < H; y++) { const sy = y - d; if (sy < 0 || sy >= H) continue; dst.set(src.subarray(sy * W * 4, (sy + 1) * W * 4), y * W * 4); } o[k] = dst; }
+  return o;
+}
 function bakeFrames(fr, W, H, sym) {
+  fr = alignWalk(fr, W, H);
   const box = frameBox(fr, W, H, sym), o = {};
   for (const k in fr) o[k] = { n: rgbaCanvas(fr[k], W, H, false, box), w: rgbaCanvas(fr[k], W, H, true, box) };
   return o;
@@ -7487,7 +7499,7 @@ function drawBlasts() {
 function drawFloor(zn) {
   { const pk = zn.id === 'quicksand' ? 'pit' : zn.id === 'honey-pool' ? 'fl_honey' : !zn.parts && { fire: 'fl_fire', poison: 'fl_poison', elec: 'fl_elec' }[zn.t];
     if (pk && plOk(pk)) { const k = Math.min(1, (zn.max - zn.life) / .3) * Math.min(1, zn.life / .5), S = PLFX[pk], sc = zn.rad * (pk === 'fl_fire' ? 2 : 2.15) * (.6 + .4 * k) / (S.w * PIX_D);
-      ctx.globalAlpha = Math.max(.1, k) * (pk === 'pit' ? .55 : pk === 'fl_fire' ? .3 : .36); ctx.save(); ctx.translate(zn.x, zn.y); ctx.scale(1, pk === 'fl_fire' ? .55 : .85); plDraw(pk, plLoop(pk, B.t + (zn.uid || 0) * .37), 0, 0, sc, 0); ctx.restore(); ctx.globalAlpha = 1;   // ゆかは うすく ひらたく（めだちすぎない）
+      ctx.globalAlpha = Math.max(.1, k) * (pk === 'pit' ? .8 : pk === 'fl_fire' ? .6 : .66); ctx.save(); ctx.translate(zn.x, zn.y); ctx.scale(1, pk === 'fl_fire' ? .55 : .85); plDraw(pk, plLoop(pk, B.t + (zn.uid || 0) * .37), 0, 0, sc, 0); ctx.restore(); ctx.globalAlpha = 1;   // ゆかは うすく ひらたく（めだちすぎない）
       if (zn.pat === 'pull' && pk !== 'pit') drawPullSwirl(zn);
       ctx.strokeStyle = zn.side === 1 ? '#ff5a6a' : '#5ab8ff'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.lineDashOffset = -B.t * 20; ctx.globalAlpha = .4; ctx.beginPath(); ctx.ellipse(zn.x, zn.y, zn.rad, zn.rad * .62, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; return; } }
   if (zn.id === 'quicksand') { drawAntlion(zn); return; }
@@ -7508,7 +7520,7 @@ function drawFloor(zn) {
   if (S && S.img.complete) {   // FXEL の ゆか（くりかえし）
     const n = S.n, i = Math.floor(B.t * 16 + (zn.uid || 0)) % n, sz = rx * 2.3 * (.6 + .4 * k);
     ctx.globalAlpha = k; ctx.drawImage(S.img, i * 48, 0, 48, 48, Math.round(zn.x - sz / 2), Math.round(zn.y - sz * .74), sz, sz);
-  } else { ctx.globalAlpha = .45 * k; ctx.fillStyle = TYPES[zn.t].c; ctx.beginPath(); ctx.ellipse(zn.x, zn.y, rx, ry, 0, 0, 7); ctx.fill(); }
+  } else { ctx.globalAlpha = .7 * k; ctx.fillStyle = TYPES[zn.t].c; ctx.beginPath(); ctx.ellipse(zn.x, zn.y, rx, ry, 0, 0, 7); ctx.fill(); }
   if (zn.pat === 'pull') drawPullSwirl(zn);
   ctx.globalAlpha = k; ctx.strokeStyle = enemy ? '#ff5a6a' : '#5ab8ff'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.lineDashOffset = -B.t * 20; ctx.beginPath(); ctx.ellipse(zn.x, zn.y, rx, ry, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]);
   ctx.globalAlpha = 1;
@@ -8270,6 +8282,7 @@ function drawConditions(f, top, oy, img) {
 }
 
 // いまの 状態に あう アニメの コマ
+const WALK_FPS = 5.5;   // 走りの コマ送り（1びょうに なんコマ）。移動の はやさとは べつ
 function monFrame(f) {
   switch (f.state) {
     case 'faint': return 'ko';
@@ -8281,7 +8294,7 @@ function monFrame(f) {
     case 'dodge': return hovers(f) ? 'idle1' : 'walk1';
     case 'lag': return 'idle' + (Math.floor(B.t * 3) % 4);
   }
-  if (f.moving) return hovers(f) && !AISpr.ANIM[f.mon.sid] ? 'idle' + (Math.floor(B.t * 9 + f.side * 2) % 4) : 'walk' + (Math.floor(f.walk * 9) % 4);   // 浮かぶ ものは 足を うごかさない（走りの 絵が ある 子は その 絵で）
+  if (f.moving) return hovers(f) && !AISpr.ANIM[f.mon.sid] ? 'idle' + (Math.floor(B.t * 6 + f.side * 2) % 4) : 'walk' + (Math.floor(f.walk * WALK_FPS) % 4);   // 浮かぶ ものは 足を うごかさない（走りの 絵が ある 子は その 絵で）
   if ((B.t + f.side * 1.7) % 3.6 < .14) return 'blink';
   return 'idle' + (Math.floor(B.t * 5 + f.side * 2) % 4);
 }
@@ -8655,7 +8668,7 @@ function render() {
   }
 
   if (B.scrFlash > 0) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = Math.min(.5, B.scrFlash * 3); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.restore(); }
-  if (B.pinch > 0) {   // ピンチ：画面の ふちが 赤く どくどく
+  if (false && B.pinch > 0) {   // ピンチの 画面ふち：つかわない
     const pim = uiIm('pinch');
     if (pim) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false; const W = cv.width, H = cv.height, z = Math.max(2, Math.round(H * .22 / pim.height)), w = pim.width * z, h = pim.height * z, m = Math.round(H * .03);
       ctx.globalAlpha = B.pinch * (.55 + .45 * Math.max(0, Math.sin(B.t * 7.4)));   // ピンチ：画面の すみに 赤い かぎ（ドット）が どくどく
