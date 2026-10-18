@@ -972,6 +972,23 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .trseg button.on{background:var(--acc);color:#1a1222;border-color:var(--acc)}
 .trrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:3px 0}
 .trrow>b{width:7.5em;font-size:12px}
+.trtab{display:flex;gap:6px;margin:8px 0 2px}
+.trtab button{flex:1;font:inherit;font-size:13px;padding:5px;border-radius:6px;border:2px solid var(--edge);background:transparent;color:var(--ink)}
+.trtab button.on{background:var(--acc);color:#1a1222;border-color:var(--acc)}
+.chipg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px auto;max-width:420px}
+.chipg button{position:relative;aspect-ratio:1.15;min-width:0;font:inherit;font-size:10px;line-height:1.2;padding:2px;border-radius:5px;border:1px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.03);color:var(--ink);overflow:visible;word-break:keep-all;overflow-wrap:anywhere}
+.chipg button.k-if{background:#2c4a7a;border:2px solid #6aa0ff}
+.chipg button.k-do{background:#6a3a2a;border:2px solid #ff9a5a}
+.chipg button.k-flow{background:#3a3a4a;border:2px solid #b8b8c8}
+.chipg button.sel{outline:3px solid var(--acc);outline-offset:1px;z-index:2}
+.chipg button i{position:absolute;font-style:normal;font-size:12px;font-weight:700;line-height:1;pointer-events:none;text-shadow:0 0 2px #000,0 0 2px #000}
+.chipg i.y{color:#7bff8a} .chipg i.n{color:#ff7a7a}
+.chipg i.r{right:-7px;top:calc(50% - 6px)} .chipg i.l{left:-7px;top:calc(50% - 6px)} .chipg i.d{bottom:-8px;left:calc(50% - 4px)} .chipg i.u{top:-8px;left:calc(50% - 4px)}
+.chipg i.y.r,.chipg i.n.r{transform:none} .chipg i.n.r,.chipg i.n.l{top:calc(50% + 2px)} .chipg i.y.r,.chipg i.y.l{top:calc(50% - 12px)} .chipg i.n.d,.chipg i.n.u{left:calc(50% + 2px)} .chipg i.y.d,.chipg i.y.u{left:calc(50% - 10px)}
+.chipins{border-top:1px solid var(--edge);margin-top:6px;padding-top:6px;display:flex;flex-direction:column;gap:5px}
+.chippal{display:flex;flex-wrap:wrap;gap:4px}
+.chippal button{font:inherit;font-size:11px;padding:3px 7px;border-radius:5px;color:var(--ink)}
+.chippal .k-if{background:#2c4a7a;border:1px solid #6aa0ff} .chippal .k-do{background:#6a3a2a;border:1px solid #ff9a5a} .chippal .k-flow{background:#3a3a4a;border:1px solid #b8b8c8}
 </style>
 </head>
 <body>
@@ -3188,22 +3205,56 @@ function trainEditor(m) {
   const T = m.tr = m.tr || {}; T.use = T.use || {}; T.style = T.style || {}; delete T.moves;
   const bg = document.createElement('div'); bg.className = 'askbg';
   const seg = (opts, cur, key) => `<div class="trseg" data-k="${key}">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+  let sel = null;
+  // チップの なまえ（マスに かく みじかい ことば）
+  const mvName = (i) => { const id = equipped(m)[i]; return id ? MOVES[id].n : 'わざ' + (i + 1); };
+  const chipLabel = (c) => { const K = CHIPS[c.t]; if (!K) return '?'; if (c.t === 'use') return mvName(c.p | 0) + '<br>つかう'; if (c.t === 'ready') return mvName(c.p | 0) + '<br>つかえる？'; if (c.t === 'eff') return mvName(c.p | 0) + '<br>ばつぐん？';
+    const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '<br>' + p : '') + (K.c === 'if' ? '？' : ''); };
+  const simple = () => { const mv = equipped(m); return `<h3>わざの つかいかた</h3><div class="dim" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">わざは いま おぼえている 4つ。いれかえは スクロールで<button class="btn sub" data-a="tm" style="padding:2px 10px;font-size:12px"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button></div><div class="truse">${mv.map(id => { const u = T.use[id] || {}; return `<div style="--c:${TYPES[MOVES[id].t].c}" data-id="${id}"><b>${MOVES[id].n} <span class="dim">${moveSub(MOVES[id])}</span></b>
+        ${seg(TR_USE.map((x, i) => [i, x.n]), u.w ?? 2, 'w')}${seg(Object.entries(TR_WHEN), u.c || 'any', 'c')}</div>`; }).join('')}</div>`; };
+  const chips = () => {
+    const P = T.prog = T.prog || chipNew(), c = sel && P.cells[sel];
+    let grid = ''; for (let y = 0; y < CHIP_H; y++) for (let x = 0; x < CHIP_W; x++) { const k = x + ',' + y, q = P.cells[k], K = q && CHIPS[q.t];
+      grid += `<button data-c="${k}" class="${K ? 'k-' + K.c : ''}${sel === k ? ' sel' : ''}">${q ? chipLabel(q) : ''}${K && K.c !== 'do' && q.y ? `<i class="y ${q.y}">${CHIP_ARW[q.y]}</i>` : ''}${K && K.c === 'if' && q.n ? `<i class="n ${q.n}">${CHIP_ARW[q.n]}</i>` : ''}</button>`; }
+    let ins = '<div class="dim">マスを タップして チップを おく・えらぶ</div>';
+    if (sel && !c) ins = `<div class="dim">おく チップを えらぶ（あお＝じょうけん・あか＝こうどう）</div><div class="chippal">${Object.entries(CHIPS).filter(([k]) => k !== 'start').map(([k, K]) => `<button data-n="${k}" class="k-${K.c}">${K.n}</button>`).join('')}</div>`;
+    else if (c) { const K = CHIPS[c.t], dirs = (key, cur, lab) => `<div class="trrow"><b>${lab}</b>${seg(Object.entries(CHIP_ARW).map(([d, a]) => [d, a]), cur || '', key)}</div>`;
+      ins = `<div><b>${K.n}</b> <span class="dim">${K.c === 'if' ? 'じょうけん：あてはまれば みどりの やじるし、ちがえば あかの やじるしへ' : K.c === 'do' ? 'こうどう：ここに ついたら これを する（つかえない ときは なにも しない）' : 'やじるしの ほうへ すすむ'}</span></div>
+        ${K.ps ? `<div class="trrow"><b>せってい</b>${seg(K.ps.map(([v, n]) => [v, c.t === 'use' || c.t === 'ready' || c.t === 'eff' ? mvName(v) : n]), c.p ?? K.ps[0][0], 'cp')}</div>` : ''}
+        ${K.c !== 'do' ? dirs('cy', c.y, K.c === 'if' ? '<span style="color:#7bff8a">はい →</span>' : 'つぎ →') : ''}${K.c === 'if' ? dirs('cn', c.n, '<span style="color:#ff7a7a">いいえ →</span>') : ''}
+        ${c.t !== 'start' ? '<div style="display:flex;gap:6px"><button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px">けす</button></div>' : ''}`; }
+    return `<h3>チップで プログラム</h3><div class="dim">「はじまり」から やじるしを たどって、さいしょに ついた <b style="color:#ff9a5a">こうどう</b>を します（0.25びょう ごと）。なにも ない マスに ついたら いつもの AI に まかせます。</div>
+      <div class="chipg">${grid}</div><div class="chipins">${ins}</div>
+      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap"><button class="btn sub" data-a="ex" style="padding:3px 12px;font-size:12px">おてほんを いれる</button><button class="btn sub" data-a="clr" style="padding:3px 12px;font-size:12px">ぜんぶ けす</button></div>`;
+  };
   const draw = () => {
-    const mv = equipped(m);
+    const mode = T.mode === 'chip' ? 'chip' : 'simple';
     bg.innerHTML = `<div class="askbox trbox"><div><b>${sp.n}</b> の くんれん</div>
       <div class="dim">くんれんモードを ON に すると、しあい中は しじが できず、ここで きめた とおりに たたかいます。</div>
-      <h3>わざの つかいかた</h3><div class="dim" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">わざは いま おぼえている 4つ。いれかえは スクロールで<button class="btn sub" data-a="tm" style="padding:2px 10px;font-size:12px"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button></div><div class="truse">${mv.map(id => { const u = T.use[id] || {}; return `<div style="--c:${TYPES[MOVES[id].t].c}" data-id="${id}"><b>${MOVES[id].n} <span class="dim">${moveSub(MOVES[id])}</span></b>
-        ${seg(TR_USE.map((x, i) => [i, x.n]), u.w ?? 2, 'w')}${seg(Object.entries(TR_WHEN), u.c || 'any', 'c')}</div>`; }).join('')}</div>
-      <h3>うごきかた</h3><div class="dim">「せいかく」は いまの せいかく（${nat ? nat.n : ''}）まかせ</div>
+      <div class="trtab"><button data-m="simple" class="${mode === 'simple' ? 'on' : ''}">かんたん</button><button data-m="chip" class="${mode === 'chip' ? 'on' : ''}">チップ（プログラム）</button></div>
+      ${mode === 'chip' ? chips() : simple()}
+      <h3>うごきかた</h3><div class="dim">「せいかく」は いまの せいかく（${nat ? nat.n : ''}）まかせ${mode === 'chip' ? '。チップの こうどうが ない ときに つかう' : ''}</div>
       ${Object.entries(TR_STYLE).map(([k, d]) => `<div class="trrow"><b>${d.n}</b>${seg([['', 'せいかく'], ...d.o.map((n, i) => [i, n])], T.style[k] ?? '', 's:' + k)}</div>`).join('')}
       <div style="display:flex;gap:8px;justify-content:center;margin-top:12px"><button class="btn sub" data-a="reset">はじめに もどす</button><button class="btn" data-a="close">OK</button></div></div>`;
-    bg.querySelector('[data-a="tm"]').onclick = () => { bg.remove(); useTM(m); };
+    const on = (q, f) => { const e = bg.querySelector(q); if (e) e.onclick = f; };
+    on('[data-a="tm"]', () => { bg.remove(); useTM(m); });
+    bg.querySelectorAll('.trtab button').forEach(b => b.onclick = () => { T.mode = b.dataset.m; sel = null; SND.se('click'); save(); draw(); });
+    bg.querySelectorAll('.chipg button').forEach(b => b.onclick = () => { sel = sel === b.dataset.c ? null : b.dataset.c; SND.se('click'); draw(); });
+    bg.querySelectorAll('.chippal button').forEach(b => b.onclick = () => { T.prog.cells[sel] = { t: b.dataset.n, y: CHIPS[b.dataset.n].c === 'do' ? undefined : 'd', n: CHIPS[b.dataset.n].c === 'if' ? 'r' : undefined, p: CHIPS[b.dataset.n].ps ? CHIPS[b.dataset.n].ps[0][0] : undefined }; SND.se('ok'); save(); draw(); });
+    on('[data-a="cdel"]', () => { delete T.prog.cells[sel]; SND.se('back'); save(); draw(); });
+    on('[data-a="clr"]', () => { T.prog = chipNew(); sel = null; save(); draw(); });
+    on('[data-a="ex"]', () => { T.prog = { cells: {   // おてほん：ためてたら よける → HPが へったら かくれる → わざ1・わざ2 → とおければ ちかづく
+      '0,0': { t: 'start', y: 'd' }, '0,1': { t: 'foe', y: 'r', n: 'd' }, '1,1': { t: 'dodge' }, '0,2': { t: 'myhp', p: 25, y: 'r', n: 'd' }, '1,2': { t: 'hide' },
+      '0,3': { t: 'ready', p: 0, y: 'r', n: 'd' }, '1,3': { t: 'use', p: 0 }, '0,4': { t: 'ready', p: 1, y: 'r', n: 'd' }, '1,4': { t: 'use', p: 1 }, '0,5': { t: 'dist', p: 'far', y: 'r', n: 'd' }, '1,5': { t: 'near' } } }; sel = null; SND.se('ok'); save(); draw(); });
     bg.querySelectorAll('.trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b) return; const k = g.dataset.k, v = b.dataset.v;
       if (k.startsWith('s:')) { if (v === '') delete T.style[k.slice(2)]; else T.style[k.slice(2)] = +v; }
+      else if (k === 'cp') { const c = T.prog.cells[sel], K = CHIPS[c.t]; c.p = typeof K.ps[0][0] === 'number' ? +v : v; }
+      else if (k === 'cy' || k === 'cn') T.prog.cells[sel][k === 'cy' ? 'y' : 'n'] = v;
       else { const id = g.parentNode.dataset.id, u = T.use[id] = T.use[id] || {}; if (k === 'w') u.w = +v; else u.c = v; }
       SND.se('click'); save(); draw(); });
-    bg.querySelector('[data-a="close"]').onclick = () => { bg.remove(); renderTeam(); };
-    bg.querySelector('[data-a="reset"]').onclick = () => { m.tr = { use: {}, style: {} }; bg.remove(); trainEditor(m); };
+    on('[data-a="close"]', () => { bg.remove(); renderTeam(); });
+    on('[data-a="reset"]', () => { m.tr = { use: {}, style: {} }; bg.remove(); trainEditor(m); });
+    if (sel) { const ins = bg.querySelector('.chipins'); if (ins && ins.scrollIntoView) ins.scrollIntoView({ block: 'nearest' }); }   // えらんだ チップの せってい・チップの いちらんが みえる ように
   };
   draw(); document.body.appendChild(bg);
 }
@@ -4976,6 +5027,7 @@ function startDodge(f, dirOverride) {
 const canAct = (f) => f.status !== 'slp' && f.status !== 'frz';
 // 指示なしで かわす かくりつ：すばやさ（種族値）と すばやさの 強化で かわる。さいだい 50%
 function autoDodgeP(f) {
+  if (trProg(f)) return 0;   // くんれんの チップ：よけるのは「よける」チップ だけ
   let p = .02 + (f.eva || 70) / 520;   // かいひ 平均（約70）で 15%、さいだい 50%
   if (f.status === 'par') p *= .5;
   if (B.sides[f.side].tail > 0) p *= 1.2;
@@ -5112,6 +5164,66 @@ function trW(f, o, id) {
   if ((c === 'open' && f.enterT > 10) || (c === 'high' && hp < .5) || (c === 'low' && hp >= .5) || (c === 'near' && d > 170) || (c === 'far' && d < 240)) return 0;
   return TR_USE[lv].k;
 }
+// ===== くんれん：チップ（カルネージハート ふう）：マス目に チップを ならべて やじるしで つなぐ。0.25びょう ごとに「はじまり」から たどり、さいしょに ついた こうどうチップを する =====
+const CHIP_W = 6, CHIP_H = 8, CHIP_DIRS = { r: [1, 0], d: [0, 1], l: [-1, 0], u: [0, -1] }, CHIP_ARW = { u: '↑', r: '→', d: '↓', l: '←' };
+const CHIP_MV = [[0, 'わざ1'], [1, 'わざ2'], [2, 'わざ3'], [3, 'わざ4']], CHIP_PCT = [[25, '25%'], [50, '50%'], [75, '75%']];
+const CHIPS = {
+  start: { c: 'flow', n: 'はじまり' }, link: { c: 'flow', n: 'つなぎ' },
+  dist:  { c: 'if', n: 'きょりは', ps: [['near', 'ちかい'], ['mid', 'ふつう'], ['far', 'とおい']] },
+  myhp:  { c: 'if', n: 'じぶんHP', ps: CHIP_PCT.map(([v, n]) => [v, n + 'みまん']) },
+  ophp:  { c: 'if', n: 'あいてHP', ps: CHIP_PCT.map(([v, n]) => [v, n + 'みまん']) },
+  foe:   { c: 'if', n: 'あいてが ためてる' },
+  ready: { c: 'if', n: 'つかえる', ps: CHIP_MV },
+  eff:   { c: 'if', n: 'ばつぐん', ps: CHIP_MV },
+  mysts: { c: 'if', n: 'じぶん じょうたいいじょう' },
+  opsts: { c: 'if', n: 'あいて じょうたいいじょう' },
+  see:   { c: 'if', n: 'あいてが みえる' },
+  rand:  { c: 'if', n: 'かくりつ', ps: CHIP_PCT },
+  use:   { c: 'do', n: 'つかう', ps: CHIP_MV },
+  near:  { c: 'do', n: 'ちかづく' }, far: { c: 'do', n: 'はなれる' }, hide: { c: 'do', n: 'かくれる' }, flank: { c: 'do', n: 'まわりこむ' },
+  dodge: { c: 'do', n: 'よける' }, swap: { c: 'do', n: 'こうたい' }, idle: { c: 'do', n: 'なにもしない' },
+};
+const chipNew = () => ({ cells: { '0,0': { t: 'start', y: 'd' } } });
+const trProg = (f) => { const T = trOf(f); return T && T.mode === 'chip' && T.prog ? T.prog : null; };
+function chipIf(f, o, c) {
+  const hpk = (x) => x.hp / x.maxHp * 100, mv = f.moves[c.p | 0], d = dist(f, o);
+  switch (c.t) {
+    case 'dist': return c.p === 'near' ? d < 150 : c.p === 'mid' ? d >= 150 && d < 290 : d >= 290;
+    case 'myhp': return hpk(f) < (c.p || 50);
+    case 'ophp': return hpk(o) < (c.p || 50);
+    case 'foe': return !!(threatState(o) && o.cur && isDamaging(o.cur.m));
+    case 'ready': return !!(mv && !(f.cd[mv] > 0) && !moveBlocked(f, mv));
+    case 'eff': return !!(mv && isDamaging(MOVES[mv]) && effVs(MOVES[mv].t, o.sp) >= 2);
+    case 'mysts': return !!f.status;
+    case 'opsts': return !!o.status;
+    case 'see': return losClear(f, o);
+    case 'rand': return Math.random() * 100 < (c.p || 50);
+  }
+  return false;
+}
+function chipDo(f, o, c) {
+  const sd = B.sides[f.side];
+  switch (c.t) {
+    case 'use': { const id = f.moves[c.p | 0]; if (id && !(f.cd[id] > 0) && !moveBlocked(f, id)) f.queued = id; break; }
+    case 'near': case 'far': f.trGo = c.t; break;
+    case 'hide': case 'flank': if (!(f.order && f.order.k === c.t)) giveOrder(f, c.t, f.side); break;
+    case 'dodge': if (!(sd.dodgeCmd > 0) && ['free', 'act', 'wind', 'chan'].includes(f.state) && canAct(f)) { startDodge(f, null); sd.dodgeCmd = DODGE_CMD_CD; } break;
+    case 'swap': { const i = benchIdx(f.side); if (i >= 0 && !(sd.swapCd > 0) && ['free', 'act', 'stun'].includes(f.state)) { const x = sd.fs[i]; doSwitch(f, i); say(`もどれ、${f.sp.n}！ いけっ、${x.sp.n}！`); } break; }
+  }
+}
+// はじまりから たどる：こうどうチップに ついたら true（なにも ない マス・そとに でたら false → いつもの AI）
+function runChips(f, o) {
+  const P = trProg(f); let x = 0, y = 0, c = P.cells['0,0'], n = 0; f.trGo = null;
+  while (c && n++ < 48) {
+    const K = CHIPS[c.t]; if (!K) return false;
+    if (K.c === 'do') { f.trAt = x + ',' + y; chipDo(f, o, c); return true; }
+    const v = CHIP_DIRS[K.c === 'if' && !chipIf(f, o, c) ? c.n : c.y]; if (!v) return false;
+    x += v[0]; y += v[1]; if (x < 0 || y < 0 || x >= CHIP_W || y >= CHIP_H) return false;
+    c = P.cells[x + ',' + y];
+  }
+  return false;
+}
+function chipTick(f, o, dt) { f.trT = (f.trT || 0) - dt; if (f.trT <= 0) { f.trT = .25; f.trRan = runChips(f, o); } return f.trRan; }
 function natPref(f, m) {
   const nat = f.mon.nat, e = m.e || {}, dmg = isDamaging(m), close = ['melee', 'swipe', 'dash', 'vault'].includes(m.k), boost = m.k === 'self' || m.k === 'curse';
   const guardy = ['heal', 'wall', 'floor', 'hazard', 'sub', 'protect', 'counter', 'field'].includes(m.k), status = !dmg && !boost && !guardy, drain = !!e.drain || m.k === 'heal';
@@ -5252,7 +5364,9 @@ function aiMove(f, o, dt, autoSpecial) {
   const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
   f.paceT = 1;
   if (f.side === 1 && aiSwitch(f, o, dt)) return;
-  if (autoSpecial && !f.queued) {
+  const chipOn = !!(autoSpecial && trProg(f) && chipTick(f, o, dt));   // くんれんの チップが うごいて いる：わざ・うごきは チップ まかせ
+  if (!chipOn) f.trGo = null;
+  if (autoSpecial && !f.queued && !chipOn) {
     if (f.aiT > .1 && f.moves.some(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id))) f.aiT = .1;   // うてる わざが あるのに またない
     f.aiT -= dt;
     if (f.aiT <= 0) {
@@ -5268,7 +5382,7 @@ function aiMove(f, o, dt, autoSpecial) {
   // ボタンで えらんだ わざは、ひるんだり かわしたり しても だせるまで ねらいつづける（8びょう まで・クールダウン中は あけたら すぐ）
   if (f.want) { if (B.t - f.want.t > 8 || moveBlocked(f, f.want.id)) f.want = null; else if (!f.queued && !f.cur && !((f.cd[f.want.id] || 0) > 0)) f.queued = f.want.id; }
   if (f.queued && moveBlocked(f, f.queued)) f.queued = null;
-  if (autoSpecial && o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
+  if (autoSpecial && !chipOn && o && o.state === 'wind' && o.cur && o.cur.boost && !f.queued) { f.queued = aiPickMove(f, o); f.aiT = 0; }   // あいてが ためている：すかさず こうげき
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
   // しじした じぶんに つかう わざ（まもる・カウンター・つみわざ・かいふく）：その場で すぐ だす（よちょうの はんいの 中でも）
   if (f.want && f.queued === f.want.id && ['protect', 'counter', 'self', 'heal', 'sub'].includes(MOVES[f.queued].k)) { const q = f.queued; f.queued = null; beginMove(f, q); return; }
@@ -5325,6 +5439,8 @@ function aiMove(f, o, dt, autoSpecial) {
     if (!hide && (soon < .9 || per.hold || stall)) { want = { R: prefRange(f, per) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' }; f.paceT = stall ? 1 : (per.idle + 1) / 2; }
     else { want = { R: (prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' }; f.paceT = hurt || f.awayT > 0 ? 1.1 : per.idle; }   // ひまな ときは のんびり あるく
   }
+  if (f.trGo === 'near') { want = { R: 55, los: true, cover: false, flank: false, mode: 'attack' }; f.paceT = Math.max(f.paceT || 1, 1.8); }   // チップ：ちかづく
+  else if (f.trGo === 'far') { want = { R: Math.max(want.R + 160, 330), los: false, cover: false, flank: false, mode: 'rest' }; f.paceT = Math.max(f.paceT || 1, 1.6); }   // チップ：はなれる
   const g = pickSpot(f, o, want, dt);
   f.aiMode = want.mode;
   const gd = Math.hypot(g.x - f.x, g.y - f.y);
