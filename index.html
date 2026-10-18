@@ -7375,7 +7375,14 @@ function drawSprite(img, x, y, face, scale, alpha, sx, sy) {
   ctx.restore();
 }
 // モンスターの かげ：あたりはんてい（足もとの まる、はんけい f.r）と おなじ 大きさ・かたち
-function hitShadow(f, a) { ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = 'rgba(10,8,18,.34)'; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(10,8,18,.45)'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore(); }
+function hitShadow(f, a) {
+  const x = f.x, y = f.y, r = f.r, th = Math.max(3, r * .14); ctx.save(); ctx.globalAlpha *= a;
+  ctx.fillStyle = 'rgba(6,4,12,.42)'; ctx.beginPath(); ctx.arc(x, y + th, r, 0, Math.PI * 2); ctx.fill();   // あつみ：したに ずらした かげ（まるい 台の よこがわ）
+  const g = ctx.createRadialGradient(x - r * .25, y - r * .3, r * .1, x, y, r); g.addColorStop(0, 'rgba(8,6,16,.18)'); g.addColorStop(.75, 'rgba(8,6,16,.38)'); g.addColorStop(1, 'rgba(8,6,16,.55)');   // うえの めん：ふちほど こい
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.beginPath(); ctx.arc(x, y, r - 1, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();   // うえの ふちに ひかり
+  ctx.strokeStyle = 'rgba(6,4,12,.6)'; ctx.beginPath(); ctx.arc(x, y + th, r - 1, Math.PI * .08, Math.PI * .92); ctx.stroke();   // したの ふちは こく
+  ctx.restore(); }
 function shadow(x, y, rx) { ctx.fillStyle = 'rgba(10,8,18,.35)'; ctx.beginPath(); ctx.ellipse(x, y, rx, rx * .4, 0, 0, Math.PI * 2); ctx.fill(); }
 
 // ジグザグの とっしんの みち（はしる とおりの かたち）
@@ -8116,7 +8123,7 @@ const PROJ_ROWS = {
 };
 const PROJ_ROT = { ice: Math.PI / 2, bug: Math.PI / 4, grass: Math.PI / 4 };   // とぶ 向きに あわせて まわす（絵の もとの 向き）
 function drawProj(p) {
-  if (!p.h && p.pat !== 'lob') { ctx.fillStyle = 'rgba(10,8,18,.3)'; ctx.beginPath(); ctx.arc(Math.round(p.x), Math.round(p.y) + BODY, p.r, 0, 7); ctx.fill(); }   // たまの かげ＝あたりはんてい（モンスターの かげに ふれたら あたる）
+  if (!p.h && p.pat !== 'lob') { const sx = Math.round(p.x), sy = Math.round(p.y) + BODY, g = ctx.createRadialGradient(sx, sy, 0, sx, sy, p.r); g.addColorStop(0, 'rgba(8,6,16,.45)'); g.addColorStop(1, 'rgba(8,6,16,.12)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, p.r, 0, 7); ctx.fill(); }   // たまの かげ＝あたりはんてい（モンスターの かげに ふれたら あたる）
   if (drawProjX(p)) return;
   const x = Math.round(p.x), y = Math.round(p.y), t = p.m.t, R = p.r, S_ = FX_STYLE[t] || FX_STYLE.normal;
   glowDot(x, y, R * 2.2, S_.cols[1], .35);
