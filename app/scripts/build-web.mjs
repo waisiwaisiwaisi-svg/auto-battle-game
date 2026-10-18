@@ -26,6 +26,8 @@ fs.copyFileSync(fs.existsSync(cfgSrc) ? cfgSrc : path.join(root, 'firebase-confi
 // ステージの きょく（mp3）
 fs.mkdirSync(path.join(www, 'music'), { recursive: true });
 for (const f of fs.readdirSync(path.join(root, '..', 'music')).filter((f) => f.endsWith('.mp3'))) fs.copyFileSync(path.join(root, '..', 'music', f), path.join(www, 'music', f));
+fs.mkdirSync(path.join(www, 'stage'), { recursive: true });   // ステージの 絵
+for (const f of fs.readdirSync(path.join(root, '..', 'stage'))) fs.copyFileSync(path.join(root, '..', 'stage', f), path.join(www, 'stage', f));
 fs.mkdirSync(path.join(www, 'se8bit'), { recursive: true });   // 効果音
 for (const f of fs.readdirSync(path.join(root, '..', 'se8bit')).filter((f) => f.endsWith('.wav'))) fs.copyFileSync(path.join(root, '..', 'se8bit', f), path.join(www, 'se8bit', f));
 

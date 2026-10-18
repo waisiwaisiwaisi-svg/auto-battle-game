@@ -3,7 +3,7 @@ name: Android アプリ
 on:
   workflow_dispatch:
   push:
-    paths: ['index.html', 'app/**', '.github/workflows/app-android.yml']
+    paths: ['index.html', 'stage/**', 'app/**', '.github/workflows/app-android.yml']
 jobs:
   build:
     runs-on: ubuntu-latest

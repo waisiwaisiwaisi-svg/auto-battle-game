@@ -1,13 +1,15 @@
-# ステージを「床（ステージごと）」「観客席の枠（共通）」「観客」「旗」「置きもの」に わけて index.html に いれる
+# ステージを「床（ステージごと）」「観客席の枠（共通）」「観客」「旗」「置きもの」に わけて index.html に いれる（画像は stage/ に ファイルで おく）
 # 使い方: python3 tools/arenas/build_stage.py
 #   stage_src/F1.png 枠（まんなか透明） F2.png 観客 6×2  F3.png 旗 6×5  S01〜S10.png 床  P1〜P5.png 置きもの 4×2
 #   座標は 元の 闘技場の 画像（1448×1086）＝ゲームの 世界座標
-import base64, io, json, os, re
+import hashlib, io, json, os, re, shutil
 import numpy as np
 from PIL import Image
 from scipy import ndimage
 HERE = os.path.dirname(os.path.abspath(__file__)); SRC = os.path.join(HERE, 'stage_src')
 GAME = os.path.join(HERE, '..', '..', 'index.html')
+OUT = os.path.join(HERE, '..', '..', 'stage')   # 画像は ここに ファイルで おく（index.html を かるく する）
+shutil.rmtree(OUT, ignore_errors=True); os.makedirs(OUT)
 BEGIN, END = '// ====== STAGE（tools/arenas/build_stage.py が 自動生成）======', '// ====== ここまで STAGE ======'
 W, H = 1448, 1086
 KEYS = ['grass', 'fire', 'water', 'elec', 'ice', 'dragon', 'wind', 'ground', 'poison', 'fighting']
@@ -17,7 +19,9 @@ def enc(im, fmt='WEBP', q=88):
     b = io.BytesIO()
     if fmt == 'WEBP': im.save(b, 'WEBP', quality=q, method=6)
     else: im.save(b, 'PNG', optimize=True)
-    return f'data:image/{fmt.lower()};base64,' + base64.b64encode(b.getvalue()).decode()
+    v = b.getvalue(); name = hashlib.sha1(v).hexdigest()[:12] + '.' + fmt.lower()
+    open(os.path.join(OUT, name), 'wb').write(v)
+    return 'stage/' + name
 
 def cells(a, cols, rows):
     # マスわり：絵の ない すきまで きる
