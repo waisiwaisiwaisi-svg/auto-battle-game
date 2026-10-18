@@ -138,7 +138,7 @@ async function save(id) {
   delete pend[id]; saving++;
   try {
     if (col) await col.doc(id).set({ k: K[id], n: BY[id].n });
-    else { try { localStorage.setItem('sizes4', JSON.stringify(K)); } catch (e) { } }
+    else { try { localStorage.setItem('sizes5', JSON.stringify(K)); } catch (e) { } }
     $('save').textContent = col ? 'ほぞん ずみ ✓' : 'この ブラウザに だけ ほぞん';
   } catch (e) { $('save').textContent = 'ほぞん できなかった（' + (e && e.code || 'error') + '）'; }
   saving--;
@@ -160,13 +160,13 @@ $('rs').onclick = () => sel && setK(sel, 1);
 document.addEventListener('keydown', (e) => { if (!sel || e.target.tagName === 'INPUT') return; if (e.key === 'ArrowUp') { e.preventDefault(); setK(sel, (K[sel] || 1) * 1.02); } if (e.key === 'ArrowDown') { e.preventDefault(); setK(sel, (K[sel] || 1) / 1.02); } });
 for (const id of ['q', 'type', 'sort', 'onlyChg']) $(id).addEventListener('input', () => render());
 $('zoom').addEventListener('input', () => { Z = +$('zoom').value; render(true); });
-try { const s = JSON.parse(localStorage.getItem('sizes4') || 'null'); if (s) Object.assign(K, s); } catch (e) { }
+try { const s = JSON.parse(localStorage.getItem('sizes5') || 'null'); if (s) Object.assign(K, s); } catch (e) { }
 render();
 // みんなで おなじ 大きさを みる：db の sizes コレクション
 (async () => {
   try { db = window.claude && await window.claude.use('db'); } catch (e) { db = null; }
   if (!db) { local = true; $('save').textContent = 'この ブラウザに だけ ほぞん'; return; }
-  col = db.collection('sizes4'); let first = true;
+  col = db.collection('sizes5'); let first = true;
   col.onSnapshot((snap) => {
     for (const d of snap.docs) { const v = d.data(); if (pend[d.id]) continue; if (v && typeof v.k === 'number') K[d.id] = v.k; }
     $('save').textContent = 'ほぞん ずみ ✓';
