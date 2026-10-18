@@ -3015,22 +3015,21 @@ function startTitleAnim() {
       g.fillStyle = lg; g.beginPath(); g.moveTo(-6, 0); g.lineTo(6, 0); g.lineTo(hw, len); g.lineTo(-hw, len); g.closePath(); g.fill(); g.restore();
     }
     g.restore();
-    // あるく モンスター：じめんの うえを よこぎって いく（おくの れつは すこし ちいさく くらく）
-    const land = W > H, gy = land ? H * .97 : H * .82, hgt = land ? H * .2 : Math.min(H * .15, W * .27), cap = land ? 5 : 3;
-    if (pool.length && walkers.length < cap && t >= nextW) {
-      const back = walkers.length && Math.random() < .45, dir = Math.random() < .5 ? 1 : -1, id = choice(pool.filter(x => !walkers.some(w => w.id === x)));
-      const sc = (back ? .78 : 1) * Math.min(1.5, Math.max(.75, worldH(id) / refH)), w = hgt * sc * 1.6;
-      walkers.push({ id, dir, back, sc, x: dir > 0 ? -w : W + w, spd: hgt * (.55 + Math.random() * .35) * (back ? .8 : 1), ph: Math.random() * 4, w });
-      nextW = t + 1.2 + Math.random() * 2.2;
-    }
-    walkers.sort((p, q) => (q.back ? 1 : 0) - (p.back ? 1 : 0));
-    for (const w of walkers) { w.x += w.dir * w.spd * dt;
+    // あるく モンスター：画面ぜんたいを 左から 右へ。上（おく）ほど ちいさく くらく、下（てまえ）ほど 大きい
+    const land = W > H, hgt = land ? H * .2 : Math.min(H * .13, W * .24), cap = land ? 9 : 8;
+    const spawn = (x0) => { const id = choice(pool.filter(x => !walkers.some(w => w.id === x))), y = H * (.14 + Math.random() * .84), d = y / H;
+      const sc = (.45 + d * .7) * Math.min(1.5, Math.max(.75, worldH(id) / refH)), w = hgt * sc * 1.6;
+      walkers.push({ id, y, d, sc, x: x0 != null ? x0 : -w, spd: hgt * (.5 + Math.random() * .35) * (.55 + d * .6), ph: Math.random() * 4, w }); };
+    if (pool.length && !walkers.length && t < .1) for (let i = 0; i < Math.round(cap * .6); i++) spawn(Math.random() * W);   // はじめから すこし いる
+    if (pool.length && walkers.length < cap && t >= nextW) { spawn(); nextW = t + .6 + Math.random() * 1.4; }
+    walkers.sort((p, q) => p.y - q.y);
+    for (const w of walkers) { w.x += w.spd * dt;
       const S_ = SPR[w.id], fl = floats(w.id), key = fl ? 'idle' + (Math.floor(t * 5 + w.ph) % 4) : 'walk' + (Math.floor(t * WALK_FPS + w.ph) % 4), fr = (S_.fr[key] || S_.fr.idle0).n, [bx, by, bw, bh] = sprBox(w.id);
-      const k = hgt * w.sc / Math.max(bh, bw * .8), y = gy - (w.back ? hgt * .22 : 0), bob = fl ? Math.sin(t * 2.4 + w.ph) * hgt * .04 - hgt * .14 : 0;
-      g.fillStyle = 'rgba(0,0,0,.42)'; g.beginPath(); g.ellipse(w.x, y, bw * k * .42, hgt * .06 * w.sc, 0, 0, 7); g.fill();
-      g.save(); g.translate(Math.round(w.x), Math.round(y + bob)); if (w.dir < 0) g.scale(-1, 1); if (w.back) g.filter = 'brightness(.78)';
+      const k = hgt * w.sc / Math.max(bh, bw * .8), bob = fl ? Math.sin(t * 2.4 + w.ph) * hgt * .04 - hgt * .14 * w.sc : 0;
+      g.fillStyle = `rgba(0,0,0,${.2 + w.d * .25})`; g.beginPath(); g.ellipse(w.x, w.y, bw * k * .42, hgt * .06 * w.sc, 0, 0, 7); g.fill();
+      g.save(); g.translate(Math.round(w.x), Math.round(w.y + bob)); g.filter = `brightness(${(.6 + w.d * .45).toFixed(2)})`;
       g.drawImage(fr, Math.round(-(bx + bw / 2) * k), Math.round(-(by + bh) * k), Math.round(fr.width * k), Math.round(fr.height * k)); g.restore(); }
-    walkers = walkers.filter(w => w.dir > 0 ? w.x < W + w.w : w.x > -w.w);
+    walkers = walkers.filter(w => w.x < W + w.w);
     // 火の粉（下から のぼる）
     if (embers.length < 70) embers.push({ x: Math.random() * W, y: H + 5, vy: 20 + Math.random() * 45, ph: Math.random() * 6, s: Math.random() < .25 ? 3 : 2, c: Math.random() < .5 ? '255,200,90' : '255,140,60' });
     g.save(); g.globalCompositeOperation = 'lighter';
