@@ -887,6 +887,7 @@ html.land #tabbar button.home.on{box-shadow:inset 3px 0 0 var(--acc)!important}
   background:linear-gradient(180deg,#4c3f82,#2c2350);box-shadow:inset 0 0 0 2px #0b0914,inset 0 5px 0 #ffd166,inset 0 7px 0 #b8862a,inset 0 -4px 0 rgba(0,0,0,.35);
   clip-path:polygon(0 4px,2px 4px,2px 2px,4px 2px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 2px,calc(100% - 2px) 2px,calc(100% - 2px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 2px) calc(100% - 4px),calc(100% - 2px) calc(100% - 2px),calc(100% - 4px) calc(100% - 2px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 2px),2px calc(100% - 2px),2px calc(100% - 4px),0 calc(100% - 4px))}
 #tabbar .tabind.show{opacity:1}
+.sbar b{transform-origin:left} .trmons em{display:inline-block}
 #tabbar button.on:not(.home){background:none!important;box-shadow:none!important;color:#ffd166!important;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914!important;font-weight:700}
 #tabbar button:not(.home) .ico{transition:transform .25s cubic-bezier(.34,1.56,.64,1),filter .2s}
 #tabbar button.on:not(.home) .ico{transform:translateY(-3px) scale(1.18);filter:drop-shadow(0 2px 0 #0b0914)}
@@ -3239,10 +3240,25 @@ function teamMove(a, b) {
   else return false;
   SND.se('swapIn'); save(); return true;
 }
+// ===== モーションの どうぐ（ドットの トンマナ：ぼかし なし・ピクセル単位の 移動・みじかく すこし はねる）=====
+// ・まえの 位置から つなげる（FLIP）・入ってくる ものは じゅんばんに（段階リビール）・おいた／きまった ところは ぽんと おさまる
+const MO = {
+  ok: () => !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
+  rects(root, sel) { const m = new Map(); if (root) root.querySelectorAll(sel).forEach(e => { const k = e.dataset.key; if (k != null && !m.has(k)) m.set(k, e.getBoundingClientRect()); }); return m; },
+  flip(root, sel, before, pop) { if (!MO.ok() || !root) return; root.querySelectorAll(sel).forEach(e => { if (!e.animate) return; const r0 = before.get(e.dataset.key), r1 = e.getBoundingClientRect();
+    if (r0) { const dx = Math.round(r0.left - r1.left), dy = Math.round(r0.top - r1.top); if (dx || dy) e.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.3,1.25,.5,1)' }); }
+    else if (pop && before.size) MO.pop(e); }); },
+  pop(e) { if (MO.ok() && e && e.animate) e.animate([{ transform: 'scale(.6)', opacity: 0 }, { transform: 'scale(1.12)', opacity: 1, offset: .55 }, { transform: 'none' }], { duration: 240, easing: 'cubic-bezier(.3,.7,.4,1)' }); },
+  settle(e) { if (MO.ok() && e && e.animate) e.animate([{ transform: 'translateY(-6px) scale(1.06)' }, { transform: 'translateY(1px) scale(.97)', offset: .55 }, { transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.3,.7,.4,1)' }); },
+  stagger(nodes, step = 26, dy = 8) { if (!MO.ok()) return; [...nodes].forEach((e, i) => e.animate && e.animate([{ transform: `translateY(${dy}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 230, delay: Math.min(i, 14) * step, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'backwards' })); },
+  swapIn(e, dir = 1) { if (MO.ok() && e && e.animate) e.animate([{ transform: `translateX(${10 * dir}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.2,.8,.3,1)' }); },
+  bars(root) { if (!MO.ok() || !root) return; root.querySelectorAll('.sbar b').forEach((b, i) => b.animate && b.animate([{ transform: 'scaleX(0)' }, { transform: 'none' }], { duration: 360, delay: 60 + i * 35, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' })); },
+  stamp(e) { if (MO.ok() && e && e.animate) e.animate([{ transform: 'scale(1.8) rotate(-8deg)', opacity: 0 }, { transform: 'scale(.92) rotate(-2deg)', opacity: 1, offset: .5 }, { transform: 'none' }], { duration: 320, easing: 'steps(8, end)' }); },
+};
 function renderTeam(openUid) {
   if (openUid != null) teamView = openUid;
   const slot = (m, r, cls) => {
-    const d = document.createElement('div'); d.className = 'slot ' + cls + (m ? '' : ' empty'); d.dataset.w = r.w; d.dataset.i = r.i;
+    const d = document.createElement('div'); d.className = 'slot ' + cls + (m ? '' : ' empty'); d.dataset.w = r.w; d.dataset.i = r.i; if (m) d.dataset.key = m.uid;
     if (r.w === 'p' && r.i < 3) d.insertAdjacentHTML('beforeend', `<span class="no">${r.i + 1}</span>`);
     if (m) {
       const st = stats(m), sp = SPECIES[m.sid];
@@ -3254,14 +3270,17 @@ function renderTeam(openUid) {
     } else d.insertAdjacentHTML('beforeend', `<div style="font-size:22px;opacity:.5">＋</div><div>${r.w === 'p' && r.i < 3 ? 'しゅつじょう わく' : 'あき'}</div>`);
     return d;
   };
-  const M = $('tmMain'), U = $('tmSub'), X = $('tmBox'); M.innerHTML = U.innerHTML = X.innerHTML = '';
+  const M = $('tmMain'), U = $('tmSub'), X = $('tmBox'), T = $('scTeam'), opened = !T.hidden, before = opened ? MO.rects(T, '.slot[data-key]') : new Map(); M.innerHTML = U.innerHTML = X.innerHTML = '';
   for (let i = 0; i < 6; i++) (i < 3 ? M : U).appendChild(slot(S.party[i], { w: 'p', i }, i < 3 ? 'main' : ''));
   const drop = document.createElement('div'); drop.className = 'slot drop'; drop.dataset.w = 'drop'; drop.dataset.i = 0; drop.innerHTML = '<div style="font-size:18px">⬇</div><div>ここに<br>あずける</div>'; X.appendChild(drop);
   S.box.forEach((m, i) => X.appendChild(slot(m, { w: 'b', i }, '')));
   $('boxCount').textContent = `${S.box.length}たい`;
   updTrainBtn(); renderTeamDetail();
   show('scTeam');
+  if (opened) MO.flip(T, '.slot[data-key]', before); else MO.stagger(T.querySelectorAll('.slot'), 18, 6);   // いれかえは まえの 位置から すべる／ひらいた ときは じゅんばんに
+  if (teamDrop != null) { MO.settle(T.querySelector(`.slot[data-key="${teamDrop}"]`)); teamDrop = null; }
 }
+let teamDrop = null;
 function renderTeamDetail() {
   const D = $('tmDetail'), all = [...S.party, ...S.box], m = all.find(x => x.uid === teamView) || S.party[0];
   if (!m) { D.innerHTML = ''; return; }
@@ -3275,6 +3294,7 @@ function renderTeamDetail() {
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button><button class="btn sub" data-a="train" style="color:var(--acc)">訓練</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn danger" data-a="release">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
+  if (D._uid !== m.uid) { const dir = D._uid == null ? 0 : 1; D._uid = m.uid; if (dir) MO.swapIn(D, dir); MO.bars(D); }   // ちがう モンスター：よこから はいって のうりょくバーが のびる
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
     if (act === 'tm') return useTM(m);
@@ -3336,13 +3356,13 @@ function renderTrain(uid) {
   const mvCls = (id) => eq.includes(id) ? '' : tm.includes(id) ? ' tmv' : ' bad';
   const where = (x) => (x.tr && x.tr.prog && x.tr.prog.mv && x.tr.mode === 'chip' ? '<em class="ok">設定済み</em>' : '') + (x.tr && x.tr.draft && x.tr.draft.mv ? '<em class="dr">仮</em>' : '');
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
-  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : ''}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}">${trCondTx(c)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '' : '条件なし '}<small>（${l ? '別の条件をここへ' : '条件をここへ'}）</small></span>`}</div>`).join('');
+  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : ''}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '' : '条件なし '}<small>（${l ? '別の条件をここへ' : '条件をここへ'}）</small></span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え">≡${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え">≡${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
   const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技を 1→4 の順に撃つ。条件が合う技がないときは通常のAIが相性などを見て選ぶ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
     <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">呼び出す</button><button class="btn sub" data-a="revert">元に戻す</button><button class="btn sub" data-a="clr">リセット</button></div>
-    <div class="dim" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? 'この設定' : '通常のAI'}</div>`;
+    <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? 'この設定' : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
   const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
   let ins = '';
@@ -3355,6 +3375,7 @@ function renderTrain(uid) {
     <h3>条件</h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
     <div class="trins">${ins}</div>`;
   const scr = $('scTrain'), keep = !scr.hidden && [scr, ...['.trside', '.trmons'].map(q => $('trBody').querySelector(q))].map(e => e ? [e.scrollTop, e.scrollLeft] : [0, 0]);   // いまの スクロールを おぼえておく
+  const trB0 = $('trBody'), trSame = !$('scTrain').hidden && MO.trUid === uid, trRows0 = trSame ? MO.rects(trB0, '.trr[data-key]') : new Map(), trC0 = trSame ? MO.rects(trB0, '.cnd[data-key]') : new Map();
   $('trBody').innerHTML = `<div class="trtop"><button class="btn sub${S.train ? ' on' : ''}" id="trMode" style="padding:6px 14px;font-size:13px">訓練モード：${S.train ? 'ON' : 'OFF'}</button><span class="dim">${S.train ? '試合中は見るだけ。訓練の設定どおりに戦う' : 'ONにすると試合中は見るだけになる'}</span></div>
     <div class="trpage"><div class="trmons">${all.map(x => `<button data-u="${x.uid}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
       <div class="trmain"><div class="trhead"><b>${sp.n}</b></div>${trNatCard(nk)}${main}</div>
@@ -3406,11 +3427,14 @@ function renderTrain(uid) {
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
   act('cdel', () => { W.mv[+sel[0]].c[+sel[1]].splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
-  act('draft', () => { trDraft(); SND.se('ok'); say0('仮保存しました（試合ではまだ使いません）').then(redo); });
-  act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; TRN.dirty = false; save(); SND.se('ok'); redo(); }));
+  act('draft', () => { trDraft(); SND.se('ok'); say0('仮保存しました（試合ではまだ使いません）').then(() => { redo(); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.dr`)); }); });
+  act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; TRN.dirty = false; save(); SND.se('ok'); redo(); MO.stamp($('trBody').querySelector('.trstat')); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.ok`)); }));
   act('revert', () => { TRN.W = trClone(T.draft || T.prog, m); TRN.dirty = false; TRN.sel = null; redo(); });
   act('clr', () => { TRN.W = trBlank(m); TRN.sel = null; touch(); });
   act('load', () => trLoadFrom(m));
+  if (trSame) { MO.flip(B, '.trr[data-key]', trRows0, true); MO.flip(B, '.cnd[data-key]', trC0, true); }   // ならびかえは すべる・あたらしい じょうけんは ぽんと でる
+  else { MO.stagger(B.querySelectorAll('.trnat, .trr'), 34, 8); if (!keep) MO.stagger(B.querySelectorAll('.trpal .pal'), 10, 4); }   // ひらいた／モンスターを かえた：じゅんばんに
+  MO.trUid = uid;
   if (keep) [scr, B.querySelector('.trside'), B.querySelector('.trmons')].forEach((e, i) => { if (e) [e.scrollTop, e.scrollLeft] = keep[i]; });   // そうさ しても 画面は そのまま（出しなおさない）
   else show('scTrain');
 }
@@ -3538,7 +3562,7 @@ function openBoost(m) {
   const end = (ev) => {
     if (!drag) return; const d = drag; drag = null;
     if (d.ghost) d.ghost.remove(); d.r.el.classList.remove('dragging'); if (d.over) d.over.classList.remove('over');
-    if (d.moved) { justDragged = performance.now(); const o = under(ev.clientX, ev.clientY); teamSel = null; if (o) { teamView = teamMon(d.r).uid; teamMove(d.r, o); } renderTeam(); }
+    if (d.moved) { justDragged = performance.now(); const o = under(ev.clientX, ev.clientY); teamSel = null; if (o) { teamView = teamMon(d.r).uid; teamDrop = teamView; teamMove(d.r, o); } renderTeam(); }
   };
   document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
   document.addEventListener('click', (ev) => {
