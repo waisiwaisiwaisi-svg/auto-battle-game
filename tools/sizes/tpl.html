@@ -30,6 +30,9 @@ h1{font-size:20px;margin:0;letter-spacing:.04em;text-wrap:balance}
 .mon .hd{position:absolute;left:50%;transform:translateX(-50%);width:26px;height:6px;border-radius:3px;background:var(--sel);opacity:0;top:-10px}
 .mon:hover .hd,.mon.sel .hd{opacity:.9}
 .mon.sel img{filter:drop-shadow(0 0 0 var(--sel)) drop-shadow(0 0 3px var(--sel))}
+.mon.ref{cursor:default}
+.mon.ref img{opacity:.92}
+.mon.ref .cap .nm{color:var(--acc)}
 .mon .dots{position:absolute;top:-22px;display:flex;gap:2px}
 .mon .dots i{width:8px;height:8px;border-radius:2px;display:block}
 .panel{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
@@ -47,7 +50,7 @@ button:hover{border-color:var(--sel)}
 </style>
 <div class="wrap">
   <h1>モンスター身長くらべ</h1>
-  <p class="sub">ゲームの中と おなじ 大きさで ならべています。モンスターの うえで <b>マウスホイール</b>（Shift で こまかく）か、<b>うえ・したに ドラッグ</b>で 大きさを かえられます。スマホは タップして したの スライダーで。かえた 大きさは じどうで ほぞんされ、ゲームに はんえいできます。</p>
+  <p class="sub">ゲームの中と おなじ 大きさで ならべています。左はしの トレーナーは めやすです（大きさは かえられません）。モンスターの うえで <b>マウスホイール</b>（Shift で こまかく）か、<b>うえ・したに ドラッグ</b>で 大きさを かえられます。スマホは タップして したの スライダーで。かえた 大きさは じどうで ほぞんされ、ゲームに はんえいできます。</p>
   <div class="bar">
     <input type="search" id="q" placeholder="なまえで さがす">
     <select id="type"><option value="">ぜんぶの タイプ</option></select>
@@ -90,9 +93,13 @@ let order = [];
 function render(keepOrder) {
   const st = $('stage'); if (!keepOrder) order = list().map(m => m.id);
   const L = order.map(id => BY[id]);
-  const maxH = Math.max(120, ...L.map(m => dispH(m) * Z)), top = 40, H = maxH + top, capH = 62;
+  const TR = DATA.trainers || [], maxH = Math.max(120, ...L.map(m => dispH(m) * Z), ...TR.map(t => t.h * t.ms * Z)), top = 40, H = maxH + top, capH = 62;
   st.style.height = (H + capH) + 'px'; st.style.paddingBottom = capH + 'px';
   st.innerHTML = L.length ? '' : '<div class="empty">あてはまる モンスターが いません</div>';
+  for (const t of TR) {   // めやすの トレーナー（大きさは かえられない）
+    const el = document.createElement('div'), img = new Image(), s = t.ms * Z; el.className = 'mon ref'; img.src = t.img; img.width = Math.round(t.w * s); img.height = Math.round(t.h * s); img.alt = t.n; el.appendChild(img);
+    const cap = document.createElement('div'); cap.className = 'cap'; cap.innerHTML = `<div class="nm"></div><div class="v">トレーナー<br>${Math.round(t.h * t.ms)}ドット</div>`; cap.firstChild.textContent = t.n.split(' ').pop(); el.appendChild(cap); st.appendChild(el);
+  }
   for (const m of L) {
     const el = document.createElement('div'); el.className = 'mon' + (m.id === sel ? ' sel' : '') + (Math.abs((K[m.id] || 1) - 1) > .001 ? ' chg' : ''); el.dataset.id = m.id;
     const s = m.ms * (K[m.id] || 1) * Z, img = new Image(); img.src = m.img; img.width = Math.round(m.w * s); img.height = Math.round(m.h * s); img.alt = m.n;
@@ -138,10 +145,10 @@ async function save(id) {
 }
 // そうさ：ホイール・ドラッグ・タップ
 const stage = $('stage');
-stage.addEventListener('wheel', (e) => { const el = e.target.closest('.mon'); if (!el) return; e.preventDefault(); const id = el.dataset.id; if (sel !== id) { sel = id; document.querySelectorAll('.mon.sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); }
+stage.addEventListener('wheel', (e) => { const el = e.target.closest('.mon[data-id]'); if (!el) return; e.preventDefault(); const id = el.dataset.id; if (sel !== id) { sel = id; document.querySelectorAll('.mon.sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); }
   const step = e.shiftKey ? 1.01 : 1.04; setK(id, (K[id] || 1) * (e.deltaY < 0 ? step : 1 / step)); }, { passive: false });
 let drag = null;
-stage.addEventListener('pointerdown', (e) => { const el = e.target.closest('.mon'); if (!el) return; const id = el.dataset.id; sel = id; document.querySelectorAll('.mon.sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); panel();
+stage.addEventListener('pointerdown', (e) => { const el = e.target.closest('.mon[data-id]'); if (!el) return; const id = el.dataset.id; sel = id; document.querySelectorAll('.mon.sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); panel();
   drag = { id, y: e.clientY, k: K[id] || 1, h: dispH(BY[id]) * Z, moved: false }; el.setPointerCapture(e.pointerId); });
 stage.addEventListener('pointermove', (e) => { if (!drag) return; const dy = drag.y - e.clientY; if (Math.abs(dy) > 3) drag.moved = true; if (!drag.moved) return; setK(drag.id, drag.k * Math.max(.2, (drag.h + dy) / drag.h)); });
 const endDrag = () => { if (drag && drag.moved) render(true); drag = null; };
