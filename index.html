@@ -3894,7 +3894,7 @@ function mkFighter(mon, side) {
   return {
     mon, sp, side, lvl: MON_LV, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, spa: st.spa, sdef: st.spd, speStat: st.spe, eva: st.eva, baseSpd: Math.round(st.spe * .85 - 10),
     moves: equipped(mon).slice(),
-    x: 0, y: 0, r: Math.round(23 * bodySz(sp)), face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
+    x: 0, y: 0, r: Math.round(28 * bodySz(sp)), face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
     inv: 0, flash: 0, kx: 0, ky: 0, dodgeCd: 0, aiT: 1, plan: null, planFor: 0, strafe: 1, stratT: 0,
     scale: 1, fainted: false, moving: false, walk: 0, ghostT: 0, splashT: 0,
     st: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }, status: '', statusT: 0, tickT: TICK, toxN: 1, parT: 2.5,
@@ -8415,7 +8415,7 @@ function drawFighter(f) {
       ctx.save(); if (f.v.protect > 0 && f.v.protect < 2 && Math.floor(B.t * 8) % 2) ctx.globalAlpha = .45;
       if (gd) plDraw(gk, plLoop(gk, B.t), f.x + f.face * R * .55, f.y + oy - img0.height * ms * .3, Math.max(.7, sc * .8), 0, null, null, false, f.face < 0);
       else if (!f.v.pg && dt0 < .45) plDraw('g_open', plOnce('g_open', dt0 / .45), f.x, cy, sc);
-      else plDraw(gk, plLoop(gk, B.t), f.x, cy, f.v.pg ? sc * 33 / 30 : sc);
+      else { ctx.globalAlpha *= .4; plDraw(gk, plLoop(gk, B.t), f.x, cy, f.v.pg ? sc * 33 / 30 : sc); }   // はった あとは うすく（モンスターが 見える）
       ctx.restore();
     } else {
     const pc = f.v.pg ? ['#c88ae8', '#f0d8ff'] : ['#9ff0ff', '#d8faff'];
