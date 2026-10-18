@@ -2887,9 +2887,9 @@ function tabMotion(t) {
   const po = pb && pb.querySelector('.ico'); if (po && po.animate) po.animate([{ transform: 'translateY(-3px) scale(1.18)' }, { transform: 'translateY(0) scale(1)' }], { duration: D * .7, easing: 'cubic-bezier(.3,.7,.2,1)' });
 }
 addEventListener('resize', () => { clearTimeout(tabMotion.rt); tabMotion.rt = setTimeout(() => { if (!TAB_CUR) return; const t = TAB_CUR; TAB_CUR = null; const tb = $('tabbar'), ind = tb && tb.querySelector('.tabind'); if (ind) ind.classList.remove('show'); tabMotion(t); }, 80); });   // 向き・大きさが かわったら いちから おきなおす
-// バトルへ いく ときの きりかえ：ピクセルディゾルブ アウト（まえの 画面が ドットの マスごとに 黒く なる）→ 黒 → ディゾルブ イン（マスが ぬけて バトル画面）
+// バトルへ いく／もどる ときの きりかえ：ピクセルディゾルブ アウト（まえの 画面が ドットの マスごとに 黒く なる）→ 黒 → ディゾルブ イン（マスが ぬけて バトル画面）
 //   きりかえの あいだは バトルの 時間を とめる（VS の えんしゅつを さいしょから みせる）
-const DSV = { cell: 10, out: 380, hold: 160, in: 380, steps: 10, col: '#000' };
+const DSV = { cell: 18, out: 380, hold: 160, in: 380, steps: 10, col: '#000' };
 let dsvNow = null;
 function dsvKill() { if (dsvNow) { cancelAnimationFrame(dsvNow.raf); dsvNow.cv.remove(); if (dsvNow.cl) dsvNow.cl.remove(); dsvNow = null; } }
 function pixDissolve(old) {
@@ -2930,9 +2930,10 @@ function pixDissolve(old) {
 }
 function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && !$('scTrain').hidden) TRN = null;   /* くんれんを はなれた：ほぞん して いない へんこうは すてる（もどったら ほぞんした ものを ひらく） */
   const same = (() => { const e = document.getElementById(id); return !!(e && !e.hidden); })();   // おなじ 画面の かきなおし：フェードも BGM の はじめなおしも しない
-  const prev = same || id !== 'scBattle' ? null : [...document.querySelectorAll('.screen')].find(s => !s.hidden && !s.dataset.dsv);
-  if (!same && id !== 'scBattle') dsvKill();
-  const dsv = id === 'scBattle' && !same && pixDissolve(prev);   // ディゾルブは バトルへ いく ときだけ
+  const prev = same ? null : [...document.querySelectorAll('.screen')].find(s => !s.hidden && !s.dataset.dsv);
+  const bat = !same && prev && (id === 'scBattle' || prev.id === 'scBattle');   // ディゾルブは バトルへ いく ときと もどる ときだけ
+  if (!same && !bat) dsvKill();
+  const dsv = bat && pixDissolve(prev);
   for (const s of document.querySelectorAll('.screen')) if (!s.dataset.dsv) s.hidden = s.id !== id;
   { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); if (!tb.hidden) tabMotion(t); } }
   if (same) return;
