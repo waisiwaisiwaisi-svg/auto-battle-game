@@ -5352,20 +5352,27 @@ const TR_OR_MAX = 3, TR_EV = ['enter', 'swap'];
 const condsOk = (f, o, cs, id) => (cs || []).every(c => condOk(f, o, c, id));
 function runRules(f, o) {
   const P = trProg(f); f.trGo = null; f.trAt = '';
-  const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id);
+  if (f.queued) {   // 撃つ 技が きまっている：ふつうの うごきで 間合いへ（2.5びょう 撃てなければ しばらく ほかの 技へ）
+    if (!f.trQ || f.trQ.id !== f.queued) f.trQ = { id: f.queued, t: B.t };
+    if (B.t - f.trQ.t < 2.5) { f.trAt = 'm:' + f.queued + ' q'; return; }
+    f.trSkip = { id: f.queued, until: B.t + 4 }; f.queued = null; f.trQ = null;
+  }
+  const skip = (id) => f.trSkip && f.trSkip.id === id && B.t < f.trSkip.until;
+  const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id) && !skip(r.id);
   const lineHit = (r, ev) => trLines(r.c).some(l => l.length && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
   const hit = rows.filter(r => lineHit(r, 1)).concat(rows.filter(r => !lineHit(r, 1) && lineHit(r))), order = hit.concat(rows.filter(r => !hit.includes(r)));   // きっかけの 条件（出場時・交代時）が 合う 技が いちばん 先
-  const r = order.find(ok) || order[0]; if (!r) return;   // 撃てる技が ない ときは 次に撃つ技の 立ち回りを する
+  const pr = f.trPrep && rows.find(r => r.id === f.trPrep.id && ok(r));   // うごきはじめた 技は 撃つまで かえない（条件の ちらつきで やりなおさない）
+  const r = pr || order.find(ok) || order[0]; if (!r) return;   // 撃てる技が ない ときは 次に撃つ技の 立ち回りを する
   const g = r.go || 'auto'; f.trAt = 'm:' + r.id + (hit.includes(r) ? ' c' : '') + ' g:' + g;
-  if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g) && ok(r)) { giveOrder(f, g, f.side); if (f.order) f.order.tr = 1; }
+  if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g) && ok(r) && !(f.trPrep && f.trPrep.id === r.id && f.trPrep.ord) && !(B.t - (f.trOrdT || -9) < 2.5)) { f.trOrdT = B.t; giveOrder(f, g, f.side, true); if (f.order) { f.order.tr = 1; if (f.trPrep) f.trPrep.ord = 1; } }
   if (!ok(r)) { f.trPrep = null; return; }
-  if (f.queued || f.state !== 'free') return;
+  if (f.state !== 'free') return;
   if (g !== 'auto') {   // 近づいて／離れて／隠れて／回り込んで から 撃つ（3びょう たったら 撃つ）
-    if (!f.trPrep || f.trPrep.id !== r.id) f.trPrep = { id: r.id, t: 0 };
+    if (!f.trPrep || f.trPrep.id !== r.id) { f.trPrep = { id: r.id, t: 0, ord: f.order && f.order.tr ? 1 : 0 }; }
     f.trPrep.t += .25; const d = dist(f, o), rd = g === 'near' ? d < 150 : g === 'far' ? d >= 260 : f.trPrep.t >= 1.5;
     if (!rd && f.trPrep.t < 3) return;
   }
-  f.trPrep = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trAt += ' q';
+  f.trPrep = null; f.trGo = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t }; f.trAt += ' q';
 }
 function chipTick(f, o, dt) { f.trT = (f.trT || 0) - dt; if (f.trT <= 0) { f.trT = .25; runRules(f, o); } return trProg(f).mv.length > 0; }
 function natPref(f, m) {
@@ -7191,12 +7198,12 @@ function orderSpot(f, o, k) {
   }
   return best;
 }
-function giveOrder(f, k, side) {
+function giveOrder(f, k, side, quiet) {
   const sd = B.sides[side], o = opp(f);
   if (!f || !o || (sd.orderCd || 0) > 0 || !canAct(f)) return;
   if (f.order && f.order.k === k) { f.order = null; sd.orderCd = .5; say(`${f.sp.n}は もとの うごきに もどった`); return; }   // もういちど おすと やめる
   const spot = orderSpot(f, o, k);
-  if (!spot) { say(k === 'hide' ? 'かくれる ばしょが ない！' : 'まわりこむ みちが ない！'); SND.se('deny'); return; }
+  if (!spot) { if (!quiet) { say(k === 'hide' ? 'かくれる ばしょが ない！' : 'まわりこむ みちが ない！'); SND.se('deny'); } return; }   // 訓練の じどう めいれいは だまって あきらめる
   f.order = { k, t: ORDER_T[k], spot, re: .5, ox: o.x, oy: o.y }; f.want = null;
   if (k === 'flank' && losFrom(f.x, f.y, o)) {   // かべが ない：あいての まわりを まわって よこ・うしろへ
     const base = Math.atan2(f.y - o.y, f.x - o.x), R = clamp(dist(f, o), 90, 150), room = (sg) => [.8, 1.6, 2.4].filter(da => spotOk(f, o.x + Math.cos(base + sg * da) * R, o.y + Math.sin(base + sg * da) * R)).length;
@@ -9290,7 +9297,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 })();
 </script>
