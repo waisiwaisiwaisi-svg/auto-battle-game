@@ -983,33 +983,35 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .trmons canvas{flex:none;image-rendering:pixelated}
 .trmons em{font-style:normal;font-size:9px;padding:0 4px;border-radius:3px;background:#3a3a4a;margin-right:2px}.trmons em.ok{background:#2f7a4a}.trmons em.dr{background:#7a5a2a}
 .trmain,.trside{min-width:0;display:flex;flex-direction:column;gap:6px}
-.trhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.trhead>b{font-size:16px}.trhead .trtab{flex:1;margin:0}
-.trhelp{font-size:11px;line-height:1.5}
-.chipg2{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;padding:6px;border-radius:8px;background:rgba(0,0,0,.25);user-select:none;-webkit-user-select:none}
-.chipg2 .cell{position:relative;aspect-ratio:1.1;min-width:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;line-height:1.15;padding:2px;border-radius:5px;border:1px dashed rgba(255,255,255,.16);background:rgba(255,255,255,.03);color:var(--ink);word-break:keep-all;overflow-wrap:anywhere;cursor:pointer}
-.chipg2 .cell>span{pointer-events:none}
-.chipg2 .cell.k-if,.chipg2 .cell.k-do,.chipg2 .cell.k-flow{touch-action:none;cursor:grab;border-style:solid;border-width:2px}
-.k-if{background:#2c4a7a!important;border-color:#6aa0ff!important}
-.k-do{background:#6a3a2a!important;border-color:#ff9a5a!important}
-.k-flow{background:#3a3a4a!important;border-color:#b8b8c8!important}
-.chipg2 .cell.tmv::after,.pal.tmv::after{content:'★';position:absolute;top:1px;right:3px;font-size:10px;color:#ffd84a}
-.chipg2 .cell.bad{border-color:#ff4a4a!important;background:#5a1a22!important}.chipg2 .cell.bad::after{content:'×';position:absolute;top:0;right:3px;color:#ff6a6a;font-weight:700}
-.chipg2 .cell.sel{outline:3px solid var(--acc);outline-offset:1px;z-index:2}
-.chipg2 .cell.hov{outline:3px dashed #7bff8a;outline-offset:1px;z-index:2}
-.chipg2 .cell i{position:absolute;font-style:normal;font-size:13px;font-weight:700;line-height:1;pointer-events:none;text-shadow:0 0 2px #000,0 0 2px #000;z-index:3}
-.chipg2 i.y{color:#7bff8a}.chipg2 i.n{color:#ff7a7a}
-.chipg2 i.r{right:-8px;top:calc(50% - 6px)}.chipg2 i.l{left:-8px;top:calc(50% - 6px)}.chipg2 i.d{bottom:-9px;left:calc(50% - 4px)}.chipg2 i.u{top:-9px;left:calc(50% - 4px)}
-.chipg2 i.n.r,.chipg2 i.n.l{top:calc(50% + 2px)}.chipg2 i.y.r,.chipg2 i.y.l{top:calc(50% - 13px)}.chipg2 i.n.d,.chipg2 i.n.u{left:calc(50% + 2px)}.chipg2 i.y.d,.chipg2 i.y.u{left:calc(50% - 11px)}
+.trhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.trhead>b{font-size:16px}
+.trsec{display:flex;flex-direction:column;gap:5px}.trsec h3{font-size:14px;margin:4px 0 0}.trsec h3 .dim{font-size:11px;font-weight:400}
+.trr{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;padding:5px 6px;border-radius:8px;background:rgba(255,255,255,.05)}
+.trr .no{width:1.3em;text-align:center;font-weight:700;color:var(--acc)}
+.trr .arw{font-size:11px;opacity:.75}
+.trr.add{justify-content:center;min-height:38px;font-size:12px;opacity:.8;background:transparent;border:2px dashed rgba(255,255,255,.22);cursor:pointer}
+.rh{position:relative;min-width:6.5em;text-align:center;padding:5px 9px;border-radius:6px;font-size:12px;font-weight:700;border:2px solid;color:var(--ink)}
+.rh.mv,.pal.k-mv{background:#6a3a2a;border-color:#ff9a5a;border-left:6px solid var(--c)}
+.rh.go,.pal.k-go{background:#24584a;border-color:#6adab0}
+.pal.k-c,.cnd{background:#2c4a7a;border-color:#6aa0ff}
+.rh.tmv::after,.pal.tmv::after{content:'★';position:absolute;top:-6px;right:-4px;font-size:11px;color:#ffd84a;text-shadow:0 0 2px #000}
+.rh.bad{background:#5a1a22;border-color:#ff4a4a}.rh.bad::after{content:'×';position:absolute;top:-7px;right:-4px;color:#ff6a6a;font-weight:700;text-shadow:0 0 2px #000}
+.rc{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:32px;padding:3px 5px;border-radius:6px;border:1px dashed rgba(255,255,255,.22)}
+.rc i{font-style:normal;font-size:10px;opacity:.7}.rc .any{font-size:11px;opacity:.7}.rc .any small{font-size:9px}
+.cnd{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:3px 7px;border-radius:5px;border:2px solid;color:var(--ink)}
+.cnd.not{background:#4a2c5a;border-color:#c07aff}.cnd b{color:#ffb0ff}
+.cnd.sel{outline:3px solid var(--acc);outline-offset:1px}
+.rb{display:flex;gap:3px}.rb button{font:inherit;font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid var(--edge);background:transparent;color:var(--ink)}.rb button:disabled{opacity:.3}
+.hov{outline:3px dashed #7bff8a!important;outline-offset:1px}
 .trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.trbtns .btn{padding:6px 12px;font-size:13px}
 .trside h3{font-size:13px;margin:4px 0 0}
 .trins{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--edge);font-size:12px;min-height:60px}
 .trpal{display:flex;flex-wrap:wrap;gap:4px}
-.pal{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:5px 9px;border-radius:5px;border:2px solid;color:var(--ink)}
+.pal{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:5px 9px;border-radius:5px;border:2px solid;color:var(--ink)}.pal.k-mv{border-left-width:6px}
 .pal small{font-size:9px;margin-left:3px;color:#ffd84a}
 .pal[style*="--c"]{border-left:6px solid var(--c)!important}
 .pal.on{outline:3px solid var(--acc);outline-offset:1px}
 .trghost{position:fixed!important;pointer-events:none;z-index:9999;opacity:.85;transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.5);margin:0}
-@media (max-width:860px){.trpage{grid-template-columns:minmax(0,1fr)}.trside{position:sticky;bottom:calc(78px + var(--sab));z-index:5;max-height:32vh;overflow:auto;padding:4px 8px;border-radius:10px;background:rgba(22,18,40,.96);border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
+@media (max-width:860px){.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;bottom:calc(78px + var(--sab));z-index:5;max-height:32vh;overflow:auto;padding:4px 8px;border-radius:10px;background:rgba(22,18,40,.96);border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
 .chipg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px auto;max-width:420px}
 .chipg button{position:relative;aspect-ratio:1.15;min-width:0;font:inherit;font-size:10px;line-height:1.2;padding:2px;border-radius:5px;border:1px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.03);color:var(--ink);overflow:visible;word-break:keep-all;overflow-wrap:anywhere}
 .chipg button.k-if{background:#2c4a7a;border:2px solid #6aa0ff}
@@ -3240,117 +3242,106 @@ function rerollPool(m, idx, sameType) {
   const ids = sameType ? Object.keys(MOVES).filter(id => id !== 'tackle' && MOVES[id].t === old.t && canLearn(m.sid, id)) : learned(m);
   return ids.filter(id => MOVES[id] && !cur.includes(id));
 }
-// くんれん：わざ 4つ・わざの つかいかた・うごきかた を きめる（くんれんモードの しあいで つかう）
-// ===== くんれん ページ：チップで プログラム（ドラッグで おく）・かりほぞん・かくてい（スクロールを つかうか かくにん）・ほかの モンスターから よびだす =====
-let TRN = null;   // { uid, W: さぎょうちゅうの プログラム, dirty, sel, pick, tab }
+// ===== くんれん ページ：わざ ごとに「どんな ときに つかうか」・たちまわり ごとに「どんな ときに するか」を ドラッグで きめる =====
+let TRN = null;   // { uid, W: さぎょうちゅうの ルール { mv:[{id,c:[]}], mo:[{a,c:[]}] }, dirty, sel, pick }
+const TR_MO_MAX = 6;
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
-const trClone = (p) => JSON.parse(JSON.stringify(p || chipNew()));
+const trBlank = (m) => ({ mv: equipped(m).map(id => ({ id, c: [] })), mo: [] });
+const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify(p)) : trBlank(m);
 // つかえる わざ：おぼえている 4つ ＋ もっている スクロールで おぼえられる わざ
 function trMoves(m) { const eq = equipped(m).slice(), tm = Object.keys(S.tms || {}).filter(id => S.tms[id] > 0 && MOVES[id] && id !== 'tackle' && !eq.includes(id) && canLearn(m.sid, id)); return { eq, tm }; }
-const trMvIds = (W) => [...new Set(Object.values(W.cells).filter(c => CHIPS[c.t] && CHIPS[c.t].mv && typeof c.p === 'string' && MOVES[c.p]).map(c => c.p))];
-function trNewChip(t, p, m) { const K = CHIPS[t]; return { t, p: p ?? (K.ps ? K.ps[0][0] : K.mv ? equipped(m)[0] : undefined), y: K.c !== 'do' ? 'd' : undefined, n: K.c === 'if' ? 'r' : undefined }; }
-function trDraft() { const m = trMon(TRN.uid); if (!m) return; m.tr = m.tr || {}; m.tr.draft = trClone(TRN.W); TRN.dirty = false; save(); }
-function trLeave(go) { if (!TRN || !TRN.dirty) return go(); ask('いまの プログラムを かりほぞん しますか？', 'する', 'しない').then(y => { if (y) trDraft(); TRN.dirty = false; go(); }); }
+const trMvIds = (W) => [...new Set(W.mv.map(r => r.id).filter(id => MOVES[id]))];
+const trCondNew = (t) => ({ t, p: CONDS[t].ps ? CONDS[t].ps[0][0] : undefined });
+const trCondTx = (c) => { const K = CONDS[c.t]; if (!K) return '？'; const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '：' + p : '') + (c.not ? ' <b>ではない</b>' : ''); };
+function trDraft() { const m = trMon(TRN.uid); if (!m) return; m.tr = m.tr || {}; m.tr.draft = trClone(TRN.W, m); TRN.dirty = false; save(); }
+function trLeave(go) { if (!TRN || !TRN.dirty) return go(); ask('いまの せっていを かりほぞん しますか？', 'する', 'しない').then(y => { if (y) trDraft(); TRN.dirty = false; go(); }); }
 function renderTrain(uid) {
-  if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { ask('いまの プログラムを かりほぞん しますか？', 'する', 'しない').then(y => { if (y) trDraft(); TRN.dirty = false; renderTrain(uid); }); return; }
+  if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { ask('いまの せっていを かりほぞん しますか？', 'する', 'しない').then(y => { if (y) trDraft(); TRN.dirty = false; renderTrain(uid); }); return; }
   const all = [...S.party, ...S.box];
   if (uid == null) uid = TRN && trMon(TRN.uid) ? TRN.uid : (all[0] && all[0].uid);
   const m = trMon(uid); if (!m) return;
-  const T = m.tr = m.tr || {}; T.use = T.use || {}; T.style = T.style || {}; delete T.moves;
-  if (!TRN || TRN.uid !== uid) TRN = { uid, W: trClone(T.draft || T.prog), dirty: false, sel: null, pick: null, tab: TRN ? TRN.tab : 'chip' };
-  const W = TRN.W, sp = SPECIES[m.sid], nat = NATURES[natOf({ mon: m, sp })], { eq, tm } = trMoves(m), avail = eq.concat(tm);
-  const seg = (opts, cur, key) => `<div class="trseg" data-k="${key}">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
-  const mvn = (id) => id && MOVES[id] ? MOVES[id].n : '？';
-  const label = (c) => { const K = CHIPS[c.t]; if (!K) return '？';
-    if (K.mv) { const id = typeof c.p === 'number' ? eq[c.p] : c.p; return mvn(id) + '<br>' + (c.t === 'use' ? 'つかう' : c.t === 'ready' ? 'つかえる？' : 'ばつぐん？'); }
-    const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '<br>' + p : '') + (K.c === 'if' ? '？' : ''); };
-  const mvState = (c) => { const K = CHIPS[c.t]; if (!K || !K.mv) return ''; const id = typeof c.p === 'number' ? eq[c.p] : c.p; return eq.includes(id) ? '' : tm.includes(id) ? ' tmv' : ' bad'; };
-  const where = (x) => (x.tr && x.tr.prog && x.tr.mode === 'chip' ? '<em class="ok">チップ</em>' : x.tr && x.tr.mode === 'simple' ? '<em>かんたん</em>' : '') + (x.tr && x.tr.draft ? '<em class="dr">かり</em>' : '');
-  let main = '', side = '';
-  if (TRN.tab === 'chip') {
-    let grid = ''; for (let y = 0; y < CHIP_H; y++) for (let x = 0; x < CHIP_W; x++) { const k = x + ',' + y, q = W.cells[k], K = q && CHIPS[q.t];
-      grid += `<div data-c="${k}" class="cell${K ? ' k-' + K.c + mvState(q) : ''}${TRN.sel === k ? ' sel' : ''}">${q ? '<span>' + label(q) + '</span>' : ''}${K && K.c !== 'do' && q.y ? `<i class="y ${q.y}">${CHIP_ARW[q.y]}</i>` : ''}${K && K.c === 'if' && q.n ? `<i class="n ${q.n}">${CHIP_ARW[q.n]}</i>` : ''}</div>`; }
-    main = `<div class="dim trhelp">「はじまり」から やじるしを たどり、さいしょに ついた <b style="color:#ffb07a">こうどう</b>を します。なにも ない マスに ついたら いつもの AI まかせ（よけるのは いつも じぶんで します）。チップは みぎから <b>ドラッグ</b>で おく・マスの そとへ ドラッグで けす。</div>
-      <div class="chipg2">${grid}</div>
-      <div class="trbtns"><button class="btn sub" data-a="draft">かりほぞん</button><button class="btn" data-a="ok">かくてい</button><button class="btn sub" data-a="load">よびだす</button><button class="btn sub" data-a="ex">おてほん</button><button class="btn sub" data-a="revert">もとに もどす</button><button class="btn sub" data-a="clr">ぜんぶ けす</button></div>
-      <div class="dim" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">まだ ほぞん して いません</b>' : T.draft ? 'かりほぞん ずみ（しあいでは まだ つかわない）' : T.prog ? 'かくてい ずみ' : 'まだ ありません'}　/　しあいで つかう：${T.mode === 'chip' && T.prog ? 'チップ' : T.mode === 'simple' ? 'かんたん' : 'いつもの AI'}</div>`;
-    const pal = (t, p, n, cls, extra, attr) => `<div class="pal k-${CHIPS[t].c}${cls || ''}" data-t="${t}"${p != null ? ` data-p="${p}"` : ''}${attr || ''}>${n}${extra || ''}</div>`;
-    const c = TRN.sel && W.cells[TRN.sel];
-    let ins = '';
-    if (c) { const K = CHIPS[c.t], dirs = (key, cur, lab) => `<div class="trrow"><b>${lab}</b>${seg(Object.entries(CHIP_ARW), cur || '', key)}</div>`;
-      const cur = typeof c.p === 'number' ? eq[c.p] : c.p, mopts = avail.concat(cur && !avail.includes(cur) ? [cur] : []);
-      ins = `<div><b>${K ? K.n : '？'}</b> <span class="dim">${K && K.c === 'if' ? 'あてはまれば みどり・ちがえば あかの やじるしへ' : K && K.c === 'do' ? 'ここに ついたら これを する' : 'やじるしの ほうへ すすむ'}</span></div>
-        ${K && K.ps ? `<div class="trrow"><b>せってい</b>${seg(K.ps, c.p ?? K.ps[0][0], 'cp')}</div>` : ''}
-        ${K && K.mv ? `<div class="trrow"><b>わざ</b>${seg(mopts.map(id => [id, mvn(id) + (tm.includes(id) ? '★' : eq.includes(id) ? '' : '×')]), cur, 'cm')}</div>` : ''}
-        ${K && K.c !== 'do' ? dirs('cy', c.y, K.c === 'if' ? '<span style="color:#7bff8a">はい</span>' : 'つぎ') : ''}${K && K.c === 'if' ? dirs('cn', c.n, '<span style="color:#ff7a7a">いいえ</span>') : ''}
-        ${c.t !== 'start' ? '<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">けす</button>' : ''}`; }
-    else if (TRN.pick) ins = `<div class="dim">「${CHIPS[TRN.pick.t].n}${TRN.pick.p ? '：' + mvn(TRN.pick.p) : ''}」を おく マスを タップ</div>`;
-    else ins = '<div class="dim">チップを ドラッグして マスへ。タップで えらんで マスを タップでも おけます</div>';
-    side = `<h3>じょうけん</h3><div class="trpal">${Object.entries(CHIPS).filter(([, K]) => K.c === 'if').map(([t, K]) => pal(t, null, K.n + '？', TRN.pick && TRN.pick.t === t ? ' on' : '')).join('')}</div>
-      <h3>こうどう</h3><div class="trpal">${Object.entries(CHIPS).filter(([t, K]) => K.c === 'do' && t !== 'use').map(([t, K]) => pal(t, null, K.n, TRN.pick && TRN.pick.t === t ? ' on' : '')).join('')}${pal('link', null, 'つなぎ')}</div>
-      <h3>わざ <span class="dim">（★＝スクロールで おぼえる）</span></h3><div class="trpal">${eq.map(id => pal('use', id, mvn(id), TRN.pick && TRN.pick.p === id ? ' on' : '', '', ` style="--c:${TYPES[MOVES[id].t].c}"`)).join('')}${tm.map(id => pal('use', id, mvn(id) + `<small>★×${S.tms[id]}</small>`, ' tmv' + (TRN.pick && TRN.pick.p === id ? ' on' : ''), '', ` style="--c:${TYPES[MOVES[id].t].c}"`)).join('')}</div>
-      <div class="trins">${ins}</div>`;
-  } else {
-    main = `<h3>わざの つかいかた</h3><div class="truse">${eq.map(id => { const u = T.use[id] || {}; return `<div style="--c:${TYPES[MOVES[id].t].c}" data-id="${id}"><b>${MOVES[id].n} <span class="dim">${moveSub(MOVES[id])}</span></b>
-        ${seg(TR_USE.map((x, i) => [i, x.n]), u.w ?? 2, 'w')}${seg(Object.entries(TR_WHEN), u.c || 'any', 'c')}</div>`; }).join('')}</div>
-      <div class="trbtns"><button class="btn" data-a="usesimple">${T.mode === 'simple' ? 'しあいで つかって います ✓' : 'しあいで かんたんを つかう'}</button></div>`;
-    side = `<h3>うごきかた</h3><div class="dim">「せいかく」は いまの せいかく（${nat ? nat.n : ''}）まかせ。チップの こうどうが ない ときも これで うごく</div>
-      ${Object.entries(TR_STYLE).map(([k, d]) => `<div class="trrow"><b>${d.n}</b>${seg([['', 'せいかく'], ...d.o.map((n, i) => [i, n])], T.style[k] ?? '', 's:' + k)}</div>`).join('')}`;
-  }
+  const T = m.tr = m.tr || {};
+  if (!TRN || TRN.uid !== uid) TRN = { uid, W: trClone(T.draft || T.prog, m), dirty: false, sel: null, pick: null };
+  const W = TRN.W, sp = SPECIES[m.sid], { eq, tm } = trMoves(m);
+  const mvn = (id) => id && MOVES[id] ? MOVES[id].n : '？', tcol = (id) => MOVES[id] ? TYPES[MOVES[id].t].c : '#888';
+  const mvCls = (id) => eq.includes(id) ? '' : tm.includes(id) ? ' tmv' : ' bad';
+  const where = (x) => (x.tr && x.tr.prog && x.tr.prog.mv && x.tr.mode === 'chip' ? '<em class="ok">せってい</em>' : '') + (x.tr && x.tr.draft && x.tr.draft.mv ? '<em class="dr">かり</em>' : '');
+  const conds = (sec, i, cs) => `<div class="rc" data-drop="c" data-s="${sec}" data-i="${i}">${cs.length ? cs.map((c, j) => `<span class="cnd${c.not ? ' not' : ''}${TRN.sel === `${sec}:${i}:${j}` ? ' sel' : ''}" data-s="${sec}" data-i="${i}" data-j="${j}">${trCondTx(c)}</span>`).join('<i>かつ</i>') : '<span class="any">いつでも <small>（じょうけんを ここへ）</small></span>'}</div>`;
+  const btns = (sec, i, n) => `<div class="rb"><button data-mv="${sec}:${i}:-1" ${i ? '' : 'disabled'}>▲</button><button data-mv="${sec}:${i}:1" ${i < n - 1 ? '' : 'disabled'}>▼</button><button data-rm="${sec}:${i}">×</button></div>`;
+  const mvRows = W.mv.map((r, i) => `<div class="trr"><span class="no">${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-s="mv" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="arw">←</span>${conds('mv', i, r.c)}${btns('mv', i, W.mv.length)}</div>`).join('')
+    + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ わざを ここへ（4つ まで）</div>' : '');
+  const moRows = W.mo.map((r, i) => `<div class="trr"><span class="no">${i + 1}</span><span class="rh go" data-drop="h" data-s="mo" data-i="${i}">${TR_GO[r.a]}</span><span class="arw">←</span>${conds('mo', i, r.c)}${btns('mo', i, W.mo.length)}</div>`).join('')
+    + (W.mo.length < TR_MO_MAX ? '<div class="trr add" data-drop="monew">＋ たちまわりを ここへ</div>' : '');
+  const main = `<div class="trsec"><h3>わざ <span class="dim">— うえから じゅんに みて、← の じょうけんが ぜんぶ あう わざを つかう。ここに ない わざは つかわない</span></h3>${mvRows}</div>
+    <div class="trsec"><h3>たちまわり <span class="dim">— うえから みて、あう ものを する。どれも あわない ときは いつもの うごき（よけるのは いつも じぶんで します）</span></h3>${moRows}</div>
+    <div class="trbtns"><button class="btn sub" data-a="draft">かりほぞん</button><button class="btn" data-a="ok">かくてい</button><button class="btn sub" data-a="load">よびだす</button><button class="btn sub" data-a="revert">もとに もどす</button><button class="btn sub" data-a="clr">さいしょから</button></div>
+    <div class="dim" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">まだ ほぞん して いません</b>' : T.draft && T.draft.mv ? 'かりほぞん ずみ（しあいでは まだ つかわない）' : T.prog && T.prog.mv ? 'かくてい ずみ' : 'まだ ありません'}　/　しあいで つかう：${T.mode === 'chip' && T.prog && T.prog.mv ? 'この せってい' : 'いつもの AI'}</div>`;
+  const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
+  const sel = TRN.sel && TRN.sel.split(':'), sc = sel && (W[sel[0]][+sel[1]] || { c: [] }).c[+sel[2]];
+  let ins = '';
+  if (sc) { const K = CONDS[sc.t], seg = (opts, cur, key) => `<div class="trseg" data-k="${key}">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+    ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow"><b>せってい</b>${seg(K.ps, sc.p ?? K.ps[0][0], 'cp')}</div>` : ''}<div class="trrow"><b>むき</b>${seg([['0', 'である'], ['1', 'ではない']], sc.not ? '1' : '0', 'cnot')}</div>
+      <button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">けす</button>`; }
+  else if (pk) ins = '<div class="dim">おく ばしょを タップ（わざ・たちまわりは ＋の わく か いまの わく、じょうけんは みぎの わく）</div>';
+  else ins = '<div class="dim">ドラッグで ひだりの わくへ。タップで えらんで わくを タップでも おけます。おいた じょうけんは タップで せってい、そとへ ドラッグで けす</div>';
+  const side = `<h3>わざ <span class="dim">（★＝スクロールで おぼえる）</span></h3><div class="trpal">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${S.tms[id]}</small></div>`).join('')}</div>
+    <h3>たちまわり</h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
+    <h3>じょうけん</h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-k="c" data-v="${t}">${K.n}${K.mv ? '<small>わざだけ</small>' : ''}</div>`).join('')}</div>
+    <div class="trins">${ins}</div>`;
   $('trBody').innerHTML = `<div class="trtop"><button class="btn sub${S.train ? ' on' : ''}" id="trMode" style="padding:6px 14px;font-size:13px">くんれんモード：${S.train ? 'ON' : 'OFF'}</button><span class="dim">${S.train ? 'しあい中は みるだけ。くんれん どおりに たたかう' : 'ON に すると しあい中は みるだけ に なる'}</span></div>
     <div class="trpage"><div class="trmons">${all.map(x => `<button data-u="${x.uid}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
-      <div class="trmain"><div class="trhead"><b>${sp.n}</b><div class="trtab"><button data-tab="chip" class="${TRN.tab === 'chip' ? 'on' : ''}">チップ</button><button data-tab="simple" class="${TRN.tab === 'simple' ? 'on' : ''}">かんたん</button></div></div>${main}</div>
+      <div class="trmain"><div class="trhead"><b>${sp.n}</b></div>${main}</div>
       <div class="trside">${side}</div></div>`;
   const B = $('trBody');
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
   $('trMode').onclick = () => { S.train = !S.train; save(); SND.se('click'); renderTrain(uid); };
-  B.querySelectorAll('.trtab button').forEach(b => b.onclick = () => { TRN.tab = b.dataset.tab; TRN.sel = null; SND.se('click'); renderTrain(uid); });
   const act = (a, f) => { const e = B.querySelector(`[data-a="${a}"]`); if (e) e.onclick = f; };
   const redo = () => renderTrain(uid), touch = () => { TRN.dirty = true; redo(); };
-  // チップを おく・うごかす（ドラッグ ／ タップ）
-  const drop = (pl, key) => {
-    if (pl.new) { if (key && key !== '0,0') { W.cells[key] = trNewChip(pl.new.t, pl.new.p, m); TRN.sel = key; TRN.pick = null; SND.se('ok'); touch(); } return; }
-    if (pl.from === '0,0') return;
-    if (!key) { delete W.cells[pl.from]; TRN.sel = null; SND.se('back'); touch(); return; }   // マスの そとへ：けす
-    if (key === pl.from || key === '0,0') return;
-    const a = W.cells[pl.from], b = W.cells[key]; W.cells[key] = a; if (b) W.cells[pl.from] = b; else delete W.cells[pl.from]; TRN.sel = key; SND.se('click'); touch();
+  // おく：pl = { k:'mv'|'go'|'c', v } あたらしく ／ { from:[sec,i,j] } おいてある じょうけん。zone = おとした わく
+  const drop = (pl, z) => {
+    const d = z && z.dataset.drop, sec = z && z.dataset.s, i = z ? +z.dataset.i : -1;
+    if (pl.from) { const [fs, fi, fj] = pl.from, c = W[fs][fi].c[fj];
+      if (!z) { W[fs][fi].c.splice(fj, 1); TRN.sel = null; SND.se('back'); touch(); return; }   // わくの そとへ：けす
+      if (d !== 'c' || (sec === fs && i === fi) || (CONDS[c.t].mv && sec !== 'mv')) return;
+      W[fs][fi].c.splice(fj, 1); W[sec][i].c.push(c); TRN.sel = null; SND.se('click'); touch(); return; }
+    if (!z) return;
+    if (pl.k === 'mv') { const at = W.mv.findIndex(r => r.id === pl.v);
+      if (d === 'mvnew') { if (at >= 0) return; W.mv.push({ id: pl.v, c: [] }); }
+      else if (d === 'h' && sec === 'mv') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; }
+      else return; }
+    else if (pl.k === 'go') { if (d === 'monew') W.mo.push({ a: pl.v, c: [] }); else if (d === 'h' && sec === 'mo') W.mo[i].a = pl.v; else return; }
+    else if (pl.k === 'c') { if (d !== 'c' || (CONDS[pl.v].mv && sec !== 'mv')) return; W[sec][i].c.push(trCondNew(pl.v)); TRN.sel = `${sec}:${i}:${W[sec][i].c.length - 1}`; }
+    TRN.pick = null; SND.se('ok'); touch();
   };
+  const zoneAt = (x, y) => { const t = document.elementFromPoint(x, y); return t && t.closest('#trBody [data-drop]'); };
   const drag = (el, pl, tapFn) => el.addEventListener('pointerdown', (ev) => {
     if (ev.button > 0) return; const sx = ev.clientX, sy = ev.clientY; let g = null;
-    const mv = (e) => { if (!g && Math.hypot(e.clientX - sx, e.clientY - sy) > 6) { g = el.cloneNode(true); g.classList.add('trghost'); g.style.width = el.offsetWidth + 'px'; g.style.height = el.offsetHeight + 'px'; document.body.appendChild(g); }
-      if (g) { e.preventDefault(); g.style.left = (e.clientX - el.offsetWidth / 2) + 'px'; g.style.top = (e.clientY - el.offsetHeight / 2) + 'px'; const t = document.elementFromPoint(e.clientX, e.clientY); B.querySelectorAll('.cell.hov').forEach(x => x.classList.remove('hov')); const c = t && t.closest('.chipg2 [data-c]'); if (c) c.classList.add('hov'); } };
+    const mv = (e) => { if (!g && Math.hypot(e.clientX - sx, e.clientY - sy) > 6) { g = el.cloneNode(true); g.classList.add('trghost'); g.style.width = el.offsetWidth + 'px'; document.body.appendChild(g); }
+      if (g) { e.preventDefault(); g.style.left = (e.clientX - el.offsetWidth / 2) + 'px'; g.style.top = (e.clientY - el.offsetHeight / 2) + 'px'; B.querySelectorAll('.hov').forEach(x => x.classList.remove('hov')); const z = zoneAt(e.clientX, e.clientY); if (z) z.classList.add('hov'); } };
     const up = (e) => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
-      if (!g) { tapFn(); return; } g.remove(); const t = document.elementFromPoint(e.clientX, e.clientY), c = t && t.closest('.chipg2 [data-c]'); drop(pl, c ? c.dataset.c : null); };
+      B.querySelectorAll('.hov').forEach(x => x.classList.remove('hov')); if (!g) { tapFn(); return; } g.remove(); drop(pl, zoneAt(e.clientX, e.clientY)); };
     window.addEventListener('pointermove', mv, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
   });
-  B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { new: { t: e.dataset.t, p: e.dataset.p } }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.t === pl.new.t && TRN.pick.p === pl.new.p ? null : pl.new; TRN.sel = null; SND.se('click'); redo(); }); });
-  B.querySelectorAll('.chipg2 .cell').forEach(e => { const k = e.dataset.c;
-    const tapFn = () => { if (TRN.pick && !W.cells[k]) { drop({ new: TRN.pick }, k); return; } TRN.sel = TRN.sel === k ? null : W.cells[k] ? k : null; SND.se('click'); redo(); };
-    if (W.cells[k]) drag(e, { from: k }, tapFn); else e.onclick = tapFn; });
-  B.querySelectorAll('.trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b) return; const k = g.dataset.k, v = b.dataset.v, c = TRN.sel && W.cells[TRN.sel];
-    if (k.startsWith('s:')) { if (v === '') delete T.style[k.slice(2)]; else T.style[k.slice(2)] = +v; save(); }
-    else if (k === 'cp') { const K = CHIPS[c.t]; c.p = typeof K.ps[0][0] === 'number' ? +v : v; TRN.dirty = true; }
-    else if (k === 'cm') { c.p = v; TRN.dirty = true; }
-    else if (k === 'cy' || k === 'cn') { c[k === 'cy' ? 'y' : 'n'] = v; TRN.dirty = true; }
-    else { const id = g.parentNode.dataset.id, u = T.use[id] = T.use[id] || {}; if (k === 'w') u.w = +v; else u.c = v; save(); }
-    SND.se('click'); redo(); });
-  act('cdel', () => { delete W.cells[TRN.sel]; TRN.sel = null; SND.se('back'); touch(); });
+  B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
+  B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.s}:${e.dataset.i}:${e.dataset.j}`; drag(e, { from: [e.dataset.s, +e.dataset.i, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); TRN.sel = TRN.sel === k ? null : k; SND.se('click'); redo(); }); });
+  B.querySelectorAll('.trmain [data-drop]').forEach(z => z.addEventListener('click', (ev) => { if (TRN.pick && !ev.target.closest('.cnd')) drop(TRN.pick, z); }));
+  B.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const [sec, i, d] = b.dataset.mv.split(':'), L = W[sec], a = +i, t = a + +d; [L[a], L[t]] = [L[t], L[a]]; TRN.sel = null; SND.se('click'); touch(); });
+  B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { const [sec, i] = b.dataset.rm.split(':'); W[sec].splice(+i, 1); TRN.sel = null; SND.se('back'); touch(); });
+  B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
+    if (g.dataset.k === 'cp') sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; else sc.not = b.dataset.v === '1' || undefined;
+    SND.se('click'); touch(); });
+  act('cdel', () => { W[sel[0]][+sel[1]].c.splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
   act('draft', () => { trDraft(); SND.se('ok'); say0('かりほぞん しました（しあいでは まだ つかいません）').then(redo); });
-  act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W); T.mode = 'chip'; delete T.draft; TRN.dirty = false; save(); SND.se('ok'); redo(); }));
-  act('revert', () => { TRN.W = trClone(T.draft || T.prog); TRN.dirty = false; TRN.sel = null; redo(); });
-  act('clr', () => { TRN.W = chipNew(); TRN.sel = null; touch(); });
-  act('ex', () => { const e1 = eq[0], e2 = eq[1] || eq[0];   // おてほん：HPが へったら かくれる → わざ1 → わざ2 → とおければ ちかづく
-    TRN.W = { cells: { '0,0': { t: 'start', y: 'd' }, '0,1': { t: 'myhp', p: 25, y: 'r', n: 'd' }, '1,1': { t: 'hide' }, '0,2': { t: 'ready', p: e1, y: 'r', n: 'd' }, '1,2': { t: 'use', p: e1 },
-      '0,3': { t: 'ready', p: e2, y: 'r', n: 'd' }, '1,3': { t: 'use', p: e2 }, '0,4': { t: 'dist', p: 'far', y: 'r', n: 'd' }, '1,4': { t: 'near' } } }; TRN.sel = null; touch(); });
+  act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; TRN.dirty = false; save(); SND.se('ok'); redo(); }));
+  act('revert', () => { TRN.W = trClone(T.draft || T.prog, m); TRN.dirty = false; TRN.sel = null; redo(); });
+  act('clr', () => { TRN.W = trBlank(m); TRN.sel = null; touch(); });
   act('load', () => trLoadFrom(m));
-  act('usesimple', () => { T.mode = 'simple'; save(); SND.se('ok'); redo(); });
   show('scTrain');
 }
-// かくてい：プログラムで つかう わざが いま おぼえて いない ときは スクロールを つかう（かならず かくにん）
+// かくてい：つかう わざを いま おぼえて いない ときは スクロールを つかう（かならず かくにん）
 async function trConfirm(m) {
   const W = TRN.W, ids = trMvIds(W), eq = equipped(m), add = ids.filter(id => !eq.includes(id));
-  if (Object.values(W.cells).some(c => CHIPS[c.t] && CHIPS[c.t].mv && typeof c.p === 'number')) { for (const c of Object.values(W.cells)) if (CHIPS[c.t] && CHIPS[c.t].mv && typeof c.p === 'number') c.p = eq[c.p]; }
   if (ids.length > 4) { await say0(`つかう わざが ${ids.length}こ あります。わざは 4つ まで です`); return false; }
   const ng = add.filter(id => !(S.tms && S.tms[id] > 0 && canLearn(m.sid, id)));
   if (ng.length) { await say0(`${ng.map(id => MOVES[id].n).join('・')} は おぼえられません（スクロールが ない か、この モンスターは おぼえられない）`); return false; }
@@ -3362,14 +3353,14 @@ async function trConfirm(m) {
 }
 // ほかの モンスターの プログラムを よびだす（コピー）
 function trLoadFrom(m) {
-  const src = [...S.party, ...S.box].filter(x => x !== m && x.tr && (x.tr.prog || x.tr.draft));
-  if (!src.length) { say0('プログラムの ある モンスターが いません'); return; }
+  const src = [...S.party, ...S.box].filter(x => x !== m && x.tr && ((x.tr.prog && x.tr.prog.mv) || (x.tr.draft && x.tr.draft.mv)));
+  if (!src.length) { say0('せっていの ある モンスターが いません'); return; }
   const bg = document.createElement('div'); bg.className = 'askbg';
-  bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>どの モンスターの プログラムを よびだす？</b><div class="dim">いまの プログラムは うわがき されます（わざが ちがう ときは かくてい で スクロールが ひつよう）</div></div>
-    <div class="tmlist">${src.map(x => [x.tr.prog ? ['prog', 'かくてい'] : null, x.tr.draft ? ['draft', 'かりほぞん'] : null].filter(Boolean).map(([k, n]) => `<button data-u="${x.uid}" data-k="${k}"><b>${SPECIES[x.sid].n}</b> <span class="dim">${n}</span></button>`).join('')).join('')}</div>
+  bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>どの モンスターの せっていを よびだす？</b><div class="dim">いまの せっていは うわがき されます（おぼえて いない わざは スクロールが ひつよう・おぼえられない わざは つかえません）</div></div>
+    <div class="tmlist">${src.map(x => [x.tr.prog && x.tr.prog.mv ? ['prog', 'かくてい'] : null, x.tr.draft && x.tr.draft.mv ? ['draft', 'かりほぞん'] : null].filter(Boolean).map(([k, n]) => `<button data-u="${x.uid}" data-k="${k}"><b>${SPECIES[x.sid].n}</b> <span class="dim">${n}</span></button>`).join('')).join('')}</div>
     <button class="btn sub" data-a="x" style="margin-top:8px">やめる</button></div>`;
   bg.querySelector('[data-a="x"]').onclick = () => bg.remove();
-  bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => { const x = trMon(+b.dataset.u); TRN.W = trClone(x.tr[b.dataset.k]); TRN.dirty = true; TRN.sel = null; bg.remove(); SND.se('ok'); renderTrain(m.uid); });
+  bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => { const x = trMon(+b.dataset.u); TRN.W = trClone(x.tr[b.dataset.k], m); TRN.dirty = true; TRN.sel = null; bg.remove(); SND.se('ok'); renderTrain(m.uid); });
   $('app').appendChild(bg);
 }
 function updTrainBtn() { const b = $('btnTrain'); if (!b) return; b.textContent = 'くんれんモード：' + (S.train ? 'ON' : 'OFF'); b.classList.toggle('on', !!S.train);
@@ -5278,66 +5269,44 @@ function trW(f, o, id) {
   return TR_USE[lv].k;
 }
 // ===== くんれん：チップ（カルネージハート ふう）：マス目に チップを ならべて やじるしで つなぐ。0.25びょう ごとに「はじまり」から たどり、さいしょに ついた こうどうチップを する =====
-const CHIP_W = 8, CHIP_H = 8, CHIP_DIRS = { r: [1, 0], d: [0, 1], l: [-1, 0], u: [0, -1] }, CHIP_ARW = { u: '↑', r: '→', d: '↓', l: '←' };
+// くんれんの ルール：わざ ごとに「どんな ときに つかうか」、たちまわり ごとに「どんな ときに するか」
 const CHIP_PCT = [[25, '25%'], [50, '50%'], [75, '75%']];
-const CHIPS = {
-  start: { c: 'flow', n: 'はじまり' }, link: { c: 'flow', n: 'つなぎ' },
-  dist:  { c: 'if', n: 'きょりは', ps: [['near', 'ちかい'], ['mid', 'ふつう'], ['far', 'とおい']] },
-  myhp:  { c: 'if', n: 'じぶんHP', ps: CHIP_PCT.map(([v, n]) => [v, n + 'みまん']) },
-  ophp:  { c: 'if', n: 'あいてHP', ps: CHIP_PCT.map(([v, n]) => [v, n + 'みまん']) },
-  foe:   { c: 'if', n: 'あいてが ためてる' },
-  ready: { c: 'if', n: 'つかえる', mv: 1 },
-  eff:   { c: 'if', n: 'ばつぐん', mv: 1 },
-  mysts: { c: 'if', n: 'じぶん じょうたいいじょう' },
-  opsts: { c: 'if', n: 'あいて じょうたいいじょう' },
-  see:   { c: 'if', n: 'あいてが みえる' },
-  rand:  { c: 'if', n: 'かくりつ', ps: CHIP_PCT },
-  use:   { c: 'do', n: 'つかう', mv: 1 },
-  near:  { c: 'do', n: 'ちかづく' }, far: { c: 'do', n: 'はなれる' }, hide: { c: 'do', n: 'かくれる' }, flank: { c: 'do', n: 'まわりこむ' },
-  swap: { c: 'do', n: 'こうたい' }, idle: { c: 'do', n: 'なにもしない' },   // よける のは いつもの AI が じぶんで する
+const CONDS = {
+  dist:  { n: 'きょり', ps: [['near', 'ちかい'], ['mid', 'ふつう'], ['far', 'とおい']] },
+  myhp:  { n: 'じぶんHP', ps: CHIP_PCT.map(([v, n]) => [v, n + 'みまん']) },
+  ophp:  { n: 'あいてHP', ps: CHIP_PCT.map(([v, n]) => [v, n + 'みまん']) },
+  foe:   { n: 'あいてが ためてる' },
+  eff:   { n: 'ばつぐん', mv: 1 },   // わざの ルール だけ（その わざが ばつぐん）
+  mysts: { n: 'じぶんが じょうたいいじょう' },
+  opsts: { n: 'あいてが じょうたいいじょう' },
+  see:   { n: 'あいてが みえる' },
+  rand:  { n: 'かくりつ', ps: CHIP_PCT },
 };
-const chipNew = () => ({ cells: { '0,0': { t: 'start', y: 'd' } } });
-const trProg = (f) => { const T = trOf(f); return T && T.mode === 'chip' && T.prog ? T.prog : null; };
-// わざの チップ：p は わざの id（むかしの データは 0〜3 の ばんごう）。いま おぼえて いない わざは つかえない
-const chipMv = (f, p) => typeof p === 'number' ? f.moves[p] : f.moves.includes(p) ? p : null;
-function chipIf(f, o, c) {
-  const hpk = (x) => x.hp / x.maxHp * 100, mv = chipMv(f, c.p), d = dist(f, o);
+const TR_GO = { near: 'ちかづく', far: 'はなれる', hide: 'かくれる', flank: 'まわりこむ' };   // よける のは いつもの AI が じぶんで する
+const trProg = (f) => { const T = trOf(f); return T && T.mode === 'chip' && T.prog && T.prog.mv ? T.prog : null; };
+function condOk(f, o, c, mv) {
+  const hpk = (x) => x.hp / x.maxHp * 100, d = dist(f, o); let v = false;
   switch (c.t) {
-    case 'dist': return c.p === 'near' ? d < 150 : c.p === 'mid' ? d >= 150 && d < 290 : d >= 290;
-    case 'myhp': return hpk(f) < (c.p || 50);
-    case 'ophp': return hpk(o) < (c.p || 50);
-    case 'foe': return !!(threatState(o) && o.cur && isDamaging(o.cur.m));
-    case 'ready': return !!(mv && !(f.cd[mv] > 0) && !moveBlocked(f, mv));
-    case 'eff': return !!(mv && isDamaging(MOVES[mv]) && effVs(MOVES[mv].t, o.sp) >= 2);
-    case 'mysts': return !!f.status;
-    case 'opsts': return !!o.status;
-    case 'see': return losClear(f, o);
-    case 'rand': return Math.random() * 100 < (c.p || 50);
+    case 'dist': v = c.p === 'near' ? d < 150 : c.p === 'mid' ? d >= 150 && d < 290 : d >= 290; break;
+    case 'myhp': v = hpk(f) < (c.p || 50); break;
+    case 'ophp': v = hpk(o) < (c.p || 50); break;
+    case 'foe': v = !!(threatState(o) && o.cur && isDamaging(o.cur.m)); break;
+    case 'eff': v = !!(mv && isDamaging(MOVES[mv]) && effVs(MOVES[mv].t, o.sp) >= 2); break;
+    case 'mysts': v = !!f.status; break;
+    case 'opsts': v = !!o.status; break;
+    case 'see': v = losClear(f, o); break;
+    case 'rand': v = Math.random() * 100 < (c.p || 50); break;
   }
-  return false;
+  return c.not ? !v : v;
 }
-function chipDo(f, o, c) {
-  const sd = B.sides[f.side];
-  switch (c.t) {
-    case 'use': { const id = chipMv(f, c.p); if (id && !(f.cd[id] > 0) && !moveBlocked(f, id)) f.queued = id; break; }
-    case 'near': case 'far': f.trGo = c.t; break;
-    case 'hide': case 'flank': if (!(f.order && f.order.k === c.t)) giveOrder(f, c.t, f.side); break;
-    case 'swap': { const i = benchIdx(f.side); if (i >= 0 && !(sd.swapCd > 0) && ['free', 'act', 'stun'].includes(f.state)) { const x = sd.fs[i]; doSwitch(f, i); say(`もどれ、${f.sp.n}！ いけっ、${x.sp.n}！`); } break; }
-  }
+const condsOk = (f, o, cs, mv) => (cs || []).every(c => condOk(f, o, c, mv));
+// うえから じゅんに しらべる：わざは じょうけんが ぜんぶ あう さいしょの わざを つかう（リストに ない わざは つかわない）。たちまわりは あう ものが なければ いつもの うごき
+function runRules(f, o) {
+  const P = trProg(f); f.trGo = null; f.trAt = '';
+  for (const r of P.mv) { const id = r.id; if (!f.moves.includes(id) || f.cd[id] > 0 || moveBlocked(f, id)) continue; if (condsOk(f, o, r.c, id)) { f.queued = id; f.trAt = 'm:' + id; break; } }
+  for (const r of P.mo || []) if (condsOk(f, o, r.c)) { f.trAt += ' g:' + r.a; if (r.a === 'near' || r.a === 'far') f.trGo = r.a; else if (!(f.order && f.order.k === r.a)) giveOrder(f, r.a, f.side); break; }
 }
-// はじまりから たどる：こうどうチップに ついたら true（なにも ない マス・そとに でたら false → いつもの AI）
-function runChips(f, o) {
-  const P = trProg(f); let x = 0, y = 0, c = P.cells['0,0'], n = 0; f.trGo = null;
-  while (c && n++ < 48) {
-    const K = CHIPS[c.t]; if (!K) return false;
-    if (K.c === 'do') { f.trAt = x + ',' + y; chipDo(f, o, c); return true; }
-    const v = CHIP_DIRS[K.c === 'if' && !chipIf(f, o, c) ? c.n : c.y]; if (!v) return false;
-    x += v[0]; y += v[1]; if (x < 0 || y < 0 || x >= CHIP_W || y >= CHIP_H) return false;
-    c = P.cells[x + ',' + y];
-  }
-  return false;
-}
-function chipTick(f, o, dt) { f.trT = (f.trT || 0) - dt; if (f.trT <= 0) { f.trT = .25; f.trRan = runChips(f, o); } return f.trRan; }
+function chipTick(f, o, dt) { f.trT = (f.trT || 0) - dt; if (f.trT <= 0) { f.trT = .25; runRules(f, o); } return trProg(f).mv.length > 0; }
 function natPref(f, m) {
   const nat = f.mon.nat, e = m.e || {}, dmg = isDamaging(m), close = ['melee', 'swipe', 'dash', 'vault'].includes(m.k), boost = m.k === 'self' || m.k === 'curse';
   const guardy = ['heal', 'wall', 'floor', 'hazard', 'sub', 'protect', 'counter', 'field'].includes(m.k), status = !dmg && !boost && !guardy, drain = !!e.drain || m.k === 'heal';
@@ -5478,8 +5447,8 @@ function aiMove(f, o, dt, autoSpecial) {
   const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
   f.paceT = 1;
   if (f.side === 1 && aiSwitch(f, o, dt)) return;
-  const chipOn = !!(autoSpecial && trProg(f) && chipTick(f, o, dt));   // くんれんの チップが うごいて いる：わざ・うごきは チップ まかせ
-  if (!chipOn) f.trGo = null;
+  const trP = autoSpecial && trProg(f), chipOn = !!(trP && chipTick(f, o, dt));   // くんれんの ルール：わざは ルール まかせ（たちまわりは trGo・めいれい）
+  if (!trP) f.trGo = null;
   if (autoSpecial && !f.queued && !chipOn) {
     if (f.aiT > .1 && f.moves.some(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id))) f.aiT = .1;   // うてる わざが あるのに またない
     f.aiT -= dt;
