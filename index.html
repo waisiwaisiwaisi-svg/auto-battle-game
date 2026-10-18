@@ -369,7 +369,15 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .cmd:active{transform:translateY(2px)}
 .cmd[hidden]{display:none}
 .cmd.blocked{opacity:.4}
-.plate .cond{font-size:9.5px;color:var(--acc);min-height:1.3em;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plate .cond{font-size:9.5px;color:var(--acc);min-height:1.3em;line-height:1.3;display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
+#plE .cond{justify-content:flex-end}
+.plate .db{position:relative;display:inline-flex;align-items:baseline;gap:3px;padding:1px 4px 2px;background:rgba(11,9,20,.72);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 55%,transparent);color:var(--c);font-size:9.5px;line-height:1.15;white-space:nowrap;overflow:hidden}
+.plate .db b{font-weight:700}
+.plate .db em{font-style:normal;font-variant-numeric:tabular-nums;color:#fff;opacity:.9;font-size:9px}
+.plate .db i{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--c);transform-origin:left;opacity:.9}
+.plate .db.bad.tm{box-shadow:inset 0 0 0 1px var(--c)}
+.plate .db.end{animation:dbBlink .25s steps(2) infinite}
+@keyframes dbBlink{50%{opacity:.45}}
 #bTop{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dim)}
 #bTop button.off{text-decoration:line-through}
 #bTop button{font-size:11px;color:var(--dim);background:var(--panel);box-shadow:0 0 0 1px var(--edge);padding:2px 8px}
@@ -397,7 +405,7 @@ html.land.short #scBattle:not([hidden]){grid-template-columns:minmax(0,1fr) 290p
 html.land.short #cvWrap{width:min(100%, calc((var(--appH, calc(100 * var(--vh))) - 36px) * 16 / 9))}
 html.land.short #btns{gap:5px} html.land.short #btns button.cmd{min-height:40px} html.land.short .cmd.info{min-height:44px;padding:2px 6px} html.land.short .cmd.info .d{font-size:9.5px;line-height:1.25}
 html.land.short .cmd .a{font-size:12px} html.land.short .cmd .b{font-size:9px} html.land.short #banner{font-size:11px;min-height:2em;padding:3px 6px}
-html.land.short .plate{padding:3px 6px;font-size:10px} html.land.short .plate .top b{font-size:12px} html.land.short .plate .cond{display:none} html.land.short .plates{gap:4px;grid-template-columns:1fr 1fr}
+html.land.short .plate{padding:3px 6px;font-size:10px} html.land.short .plate .top b{font-size:12px} html.land.short .plate .cond{min-height:0;margin-top:1px} html.land.short .plates{gap:4px;grid-template-columns:1fr 1fr}
 html.land.short #scHub, html.land.short #scDex{padding:8px 14px} html.land.short .bigbtns .btn{padding:10px 8px;font-size:16px} html.land.short .hubgrid{gap:12px}
 html.land.short .screen{padding-top:calc(6px + var(--sat));padding-bottom:calc(6px + var(--sab))}
 html.land.short #scTitle{padding:0} html.land.short .tcenter{padding:10px 16px 70px;gap:8px} html.land.short h1.tlogo{font-size:clamp(24px,calc(5 * var(--vw)),40px)}
@@ -4312,9 +4320,15 @@ function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.r
 // 回復できる わざは 1戦で 使える 回数に 上限（どの わざも さいてい USE_MIN かい）
 const USE_MIN = 5;
 function healMax(m) { const e = m.e || {}; if (m.k === 'counter' || m.k === 'heal' || e.seed || e.heal) return USE_MIN; return bigMax(m); }
-// 大わざ：1せんで つかえる 回数に 上限
-const SPECIAL_MAX = 3;   // とくべつな こうか（ゆか・かべ・わな・のうりょく・じょうたい など）の わざは 1せん 3かいまで（まもりは 5かい）
-function bigMax(m) { if (m.ohko) return USE_MIN; if (m.cat === 'stat') return m.k === 'protect' || m.k === 'stance' ? USE_MIN : SPECIAL_MAX; const p = m.power || Math.round((m.pow || 0) * 5); return p >= 100 ? USE_MIN : 0; }
+// 1せんで つかえる 回数：いりょく50いかの シンプルな こうげきだけ むせいげん。
+//   いりょく100いじょう・いちげき＝5かい、それいがいの こうげき（60いじょう・ついか こうかつき）＝10かい、
+//   へんかわざ（ゆか・かべ・のうりょく・アンコール・こうたい など）＝5かい
+const SPECIAL_MAX = 5, MID_MAX = 10;
+const SIMPLE_NG = ['switchOut', 'fakeout', 'rapidSpin', 'healBlock', 'ctr', 'sucker', 'hide', 'chain', 'rampage', 'charge2', 'selfConfuse'];
+const movePower = (m) => m.power || Math.round((m.pow || 0) * 5);
+const simpleAtk = (m) => m.cat !== 'stat' && movePower(m) <= 50 && !Object.keys(m.e || {}).length && !SIMPLE_NG.some(k => m[k]);
+function bigMax(m) { if (m.ohko) return USE_MIN; if (m.cat === 'stat') return SPECIAL_MAX; if (simpleAtk(m)) return 0; return movePower(m) >= 100 ? USE_MIN : MID_MAX; }
+const useTier = (m) => m.cat === 'stat' ? 'とくしゅこうか：' : m.ohko || movePower(m) >= 100 ? '大わざ：' : '';
 // すいとる こうげき：なんどでも うてる。かいふく するのは 1戦 DRAIN_MAX 回まで（それいこうは ふつうの こうげき）
 const DRAIN_MAX = 3;
 const drainLeft = (f, id) => ((MOVES[id] && MOVES[id].drainMax) || DRAIN_MAX) - ((f.drains && f.drains[id]) || 0);
@@ -7271,7 +7285,7 @@ function moveDesc(m) {
   if (m.ramp) out.push(`あてるたびに いりょくが ${m.ramp * 100}%ずつ あがる（6かいまで）`); if (e.web) out.push(`あたると ${e.web}びょう、こうげきを うけるたびに ついかダメージ`); if (m.charge2) out.push('1かいめは ためる。2かいめは ためなしで ほそい ビームを はなつ'); if (m.bugHeal) out.push('みかたの むしタイプは うえで かいふく');
   if (m.bigKb) out.push('あたった あいてを とおくへ ふきとばす'); if (m.chain) out.push('あたると もういちど とっしん。そのあとも あたるたびに 50%で つづく');
   if (m.whip) out.push('みぎ・ひだりと 2かい ふる'); if (e.yawn) out.push('あたると しばらくして ねむる'); if (m.noKb) out.push('ふきとばさない'); if (m.blastR) out.push('ひろい はんいに おちる');
-  if (healMax(m)) out.push(`${bigMax(m) && healMax(m) === bigMax(m) ? (m.cat === 'stat' ? 'とくしゅこうか：' : '大わざ：') : ''}1せん ${healMax(m)}かいまで`);
+  if (healMax(m)) out.push(`${bigMax(m) && healMax(m) === bigMax(m) ? useTier(m) : ''}1せん ${healMax(m)}かいまで`);
   return out.filter(Boolean).join('・');
 }
 const PAT_DESC = { scatter: 'あいての まわりに ばらばらに おちる', swarm: 'むれが つぎつぎ おそう', big: 'おおきな はんいに おそく おちる', line: 'てまえから あいてへ じゅんに ふきあがる', row: 'よこ 1れつに おちる', cross: '✕の かたちに おちる', double: 'おなじ ところに 2かい（よけた あとも ちゅうい）', cage: 'おちた まわりを いわで かこむ', ring: 'そとの わ → まんなかへ とじる',
@@ -7432,14 +7446,42 @@ function updAutoBtn() { const b = $('bAuto'); if (!b) return; const on = !!(S &&
 /* ---------- HUD ---------- */
 function setText(el, t) { if (el._t !== t) { el._t = t; el.textContent = t; } }
 const plCache = {};
-function condText(f) {
-  const a = [];
-  if (f.status) a.push(STATUS_NAMES[f.status]);
-  for (const k of STAGE_KEYS) if (f.st[k]) a.push(`${STAGE_NAMES[k].slice(0, 2)}${f.st[k] > 0 ? '+' : ''}${f.st[k]}`);
-  if (f.v.sub > 0) a.push('デコイ'); if (f.v.taunt > 0) a.push('ちょうはつ'); if (f.v.encore) a.push('アンコール');
-  if (f.v.web > 0) a.push('ほういもう'); if (f.v.charged) a.push('ためた'); if (f.st && f.st.eva > 0) a.push('かいひ+' + f.st.eva);
-  if (f.v.seed) a.push('タネ'); if (f.v.confuse > 0) a.push('こんらん'); if (f.v.healBlock > 0) a.push('かいふくふうじ'); if (f.v.yawn > 0) a.push('ねむけ');
-  return a.join(' ');
+// じょうたい タイマー：かかっている こうか と、あと なんびょうで きれるか
+const STAGE_SHORT = { atk: '攻撃', def: '防御', spa: '特攻', spd: '特防', spe: '素早', eva: '回避' };
+const COND_COL = { brn: '#ff8a5a', par: '#ffd84a', psn: '#c07be0', tox: '#a64fd0', slp: '#9aa6ff', frz: '#8fe6ff' };
+const ST_KANJI = { brn: '火傷', par: '麻痺', psn: '毒', tox: '猛毒', slp: '眠り', frz: '凍結' };
+function condList(f) {
+  const v = f.v, a = [], T = (k, n, c, t, bad = 1) => a.push({ k, n, c, t, bad });
+  if (f.status) T('st', ST_KANJI[f.status] || STATUS_NAMES[f.status], COND_COL[f.status] || '#fff', f.status === 'slp' || f.status === 'frz' ? Math.max(0, f.statusT) : null);
+  if (v.yawn > 0) T('yawn', '眠気', '#c0b8ff', v.yawn);
+  if (v.encore) T('encore', 'アンコール', '#ff9ad5', Math.max(0, v.encore.t));
+  if (v.taunt > 0) T('taunt', '挑発', '#ff6b5b', v.taunt);
+  if (v.healBlock > 0) T('healBlock', '回復封じ', '#b0a0ff', v.healBlock);
+  if (v.confuse > 0) T('confuse', '混乱', '#ffb0e0', v.confuse);
+  if (v.web > 0) T('web', '包囲網', '#d8e0a0', v.web);
+  if (v.seed) T('seed', 'やどりぎ', '#7be07b', null);
+  if (v.curse) T('curse', '呪い', '#a898e8', null);
+  if (v.dbond > 0) T('dbond', '道連れ', '#a07bd0', v.dbond, 0);
+  if (v.protect > 0) T('protect', '守り', '#9ff0ff', v.protect, 0);
+  if (v.counter) T('counter', '反撃構え', '#ffd166', Math.max(0, v.counter.t), 0);
+  if (v.sub > 0) T('sub', 'デコイ', '#e0d0a0', null, 0);
+  if (v.charged) T('charged', '溜め', '#ffd166', null, 0);
+  for (const k of STAGE_KEYS) if (f.st[k]) T('s_' + k, `${STAGE_SHORT[k]}${f.st[k] > 0 ? '+' : ''}${f.st[k]}`, f.st[k] > 0 ? '#7be0a8' : '#ff8a7a', null, f.st[k] < 0 ? 1 : 0);
+  // さいだい じかん（バーの もと）は はじめて みた ときの のこり（かけなおしで のびたら そこから）
+  const mx = f.condMax || (f.condMax = {}), seen = {};
+  for (const x of a) { if (x.t == null) continue; seen[x.k] = 1; if (!(mx[x.k] >= x.t - .05)) mx[x.k] = x.t; x.max = mx[x.k]; }
+  for (const k in mx) if (!seen[k]) delete mx[k];
+  return a;
+}
+function condText(f) { return condList(f).map(x => x.n).join(' '); }
+function updCond(el, f) {
+  const a = condList(f), sig = a.map(x => x.k + x.n + (x.t == null ? '' : 't')).join('|');
+  if (el._sig !== sig) {
+    el._sig = sig;
+    el.innerHTML = a.map(x => `<span class="db${x.bad ? ' bad' : ''}${x.t == null ? '' : ' tm'}" style="--c:${x.c}"><b>${x.n}</b>${x.t == null ? '' : '<em></em><i></i>'}</span>`).join('');
+  }
+  a.forEach((x, i) => { if (x.t == null) return; const c = el.children[i]; if (!c) return; const t = x.t < 10 ? x.t.toFixed(1) : String(Math.ceil(x.t)); const em = c.children[1], bar = c.children[2];
+    if (em._t !== t) { em._t = t; em.textContent = t; } bar.style.transform = `scaleX(${x.max ? clamp(x.t / x.max, 0, 1) : 0})`; c.classList.toggle('end', x.t < 1); });
 }
 // ゴーストバー：ダメージを うけたら ほんとうの HP は すぐ へり、へった ぶんの バーが すこし おくれて おいかける
 function hpGhost(f) {
@@ -7461,7 +7503,7 @@ function updPlate(id, side) {
   bar.style.transform = `scaleX(${k})`;
   bar.style.background = k > .5 ? 'var(--good)' : k > .2 ? 'var(--mid)' : 'var(--bad)';
   setText(root.querySelector('.hpn'), `${Math.ceil(f.hp)}/${f.maxHp}`);
-  setText(root.querySelector('.cond'), condText(f));
+  updCond(root.querySelector('.cond'), f);
   const sig = B.sides[side].fs.map(x => x.fainted ? 0 : 1).join('');
   if (plCache[id] !== sig) { plCache[id] = sig; root.querySelector('.balls').innerHTML = B.sides[side].fs.map(x => `<i class="${x.fainted ? 'out' : ''}"></i>`).join(''); }
 }
@@ -9459,7 +9501,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 })();
 </script>
