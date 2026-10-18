@@ -93,6 +93,11 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 #titleMons{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 #titleMons canvas{width:48px;height:48px}
 #scTitle{overflow:hidden;padding:0}
+.gpulse{position:absolute;z-index:70;pointer-events:none;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;border:4px solid #ffd84a;box-shadow:0 0 18px 6px rgba(255,210,70,.8),inset 0 0 14px 4px rgba(255,240,170,.7);animation:gpulse .55s ease-out forwards}
+.gpulse.b{animation-delay:.12s;opacity:0;border-width:3px}
+@keyframes gpulse{0%{transform:scale(.3);opacity:1}100%{transform:scale(18);opacity:0}}
+.tapstart.hit{animation:tapHit .45s ease-out}
+@keyframes tapHit{0%{filter:brightness(2.2) drop-shadow(0 0 14px #ffd84a);transform:scale(1.12)}100%{filter:none;transform:scale(1)}}
 #titleCv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
 .tcenter{position:relative;z-index:1;padding:24px 16px 120px;justify-content:center}
 h1.tlogo{font-size:clamp(30px,calc(6 * var(--vw)),60px);line-height:1;display:flex;flex-direction:column;align-items:center;gap:4px;filter:drop-shadow(0 6px 0 #0d0b14)}
@@ -8726,10 +8731,15 @@ document.addEventListener('gesturestart', (ev) => ev.preventDefault());
    ===================================================================== */
 // TAP TO START：がめんの どこを タップしても はじまる（セーブが あれば つづきから、なければ あいぼう えらび）。はじめからは せってい の しょきか で
 // タイトル：ブラウザは さいしょの タップまで 音を だせないので、1かいめの タップで BGM を ならし、2かいめで はじめる
-let titleArmed = false;
+let titleArmed = false, titleGo = false;
 $('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') || $('scTitle').hidden) return;
   if (!titleArmed && !SND.opt.mute) { titleArmed = true; SND.init(); SND.play('hub'); const t = $('tapStart'); if (t) { t.textContent = 'TAP TO START'; t.classList.add('armed'); } return; }
-  titleArmed = true; SND.se('ok'); S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else renderStarter(); });
+  if (titleGo) return; titleGo = true; titleArmed = true; SND.se('ok');
+  // 金色の パルス：TAP TO START から わっと ひろがってから ホームへ
+  const A = $('app'), ar = A.getBoundingClientRect(), t = $('tapStart'), tr = t ? t.getBoundingClientRect() : null, cx = tr ? tr.left + tr.width / 2 - ar.left : e.clientX - ar.left, cy = tr ? tr.top + tr.height / 2 - ar.top : e.clientY - ar.top;
+  if (t) { t.classList.remove('hit'); void t.offsetWidth; t.classList.add('hit'); }
+  for (const c of ['gpulse', 'gpulse b']) { const d = document.createElement('div'); d.className = c; d.style.left = cx + 'px'; d.style.top = cy + 'px'; A.appendChild(d); setTimeout(() => d.remove(), 900); }
+  setTimeout(() => { titleGo = false; S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else renderStarter(); }, 420); });
 /* ---------- 画面の 向き：横長なら 横レイアウト。スマホを たてに もった ままでも「横画面」で 90度 回して あそべる ---------- */
 let LAND_PREF = (() => { try { return localStorage.getItem('pma_land') === '1'; } catch (e) { return false; } })();
 function layout() {
