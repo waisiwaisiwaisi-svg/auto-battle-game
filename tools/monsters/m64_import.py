@@ -10,6 +10,7 @@ SRC, MONS, OUT = sys.argv[1:4]
 L = json.load(open(MONS))
 AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-'
 P = 4
+FLIP = {'g1'}   # 左むきに かかれた シート（レイコン）
 
 
 def rle(idx):
@@ -144,6 +145,7 @@ for card, kk, a in jobs:
             if 0 <= ty < cell.shape[0] and 0 <= tx < cell.shape[1]: cell[ty, tx] = g[yy, xx]
         fr.append(cell)
       fr = complete(fr, M, CW, CH, sid)
+      if sid in FLIP: fr = [x[:, ::-1] for x in fr]   # 左むきに かかれた え は 右むきに そろえる
       # 12コマ ぜんぶ おなじ わくで きる（コマどうしの いちを たもつ）
       al = np.any([x[..., 3] > 0 for x in fr], axis=0); yy, xx = np.where(al)
       y0, y1, x0, x1 = yy.min(), yy.max() + 1, xx.min(), xx.max() + 1
