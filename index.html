@@ -878,25 +878,36 @@ html.land #tabbar button.home,html.land #tabbar button.home:not(.on){margin:0;ju
 #tabbar button.home.on{background:linear-gradient(180deg,rgba(255,209,102,.2),rgba(255,209,102,.06))!important;box-shadow:inset 0 3px 0 var(--acc)!important;color:var(--acc)!important}
 html.land #tabbar button.home.on{box-shadow:inset 3px 0 0 var(--acc)!important}
 #tabbar .medal{border-radius:50%;background-color:#2a2148}   /* 絵が まだ よめて いない ときも まるく 見える */
-/* タブの えらばれた 見た目：ドットの パネル（かどを かいだんに けずる・くろい ふち・うえに 金の ライン） */
-#tabbar button.on:not(.home){border-radius:0!important;background:linear-gradient(180deg,#4c3f82,#2c2350)!important;color:#ffd166!important;
-  clip-path:polygon(0 4px,2px 4px,2px 2px,4px 2px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 2px,calc(100% - 2px) 2px,calc(100% - 2px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 2px) calc(100% - 4px),calc(100% - 2px) calc(100% - 2px),calc(100% - 4px) calc(100% - 2px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 2px),2px calc(100% - 2px),2px calc(100% - 4px),0 calc(100% - 4px));
-  box-shadow:inset 0 0 0 2px #0b0914,inset 0 5px 0 #ffd166,inset 0 7px 0 #b8862a,inset 2px 0 0 rgba(170,156,240,.35),inset 0 -4px 0 rgba(0,0,0,.35)!important;
-  text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914!important;font-weight:700}
-#tabbar button.on:not(.home) .ico{transform:translateY(-2px) scale(1.08);filter:drop-shadow(0 2px 0 #0b0914)}
-html.land #tabbar button.on:not(.home){box-shadow:inset 0 0 0 2px #0b0914,inset 5px 0 0 #ffd166,inset 7px 0 0 #b8862a,inset 0 2px 0 rgba(170,156,240,.35),inset -4px 0 0 rgba(0,0,0,.35)!important}
-#tabbar button:not(.on):hover{color:#d8d0f0}
-/* ホームだけ とくべつ：バーを 左右に わけ、まんなかを まるく くりぬいて メダルを おく */
-#tabbar{background:none!important;border:0!important;box-shadow:none!important;--hr:44px}
-#tabbar::before,#tabbar::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none}
+/* ===== 下の タブ（モーションの きほん：まえの 位置から つなげる・かたちと 位置でも 選択を 見せる・おしたら すぐ 反応・すこし ばねで おさまる）===== */
+#tabbar{background:none!important;border:0!important;box-shadow:none!important;overflow:visible}
+#tabbar::before,#tabbar::after{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none}
+/* バー：うえの ふちを まんなかだけ ゆるく へこませて メダルを のせる（クレードル） */
 #tabbar::before{background:linear-gradient(180deg,#2f2750,#1b1530);box-shadow:inset 0 3px 0 #0b0914,inset 0 5px 0 rgba(154,140,224,.45);
-  -webkit-mask:radial-gradient(circle at 50% 50%,transparent var(--hr),#000 calc(var(--hr) + .5px));mask:radial-gradient(circle at 50% 50%,transparent var(--hr),#000 calc(var(--hr) + .5px))}
-#tabbar::after{background:radial-gradient(circle at 50% 50%,#0d0a18 calc(var(--hr) - 8px),#161229 var(--hr),#0b0914 calc(var(--hr) + .5px),#0b0914 calc(var(--hr) + 3px),rgba(154,140,224,.45) calc(var(--hr) + 3.5px),rgba(154,140,224,.45) calc(var(--hr) + 5px),transparent calc(var(--hr) + 5.5px))}
-#tabbar button.home,#tabbar button.home:not(.on),html.land #tabbar button.home,#tabbar button.home.on,html.land #tabbar button.home.on{margin:0!important;align-self:stretch;justify-content:center!important;background:none!important;box-shadow:none!important;clip-path:none!important}
+  -webkit-mask:radial-gradient(circle at 50% -6px,transparent 38px,#000 38.5px);mask:radial-gradient(circle at 50% -6px,transparent 38px,#000 38.5px)}
+#tabbar::after{background:radial-gradient(circle at 50% -6px,transparent 38px,#0b0914 38.5px,#0b0914 41px,rgba(154,140,224,.45) 41.5px,rgba(154,140,224,.45) 43px,transparent 43.5px)}
+/* えらばれた しるし：1まいの ドットの いた が タブから タブへ のびて うつる */
+#tabbar .tabind{position:absolute;z-index:-1;top:6px;height:calc(100% - 12px - var(--sab));left:0;width:0;pointer-events:none;opacity:0;transition:opacity .18s;
+  background:linear-gradient(180deg,#4c3f82,#2c2350);box-shadow:inset 0 0 0 2px #0b0914,inset 0 5px 0 #ffd166,inset 0 7px 0 #b8862a,inset 0 -4px 0 rgba(0,0,0,.35);
+  clip-path:polygon(0 4px,2px 4px,2px 2px,4px 2px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 2px,calc(100% - 2px) 2px,calc(100% - 2px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 2px) calc(100% - 4px),calc(100% - 2px) calc(100% - 2px),calc(100% - 4px) calc(100% - 2px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 2px),2px calc(100% - 2px),2px calc(100% - 4px),0 calc(100% - 4px))}
+#tabbar .tabind.show{opacity:1}
+#tabbar button.on:not(.home){background:none!important;box-shadow:none!important;color:#ffd166!important;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914!important;font-weight:700}
+#tabbar button:not(.home) .ico{transition:transform .25s cubic-bezier(.34,1.56,.64,1),filter .2s}
+#tabbar button.on:not(.home) .ico{transform:translateY(-2px) scale(1.1);filter:drop-shadow(0 2px 0 #0b0914)}
+#tabbar button:not(.home):not(.on) .ico{filter:saturate(.75) brightness(.9)}
+#tabbar button:not(.on):hover{color:#d8d0f0}
+#tabbar button:active{transform:none!important} #tabbar button:not(.home):active .ico{transform:translateY(1px) scale(.9)!important;transition-duration:.06s}
+/* ホームの メダル：へこみに うかせる。えらばれたら ひかりが はしり、ほそい 金の わが ひろがる */
+#tabbar button.home,#tabbar button.home:not(.on),#tabbar button.home.on{margin:-22px 0 0!important;background:none!important;box-shadow:none!important;justify-content:flex-start!important}
 #tabbar button.home > span:not(.medal){display:none}
-#tabbar .medal{width:58px;height:58px}
-#tabbar button.home.on .medal{filter:drop-shadow(0 3px 0 #0b0914) drop-shadow(0 0 6px rgba(255,209,102,.7))}
-html.land #tabbar{--hr:44px}
+#tabbar .medal{width:58px;height:58px;overflow:hidden;transition:transform .3s cubic-bezier(.34,1.56,.64,1),filter .3s}
+#tabbar button.home:not(.on) .medal{filter:drop-shadow(0 3px 0 #0b0914) saturate(.85)}
+#tabbar button.home.on .medal{filter:drop-shadow(0 3px 0 #0b0914) drop-shadow(0 0 7px rgba(255,209,102,.65))}
+#tabbar button.home:active .medal{transform:scale(.9);transition-duration:.06s}
+#tabbar .medal .shine{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.85) 48%,transparent 60%);transform:translateX(-120%)}
+#tabbar .hring{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;border:1.5px solid rgba(255,222,120,.95);pointer-events:none;opacity:0}
+html.land #tabbar::before{-webkit-mask:none;mask:none;background:linear-gradient(90deg,#1b1530,#2f2750);box-shadow:inset -3px 0 0 #0b0914,inset -5px 0 0 rgba(154,140,224,.45)} html.land #tabbar::after{content:none}
+html.land #tabbar .tabind{top:0;left:6px;width:calc(100% - 12px - var(--sal));height:0;box-shadow:inset 0 0 0 2px #0b0914,inset 5px 0 0 #ffd166,inset 7px 0 0 #b8862a,inset -4px 0 0 rgba(0,0,0,.35)}
+html.land #tabbar button.home,html.land #tabbar button.home.on,html.land #tabbar button.home:not(.on){margin:0!important;justify-content:center!important;box-shadow:none!important;background:none!important}
 
 /* よこ画面バトル：ひかえの ボタンが 細く つぶれて いたので パネルの はば いっぱいに、まわりこめ の 文字も おさめる */
 html.land #app #bpanel #bbar{width:100%;flex-wrap:nowrap} html.land #app #bpanel #bench{flex:1 1 auto;min-width:0}
@@ -2845,9 +2856,35 @@ function setArtBg() {
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
 const TAB_OF = { scRank: 'rank', scHub: 'home', scTeam: 'team', scDex: 'dex', scGuild: 'guild', scMaker: 'guild', scTrain: 'train' };
+// 下の タブの うごき：えらばれた いた が まえの タブから のびて うつる（液体タブブリッジ）・アイコンが はねる・ホームは ひかりと わ
+let TAB_CUR = null;
+function tabMotion(t) {
+  const tb = $('tabbar'); if (!tb || tb.hidden) return;
+  let ind = tb.querySelector('.tabind'); if (!ind) { ind = document.createElement('i'); ind.className = 'tabind'; tb.prepend(ind); }
+  const land = document.documentElement.classList.contains('land'), btn = tb.querySelector(`button[data-tab="${t}"]`), prev = TAB_CUR; TAB_CUR = t;
+  const rect = (b) => { const r = b.getBoundingClientRect(), R = tb.getBoundingClientRect(); return land ? { a: r.top - R.top, s: r.height } : { a: r.left - R.left, s: r.width }; };
+  const set = (o) => land ? { top: o.a + 'px', height: o.s + 'px' } : { left: o.a + 'px', width: o.s + 'px' };
+  if (!btn || btn.classList.contains('home')) { ind.classList.remove('show'); if (btn && prev !== t) homeFx(btn); return; }
+  const to = rect(btn), pb = prev && tb.querySelector(`button[data-tab="${prev}"]`), from = pb && !pb.classList.contains('home') && ind.classList.contains('show') ? rect(pb) : null;
+  Object.assign(ind.style, set(to)); ind.classList.add('show');
+  if (from && prev !== t && ind.animate) {   // のびて（まえと つぎを つなぐ）→ ちぢんで すこし ゆれて おさまる
+    const lo = Math.min(from.a, to.a), hi = Math.max(from.a + from.s, to.a + to.s), d = Math.sign(to.a - from.a) * 3;
+    ind.animate([set(from), { ...set({ a: lo, s: hi - lo }), offset: .38 }, { ...set({ a: to.a + d, s: to.s - Math.abs(d) }), offset: .78 }, set(to)], { duration: 440, easing: 'cubic-bezier(.3,.7,.2,1)' });
+  }
+  const ico = btn.querySelector('.ico'); if (ico && ico.animate && prev !== t) ico.animate([{ transform: 'translateY(0) scale(.9)' }, { transform: 'translateY(-7px) scale(1.2)', offset: .45 }, { transform: 'translateY(-2px) scale(1.1)' }], { duration: 380, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+}
+function homeFx(btn) {
+  const m = btn.querySelector('.medal'); if (!m || !m.animate) return;
+  m.animate([{ transform: 'scale(.86)' }, { transform: 'scale(1.12)', offset: .5 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+  let sh = m.querySelector('.shine'); if (!sh) { sh = document.createElement('i'); sh.className = 'shine'; m.appendChild(sh); }
+  sh.animate([{ transform: 'translateX(-120%)' }, { transform: 'translateX(120%)' }], { duration: 620, delay: 120, easing: 'cubic-bezier(.4,0,.2,1)' });
+  const r = document.createElement('i'); r.className = 'hring'; btn.appendChild(r);
+  r.animate([{ transform: 'scale(1)', opacity: .9 }, { transform: 'scale(1.9)', opacity: 0 }], { duration: 560, easing: 'cubic-bezier(.2,.7,.3,1)' }).onfinish = () => r.remove();
+}
+addEventListener('resize', () => { if (TAB_CUR) { const t = TAB_CUR; TAB_CUR = null; requestAnimationFrame(() => { TAB_CUR = t; const tb = $('tabbar'), b = tb && tb.querySelector(`button[data-tab="${t}"]`), ind = tb && tb.querySelector('.tabind'); if (b && ind && !b.classList.contains('home')) { const R = tb.getBoundingClientRect(), r = b.getBoundingClientRect(), land = document.documentElement.classList.contains('land'); Object.assign(ind.style, land ? { top: r.top - R.top + 'px', height: r.height + 'px' } : { left: r.left - R.left + 'px', width: r.width + 'px' }); } }); } });
 function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && TRN.dirty) trDraft();   /* くんれんの とちゅうで ほかへ：かりほぞん */
   for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== id;
-  { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); } }
+  { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); if (!tb.hidden) tabMotion(t); } }
   { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); void el.offsetWidth; el.classList.add('scr-in'); } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank', 'scTrain'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play('hub'); /* タイトルも ホームと おなじ きょく（つながって ながれる） */ }
 // 設定（高さ・重さ・すみか・しんか先）を 1行に
 function profLine(sp) {
