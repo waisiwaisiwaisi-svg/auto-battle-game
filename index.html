@@ -878,6 +878,15 @@ html.land #tabbar button.home,html.land #tabbar button.home:not(.on){margin:0;ju
 #tabbar button.home.on{background:linear-gradient(180deg,rgba(255,209,102,.2),rgba(255,209,102,.06))!important;box-shadow:inset 0 3px 0 var(--acc)!important;color:var(--acc)!important}
 html.land #tabbar button.home.on{box-shadow:inset 3px 0 0 var(--acc)!important}
 #tabbar .medal{border-radius:50%;background-color:#2a2148}   /* 絵が まだ よめて いない ときも まるく 見える */
+/* タブの えらばれた 見た目：ドットの パネル（かどを かいだんに けずる・くろい ふち・うえに 金の ライン） */
+#tabbar button.on,#tabbar button.home.on{border-radius:0!important;background:linear-gradient(180deg,#4c3f82,#2c2350)!important;color:#ffd166!important;
+  clip-path:polygon(0 4px,2px 4px,2px 2px,4px 2px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 2px,calc(100% - 2px) 2px,calc(100% - 2px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 2px) calc(100% - 4px),calc(100% - 2px) calc(100% - 2px),calc(100% - 4px) calc(100% - 2px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 2px),2px calc(100% - 2px),2px calc(100% - 4px),0 calc(100% - 4px));
+  box-shadow:inset 0 0 0 2px #0b0914,inset 0 5px 0 #ffd166,inset 0 7px 0 #b8862a,inset 2px 0 0 rgba(170,156,240,.35),inset 0 -4px 0 rgba(0,0,0,.35)!important;
+  text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914!important;font-weight:700}
+#tabbar button.on:not(.home) .ico{transform:translateY(-2px) scale(1.08);filter:drop-shadow(0 2px 0 #0b0914)}
+html.land #tabbar button.on,html.land #tabbar button.home.on{box-shadow:inset 0 0 0 2px #0b0914,inset 5px 0 0 #ffd166,inset 7px 0 0 #b8862a,inset 0 2px 0 rgba(170,156,240,.35),inset -4px 0 0 rgba(0,0,0,.35)!important}
+#tabbar button:not(.on):hover{color:#d8d0f0}
+
 /* よこ画面バトル：ひかえの ボタンが 細く つぶれて いたので パネルの はば いっぱいに、まわりこめ の 文字も おさめる */
 html.land #app #bpanel #bbar{width:100%;flex-wrap:nowrap} html.land #app #bpanel #bench{flex:1 1 auto;min-width:0}
 html.land #app #bpanel .bmon{min-width:0} html.land #app #bpanel .bmon .bn{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
