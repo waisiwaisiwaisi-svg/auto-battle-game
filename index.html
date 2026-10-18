@@ -601,7 +601,8 @@ html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #
 .hme{display:flex;align-items:center;gap:6px;padding:2px 8px 2px 2px;flex:none;min-height:44px}
 .hme canvas{height:40px;width:auto;image-rendering:pixelated;background:#1b1530}
 .hme #hRank{font-size:11px;line-height:1.2;text-align:left;display:grid;grid-template-columns:auto auto;column-gap:5px;align-items:center}
-.hme #hRank .ico{grid-row:1/3;width:26px;height:26px}
+.hme #hRank .ico{grid-row:2/4;width:26px;height:26px}
+#hRank .hnm{grid-column:1/3;font-size:12px;color:var(--ink);max-width:8.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hme #hRank .mb{grid-column:2;display:block;width:64px;height:5px;background:#0b0914;box-shadow:0 0 0 1px #3a3060;margin-top:2px}.hme #hRank .mb i{display:block;height:100%}
 .rkbody{display:flex;flex-direction:column;gap:10px}
 .rkme[hidden],.rkladder[hidden]{display:none!important}
@@ -2200,6 +2201,11 @@ const NG_WORDS = ['しね', '死ね', '氏ね', 'ころす', '殺す', 'きえ�
 const NG_RE = new RegExp(NG_WORDS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').split('').join('[\\s・._-]*')).join('|'), 'gi');
 const ngMask = (t) => String(t == null ? '' : t).replace(NG_RE, (m) => '＊'.repeat(Math.min(6, m.replace(/[\s・._-]/g, '').length)));
 const safeName = (t, n = 8) => ngMask(String(t || '').replace(/[<>&"'`\\]/g, '').trim().slice(0, n));
+// トレーナーの なまえ（オンライン・ランキング・ギルドで みんなに みえる）。アプリ版は サーバーの なまえ
+const NAME_MAX = 8;
+const myName = () => safeName((window.PMA_NAME && window.PMA_NAME.get()) || (typeof S !== 'undefined' && S && S.pname) || '', NAME_MAX) || 'トレーナー';
+// みんなの なまえ：db に かいた なまえ（nm）が あれば それ、なければ アカウントの なまえ
+const pickName = (doc, prof) => safeName(doc && doc.nm, NAME_MAX) || (prof && prof.name) || 'トレーナー';
 const okHex = (c) => typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c);
 let CUSTOM = { tr: {}, mon: {} };
 function saveCustom() { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(CUSTOM)); } catch (e) { } }
@@ -3149,7 +3155,8 @@ function renderChests() {
   { const n = S.chests.filter(c => chestLeft(c) === 0).length, b = $('tabHomeBadge'); if (b) { b.hidden = !n; b.textContent = n || ''; } }
   $('hGems').textContent = S.gems || 0; $('hGuildBonus').hidden = !S.guildOn;
   $('hItems').textContent = Object.values(S.items || {}).reduce((a, b) => a + b, 0);
-  { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<i class="ico" style="background-image:url(${tierBadge(t.i)})"></i><b style="color:${t.c}">${t.n}</b><span style="grid-column:2">${k.r}</span><span class="mb"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></span>`; $('hRank').style.gridTemplateRows = 'auto auto auto'; }
+  { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<b class="hnm"></b><i class="ico" style="background-image:url(${tierBadge(t.i)})"></i><b style="color:${t.c}">${t.n}</b><span style="grid-column:2">${k.r}</span><span class="mb"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></span>`; $('hRank').style.gridTemplateRows = 'auto auto auto auto'; $('hRank').querySelector('.hnm').textContent = myName(); }
+  if (!S.pname && !window.PMA_NAME && !TUT && !renderHub.asked) { renderHub.asked = true; setTimeout(() => { if (!S.pname && !$('scHub').hidden && !document.querySelector('.askbg')) askName(true); }, 700); }   // なまえが まだ：いちど だけ きく
   $('hTms').textContent = Object.values(S.tms || {}).reduce((a, b) => a + b, 0);
 }
 async function tapChest(i) {
@@ -3720,6 +3727,33 @@ function moveEditor(m) {   // おぼえている わざ（獲得した ときに
   return box;
 }
 // ブラウザの alert / confirm は 埋めこみ表示で 出ないので、ページ内の 小窓で たずねる
+// なまえを きめる まど（first：はじめて きく とき。あとで かえられる ことを つたえる）
+function askName(first) {
+  return new Promise(res => {
+    const bg = document.createElement('div'); bg.className = 'askbg';
+    bg.innerHTML = `<div class="askbox"><div style="margin-bottom:10px">${first ? 'トレーナーの なまえを きめよう！<br><span class="dim" style="font-size:12px">オンライン対戦・ランキング・ギルドで みんなに みえるよ（あとで オプションから かえられる）</span>' : 'トレーナーの なまえ'}</div>
+      <input id="nmIn" maxlength="${NAME_MAX}" autocomplete="off" placeholder="${NAME_MAX}もじ まで" style="width:100%;font:inherit;font-size:18px;padding:9px;text-align:center;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)">
+      <div class="dim" id="nmErr" style="font-size:12px;min-height:1.4em;margin-top:4px"></div>
+      <div class="row">${first ? '' : '<button class="btn sub">やめる</button>'}<button class="btn">けってい</button></div></div>`;
+    const inp = bg.querySelector('#nmIn'), bs = bg.querySelectorAll('button'), okb = bs[bs.length - 1];
+    inp.value = S && S.pname || '';
+    const done = (v) => { bg.remove(); res(v); };
+    const go = () => { const raw = inp.value.trim(), v = safeName(raw, NAME_MAX);
+      if (!v) { bg.querySelector('#nmErr').textContent = 'なまえを いれてね'; inp.focus(); return; }
+      if (v !== raw.replace(/[<>&"'`\\]/g, '').slice(0, NAME_MAX)) { bg.querySelector('#nmErr').textContent = 'つかえない ことばが はいっています'; inp.focus(); return; }
+      S.pname = v; save(); SND.se('ok'); syncName(); done(v); };
+    okb.onclick = go; inp.onkeydown = (e) => { if (e.key === 'Enter') go(); };
+    if (!first) bs[0].onclick = () => done(null);
+    $('app').appendChild(bg); setTimeout(() => inp.focus(), 50);
+  });
+}
+// なまえを かえたら、サーバーに ある じぶんの データ（ランキング・ギルド・チャット）にも はんえい
+async function syncName() {
+  if (typeof renderHub === 'function' && S && !$('scHub').hidden) renderHub();
+  const R = await rankDb().catch(() => null); if (!R) return; const nm = myName();
+  for (const path of ['ranks/', 'gmembers/', 'gchat/']) { try { const d = await R.db.doc(path + R.id).get(); if (d && d.exists) await R.db.doc(path + R.id).update({ nm }); } catch (e) { } }
+  if (GUILD.me) GUILD.me.nm = nm;
+}
 function ask(msg, ok = 'はい', ng = 'いいえ') {
   return new Promise(res => {
     const bg = document.createElement('div'); bg.className = 'askbg';
@@ -4098,7 +4132,7 @@ function startBattle(cfg) {
   B = {
     kind: cfg.kind, st, cfg, t: 0, mode: 'intro', modeT: 0, paused: false, uidc: 0, vsT: cfg.kind === 'wild' || cfg.tut || TUT || cfg.title === 'チュートリアル' ? 0 : VS_T,
     sides: [
-      { fs: pf, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: { name: 'あなた', spr: trArt(myLook()), x: st.trainers[0].x, y: st.trainers[0].y, shout: 0 } },
+      { fs: pf, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: { name: myName(), spr: trArt(myLook()), x: st.trainers[0].x, y: st.trainers[0].y, shout: 0 } },
       { fs: ef, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: cfg.trainer ? { name: cfg.trainer.name, spr: cfg.trainer.spr, x: st.trainers[1].x, y: st.trainers[1].y, shout: 0 } : null },
     ],
     projs: [], parts: [], texts: [], fx: [], decals: [], walls: [], wallRects: [], zones: [], holes: [], blasts: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
@@ -6309,7 +6343,7 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   try { NET.nr = await room.join('pma-' + code); } catch (e) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
   await guildMe().catch(() => { });   // あいてに ギルドめいを みせる
   NET.team6 = teamOf(S.party, 6); NET.myPick = null; NET.preview = null;
-  const me = { role: asHost ? 'host' : 'guest', team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
+  const me = { role: asHost ? 'host' : 'guest', nm: myName(), team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
   // じぶんで かいた もの の え（la：トレーナー、ca：モンスター）。あいては はじまる まえに うけとって おぼえる。presence は 4KB まで なので 入りきらない え は おくらない
   for (const o of NET.team6) if (CUSTOM.mon[o.sid] && !me.ca[o.sid]) me.ca[o.sid] = CUSTOM.mon[o.sid];
   const fits = () => presOk(me);
@@ -6359,7 +6393,7 @@ function netPeerLeft() {
 }
 /* ---------- ホスト ---------- */
 // あいての みため（presence の lk。しらない ものなら レイ）
-function oppName() { const p = NET.nr && NET.nr.peers().find(x => isOther(x) && x.presence && x.presence.lk); const g = p && safeName(p.presence.gn, 10); return g ? `あいて（${g}）` : 'あいて'; }
+function oppName() { const p = NET.nr && NET.nr.peers().find(x => isOther(x) && x.presence && x.presence.lk); const n = p && safeName(p.presence.nm, NAME_MAX), g = p && safeName(p.presence.gn, 10); return (n || 'あいて') + (g ? `（${g}）` : ''); }
 function netCacheArt(pr) {
   if (!pr || typeof pr !== 'object') return;
   if (pr.la || pr.ca) pr = { ...pr, la: unchunkS(pr.la), ca: unchunkS(pr.ca) };
@@ -6428,7 +6462,7 @@ function netGuestStart(st) {
   NET.started = true; setTimeout(netSendInput, 200);   // AUTO か どうかを ホストに つたえる
   if (NET.nr) NET.nr.presence({ team6: null, pick: null, ca: null, la: null }).catch(() => { });
   const host = st.h.map(monFrom), me = st.g.map(monFrom);
-  startBattle({ kind: 'online', field: st.field, enemies: me, p0: host, trainer: { name: 'あなた', spr: trArt(myLook()) }, title: 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
+  startBattle({ kind: 'online', field: st.field, enemies: me, p0: host, trainer: { name: myName(), spr: trArt(myLook()) }, title: 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.remote = true; B.my = 1; B.mode = 'intro'; B.snapT = 0; if (NET.ranked) $('bTitle').textContent = 'ランク対戦';
   B.sides[0].trainer.name = oppName(); B.sides[0].trainer.spr = trArt(oppLook());
 }
@@ -6545,7 +6579,7 @@ async function rankDb() {
 async function rankSave() {
   const R = await rankDb(); if (!R || !R.id) return;
   const k = myRank(), lead = S.party[0];
-  R.db.doc('ranks/' + R.id).set({ r: k.r, w: k.w, l: k.l, t: Date.now(), m: lead ? lead.sid : '' }).catch(() => { });
+  R.db.doc('ranks/' + R.id).set({ r: k.r, w: k.w, l: k.l, t: Date.now(), m: lead ? lead.sid : '', nm: myName() }).catch(() => { });
 }
 // 1しあいの けっか：レートを うごかす（ランク対戦の ときだけ）
 function rankResult(win) {
@@ -6566,7 +6600,7 @@ async function renderLeaderboard(el) {
     if (!rows.length) { el.innerHTML = '<p class="dim">まだ だれも いません。さいしょの 1にんに なろう！</p>'; return; }
     const ps = await R.user.profiles(rows.map(r => r.id)).catch(() => ({}));
     el.innerHTML = '<div class="lb">' + rows.map((r, i) => `<div class="${r.id === R.id ? 'me' : ''}"><b>${i + 1}</b><span class="lbn"></span>${tierChip(r.r)}<span>${r.r}</span><span class="dim">${r.w || 0}-${r.l || 0}</span></div>`).join('') + '</div>';
-    el.querySelectorAll('.lbn').forEach((s, i) => { const p = ps && ps[rows[i].id]; s.textContent = (p && p.name) || 'トレーナー'; });
+    el.querySelectorAll('.lbn').forEach((s, i) => { const p = ps && ps[rows[i].id]; s.textContent = pickName(rows[i], p); });
   } catch (e) { el.innerHTML = '<p class="dim">ランキングを よみこめませんでした</p>'; }
 }
 /* ---------- ランキング画面：じぶんの ランク・ランクの かいだん・プレイヤー / ギルドの ひょうしょうだい ---------- */
@@ -6608,7 +6642,7 @@ async function rankPlayers(R, L) {
   const rows = q.docs.map(d => ({ id: d.id, ...(d.data() || {}) })).filter(r => typeof r.r === 'number');
   if ($('scRank').hidden || RK_TAB !== 'p') return;
   if (!rows.length) { L.innerHTML = '<p class="dim">まだ だれも いません。さいしょの 1にんに なろう！</p>'; return; }
-  const ps = await R.user.profiles(rows.map(r => r.id)).catch(() => ({})), nm = (id) => (ps && ps[id] && ps[id].name) || 'トレーナー';
+  const ps = await R.user.profiles(rows.map(r => r.id)).catch(() => ({})), nm = (id) => pickName(rows.find(r => r.id === id), ps && ps[id]);
   const mi = rows.findIndex(r => r.id === R.id); { const el = $('rkPos'); if (el) el.innerHTML = `じゅんい <b>${mi >= 0 ? mi + 1 + 'い' : '50い いか'}</b>`; }
   const face = (r) => { if (r.m && SPR[r.m]) return spriteCanvas(r.m, 52); const c = document.createElement('canvas'); c.width = c.height = 1; return c; };
   L.innerHTML = '';
@@ -6678,7 +6712,7 @@ async function guildMe() {
 async function guildWin(n) {
   try {
     const R = await rankDb(); if (!R || !R.id) return; const m = GUILD.me || await guildMe(); if (!m || !m.gid) return;
-    const wk = weekNo(); GUILD.me = { gid: m.gid, wk, pts: (m.wk === wk ? m.pts || 0 : 0) + n, tot: (m.tot || 0) + n, lk: myLook(), t: Date.now() };
+    const wk = weekNo(); GUILD.me = { gid: m.gid, wk, pts: (m.wk === wk ? m.pts || 0 : 0) + n, tot: (m.tot || 0) + n, lk: myLook(), nm: myName(), t: Date.now() };
     await R.db.doc('gmembers/' + R.id).set(GUILD.me);
   } catch (e) { }
 }
@@ -6743,7 +6777,7 @@ async function guildJoin(R, gid) {
   try {
     const q = await R.db.collection('gmembers').where('gid', '==', gid).limit(G_MAX + 1).get();
     if (q.size >= G_MAX && !q.docs.some(d => d.id === R.id)) { await ask('この ギルドは いっぱいです。', 'OK', null); return; }
-    GUILD.me = { gid, wk: weekNo(), pts: 0, tot: 0, lk: myLook(), t: Date.now() };
+    GUILD.me = { gid, wk: weekNo(), pts: 0, tot: 0, lk: myLook(), nm: myName(), t: Date.now() };
     await R.db.doc('gmembers/' + R.id).set(GUILD.me); SND.se('ok'); renderGuild();
   } catch (e) { await ask('ギルドに はいれませんでした（' + (e && e.code || 'error') + '）', 'OK', null); }
 }
@@ -6791,7 +6825,7 @@ async function guildHome(R, g, rank) {
     eb.onclick = () => mkEdit('emb', null, { src: g.art, onCancel: () => renderGuild(), onSave: async (art) => { try { await R.db.doc('guilds/' + R.id).update({ art }); SND.se('ok'); } catch (e) { await ask('ほぞん できませんでした', 'OK', null); } renderGuild(); } });
     W.querySelector('.gdhead').after(eb); }
   const mem = g.mem.slice().sort((a, b) => ((b.wk === wk ? b.pts : 0) | 0) - ((a.wk === wk ? a.pts : 0) | 0));
-  const ps = await R.user.profiles(mem.map(m => m.id)).catch(() => ({})), nameOf = (id) => (ps && ps[id] && ps[id].name) || 'トレーナー';
+  const ps = await R.user.profiles(mem.map(m => m.id)).catch(() => ({})), nameOf = (id) => pickName(mem.find(m => m.id === id), ps && ps[id]);
   const M = $('gdMem');
   for (const m of mem) {
     const row = document.createElement('div'); row.className = 'gdrow card' + (m.id === R.id ? ' me' : '');
@@ -6835,11 +6869,11 @@ async function guildHome(R, g, rank) {
   // チャット：ギルドの みんなの さいきんの はつげんを まとめて じかんじゅん に
   const C = $('gdChat');
   GUILD.unsub = R.db.collection('gchat').where('gid', '==', g.id).limit(G_MAX + 5).onSnapshot(async (snap) => {
-    const all = []; for (const d of snap.docs) { const v = d.data() || {}; for (const m of (Array.isArray(v.msgs) ? v.msgs : []).slice(-10)) if (m && typeof m.x === 'string' && !(S.blocked && S.blocked[d.id])) all.push({ id: d.id, t: +m.t || 0, x: ngMask(m.x.slice(0, 40)) }); }
+    const all = []; for (const d of snap.docs) { const v = d.data() || {}; for (const m of (Array.isArray(v.msgs) ? v.msgs : []).slice(-10)) if (m && typeof m.x === 'string' && !(S.blocked && S.blocked[d.id])) all.push({ id: d.id, t: +m.t || 0, x: ngMask(m.x.slice(0, 40)), nm: safeName(v.nm, NAME_MAX) }); }
     all.sort((a, b) => a.t - b.t); const last = all.slice(-40);
     const need = [...new Set(last.map(m => m.id))].filter(id => !(ps && ps[id])); const ps2 = need.length ? await R.user.profiles(need).catch(() => ({})) : {};
     C.innerHTML = last.length ? '' : '<span class="dim">まだ だれも はなして いません</span>';
-    for (const m of last) { const el = document.createElement('div'); el.className = 'm'; const b = document.createElement('b'); b.textContent = (ps[m.id] && ps[m.id].name) || (ps2[m.id] && ps2[m.id].name) || 'トレーナー'; if (m.id !== R.id) { b.style.cursor = 'pointer'; b.title = 'つうほう・ブロック'; b.onclick = () => modUser(R, m.id, b.textContent, m.x); } el.appendChild(b); el.appendChild(document.createTextNode(m.x)); const sm = document.createElement('small'); const dt = new Date(m.t); sm.textContent = `${dt.getMonth() + 1}/${dt.getDate()} ${dt.getHours()}:${String(dt.getMinutes()).padStart(2, '0')}`; el.appendChild(sm); C.appendChild(el); }
+    for (const m of last) { const el = document.createElement('div'); el.className = 'm'; const b = document.createElement('b'); b.textContent = m.nm || (ps[m.id] && ps[m.id].name) || (ps2[m.id] && ps2[m.id].name) || 'トレーナー'; if (m.id !== R.id) { b.style.cursor = 'pointer'; b.title = 'つうほう・ブロック'; b.onclick = () => modUser(R, m.id, b.textContent, m.x); } el.appendChild(b); el.appendChild(document.createTextNode(m.x)); const sm = document.createElement('small'); const dt = new Date(m.t); sm.textContent = `${dt.getMonth() + 1}/${dt.getDate()} ${dt.getHours()}:${String(dt.getMinutes()).padStart(2, '0')}`; el.appendChild(sm); C.appendChild(el); }
     C.scrollTop = C.scrollHeight;
   }, () => { });
   let sending = false;
@@ -6848,7 +6882,7 @@ async function guildHome(R, g, rank) {
     try {
       const ref = R.db.doc('gchat/' + R.id), cur = await ref.get().catch(() => null), v = cur && cur.exists ? cur.data() : null;
       const msgs = (v && v.gid === g.id && Array.isArray(v.msgs) ? v.msgs : []).concat([{ t: Date.now(), x }]).slice(-10);
-      await ref.set({ gid: g.id, msgs }); $('gdIn').value = ''; SND.se('ok');
+      await ref.set({ gid: g.id, msgs, nm: myName() }); $('gdIn').value = ''; SND.se('ok');
     } catch (e) { } sending = false;
   };
   $('gdSend').onclick = send; $('gdIn').onkeydown = (e) => { if (e.key === 'Enter') send(); };
@@ -9094,10 +9128,12 @@ $('btnOpt').onclick = () => {
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
     <div class="optrow"><span></span><button class="btn sub" id="oSeAdj" style="font-size:12px;padding:6px 12px">こうかおんを ひとつずつ ちょうせい</button></div>
     <label class="optrow">あいての つよさ <select id="oAi"><option value="0">ふつう</option><option value="1">かしこい</option><option value="2">さいきょう（かならず よける）</option></select></label>
+    ${!window.PMA_NAME ? `<div class="optrow">なまえ <span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">かえる</button></span></div>` : ''}
     ${window.PMA_NAME ? `<label class="optrow">なまえ（オンライン） <span style="display:flex;gap:6px"><input type="text" id="oName" maxlength="12" style="width:9em;font:inherit;font-size:14px;padding:4px 6px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"><button class="btn sub" id="oNameSave" style="padding:4px 10px;font-size:12px">きめる</button></span></label>` : ''}
     <div style="margin-top:12px">トレーナーの みため</div><div class="looks" id="oLooks"></div>
     <div class="row" style="margin-top:16px;justify-content:space-between"><span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><button class="dim" id="oReset" style="text-decoration:underline">データを しょきか（はじめから あそぶ）</button>${window.PMA_NAME ? '<button class="dim" id="oWipe" style="text-decoration:underline">オンラインの データを けす</button>' : ''}<a class="dim" href="https://waisiwaisiwaisi-svg.github.io/auto-battle-game/privacy.html" target="_blank" rel="noopener" style="font-size:12px">プライバシーポリシー</a></span><button class="btn" id="oClose">とじる</button></div>`);
   const m = bg.querySelector('#oMusic'), x = bg.querySelector('#oSfx'), u = bg.querySelector('#oMute');
+  if (!window.PMA_NAME) { const P = bg.querySelector('#oPname'); P.textContent = myName(); bg.querySelector('#oPnameEd').onclick = async () => { const v = await askName(false); if (v) P.textContent = myName(); }; }
   if (window.PMA_NAME) {   // アプリ版：なまえ と オンラインの データ けし
     const N = bg.querySelector('#oName'); N.value = window.PMA_NAME.get();
     bg.querySelector('#oNameSave').onclick = async () => { const ok = await window.PMA_NAME.set(N.value).catch(() => false); if (ok) SND.se('ok'); if (ok) N.value = window.PMA_NAME.get(); };
