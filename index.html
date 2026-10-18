@@ -1067,7 +1067,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .pal[style*="--c"]{border-left:6px solid var(--c)!important}
 .pal.on{outline:3px solid var(--acc);outline-offset:1px}
 .trghost{position:fixed!important;pointer-events:none;z-index:9999;opacity:.85;transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.5);margin:0}
-@media (max-width:860px){.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;bottom:0;z-index:5;max-height:32vh;overflow:auto;padding:4px 8px;border-radius:10px;background:rgba(22,18,40,.96);border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}
+@media (max-width:860px){.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;bottom:0;z-index:5;max-height:32vh;overflow:auto;padding:4px 8px;border-radius:10px;background:#161228;border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}
 .trmini{align-self:flex-end;font-size:11px;color:var(--dim);padding:2px 6px;margin:-2px -4px 0 0}
 .trside.mini{padding:2px 8px}
 .trside.mini > :not(.trmini){display:none}
@@ -3445,7 +3445,17 @@ let TR_MINI = false;   // くんれんの パレットを たたんで いるか
 function trMoves(m) { const eq = equipped(m).slice(), tm = Object.keys(S.tms || {}).filter(id => S.tms[id] > 0 && MOVES[id] && id !== 'tackle' && !eq.includes(id) && canLearn(m.sid, id)); return { eq, tm }; }
 const trMvIds = (W) => [...new Set(W.mv.map(r => r.id).filter(id => MOVES[id]))];
 const trCondNew = (t) => ({ t, p: CONDS[t].ps ? CONDS[t].ps[0][0] : undefined });
-const trCondTx = (c) => { const K = CONDS[c.t]; if (!K) return '？'; const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '：' + p : ''); };
+// 「技n」の じょうけんは いまの 1〜4ばんめの 技を さす：わざめいで みせる
+const trSlotName = (W, n) => { const r = W && W.mv && W.mv[(+n || 1) - 1]; return r && MOVES[r.id] ? MOVES[r.id].n : null; };
+const trPs = (t, W) => (t === 'after' || t === 'off') ? CONDS[t].ps.map(([v, l]) => [v, `${l}（${trSlotName(W, v) || 'なし'}）`]) : CONDS[t].ps;
+const trCondTx = (c, W) => { const K = CONDS[c.t]; if (!K) return '？';
+  if ((c.t === 'after' || c.t === 'off') && W) { const nm = trSlotName(W, c.p) || '（なし）'; return c.t === 'after' ? `${nm}を撃った後` : `${nm}の効果が切れた`; }
+  const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '：' + p : ''); };
+// ならびかえ・さくじょ の あとも「技を撃った後／効果が切れた」が おなじ 技を さしつづける ように 番号を つけなおす（なくなった 技を さす じょうけんは けす）
+function trRemap(W, oldIds) {
+  for (const r of W.mv) for (const ls of (r.c || [])) for (let j = ls.length - 1; j >= 0; j--) { const c = ls[j]; if (c.t !== 'after' && c.t !== 'off') continue;
+    const id = oldIds[(+c.p || 1) - 1], ni = W.mv.findIndex(x => x.id === id); if (ni < 0) ls.splice(j, 1); else c.p = ni + 1; }
+}
 function trDraft() { const m = trMon(TRN.uid); if (!m) return; m.tr = m.tr || {}; m.tr.draft = trClone(TRN.W, m); TRN.dirty = false; save(); }
 function trLeave(go) { if (!TRN || !TRN.dirty) return go(); ask('変更が保存されていません。\n仮保存してから移動しますか？', '仮保存', '保存しない').then(y => { if (y) trDraft(); TRN.dirty = false; go(); }); }
 // 訓練の とちゅうで 下の タブを おした：ほぞん して いなければ きいてから うつる
@@ -3463,18 +3473,18 @@ function renderTrain(uid) {
   const mvCls = (id) => eq.includes(id) ? '' : tm.includes(id) ? ' tmv' : ' bad';
   const where = (x) => (x.tr && x.tr.prog && x.tr.prog.mv && x.tr.mode === 'chip' ? '<em class="ok">設定済み</em>' : '') + (x.tr && x.tr.draft && x.tr.draft.mv ? '<em class="dr">仮</em>' : '');
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
-  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : ''}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '' : '条件なし '}<small>（${l ? '別の条件をここへ' : '条件をここへ'}）</small></span>`}</div>`).join('');
+  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : ''}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '' : '条件なし '}<small>（${l ? '別の条件をここへ' : '条件をここへ'}）</small></span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
   const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え">≡${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
   const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技を 1→4 の順に撃つ。条件が合う技がないときは通常のAIが相性などを見て選ぶ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
-    <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">呼び出す</button><button class="btn sub" data-a="revert">元に戻す</button><button class="btn sub" data-a="clr">リセット</button></div>
+    <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">他からコピー</button><button class="btn sub" data-a="revert">保存時に戻す</button><button class="btn sub" data-a="clr">リセット</button></div>
     <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
   const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
   let ins = '';
   if (sc) { const K = CONDS[sc.t], seg = (opts, cur) => `<div class="trseg" data-k="cp">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
-    ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(K.ps, sc.p ?? K.ps[0][0])}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
+    ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
   else if (pk) ins = '<div class="dim">置く場所をタップ（技は技の枠・立ち回りは「〜撃つ」の枠・条件は右の枠）</div>';
   else ins = '<div class="dim">左の枠へドラッグ。タップで選んで枠をタップでも置けます。置いた条件はタップで設定、枠の外へドラッグで削除</div>';
   const side = `<h3>技 <span class="dim">（★＝スクロールで覚える）</span></h3><div class="trpal">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${S.tms[id]}</small></div>`).join('')}</div>
@@ -3503,7 +3513,7 @@ function renderTrain(uid) {
       if (d !== 'c' || (i === fi && L === fl)) return;
       line(W.mv[i], L).push(c); W.mv[fi].c[fl].splice(fj, 1); TRN.sel = null; SND.se('click'); touch(); return; }
     if (pl.rowEl) { const t = z && z.closest('.trr[data-row]'); if (!t) return; const to = +t.dataset.row; if (to === pl.i) return;
-      const [r] = W.mv.splice(pl.i, 1); W.mv.splice(to, 0, r); TRN.sel = null; SND.se('click'); touch(); return; }
+      const ids = W.mv.map(x => x.id), [r] = W.mv.splice(pl.i, 1); W.mv.splice(to, 0, r); trRemap(W, ids); TRN.sel = null; SND.se('click'); touch(); return; }
     if (pl.gFrom != null) { const r = W.mv[pl.gFrom], g = r.go;
       if (!z) { r.go = 'auto'; SND.se('back'); touch(); return; }
       if (d !== 'g' || i === pl.gFrom) return; r.go = 'auto'; W.mv[i].go = g; SND.se('click'); touch(); return; }
@@ -3549,7 +3559,7 @@ function renderTrain(uid) {
   B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (TRN.pick && !ev.target.closest('.cnd')) drop(TRN.pick, z); }); });
   // 技の 優先度：番号 か 技名を ドラッグして ほかの 行へ（その位置に 入れる）
   B.querySelectorAll('.trr[data-row]').forEach(e => drag(e, { rowEl: 1, i: +e.dataset.row }, () => { }, (t) => !t.closest('.cnd, .gs.on, .rb, button')));
-  B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { W.mv.splice(+b.dataset.rm, 1); TRN.sel = null; SND.se('back'); touch(); });
+  B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { const ids = W.mv.map(x => x.id); W.mv.splice(+b.dataset.rm, 1); trRemap(W, ids); TRN.sel = null; SND.se('back'); touch(); });
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
   act('cdel', () => { W.mv[+sel[0]].c[+sel[1]].splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
