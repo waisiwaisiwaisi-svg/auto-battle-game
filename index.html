@@ -7374,6 +7374,8 @@ function drawSprite(img, x, y, face, scale, alpha, sx, sy) {
   ctx.drawImage(img, Math.round(-w / 2), Math.round(-h), Math.round(w), Math.round(h));
   ctx.restore();
 }
+// モンスターの かげ：あたりはんてい（足もとの まる、はんけい f.r）と おなじ 大きさ・かたち
+function hitShadow(f, a) { ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = 'rgba(10,8,18,.34)'; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(10,8,18,.45)'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore(); }
 function shadow(x, y, rx) { ctx.fillStyle = 'rgba(10,8,18,.35)'; ctx.beginPath(); ctx.ellipse(x, y, rx, rx * .4, 0, 0, Math.PI * 2); ctx.fill(); }
 
 // ジグザグの とっしんの みち（はしる とおりの かたち）
@@ -8114,11 +8116,12 @@ const PROJ_ROWS = {
 };
 const PROJ_ROT = { ice: Math.PI / 2, bug: Math.PI / 4, grass: Math.PI / 4 };   // とぶ 向きに あわせて まわす（絵の もとの 向き）
 function drawProj(p) {
+  if (!p.h && p.pat !== 'lob') { ctx.fillStyle = 'rgba(10,8,18,.3)'; ctx.beginPath(); ctx.arc(Math.round(p.x), Math.round(p.y) + BODY, p.r, 0, 7); ctx.fill(); }   // たまの かげ＝あたりはんてい（モンスターの かげに ふれたら あたる）
   if (drawProjX(p)) return;
   const x = Math.round(p.x), y = Math.round(p.y), t = p.m.t, R = p.r, S_ = FX_STYLE[t] || FX_STYLE.normal;
   glowDot(x, y, R * 2.2, S_.cols[1], .35);
   if (Math.random() < .45) B.parts.push({ x: p.x + rand(-2, 2), y: p.y + rand(-2, 2), vx: -p.vx * .15 + rand(-12, 12), vy: -p.vy * .15 + rand(-12, 12), life: .32, max: .32, col: choice(S_.cols), size: 5, g: 0, shape: S_.shape, rot: Math.random() * 6, vr: 6, glow: Math.random() < .5 });
-  ctx.fillStyle = 'rgba(10,8,18,.25)'; ctx.beginPath(); ctx.ellipse(x, y + BODY + (p.h || 0), R * (p.h ? .7 : 1), R * .4, 0, 0, 7); ctx.fill();
+  if (p.h) { ctx.fillStyle = 'rgba(10,8,18,.25)'; ctx.beginPath(); ctx.ellipse(x, y + BODY + p.h, R * .7, R * .4, 0, 0, 7); ctx.fill(); }
   if (p.pat === 'lob') { ctx.strokeStyle = p.side === 1 ? 'rgba(255,90,100,.6)' : 'rgba(90,190,255,.6)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(p.tx, p.ty, p.m.blastR || 48, (p.m.blastR || 48) * .78, 0, 0, 7); ctx.stroke(); }   // おちる ばしょ
   const pk = p.m.e && p.m.e.seed && PLFX.seed_proj ? 'seed_proj' : 'p_' + (t === 'ground' ? 'rock' : t);
   if (PLFX[pk] && plProj(pk, p)) { if (t === 'fire' && Math.random() < .7) B.parts.push({ x: p.x + rand(-3, 3), y: p.y, vx: rand(-15, 15), vy: -30, life: .3, max: .3, col: choice(['#ff8a3d', '#ffd166']), size: 2, g: 0 }); }
@@ -8382,8 +8385,7 @@ function drawFighter(f) {
   const bone = BONES && !['faint', 'enter', 'return', 'hide'].includes(f.state) && !f.isClone;   // ぎじボーン：ベースの え 1まいを だんごとに ゆがめて うごかす
   const fr = SPR[f.mon.sid].fr[bone ? boneFrame(f) : monFrame(f)], img0 = SPR[f.mon.sid].n;
   const ms = SPR[f.mon.sid].ms;
-  if (fly) { ctx.globalAlpha = .7 - bob * .08; shadow(f.x, f.y, img0.width * ms * (.22 - bob * .015)); ctx.globalAlpha = 1; }
-  else shadow(f.x, f.y, img0.width * ms * .31);
+  hitShadow(f, fly ? .75 - bob * .08 : 1);   // かげ＝あたりはんてい（この まるに こうげきが ふれたら あたる）
   const img = (f.flash > 0 || f.state === 'enter' || f.state === 'return') ? fr.w : fr.n;
   // ため中：あしもとの わ・あつまる ひかり・からだが ひかる・ゲージ（とっしんで キャンセルできる あいず）
   const chg = f.cur && (f.state === 'chan' || (f.state === 'wind' && f.cur.wind >= .3)) ? f.cur : null;
