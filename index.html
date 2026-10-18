@@ -2583,7 +2583,7 @@ const SND = (() => {
   const NOTE = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
   const hz = (n) => { const m = /^([A-G][#b]?)(\d)$/.exec(n); return m ? 440 * Math.pow(2, (NOTE[m[1]] + (+m[2] + 1) * 12 - 69) / 12) : 0; };
   const MUSIC_K = .25;   // おんがくの もとの おおきさ（まえの はんぶん）
-  function applyVol() { if (!ac) return; master.gain.value = opt.mute ? 0 : 1; musicG.gain.value = opt.music * MUSIC_K; sfxG.gain.value = opt.sfx * .6; if (aG) aG.gain.value = opt.music * MUSIC_K * AUDIO_K; }
+  function applyVol() { if (!ac) return; master.gain.value = opt.mute ? 0 : 1; musicG.gain.value = opt.music * MUSIC_K; sfxG.gain.value = opt.sfx * .38; if (aG) aG.gain.value = opt.music * MUSIC_K * AUDIO_K; }
   function init() {
     if (ac) { if (ac.state === 'suspended') ac.resume(); return true; }
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
@@ -4346,7 +4346,7 @@ const isDamaging = (m) => m.cat !== 'stat';
 
 /* ---------- わざ ---------- */
 function beginMove(f, id) {
-  const o = opp(f); if (!o) return;
+  const o = opp(f); if (!o || B.mode === 'intro') return;   // ファイト！ まえは うたない
   const m = MOVES[id];
   if (f.v.confuse > 0 && !f.cfuse && confusedAct(f, id)) return;   // こんらん：しじと ちがう ことを する
   if (healMax(m) && !(m.charge2 && !f.v.charged)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }   // がりょうてんせいは ためる ときは かぞえない
@@ -6015,6 +6015,7 @@ function updateFighter(f, dt) {
     case 'faint': f.stT -= dt; if (f.stT <= 0) afterFaint(f); return;
     case 'free': {
       if (!canAct(f)) break; // ねむり・こおり
+      if (B.mode === 'intro') break;   // レディ… ファイト！ までは まつ（わざも いどうも しない）
       if (!oT) {
         // あいてが 空／地中に いる：おりてくる ばしょから にげる
         if (o && o.state === 'hide' && o.cur && f.hideFor !== o.cur.uid) { f.hideFor = o.cur.uid; f.hideFlee = Math.random() < (f.side === 1 ? .35 + B.skill * .4 : .5); }   // にげるか どうかは 1回ごとに きめる
