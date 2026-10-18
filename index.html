@@ -291,7 +291,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .plate .top b{font-size:13px;overflow:hidden;text-overflow:ellipsis}
 .plate .hp{height:8px;background:#0d0b14;margin:4px 0 3px;box-shadow:0 0 0 1px #0d0b14}
 .plate .hp i{display:block;height:100%;background:var(--good);transform-origin:left;transition:background .2s;position:relative}
-.plate .hp{position:relative}.plate .hp .g{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:left;background:#fff1b8;box-shadow:inset 0 -2px 0 rgba(255,120,80,.55)}
+.plate .hp{position:relative}.plate .hp .g{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:left;background:#f4f4fa;box-shadow:inset 0 -2px 0 rgba(170,170,200,.6)}
 .plate .bot{display:flex;justify-content:space-between;align-items:center;color:var(--dim)}
 .balls{display:flex;gap:3px}
 .balls i{width:7px;height:7px;background:var(--acc);box-shadow:0 0 0 1px #0d0b14}
@@ -7332,7 +7332,7 @@ function hpGhost(f) {
   if (f.hpG == null || k >= f.hpG) { f.hpG = k; f.hpGd = t; f.hpGt = t; return k; }   // かいふくは すぐ
   if (f.hpGk !== k) { if (f.hpGk != null && k < f.hpGk) f.hpGd = t; f.hpGk = k; }   // あたらしく へった：まち時間を やりなおす
   const dt = Math.max(0, t - (f.hpGt || t)); f.hpGt = t;
-  if (t - f.hpGd > .45) f.hpG = Math.max(k, f.hpG - dt * Math.max(.35, (f.hpG - k) * 2.2));   // 0.45びょう まってから するする へる
+  if (t - f.hpGd > .35) f.hpG = Math.max(k, f.hpG - dt * Math.max(.7, (f.hpG - k) * 4));   // 0.35びょう まってから すっと へる
   return f.hpG;
 }
 function updPlate(id, side) {
@@ -8449,7 +8449,7 @@ function drawFighter(f) {
     const w = 46, x = Math.round(f.x - w / 2), k = f.hp / f.maxHp;
     ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 1, top - 1, w + 2, 7);
     ctx.fillStyle = '#3a3350'; ctx.fillRect(x, top, w, 5);
-    const gk = hpGhost(f); if (gk > k) { ctx.fillStyle = '#fff1b8'; ctx.fillRect(x, top, Math.round(w * gk), 5); }   // ゴーストバー
+    const gk = hpGhost(f); if (gk > k) { ctx.fillStyle = '#f4f4fa'; ctx.fillRect(x, top, Math.round(w * gk), 5); }   // ゴーストバー
     ctx.fillStyle = k > .5 ? (f.side ? '#ff7a6a' : '#5ab8ff') : k > .2 ? '#ffd166' : '#ff4a4a';
     ctx.fillRect(x, top, Math.round(w * k), 5);
     ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(x, top, Math.round(w * k), 1);
