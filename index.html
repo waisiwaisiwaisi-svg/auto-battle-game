@@ -1120,6 +1120,8 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 .trr.add{border-radius:0!important;border:2px dashed rgba(255,209,102,.45)!important;box-shadow:none!important;background:rgba(0,0,0,.2)!important}
 .trins{border-radius:0!important;background:rgba(0,0,0,.3)!important;border:2px solid rgba(0,0,0,.35)!important}
 .rb button{border-radius:0!important;background:#3a2a4a!important;box-shadow:0 2px 0 #0b0914}
+.simtbl td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}.simtbl td.n{text-align:right;font-variant-numeric:tabular-nums}.simtbl tr:not(.dim):nth-child(even){background:rgba(255,255,255,.04)}.simtbl td:last-child{white-space:normal}
+.gs.autog{border:2px solid #9ff0ff;background:#1f4a5a;color:#d8faff;cursor:default}.rc.autoc{border-style:solid!important;background:rgba(40,90,110,.2)}.rc.autoc .any{opacity:1;color:#bfeaf5}
 .trq summary{border-radius:0!important;background:#3a3264;box-shadow:0 2px 0 #0b0914}
 .chipg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px auto;max-width:420px}
 .chipg button{position:relative;aspect-ratio:1.15;min-width:0;font:inherit;font-size:10px;line-height:1.2;padding:2px;border-radius:5px;border:1px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.03);color:var(--ink);overflow:visible;word-break:keep-all;overflow-wrap:anywhere}
@@ -3535,13 +3537,13 @@ async function trSim(m, W, n) {
 }
 function trSimShow(m, W, log) {
   const pct = (v) => Math.round(v * 100) + '%', n = log.n || 1;
-  const rows = W.mv.map((r, i) => { const u = log.used[r.id] || 0, c = log.cond[r.id] || 0, hasC = trLines(r.c).some(l => l.length);
-    const warn = !u ? '<b style="color:#ff8a6a">いちども 撃たなかった</b>' : hasC && !c ? '<b style="color:#ffd166">条件が いちども 合わなかった</b>' : '';
-    return `<tr><td>${i + 1}</td><td>${MOVES[r.id] ? MOVES[r.id].n : '？'}</td><td style="text-align:right">${u}</td><td style="text-align:right">${hasC ? c : '－'}</td><td>${warn}</td></tr>`; }).join('');
+  const rows = W.mv.map((r, i) => { const u = log.used[r.id] || 0, c = log.cond[r.id] || 0, auto = MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k], hasC = !auto && trLines(r.c).some(l => l.length);
+    const warn = auto ? (u ? '' : '<b style="color:#ffd166">あう こうげきを うけず、でなかった</b>') : !u ? '<b style="color:#ff8a6a">いちども 撃たなかった</b>' : hasC && !c ? '<b style="color:#ffd166">条件が いちども 合わなかった</b>' : '';
+    return `<tr><td>${i + 1}</td><td><b>${MOVES[r.id] ? MOVES[r.id].n : '？'}</b></td><td class="n">${u}</td><td class="n">${auto ? 'じどう' : hasC ? c : '－'}</td><td>${warn}</td></tr>`; }).join('');
   modal(`<h3 style="margin-bottom:6px">模擬戦の けっか</h3>
     <div class="dim" style="font-size:12px;margin-bottom:6px">${SPECIES[m.sid].n} 1たい で ${log.vs}の モンスターと ${log.n}かい（いまの 設定。ほぞん まえでも OK）</div>
     <div class="row" style="gap:12px;flex-wrap:wrap;margin-bottom:8px"><span>かち <b style="font-size:18px;color:var(--acc)">${log.win}</b>/${log.n}</span><span>のこりHP <b>${pct(log.hp / n)}</b></span><span>あいてに あたえた <b>${pct(log.dmg / n)}</b></span><span>へいきん <b>${Math.round(log.t / n)}</b>びょう</span>${log.to ? `<span>タイムアップ ${log.to}</span>` : ''}</div>
-    <div style="overflow-x:auto"><table class="simtbl" style="width:100%;font-size:12px;border-collapse:collapse"><tr class="dim"><td>#</td><td>技</td><td style="text-align:right">撃った</td><td style="text-align:right">うち条件</td><td></td></tr>${rows}</table></div>
+    <div style="overflow-x:auto"><table class="simtbl" style="width:100%;font-size:12px;border-collapse:collapse"><tr class="dim"><td>#</td><td>技</td><td class="n">撃った</td><td class="n">うち条件</td><td></td></tr>${rows}</table></div>
     <div class="dim" style="font-size:11px;margin-top:6px">あいて：${log.foes.map(([nm, w]) => `${nm}${w ? '○' : '×'}`).join('　')}</div>
     <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" data-x="close">とじる</button></div>`).querySelector('[data-x="close"]').onclick = (ev) => ev.target.closest('.askbg').remove();
 }
@@ -3564,7 +3566,7 @@ function renderTrain(uid) {
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
   const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '<small>＋ ほかの条件（ここへ）</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span><span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・まち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}びょう</b><br>${moveDesc(MOVES[r.id])}` : ''}</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・まち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}びょう</b><br>${moveDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
   const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>どの 条件も 合わないときは、いつもの AIが 相性を 見て えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
     <div class="trbtns"><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
