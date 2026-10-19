@@ -1045,7 +1045,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .gs{touch-action:none;user-select:none;-webkit-user-select:none;font-size:11px;padding:4px 8px;border-radius:6px;border:1px dashed #6adab0;color:#9ae8c8;white-space:nowrap;cursor:pointer}.gs.on{border-style:solid;border-width:2px;background:#24584a;color:var(--ink);cursor:grab}
 .pal.k-go{background:#24584a;border-color:#6adab0}
 .pal.k-c,.cnd{background:#2c4a7a;border-color:#6aa0ff}
-.rh.tmv::after,.pal.tmv::after{content:'★';position:absolute;top:-6px;right:-4px;font-size:11px;color:#ffd84a;text-shadow:0 0 2px #000}
+.rh.tmv::after{content:'★';position:absolute;top:-6px;right:-4px;font-size:11px;color:#ffd84a;text-shadow:0 0 2px #000}
 .rh.bad{background:#5a1a22;border-color:#ff4a4a}.rh.bad::after{content:'×';position:absolute;top:-7px;right:-4px;color:#ff6a6a;font-weight:700;text-shadow:0 0 2px #000}
 .rc{flex:1 1 100%;order:5;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:32px;padding:3px 5px;border-radius:6px;border:1px dashed rgba(255,255,255,.22)}
 .rc.or{border-color:rgba(255,200,90,.35)}.rc .orl{font-size:10px;color:var(--acc);margin-right:2px}.trnat{display:flex;flex-direction:column;gap:5px;padding:8px 10px;border-radius:10px;background:rgba(255,200,90,.08);border:2px solid rgba(255,200,90,.45)}
@@ -2866,9 +2866,9 @@ const SND = (() => {
   let lastSe = {};
   const seVol = (n) => { const u = opt.seVol && opt.seVol[n]; return (u == null ? 1 : u) * (SE_BASE[n] == null ? 1 : SE_BASE[n]); };
   function se(name, k = 1) {
+    const now = performance.now() / 1000; if (lastSe[name] && now - lastSe[name] < (name === 'click' || name === 'back' ? .25 : .04)) return; lastSe[name] = now;   // ボタンを おした 音（pointerdown）と クリック処理の 音が 2かい ならない ように
     if (api.onSe) api.onSe(name, k);
-    if (!ac || opt.mute) return;
-    const now = ac.currentTime; if (lastSe[name] && now - lastSe[name] < .04) return; lastSe[name] = now;
+    if (!ac || opt.mute) return;   // ボタンを おした 音（pointerdown）と クリック処理の 音が 2かい ならない ように
     const gv = seVol(name); if (gv <= 0) return;
     const D = ac.createGain(); D.gain.value = gv; D.connect(sfxG); setTimeout(() => { try { D.disconnect(); } catch (e) { } }, 2500);   // おとごとの おおきさ（せってい で かえられる）
     const t = now + .005, j = SE_JIT[name] ? 1 + (Math.random() - .5) * SE_JIT[name] : 1;   // よく なる おとは すこし 高さを ゆらして 耳に つかないように
@@ -3495,7 +3495,7 @@ const planName = (m) => { const k = planOfMon(m), P = TR_PLAN.find(p => p[0] ===
 function trNatCard(k, W, m) {
   const N = NATURES[m.nat], rec = recPlan(m.sid), cur = trPlanOf(W && W.nat) || rec, P = TR_PLAN.find(p => p[0] === cur);
   return `<div class="trnat"><div class="trh"><span class="trstep">1</span><b>作戦</b><span class="dim">ふだんの 立ち回り</span></div>
-    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}" style="--g:${GRP[NAT_GRP[x]].c}"><span>${GRP[NAT_GRP[x]].ic}</span><b>${n}</b>${x === rec ? '<small>★おすすめ</small>' : ''}</button>`).join('')}</div>
+    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}" style="--g:${GRP[NAT_GRP[x]].c}"><b>${n}</b>${x === rec ? '<small>★おすすめ</small>' : ''}</button>`).join('')}</div>
     <div class="ndsc">${P ? P[2] : ''}</div>
     <div class="dim nrel">${natRelText(cur)}<details class="trq"><summary>？</summary><div>3すくみ：🔥せめ → 🌀からめて → 🛡まもり → 🔥せめ。<br>よわい あいてから うけるときは ぼうぎょ 1.15ばい、にがてな あいてからは 0.87ばい。<br>性格は 能力の 上下だけ。撃ち方が「お任せ」の 技は この 作戦の 動きで 撃ちます。</div></details></div></div>`;
 }
