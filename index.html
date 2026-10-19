@@ -1210,7 +1210,7 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
     <canvas id="titleCv"></canvas>
     <button class="sndbtn" id="titleSnd" aria-label="おと">♪</button><button class="sndbtn rotbtn" id="titleRot" aria-label="よこがめん">⟳</button>
     <div class="center tcenter">
-      <h1 class="logo tlogo"><span class="tlwrap"><img id="tlogoImg" class="tlogoimg" alt="PIXEL MONSTER ARENA" hidden><i class="tshine"></i></span><span class="l1">PIXEL MONSTER</span><span class="l2">ARENA</span><small>ピクセル モンスター アリーナ</small></h1>
+      <h1 class="logo tlogo"><span class="tlwrap"><img id="tlogoImg" class="tlogoimg" alt="PIXEL MONSTER ARENA" hidden></span><span class="l1">PIXEL MONSTER</span><span class="l2">ARENA</span><small>ピクセル モンスター アリーナ</small></h1>
       <p class="lead tlead">つかまえて、そだてて、スタジアムで ぶつかりあえ！<br>リアルタイム モンスターバトル</p>
       <div class="tbtns">
         <div class="tapstart" id="tapStart">TAP TO START</div>
@@ -3093,7 +3093,7 @@ function renderTitle() {
   show('scTitle');
   startTitleAnim();
 }
-// タイトルの うしろ：闘技場を ゆっくり ながめ、つよそうな 2たいが にらみあう（スポットライト・火の粉・ひかり）
+// タイトルの うしろ：闘技場を ゆっくり ながめ、つよそうな 2たいが にらみあう（火の粉・ひかり）
 let titleRAF = 0;
 const titleBg = {};   // 闘技場の 1まい絵（ステージの 部品が よみこめたら つくる）
 function titleArena(k) {
@@ -3130,14 +3130,6 @@ function startTitleAnim() {
     }
     let gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(16,12,30,.72)'); gr.addColorStop(.5, 'rgba(16,12,30,.38)'); gr.addColorStop(1, 'rgba(16,12,30,.9)');
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
-    // スポットライト（上から ゆれる 2本）
-    g.save(); g.globalCompositeOperation = 'lighter';
-    for (let i = 0; i < 2; i++) {
-      const sx = W * (i ? .88 : .12), ang = (i ? -1 : 1) * (.42 + Math.sin(t * .5 + i * 2) * .22), len = Math.hypot(W, H) * 1.1, hw = len * .16;
-      g.save(); g.translate(sx, -20); g.rotate(ang); const lg = g.createLinearGradient(0, 0, 0, len); lg.addColorStop(0, 'rgba(255,236,170,.32)'); lg.addColorStop(1, 'rgba(255,236,170,0)');
-      g.fillStyle = lg; g.beginPath(); g.moveTo(-6, 0); g.lineTo(6, 0); g.lineTo(hw, len); g.lineTo(-hw, len); g.closePath(); g.fill(); g.restore();
-    }
-    g.restore();
     // あるく モンスター：画面ぜんたいを 左から 右へ。上（おく）ほど ちいさく くらく、下（てまえ）ほど 大きい
     const land = W > H, hgt = land ? H * .2 : Math.min(H * .13, W * .24), cap = land ? 9 : 8;
     const spawn = (x0) => { const id = choice(pool.filter(x => !walkers.some(w => w.id === x))), y = H * (.14 + Math.random() * .84), d = y / H;
