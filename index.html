@@ -9494,7 +9494,7 @@ function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
   const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), enemies: gymTeam(lt, 3, 10 + k, true, true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3,
-    skill: clamp(.72 + k * .05, 0, .9), journey: { league: k }, eMul: jr().champ ? undefined : k === 3 ? .92 : .88, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
+    skill: clamp(.72 + k * .05, 0, .9), journey: { league: k }, eMul: jr().champ ? undefined : [.88, .8, .88, .88][k], title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
