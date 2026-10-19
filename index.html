@@ -67,7 +67,7 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
 .lb{display:flex;flex-direction:column;gap:3px;margin-top:6px}.lb div{display:grid;grid-template-columns:26px 1fr auto 44px 48px;gap:6px;align-items:center;font-size:12px;padding:3px 6px;background:#15112a;border-radius:3px}.lb div.me{box-shadow:inset 0 0 0 2px var(--acc)}.lb .lbn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
 .nstat{margin-top:10px;font-size:13px;line-height:1.7;min-height:1.7em}.nstat.err{color:var(--bad)}.ncode{font-size:26px;letter-spacing:.3em;color:var(--acc);display:inline-block;padding:2px 10px;background:#120e1c;border-radius:4px;margin:4px 0}
 .optrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--edge)}
-.looks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;max-height:calc(38 * var(--vh));overflow:auto}.look{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border:2px solid var(--edge);border-radius:6px;background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.look canvas{height:64px;width:auto}.look small{font-size:10px;white-space:nowrap}.look.on{border-color:var(--acc);background:rgba(255,209,102,.15)}
+.looks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;max-height:calc(38 * var(--vh));overflow:auto}.look{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border:2px solid var(--edge);border-radius:6px;background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.look canvas{height:64px;width:auto;max-width:100%;object-fit:contain}.look small{font-size:10px;white-space:nowrap}.look.on{border-color:var(--acc);background:rgba(255,209,102,.15)}
 .optrow input[type=range]{width:55%;accent-color:var(--acc)}
 .optrow input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
 .help p{font-size:13px;line-height:1.7;margin-bottom:8px}
@@ -9205,7 +9205,13 @@ $('btnOpt').onclick = () => {
   const LK = bg.querySelector('#oLooks');
   const drawLooks = () => { LK.innerHTML = ''; for (const [k, n] of TR_LOOKS) {
     const b = document.createElement('button'), a = trArt(k), img = a.idle0.n, c = document.createElement('canvas'), z = 2;
-    c.width = img.width * z; c.height = img.height * z; c.className = 'pix'; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, c.width, c.height);
+    // え の まわりの すきまが ひだり・みぎで ちがうので、うつっている ところだけ きりだして まんなかに
+    const t = document.createElement('canvas'); t.width = img.width; t.height = img.height; const tg = t.getContext('2d'); tg.drawImage(img, 0, 0);
+    const d = tg.getImageData(0, 0, t.width, t.height).data; let x0 = t.width, x1 = -1, y0 = t.height, y1 = -1;
+    for (let y = 0; y < t.height; y++) for (let x = 0; x < t.width; x++) if (d[(y * t.width + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) { x0 = 0; x1 = t.width - 1; y0 = 0; y1 = t.height - 1; }
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    c.width = w * z; c.height = h * z; c.className = 'pix'; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(t, x0, y0, w, h, 0, 0, c.width, c.height);
     b.className = 'look' + (k === myLook() ? ' on' : ''); b.title = n; b.appendChild(c); b.insertAdjacentHTML('beforeend', `<small>${n}</small>`);
     b.onclick = () => { if (!S) return; S.look = k; save(); SND.se('ok'); drawLooks(); };
     LK.appendChild(b); } };
