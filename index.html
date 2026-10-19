@@ -1065,10 +1065,28 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .hov{outline:3px solid #ffd166!important;outline-offset:1px;box-shadow:0 0 10px rgba(255,209,102,.45)!important}
 .trghost.snap{opacity:1;transform:scale(1.04);box-shadow:0 0 0 2px #ffd166,0 6px 16px rgba(0,0,0,.5)}
 .trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.trbtns .btn{padding:6px 12px;font-size:13px}
-.trside h3{font-size:13px;margin:4px 0 0}
+.trside h3{font-size:13px;margin:4px 0 0}.trside h3 .dim{font-size:10px;font-weight:400}.trside{background:rgba(20,16,36,.55);border:1px solid var(--edge);border-radius:10px;padding:8px}
 .trins{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--edge);font-size:12px;min-height:60px}
 .trmvinfo{display:flex;flex-direction:column;gap:3px;padding:4px 0 4px 8px;border-left:4px solid var(--c);line-height:1.45}.trmvinfo b{font-size:13px}
-.trr .rdesc{flex:1 1 180px;min-width:0;font-size:11px;color:var(--dim,#9a93b8);line-height:1.35;align-self:center}
+.trr .rdesc{flex:1 1 180px;min-width:0;font-size:11px;color:var(--dim,#9a93b8);line-height:1.4;align-self:center}.trr .rdesc b{color:var(--ink);font-weight:400;opacity:.85}
+/* 訓練：みやすく */
+.trh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.trh>b{font-size:15px}.trh>.dim{font-size:11px}
+.trstep{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--acc);color:#1a1222;font-size:12px;font-weight:700;flex:none}
+.trq{display:inline-block;position:relative}.trq summary{list-style:none;cursor:pointer;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--edge);font-size:11px;color:var(--ink);opacity:.8}.trq summary::-webkit-details-marker{display:none}
+.trq[open] summary{background:var(--acc);color:#1a1222}.trq>div{position:absolute;z-index:20;left:0;top:22px;width:min(320px,70vw);padding:8px 10px;border-radius:8px;background:#1d1830;border:1px solid var(--edge);box-shadow:0 6px 16px rgba(0,0,0,.5);font-size:12px;line-height:1.55;color:var(--ink)}
+.trnatn{margin-left:auto;font-size:11px;opacity:.75}
+.trnatsel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.trnatsel button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:8px;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--ink);font:inherit;min-width:0}
+.trnatsel button span{font-size:18px;line-height:1}.trnatsel button b{font-size:13px;white-space:nowrap}.trnatsel button small{font-size:10px;color:#ffd84a;opacity:1}
+.trnatsel button.on{border-color:var(--g);background:color-mix(in srgb,var(--g) 22%,transparent);box-shadow:0 0 0 1px var(--g)}
+.trnat .nrel{display:flex;align-items:center;gap:6px;font-size:11px}
+.trr{border-left:5px solid var(--c,#888)!important;padding:7px 8px!important;background:rgba(255,255,255,.06)!important}
+.trr .no{display:flex;flex-direction:column;align-items:center;line-height:1;width:1.6em!important;font-size:10px;opacity:.9}.trr .no b{font-size:17px}
+.trr .rh{font-size:14px;padding:6px 12px}
+.rc .ifl{font-size:10px;color:#9ec2ff;margin-right:2px;white-space:nowrap}
+.rc .any{font-size:12px;opacity:.85}.rc .any small{font-size:10px;opacity:.7}
+.trbtns .trok{font-size:15px;padding:8px 26px;background:var(--acc);color:#1a1222}.trbtns .trsim{font-size:14px;padding:8px 18px}
+.trbtns2{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center}.trbtns2 button{font:inherit;font-size:11px;color:var(--ink);opacity:.7;text-decoration:underline;text-underline-offset:3px;padding:2px}
 .trpal{display:flex;flex-wrap:wrap;gap:4px}
 .pal{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:5px 9px;border-radius:5px;border:2px solid;color:var(--ink)}.pal.k-mv{border-left-width:6px}
 .pal small{font-size:9px;margin-left:3px;color:#ffd84a}
@@ -1079,7 +1097,7 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .trmini{align-self:flex-end;font-size:11px;color:var(--dim);padding:2px 6px;margin:-2px -4px 0 0}
 .trside.mini{padding:2px 8px}
 .trside.mini > :not(.trmini){display:none}
-html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
+html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage{grid-template-columns:minmax(0,1fr) 200px}html.land .trmons{grid-column:1/-1}html.land .trside{position:sticky;top:0;bottom:auto;align-self:start;max-height:calc(100vh - 16px);box-shadow:none}html.land .trmini{display:none}html.land .trside.mini > :not(.trmini){display:revert}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
 .chipg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px auto;max-width:420px}
 .chipg button{position:relative;aspect-ratio:1.15;min-width:0;font:inherit;font-size:10px;line-height:1.2;padding:2px;border-radius:5px;border:1px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.03);color:var(--ink);overflow:visible;word-break:keep-all;overflow-wrap:anywhere}
 .chipg button.k-if{background:#2c4a7a;border:2px solid #6aa0ff}
@@ -3447,11 +3465,10 @@ const trPlanOf = (n) => n && NATURES[n] ? (TR_PLAN.find(p => p[0] === n) || TR_P
 const planName = (m) => { const k = planOfMon(m), P = TR_PLAN.find(p => p[0] === k); return (P ? P[1] : '') + (m.tr && m.tr.prog && m.tr.prog.mv && trPlanOf(m.tr.prog.nat) ? '' : '（おすすめ）'); };
 function trNatCard(k, W, m) {
   const N = NATURES[m.nat], rec = recPlan(m.sid), cur = trPlanOf(W && W.nat) || rec, P = TR_PLAN.find(p => p[0] === cur);
-  return `<div class="trnat"><div class="nh"><span class="nl">作戦</span><b>${P ? P[1] : ''}</b>${cur === rec ? '<span class="dim" style="font-size:11px">（おすすめ）</span>' : ''}<span class="dim" style="font-size:11px">　性格：${N ? N.n + '（' + N.d + '）' : ''}</span></div>
+  return `<div class="trnat"><div class="trh"><span class="trstep">1</span><b>作戦</b><span class="dim">ふだんの 立ち回り</span><span class="trnatn">性格：${N ? `${N.n}（${N.d}）` : ''}</span></div>
+    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}" style="--g:${GRP[NAT_GRP[x]].c}"><span>${GRP[NAT_GRP[x]].ic}</span><b>${n}</b>${x === rec ? '<small>★おすすめ</small>' : ''}</button>`).join('')}</div>
     <div class="ndsc">${P ? P[2] : ''}</div>
-    <div class="dim" style="font-size:12px">${natRelText(cur)}（よわい あいてから うけるときは ぼうぎょ 1.15ばい・にがてな あいてからは 0.87ばい）</div>
-    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}">${GRP[NAT_GRP[x]].ic}${n}${x === rec ? '<small>★おすすめ</small>' : ''}</button>`).join('')}</div>
-    <div class="nft">作戦で 立ち回りと 3すくみの グループが きまります。さいしょは その子に おすすめの 作戦。性格は 能力の 上下だけです。撃ち方が「お任せ」の技は この動きのまま撃ちます</div></div>`;
+    <div class="dim nrel">${natRelText(cur)}<details class="trq"><summary>？</summary><div>3すくみ：🔥せめ → 🌀からめて → 🛡まもり → 🔥せめ。<br>よわい あいてから うけるときは ぼうぎょ 1.15ばい、にがてな あいてからは 0.87ばい。<br>性格は 能力の 上下だけ。撃ち方が「お任せ」の 技は この 作戦の 動きで 撃ちます。</div></details></div></div>`;
 }
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trBlank = (m) => ({ mv: equipped(m).map(id => ({ id, go: 'auto', c: [] })) });
@@ -3522,12 +3539,13 @@ function renderTrain(uid) {
   const mvCls = (id) => eq.includes(id) ? '' : tm.includes(id) ? ' tmv' : ' bad';
   const where = (x) => (x.tr && x.tr.prog && x.tr.prog.mv && x.tr.mode === 'chip' ? '<em class="ok">設定済み</em>' : '') + (x.tr && x.tr.draft && x.tr.draft.mv ? '<em class="dr">仮</em>' : '');
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
-  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : ''}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '' : '条件なし '}<small>（${l ? '別の条件をここへ' : '条件をここへ'}）</small></span>`}</div>`).join('');
+  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '<small>＋ ほかの条件（ここへ）</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え">≡${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span><span class="rdesc">${MOVES[r.id] ? `${CAT_NAMES[MOVES[r.id].cat] || ''}・まち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}びょう<br>${moveDesc(MOVES[r.id])}` : ''}</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
-    + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
-  const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技を 1→4 の順に撃つ。条件が合う技がないときは通常のAIが相性などを見て選ぶ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
-    <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">他からコピー</button><button class="btn sub" data-a="revert">保存時に戻す</button><button class="btn sub" data-a="clr">リセット</button><button class="btn sub" data-a="sim">模擬戦</button></div>
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span><span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・まち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}びょう</b><br>${moveDesc(MOVES[r.id])}` : ''}</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
+    + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
+  const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>どの 条件も 合わないときは、いつもの AIが 相性を 見て えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
+    <div class="trbtns"><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
+    <div class="trbtns2"><button data-a="draft">仮保存</button><button data-a="load">他からコピー</button><button data-a="revert">保存時に戻す</button><button data-a="clr">リセット</button></div>
     <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${!S.train ? '使わない（訓練モードがOFF）' : T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
   const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
@@ -3537,10 +3555,10 @@ function renderTrain(uid) {
   if (sc) { const K = CONDS[sc.t], seg = (opts, cur) => `<div class="trseg" data-k="cp">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
     ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
   else if (pk) ins = '<div class="dim">置く場所をタップ（技は技の枠・立ち回りは「〜撃つ」の枠・条件は右の枠）</div>';
-  else ins = '<div class="dim">左の枠へドラッグ。タップで選んで枠をタップでも置けます。置いた条件はタップで設定、枠の外へドラッグで削除。置いた技はタップで内容を表示</div>';
-  const side = `<h3>技 <span class="dim">（★＝スクロールで覚える）</span></h3><div class="trpal">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${S.tms[id]}</small></div>`).join('')}</div>${infoId && MOVES[infoId] ? mvInfo(infoId) : ''}
-    <h3>立ち回り</h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
-    <h3>条件</h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
+  else ins = '<div class="dim">ドラッグで 左へ 置く（タップ → 置き場所タップ でもOK）<br>置いた 条件：タップで 設定・外へ ドラッグで 削除</div>';
+  const side = `<h3>技 <span class="dim">→ 技の 枠へ（★＝スクロール）</span></h3><div class="trpal">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${S.tms[id]}</small></div>`).join('')}</div>${infoId && MOVES[infoId] ? mvInfo(infoId) : ''}
+    <h3>撃ち方 <span class="dim">→「〜撃つ」の 枠へ</span></h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
+    <h3>条件 <span class="dim">→「使うとき」の 枠へ</span></h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
     <div class="trins">${ins}</div>`;
   const scr = $('scTrain'), keep = !scr.hidden && [scr, ...['.trside', '.trmons'].map(q => $('trBody').querySelector(q))].map(e => e ? [e.scrollTop, e.scrollLeft] : [0, 0]);   // いまの スクロールを おぼえておく
   const trB0 = $('trBody'), trSame = !$('scTrain').hidden && MO.trUid === uid, trRows0 = trSame ? MO.rects(trB0, '.trr[data-key]') : new Map(), trC0 = trSame ? MO.rects(trB0, '.cnd[data-key]') : new Map();
@@ -9799,7 +9817,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ recPlan, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ recPlan, renderTrain, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 })();
 </script>
