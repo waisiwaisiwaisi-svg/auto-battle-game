@@ -1098,6 +1098,29 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .trside.mini{padding:2px 8px}
 .trside.mini > :not(.trmini){display:none}
 html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage{grid-template-columns:minmax(0,1fr) 200px}html.land .trmons{grid-column:1/-1}html.land .trside{position:sticky;top:0;bottom:auto;align-self:start;max-height:calc(100vh - 16px);box-shadow:none}html.land .trmini{display:none}html.land .trside.mini > :not(.trmini){display:revert}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
+/* 訓練：ゲームらしい みため（ドット絵の わく） */
+.trnat,.trr,.trside,.trmons button,.trnatsel button,.trhead,.trq>div{border-radius:0!important;border:4px solid transparent!important;border-image:var(--fr-win) 2 / 4px / 0 stretch!important;background-clip:padding-box!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
+.trnat{background:linear-gradient(180deg,#2f2750,#1d1733)!important}
+.trr{background:linear-gradient(180deg,#2a2346,#1f1a36)!important;border-left-width:4px!important;box-shadow:inset 5px 0 0 var(--c,#888),0 3px 0 rgba(0,0,0,.4)!important;padding-left:12px!important}
+.trside{background:#1b1630!important}
+.trmons button.on,.trnatsel button.on{border-image-source:var(--fr-gold)!important}
+.trnatsel button,.trnatsel button.on{background:linear-gradient(180deg,#33295a,#221c3c)!important;color:var(--ink)!important}
+.trnatsel button.on{background:linear-gradient(180deg,color-mix(in srgb,var(--g) 45%,#2a2148),#221c3c)!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
+.trnatsel button b,.trh>b,.trhn b,.trr .no b,.rh,.pal,.cnd,.gs{text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914}
+.trhead{padding:6px 10px;gap:12px!important;background:linear-gradient(180deg,#2f2750,#1d1733)!important}
+.trhead canvas{image-rendering:pixelated;flex:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.45))}
+.trhn{display:flex;flex-direction:column;gap:3px}.trhn b{font-size:18px}.trhn .chip{margin-right:3px}
+.trstep{border-radius:0!important;box-shadow:0 0 0 2px #0b0914,inset 0 -2px 0 rgba(0,0,0,.25)}
+.trh{padding:2px 0 2px 8px;border-left:4px solid var(--acc)}
+.pal,.rh,.cnd,.gs.on{border-radius:0!important;border-width:2px!important;box-shadow:0 2px 0 #0b0914,inset 0 1px 0 rgba(255,255,255,.25)!important}
+.gs{border-radius:0!important}
+.pal:active,.cnd:active{transform:translateY(2px);box-shadow:0 0 0 #0b0914!important}
+.rc{border-radius:0!important;border:2px solid rgba(0,0,0,.35)!important;background:rgba(0,0,0,.28);box-shadow:inset 0 2px 0 rgba(0,0,0,.35)}
+.rc.or{background:rgba(40,28,0,.22)}
+.trr.add{border-radius:0!important;border:2px dashed rgba(255,209,102,.45)!important;box-shadow:none!important;background:rgba(0,0,0,.2)!important}
+.trins{border-radius:0!important;background:rgba(0,0,0,.3)!important;border:2px solid rgba(0,0,0,.35)!important}
+.rb button{border-radius:0!important;background:#3a2a4a!important;box-shadow:0 2px 0 #0b0914}
+.trq summary{border-radius:0!important;background:#3a3264;box-shadow:0 2px 0 #0b0914}
 .chipg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:6px auto;max-width:420px}
 .chipg button{position:relative;aspect-ratio:1.15;min-width:0;font:inherit;font-size:10px;line-height:1.2;padding:2px;border-radius:5px;border:1px dashed rgba(255,255,255,.18);background:rgba(255,255,255,.03);color:var(--ink);overflow:visible;word-break:keep-all;overflow-wrap:anywhere}
 .chipg button.k-if{background:#2c4a7a;border:2px solid #6aa0ff}
@@ -3465,7 +3488,7 @@ const trPlanOf = (n) => n && NATURES[n] ? (TR_PLAN.find(p => p[0] === n) || TR_P
 const planName = (m) => { const k = planOfMon(m), P = TR_PLAN.find(p => p[0] === k); return (P ? P[1] : '') + (m.tr && m.tr.prog && m.tr.prog.mv && trPlanOf(m.tr.prog.nat) ? '' : '（おすすめ）'); };
 function trNatCard(k, W, m) {
   const N = NATURES[m.nat], rec = recPlan(m.sid), cur = trPlanOf(W && W.nat) || rec, P = TR_PLAN.find(p => p[0] === cur);
-  return `<div class="trnat"><div class="trh"><span class="trstep">1</span><b>作戦</b><span class="dim">ふだんの 立ち回り</span><span class="trnatn">性格：${N ? `${N.n}（${N.d}）` : ''}</span></div>
+  return `<div class="trnat"><div class="trh"><span class="trstep">1</span><b>作戦</b><span class="dim">ふだんの 立ち回り</span></div>
     <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}" style="--g:${GRP[NAT_GRP[x]].c}"><span>${GRP[NAT_GRP[x]].ic}</span><b>${n}</b>${x === rec ? '<small>★おすすめ</small>' : ''}</button>`).join('')}</div>
     <div class="ndsc">${P ? P[2] : ''}</div>
     <div class="dim nrel">${natRelText(cur)}<details class="trq"><summary>？</summary><div>3すくみ：🔥せめ → 🌀からめて → 🛡まもり → 🔥せめ。<br>よわい あいてから うけるときは ぼうぎょ 1.15ばい、にがてな あいてからは 0.87ばい。<br>性格は 能力の 上下だけ。撃ち方が「お任せ」の 技は この 作戦の 動きで 撃ちます。</div></details></div></div>`;
@@ -3564,11 +3587,12 @@ function renderTrain(uid) {
   const trB0 = $('trBody'), trSame = !$('scTrain').hidden && MO.trUid === uid, trRows0 = trSame ? MO.rects(trB0, '.trr[data-key]') : new Map(), trC0 = trSame ? MO.rects(trB0, '.cnd[data-key]') : new Map();
   $('trBody').innerHTML = `<div class="trtop"><button class="btn sub${S.train ? ' on' : ''}" id="trMode" style="padding:6px 14px;font-size:13px">訓練モード：${S.train ? 'ON' : 'OFF'}</button><span class="dim">${S.train ? '試合中は見るだけ。訓練の設定どおりに戦う' : 'ONにすると試合中は見るだけになる'}</span></div>
     <div class="trpage"><div class="trmons">${all.map(x => `<button data-u="${x.uid}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
-      <div class="trmain"><div class="trhead"><b>${sp.n}</b> <span class="dim" style="font-size:12px">体格：${bodyTxt(sp)[0]}</span></div>${trNatCard(nk, W, m)}${main}</div>
+      <div class="trmain"><div class="trhead"><i data-big="${m.sid}"></i><div class="trhn"><b>${sp.n}</b><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><span class="dim">体格：${bodyTxt(sp)[0]}　性格：${NATURES[m.nat] ? `${NATURES[m.nat].n}（${NATURES[m.nat].d}）` : ''}</span></div></div>${trNatCard(nk, W, m)}${main}</div>
       <div class="trside${TR_MINI ? ' mini' : ''}"><button class="trmini" type="button">${TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'}</button>${side}</div></div>`;
   const B = $('trBody');
   { const sd = B.querySelector('.trside'), mb = sd && sd.querySelector('.trmini'); if (mb) mb.onclick = () => { TR_MINI = !TR_MINI; sd.classList.toggle('mini', TR_MINI); mb.textContent = TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'; SND.se('click'); }; }   // パレットを たたんで したの らんを ひろく みる
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
+  B.querySelectorAll('.trhead i[data-big]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.big, 64)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
   $('trMode').onclick = () => { S.train = !S.train; save(); SND.se('click'); renderTrain(uid); };
   B.querySelectorAll('.trnatsel button').forEach(b => b.onclick = () => { const v = b.dataset.nat; W.nat = v === recPlan(m.sid) ? undefined : v; TRN.dirty = true; SND.se('click'); renderTrain(uid); });   // 作戦：「確定」で 試合に つかう
