@@ -3528,7 +3528,7 @@ async function trSim(m, W, n) {
   try {
     for (let k = 0; k < n; k++) {
       const en = gymTeam(type, 1, lg ? jProg(10 + J.league, 2) : jProg(gi, J.step || 0), lg || gi >= 5);
-      startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [m], skill: clamp(.25 + lv * .045, 0, .9), title: '模擬戦' });
+      startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [m], title: '模擬戦' });
       B.simLog = log; const e0 = B.sides[1].fs[0];
       for (let s2 = 0; s2 < 30 * (MATCH_T + 20) && B.mode !== 'end'; s2++) { bStep(1 / 30); if (s2 % 900 === 899) await new Promise(r => setTimeout(r, 0)); }
       const f = B.sides[0].fs[0], e = B.sides[1].fs[0];
@@ -4270,10 +4270,10 @@ function startBattle(cfg) {
       { fs: ef, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: cfg.trainer ? { name: cfg.trainer.name, spr: cfg.trainer.spr, x: st.trainers[1].x, y: st.trainers[1].y, shout: 0 } : null },
     ],
     projs: [], parts: [], texts: [], fx: [], decals: [], walls: [], wallRects: [], zones: [], holes: [], blasts: [], cheer: 0.3, shake: 0, hitstop: 0, trickRoom: 0,
-    cam: { x: st.W / 2, y: st.H / 2, z: Math.max(VW / st.W, VH / st.H) }, catchO: null, result: null, exp: {}, skill: cfg.skill ?? .4, sent: 0,
+    cam: { x: st.W / 2, y: st.H / 2, z: Math.max(VW / st.W, VH / st.H) }, catchO: null, result: null, exp: {}, skill: .4, sent: 0,
   };
   // AI の かしこさ：みかたの モンスターは いつも かしこく わざを えらぶ。あいては せっていの「あいての つよさ」しだい（オンラインは どちらも かしこく、よけは ふつう）
-  { const lv = S.aiLevel == null ? 0 : S.aiLevel; B.smart = [true, cfg.kind === 'online' || lv >= 1]; B.smartDodge = cfg.kind !== 'online' && cfg.kind !== 'wild' && lv >= 2; }
+  { const lv = S.aiLevel == null ? 0 : S.aiLevel; B.smart = [true, true]; B.smartDodge = false; void lv; }
   // くんれんモード：みかたは くんれん どおりに うごく（しあい中の しじは なし）。オンライン・チュートリアルでは つかわない
   B.train = !!S.train && cfg.kind !== 'online' && !cfg.tut && !TUT && !cfg.headless;
   if (cfg.sim) { B.train = true; B.headless = true; B.autoChoose = true; B.vsT = 0; return; }   // 模擬戦：がめんは そのまま、うらで うごかす
@@ -5917,7 +5917,7 @@ function aiMove(f, o, dt, autoSpecial) {
       else {
         // つかえる こうげきわざが あれば すぐ うつ（まのびさせない）。ほじょ わざしか ない ときだけ すこし まよう
         const atkReady = f.moves.some(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id));
-        f.aiT = (atkReady ? rand(.08, .25) : rand(.4, .9)) * (f.side === 1 ? (1.2 - B.skill * .5) : 1) * persona(f).react;
+        f.aiT = (atkReady ? rand(.08, .25) : rand(.4, .9)) * persona(f).react;
         f.queued = aiPickMove(f, o);
       }
     }
@@ -5932,7 +5932,7 @@ function aiMove(f, o, dt, autoSpecial) {
   { const z = !hovers(f) && B.zones.find(z => z.side !== f.side && inZoneFloor({ ...z, rad: z.rad * 1.15, parts: z.parts && z.parts.map(q => ({ ...q, rad: q.rad * 1.15 })) }, f.x, f.y));   // あいての ゆか（ありじごく など）に いる：まず そとへ でる
     if (z) { let ax = f.x - z.x, ay = (f.y - z.y) / .62; if (Math.hypot(ax, ay) < 4) { ax = Math.cos(ang + Math.PI / 2); ay = Math.sin(ang + Math.PI / 2); } const a = Math.atan2(ay * .62, ax); f.paceT = Math.max(f.paceT || 1, 1.8); f.aiMode = 'rest'; return moveDir(f, Math.cos(a), Math.sin(a), dt, true); } }
   const rushIn = !!(f.want && f.queued === f.want.id && rpsOf(MOVES[f.queued]) === 'rock' && charging(o));   // しじした とっしんで ために わりこむ：にげずに つっこむ
-  if (!rushIn && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < (f.side === 1 ? B.skill : .5) + .5 + persona(f).dodge) {
+  if (!rushIn && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < 1 + persona(f).dodge) {
     const t = threatDir(f, o); f.paceT = 1.5; return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
   }
   const per = persona(f), hurt = f.hp < f.maxHp * per.flee;
@@ -6286,7 +6286,7 @@ function updateFighter(f, dt) {
       if (B.mode === 'intro') break;   // レディ… ファイト！ までは まつ（わざも いどうも しない）
       if (!oT) {
         // あいてが 空／地中に いる：おりてくる ばしょから にげる
-        if (o && o.state === 'hide' && o.cur && f.hideFor !== o.cur.uid) { f.hideFor = o.cur.uid; f.hideFlee = Math.random() < (f.side === 1 ? .35 + B.skill * .4 : .5); }   // にげるか どうかは 1回ごとに きめる
+        if (o && o.state === 'hide' && o.cur && f.hideFor !== o.cur.uid) { f.hideFor = o.cur.uid; f.hideFlee = Math.random() < .5; }   // にげるか どうかは 1回ごとに きめる
         if (o && o.state === 'hide' && o.cur && f.hideFlee && o.cur.t > o.cur.wind * Math.min(.35, o.cur.m.track || .5) && inZone(o.cur, o, f.x, f.y, f.r + 10)) { const t = threatDir(f, o); f.paceT = 1.5; moveDir(f, Math.cos(t.base), Math.sin(t.base), dt); }
         break;
       }
@@ -9351,7 +9351,7 @@ $('btnOpt').onclick = () => {
     <label class="optrow">こうかおん <input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
     <div class="optrow"><span></span><button class="btn sub" id="oSeAdj" style="font-size:12px;padding:6px 12px">こうかおんを ひとつずつ ちょうせい</button></div>
-    <label class="optrow">あいての つよさ <select id="oAi"><option value="0">ふつう</option><option value="1">かしこい</option><option value="2">さいきょう（かならず よける）</option></select></label>
+    
     ${!window.PMA_NAME ? `<div class="optrow">なまえ <span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">かえる</button></span></div>` : ''}
     ${window.PMA_NAME ? `<label class="optrow">なまえ（オンライン） <span style="display:flex;gap:6px"><input type="text" id="oName" maxlength="12" style="width:9em;font:inherit;font-size:14px;padding:4px 6px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"><button class="btn sub" id="oNameSave" style="padding:4px 10px;font-size:12px">きめる</button></span></label>` : ''}
     <div style="margin-top:12px">トレーナーの みため</div><div class="looks" id="oLooks"></div>
@@ -9365,7 +9365,7 @@ $('btnOpt').onclick = () => {
   }
   m.value = SND.opt.music; x.value = SND.opt.sfx; u.checked = SND.opt.mute;
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
-  const AI = bg.querySelector('#oAi'); AI.value = S ? String(S.aiLevel == null ? 0 : S.aiLevel) : '0'; AI.disabled = !S; AI.onchange = () => { if (S) { S.aiLevel = +AI.value; save(); } };
+  
   const LK = bg.querySelector('#oLooks');
   const drawLooks = () => { LK.innerHTML = ''; for (const [k, n] of TR_LOOKS) {
     const b = document.createElement('button'), a = trArt(k), img = a.idle0.n, c = document.createElement('canvas'), z = 2;
@@ -9588,7 +9588,7 @@ function startWild() {
   let r = Math.random() * weights.reduce((a, b) => a + b, 0), sid = pool[0];
   for (let i = 0; i < pool.length; i++) { r -= weights[i]; if (r <= 0) { sid = pool[i]; break; } }
   startBattle({
-    kind: 'wild', enemies: [fixMon({ uid: -1, sid })], skill: .15,
+    kind: 'wild', enemies: [fixMon({ uid: -1, sid })],
     title: 'くさむら', intro: 'くさむらが ガサガサ ゆれている…',
   });
 }
@@ -9648,8 +9648,7 @@ function startJourney(gi) {
   const others = TR_NPC.filter(t => t[0] !== G.lead && t[0] !== myLook());
   const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${FIELD_NAMES[G.f]}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
   startBattle({
-    kind: 'cup', field: G.f, enemies: gymTeam(G.f, gi === 0 ? (leader ? 2 : 1) : leader ? 3 : (gi < 3 ? 2 : 3), jProg(gi, step), gi >= 5), trainer: tr, boss: leader,   // さいしょの ジムは すくなめ
-    skill: clamp(.25 + i * .045 + (leader ? .08 : 0), 0, .9), journey: { gi, step },
+    kind: 'cup', field: G.f, enemies: gymTeam(G.f, gi === 0 ? (leader ? 2 : 1) : leader ? 3 : (gi < 3 ? 2 : 3), jProg(gi, step), gi >= 5), trainer: tr, boss: leader,   // さいしょの ジムは すくなめ journey: { gi, step },
     title: `${FIELD_NAMES[G.f]}ジム　${leader ? 'ジムリーダー' : `トレーナー ${step + 1}`}`,
     intro: leader ? `${G.ln}「${G.say}」` : `${tr.name}が しょうぶを しかけてきた！`,
   });
@@ -9658,8 +9657,7 @@ function startJourney(gi) {
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
-  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), enemies: gymTeam(lt, 3, jProg(10 + k, 2), true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3,
-    skill: clamp(.72 + k * .05, 0, .9), journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
+  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), enemies: gymTeam(lt, 3, jProg(10 + k, 2), true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
@@ -9742,7 +9740,7 @@ function arcadeStart() {
   const t = TR_NPC[(R.seeds[i] || i) % TR_NPC.length];
   startBattle({ kind: 'cup', field: f, enemies: en, p0: team, hpCarry: R.hp, boss, arcade: { stage: i },
     trainer: { name: boss ? `ボス ${t[1].split(' ')[1]}` : t[1], spr: trArt(boss && i === AC_N - 1 ? 'girl' : t[0]) },
-    skill: clamp(.2 + i * .05 + (boss ? .08 : 0), 0, .85), title: `アーケード　ステージ ${i + 1}/${AC_N}${boss ? '　BOSS' : ''}`,
+    title: `アーケード　ステージ ${i + 1}/${AC_N}${boss ? '　BOSS' : ''}`,
     intro: boss ? 'ボスが あらわれた！' : `ステージ ${i + 1}！ ${t[1]}が しょうぶを しかけてきた！` });
 }
 function arcadeResult(res, lines) {
@@ -9801,7 +9799,7 @@ function startCup(fieldArg) {
   for (let i = 0; i < r.size; i++) { let sid; do { sid = choice(pool); } while (enemies.some(e => e.sid === sid) && pool.length > r.size); enemies.push(foeMon(sid, clamp(S.round * .15 + S.tier * .2, 0, 1), -1 - i)); /* 後の 回戦ほど 強い 個体 */ }
   const field = FIELDS.includes(fieldArg) ? fieldArg : choice(FIELDS);
   startBattle({
-    kind: 'cup', enemies, field, skill: clamp(.3 + S.round * .1 + S.tier * .06, 0, .8),
+    kind: 'cup', enemies, field,
     trainer: (() => { const t = roundTrainer(S.round); return { name: t.n, spr: trArt(t.k) }; })(),
     title: `${cupName()}　${r.n}`, intro: `${cupName()} ${r.n}！ ${FIELD_NAMES[field]}フィールドで しあい かいし！`,
   });
