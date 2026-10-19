@@ -2932,9 +2932,10 @@ const SND = (() => {
   let lastSe = {};
   const seVol = (n) => { const u = opt.seVol && opt.seVol[n]; return (u == null ? 1 : u) * (SE_BASE[n] == null ? 1 : SE_BASE[n]); };
   function se(name, k = 1) {
-    const now = performance.now() / 1000; if (lastSe[name] && now - lastSe[name] < (name === 'click' || name === 'back' ? .25 : .04)) return; lastSe[name] = now;   // ボタンを おした 音（pointerdown）と クリック処理の 音が 2かい ならない ように
+    const pn = performance.now() / 1000; if (lastSe[name] && pn - lastSe[name] < (name === 'click' || name === 'back' ? .25 : .04)) return; lastSe[name] = pn;   // ボタンを おした 音（pointerdown）と クリック処理の 音が 2かい ならない ように
     if (api.onSe) api.onSe(name, k);
-    if (!ac || opt.mute) return;   // ボタンを おした 音（pointerdown）と クリック処理の 音が 2かい ならない ように
+    if (!ac || opt.mute) return;
+    const now = ac.currentTime;   // おとを ならす じこくは オーディオの とけい（performance.now では ずれて ならない）
     const gv = seVol(name); if (gv <= 0) return;
     const D = ac.createGain(); D.gain.value = gv; D.connect(sfxG); setTimeout(() => { try { D.disconnect(); } catch (e) { } }, 2500);   // おとごとの おおきさ（せってい で かえられる）
     const t = now + .005, j = SE_JIT[name] ? 1 + (Math.random() - .5) * SE_JIT[name] : 1;   // よく なる おとは すこし 高さを ゆらして 耳に つかないように
