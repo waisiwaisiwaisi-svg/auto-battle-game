@@ -7752,13 +7752,15 @@ function updHUD() {
     const m = MOVES[id];
     b.querySelector('.cdv').style.height = ((f.cd[id] || 0) / ((f.cdMax && f.cdMax[id]) || m.cd) * 100) + '%';
     b.classList.toggle('hot', f.queued === id || !!(f.want && f.want.id === id) || !!(B.remote && NET.myQ && NET.myQ.id === id && performance.now() - NET.myQ.t < 1500));
-    b.classList.toggle('blocked', !!moveBlocked(f, id));   // つかえない わざは グレー
+    const auto = !!AUTO_GUARD[m.k], why = auto && moveBlocked(f, id) === 'じどうで でる' ? null : moveBlocked(f, id);   // じどうで でる ガードは グレーに しない（クールダウンを みせる）
+    b.classList.toggle('blocked', !!why);   // つかえない わざは グレー
     // あいてへの あいしょうを ボタンに 表示
     const o = active(1); let eff = '';
     if (o && m.cat !== 'stat') { const v = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1); eff = v >= 2 ? '2' : v === 0 ? '0' : v < 1 ? '0.5' : ''; }
     if (b.dataset.eff !== eff) b.dataset.eff = eff;
     const left = healMax(m) ? `（のこり ${Math.max(0, healLeft(f, id))}）` : m.e && m.e.drain ? `（かいふく ${Math.max(0, drainLeft(f, id))}）` : '';
-    const why = moveBlocked(f, id); if (why) { setText(b.querySelector('.b'), `つかえない：${why}`); return; }
+    if (why) { setText(b.querySelector('.b'), `つかえない：${why}`); return; }
+    if (auto) { setText(b.querySelector('.b'), ((f.cd[id] || 0) > 0 ? `じどう・あと ${Math.ceil(f.cd[id])}びょう` : 'じどう・まちかまえ中') + left); return; }
     setText(b.querySelector('.b'), (eff ? `${TYPES[m.t].n}・${eff === '2' ? 'ばつぐん！' : eff === '0' ? 'きかない' : 'いまいち'}` : moveSub(m)) + left);
   });
   $('cDodge').querySelector('.cdv').style.height = ((B.sides[my].dodgeCmd || 0) / DODGE_CMD_CD * 100) + '%';
