@@ -145,6 +145,15 @@ for card, kk, a in jobs:
             if 0 <= ty < cell.shape[0] and 0 <= tx < cell.shape[1]: cell[ty, tx] = g[yy, xx]
         fr.append(cell)
       fr = complete(fr, M, CW, CH, sid)
+      # となりの コマから はみ出した ほそい きれはし（はば 4ドット いかで ながほそい・本体と はなれている）を けす（ホーリュウの 口の まえの むらさき など）
+      for x in fr:
+          lb, nn = ndimage.label(x[..., 3] > 0, structure=np.ones((3, 3)))
+          if nn < 2: continue
+          sz2 = ndimage.sum(np.ones_like(lb), lb, range(1, nn + 1)); mi2 = int(np.argmax(sz2)) + 1
+          for cc in range(1, nn + 1):
+              if cc == mi2: continue
+              yy2, xx2 = np.where(lb == cc); w2, h2 = np.ptp(xx2) + 1, np.ptp(yy2) + 1
+              if min(w2, h2) <= 4 and max(w2, h2) >= 2 * min(w2, h2): x[lb == cc] = 0
       if sid in FLIP: fr = [x[:, ::-1] for x in fr]   # 左むきに かかれた え は 右むきに そろえる
       # 12コマ ぜんぶ おなじ わくで きる（コマどうしの いちを たもつ）
       al = np.any([x[..., 3] > 0 for x in fr], axis=0); yy, xx = np.where(al)
