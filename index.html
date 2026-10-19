@@ -417,6 +417,7 @@ html.land.short .screen{padding-top:calc(6px + var(--sat));padding-bottom:calc(6
 html.land.short #scTitle{padding:0} html.land.short .tcenter{padding:10px 16px 70px;gap:8px} html.land.short h1.tlogo{font-size:clamp(24px,calc(5 * var(--vw)),40px)}
 /* 横画面に 回す（スマホを たてに もった まま 横画面で あそぶ） */
 html.rot body{overflow:hidden}
+html.rot,html.rot body,html.rot.iosapp,html.rot.iosapp body{width:var(--physW,100%)!important;height:var(--physH,100%)!important;min-height:0!important}   /* 90度 まわした ときも ページは まえの 画面の 大きさの まま（ちいさく すると iPhone の アプリで はしが きれる） */
 html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(90deg) translateY(-100%);max-width:none}
 
 
@@ -9476,6 +9477,7 @@ function layout() {
   app.style.zoom = Z > 1.02 ? String(Z) : ''; r.classList.toggle('zoomed', Z > 1.02);
   r.classList.toggle('rot', rot); r.classList.toggle('land', W / H >= 1.25); r.classList.toggle('short', W / H >= 1.25 && H < 560); r.classList.toggle('vshort', H <= 400); r.classList.toggle('vnarrow', W <= 380); r.classList.toggle('lnar', W / H >= 1.25 && W <= 1000); r.classList.toggle('lnar2', W / H >= 1.25 && W <= 880); r.classList.toggle('iosapp', iosApp);
   r.style.setProperty('--appW', W + 'px'); r.style.setProperty('--appH', H + 'px');
+  r.style.setProperty('--physW', iw + 'px'); r.style.setProperty('--physH', ih + 'px');   // まわす まえの ほんとうの 画面の 大きさ（ページ そのものは この 大きさに しておく）
   if (rot || iosApp || Z > 1.02) { r.style.setProperty('--vw', W / 100 + 'px'); r.style.setProperty('--vh', H / 100 + 'px'); } else { r.style.removeProperty('--vw'); r.style.removeProperty('--vh'); }
     VH = Math.round(480 * clamp(H / W, .3, 2.4));   // 戦場は 画面 ぜんたい
   updPad();
