@@ -5226,7 +5226,7 @@ function hit(att, def, m, ang, opt) {
     return false; }
   if (def.inv > 0 && !opt.sure && !opt.throw) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
   if (rpsOf(m) === 'rock' && (gshiftOn(def) || gshiftOn(att))) { burst(def.x, def.y - BODY, '#8a78c8', 6, 50, .3); return false; }   // ゴーストシフト
-  if (def.st.eva > 0 && !opt.tick && !opt.sure && !opt.throw && !m.ohko && Math.random() < 1 - 1 / (1 + def.st.eva * .12)) { SND.se('dodge'); popText(def.x, def.y - 66, 'ミス！', '#7fd8ff'); if (plOk('dodge')) fxp({ type: 'pl', k: 'dodge', x: def.x, y: def.y - BODY, s: 1, fy: att.x < def.x, ang: att.x < def.x ? Math.PI : 0, life: .4 }); fxPush({ type: 'ghost', sid: def.mon.sid, x: def.x + rand(-14, 14), y: def.y, face: def.face, life: .2, max: .2 }); return false; }   // かいひりつ
+  if (def.st.eva > 0 && !opt.tick && !opt.sure && !opt.throw && !m.ohko && !ZONE_KINDS.includes(m.k) && m.k !== 'proj' && Math.random() < 1 - 1 / (1 + def.st.eva * .12)) { SND.se('dodge'); popText(def.x, def.y - 66, 'ミス！', '#7fd8ff'); if (plOk('dodge')) fxp({ type: 'pl', k: 'dodge', x: def.x, y: def.y - BODY, s: 1, fy: att.x < def.x, ang: att.x < def.x ? Math.PI : 0, life: .4 }); fxPush({ type: 'ghost', sid: def.mon.sid, x: def.x + rand(-14, 14), y: def.y, face: def.face, life: .2, max: .2 }); return false; }   // かいひりつ
   if (def.state === 'dash' && def.cur && def.cur.m.guardDash && !opt.throw && !def.cur.hit) {   // こうらおし：まもりながら すすむ
     SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); if (plOk('g_hit')) fxp({ type: 'pl', k: 'parry', x: def.x + def.face * 18, y: def.y - BODY, s: .9, life: .4 }); else fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 }); return false; }
   if (def.v.protect > 0 && !opt.throw && rpsOf(m) === 'rock' && !opt.tick) {   // ✊ は ガードシェルを わって とおる
@@ -5449,17 +5449,18 @@ function startDodge(f, dirOverride) {
 
 /* ---------- AI ---------- */
 const canAct = (f) => f.status !== 'slp' && f.status !== 'frz';
-// 指示なしで かわす かくりつ：すばやさ（種族値）と すばやさの 強化で かわる。さいだい 50%
+// 指示なしで かわす かくりつ（みかたも あいても おなじ）：かいひの 能力値で きまり、かいひの だんかい（かげぶんしん など）で ふえる。
+//   かいひ 平均（約70）で 15%、だんかい +6 まで つむと 約50%（さいだい 60%）。すばやさでは かわらない
 function autoDodgeP(f) {
-  let p = .02 + (f.eva || 70) / 520;   // かいひ 平均（約70）で 15%、さいだい 50%
+  let p = .02 + (f.eva || 70) / 520;
+  const s = f.st ? f.st.eva || 0 : 0; p *= s >= 0 ? 1 + s * .37 : 1 / (1 - s * .37);
   if (f.status === 'par') p *= .5;
   if (B.sides[f.side].tail > 0) p *= 1.2;
   if (trOf(f) && trOf(f).style) p *= [.3, 1, 1.9][trOf(f).style.dodge ?? 1];   // くんれん：よける かどうか
   return clamp(p, 0, .6);
 }
 function aiDodgeCheck(f, o) {
-  const isP = f.side === 0 || B.kind === 'online';
-  const skill = isP ? autoDodgeP(f) : isSmart(f) ? 1 : clamp(B.skill * (f.eva || 70) / avgStats().eva, 0, .95);   // プレイヤーの モンスターも 指示なしで たまに かわす
+  const skill = autoDodgeP(f);   // かわす かくりつは みかたも あいても かいひ しだい（あいての つよさ・かしこさ では かえない）
   if (skill <= 0 || f.dodgeCd > 0 || !['free', 'act'].includes(f.state) || !canAct(f)) return;
   if (o && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && isDamaging(o.cur.m)) {
     if (f.planFor !== o.cur.uid) {
@@ -5467,7 +5468,7 @@ function aiDodgeCheck(f, o) {
       // ガード系の わざを もっていれば たまに それで うける
       const rr = rpsOf(o.cur.m), guard = f.moves.find(id => (rr === 'scissors' ? MOVES[id].k === 'protect' : rr === 'rock' && MOVES[id].k === 'counter') && (f.cd[id] || 0) <= 0 && !moveBlocked(f, id)) || null;   // 🛡 は ✌️ に、✋ は ✊ に だけ
       f.plan = B.smartDodge && f.side === 1
-        ? { will: true, at: Math.max(o.cur.wind * .62, o.cur.wind - .28), guard: guard && estDmg(o, f, o.cur.m) > f.hp * .3 ? guard : null }   // かしこい AI：ねらいが きまってから ぎりぎりで よける
+        ? { will: Math.random() < skill, at: Math.max(o.cur.wind * .62, o.cur.wind - .28), guard: guard && estDmg(o, f, o.cur.m) > f.hp * .3 ? guard : null }   // かしこい AI：ねらいが きまってから ぎりぎりで よける
         : (() => { const g = guard && Math.random() < (natOf(f) === 'nonki' ? .9 : .4) ? guard : null; return { will: !!g && natOf(f) === 'nonki' || Math.random() < skill, at: rand(.12, .4) * o.cur.wind / .8, guard: g }; })();   // のんき：かまえて まつ
     }
     if (f.plan.will && o.cur.t >= f.plan.at && inZone(o.cur, o, f.x, f.y, f.r)) {
@@ -5480,7 +5481,7 @@ function aiDodgeCheck(f, o) {
     if (p.side === f.side) continue;
     const dx = f.x - p.x, dy = f.y - BODY - p.y, d = Math.hypot(dx, dy);
     if (d > 110) continue;
-    if (!p.rolled) { p.rolled = true; p.will = Math.random() < (B.smartDodge && f.side === 1 ? 1 : skill * .8); }
+    if (!p.rolled) { p.rolled = true; p.will = Math.random() < skill * .8; }
     if (p.will && (dx * p.vx + dy * p.vy) > 0) { startDodge(f); return; }
   }
 }
