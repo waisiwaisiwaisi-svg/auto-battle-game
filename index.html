@@ -1223,6 +1223,10 @@ html.land #scHub .hchest .chesthead span:first-child{font-size:12px;padding:2px 
 html.land #scHub .chests{gap:6px}html.land #scHub .chests .chest{min-height:0!important;padding:4px 2px!important}html.land #scHub .chests .chest .chimg{max-height:34px;width:auto}
 html.land #scHub .inv{font-size:11px}
 html.land #scHub .hme,html.land #scHub .hres>span,html.land #scHub .hicon{background-color:rgba(20,13,9,.72)!important}
+/* せまい よこ画面（iPhone の よこ・90度 かいてん など）：うえの 列が はみださない ように つめる。かいてんでも きく よう 画面の はばでは なく ホームの はばで みる */
+html.land #scHub{container-type:inline-size;container-name:hub}
+@container hub (max-width:900px){#scHub .hbar{gap:6px;flex-wrap:nowrap}#scHub .hres{gap:4px;min-width:0}#scHub .hres>span{padding:2px 6px 2px 3px}#scHub .hrv small{display:none}#scHub .hicons{gap:4px}#scHub .hicon{width:34px;height:34px}#scHub .hicon .ico{width:20px;height:20px}#scHub .hubgrid{grid-template-columns:minmax(0,1fr) clamp(250px,42%,460px);gap:8px 12px}}
+@container hub (max-width:760px){#scHub .hme #hRank .hnm{max-width:5em}#scHub .hres .ico{width:18px;height:18px}#scHub .hres>span{font-size:12px}#scHub .hicon{width:30px;height:30px}#scHub .hmode small{display:none}#scHub .hmode{min-height:46px}}
 </style>
 </head>
 <body>
