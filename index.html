@@ -1509,7 +1509,7 @@ const MOVE_PAT = {
 };
 for (const id in MOVE_PAT) if (MOVES[id]) MOVES[id].pat = MOVE_PAT[id];
 setTimeout(() => { for (const sid in SPECIES) { const sp = SPECIES[sid], L = LEARN[sid]; if (!L) continue; const add = (lv, id) => { if (!L.some(([, x]) => x === id)) L.push([lv, id]); }; const ty = [sp.type, sp.type2];
-  if (ty.includes('bug')) { add(1, 'bug-bite'); add(6, 'bug-alert'); add(9, 'web-net'); add(12, 'honey-pool'); } if (ty.includes('ghost')) add(10, 'ghost-shift'); if (ty.includes('normal') || ty.includes('dark') || ty.includes('fighting')) add(5, 'intimidate'); if (ty.includes('dragon')) { add(14, 'garyou'); add(18, 'dragon-rush'); } }
+  if (ty.includes('bug')) { add(1, 'bug-bite'); add(6, 'bug-alert'); add(9, 'web-net'); add(12, 'honey-pool'); } if (ty.includes('ghost')) add(10, 'ghost-shift'); if (ty.includes('normal') || ty.includes('dark') || ty.includes('fighting')) add(5, 'intimidate'); if (ty.includes('dragon')) { add(14, 'garyou'); add(18, 'dragon-rush'); } if (ty.some(t => ['dark', 'fighting'].includes(t))) add(8, 'sucker-punch'); if (ty.includes('psychic')) add(11, 'mirror-coat'); }   // だしぬき・はんしゃのかべ
   for (const sid in SPECIES) { const sp = SPECIES[sid]; if (['ghost', 'dark', 'psychic'].includes(sp.type) && LEARN[sid] && !LEARN[sid].some(([, x]) => x === 'double-team')) LEARN[sid].push([7, 'double-team']); } }, 0);   // ゴースト・あく・エスパーは しぜんに おぼえる
 // かたちに あわせた 数値（つよさは 1かいの わざで 1ヒットまで → ダメージは かわらない）
 for (const id in MOVES) { const m = MOVES[id];
