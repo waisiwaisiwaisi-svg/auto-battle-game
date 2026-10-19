@@ -4748,7 +4748,7 @@ function fireMove(f) {
   // 失敗する条件
   if (m.k === 'vault') {   // そらをとぶ・あなをほる：空／地中に かくれて あいての ところへ。おりてくる ばしょは 見えるので よけられる
     cur.t = 0; cur.wind = 1.4; cur.tx = o ? o.x : f.x; cur.ty = o ? o.y : f.y; f.state = 'hide'; f.inv = 0;
-    if (m.hide === 'dig') cur.hole = addHole(f.x, f.y, bodySz(f.sp));   // もぐった 穴（あきっぱなし）
+    if (m.hide === 'dig') { B.holes = B.holes.filter(h => h.side !== f.side); cur.hole = addHole(f.x, f.y, bodySz(f.sp), f.side); }   // もぐった 穴（あきっぱなし）。穴は 1プレイヤー 1セット：まえの 穴は けす
     if (m.hide === 'dig' && plOk('dig_in')) plFx('dig_in', f.x, f.y + 4, digSc(f)); else sheetFx(m.hide === 'fly' ? 'speed' : 'st_ground', f.x, f.y - 20, 1.1); B.shake = Math.max(B.shake, m.hide === 'dig' ? 4 : 2);
     say(m.hide === 'fly' ? `${f.sp.n}は そらたかく とびあがった！` : `${f.sp.n}は じめんに もぐった！`); return;
   }
@@ -4896,8 +4896,8 @@ function afterMoveUsed(f) {
 
 /* ---------- 補助わざ ---------- */
 /* ---------- あなをほる の 穴（あきっぱなし）：ほった モンスターより 大きくない ものは 穴から 穴へ くぐれる ---------- */
-function addHole(x, y, sz) {
-  const h = { x, y, sz, uid: ++B.uidc, to: 0 };
+function addHole(x, y, sz, side) {
+  const h = { x, y, sz, uid: ++B.uidc, to: 0, side };
   plFx('dirt', x, y - 10, 1.3);
   B.holes.push(h); if (B.holes.length > 8) { const old = B.holes.shift(); const p = B.holes.find(q => q.uid === old.to); if (p) p.to = 0; }
   return h;
@@ -6052,6 +6052,19 @@ function moveDir(f, mx, my, dt, nav) {
   }
   f.x += mx * sp * dt; f.y += my * sp * dt;
   f.moving = Math.hypot(mx, my) > .15; if (f.moving) f.walk += dt * clamp(f.pace, .7, 1.8);
+  // すすもうと しているのに 3びょう ほとんど うごけて いない（かべや すみに はさまった など）→ ダッシュで ぬける
+  if (Math.hypot(mx, my) > .3) { const k = f.stk || (f.stk = { x: f.x, y: f.y, t: 0 });
+    if (Math.hypot(f.x - k.x, f.y - k.y) > 24) { k.x = f.x; k.y = f.y; k.t = 0; } else if ((k.t += dt) >= 3 && f.state === 'free') { k.t = 0; escapeDash(f); } }
+  else if (f.stk) f.stk.t = 0;
+}
+function escapeDash(f) {
+  const D = 170, cx = (B.st.fx0 + B.st.fx1) / 2, cy = (B.st.fy0 + B.st.fy1) / 2; let best = null, bs = -1e9;
+  for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, x = f.x + Math.cos(a) * D, y = f.y + Math.sin(a) * D;
+    if (!inField(x, y, f.r) || (B.st.solid && !flies(f) && blockedAt(x, y, footR(f)))) continue;
+    const sc = -Math.hypot(x - cx, y - cy) + Math.random() * 40; if (sc > bs) { bs = sc; best = a; } }
+  if (best == null) best = Math.atan2(cy - f.y, cx - f.x);
+  SND.se('dash'); f.cur = null; f.state = 'dodge'; f.stT = .3; f.dvx = Math.cos(best) * D / .3; f.dvy = Math.sin(best) * D / .3; f.inv = .2; f.ghostT = 0;
+  popText(f.x, f.y - 70, 'ぬけだした！', '#ffffff');
 }
 
 /* ---------- 入力 ---------- */
@@ -6176,7 +6189,7 @@ function updateFighter(f, dt) {
       if (cur.t >= cur.wind) {
         const m = cur.m; f.x = cur.tx; f.y = cur.ty; if (blockedAt(f.x, f.y, footR(f))) freeSpot(f);
         if (m.hide === 'dig' && plOk('dig_out')) plFx('dig_out', f.x, f.y + 4, digSc(f) * 1.2); else sheetFx(m.hide === 'fly' ? 'slam' : 'st_ground', f.x, f.y - 20, 1.3); B.shake = Math.max(B.shake, 7); SND.se('boom');
-        if (m.hide === 'dig') { const h = addHole(f.x, f.y, bodySz(f.sp)); if (cur.hole) { h.to = cur.hole.uid; cur.hole.to = h.uid; } }   // でてきた 穴：もぐった 穴と つながる
+        if (m.hide === 'dig') { const h = addHole(f.x, f.y, bodySz(f.sp), f.side); if (cur.hole) { h.to = cur.hole.uid; cur.hole.to = h.uid; } }   // でてきた 穴：もぐった 穴と つながる
         if (oT && Math.hypot(o.x - cur.tx, o.y - cur.ty) <= m.rad + o.r * .5) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x));
         f.state = 'wind'; endAct(f, .4);
       }
@@ -6275,7 +6288,7 @@ function updateFighter(f, dt) {
       f.x += f.dvx * dt; f.y += f.dvy * dt;
       if (Math.abs(f.dvx) > 1) f.face = f.dvx > 0 ? 1 : -1;
       if (f.ghostT <= 0) { fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .2, max: .2 }); f.ghostT = .04; }
-      if (f.stT <= 0) f.state = 'free';
+      if (f.stT <= 0) { f.state = 'free'; if (B.st.solid && !flies(f) && blockedAt(f.x, f.y, footR(f))) freeSpot(f); }   // かべの なかで とまらない
       break;
   }
   if (f.scareT > 0) { f.scareT -= dt; if (f.state === 'stun') { f.x += f.scareV[0] * dt; f.y += f.scareV[1] * dt; f.moving = true; f.walk += dt * 1.5; if (Math.random() < dt * 8) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: 0, vy: -12, life: .3, max: .3, col: '#d8c8a8', size: 3, g: 60 }); } else f.scareT = 0; }
