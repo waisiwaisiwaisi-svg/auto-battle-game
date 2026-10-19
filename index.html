@@ -3478,7 +3478,7 @@ async function trSim(m, W, n) {
   m.tr = Object.assign({}, tr0, { mode: 'chip', prog: trClone(W, m) }); S.train = true; SND.opt.mute = true;
   try {
     for (let k = 0; k < n; k++) {
-      const en = gymTeam(type, 1, lv, false, lg || gi >= 5);
+      const en = gymTeam(type, 1, lg ? jProg(10 + J.league, 2) : jProg(gi, J.step || 0), lg || gi >= 5);
       startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [m], skill: clamp(.25 + lv * .045, 0, .9), title: '模擬戦' });
       B.simLog = log; const e0 = B.sides[1].fs[0];
       for (let s2 = 0; s2 < 30 * (MATCH_T + 20) && B.mode !== 'end'; s2++) { bStep(1 / 30); if (s2 % 900 === 899) await new Promise(r => setTimeout(r, 0)); }
@@ -4219,7 +4219,6 @@ function startBattle(cfg) {
   B.train = !!S.train && cfg.kind !== 'online' && !cfg.tut && !TUT && !cfg.headless;
   if (cfg.sim) { B.train = true; B.headless = true; B.autoChoose = true; B.vsT = 0; return; }   // 模擬戦：がめんは そのまま、うらで うごかす
   $('scBattle').classList.toggle('watch', B.train);
-  if (cfg.eMul) for (const f of B.sides[1].fs) { const k = cfg.eMul; f.maxHp = f.hp = Math.round(f.maxHp * k); f.atk *= k; f.spa *= k; f.def *= Math.sqrt(k); f.sdef *= Math.sqrt(k); }   // アーケード：はじめの 敵は よわめ
   if (cfg.hpCarry) {   // アーケード：まえの たたかいの HP を ひきつぐ
     pf.forEach((f, i) => { const k = cfg.hpCarry[i]; if (k == null) return; f.hp = Math.round(f.maxHp * k); if (f.hp <= 0) { f.hp = 0; f.fainted = true; } });
     B.sides[0].act = Math.max(0, pf.findIndex(f => !f.fainted));
@@ -9540,16 +9539,35 @@ const GYMS = [
 ];
 const LEAGUE = [['ranger', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'wind'], ['researcher', 'してんのう シオリ', 'データは もう そろっているの。', 'poison'], ['firefighter', 'してんのう アカリ', 'もえる こころで かかってこい！', 'fighting'], ['girl', 'チャンピオン レイ', '', null]];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
 const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; return S.journey; };
-// 敵チーム：そのジムの タイプの モンスター（たりなければ ほかから）。後の ジムほど 個体値が 高く、リーダーは きょうかも
-function gymTeam(type, n, i, leader, rare) {
+// 敵の モンスター：すすむ（p：0〜1）ほど 個体値・きょうか・わざの くみあわせが つよくなる（のうりょくの 倍率は かけない）
+function foeMon(sid, p, uid) {
+  const em = fixMon({ uid, sid }, clamp(p * .9, 0, .95));
+  const pts = Math.round(EV_MAX * clamp(p, 0, 1)), b = base6(sid), main = b.atk >= b.spa ? 'atk' : 'spa';
+  if (pts > 0) em.ev = { [main]: Math.min(EV_STAT_MAX, Math.ceil(pts * .5)), spe: Math.min(EV_STAT_MAX, Math.floor(pts * .3)), hp: Math.floor(pts * .2) };
+  if (p > 0) em.moves = strongMoves(em, p);
+  return em;
+}
+// つよい わざの くみあわせ：いりょく・タイプいっち・とくいな ぶんるい（ぶつり／ぞくせい）で えらび、タイプが かぶらないように。p の わりあいで ふつうの えらびかたと まぜる
+function strongMoves(m, p) {
+  const sp = SPECIES[m.sid], b = base6(m.sid), my = [sp.type, sp.type2], L = learned(m), base = pickMoves(m);
+  const sc = (id) => { const x = MOVES[id]; return (x.power || (x.pow || 0) * 5) * (my.includes(x.t) ? 1.5 : 1) * ((x.cat === 'phys') === (b.atk >= b.spa) ? 1.25 : 1) * (x.ohko ? .2 : 1) * (x.acc || 100) / 100; };
+  const atk = L.filter(id => isDamaging(MOVES[id]) && !AUTO_GUARD[MOVES[id].k]), best = [];
+  while (best.length < 3 && best.length < atk.length) { const ts = best.map(x => MOVES[x].t); best.push(atk.filter(id => !best.includes(id)).sort((a, c) => sc(c) * (ts.includes(MOVES[c].t) ? .6 : 1) - sc(a) * (ts.includes(MOVES[a].t) ? .6 : 1))[0]); }
+  const g = L.find(id => AUTO_GUARD[MOVES[id].k]); if (g) best.push(g);
+  const out = [];
+  for (let k = 0; k < 4; k++) { const x = best[k] && Math.random() < p ? best[k] : base[k]; if (x && !out.includes(x)) out.push(x); }
+  for (const x of base.concat(best)) if (out.length < 4 && x && !out.includes(x)) out.push(x);
+  return out;
+}
+// ジムの すすみぐあい（ジム 0〜9 の トレーナー1・2・リーダー → リーグ 4にん）
+const jProg = (g, step) => clamp((g * 3 + step) / 41, 0, 1) + (jr().champ ? .3 : 0);
+// 敵チーム：そのジムの タイプの モンスター（たりなければ ほかから）
+function gymTeam(type, n, p, rare) {
   const ids = poolIds().filter(id => rare || !SPECIES[id].rare);
   let pool = type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids;
   if (pool.length < n + 2) pool = pool.concat(ids.filter(id => !pool.includes(id)).slice(0, 8));
-  const out = [], loop = jr().champ ? .25 : 0;
-  for (let k = 0; k < n; k++) { let sid, g = 0; do { sid = choice(pool); } while (out.some(e => e.sid === sid) && g++ < 20);
-    const em = fixMon({ uid: -1 - k, sid }, clamp(.03 + i * .06 + (leader ? .06 : 0) + loop, 0, .95));
-    if (leader || loop) { const pts = Math.min(EV_MAX, Math.round(4 + i * 3 + loop * 40)), b = base6(sid), main = b.atk >= b.spa ? 'atk' : 'spa'; em.ev = { [main]: Math.min(EV_STAT_MAX, Math.ceil(pts * .5)), spe: Math.min(EV_STAT_MAX, Math.floor(pts * .3)), hp: Math.floor(pts * .2) }; }
-    out.push(em); }
+  const out = [];
+  for (let k = 0; k < n; k++) { let sid, g = 0; do { sid = choice(pool); } while (out.some(e => e.sid === sid) && g++ < 20); out.push(foeMon(sid, p, -1 - k)); }
   return out;
 }
 function startJourney(gi) {
@@ -9559,7 +9577,7 @@ function startJourney(gi) {
   const others = TR_NPC.filter(t => t[0] !== G.lead && t[0] !== myLook());
   const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${FIELD_NAMES[G.f]}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
   startBattle({
-    kind: 'cup', field: G.f, enemies: gymTeam(G.f, gi === 0 ? (leader ? 2 : 1) : leader ? 3 : (gi < 3 ? 2 : 3), i, leader, gi >= 5), trainer: tr, boss: leader,   // さいしょの ジムは すくなめ
+    kind: 'cup', field: G.f, enemies: gymTeam(G.f, gi === 0 ? (leader ? 2 : 1) : leader ? 3 : (gi < 3 ? 2 : 3), jProg(gi, step), gi >= 5), trainer: tr, boss: leader,   // さいしょの ジムは すくなめ
     skill: clamp(.25 + i * .045 + (leader ? .08 : 0), 0, .9), journey: { gi, step },
     title: `${FIELD_NAMES[G.f]}ジム　${leader ? 'ジムリーダー' : `トレーナー ${step + 1}`}`,
     intro: leader ? `${G.ln}「${G.say}」` : `${tr.name}が しょうぶを しかけてきた！`,
@@ -9569,7 +9587,7 @@ function startJourney(gi) {
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
-  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), enemies: gymTeam(lt, 3, 10 + k, true, true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3,
+  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), enemies: gymTeam(lt, 3, jProg(10 + k, 2), true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3,
     skill: clamp(.72 + k * .05, 0, .9), journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 function journeyResult(res, lines) {
@@ -9649,11 +9667,9 @@ function arcadeStart() {
   const ids = poolIds().filter(id => i >= 4 || !SPECIES[id].rare), en = [];
   const nE = i === 0 ? 1 : i < 4 ? 2 : 3;   // はじめは 1たい、だんだん ふえる
   for (let k = 0; k < nE; k++) { let sid, g = 0; do { sid = choice(ids); } while (en.some(e => e.sid === sid) && g++ < 20);
-    const em = fixMon({ uid: -1 - k, sid }, clamp(i * .055 + (boss ? .08 : 0), 0, .95));
-    if (boss || i >= 6) { const pts = Math.min(EV_MAX, i * 2.5 + (boss ? 4 : 0)), b = base6(sid), main = b.atk >= b.spa ? 'atk' : 'spa'; em.ev = { [main]: Math.min(EV_STAT_MAX, Math.ceil(pts * .5)), spe: Math.min(EV_STAT_MAX, Math.floor(pts * .3)), hp: Math.floor(pts * .2) }; }
-    en.push(em); }
+    en.push(foeMon(sid, clamp(i / (AC_N - 1) + (boss ? .05 : 0), 0, 1), -1 - k)); }
   const t = TR_NPC[(R.seeds[i] || i) % TR_NPC.length];
-  startBattle({ kind: 'cup', field: f, enemies: en, p0: team, hpCarry: R.hp, boss, arcade: { stage: i }, eMul: Math.min(1.05, .55 + i * .045 + (boss ? .04 : 0)),
+  startBattle({ kind: 'cup', field: f, enemies: en, p0: team, hpCarry: R.hp, boss, arcade: { stage: i },
     trainer: { name: boss ? `ボス ${t[1].split(' ')[1]}` : t[1], spr: trArt(boss && i === AC_N - 1 ? 'girl' : t[0]) },
     skill: clamp(.2 + i * .05 + (boss ? .08 : 0), 0, .85), title: `アーケード　ステージ ${i + 1}/${AC_N}${boss ? '　BOSS' : ''}`,
     intro: boss ? 'ボスが あらわれた！' : `ステージ ${i + 1}！ ${t[1]}が しょうぶを しかけてきた！` });
@@ -9711,7 +9727,7 @@ function startCup(fieldArg) {
   const r = ROUNDS[S.round], lv = roundLv(r);
   const pool = poolIds().filter(id => r.rare || !SPECIES[id].rare);
   const enemies = [];
-  for (let i = 0; i < r.size; i++) { let sid; do { sid = choice(pool); } while (enemies.some(e => e.sid === sid) && pool.length > r.size); const em = fixMon({ uid: -1 - i, sid }, clamp(S.round * .15 + S.tier * .2, 0, .9)); /* 後の 回戦ほど 強い 個体 */ enemies.push(em); }
+  for (let i = 0; i < r.size; i++) { let sid; do { sid = choice(pool); } while (enemies.some(e => e.sid === sid) && pool.length > r.size); enemies.push(foeMon(sid, clamp(S.round * .15 + S.tier * .2, 0, 1), -1 - i)); /* 後の 回戦ほど 強い 個体 */ }
   const field = FIELDS.includes(fieldArg) ? fieldArg : choice(FIELDS);
   startBattle({
     kind: 'cup', enemies, field, skill: clamp(.3 + S.round * .1 + S.tier * .06, 0, .8),
