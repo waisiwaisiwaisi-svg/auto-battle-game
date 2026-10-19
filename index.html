@@ -3438,7 +3438,8 @@ function trNatCard(k, W, m) {
   const cur = (W && W.nat && NATURES[W.nat]) ? W.nat : '', P = TR_PLAN.find(p => p[0] === cur) || TR_PLAN[0];
   return `<div class="trnat"><div class="nh"><span class="nl">作戦</span><b>${P[1]}</b><span class="dim" style="font-size:11px">（性格：${T[0]}${N.up ? ` ${TR_STAT[N.up]}↑ ${TR_STAT[N.down]}↓` : ''}）</span></div>
     <div class="ndsc">${cur ? P[2] : `${T[0]}：${T[1]}`}</div>
-    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}">${n}</button>`).join('')}</div>
+    <div class="dim" style="font-size:12px">${natRelText(cur || k)}（つよい あいてに ダメージ 1.15ばい・にがてな あいてには 0.87ばい）</div>
+    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}">${x ? GRP[NAT_GRP[x]].ic : ''}${n}</button>`).join('')}</div>
     <div class="nft">作戦で ふだんの 立ち回りが かわります（能力は かわりません）。撃ち方が「お任せ」の技は この動きのまま撃ちます</div></div>`;
 }
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
@@ -5262,7 +5263,7 @@ function hit(att, def, m, ang, opt) {
   const lagHit = def.state === 'lag' || boostHit;
   // ポケモンの ダメージ式：((2×Lv÷5＋2)×いりょく×A÷D÷50＋2)×タイプ一致×あいしょう×きゅうしょ×乱数(0.85〜1.00)。リアルタイム用に DMG_K を かける
   const P = pow * 5 * (KIND_DMG[m.k] || 1), base = Math.floor(Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D) / 50) + 2;
-  let dmg = Math.max(1, Math.round(DMG_K * base * (opt.mul || 1) * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
+  let dmg = Math.max(1, Math.round(DMG_K * base * (opt.mul || 1) * stab * eff * natMul(att, def) * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
   if (crit || eff > 1 || dmg > def.maxHp * .3) B.cheerT = Math.max(B.cheerT || 0, 1.6);   // かんきゃくが もりあがる
   const heavy = !opt.tick && pow >= 19, big = !opt.tick || opt.first;
   const tier = opt.tick ? 0 : (crit && (heavy || eff > 1)) || (heavy && eff > 1) ? 2 : heavy || eff > 1 || crit ? 1 : 0;   // ヒットの 大きさ 3だんかい   // うちつづける わざは 1回ごとは かるい
@@ -5966,9 +5967,9 @@ const NATURES = {
 const NATURE_KEYS = Object.keys(NATURES);
 // 性格の 相性を ひとことで（せつめい用）
 function natRelText(k) {
-  if (k === 'kimagure') return 'あいてが でるたび のうりょくが かわる';
-  const R = NAT_REL[k] || {}, by = (ms) => Object.keys(R).filter(x => ms.includes(R[x])).map(x => NATURES[x].n).join('・');
-  return [['にがて', by(['scared', 'wary'])], ['もえる', by(['rival', 'fired', 'chase', 'irri'])], ['なめてる', by(['mock'])]].filter(x => x[1]).map(x => x[0] + '：' + x[1]).join('　');
+  const g = GRP[NAT_GRP[k]]; if (!g) return '';
+  const w = Object.values(GRP).find(x => x.beats === NAT_GRP[k]);
+  return `${g.ic}${g.n}：${GRP[g.beats].ic}${GRP[g.beats].n}に つよい・${w.ic}${w.n}に よわい` + (k === 'kimagure' ? '（あいてが でるたび のうりょくも かわる）' : '');
 }
 // 性格を きめる（戦い方の タイプで 少し かたよる）
 function pickNature(sp) {
@@ -5983,22 +5984,20 @@ const MOODS = {
   fired:  { n: 'やる気まんまん！', col: '#ffa94a', range: .8,  cover: .5, flee: .6, react: .8,  rush: 1.15, idle: 1.2 },
   rival:  { n: 'ライバルだ！',     col: '#ff5a5a', range: .7,  cover: .2, flee: .3, react: .75, rush: 1.25, idle: 1.4, hold: 1 },
   chase:  { n: 'まてまてー！',     col: '#ffd84a', range: .75, cover: .6, flee: .8, react: .85, rush: 1.2,  idle: 1.2, flank: .4 },
-  scared: { n: 'びくびく…',        col: '#8ab8ff', range: 1.4, cover: 1.8, flee: 1.6, react: 1.25, rush: .85, idle: 1.35, dodge: .15 },
+  scared: { n: 'びくびく…（あいしょう×）',        col: '#8ab8ff', range: 1.4, cover: 1.8, flee: 1.6, react: 1.25, rush: .85, idle: 1.35, dodge: .15 },
   irri:   { n: 'イライラ…',        col: '#ff7a9a', range: .9,  cover: .6, flee: .8, react: .65, rush: 1.1,  idle: 1.3, dodge: -.1 },
-  wary:   { n: 'けいかい',         col: '#6ad8c8', range: 1.15, cover: 1.3, flee: 1.1, react: 1.1, rush: 1,   idle: .9, dodge: .15, flank: .2 },
-  mock:   { n: 'よゆう〜',         col: '#9ae07a', range: .9,  cover: .6, flee: .8, react: 1.3, rush: .95,  idle: .7, dodge: -.1 },
+  wary:   { n: 'けいかい（あいしょう×）',         col: '#6ad8c8', range: 1.15, cover: 1.3, flee: 1.1, react: 1.1, rush: 1,   idle: .9, dodge: .15, flank: .2 },
+  mock:   { n: 'よゆう〜（あいしょう◎）',         col: '#9ae07a', range: .9,  cover: .6, flee: .8, react: 1.3, rush: .95,  idle: .7, dodge: -.1 },
 };
-//  じぶんの 性格 → { あいての 性格: きもち }
-const NAT_REL = {
-  yuukan:       { yuukan: 'rival', nebarizuyoi: 'rival', okubyou: 'chase', nonki: 'mock', zurugashikoi: 'irri', sekkachi: 'fired' },
-  okubyou:      { yuukan: 'scared', sekkachi: 'scared', zurugashikoi: 'scared', nebarizuyoi: 'wary', nonki: 'fired', okubyou: 'mock' },
-  reisei:       { sekkachi: 'mock', yuukan: 'mock', kimagure: 'wary', zurugashikoi: 'wary', reisei: 'rival' },
-  sekkachi:     { nonki: 'irri', reisei: 'irri', okubyou: 'chase', sekkachi: 'rival', nebarizuyoi: 'irri' },
-  zurugashikoi: { nonki: 'chase', okubyou: 'chase', yuukan: 'mock', reisei: 'wary', zurugashikoi: 'rival' },
-  nonki:        { sekkachi: 'mock', nonki: 'mock', yuukan: 'wary' },
-  kimagure:     {},   // むらっけ：きもちは かわらず、のうりょくが ゆれる
-  nebarizuyoi:  { yuukan: 'rival', nebarizuyoi: 'rival', zurugashikoi: 'irri', okubyou: 'fired', sekkachi: 'fired' },
-};
+// 性格の 3すくみ：せめ 🔥 → からめて 🌀 → まもり 🛡 → せめ 🔥（つよい ほうへ ダメージ 1.15ばい、よわい ほうは 0.87ばい）
+const NAT_GRP = { yuukan: 'atk', sekkachi: 'atk', nebarizuyoi: 'atk', nonki: 'def', okubyou: 'def', reisei: 'tec', zurugashikoi: 'tec', kimagure: 'tec' };
+const GRP = { atk: { n: 'せめ', ic: '🔥', beats: 'tec', c: '#ff8a6a' }, tec: { n: 'からめて', ic: '🌀', beats: 'def', c: '#c08aff' }, def: { n: 'まもり', ic: '🛡', beats: 'atk', c: '#7ab8ff' } };
+const natAdv = (a, b) => { const ga = NAT_GRP[a], gb = NAT_GRP[b]; if (!ga || !gb || ga === gb) return 0; return GRP[ga].beats === gb ? 1 : GRP[gb].beats === ga ? -1 : 0; };
+const NAT_DMG = { 1: 1.15, 0: 1, '-1': .87 };
+const natMul = (att, def) => att && def && att.mon && def.mon ? NAT_DMG[natAdv(natOf(att), natOf(def))] : 1;
+//  じぶんの 性格 → { あいての 性格: きもち }：3すくみ から きまる（つよい あいて＝よゆう、にがて＝けいかい、おなじ なかま＝ライバル）
+const NAT_REL = {};
+for (const a of Object.keys(NAT_GRP)) { NAT_REL[a] = {}; for (const b of Object.keys(NAT_GRP)) { const v = natAdv(a, b); NAT_REL[a][b] = v > 0 ? 'mock' : v < 0 ? (a === 'okubyou' ? 'scared' : 'wary') : NAT_GRP[a] === NAT_GRP[b] && a !== 'kimagure' ? 'rival' : null; } }
 function natOf(f) { if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp); const P = f.side != null && B ? trProg(f) : null; return P && P.nat && NATURES[P.nat] ? P.nat : f.mon.nat; }   // 訓練で きめた 性格（たちまわり）が あれば それ。のうりょくの 上下は もとの 性格のまま
 function moodVs(f, o) {
   const me = natOf(f);
@@ -9439,6 +9438,7 @@ $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
     <p><b>わざは ボタンで しじ</b>：わざボタンを タップすると、モンスターが まあいまで うごいて その わざを だす（うごきは じどう）。<b>AUTO</b> を おすと わざも おまかせ。<b>かわす</b> と <b>こうたい</b> も 指示しよう。キーボードは 1〜4 で わざ、A で AUTO。</p>
+    <p><b>せいかくの 3すくみ</b>：🔥せめ（ゆうかん・せっかち・ねばりづよい）は 🌀からめて（れいせい・ずるがしこい・むらっけ）に つよく、🌀からめては 🛡まもり（のんき・おくびょう）に、🛡まもりは 🔥せめに つよい。つよい あいてには ダメージ 1.15ばい、にがてな あいてには 0.87ばい。訓練の「作戦」でも かえられる。</p>
     <p><b>よみあい</b>：<b>とっしん</b>（近接・突進）は、わざを <b>ためて ひかっている</b> あいてに あてると キャンセルできる（ためている あいだは ほかの わざでは とまらない）。<b>ガードシェル</b>は 弾・ビーム・はんいを 1かい うちけす（とっしんには わられる）。<b>はがねのしかえし</b>などの かまえは とっしんを はねかえす（弾・ビームには くずされる）。ダメージは かわらない、だす タイミングの よみあい。</p>
     <p><b>まち時間</b>：わざを 1つ つかうと、<b>ぜんぶの わざ</b>が その わざの まち時間に なる。つよい わざほど ながく まつので、どれを いつ だすかが かんじん。</p>
     <p><b>赤い はんい</b>は あいての わざの よちょう。<b>かわす</b>で 一瞬 むてきに なれる（つかうと 5びょう まち）。</p>
