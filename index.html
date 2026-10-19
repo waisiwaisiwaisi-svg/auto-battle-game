@@ -1131,7 +1131,8 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 .simtbl td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}.simtbl td.n{text-align:right;font-variant-numeric:tabular-nums}.simtbl tr:not(.dim):nth-child(even){background:rgba(255,255,255,.04)}.simtbl td:last-child{white-space:normal}
 .gs.autog{border:2px solid #9ff0ff;background:#1f4a5a;color:#d8faff;cursor:default}.rc.autoc{border-style:solid!important;background:rgba(40,90,110,.2)}.rc.autoc .any{opacity:1;color:#bfeaf5}
 #trtut{position:fixed;inset:0;z-index:100000;pointer-events:none}
-#trtut .hl{position:fixed;border:3px solid var(--acc);box-shadow:0 0 0 9999px rgba(8,6,16,.45),0 0 14px rgba(255,209,102,.8);animation:trtp 1s ease-in-out infinite;pointer-events:none}
+#trtut .dim{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}#trtut .dim path{fill:rgba(8,6,16,.45)}
+#trtut .hls>div{position:fixed;border:3px solid var(--acc);box-shadow:0 0 14px rgba(255,209,102,.8);animation:trtp 1s ease-in-out infinite;pointer-events:none}
 @keyframes trtp{50%{border-color:#fff}}
 #trtut .bub{position:fixed;pointer-events:auto;padding:10px 12px;font-size:13px;line-height:1.6;color:var(--ink);background:linear-gradient(180deg,#2f2750,#1d1733);border:4px solid transparent;border-image:var(--fr-gold) 2 / 4px / 0 stretch;box-shadow:0 4px 0 rgba(0,0,0,.5);text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
 #trtut .bub b{color:var(--acc)}#trtut .bub small{opacity:.8;font-size:11px}
@@ -3580,9 +3581,9 @@ const TRT_STEPS = [
   { tx: 'ここは <b>訓練</b>。バトルで モンスターが どう うごくかを くみたてる ばしょだよ。<br>いっしょに 1つ つくってみよう！', next: 1 },
   { sel: '.trnatsel', tx: '① まずは <b>作戦</b>。ふだんの 立ち回りを きめるよ。<br>どれか 1つ タップしてみよう（★が その子の おすすめ）', ok: () => TRT.f.nat },
   { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが <b>技の 行</b>。上ほど 先に 撃つよ。<br>左の 番号を ドラッグすると 順番を かえられる', next: 1 },
-  { sel: '.pal.k-c[data-v="ophp"]', allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を おいてみよう。<br>「<b>相手のHP</b>」を ○ばんの 技の「<b>使うとき</b>」へ ドラッグ！<br><small>（タップ → 置き場所を タップ でも OK）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
-  { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: 'これで「<b>相手の HPが 50%未満の とき</b>」に この技を 撃つ。<br>おいた 条件を タップすると 25%・75% にも かえられるよ', next: 1 },
-  { sel: '.pal.k-go[data-v="near"]', allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ つぎは <b>撃ち方</b>。<br>「<b>近づいて</b>」を ○ばんの「お任せ撃つ」の わくへ おいてみよう', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
+  { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を おいてみよう。<br>「<b>相手のHP</b>」を ○ばんの 技の「<b>使うとき</b>」へ ドラッグ！<br><small>（タップ → 置き場所を タップ でも OK）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
+  { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手の HPが ${p}の とき</b>」に この技を 撃つ。<br>おいた 条件を タップすると ${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも かえられるよ`; }, next: 1 },
+  { sel: '.pal.k-go[data-v="near"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ つぎは <b>撃ち方</b>。<br>「<b>近づいて</b>」を ○ばんの「お任せ撃つ」の わくへ おいてみよう', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
   { sel: '[data-a="sim"]', tx: '⑤ できたら <b>模擬戦で ためす</b>！<br>5かい たたかわせて けっかを みせてくれるよ', ok: () => !!document.querySelector('.simtbl') },
   { sel: '.simcs', allow: () => [], tx: '⑥「<b>条件の はつどう</b>」で、条件が なりたったか（○×）と 何かい 撃ったかが わかる。<br>うまく いかなければ 条件を かえて また ためそう', next: 1, onNext: () => { const a = document.querySelector('.simtbl'); if (a) { const bg = a.closest('.askbg'); if (bg) bg.remove(); } } },
   { sel: '[data-a="ok"]', tx: '⑦ よければ <b>確定</b>。この子の 訓練が ほぞん されるよ', ok: () => { const m = trMon(TRN && TRN.uid); return !!(m && m.tr && m.tr.prog && m.tr.prog.mv && !TRN.dirty); } },
@@ -3593,11 +3594,11 @@ const trtAllowed = (el) => { if (!TRT || !el || !el.closest) return true; if (el
   const st = TRT_STEPS[TRT.i], q = st.allow ? st.allow() : st.sel ? [typeof st.sel === 'function' ? st.sel() : st.sel] : [];
   return q.some(x => { const t = el.closest(x); return !!t; }); };
 for (const ev of ['pointerdown', 'mousedown', 'click']) window.addEventListener(ev, (e) => { if (TRT && !trtAllowed(e.target)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } }, true);
-function trtStart() { trtStop(); TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1 }; TRT.el.id = 'trtut'; TRT.el.innerHTML = '<div class="hl"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; document.body.appendChild(TRT.el);
+function trtStart() { trtStop(); TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1 }; TRT.el.id = 'trtut'; TRT.el.innerHTML = '<svg class="dim"><path fill-rule="evenodd"></path></svg><div class="hls"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; document.body.appendChild(TRT.el);
   TRT.el.querySelector('.skip').onclick = () => { SND.se('back'); trtEnd(); };
   TRT.el.querySelector('.nx').onclick = () => { const st = TRT_STEPS[TRT.i]; if (st.onNext) st.onNext(); if (st.end) { SND.se('ok'); trtEnd(); return; } SND.se('click'); trtGo(TRT.i + 1); };
   trtGo(0); trtLoop(); }
-function trtGo(i) { TRT.i = i; TRT.scrolled = -1; const st = TRT_STEPS[i]; TRT.el.querySelector('.tx').innerHTML = st.tx.replace('○ばん', `${trtRow() + 1}ばん`); TRT.el.querySelector('.nx').hidden = !st.next; TRT.el.querySelector('.nx').textContent = st.end ? 'おわり ✔' : 'つぎへ ▶'; }
+function trtGo(i) { TRT.i = i; TRT.scrolled = -1; const st = TRT_STEPS[i]; TRT.el.querySelector('.tx').innerHTML = (typeof st.tx === 'function' ? st.tx() : st.tx).replace('○ばん', `${trtRow() + 1}ばん`); TRT.el.querySelector('.nx').hidden = !st.next; TRT.el.querySelector('.nx').textContent = st.end ? 'おわり ✔' : 'つぎへ ▶'; }
 function trtEnd() { if (S) { S.trTutDone = 1; save(); } trtStop(); }
 function trtStop() { if (TRT && TRT.el) TRT.el.remove(); TRT = null; }
 function trtLoop() {
@@ -3606,10 +3607,13 @@ function trtLoop() {
   const st = TRT_STEPS[TRT.i]; if (st.ok && st.ok()) { SND.se('ok'); if (TRT.i + 1 < TRT_STEPS.length) trtGo(TRT.i + 1); return; }
   const q = typeof st.sel === 'function' ? st.sel() : st.sel; let t = q ? document.querySelector(q) : null;
   if (t && t.closest('.trside.mini')) { TR_MINI = false; const sd = t.closest('.trside'); sd.classList.remove('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▼ たたむ'; }
-  const hl = TRT.el.querySelector('.hl'), bub = TRT.el.querySelector('.bub'), vw = innerWidth, vh = innerHeight;
-  if (t && TRT.scrolled !== TRT.i) { TRT.scrolled = TRT.i; t.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  const bub = TRT.el.querySelector('.bub'), vw = innerWidth, vh = innerHeight;
+  if (TRT.scrolled !== TRT.i) { const sc = st.scr ? document.querySelector(st.scr()) : t; if (sc) { TRT.scrolled = TRT.i; sc.scrollIntoView({ block: st.scr ? 'start' : 'center', behavior: 'smooth' }); } }
+  // ひからせる ところ（おく ものと おく ばしょ の 2つ ある ことも）：まわりを うすぐらく して あなを あける
+  const rs = (st.hl ? st.hl() : q ? [q] : []).map(x => document.querySelector(x)).filter(Boolean).map(e => e.getBoundingClientRect()).filter(r => r.width), box = TRT.el.querySelector('.hls');
+  while (box.children.length < rs.length) box.appendChild(document.createElement('div')); [...box.children].forEach((d, k) => { const r = rs[k]; d.hidden = !r; if (r) Object.assign(d.style, { left: r.left - 5 + 'px', top: r.top - 5 + 'px', width: r.width + 10 + 'px', height: r.height + 10 + 'px' }); });
+  TRT.el.querySelector('.dim path').setAttribute('d', rs.length ? `M0 0H${vw}V${vh}H0Z` + rs.map(r => `M${r.left - 5} ${r.top - 5}h${r.width + 10}v${r.height + 10}h${-r.width - 10}Z`).join('') : '');
   const r = t ? t.getBoundingClientRect() : null;
-  if (r && r.width) { hl.hidden = false; Object.assign(hl.style, { left: r.left - 5 + 'px', top: r.top - 5 + 'px', width: r.width + 10 + 'px', height: r.height + 10 + 'px' }); } else hl.hidden = true;
   const bw = Math.min(380, vw - 24), bh = bub.offsetHeight || 120; bub.style.width = bw + 'px';
   let x = vw / 2 - bw / 2, y = vh / 2 - bh / 2;
   if (r && r.width) { x = clamp(r.left + r.width / 2 - bw / 2, 12, vw - bw - 12); const below = r.bottom + 14, above = r.top - 14 - bh;
