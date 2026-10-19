@@ -1145,7 +1145,7 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}.trhelp{font-size
       </div>
       <!-- たからばこ（たて画面：ボタンの 下／よこ画面：トレーナーと モンスターの 下） -->
       <div class="hcol hchest">
-        <div class="sec-title chesthead"><span>たからばこ <small>かつと もらえる・4つまで</small></span><button class="chlog" id="btnChLog">りれき</button></div>
+        <div class="sec-title chesthead"><span>たからばこ <small>かつと ときどき もらえる（ボスは かならず）・4つまで</small></span><button class="chlog" id="btnChLog">りれき</button></div>
         <div id="hGuildBonus" hidden style="font-size:11.5px;color:#ffd166;margin-top:-6px">🛡 ギルド ボーナス：たからばこが 5% はやく あく</div>
         <div class="chests" id="hubChests"></div>
         <div class="inv"><span><i class="ico ico-s" data-ico="scroll"></i>スクロール <b id="hTms">0</b></span><span>どうぐ <b id="hItems">0</b></span><span>つかまえた <b id="hCaught">0</b></span></div>
@@ -3060,7 +3060,7 @@ function renderStarter() {
   show('scStarter');
 }
 /* =====================================================================
-   たからばこ（クラッシュ・ロワイヤル式：勝つと もらえる／4スロット／1つずつ 時間で あく／ジェムで すぐ あく）
+   たからばこ（クラッシュ・ロワイヤル式：勝つと ときどき もらえる／4スロット／1つずつ 時間で あく／ジェムで すぐ あく）
    ===================================================================== */
 const CHEST_T = /fastchest/.test(location.search + location.hash) ? 1 / 12 : 1;   /* 本番の 時間。テストは URL の さいごに #fastchest を つけると 1/12（木5びょう〜でんせつ2ふん30びょう） */
 const CHESTS = {
@@ -7227,7 +7227,8 @@ function endBattle(res) {
       lines.unshift('まけてしまった… たいかいは 1かいせんから やりなおし');
     }
   }
-  let ck = null; if (res === 'win') { ck = giveChest(); if (!ck) { S.gems = (S.gems || 0) + 2; lines.push('たからばこが いっぱい… かわりに ジェムを 2こ もらった'); } }   // いっぱいの ときも むだに しない
+  // たからばこは ときどき：ボス（ジムリーダー・リーグ など）は かならず、トレーナー戦 35%、くさむら 15%
+  let ck = null; if (res === 'win' && !B.cfg.tutorial && Math.random() < (B.cfg.boss || (B.cfg.journey && B.cfg.journey.league != null) ? 1 : B.kind === 'wild' ? .15 : .35)) { ck = giveChest(); if (!ck) lines.push('たからばこが いっぱいで もらえなかった…'); }
   B.rewards = { cr: S.capsules - caps0, gem: (S.gems || 0) - gems0, chest: ck };   // リザルトで アイコンつきで ならべる
   B.resLines = lines;
   save();
@@ -9370,7 +9371,7 @@ $('btnHelp').onclick = () => {
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
     <p><b>くさむら</b>で よわらせて <b>ふういんオーブ</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
-    <p><b>たからばこ</b>は 勝つと もらえる（しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・オーブ・スクロールが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
+    <p><b>たからばこ</b>は 勝つと ときどき もらえる（ジムリーダー・チャンピオンリーグは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・オーブ・スクロールが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
     <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ・かいひ の 7つ。すばやさが 高いほど わざを はやく くりだし、かいひが 高いほど 指示なしで よける。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。ぶつりわざは こうげき→ぼうぎょ、とくしゅわざは とくこう→とくぼう で ダメージが きまる。</p>
     <p><b>きょうか</b>：へんせい → きょうか で ほかの モンスターを つかうと ポイントが ふえる（1たい +1、おなじ しゅるいなら +3。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりなおしのくすり）。</p>
     <p><b>どうぐ</b>：ふりなおしのくすり・すべてわすれのかね・ひとつわすれのは・おなじタイプのいし。たからばこから でる。へんせい → どうぐ で つかう。</p>
