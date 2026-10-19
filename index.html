@@ -1098,6 +1098,10 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .trside.mini{padding:2px 8px}
 .trside.mini > :not(.trmini){display:none}
 html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage{grid-template-columns:minmax(0,1fr) 200px}html.land .trmons{grid-column:1/-1}html.land .trside{position:sticky;top:0;bottom:auto;align-self:start;max-height:calc(100vh - 16px);box-shadow:none}html.land .trmini{display:none}html.land .trside.mini > :not(.trmini){display:revert}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
+/* 訓練：がめんの はばでは なく 訓練の わくの はばで ならびを かえる（中くらいの まどでも くずれない） */
+#trBody{container-type:inline-size}
+@container (max-width:980px){.trpage{grid-template-columns:minmax(0,1fr) 210px}.trmons{grid-column:1/-1;flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}.trside{position:sticky;top:0;align-self:start;max-height:calc(100vh - 16px);overflow:auto}}
+@container (max-width:620px){.trpage{grid-template-columns:minmax(0,1fr)}.trside{position:sticky;top:auto;bottom:0;z-index:5;max-height:34vh;overflow:auto;box-shadow:0 -6px 18px rgba(0,0,0,.5)!important}.trnatsel button b{font-size:12px;white-space:normal}}
 /* 訓練：ゲームらしい みため（ドット絵の わく） */
 .trnat,.trr,.trside,.trmons button,.trnatsel button,.trhead,.trq>div{border-radius:0!important;border:4px solid transparent!important;border-image:var(--fr-win) 2 / 4px / 0 stretch!important;background-clip:padding-box!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
 .trnat{background:linear-gradient(180deg,#2f2750,#1d1733)!important}
