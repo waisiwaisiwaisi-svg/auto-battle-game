@@ -3400,7 +3400,7 @@ function renderTeamDetail() {
   D.innerHTML = `<button class="shx" data-a="close" title="とじる"></button><button class="shc" data-a="close" title="とじる">×</button><div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
       <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'ボックス'}　${ivGrade(m)}</div>
       <div>たいかく：<b style="color:var(--acc)">${bodyTxt(SPECIES[m.sid])[0]}</b> <span class="dim">${bodyTxt(SPECIES[m.sid])[1]}</span></div>
-      ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span><div class="dim" style="font-size:11px">${natRelText(m.nat)}</div></div>` : ''}</div></div>
+      ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div><div>さくせん：<b style="color:var(--acc)">${planName(m)}</b><div class="dim" style="font-size:11px">${natRelText(planOfMon(m))}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button><button class="btn sub" data-a="train" style="color:var(--acc)">訓練</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn danger" data-a="release">にがす</button>`}</div>`;
@@ -3444,14 +3444,14 @@ const TR_STAT = { atk: '攻撃', def: '防御', spa: '属性攻撃', spd: '属�
 // 作戦は 3つ（性格の 3すくみ と おなじ：🔥せめ・🛡まもり・🌀からめて）。えらばなければ その子の 性格どおり
 const TR_PLAN = [['yuukan', 'どんどん せめる', '前へ 前へ。ほとんど かくれずに こうげき'], ['nonki', 'どっしり かまえる', 'かべ・かいふく・カウンターで まちかまえる'], ['reisei', 'まあいを たもつ', '間合いを まもり、ひまな ときは 陰で まつ']];
 const trPlanOf = (n) => n && NATURES[n] ? (TR_PLAN.find(p => p[0] === n) || TR_PLAN.find(p => NAT_GRP[p[0]] === NAT_GRP[n]) || [])[0] : undefined;   // むかしの 作戦（いのちだいじに など）は おなじ グループの 作戦に
+const planName = (m) => { const k = planOfMon(m), P = TR_PLAN.find(p => p[0] === k); return (P ? P[1] : '') + (m.tr && m.tr.prog && m.tr.prog.mv && trPlanOf(m.tr.prog.nat) ? '' : '（おすすめ）'); };
 function trNatCard(k, W, m) {
-  const N = NATURES[k], T = TR_NAT[k]; if (!N || !T) return '';
-  const cur = trPlanOf(W && W.nat) || '', P = TR_PLAN.find(p => p[0] === cur);
-  return `<div class="trnat"><div class="nh"><span class="nl">作戦</span><b>${P ? P[1] : 'なし（性格どおり）'}</b><span class="dim" style="font-size:11px">（性格：${T[0]}${N.up ? ` ${TR_STAT[N.up]}↑ ${TR_STAT[N.down]}↓` : ''}）</span></div>
-    <div class="ndsc">${P ? P[2] : `${T[0]}：${T[1]}`}</div>
-    <div class="dim" style="font-size:12px">${natRelText(cur || k)}（よわい あいてから うけるときは ぼうぎょ 1.15ばい・にがてな あいてからは 0.87ばい）</div>
-    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}">${GRP[NAT_GRP[x]].ic}${n}</button>`).join('')}</div>
-    <div class="nft">作戦で ふだんの 立ち回りが かわります（能力は かわりません）。えらんだ 作戦を もう一度 おすと 作戦なし（性格どおり）。撃ち方が「お任せ」の技は この動きのまま撃ちます</div></div>`;
+  const N = NATURES[m.nat], rec = recPlan(m.sid), cur = trPlanOf(W && W.nat) || rec, P = TR_PLAN.find(p => p[0] === cur);
+  return `<div class="trnat"><div class="nh"><span class="nl">作戦</span><b>${P ? P[1] : ''}</b>${cur === rec ? '<span class="dim" style="font-size:11px">（おすすめ）</span>' : ''}<span class="dim" style="font-size:11px">　性格：${N ? N.n + '（' + N.d + '）' : ''}</span></div>
+    <div class="ndsc">${P ? P[2] : ''}</div>
+    <div class="dim" style="font-size:12px">${natRelText(cur)}（よわい あいてから うけるときは ぼうぎょ 1.15ばい・にがてな あいてからは 0.87ばい）</div>
+    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}">${GRP[NAT_GRP[x]].ic}${n}${x === rec ? '<small>★おすすめ</small>' : ''}</button>`).join('')}</div>
+    <div class="nft">作戦で 立ち回りと 3すくみの グループが きまります。さいしょは その子に おすすめの 作戦。性格は 能力の 上下だけです。撃ち方が「お任せ」の技は この動きのまま撃ちます</div></div>`;
 }
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trBlank = (m) => ({ mv: equipped(m).map(id => ({ id, go: 'auto', c: [] })) });
@@ -3553,7 +3553,7 @@ function renderTrain(uid) {
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
   $('trMode').onclick = () => { S.train = !S.train; save(); SND.se('click'); renderTrain(uid); };
-  B.querySelectorAll('.trnatsel button').forEach(b => b.onclick = () => { const v = b.dataset.nat; W.nat = trPlanOf(W.nat) === v ? undefined : v; TRN.dirty = true; SND.se('click'); renderTrain(uid); });   // 作戦：「確定」で 試合に つかう
+  B.querySelectorAll('.trnatsel button').forEach(b => b.onclick = () => { const v = b.dataset.nat; W.nat = v === recPlan(m.sid) ? undefined : v; TRN.dirty = true; SND.se('click'); renderTrain(uid); });   // 作戦：「確定」で 試合に つかう
   const act = (a, f) => { const e = B.querySelector(`[data-a="${a}"]`); if (e) e.onclick = f; };
   const redo = () => renderTrain(uid), touch = () => { for (const r of W.mv) r.c = r.c.filter(l => l.length); TRN.dirty = true; redo(); };   // からの行は つめる
   // 置く：pl = { k:'mv'|'go'|'c', v } 新しく ／ { from:[i,j] } 置いてある条件 ／ { gFrom:i } 置いてある立ち回り。z = 落とした枠
@@ -3857,7 +3857,7 @@ function monCard(m, where, i, openUid) {
   const info = document.createElement('div'); info.className = 'minfo';
   info.innerHTML = `<div class="mname">${sp.n} ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}${where === 'party' && i < 3 ? '<span class="tag">出場</span>' : ''}</div>` +
     `<div class="mstat">${STAT6.map(k => STAT6_S[k] + st[k]).join(' ')}　<span class="dim">（${ivGrade(m)}）</span></div>` +
-    (m.nat && NATURES[m.nat] ? `<div class="desc">せいかく：<b>${NATURES[m.nat].n}</b>（${NATURES[m.nat].d}）<br><span class="dim">${natRelText(m.nat)}</span></div>` : '') +
+    (m.nat && NATURES[m.nat] ? `<div class="desc">せいかく：<b>${NATURES[m.nat].n}</b>（${NATURES[m.nat].d}）<br>さくせん：<b>${planName(m)}</b> <span class="dim">${natRelText(planOfMon(m))}</span></div>` : '') +
     (sp.prof ? `<div class="desc">${profLine(sp)}</div>` : '') +
     `<div class="mmoves">${equipped(m).map(id => `<span style="--c:${TYPES[MOVES[id].t].c}" title="${moveDesc(MOVES[id])}">${MOVES[id].n}</span>`).join('')}</div>`;
   el.appendChild(info);
@@ -5996,6 +5996,7 @@ const NATURES = {
   kimagure: { up: '', down: '', n: 'むらっけ',     d: 'あいてが でるたび のうりょくが 大きく 上下する',               range: 1,   cover: .4, flee: .3,  flank: .5, react: 1,   dodge: 0, roam: 1, rush: 1, idle: .6 },
   nebarizuyoi: { up: 'spd', down: 'spa', n: 'ねばりづよい', d: 'ふんばり型。HPが へるほど はやく はげしく なる',                 range: .85, cover: .3, flee: 0,   flank: .3, react: .95, dodge: .05, hold: 1, rush: 1, idle: .6 },
 };
+for (const k in NATURES) { const N = NATURES[k]; if (N.up) N.d = `${TR_STAT[N.up]}↑ ${TR_STAT[N.down]}↓`; }   // 性格は のうりょくの 上下だけ（うごきは 作戦）
 const NATURE_KEYS = Object.keys(NATURES);
 // 性格の 相性を ひとことで（せつめい用）
 function natRelText(k) {
@@ -6031,13 +6032,21 @@ const natDefMul = (def, att) => att && def && att.mon && def.mon ? NAT_DEF[natAd
 //  じぶんの 性格 → { あいての 性格: きもち }：3すくみ から きまる（つよい あいて＝よゆう、にがて＝けいかい、おなじ なかま＝ライバル）
 const NAT_REL = {};
 for (const a of Object.keys(NAT_GRP)) { NAT_REL[a] = {}; for (const b of Object.keys(NAT_GRP)) { const v = natAdv(a, b); NAT_REL[a][b] = v > 0 ? 'mock' : v < 0 ? (a === 'okubyou' ? 'scared' : 'wary') : NAT_GRP[a] === NAT_GRP[b] && a !== 'kimagure' ? 'rival' : null; } }
-function natOf(f) { if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp); const P = f.side != null && B ? trProg(f) : null, pn = P && trPlanOf(P.nat); return pn || f.mon.nat; }   // 訓練で きめた 性格（たちまわり）が あれば それ。のうりょくの 上下は もとの 性格のまま
+// ふだんの 作戦：訓練で きめた 作戦、なければ その モンスターに おすすめの 作戦（性格は のうりょくの 上下だけ）
+let REC_PLAN = null;   // こうげき寄り（どんどん せめる）・まんなか（まあいを たもつ）・まもり寄り（どっしり かまえる）を 3ぶんの1ずつ
+function recPlan(sid) {
+  if (!REC_PLAN) { const sc = (id) => { const b = base6(id), st = SPECIES[id].style; return (Math.max(b.atk, b.spa) + b.spe * .5) / ((b.def + b.spd) / 2 + b.hp * .3) * (st === 'melee' ? 1.08 : st === 'ranged' ? .97 : 1); };
+    const ids = Object.keys(SPECIES).sort((x, y) => sc(y) - sc(x)), n = ids.length; REC_PLAN = {}; ids.forEach((id, i) => { REC_PLAN[id] = i < n / 3 ? 'yuukan' : i < n * 2 / 3 ? 'reisei' : 'nonki'; }); }
+  return REC_PLAN[sid] || 'reisei';
+}
+const planOfMon = (m) => (m.tr && m.tr.prog && m.tr.prog.mv && trPlanOf(m.tr.prog.nat)) || recPlan(m.sid);
+function natOf(f) { if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp); return f.side === 0 || f.side == null ? planOfMon(f.mon) : recPlan(f.mon.sid); }
 function moodVs(f, o) {
   const me = natOf(f);
   return NAT_REL[me][natOf(o)] || null;
 }
 function persona(f) {
-  const o = B && B.sides ? opp(f) : null, fun = natOf(f) === 'nebarizuyoi' && f.hp < f.maxHp * .3, key = (o && o.mon ? o.mon.uid + ':' + o.mon.sid : '') + (fun ? '!' : '');
+  const o = B && B.sides ? opp(f) : null, fun = false, key = (o && o.mon ? o.mon.uid + ':' + o.mon.sid : '') + (fun ? '!' : '');
   if (f.per && f.perFor === key) return f.per;
   const nat = natOf(f);
   let h = 0; for (const c of f.mon.sid + nat) h = (h * 31 + c.charCodeAt(0)) % 9973;
@@ -6049,7 +6058,7 @@ function persona(f) {
     if (f.perFor !== undefined || key) f.moodPop = M;   // でてきた ときに きもちを ふきだしで
   }
   if (fun) { per.react *= .6; per.rush *= 1.3; per.dodge += .1; per.flee = 0; per.hold = 1; if (!(f.perFor || '').endsWith('!')) f.moodPop = { n: 'ふんばる！', col: '#ff8a3d' }; }   // ねばりづよい：おいつめられて ほんき
-  if (nat === 'kimagure' && o && o.mon && f.moodyFor !== o.mon.uid + ':' + o.mon.sid) { f.moodyFor = o.mon.uid + ':' + o.mon.sid; f.moodyNow = true; }
+  if (f.mon.nat === 'kimagure' && o && o.mon && f.moodyFor !== o.mon.uid + ':' + o.mon.sid) { f.moodyFor = o.mon.uid + ':' + o.mon.sid; f.moodyNow = true; }
   const T = trOf(f);
   if (T && T.style) {   // くんれん：うごきかたは きめた とおり（性格・きもちより つよい）
     for (const k in TR_STYLE) { const i = T.style[k]; if (i != null) per[k] = TR_STYLE[k].v[i]; }
@@ -9511,8 +9520,8 @@ function pickMoves(m) {
   const sp = SPECIES[m.sid], stab = shuffle(atk.filter(id => MOVES[id].t === sp.type || MOVES[id].t === sp.type2));
   let order = stab.length ? [stab[0]].concat(shuffle(atk.filter(id => id !== stab[0]))) : shuffle(atk);   // じぶんの タイプの こうげきを かならず 1つ
   const ind = order.find(id => INDIRECT(MOVES[id]));
-  if (ind && ['okubyou', 'reisei', 'nonki'].includes(m.nat)) order = [ind].concat(order.filter(id => id !== ind));   // かくれる 子は かべごしの わざを かならず
-  const supN = Math.min(['yuukan', 'sekkachi'].includes(m.nat) ? 1 : 2, sup.length);
+  if (ind && ['reisei', 'nonki'].includes(planOfMon(m))) order = [ind].concat(order.filter(id => id !== ind));   // かくれる 子は かべごしの わざを かならず
+  const supN = Math.min(planOfMon(m) === 'yuukan' ? 1 : 2, sup.length);
   const res = order.slice(0, Math.max(1, 4 - supN));
   return res.concat(shuffle(sup)).slice(0, 4);
 }
@@ -9790,7 +9799,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ recPlan, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 })();
 </script>
