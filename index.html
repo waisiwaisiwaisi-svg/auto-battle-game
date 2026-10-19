@@ -1183,6 +1183,23 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 .chlog{white-space:nowrap;flex:none}
 .chest.empty .chimg{opacity:.18;filter:grayscale(1) brightness(1.4);margin-bottom:2px}.chest.empty{color:var(--dim)}
 .hstage{background:linear-gradient(180deg,rgba(20,12,8,.15),rgba(20,12,8,.55)),var(--stg,none) center 70%/cover no-repeat!important;image-rendering:pixelated}
+/* ずかん：みつけた 子は タイプの いろ、まだの 子は くらく しずかに */
+.dexc.got,.dexc.seen{background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--tc) 30%,transparent),transparent 62%),var(--panel)!important;box-shadow:inset 0 -4px 0 var(--tc),0 3px 0 rgba(0,0,0,.4)!important}
+.dexc.unseen{background:#1c1510!important;border-image-source:none!important;border:4px solid #2a2019!important;box-shadow:inset 0 2px 6px rgba(0,0,0,.6)!important}
+.dexc.unseen canvas{opacity:.18!important}.dexc.unseen .nm{color:#5e4c3c}.dexc.unseen .no{color:#6a5646}
+/* アーケード：10れんせんの みちのり */
+.acintro{display:flex;flex-direction:column;gap:10px}
+.achero{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.achero b{font-size:22px;color:var(--acc);letter-spacing:.06em}.achero span{color:var(--dim);font-size:12px}
+.acpath{display:flex;align-items:center;gap:0;flex-wrap:nowrap;overflow-x:auto;padding:12px 2px 4px}
+.acpath i{position:relative;flex:none;width:26px;height:26px;display:grid;place-items:center;background:linear-gradient(180deg,#6a4e34,#3e2c1e);box-shadow:0 0 0 2px #0b0914,inset 0 2px 0 rgba(255,230,180,.3)}
+.acpath i em{font-style:normal;font-size:11px;color:#fff3dc;text-shadow:1px 1px 0 #0b0914}
+.acpath i.boss{width:32px;height:32px;background:linear-gradient(180deg,#c8462e,#7a2418)}
+.acpath s{flex:1 1 8px;min-width:6px;height:4px;background:repeating-linear-gradient(90deg,#c9a26a 0 4px,transparent 4px 8px)}
+.acrules{display:flex;flex-direction:column;gap:4px;font-size:12px}.acrules b{display:inline-block;width:1.6em;color:var(--acc)}
+.acstage{background:linear-gradient(180deg,rgba(20,12,8,.1),rgba(20,12,8,.5)),var(--stg,none) center 70%/cover no-repeat!important;padding:14px 8px!important}
+.acstage b{text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
+/* ひろい よこ画面の ホーム：たかさ いっぱいに つかう */
+@media (min-height:620px){html.land:not(.short) #scHub:not([hidden]){display:flex;flex-direction:column}html.land:not(.short) #scHub .hubgrid{flex:1;grid-template-rows:1fr auto}html.land:not(.short) #scHub .hubgrid>.hcol:nth-child(1){height:100%;display:flex;flex-direction:column}html.land:not(.short) #scHub .hstage{flex:1;min-height:260px}html.land:not(.short) #scHub .hmode b{font-size:16px}html.land:not(.short) #scHub .hmode small{font-size:12px}html.land:not(.short) #scHub .hmode .ico{width:44px;height:44px}html.land:not(.short) #scHub .chests .chest{min-height:96px}}
 </style>
 </head>
 <body>
@@ -9475,10 +9492,10 @@ function renderDex() {
   const G = $('dexGrid'); G.innerHTML = '';
   ids.forEach((id, i) => {
     const sp = SPECIES[id]; if (dexType !== 'all' && sp.type !== dexType && sp.type2 !== dexType) return;
-    const lv = D[id] || 0, c = document.createElement('div'); c.className = 'dexc ' + (lv >= 2 ? 'got' : lv ? 'seen' : 'unseen');
+    const lv = D[id] || 0, c = document.createElement('div'); c.className = 'dexc ' + (lv >= 2 ? 'got' : lv ? 'seen' : 'unseen'); if (lv) c.style.setProperty('--tc', TYPES[sp.type].c);   // みつけた 子は タイプの いろで ふちどり
     c.appendChild(spriteCanvas(id, 64));
     c.insertAdjacentHTML('afterbegin', `<span class="no">No.${String(i + 1).padStart(3, '0')}</span>${lv >= 2 ? '<span class="got">★</span>' : ''}`);
-    c.insertAdjacentHTML('beforeend', `<div class="nm">${lv ? sp.n : '？？？'}</div>`);
+    c.insertAdjacentHTML('beforeend', `<div class="nm">${lv ? sp.n : '？'}</div>`);
     if (lv) c.onclick = () => dexDetail(id, i + 1);
     G.appendChild(c);
   });
@@ -9958,8 +9975,11 @@ function renderArcade() {
   const head = `<div class="card acscore"><span>ハイスコア <b>${A.best}</b></span><span class="dim">さいこう ステージ ${A.bestStage}/${AC_N}・クリア ${A.clears}かい</span></div>`;
   if (!R) {
     const team = S.party.slice(0, 3);
-    body.innerHTML = head + `<div class="card"><div style="margin-bottom:8px">パーティの 上3体で 10れんせん。HPは つぎの たたかいに ひきつがれる（かつと 40% かいふく、ボスの あとは ひんしも ふっかつ）。まけたら おわり。</div>
-      <div class="acteam">${team.map(m => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b></div>`).join('')}</div></div>
+    const st = $('hStage') && getComputedStyle($('hStage')).getPropertyValue('--stg');
+    body.innerHTML = head + `<div class="card acintro"><div class="achero"><b>10れんせん</b><span>パーティの 上3体で かちぬけ！</span></div>
+      <div class="acpath">${Array.from({ length: AC_N }, (_, i) => `<i class="${AC_BOSS.includes(i) ? 'boss' : ''}"><em>${i + 1}</em></i>`).join('<s></s>')}</div>
+      <div class="acrules"><span><b>❤</b>HPは つぎの たたかいへ ひきつぐ</span><span><b>✚</b>かつと 40% かいふく・ボスの あとは ぜんかい</span><span><b>✖</b>まけたら そこで おわり</span></div></div>
+      <div class="card acteam acstage" style="${st ? `--stg:${st}` : ''}">${team.map(m => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b></div>`).join('')}</div>
       <button class="btn" id="acGo">スタート</button>`;
     body.querySelector('#acGo').onclick = () => { SND.se('ok'); arcadeNew(); };
   } else {
@@ -9971,7 +9991,7 @@ function renderArcade() {
     body.querySelector('#acGo').onclick = () => { SND.se('ok'); arcadeStart(); };
     body.querySelector('#acQuit').onclick = async () => { if (!(await ask('アーケードを おわりますか？\nここまでの スコアで きろくします。'))) return; if (R.score > A.best) A.best = R.score; A.bestStage = Math.max(A.bestStage, R.stage); A.run = null; save(); renderArcade(); };
   }
-  body.querySelectorAll('canvas[data-sid]').forEach(c => c.replaceWith(spriteCanvas(c.dataset.sid, 56)));
+  body.querySelectorAll('canvas[data-sid]').forEach(c => c.replaceWith(spriteCanvas(c.dataset.sid, R ? 56 : 80)));
 }
 // その 回戦の あいて（ランクごとに かわる。じぶんと おなじ みためは でない）
 function roundTrainer(i) {
