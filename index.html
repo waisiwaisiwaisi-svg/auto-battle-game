@@ -9493,6 +9493,9 @@ function toggleLand() {
     document.documentElement.requestFullscreen().then(() => screen.orientation && screen.orientation.lock ? screen.orientation.lock('landscape') : null).catch(() => { }).finally(layout);
   } else if (!LAND_PREF && document.fullscreenElement) { try { screen.orientation.unlock(); } catch (e) { } document.exitFullscreen().catch(() => { }).finally(layout); }
   layout();
+  // ボタンで まわした ときは ブラウザの resize が こないので、あとから もういちど ならべなおす（iPhone は 画面の 大きさが すこし おくれて きまる）
+  const relay = () => { layout(); window.dispatchEvent(new Event('resize')); const v = [...document.querySelectorAll('.screen')].find(e => !e.hidden); if (v && v.id === 'scHub' && S) renderHub(); };
+  requestAnimationFrame(relay); setTimeout(relay, 250); setTimeout(relay, 700);
 }
 window.addEventListener('resize', layout); window.addEventListener('orientationchange', () => setTimeout(layout, 120)); if (window.visualViewport) window.visualViewport.addEventListener('resize', layout);
 for (const id of ['titleRot', 'hubRot', 'bRot']) { const b = $(id); if (b) b.onclick = (ev) => { ev.stopPropagation(); toggleLand(); }; }
