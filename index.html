@@ -1571,7 +1571,7 @@ for (const id in MOVE_FIX) if (MOVES[id]) { const fx = MOVE_FIX[id]; Object.assi
 // クールダウンは わざごと（つよい わざほど ながい。すばやさで すこし かわる）
 for (const id in MOVES) if (!(MOVES[id].cd > 0)) MOVES[id].cd = 4;
 // ぶつり／とくしゅ は わざの かたちで きめる：からだで ぶつかる わざ（格闘・とっしん・ひっかき など）＝ぶつり（こうげき→ぼうぎょ）、
-//   ビーム・弾・ほのお・らくらい・はんい など はなれて とどく わざ＝とくしゅ（とくこう→とくぼう）
+//   ビーム・弾・ほのお・らくらい・はんい など はなれて とどく わざ＝とくしゅ（属性攻撃→属性防御）
 const PHYS_KINDS = ['melee', 'dash', 'swipe', 'vault', 'warp', 'rage', 'stance', 'counter'];
 for (const id in MOVES) { const m = MOVES[id]; if (m.cat === 'stat') continue; m.cat = PHYS_KINDS.includes(m.k) ? 'phys' : 'spec'; }
 for (const id in MOVES) if (MOVES[id].k === 'beam') MOVES[id].wind = Math.round((MOVES[id].wind || .5) * 2 * 100) / 100;   // しょうしゃビーム：ため時間 2ばい（みてから かわせるように）
@@ -2485,13 +2485,13 @@ window.addEventListener('storage', (e) => { if (e.key !== SAVE_KEY || SAVE_STALE
 function save() { if (SAVE_STALE) return; if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
 /* ===== ステータス（ポケモンと おなじ しくみ） =====
-   6つの のうりょく：HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ
+   6つの のうりょく：HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ
    種族値 × 個体値（0〜31）× 性格（ひとつが 1.1ばい、ひとつが 0.9ばい）で レベル50 の 実数値を 計算 */
 const STAT6 = ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'eva'];   // かいひ：指示なしで かわす かくりつ
-const STAT6_N = { hp: 'HP', atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう', spd: 'とくぼう', spe: 'すばやさ', eva: 'かいひ' };
+const STAT6_N = { hp: 'HP', atk: 'こうげき', def: 'ぼうぎょ', spa: '属性攻撃', spd: '属性防御', spe: 'すばやさ', eva: 'かいひ' };
 const STAT6_S = { hp: 'H', atk: 'A', def: 'B', spa: 'C', spd: 'D', spe: 'S', eva: 'E' };
 const STAT_LV = 50;
-// とくこう・とくぼうの 種族値は タイプの かたよりで つくる（もとの データは こうげき・ぼうぎょ だけ）
+// 属性攻撃・属性防御の 種族値は タイプの かたよりで つくる（もとの データは こうげき・ぼうぎょ だけ）
 const SPEC_LEAN = { fire: 1.12, water: 1.05, elec: 1.18, psychic: 1.3, ghost: 1.22, ice: 1.1, dragon: 1.05, poison: 1.02, grass: 1.06, wind: 1.06, bug: .9, normal: .92, fighting: .72, ground: .84, rock: .8 };
 const BODY_K = { hp: .3, atk: .15, def: .2, spe: -.45 };   // 体長（bz：-1〜+1）ごとの 種族値の かわり方
 const _base6 = {};
@@ -3432,7 +3432,7 @@ let TRN = null;   // { uid, W: 作業中の設定 { mv:[{id,go,c:[]}] }, dirty, 
 // 性格（訓練ページの 表記）
 const TR_NAT = { yuukan: ['勇敢', '前へ前へ。ほとんど隠れない'], okubyou: ['臆病', 'すぐ陰に隠れる。遠くから狙う'], reisei: ['冷静', '間合いを守り、暇なときは陰で待つ'], sekkachi: ['せっかち', '早撃ちの手数型。溜める技は使わない'],
   zurugashikoi: ['ずる賢い', '横から回り込み、当てたらすぐ陰へ'], nonki: ['のんき', 'どっしり型。壁・回復・カウンターで待ち構える'], kimagure: ['むらっけ', '相手が出るたび能力が大きく上下する'], nebarizuyoi: ['粘り強い', '踏ん張り型。HPが減るほど速く激しくなる'] };
-const TR_STAT = { atk: '攻撃', def: '防御', spa: '特攻', spd: '特防', spe: '素早さ' };
+const TR_STAT = { atk: '攻撃', def: '防御', spa: '属性攻撃', spd: '属性防御', spe: '素早さ' };
 // 作戦（ドラクエの「さくせん」の ような もの）：たちまわりの ほうしんを きめる。中身は 性格の うごき を つかう
 // 作戦は 3つ（性格の 3すくみ と おなじ：🔥せめ・🛡まもり・🌀からめて）。えらばなければ その子の 性格どおり
 const TR_PLAN = [['yuukan', 'どんどん せめる', '前へ 前へ。ほとんど かくれずに こうげき'], ['nonki', 'どっしり かまえる', 'かべ・かいふく・カウンターで まちかまえる'], ['reisei', 'まあいを たもつ', '間合いを まもり、ひまな ときは 陰で まつ']];
@@ -4158,7 +4158,7 @@ const MAIN_CTX = ctx;
 let B = null;
 
 const STAGE_KEYS = ['atk', 'def', 'spa', 'spd', 'spe', 'eva'];
-const STAGE_NAMES = { atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう', spd: 'とくぼう', spe: 'すばやさ', eva: 'かいひ' };
+const STAGE_NAMES = { atk: 'こうげき', def: 'ぼうぎょ', spa: '属性攻撃', spd: '属性防御', spe: 'すばやさ', eva: 'かいひ' };
 const STATUS_NAMES = { brn: 'やけど', par: 'まひ', psn: 'どく', tox: 'もうどく', slp: 'ねむり', frz: 'こおり' };
 const stageMul = (s) => s >= 0 ? (2 + s) / 2 : 2 / (2 - s);
 const TICK = 3; // 状態異常ダメージの間隔（秒）＝ポケモンの「1ターン」相当
@@ -5571,7 +5571,7 @@ const realAtks = (f, o) => f.moves.filter(id => MOVES[id] && isDamaging(MOVES[id
 // こうかの ある こうげきわざが 1つも ない：こうかなしの わざでも むりやり すこし とおす（きまらない たたかいを ふせぐ）
 const desperate = (f, o) => f.moves.some(id => MOVES[id] && isDamaging(MOVES[id])) && !realAtks(f, o).length;
 // 性格ごとの わざの このみ
-const STAT_JP = { atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう', spd: 'とくぼう', spe: 'すばやさ' };
+const STAT_JP = { atk: 'こうげき', def: 'ぼうぎょ', spa: '属性攻撃', spd: '属性防御', spe: 'すばやさ' };
 // ===== くんれん：わざ・わざの つかいかた・うごきかたを まえもって きめておく（くんれんモードでは しあい中は みるだけ） =====
 const TR_USE = [{ n: 'つかわない', k: 0 }, { n: 'ひかえめ', k: .35 }, { n: 'ふつう', k: 1 }, { n: 'よくつかう', k: 2.6 }];
 const TR_WHEN = { any: 'いつでも', open: 'でてすぐ（10びょう）', high: 'HPが はんぶん いじょう', low: 'HPが はんぶん いか', near: 'あいてが ちかい', far: 'あいてが とおい' };
@@ -7445,7 +7445,7 @@ $('tutSkip').onclick = async () => { if (!TUT || !B) return; B.paused = true; if
 const KIND_LABEL = { gshift: 'ゴースト', scare: 'いかく', mines: 'じらい', trap: 'わな', leaves: 'まとう', wave: 'なみ', stance: 'まちぶせ', rage: 'あばれる', warp: 'ワープ', flip: 'はんてん', proj: 'とびどうぐ', beam: 'ちょくせん', aoe: 'まわり', strike: 'あしもと', dash: 'とっしん', melee: 'せっきん', swipe: 'まえ', cone: 'おうぎ', multi: 'はんい', ray: 'ほじょ', self: 'じぶん', heal: 'かいふく', protect: 'まもる', sub: 'デコイ', clone: 'ぶんしん', dbond: 'ほじょ', counter: 'カウンター', curse: 'ほじょ', field: 'ば', hazard: 'しかけ', baton: 'いれかえ' };
 // わざの 効果の 説明
 function moveDesc(m) {
-  const e = m.e || {}, out = [], SN = { atk: 'こうげき', def: 'ぼうぎょ', spa: 'とくこう', spd: 'とくぼう', spe: 'すばやさ', eva: 'かいひ' };
+  const e = m.e || {}, out = [], SN = { atk: 'こうげき', def: 'ぼうぎょ', spa: '属性攻撃', spd: '属性防御', spe: 'すばやさ', eva: 'かいひ' };
   const ST = { brn: 'やけど', par: 'まひ', psn: 'どく', tox: 'もうどく', frz: 'こおり', slp: 'ねむり' };
   const stg = (o) => Object.entries(o).map(([k, v]) => `${SN[k]}${v > 0 ? '+' : ''}${v}`).join('・');
   const pw = m.power || (m.pow ? Math.round(m.pow * 5) : 0);
@@ -7660,7 +7660,7 @@ function updAutoBtn() { const b = $('bAuto'); if (!b) return; const on = !!(S &&
 function setText(el, t) { if (el._t !== t) { el._t = t; el.textContent = t; } }
 const plCache = {};
 // じょうたい タイマー：かかっている こうか と、あと なんびょうで きれるか
-const STAGE_SHORT = { atk: '攻撃', def: '防御', spa: '特攻', spd: '特防', spe: '素早', eva: '回避' };
+const STAGE_SHORT = { atk: '攻撃', def: '防御', spa: '属攻', spd: '属防', spe: '素早', eva: '回避' };
 const COND_COL = { brn: '#ff8a5a', par: '#ffd84a', psn: '#c07be0', tox: '#a64fd0', slp: '#9aa6ff', frz: '#8fe6ff' };
 const ST_KANJI = { brn: '火傷', par: '麻痺', psn: '毒', tox: '猛毒', slp: '眠り', frz: '凍結' };
 function condList(f) {
@@ -9451,7 +9451,7 @@ $('btnHelp').onclick = () => {
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
     <p><b>くさむら</b>で よわらせて <b>ふういんオーブ</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
     <p><b>たからばこ</b>は 勝つと ときどき もらえる（ジムリーダー・チャンピオンリーグは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・オーブ・スクロールが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
-    <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・とくこう・とくぼう・すばやさ・かいひ の 7つ。すばやさが 高いほど わざを はやく くりだし、かいひが 高いほど 指示なしで よける。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。<b>ぶつりわざ</b>（格闘・とっしん・ひっかき など からだで ぶつかる わざ）は こうげき→ぼうぎょ、<b>とくしゅわざ</b>（ビーム・弾・ほのお・らくらい・はんい など はなれて とどく わざ）は とくこう→とくぼう で ダメージが きまる。</p>
+    <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ・かいひ の 7つ。すばやさが 高いほど わざを はやく くりだし、かいひが 高いほど 指示なしで よける。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。<b>ぶつりわざ</b>（格闘・とっしん・ひっかき など からだで ぶつかる わざ）は こうげき→ぼうぎょ、<b>とくしゅわざ</b>（ビーム・弾・ほのお・らくらい・はんい など はなれて とどく わざ）は 属性攻撃→属性防御 で ダメージが きまる。</p>
     <p><b>きょうか</b>：へんせい → きょうか で ほかの モンスターを つかうと ポイントが ふえる（1たい +1、おなじ しゅるいなら +3。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりなおしのくすり）。</p>
     <p><b>どうぐ</b>：ふりなおしのくすり・すべてわすれのかね・ひとつわすれのは・おなじタイプのいし。たからばこから でる。へんせい → どうぐ で つかう。</p>
     <p><b>スクロール</b>で すきな わざを おぼえさせよう（てもち → スクロール）。</p>
