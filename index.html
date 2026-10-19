@@ -1570,6 +1570,7 @@ const MOVE_FIX = {
 for (const id in MOVE_FIX) if (MOVES[id]) { const fx = MOVE_FIX[id]; Object.assign(MOVES[id], fx, fx.e ? { e: Object.assign({}, MOVES[id].e, fx.e) } : {}); const e = MOVES[id].e; for (const k in e) if (e[k] == null) delete e[k]; }
 const MOVE_CD = 4.4;   // クールダウンは ぜんぶの わざで おなじ（すばやさで すこし かわる）
 for (const id in MOVES) MOVES[id].cd = MOVE_CD;
+for (const id in MOVES) if (MOVES[id].k === 'beam') MOVES[id].wind = Math.round((MOVES[id].wind || .5) * 2 * 100) / 100;   // しょうしゃビーム：ため時間 2ばい（みてから かわせるように）
 for (const id in MOVES) if (/こぶし|ナックル|パンチ/.test(MOVES[id].n) && MOVES[id].k === 'melee') MOVES[id].punch = 1;   // こぶしの わざ：グーの ヒット
 
 // おぼえる わざ（[レベル, わざ]）。ランキング上位100のわざは すべて どれかの モンスターが おぼえる
