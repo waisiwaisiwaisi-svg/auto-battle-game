@@ -707,7 +707,7 @@ html.vnarrow .hmode b{font-size:12.5px}html.vnarrow .hmode .ico{width:28px;heigh
 #btnJourney.hmode{--t:#ff9a3d} #btnCup{--t:#ffd166} #btnWild.hmode{--t:#62d26f} #btnOnline{--t:#4aa8ff}
 #btnJourney.hmode,#btnWild.hmode{background:linear-gradient(90deg,color-mix(in srgb,var(--t) 38%,#241d38),#1d1733 75%)!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}   /* くさむら だけ 古い 緑の ボタンの いろが のこって いた */
 .hmode small{color:#cfc6ef}
-#tabbar{position:absolute;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;gap:4px;padding:6px 6px calc(6px + var(--sab));background:linear-gradient(180deg,#2f2750,#1b1530);border-top:3px solid #0b0914;box-shadow:inset 0 2px 0 rgba(154,140,224,.45)}
+#tabbar{position:absolute;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(6,1fr);align-items:end;gap:4px;padding:6px 6px calc(6px + var(--sab));background:linear-gradient(180deg,#2f2750,#1b1530);border-top:3px solid #0b0914;box-shadow:inset 0 2px 0 rgba(154,140,224,.45)}
 #tabbar[hidden]{display:none}
 #tabbar button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0 2px;font-size:10.5px;color:var(--dim);min-height:52px;border-radius:0}
 #tabbar button .ico{width:28px;height:28px}
@@ -717,6 +717,24 @@ html.vnarrow .hmode b{font-size:12.5px}html.vnarrow .hmode .ico{width:28px;heigh
 #tabbar button.home.on{color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914}
 #tabbar .badge{position:absolute;top:2px;right:14px;width:14px;height:14px;padding:0;background:#ff3a3a;color:transparent;font-size:0;border:2px solid #0b0914;border-radius:50%;box-shadow:0 0 6px rgba(255,58,58,.7)}   /* まるい ポチ（かずは ださない） */
 #tabbar .badge[hidden]{display:none}
+.shbody{display:flex;flex-direction:column;gap:14px;padding-bottom:12px}.shgem{display:flex;align-items:center;gap:4px;font-size:15px;color:var(--ink)}
+.shsec{display:flex;flex-direction:column;gap:6px}.shh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding-left:8px;border-left:4px solid var(--acc)}.shh b{font-size:15px}
+.shgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.shcard,.shspecial{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 8px;font:inherit;color:var(--ink);background:linear-gradient(180deg,#2f2750,#1d1733);border-radius:0;border:4px solid transparent;border-image:var(--fr-win) 2 / 4px / 0 stretch;background-clip:padding-box;box-shadow:0 3px 0 rgba(0,0,0,.4);min-width:0;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
+.shcard b{font-size:12px;line-height:1.3;text-align:center;min-height:2.6em;display:flex;align-items:center;overflow-wrap:anywhere}
+.shcard.free{border-image-source:var(--fr-green)}.shcard:active:not(:disabled),.shspecial:active:not(:disabled){transform:translateY(2px)}
+.shcard.sold,.shspecial.sold{opacity:.45}
+.shgi{height:58px;display:grid;place-items:center}.shgi canvas,.shgi img{image-rendering:pixelated}.shgi .ico-l{width:40px;height:40px}.shem{font-size:38px;line-height:1}
+.shtm{display:flex;flex-direction:column;align-items:center;gap:2px}.shtm .ico{width:34px;height:34px}.shtm small{font-size:10px;padding:0 6px;background:var(--c)}
+.shp{display:block;width:100%;padding:3px 0;background:#3a7a3a;box-shadow:0 2px 0 #0b0914,inset 0 1px 0 rgba(255,255,255,.3);font-size:13px;font-weight:700}
+.shcard.free .shp{background:#2a8a5a}.shcard.sold .shp,.shspecial.sold .shp{background:#4a4458}
+.shtag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);padding:0 8px;font-size:10px;font-weight:700;background:#ff5a5a;box-shadow:0 0 0 2px #0b0914;white-space:nowrap;z-index:1}
+.shcard .rar{position:absolute;top:-8px;left:50%;transform:translateX(-50%);white-space:nowrap}
+.shspecial{flex-direction:row;gap:12px;padding:12px;border-image-source:var(--fr-gold)}.shspecial .shp{width:auto;padding:4px 12px;margin-left:auto;white-space:nowrap}.shspecial s{opacity:.6;font-size:11px}
+.shsd{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}.shsd b{font-size:15px;color:var(--acc)}.shsd span{font-size:11px;color:var(--dim)}
+.shgot{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}.shgot b{font-size:16px}
+@container (max-width:420px){.shgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#shBody{container-type:inline-size}
 html.tabs .screen:not(#scBattle){padding-bottom:calc(84px + var(--sab))}
 html.land #tabbar{top:0;right:auto;width:calc(76px + var(--sal));grid-template-columns:1fr;grid-auto-rows:1fr;align-items:stretch;padding:6px 6px 6px calc(6px + var(--sal));border-top:0;border-right:3px solid #0b0914;box-shadow:inset -2px 0 0 rgba(154,140,224,.45);background:linear-gradient(90deg,#1b1530,#2f2750)}
 html.land #tabbar button{min-height:0;justify-content:center}
@@ -1218,6 +1236,11 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
   </section>
 
   <!-- ギルド -->
+  <section class="screen" id="scShop" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">ショップ</span><span class="shgem" id="shGems"></span></div>
+    <div id="shBody" class="shbody"></div>
+  </section>
+
   <section class="screen" id="scGuild" hidden>
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">ギルド</span><button class="btn sub" id="btnGdBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <div id="gdBody" class="gdbody"></div>
@@ -1287,6 +1310,7 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 
   <!-- した の タブ：いつでも おもな ばしょへ -->
   <nav id="tabbar" hidden>
+    <button data-tab="shop" id="btnShop"><i class="ico" data-ico="shop"></i><span>ショップ</span><em class="badge" id="tabShopBadge" hidden></em></button>
     <button data-tab="team" id="btnTeam"><i class="ico" data-ico="crystal"></i><span>へんせい</span></button>
     <button data-tab="dex" id="btnDex"><i class="ico" data-ico="book"></i><span>ずかん</span></button>
     <button data-tab="home" id="tabHome"><i class="ico" data-ico="swords"></i><span>ホーム</span><em class="badge" id="tabHomeBadge" hidden></em></button>
@@ -2479,6 +2503,7 @@ const ICONS = {
 const ICON_URL = {};
 function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
+  if (name === 'shop' && typeof UIA !== 'undefined' && UIA.chest) return (ICON_URL[name] = UIA.chest.src);   // ショップ：たからばこの 絵
   if (name === 'capcr' && typeof UIA !== 'undefined' && UIA.crystal) return (ICON_URL[name] = UIA.crystal.src);   // ふういんオーブ（リザルトと おなじ 絵）
   if (typeof UIA !== 'undefined' && UIA['ic_' + name]) return (ICON_URL[name] = UIA['ic_' + name].src);   // ChatGPT の アイコン（I1）
   const raw = ICONS[name]; if (!raw) return '';
@@ -2955,7 +2980,7 @@ function setArtBg() {
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `linear-gradient(rgba(20,16,34,.86),rgba(20,16,34,.94)),url(${im.img})`;
 }
-const TAB_OF = { scRank: 'rank', scHub: 'home', scTeam: 'team', scDex: 'dex', scGuild: 'guild', scMaker: 'guild', scTrain: 'train' };
+const TAB_OF = { scShop: 'shop', scRank: 'rank', scHub: 'home', scTeam: 'team', scDex: 'dex', scGuild: 'guild', scMaker: 'guild', scTrain: 'train' };
 // 下の タブの うごき：えらばれた いた が まえの タブから のびて うつる（液体タブブリッジ）・アイコンが はねる・ホームは ひかりと わ
 let TAB_CUR = null;
 function tabMotion(t) {
@@ -3182,6 +3207,91 @@ function giveChest() {
   S.chests.push({ kind, at: Date.now() + CHESTS[kind].sec * 1000 });
   return kind;
 }
+/* ---- ショップ（クラロワふう）：まいにち いれかわる とくばい・むりょう プレゼント・たからばこ・しゅうがわりの スペシャル ---- */
+const SHOP_TM_P = [4, 10, 25], SHOP_MON_P = [8, 20, 50];
+const SHOP_CHESTS = [['silver', 8], ['gold', 20], ['giant', 45], ['magic', 55], ['legend', 120]];
+const shopDay = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+const shopWeek = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000 - 4 * 864e5) / 6048e5);   // げつようび で かわる
+const shopRng = (seed) => () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+function shopState() { S.shop = S.shop || {}; const d = shopDay(), w = shopWeek(); if (S.shop.day !== d) { S.shop.day = d; S.shop.bought = []; } if (S.shop.week !== w) { S.shop.week = w; S.shop.wb = 0; } return S.shop; }
+const shopFreeReady = () => !!S && !(shopState().bought || []).includes(0);
+// きょうの とくばい 6わく：1わくめは むりょう、のこりは スクロール・モンスター・どうぐ・オーブ
+function shopDeals() {
+  const r = shopRng(shopDay() * 7 + 3), pick = (a) => a[Math.floor(r() * a.length)], out = [];
+  const free = pick([{ k: 'orb', n: 3 }, { k: 'gem', n: 2 }, { k: 'item' }, { k: 'tm', rar: 0 }]);
+  const tms = TM_POOL(), mons = poolIds();
+  const mk = (o) => { if (o.k === 'item' && !o.id) o.id = pick(Object.keys(ITEMS)); if (o.k === 'tm' && !o.id) { const rr = o.rar ?? (r() < .6 ? 0 : r() < .8 ? 1 : 2), L = tms.filter(id => tmRarity(id) === rr); o.id = pick(L.length ? L : tms); o.rar = tmRarity(o.id); } if (o.k === 'mon') { const rr = r() < .55 ? 0 : r() < .85 ? 1 : 2, L = mons.filter(id => monRarity(id) === rr); o.id = pick(L.length ? L : mons); o.rar = monRarity(o.id); } return o; };
+  out.push(Object.assign(mk(free), { p: 0 }));
+  out.push(mk({ k: 'tm' }), mk({ k: 'tm' }), mk({ k: 'mon' }), mk({ k: 'item' }), { k: 'orb', n: 5 });
+  for (const o of out.slice(1)) o.p = o.k === 'tm' ? SHOP_TM_P[o.rar] : o.k === 'mon' ? SHOP_MON_P[o.rar] : o.k === 'item' ? 6 : 3;
+  return out;
+}
+// しゅうがわりの スペシャル：まとめて おとく
+function shopSpecial() {
+  const r = shopRng(shopWeek() * 13 + 5), L = [
+    { n: 'ぼうけん セット', ch: 'gold', orb: 5, gem: 0, p: 25, was: 35 },
+    { n: 'わざ マスター セット', ch: 'magic', orb: 0, item: 2, p: 50, was: 75 },
+    { n: 'ジャイアント セット', ch: 'giant', orb: 8, p: 45, was: 65 },
+    { n: 'でんせつ セット', ch: 'legend', orb: 5, item: 1, p: 110, was: 150 },
+  ];
+  return L[Math.floor(r() * L.length)];
+}
+function shopName(o) { return o.k === 'orb' ? `オーブ ×${o.n}` : o.k === 'gem' ? `ジェム ×${o.n}` : o.k === 'item' ? ITEMS[o.id].n : o.k === 'tm' ? `スクロール「${MOVES[o.id].n}」` : o.k === 'mon' ? SPECIES[o.id].n : ''; }
+function shopIcon(o) {
+  if (o.k === 'orb') return `<i class="ico ico-l" data-ico="capcr"></i>`;
+  if (o.k === 'gem') return `<img class="pix" src="${UIA.ic_gem.src}" width="40" height="40" alt="">`;
+  if (o.k === 'item') return `<span class="shem">${ITEMS[o.id].ic}</span>`;
+  if (o.k === 'tm') { const m = MOVES[o.id]; return `<span class="shtm" style="--c:${TYPES[m.t].c}"><i class="ico" data-ico="scroll"></i><small>${TYPES[m.t].n}</small></span>`; }
+  if (o.k === 'mon') return `<i data-shmon="${o.id}"></i>`;
+  return '';
+}
+function shopGive(o) {
+  if (o.k === 'orb') S.capsules += o.n;
+  else if (o.k === 'gem') S.gems = (S.gems || 0) + o.n;
+  else if (o.k === 'item') { S.items = S.items || {}; S.items[o.id] = (S.items[o.id] || 0) + 1; }
+  else if (o.k === 'tm') { S.tms = S.tms || {}; S.tms[o.id] = (S.tms[o.id] || 0) + 1; }
+  else if (o.k === 'mon') { const m = newMon(o.id); (S.party.length < 6 ? S.party : (S.box = S.box || [])).push(m); }
+}
+async function shopBuyDeal(i) {
+  const st = shopState(), o = shopDeals()[i]; if ((st.bought || []).includes(i)) return;
+  if (o.p > 0) { if ((S.gems || 0) < o.p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${o.p}・もっている 💎${S.gems || 0}）`); return; }
+    if (!(await ask(`${shopName(o)}を 💎${o.p} で かいますか？`, 'かう', 'やめる'))) return; S.gems -= o.p; }
+  st.bought = [...(st.bought || []), i]; shopGive(o); save(); SND.se(o.p ? 'ok' : 'card');
+  const bg = modal(`<div class="shgot"><div class="shgi">${shopIcon(o)}</div><b>${shopName(o)}</b><div class="dim">${o.k === 'item' ? ITEMS[o.id].d : o.k === 'tm' ? moveDesc(MOVES[o.id]) : o.k === 'mon' ? (S.party.includes(S.party[S.party.length - 1]) ? 'なかまに なった！' : '') : 'てに いれた！'}</div><button class="btn" data-x="c" style="margin-top:10px">OK</button></div>`);
+  shopPaint(bg); bg.querySelector('[data-x="c"]').onclick = () => bg.remove(); renderShop();
+}
+async function shopBuyChest(kind, p) {
+  if ((S.gems || 0) < p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${p}・もっている 💎${S.gems || 0}）`); return; }
+  if (!(await ask(`${CHESTS[kind].n}を 💎${p} で かって すぐ あけますか？`, 'かう', 'やめる'))) return;
+  S.gems -= p; S.chests = S.chests || []; S.chests.push({ kind, at: 0 }); save(); openChest(S.chests.length - 1); renderShop();
+}
+async function shopBuySpecial() {
+  const st = shopState(), o = shopSpecial(); if (st.wb) return;
+  if ((S.gems || 0) < o.p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${o.p}・もっている 💎${S.gems || 0}）`); return; }
+  if (!(await ask(`${o.n}を 💎${o.p} で かいますか？`, 'かう', 'やめる'))) return;
+  S.gems -= o.p; st.wb = 1; if (o.orb) S.capsules += o.orb; S.items = S.items || {}; for (let k = 0; k < (o.item || 0); k++) { const id = choice(Object.keys(ITEMS)); S.items[id] = (S.items[id] || 0) + 1; }
+  S.chests = S.chests || []; S.chests.push({ kind: o.ch, at: 0 }); save(); openChest(S.chests.length - 1); renderShop();
+}
+function shopPaint(root) { paintIcons(root); root.querySelectorAll('i[data-shmon]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.shmon, 56))); }
+function renderShop() {
+  if (!S) return; show('scShop'); const st = shopState(), deals = shopDeals(), sp = shopSpecial(), now = new Date(), nx = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const left = Math.max(0, Math.round((nx - now) / 1000)), hm = `${Math.floor(left / 3600)}じかん ${Math.floor(left % 3600 / 60)}ふん`;
+  $('shGems').innerHTML = `<img class="pix" src="${UIA.ic_gem.src}" width="18" height="18" alt=""> ${S.gems || 0}`;
+  const rar = (o) => o.rar != null ? `<span class="rar" style="background:${RARITY[o.rar].c}">${RARITY[o.rar].n}</span>` : '';
+  const deal = (o, i) => { const sold = (st.bought || []).includes(i);
+    return `<button class="shcard${sold ? ' sold' : ''}${o.p === 0 ? ' free' : ''}" data-deal="${i}" ${sold ? 'disabled' : ''}>${o.p === 0 ? '<span class="shtag">むりょう</span>' : rar(o)}<div class="shgi">${shopIcon(o)}</div><b>${shopName(o)}</b><span class="shp">${sold ? 'うりきれ' : o.p === 0 ? 'うけとる' : `💎 ${o.p}`}</span></button>`; };
+  $('shBody').innerHTML = `
+    <div class="shsec"><div class="shh"><b>きょうの とくばい</b><span class="dim">あと ${hm} で いれかえ</span></div><div class="shgrid">${deals.map(deal).join('')}</div></div>
+    <div class="shsec"><div class="shh"><b>しゅうがわり スペシャル</b><span class="dim">げつようび に いれかえ</span></div>
+      <button class="shspecial${st.wb ? ' sold' : ''}" id="shSp" ${st.wb ? 'disabled' : ''}><span class="shtag">${Math.round((1 - sp.p / sp.was) * 100)}% おとく</span><div class="shgi">${chestIcon(sp.ch, false, 2)}</div><div class="shsd"><b>${sp.n}</b><span>${CHESTS[sp.ch].n}${sp.orb ? `・オーブ ×${sp.orb}` : ''}${sp.item ? `・どうぐ ×${sp.item}` : ''}</span></div><span class="shp">${st.wb ? 'こうにゅうずみ' : `<s>💎${sp.was}</s> 💎 ${sp.p}`}</span></button></div>
+    <div class="shsec"><div class="shh"><b>たからばこ</b><span class="dim">かうと すぐ あく</span></div><div class="shgrid shch">${SHOP_CHESTS.map(([k, p]) => `<button class="shcard" data-ch="${k}" data-p="${p}"><div class="shgi">${chestIcon(k, false, 2)}</div><b>${CHESTS[k].n}</b><span class="shp">💎 ${p}</span></button>`).join('')}</div></div>
+    <div class="dim" style="font-size:11px;text-align:center">ジェムは しあいや ジム・リーグの ごほうびで たまります</div>`;
+  const B = $('shBody'); shopPaint(B);
+  B.querySelectorAll('[data-deal]').forEach(b => b.onclick = () => shopBuyDeal(+b.dataset.deal));
+  B.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => shopBuyChest(b.dataset.ch, +b.dataset.p));
+  const spb = $('shSp'); if (spb) spb.onclick = () => shopBuySpecial();
+  { const b = $('tabShopBadge'); if (b) b.hidden = !shopFreeReady(); }
+}
 // ギルドに はいって いると たからばこが 5% はやく あく（あく じこくを すこしずつ まえに ずらす。とじていた あいだの ぶんも）
 const GUILD_CHEST = .05;
 function chestTick() {
@@ -3230,6 +3340,7 @@ function renderChests() {
   }
   if (box._h !== h) { box._h = h; box.innerHTML = h; }   // かわった ときだけ かきかえる
   { const n = S.chests.filter(c => chestLeft(c) === 0).length, b = $('tabHomeBadge'); if (b) { b.hidden = !n; b.textContent = n || ''; } }
+  { const b = $('tabShopBadge'); if (b) b.hidden = !shopFreeReady(); }   // ショップ：きょうの むりょう プレゼントが まだ
   $('hGems').textContent = S.gems || 0; $('hGuildBonus').hidden = !S.guildOn;
   $('hItems').textContent = Object.values(S.items || {}).reduce((a, b) => a + b, 0);
   { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<b class="hnm"></b><i class="ico" style="background-image:url(${tierBadge(t.i)})"></i><b style="color:${t.c}">${t.n}</b><span style="grid-column:2">${k.r}</span><span class="mb"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></span>`; $('hRank').style.gridTemplateRows = 'auto auto auto auto'; $('hRank').querySelector('.hnm').textContent = myName(); }
@@ -9588,6 +9699,7 @@ async function mkSave() {
 $('btnTrainTab').onclick = () => { guildStop(); renderTrain(); };
 $('btnTrBack').onclick = () => trLeave(() => renderHub());
 $('btnGuild').onclick = () => renderGuild();
+$('btnShop').onclick = () => { guildStop(); renderShop(); };
 $('tabHome').onclick = () => { guildStop(); renderHub(); };
 $('hStage').onclick = () => $('btnTeam').click();
 $('hMe').onclick = () => renderRank('p');
