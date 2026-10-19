@@ -161,5 +161,6 @@ for card, kk, a in jobs:
           F.append(dict(w=int(w), h=int(y1 - y0), x=0, d=rle(qi[:, i * w:(i + 1) * w])))
       out[sid] = dict(pal=palhex, f=F, full=1)
       print(sid, L[(card - 1) * 2 + (k - 1)]['n'], w, y1 - y0, len(palhex))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from fill_holes import fix_all; print('ぬけを うめた', fix_all(out))   # 体の なかの とうめいの 穴を うめる
 json.dump(out, open(OUT, 'w'), separators=(',', ':'))
 print(len(out), os.path.getsize(OUT) // 1024, 'KB')
