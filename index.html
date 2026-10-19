@@ -3429,13 +3429,17 @@ let TRN = null;   // { uid, W: 作業中の設定 { mv:[{id,go,c:[]}] }, dirty, 
 const TR_NAT = { yuukan: ['勇敢', '前へ前へ。ほとんど隠れない'], okubyou: ['臆病', 'すぐ陰に隠れる。遠くから狙う'], reisei: ['冷静', '間合いを守り、暇なときは陰で待つ'], sekkachi: ['せっかち', '早撃ちの手数型。溜める技は使わない'],
   zurugashikoi: ['ずる賢い', '横から回り込み、当てたらすぐ陰へ'], nonki: ['のんき', 'どっしり型。壁・回復・カウンターで待ち構える'], kimagure: ['むらっけ', '相手が出るたび能力が大きく上下する'], nebarizuyoi: ['粘り強い', '踏ん張り型。HPが減るほど速く激しくなる'] };
 const TR_STAT = { atk: '攻撃', def: '防御', spa: '特攻', spd: '特防', spe: '素早さ' };
+// 作戦（ドラクエの「さくせん」の ような もの）：たちまわりの ほうしんを きめる。中身は 性格の うごき を つかう
+const TR_PLAN = [['', 'せいかく まかせ', 'その子の 性格の まま うごく'], ['yuukan', 'どんどん せめろ', '前へ 前へ。ほとんど かくれずに こうげき'], ['okubyou', 'いのち だいじに', 'すぐ 陰に かくれ、とおくから ねらう'],
+  ['reisei', 'まあいを たもて', '間合いを まもり、ひまな ときは 陰で まつ'], ['sekkachi', 'てかずで おせ', 'ためる わざは つかわず、はやい わざを どんどん'], ['zurugashikoi', 'うらを かけ', '横から まわりこみ、あてたら すぐ 陰へ'],
+  ['nonki', 'どっしり かまえろ', 'かべ・かいふく・カウンターで まちかまえる'], ['nebarizuyoi', 'さいごまで ねばれ', 'HPが へるほど はげしく せめる']];
 function trNatCard(k, W, m) {
   const N = NATURES[k], T = TR_NAT[k]; if (!N || !T) return '';
-  const cur = (W && W.nat && NATURES[W.nat]) ? W.nat : k, C = TR_NAT[cur] || T;
-  return `<div class="trnat"><div class="nh"><span class="nl">性格</span><b>${C[0]}</b>${cur !== k ? `<span class="dim" style="font-size:11px">（もとは ${T[0]}）</span>` : ''}${N.up ? `<span class="nu">${TR_STAT[N.up]}↑</span><span class="nd">${TR_STAT[N.down]}↓</span>` : ''}</div>
-    <div class="ndsc">${C[1]}</div>
-    <div class="trseg trnatsel">${Object.keys(TR_NAT).map(x => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}">${TR_NAT[x][0]}</button>`).join('')}</div>
-    <div class="nft">訓練で 立ち回りの 性格を かえられます（能力の ↑↓ は もとの 性格のまま）。撃ち方が「お任せ」の技はこの動きのまま撃ちます</div></div>`;
+  const cur = (W && W.nat && NATURES[W.nat]) ? W.nat : '', P = TR_PLAN.find(p => p[0] === cur) || TR_PLAN[0];
+  return `<div class="trnat"><div class="nh"><span class="nl">作戦</span><b>${P[1]}</b><span class="dim" style="font-size:11px">（性格：${T[0]}${N.up ? ` ${TR_STAT[N.up]}↑ ${TR_STAT[N.down]}↓` : ''}）</span></div>
+    <div class="ndsc">${cur ? P[2] : `${T[0]}：${T[1]}`}</div>
+    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}">${n}</button>`).join('')}</div>
+    <div class="nft">作戦で ふだんの 立ち回りが かわります（能力は かわりません）。撃ち方が「お任せ」の技は この動きのまま撃ちます</div></div>`;
 }
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trBlank = (m) => ({ mv: equipped(m).map(id => ({ id, go: 'auto', c: [] })) });
@@ -3535,7 +3539,7 @@ function renderTrain(uid) {
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
   $('trMode').onclick = () => { S.train = !S.train; save(); SND.se('click'); renderTrain(uid); };
-  B.querySelectorAll('.trnatsel button').forEach(b => b.onclick = () => { const v = b.dataset.nat; W.nat = v === nk ? undefined : v; TRN.dirty = true; SND.se('click'); renderTrain(uid); });   // 性格：「確定」で 試合に つかう
+  B.querySelectorAll('.trnatsel button').forEach(b => b.onclick = () => { const v = b.dataset.nat; W.nat = v || undefined; TRN.dirty = true; SND.se('click'); renderTrain(uid); });   // 作戦：「確定」で 試合に つかう
   const act = (a, f) => { const e = B.querySelector(`[data-a="${a}"]`); if (e) e.onclick = f; };
   const redo = () => renderTrain(uid), touch = () => { for (const r of W.mv) r.c = r.c.filter(l => l.length); TRN.dirty = true; redo(); };   // からの行は つめる
   // 置く：pl = { k:'mv'|'go'|'c', v } 新しく ／ { from:[i,j] } 置いてある条件 ／ { gFrom:i } 置いてある立ち回り。z = 落とした枠
