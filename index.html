@@ -1198,8 +1198,30 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 .acrules{display:flex;flex-direction:column;gap:4px;font-size:12px}.acrules b{display:inline-block;width:1.6em;color:var(--acc)}
 .acstage{background:linear-gradient(180deg,rgba(20,12,8,.1),rgba(20,12,8,.5)),var(--stg,none) center 70%/cover no-repeat!important;padding:14px 8px!important}
 .acstage b{text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
-/* ひろい よこ画面の ホーム：たかさ いっぱいに つかう */
-@media (min-height:620px){html.land:not(.short) #scHub:not([hidden]){display:flex;flex-direction:column}html.land:not(.short) #scHub .hubgrid{flex:1;grid-template-rows:1fr auto}html.land:not(.short) #scHub .hubgrid>.hcol:nth-child(1){height:100%;display:flex;flex-direction:column}html.land:not(.short) #scHub .hstage{flex:1;min-height:260px}html.land:not(.short) #scHub .hmode b{font-size:16px}html.land:not(.short) #scHub .hmode small{font-size:12px}html.land:not(.short) #scHub .hmode .ico{width:44px;height:44px}html.land:not(.short) #scHub .chests .chest{min-height:96px}}
+/* ===== よこ画面の ホーム（ロビー）：Brawl Stars・ブルアカ などの 定番に あわせる =====
+   ・背景は 画面いっぱいの ステージ（わくで かこまない）。まんなか〜左に あいぼうを 大きく
+   ・うえ：じぶん（左）／しげん・せってい（右）
+   ・右下：いちばん 大事な「ランク対戦」を いちばん 大きく。その うえに ほかの あそびかた
+   ・左下：たからばこ（ちいさく まとめる） */
+html.land #scHub:not([hidden]){display:flex;flex-direction:column;background:linear-gradient(90deg,rgba(14,9,6,.25),rgba(14,9,6,0) 35%,rgba(14,9,6,0) 55%,rgba(14,9,6,.7)),linear-gradient(180deg,rgba(14,9,6,.55),rgba(14,9,6,0) 22%,rgba(14,9,6,0) 70%,rgba(14,9,6,.75)),var(--stg,none) center 65%/cover no-repeat;image-rendering:pixelated}
+html.land #scHub .hbar,html.land #scHub .hubgrid{position:relative;z-index:1}
+html.land #scHub{max-width:none!important}html.land #scHub .hbar,html.land #scHub .hubgrid{width:100%;max-width:1180px;margin-inline:auto}
+html.land #scHub .chests .chest{font-size:10px}html.land.short #scHub .hchest .chesthead small{display:none}
+html.land #scHub .hubgrid{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,38%,460px);grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"st bt" "ch bt";gap:10px 18px;align-items:stretch}
+html.land #scHub .hubgrid>.hcol:nth-child(1){grid-area:st;justify-content:flex-end;min-height:0}
+html.land #scHub .hstage{flex:1;min-height:0;background:none!important;border:0!important;border-image:none!important;box-shadow:none!important;display:flex;align-items:flex-end;justify-content:center}
+html.land #scHub .hstage canvas{width:auto;height:min(100%,62vh);max-width:100%;aspect-ratio:2/1;filter:drop-shadow(0 6px 0 rgba(0,0,0,.35))}
+html.land #scHub .hsname{left:50%;top:auto;bottom:4px;transform:translateX(-50%);padding:2px 10px;background:rgba(14,9,6,.6);box-shadow:0 0 0 2px #0b0914;white-space:nowrap}
+html.land #scHub .hubgrid>.hcol:nth-child(2){grid-area:bt;justify-content:flex-end;height:auto!important;align-self:end}
+html.land #scHub .hmodes{flex:none;grid-template-columns:1fr 1fr;grid-auto-rows:auto;gap:8px}
+html.land #scHub .hmode{min-height:56px;padding:8px 10px!important}
+html.land #scHub .hcta{order:3;min-height:clamp(72px,16vh,110px);font-size:1.1em;box-shadow:0 5px 0 #8a5a10,0 0 0 3px #0b0914,0 0 24px rgba(255,190,80,.35)!important}
+html.land #scHub .hcta .t{font-size:clamp(20px,3.2vh,30px)}
+html.land #scHub .hchest{grid-area:ch;gap:4px;max-width:520px;padding:6px 8px 4px;background:rgba(14,9,6,.55);box-shadow:0 0 0 2px #0b0914,inset 0 0 0 2px rgba(201,162,106,.35)}
+html.land #scHub .hchest .chesthead span:first-child{font-size:12px;padding:2px 12px 2px 10px!important}
+html.land #scHub .chests{gap:6px}html.land #scHub .chests .chest{min-height:0!important;padding:4px 2px!important}html.land #scHub .chests .chest .chimg{max-height:34px;width:auto}
+html.land #scHub .inv{font-size:11px}
+html.land #scHub .hme,html.land #scHub .hres>span,html.land #scHub .hicon{background-color:rgba(20,13,9,.72)!important}
 </style>
 </head>
 <body>
@@ -3007,7 +3029,7 @@ const SND = (() => {
    ===================================================================== */
 function setArtBg() {
   const im = ARENAS[S && S.tier != null ? FIELDS[S.tier % FIELDS.length] : 'grass'] || ARENAS.grass;
-  { const hs = $('hStage'); if (hs) hs.style.setProperty('--stg', `url(${im.img})`); }   // ホームの モンスターの うしろにも ステージの 絵
+  { const hs = $('scHub'); if (hs) hs.style.setProperty('--stg', `url(${im.img})`); }   // ホームの モンスターの うしろにも ステージの 絵
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `radial-gradient(ellipse at 50% 35%,rgba(30,18,10,.35),rgba(14,9,6,.88) 75%),linear-gradient(rgba(26,16,10,.5),rgba(16,10,7,.78)),url(${im.img})`;   // ステージの 絵を うすく みせる（あたたかい いろの かげ）
 }
