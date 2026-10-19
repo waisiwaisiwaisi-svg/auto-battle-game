@@ -134,6 +134,8 @@ h1.tlogo{font-size:clamp(30px,calc(6 * var(--vw)),60px);line-height:1;display:fl
 .hres > span{background:rgba(13,11,20,.7);box-shadow:0 0 0 1px var(--edge);padding:3px 9px;font-variant-numeric:tabular-nums}
 .hicon{width:34px;height:34px;background:var(--panel);box-shadow:0 0 0 2px var(--edge);font-size:16px;color:var(--acc)}
 .hicon.off{color:var(--dim);text-decoration:line-through}
+/* ミュート中：おとの ボタンに ななめの せん */
+#hubSnd,#bSnd{position:relative}#hubSnd.off::after,#bSnd.off::after{content:'';position:absolute;left:50%;top:50%;width:72%;height:4px;background:#ff5a5a;border-radius:2px;box-shadow:0 0 0 1.5px #1a1426;transform:translate(-50%,-50%) rotate(-45deg);pointer-events:none}#bSnd.off::after{width:16px;height:2px;box-shadow:0 0 0 1px #1a1426}
 .hubgrid{display:grid;grid-template-columns:1fr;gap:12px}
 .hcol{display:flex;flex-direction:column;gap:10px;min-width:0}
 body.artbg{background-size:cover;background-position:center;background-attachment:fixed}
