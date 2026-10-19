@@ -3579,15 +3579,20 @@ const trtRow = () => { const W = trtW(); if (!W) return 0; const i = W.mv.findIn
 const TRT_STEPS = [
   { tx: 'ここは <b>訓練</b>。バトルで モンスターが どう うごくかを くみたてる ばしょだよ。<br>いっしょに 1つ つくってみよう！', next: 1 },
   { sel: '.trnatsel', tx: '① まずは <b>作戦</b>。ふだんの 立ち回りを きめるよ。<br>どれか 1つ タップしてみよう（★が その子の おすすめ）', ok: () => TRT.f.nat },
-  { sel: () => `.trr[data-row="${trtRow()}"]`, tx: '② これが <b>技の 行</b>。上ほど 先に 撃つよ。<br>左の 番号を ドラッグすると 順番を かえられる', next: 1 },
-  { sel: '.pal.k-c[data-v="ophp"]', tx: '③ 条件を おいてみよう。<br>「<b>相手のHP</b>」を ○ばんの 技の「<b>使うとき</b>」へ ドラッグ！<br><small>（タップ → 置き場所を タップ でも OK）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
-  { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, tx: 'これで「<b>相手の HPが 50%未満の とき</b>」に この技を 撃つ。<br>おいた 条件を タップすると 25%・75% にも かえられるよ', next: 1 },
-  { sel: '.pal.k-go[data-v="near"]', tx: '④ つぎは <b>撃ち方</b>。<br>「<b>近づいて</b>」を ○ばんの「お任せ撃つ」の わくへ おいてみよう', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
+  { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが <b>技の 行</b>。上ほど 先に 撃つよ。<br>左の 番号を ドラッグすると 順番を かえられる', next: 1 },
+  { sel: '.pal.k-c[data-v="ophp"]', allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を おいてみよう。<br>「<b>相手のHP</b>」を ○ばんの 技の「<b>使うとき</b>」へ ドラッグ！<br><small>（タップ → 置き場所を タップ でも OK）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
+  { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: 'これで「<b>相手の HPが 50%未満の とき</b>」に この技を 撃つ。<br>おいた 条件を タップすると 25%・75% にも かえられるよ', next: 1 },
+  { sel: '.pal.k-go[data-v="near"]', allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ つぎは <b>撃ち方</b>。<br>「<b>近づいて</b>」を ○ばんの「お任せ撃つ」の わくへ おいてみよう', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
   { sel: '[data-a="sim"]', tx: '⑤ できたら <b>模擬戦で ためす</b>！<br>5かい たたかわせて けっかを みせてくれるよ', ok: () => !!document.querySelector('.simtbl') },
-  { sel: '.simcs', tx: '⑥「<b>条件の はつどう</b>」で、条件が なりたったか（○×）と 何かい 撃ったかが わかる。<br>うまく いかなければ 条件を かえて また ためそう', next: 1, onNext: () => { const a = document.querySelector('.simtbl'); if (a) { const bg = a.closest('.askbg'); if (bg) bg.remove(); } } },
+  { sel: '.simcs', allow: () => [], tx: '⑥「<b>条件の はつどう</b>」で、条件が なりたったか（○×）と 何かい 撃ったかが わかる。<br>うまく いかなければ 条件を かえて また ためそう', next: 1, onNext: () => { const a = document.querySelector('.simtbl'); if (a) { const bg = a.closest('.askbg'); if (bg) bg.remove(); } } },
   { sel: '[data-a="ok"]', tx: '⑦ よければ <b>確定</b>。この子の 訓練が ほぞん されるよ', ok: () => { const m = trMon(TRN && TRN.uid); return !!(m && m.tr && m.tr.prog && m.tr.prog.mv && !TRN.dirty); } },
-  { sel: '#trMode', tx: '⑧ さいごに <b>訓練モード</b>を ON に すると、試合で この せっていどおりに たたかうよ。<br>（OFFの ときは きみが わざを しじ する）　これで おしまい！', next: 1, end: 1 },
+  { sel: '#trMode', allow: () => ['#trMode'], tx: '⑧ さいごに <b>訓練モード</b>を ON に すると、試合で この せっていどおりに たたかうよ。<br>（OFFの ときは きみが わざを しじ する）　これで おしまい！', next: 1, end: 1 },
 ];
+// チュートリアル中は いま あんない している ところ（と ふきだし）しか さわれない。スクロールは できる
+const trtAllowed = (el) => { if (!TRT || !el || !el.closest) return true; if (el.closest('#trtut .bub')) return true; if ($('scTrain').hidden) return true;
+  const st = TRT_STEPS[TRT.i], q = st.allow ? st.allow() : st.sel ? [typeof st.sel === 'function' ? st.sel() : st.sel] : [];
+  return q.some(x => { const t = el.closest(x); return !!t; }); };
+for (const ev of ['pointerdown', 'mousedown', 'click']) window.addEventListener(ev, (e) => { if (TRT && !trtAllowed(e.target)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } }, true);
 function trtStart() { trtStop(); TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1 }; TRT.el.id = 'trtut'; TRT.el.innerHTML = '<div class="hl"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; document.body.appendChild(TRT.el);
   TRT.el.querySelector('.skip').onclick = () => { SND.se('back'); trtEnd(); };
   TRT.el.querySelector('.nx').onclick = () => { const st = TRT_STEPS[TRT.i]; if (st.onNext) st.onNext(); if (st.end) { SND.se('ok'); trtEnd(); return; } SND.se('click'); trtGo(TRT.i + 1); };
