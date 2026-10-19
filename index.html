@@ -3280,6 +3280,21 @@ function shopDeals() {
   for (const o of out.slice(1)) o.p = o.k === 'tm' ? SHOP_TM_P[o.rar] : o.k === 'mon' ? SHOP_MON_P[o.rar] : o.k === 'item' ? 6 : 3;
   return out;
 }
+// きょうの わざ スクロール ６つ・モンスター ６たい（とくばいと べつに まいにち いれかわる。おなじ ものは ならべない）
+const SHOP_LINE_N = 6;
+function shopLine(kind) {
+  const r = shopRng(shopDay() * (kind === 'tm' ? 11 : 17) + 9), used = new Set(shopDeals().filter(o => o.k === kind).map(o => o.id)), out = [];
+  const all = kind === 'tm' ? TM_POOL() : poolIds(), rr = () => { const x = r(); return kind === 'tm' ? (x < .5 ? 0 : x < .82 ? 1 : 2) : (x < .5 ? 0 : x < .83 ? 1 : 2); };
+  const rarOf = kind === 'tm' ? tmRarity : monRarity, typeOf = (id) => kind === 'tm' ? MOVES[id].t : SPECIES[id].type, seenT = new Set();
+  for (let n = 0; n < 200 && out.length < SHOP_LINE_N; n++) {
+    const want = rr(); let L = all.filter(id => !used.has(id) && rarOf(id) === want);
+    const L2 = L.filter(id => !seenT.has(typeOf(id))); if (L2.length) L = L2;   // タイプが かたよらない ように
+    if (!L.length) L = all.filter(id => !used.has(id)); if (!L.length) break;
+    const id = L[Math.floor(r() * L.length)]; used.add(id); seenT.add(typeOf(id));
+    const rar = rarOf(id); out.push({ k: kind, id, rar, p: (kind === 'tm' ? SHOP_TM_P : SHOP_MON_P)[rar] });
+  }
+  return out;
+}
 // しゅうがわりの スペシャル：まとめて おとく
 function shopSpecial() {
   const r = shopRng(shopWeek() * 13 + 5), L = [
@@ -3307,7 +3322,7 @@ function shopGive(o) {
   else if (o.k === 'mon') { const m = newMon(o.id); (S.party.length < 6 ? S.party : (S.box = S.box || [])).push(m); }
 }
 async function shopBuyDeal(i) {
-  const st = shopState(), o = shopDeals()[i]; if ((st.bought || []).includes(i)) return;
+  const st = shopState(), o = typeof i === 'string' ? shopLine(i[0] === 't' ? 'tm' : 'mon')[+i.slice(1)] : shopDeals()[i]; if (!o || (st.bought || []).includes(i)) return;
   if (o.p > 0) { if ((S.gems || 0) < o.p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${o.p}・もっている 💎${S.gems || 0}）`); return; }
     if (!(await ask(`${shopName(o)}を 💎${o.p} で かいますか？`, 'かう', 'やめる'))) return; S.gems -= o.p; }
   st.bought = [...(st.bought || []), i]; shopGive(o); save(); SND.se(o.p ? 'ok' : 'card');
@@ -3336,12 +3351,14 @@ function renderShop() {
     return `<button class="shcard${sold ? ' sold' : ''}${o.p === 0 ? ' free' : ''}" data-deal="${i}" ${sold ? 'disabled' : ''}>${o.p === 0 ? '<span class="shtag">むりょう</span>' : rar(o)}<div class="shgi">${shopIcon(o)}</div><b>${shopName(o)}</b><span class="shp">${sold ? 'うりきれ' : o.p === 0 ? 'うけとる' : `💎 ${o.p}`}</span></button>`; };
   $('shBody').innerHTML = `
     <div class="shsec"><div class="shh"><b>きょうの とくばい</b><span class="dim">あと ${hm} で いれかえ</span></div><div class="shgrid">${deals.map(deal).join('')}</div></div>
+    <div class="shsec"><div class="shh"><b>わざ スクロール</b><span class="dim">まいにち いれかえ</span></div><div class="shgrid">${shopLine('tm').map((o, j) => deal(o, 't' + j)).join('')}</div></div>
+    <div class="shsec"><div class="shh"><b>モンスター</b><span class="dim">まいにち いれかえ</span></div><div class="shgrid">${shopLine('mon').map((o, j) => deal(o, 'm' + j)).join('')}</div></div>
     <div class="shsec"><div class="shh"><b>しゅうがわり スペシャル</b><span class="dim">げつようび に いれかえ</span></div>
       <button class="shspecial${st.wb ? ' sold' : ''}" id="shSp" ${st.wb ? 'disabled' : ''}><span class="shtag">${Math.round((1 - sp.p / sp.was) * 100)}% おとく</span><div class="shgi">${chestIcon(sp.ch, false, 2)}</div><div class="shsd"><b>${sp.n}</b><span>${CHESTS[sp.ch].n}${sp.orb ? `・オーブ ×${sp.orb}` : ''}${sp.item ? `・どうぐ ×${sp.item}` : ''}</span></div><span class="shp">${st.wb ? 'こうにゅうずみ' : `<s>💎${sp.was}</s> 💎 ${sp.p}`}</span></button></div>
     <div class="shsec"><div class="shh"><b>たからばこ</b><span class="dim">かうと すぐ あく</span></div><div class="shgrid shch">${SHOP_CHESTS.map(([k, p]) => `<button class="shcard" data-ch="${k}" data-p="${p}"><div class="shgi">${chestIcon(k, false, 2)}</div><b>${CHESTS[k].n}</b><span class="shp">💎 ${p}</span></button>`).join('')}</div></div>
     <div class="dim" style="font-size:11px;text-align:center">ジェムは しあいや ジム・リーグの ごほうびで たまります</div>`;
   const B = $('shBody'); shopPaint(B);
-  B.querySelectorAll('[data-deal]').forEach(b => b.onclick = () => shopBuyDeal(+b.dataset.deal));
+  B.querySelectorAll('[data-deal]').forEach(b => b.onclick = () => shopBuyDeal(/^\d+$/.test(b.dataset.deal) ? +b.dataset.deal : b.dataset.deal));
   B.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => shopBuyChest(b.dataset.ch, +b.dataset.p));
   const spb = $('shSp'); if (spb) spb.onclick = () => shopBuySpecial();
   { const b = $('tabShopBadge'); if (b) b.hidden = !shopFreeReady(); }
