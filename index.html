@@ -9520,8 +9520,6 @@ function gymTeam(type, n, i, leader, rare) {
   let pool = type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids;
   if (pool.length < n + 2) pool = pool.concat(ids.filter(id => !pool.includes(id)).slice(0, 8));
   const out = [], loop = jr().champ ? .25 : 0;
-  // さいごの ジム（ドラゴン）の トレーナー：しんかまえ など よわい ほうの はんぶんから（つよい 最終しんかばかりで かべに なっていた）
-  if (!leader && !loop && i >= 9) { const tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; }; pool = pool.slice().sort((a, b) => tot(a) - tot(b)).slice(0, Math.max(n + 2, Math.ceil(pool.length / 2))); }
   for (let k = 0; k < n; k++) { let sid, g = 0; do { sid = choice(pool); } while (out.some(e => e.sid === sid) && g++ < 20);
     const em = fixMon({ uid: -1 - k, sid }, clamp(.03 + i * .06 + (leader ? .06 : 0) + loop, 0, .95));
     if (leader || loop) { const pts = Math.min(EV_MAX, Math.round(4 + i * 3 + loop * 40)), b = base6(sid), main = b.atk >= b.spa ? 'atk' : 'spa'; em.ev = { [main]: Math.min(EV_STAT_MAX, Math.ceil(pts * .5)), spe: Math.min(EV_STAT_MAX, Math.floor(pts * .3)), hp: Math.floor(pts * .2) }; }
@@ -9536,17 +9534,17 @@ function startJourney(gi) {
   const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${FIELD_NAMES[G.f]}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
   startBattle({
     kind: 'cup', field: G.f, enemies: gymTeam(G.f, gi === 0 ? (leader ? 2 : 1) : leader ? 3 : (gi < 3 ? 2 : 3), i, leader, gi >= 5), trainer: tr, boss: leader,   // さいしょの ジムは すくなめ
-    skill: clamp(.25 + i * .045 + (leader ? .08 : 0), 0, .9), journey: { gi, step }, eMul: gi === GYMS.length - 1 && !jr().champ ? (leader ? .68 : .72) : undefined,   // ドラゴンジム：ドラゴンは ほぼ ぜんいん さいごの しんか で、こおり・ドラゴン いがい いまひとつ。そのままだと かべ だったので よわめに
+    skill: clamp(.25 + i * .045 + (leader ? .08 : 0), 0, .9), journey: { gi, step },
     title: `${FIELD_NAMES[G.f]}ジム　${leader ? 'ジムリーダー' : `トレーナー ${step + 1}`}`,
     intro: leader ? `${G.ln}「${G.say}」` : `${tr.name}が しょうぶを しかけてきた！`,
   });
 }
-// はじめての リーグは すこし よわめ（eMul。でんどういり あとは そのまま）。してんのうは とくいタイプ
+// してんのうは とくいタイプ
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
   const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), enemies: gymTeam(lt, 3, 10 + k, true, true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3,
-    skill: clamp(.72 + k * .05, 0, .9), journey: { league: k }, eMul: jr().champ ? undefined : [.88, .8, .88, .88][k], title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
+    skill: clamp(.72 + k * .05, 0, .9), journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
