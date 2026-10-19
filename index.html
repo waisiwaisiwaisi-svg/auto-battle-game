@@ -1066,6 +1066,8 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.trbtns .btn{padding:6px 12px;font-size:13px}
 .trside h3{font-size:13px;margin:4px 0 0}
 .trins{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--edge);font-size:12px;min-height:60px}
+.trmvinfo{display:flex;flex-direction:column;gap:3px;padding:4px 0 4px 8px;border-left:4px solid var(--c);line-height:1.45}.trmvinfo b{font-size:13px}
+.trr .rdesc{flex:1 1 180px;min-width:0;font-size:11px;color:var(--dim,#9a93b8);line-height:1.35;align-self:center}
 .trpal{display:flex;flex-wrap:wrap;gap:4px}
 .pal{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:5px 9px;border-radius:5px;border:2px solid;color:var(--ink)}.pal.k-mv{border-left-width:6px}
 .pal small{font-size:9px;margin-left:3px;color:#ffd84a}
@@ -3521,7 +3523,7 @@ function renderTrain(uid) {
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
   const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : ''}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '' : '条件なし '}<small>（${l ? '別の条件をここへ' : '条件をここへ'}）</small></span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え">≡${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え">≡${i + 1}</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span><span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span><span class="rdesc">${MOVES[r.id] ? `${CAT_NAMES[MOVES[r.id].cat] || ''}・まち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}びょう${AUTO_GUARD[MOVES[r.id].k] ? '・じどう' : ''}・${moveDesc(MOVES[r.id])}` : ''}</span>${conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（4つ設定してください）</div>' : '');
   const main = `<div class="trsec"><h3>技 <span class="dim">— 1〜4 が優先度。「出場時・交代時」が合う技を一番先に、次にほかの条件が合う技を 1→4 の順に撃つ。条件が合う技がないときは通常のAIが相性などを見て選ぶ。条件は同じ行が「かつ」、下の行が「または」。回避はいつも自動</span></h3>${rows}</div>
     <div class="trbtns"><button class="btn sub" data-a="draft">仮保存</button><button class="btn" data-a="ok">確定</button><button class="btn sub" data-a="load">他からコピー</button><button class="btn sub" data-a="revert">保存時に戻す</button><button class="btn sub" data-a="clr">リセット</button><button class="btn sub" data-a="sim">模擬戦</button></div>
@@ -3529,11 +3531,13 @@ function renderTrain(uid) {
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
   const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
   let ins = '';
+  const mvInfo = (id) => { const M = MOVES[id]; if (!M) return ''; return `<div class="trmvinfo" style="--c:${tcol(id)}"><div><b>${M.n}</b> <span class="dim">${moveSub(M)}・${CAT_NAMES[M.cat] || ''}・まち${(+M.cd).toFixed(1).replace(/\.0$/, '')}びょう${AUTO_GUARD[M.k] ? '・じどう' : ''}</span></div><div>${moveDesc(M)}</div></div>`; };   // 技の 内容
+  const infoId = pk && pk.k === 'mv' ? pk.v : !pk && !sc ? TRN.info : null;
   if (sc) { const K = CONDS[sc.t], seg = (opts, cur) => `<div class="trseg" data-k="cp">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
     ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
   else if (pk) ins = '<div class="dim">置く場所をタップ（技は技の枠・立ち回りは「〜撃つ」の枠・条件は右の枠）</div>';
-  else ins = '<div class="dim">左の枠へドラッグ。タップで選んで枠をタップでも置けます。置いた条件はタップで設定、枠の外へドラッグで削除</div>';
-  const side = `<h3>技 <span class="dim">（★＝スクロールで覚える）</span></h3><div class="trpal">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${S.tms[id]}</small></div>`).join('')}</div>
+  else ins = '<div class="dim">左の枠へドラッグ。タップで選んで枠をタップでも置けます。置いた条件はタップで設定、枠の外へドラッグで削除。置いた技はタップで内容を表示</div>';
+  const side = `<h3>技 <span class="dim">（★＝スクロールで覚える）</span></h3><div class="trpal">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${S.tms[id]}</small></div>`).join('')}</div>${infoId && MOVES[infoId] ? mvInfo(infoId) : ''}
     <h3>立ち回り</h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
     <h3>条件</h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
     <div class="trins">${ins}</div>`;
@@ -3606,6 +3610,7 @@ function renderTrain(uid) {
   B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (TRN.pick && !ev.target.closest('.cnd')) drop(TRN.pick, z); }); });
   // 技の 優先度：番号 か 技名を ドラッグして ほかの 行へ（その位置に 入れる）
   B.querySelectorAll('.trr[data-row]').forEach(e => drag(e, { rowEl: 1, i: +e.dataset.row }, () => { }, (t) => !t.closest('.cnd, .gs.on, .rb, button')));
+  B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', () => { if (TRN.pick) return; const id = W.mv[+e.dataset.i] && W.mv[+e.dataset.i].id; TRN.info = TRN.info === id ? null : id; TRN.sel = null; SND.se('click'); redo(); }));   // 置いた 技：タップで 内容
   B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { const ids = W.mv.map(x => x.id); W.mv.splice(+b.dataset.rm, 1); trRemap(W, ids); TRN.sel = null; SND.se('back'); touch(); });
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
