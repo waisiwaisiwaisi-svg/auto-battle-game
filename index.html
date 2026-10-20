@@ -198,6 +198,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .boxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:calc(42 * var(--vh));overflow:auto;padding:4px;background:rgba(13,11,20,.5);border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}
 .boxgrid .slot{min-height:84px;font-size:10.5px}
 .boxgrid .slot canvas{width:44px;height:44px}
+.tsqs{display:flex;gap:3px;justify-content:center;height:10px}.tsq{display:block;width:10px;height:10px;box-shadow:0 0 0 1px #0b0914,inset 0 2px 0 rgba(255,255,255,.3)}   /* ボックスの タイプは いろの しかく */
 .slot.drop{border:2px dashed var(--rim);background:transparent;box-shadow:none;color:var(--dim);cursor:default}
 .dragghost{position:fixed;z-index:200;pointer-events:none;width:72px;height:72px;transform:translate(-50%,-60%) scale(1.15);filter:drop-shadow(0 6px 4px rgba(0,0,0,.6))}
 .teamdetail{min-width:0;font-size:12px;line-height:1.6;display:flex;flex-direction:column;gap:8px}
@@ -1180,7 +1181,7 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 .sec-title > span:first-child{position:relative;background:linear-gradient(180deg,#b5472f,#7e2a1c)!important;border:0!important;padding:4px 16px 4px 12px!important;color:#f6f0e0!important;box-shadow:0 0 0 2px #0b0914,inset 0 2px 0 rgba(255,220,160,.45),inset 0 -3px 0 rgba(0,0,0,.3),0 3px 0 rgba(0,0,0,.45);clip-path:polygon(0 0,100% 0,calc(100% - 8px) 50%,100% 100%,0 100%)}
 .sec-title > span:first-child::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc);box-shadow:inset -1px 0 0 rgba(0,0,0,.3)}
 /* パネル：うえが すこし あかるい 木の いた */
-.card,.mcard,.dexc,.pm,.slot,.cupinfo,.hres > span{background-image:linear-gradient(180deg,rgba(200,200,255,.06),rgba(0,0,0,.12))!important}
+.card,.mcard,.dexc,.pm,.slot,.cupinfo,.hres > span{background-image:linear-gradient(180deg,rgba(200,200,255,.06),rgba(0,0,0,.12)),linear-gradient(180deg,var(--win1),var(--win2))!important}   /* うえの ひかりは もとの まどの いろに かさねる（すけて うしろが みえない ように） */
 /* ちいさな みだし（しゅつじょう・ひかえ など） */
 .trh,.shh{border-left-color:var(--acc)}
 .chlog{white-space:nowrap;flex:none}
@@ -3050,7 +3051,7 @@ function tabMotion(t) {
   const tb = $('tabbar'); if (!tb || tb.hidden) return;
   let ind = tb.querySelector('.tabind'); if (!ind) { ind = document.createElement('i'); ind.className = 'tabind'; tb.prepend(ind); }
   const land = document.documentElement.classList.contains('land'), btn = tb.querySelector(`button[data-tab="${t}"]`), prev = TAB_CUR; TAB_CUR = t;
-  const rect = (b) => { const r = b.getBoundingClientRect(), R = tb.getBoundingClientRect(); return land ? { a: r.top - R.top, s: r.height } : { a: r.left - R.left, s: r.width }; };
+  const rect = (b) => { const r = b.getBoundingClientRect(), R = tb.getBoundingClientRect(), z = (R.width / tb.offsetWidth) || 1; return land ? { a: (r.top - R.top) / z, s: r.height / z } : { a: (r.left - R.left) / z, s: r.width / z }; };   // PCで 拡大（zoom）して いる ときは 見た目の 大きさを もとに もどす
   const set = (o) => land ? { top: o.a + 'px', height: o.s + 'px' } : { left: o.a + 'px', width: o.s + 'px' };
   if (ind._land !== land) { ind._land = land; ind.getAnimations && ind.getAnimations().forEach(a => a.cancel()); ind.style.left = ind.style.width = ind.style.top = ind.style.height = ''; }   // 向きが かわった：のこった 位置を けす
   if (!btn) { ind.classList.remove('show'); return; }
@@ -3642,7 +3643,7 @@ function renderTeam(openUid) {
     if (m) {
       const st = stats(m), sp = SPECIES[m.sid];
       d.appendChild(spriteCanvas(m.sid, r.w === 'b' ? 44 : 64));
-      d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div>${r.w === 'p' ? `<div class="hpw">${(() => { const A = avgStats(); return STAT6.map(k => `<span style="color:${statTone(st[k], A[k]).c}">${STAT6_S[k]}${Math.round(st[k])}</span>`).join(' '); })()}</div>` : ''}`);
+      d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div${r.w === 'b' ? ' class="tsqs"' : ''}>${r.w === 'b' ? [sp.type, sp.type2].filter(Boolean).map(t => `<i class="tsq" style="background:${TYPES[t].c}" title="${TYPES[t].n}"></i>`).join('') : typeChip(sp.type) + (sp.type2 ? typeChip(sp.type2) : '')}</div>${r.w === 'p' ? `<div class="hpw">${(() => { const A = avgStats(); return STAT6.map(k => `<span style="color:${statTone(st[k], A[k]).c}">${STAT6_S[k]}${Math.round(st[k])}</span>`).join(' '); })()}</div>` : ''}`);
       if (canBoost(m)) d.insertAdjacentHTML('beforeend', '<i class="bdot" title="きょうか できる"></i>');   // おなじ しゅるいが いて きょうか できる：あかい まる
       if (teamSel && teamSel.w === r.w && teamSel.i === r.i) d.classList.add('sel');
       if (teamView === m.uid) d.classList.add('view');
