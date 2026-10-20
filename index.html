@@ -149,7 +149,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .pmt{margin-top:2px}.pmt .chip{font-size:9px}
 .pm .tag{position:absolute;left:3px;top:3px;font-size:9px;background:var(--acc);color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;padding:0 3px;font-weight:700}
 .bigbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.acbody{display:flex;flex-direction:column;gap:12px;max-width:640px}
+.acbody{display:flex;flex-direction:column;gap:12px;max-width:640px;margin:0 auto;width:100%}
 .acbody .card{padding:12px}.acstages{display:flex;gap:6px;flex-wrap:wrap}.acstages i{width:44px;height:30px;border-radius:4px;background:#2a2440 center/cover;border:2px solid #0d0b14;position:relative;opacity:.45}
 .acstages i.done{opacity:1}.acstages i.now{opacity:1;border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}.acstages i.boss::after{content:'👑';position:absolute;top:-10px;right:-6px;font-size:12px}
 .acteam{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.acteam>div{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px}.acteam .bar{width:100%;height:6px;background:#2a2440;border-radius:3px;overflow:hidden}.acteam .bar i{display:block;height:100%;background:#7bd88f}
@@ -160,7 +160,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .jrc::before{content:'';position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(10,8,20,.88))}
 .jrc>*{position:relative}.jrc .in{padding:8px 10px;display:flex;flex-direction:column;gap:3px}
 .jrc b{font-size:15px}.jrc small{font-size:11px;opacity:.85}.jrc .dots{display:flex;gap:4px}.jrc .dots i{width:10px;height:10px;border-radius:50%;background:#3a3350;border:1px solid #0d0b14}.jrc .dots i.on{background:var(--acc)}.jrc .dots i.ld{border-radius:2px;width:14px}
-.jrc>.jtype{position:absolute;top:8px;left:10px}
+.jrc>.jtype{position:absolute;top:8px;left:10px}.jrc .in{padding-top:30px}   /* タイプの ふだと ジムの なまえが かさならない ように */
 .jrc:not(.league){min-height:132px}
 .jrc b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jrc .badge{position:absolute;top:6px;right:8px;font-size:22px;filter:drop-shadow(0 0 4px #000)}
@@ -700,6 +700,7 @@ html.vnarrow .hmode b{font-size:12.5px}html.vnarrow .hmode .ico{width:28px;heigh
 .hmodes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .hmode{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;padding:8px 10px;min-height:60px}
 .hmode .ico{grid-row:1/3;width:34px;height:34px}
+#scHub .hmode{padding-right:20px!important}   /* みぎはしの ▶ と もじが かさならない ように */
 .hmode b{font-size:14px} .hmode small{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hmode:active,.hstage:active,.hme:active,#tabbar button:active{transform:translateY(2px)}
 #scHub .chests .chest{min-height:88px}
@@ -972,6 +973,7 @@ html.land #app #bpanel #mvCmds .cmd .a{font-size:min(13px,calc(min(260px,calc(32
 html.land #app #bpanel #banner{position:fixed!important;left:50%!important;right:auto!important;bottom:auto!important;top:calc(92px + var(--sat));transform:translateX(-50%);width:min(440px,calc(56 * var(--vw)));text-align:center;justify-content:center}
 html.land #app #cvWrap .hudtop{right:calc(8px + var(--sar))!important}
 html.land #app #bpanel .bmon{min-height:0!important;padding:3px 6px!important;gap:6px;flex-direction:row!important;text-align:left} html.land #app #bpanel .bmon canvas{width:24px!important;height:24px!important}
+html.land #app #bpanel #bench .bmon .bn{display:none} html.land #app #bpanel #bench .bmon{flex:0 0 48px;flex-direction:column!important;justify-content:center;gap:2px;padding:3px 5px!important} html.land #app #bpanel #bench .bmon > span{width:100%;flex:none!important}   /* よこ画面の ひかえは せまいので なまえを けす（1もじだけ みえて ふしぜん） */
 html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 
 /* ===== バトル画面：わくを なくして すけさせる（ステージに なじむ HUD） ===== */
@@ -1129,6 +1131,7 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 .trnat{background:linear-gradient(180deg,#2f2750,#1d1733)!important}
 .trr{background:linear-gradient(180deg,#2a2346,#1f1a36)!important;border-left-width:4px!important;box-shadow:inset 5px 0 0 var(--c,#888),0 3px 0 rgba(0,0,0,.4)!important;padding-left:12px!important}
 .trside{background:#1b1630!important}
+html.tabs:not(.land) .trside{bottom:calc(70px + var(--sab))}   /* たて画面：したの タブに かくれない ように タブの うえに とめる */
 .trmons button.on,.trnatsel button.on{border-image-source:var(--fr-gold)!important}
 .trnatsel button,.trnatsel button.on{background:linear-gradient(180deg,#33295a,#221c3c)!important;color:var(--ink)!important}
 .trnatsel button.on{background:linear-gradient(180deg,color-mix(in srgb,var(--g) 45%,#2a2148),#221c3c)!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
@@ -1366,7 +1369,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
   </section>
 
   <section class="screen" id="scTrain" hidden>
-    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">訓練</span><button class="btn sub" id="btnTrBack" style="padding:6px 14px;font-size:13px">戻る</button></div>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">訓練</span><button class="btn sub" id="btnTrBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <div id="trBody"></div>
   </section>
 
@@ -3670,7 +3673,7 @@ function renderTeamDetail() {
   D.innerHTML = `<button class="shx" data-a="close" title="とじる"></button><button class="shc" data-a="close" title="とじる">×</button><div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
       <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'ボックス'}　${ivGrade(m)}</div>
       <div>たいかく：<b style="color:var(--acc)">${bodyTxt(SPECIES[m.sid])[0]}</b> <span class="dim">${bodyTxt(SPECIES[m.sid])[1]}</span></div>
-      ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim">${NATURES[m.nat].d}</span></div><div>さくせん：<b style="color:var(--acc)">${planName(m)}</b><div class="dim" style="font-size:11px">${natRelText(planOfMon(m))}</div></div>` : ''}</div></div>
+      ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim" style="display:inline-block">${NATURES[m.nat].d}</span></div><div>さくせん：<b style="color:var(--acc)">${planName(m)}</b><div class="dim" style="font-size:11px">${natRelText(planOfMon(m))}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
     <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button><button class="btn sub" data-a="train" style="color:var(--acc)">訓練</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn danger" data-a="release">にがす</button>`}</div>`;
@@ -7968,7 +7971,7 @@ function renderBench() {
   const sd = B.sides[B.my || 0], L = $('bench'); L.innerHTML = '';
   sd.fs.forEach((x, i) => {
     if (i === sd.act) return;
-    const b = document.createElement('button'); b.className = 'cmd bmon'; b.dataset.i = i;
+    const b = document.createElement('button'); b.className = 'cmd bmon'; b.dataset.i = i; b.title = x.sp.n;
     b.appendChild(spriteCanvas(x.mon.sid, 44));
     b.insertAdjacentHTML('beforeend', `<span style="flex:1;min-width:0"><div class="bn">${x.sp.n}</div><div class="bh"><i></i></div><div class="bs"></div></span><i class="cdv"></i>`);
     tap(b, () => swapTo(i));
