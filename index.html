@@ -7154,7 +7154,7 @@ const embSpan = (g, sm) => { const el = document.createElement('span'); el.class
 // じぶんの ギルドが あたらしい リーダーの ところへ うつって いたら、じぶんの きろくも うつす
 async function guildMove(R, m) {
   try {
-    const { gid0, ...rest } = m; delete rest.id; delete rest.no; GUILD.me = { ...rest, gid: m.gid };
+    const { gid0, ...rest } = m; delete rest.id; delete rest.no; const to = await R.db.doc('guilds/' + m.gid).get().catch(() => null), gen = to && to.exists && to.data().gen; GUILD.me = { ...rest, gid: m.gid, t: Date.now() }; if (gen) GUILD.me.gen = gen; else delete GUILD.me.gen;
     await R.db.doc('gmembers/' + R.id).set(GUILD.me);
     const c = await R.db.doc('gchat/' + R.id).get().catch(() => null); if (c && c.exists && c.data().gid === gid0) await R.db.doc('gchat/' + R.id).set({ ...c.data(), gid: m.gid });
   } catch (e) { }
@@ -7170,14 +7170,14 @@ async function guildMe() {
   const R = await rankDb(); if (!R || !R.id) return null;
   const s_ = await R.db.doc('gmembers/' + R.id).get().catch(() => null); GUILD.me = s_ && s_.exists ? s_.data() : null;
   if (GUILD.me && GUILD.me.gid) { const to = await guildFollow(R, GUILD.me.gid); if (to !== GUILD.me.gid) await guildMove(R, { ...GUILD.me, gid0: GUILD.me.gid, gid: to }); }
-  if (GUILD.me && GUILD.me.gid) { const g = await R.db.doc('guilds/' + GUILD.me.gid).get().catch(() => null); GUILD.gname = g && g.exists ? safeName(g.data().name, 10) : ''; if (!GUILD.gname) GUILD.me = null; } else GUILD.gname = '';
+  if (GUILD.me && GUILD.me.gid) { const g = await R.db.doc('guilds/' + GUILD.me.gid).get().catch(() => null), gd = g && g.exists ? g.data() : null; GUILD.gname = gd && guildMemOk(GUILD.me, gd) ? safeName(gd.name, 10) : ''; if (!GUILD.gname) GUILD.me = null; } else GUILD.gname = '';
   setGuildOn(!!GUILD.me); return GUILD.me;
 }
 // かったら じぶんの ギルドに ポイント（オンライン +3、そのほか +1）
 async function guildWin(n) {
   try {
     const R = await rankDb(); if (!R || !R.id) return; const m = GUILD.me || await guildMe(); if (!m || !m.gid) return;
-    const wk = weekNo(); GUILD.me = { gid: m.gid, wk, pts: (m.wk === wk ? m.pts || 0 : 0) + n, tot: (m.tot || 0) + n, lk: myLook(), nm: myName(), t: Date.now() };
+    const wk = weekNo(); GUILD.me = { gid: m.gid, ...(m.gen ? { gen: m.gen } : {}), wk, pts: (m.wk === wk ? m.pts || 0 : 0) + n, tot: (m.tot || 0) + n, lk: myLook(), nm: myName(), t: Date.now() };
     await R.db.doc('gmembers/' + R.id).set(GUILD.me);
   } catch (e) { }
 }
@@ -7193,16 +7193,19 @@ async function renderGuild() {
   if (mine && guilds[mine.gid]) { GUILD.me = mine; GUILD.gname = guilds[mine.gid].name; setGuildOn(true); guildHome(R, guilds[mine.gid], rank); }
   else { GUILD.me = null; GUILD.gname = ''; setGuildOn(false); guildBrowse(R, rank, guilds[R.id] && !guilds[R.id].offer ? guilds[R.id] : null); }
 }
+// かいさん した あとに おなじ 人が ギルドを つくりなおしても、まえの メンバーが もどって こない ように：ギルドを つくる たびに ばんごう（gen）を つけ、おなじ ばんごうで はいった 人だけ メンバー
+function guildMemOk(m, g) { return !m || !g || !m.gen || !g.gen || m.gen === g.gen; }
+const guildGen = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 // ギルドと メンバーを よんで、こんしゅうの ポイントで ならべる
 async function guildData(R) {
   const [gs, ms] = await Promise.all([R.db.collection('guilds').limit(300).get(), R.db.collection('gmembers').limit(1000).get()]);
   const wk = weekNo(), guilds = {};
-  for (const d of gs.docs) { const g = d.data() || {}; guilds[d.id] = { id: d.id, t: +g.t || 0, name: safeName(g.name, 10) || 'ギルド', emb: G_EMB.includes(g.emb) ? g.emb : '🛡', col: G_COL.includes(g.col) ? g.col : G_COL[0], msg: safeName(g.msg, 24), art: g.art && cleanArt(g.art, 16, 16, false) || null, offer: typeof g.offer === 'string' ? g.offer : '', from: typeof g.from === 'string' ? g.from : '', mem: [], wpts: 0 }; }
+  for (const d of gs.docs) { const g = d.data() || {}; guilds[d.id] = { id: d.id, t: +g.t || 0, name: safeName(g.name, 10) || 'ギルド', emb: G_EMB.includes(g.emb) ? g.emb : '🛡', col: G_COL.includes(g.col) ? g.col : G_COL[0], msg: safeName(g.msg, 24), art: g.art && cleanArt(g.art, 16, 16, false) || null, gen: typeof g.gen === 'string' ? g.gen : '', offer: typeof g.offer === 'string' ? g.offer : '', from: typeof g.from === 'string' ? g.from : '', mem: [], wpts: 0 }; }
   // リーダー こうたい：X が Y に たのんで（X.offer=Y）、Y が うけた（Y.from=X）なら X の メンバーは Y の ギルドに いる
   const alias = (gid) => { for (let i = 0; i < 6; i++) { const g = guilds[gid]; if (!g || !g.offer || !guilds[g.offer] || guilds[g.offer].from !== gid) break; gid = g.offer; } return gid; };
   const moved = new Set(Object.keys(guilds).filter(id => alias(id) !== id));
   let mine = null;
-  for (const d of ms.docs) { const m = { id: d.id, ...(d.data() || {}) }; m.gid0 = m.gid; m.gid = alias(m.gid); if (d.id === R.id) mine = m; const g = guilds[m.gid]; if (g) { g.mem.push(m); if (m.wk === wk) g.wpts += Math.max(0, m.pts | 0); } }
+  for (const d of ms.docs) { const m = { id: d.id, ...(d.data() || {}) }; if (!guildMemOk(m, guilds[m.gid])) continue; m.gid0 = m.gid; m.gid = alias(m.gid); if (d.id === R.id) mine = m; const g = guilds[m.gid]; if (g) { g.mem.push(m); if (m.wk === wk) g.wpts += Math.max(0, m.pts | 0); } }
   moved.forEach(id => delete guilds[id]);
   const rank = Object.values(guilds).filter(g => g.mem.length).sort((a, b) => b.wpts - a.wpts || b.mem.length - a.mem.length);
   return { guilds, mine, rank };
@@ -7242,7 +7245,8 @@ async function guildJoin(R, gid) {
   try {
     const q = await R.db.collection('gmembers').where('gid', '==', gid).limit(G_MAX + 1).get();
     if (q.size >= G_MAX && !q.docs.some(d => d.id === R.id)) { await ask('この ギルドは いっぱいです。', 'OK', null); return; }
-    GUILD.me = { gid, wk: weekNo(), pts: 0, tot: 0, lk: myLook(), nm: myName(), t: Date.now() };
+    const gd = await R.db.doc('guilds/' + gid).get().catch(() => null), gen = gd && gd.exists && gd.data().gen;
+    GUILD.me = { gid, ...(gen ? { gen } : {}), wk: weekNo(), pts: 0, tot: 0, lk: myLook(), nm: myName(), t: Date.now() };
     await R.db.doc('gmembers/' + R.id).set(GUILD.me); SND.se('ok'); renderGuild();
   } catch (e) { await ask('ギルドに はいれませんでした（' + (e && e.code || 'error') + '）', 'OK', null); }
 }
@@ -7269,8 +7273,8 @@ function guildCreate(R) {
     const name = safeName(bg.querySelector('#gdName').value, 10); if (!name) { bg.querySelector('#gdName').focus(); return; }
     const msg = safeName(bg.querySelector('#gdMsg').value, 24);
     try {
-      await R.db.doc('guilds/' + R.id).set({ name, emb, col, msg, t: Date.now(), ...(art ? { art } : {}) }); GUILD.draft = null;
-      GUILD.me = { gid: R.id, wk: weekNo(), pts: 0, tot: 0, lk: myLook(), t: Date.now() };
+      const gen = guildGen(); await R.db.doc('guilds/' + R.id).set({ name, emb, col, msg, gen, t: Date.now(), ...(art ? { art } : {}) }); GUILD.draft = null;
+      GUILD.me = { gid: R.id, gen, wk: weekNo(), pts: 0, tot: 0, lk: myLook(), nm: myName(), t: Date.now() };
       await R.db.doc('gmembers/' + R.id).set(GUILD.me);
       bg.remove(); SND.se('caught'); renderGuild();
     } catch (e) { await ask('つくれませんでした（' + (e && e.code || 'error') + '）', 'OK', null); }
@@ -7289,7 +7293,7 @@ async function guildHome(R, g, rank) {
   if (lead) { const eb = document.createElement('button'); eb.className = 'btn sub'; eb.style.cssText = 'padding:6px 10px;font-size:12px;align-self:flex-start'; eb.textContent = '✏ もんしょうを かく';
     eb.onclick = () => mkEdit('emb', null, { src: g.art, onCancel: () => renderGuild(), onSave: async (art) => { try { await R.db.doc('guilds/' + R.id).update({ art }); SND.se('ok'); } catch (e) { await ask('ほぞん できませんでした', 'OK', null); } renderGuild(); } });
     W.querySelector('.gdhead').after(eb); }
-  const mem = g.mem.slice().sort((a, b) => ((b.wk === wk ? b.pts : 0) | 0) - ((a.wk === wk ? a.pts : 0) | 0));
+  const mem = g.mem.slice().sort((a, b) => ((b.wk === wk ? b.pts : 0) | 0) - ((a.wk === wk ? a.pts : 0) | 0) || (b.id === g.id) - (a.id === g.id));   // おなじ ポイントなら リーダーが うえ
   const ps = await R.user.profiles(mem.map(m => m.id)).catch(() => ({})), nameOf = (id) => pickName(mem.find(m => m.id === id), ps && ps[id]);
   const M = $('gdMem');
   for (const m of mem) {
@@ -7320,7 +7324,7 @@ async function guildHome(R, g, rank) {
     bx.querySelector('[data-a="y"]').onclick = async () => {
       try {
         const cur = await R.db.doc('guilds/' + g.id).get(), v = cur.exists ? cur.data() : null; if (!v || v.offer !== R.id) { await ask('もう たのまれて いません', 'OK', null); renderGuild(); return; }
-        await R.db.doc('guilds/' + R.id).set({ name: g.name, emb: g.emb, col: g.col, msg: g.msg || '', t: Date.now(), from: g.id, ...(v.art ? { art: v.art } : {}) });
+        await R.db.doc('guilds/' + R.id).set({ name: g.name, emb: g.emb, col: g.col, msg: g.msg || '', gen: guildGen(), t: Date.now(), from: g.id, ...(v.art ? { art: v.art } : {}) });
         await guildMove(R, { ...myM, gid0: myM.gid0 || g.id, gid: R.id }); SND.se('caught');
       } catch (e) { await ask('うけられませんでした（' + (e && e.code || 'error') + '）', 'OK', null); }
       renderGuild();
@@ -7334,7 +7338,7 @@ async function guildHome(R, g, rank) {
   // チャット：ギルドの みんなの さいきんの はつげんを まとめて じかんじゅん に
   const C = $('gdChat');
   GUILD.unsub = R.db.collection('gchat').where('gid', '==', g.id).limit(G_MAX + 5).onSnapshot(async (snap) => {
-    const all = []; for (const d of snap.docs) { const v = d.data() || {}; for (const m of (Array.isArray(v.msgs) ? v.msgs : []).slice(-10)) if (m && typeof m.x === 'string' && !(S.blocked && S.blocked[d.id])) all.push({ id: d.id, t: +m.t || 0, x: ngMask(m.x.slice(0, 40)), nm: safeName(v.nm, NAME_MAX) }); }
+    const all = [], memIds = new Set(g.mem.map(x => x.id)); for (const d of snap.docs) { const v = d.data() || {}; if (!memIds.has(d.id) && d.id !== R.id) continue; for (const m of (Array.isArray(v.msgs) ? v.msgs : []).slice(-10)) if (m && typeof m.x === 'string' && !(S.blocked && S.blocked[d.id])) all.push({ id: d.id, t: +m.t || 0, x: ngMask(m.x.slice(0, 40)), nm: safeName(v.nm, NAME_MAX) }); }
     all.sort((a, b) => a.t - b.t); const last = all.slice(-40);
     const need = [...new Set(last.map(m => m.id))].filter(id => !(ps && ps[id])); const ps2 = need.length ? await R.user.profiles(need).catch(() => ({})) : {};
     C.innerHTML = last.length ? '' : '<span class="dim">まだ だれも はなして いません</span>';
@@ -10139,7 +10143,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 document.documentElement.classList.add('booted');
 })();
