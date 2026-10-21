@@ -4781,7 +4781,7 @@ function shellSc(f) { const S = SPR[f.mon.sid], h = S && S.n ? S.n.height * S.ms
 // あいての わざが せまっている（ため中・うちつづけ中・空／地中に かくれている）
 const threatState = (o) => o && (o.state === 'wind' || o.state === 'chan' || o.state === 'hide');
 const inField = (x, y, r) => x >= B.st.fx0 + r && x <= B.st.fx1 - r && y >= B.st.fy0 + r && y <= B.st.fy1 - r;
-function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRects.length)) && !flies(f) && f.state !== 'hide' && f.state !== 'tunnel') pushOut(f); f.x = clamp(f.x, st.fx0 + f.r, st.fx1 - f.r); f.y = clamp(f.y, st.fy0 + f.r, st.fy1 - f.r); }
+function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRects.length)) && !flies(f) && f.state !== 'hide' && f.state !== 'tunnel' && !(f.state === 'dash' && f.cur && f.cur.m.pat === 'leap') /* ジャンプ中（おしつぶし）は 障害物を とびこえる */) pushOut(f); f.x = clamp(f.x, st.fx0 + f.r, st.fx1 - f.r); f.y = clamp(f.y, st.fy0 + f.r, st.fy1 - f.r); }
 function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.rx, dy = (y - p.y) / p.ry; if (dx * dx + dy * dy < 1) return true; } return false; }
 
 /* ---------- わざが つかえるか ---------- */
@@ -6638,7 +6638,8 @@ function updateFighter(f, dt) {
       clampF(f);
       const wall = pat !== 'leap' && (Math.abs(f.x - (px + vx * dt)) > .5 || Math.abs(f.y - (py + vy * dt)) > .5);
       if (pat === 'leap' && cur.d >= L) {   // ちゃくち：まわりに しょうげき
-        f.hop = 0; fxPush({ type: 'shock', x: f.x, y: f.y, rad: 62, col: id2col(m), life: .35, max: .35 }); sheetFx('shockwave', f.x, f.y - 14, 1.1); addDecal(f.x, f.y, 22, 'crater'); B.shake = Math.max(B.shake, 7);
+        f.hop = 0; if (blockedAt(f.x, f.y, footR(f))) freeSpot(f);   // 障害物の うえに おりたら となりへ
+        fxPush({ type: 'shock', x: f.x, y: f.y, rad: 62, col: id2col(m), life: .35, max: .35 }); sheetFx('shockwave', f.x, f.y - 14, 1.1); addDecal(f.x, f.y, 22, 'crater'); B.shake = Math.max(B.shake, 7);
         if (oT && dist(f, o) < 62 + o.r) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x)); endAct(f, .45); break; }
       if (pat === 'double' && !cur.again && (cur.d >= L || wall) && oT) {   // もういちど むきなおって つっこむ
         cur.again = true; cur.d = L * .35; cur.ang = Math.atan2(o.y - f.y, o.x - f.x); burst(f.x, f.y, '#ffffff', 6, 80, .25); break; }
@@ -7524,10 +7525,8 @@ function bStep(dt) {
         p.vx = Math.cos(na) * sp; p.vy = Math.sin(na) * sp;
       }
       p.age += dt; p.life -= dt; p.rot += dt * 12; if (p.hitCd > 0) p.hitCd -= dt;
-      if (p.pat === 'lob') {   // やまなり：とちゅうは あたらない・ステージの 障害物は こえる（わざの かべは たかいので とまる）
+      if (p.pat === 'lob') {   // やまなり：とちゅうは あたらない・ステージの 障害物も わざの かべも こえる（かべの せつめい「空から降る技は防げない」と おなじ）
         const u = Math.min(1, p.age / p.T); p.x = p.sx + (p.tx - p.sx) * u; p.h = Math.sin(u * Math.PI) * 120; p.y = p.sy + (p.ty - p.sy) * u - BODY - p.h;
-        { const wb = wallBlocksAt(p.sx + (p.tx - p.sx) * u, p.sy + (p.ty - p.sy) * u, 6).find(b => { const w = wallOf(b); return w && w.side !== p.side; });
-          if (wb) { p.life = 0; burst(p.x, p.y, TYPES[p.m.t] ? TYPES[p.m.t].c : '#ffffff', 8, 90, .35); damageWall(wb, p.m); continue; } }
         if (u >= 1) { p.life = 0; projBlast(p, p.m.blastR || 48); } continue;
       }
       if (p.pat === 'boomerang' && p.age > (p.m.life || 2.2) * .42) {   // もどってくる
