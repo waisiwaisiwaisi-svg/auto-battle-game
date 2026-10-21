@@ -3046,7 +3046,10 @@ const SND = (() => {
    画面
    ===================================================================== */
 function setArtBg() {
-  const im = ARENAS[S && S.tier != null ? FIELDS[S.tier % FIELDS.length] : 'grass'] || ARENAS.grass;
+  // いま ちょうせん中の ジムの ステージ（バッジが そろったら リーグの あいて、でんどういり したら でんどういりの かいすうで まわす）
+  let f = 'grass';
+  if (S) try { const J = jr(); f = J.champ ? FIELDS[J.champ % FIELDS.length] : J.badges.length >= GYMS.length ? LEAGUE[J.league][3] : GYMS[J.gym].f; } catch (e) { }   // よみこみ ちゅう（GYMS が まだ ない）は くさ
+  const im = ARENAS[f] || ARENAS.grass;
   { const hs = $('scHub'); if (hs) hs.style.setProperty('--stg', `url(${im.img})`); }   // ホームの モンスターの うしろにも ステージの 絵
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `radial-gradient(ellipse at 50% 35%,rgba(22,18,44,.35),rgba(10,8,22,.88) 75%),linear-gradient(rgba(20,16,34,.5),rgba(12,10,24,.78)),url(${im.img})`;   // ステージの 絵を うすく みせる（紺の かげ）
