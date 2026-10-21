@@ -4400,10 +4400,10 @@ const obstacles = (low) => { if (!B) return []; const base = B.st.solid ? (low ?
 const circRect = (x, y, r, o) => { const cx = clamp(x, o.x0, o.x1), cy = clamp(y, o.y0, o.y1); return (x - cx) ** 2 + (y - cy) ** 2 < r * r; };
 const blockedAt = (x, y, r) => obstacles(true).some(o => circRect(x, y, r, o));
 // 障害物に めりこんだら 外へ 押しだす（いちばん 近い 辺へ）
-function pushOut(f) {
+function pushOut(f, wallsOnly) {
   for (let it = 0; it < 3; it++) {
     let moved = false;
-    for (const o of obstacles(true)) {
+    for (const o of (wallsOnly ? (B.wallRects || []) : obstacles(true))) {
       if (!circRect(f.x, f.y, footR(f), o)) continue;
       const cx = clamp(f.x, o.x0, o.x1), cy = clamp(f.y, o.y0, o.y1);
       if (cx === f.x && cy === f.y) {   // 中心が 中に 入った：いちばん 近い 辺から 出す
@@ -4419,8 +4419,7 @@ function pushOut(f) {
 // a から b まで（足もとの 線）に かたい 障害物が ないか
 // 方向わざの さえぎり：f の 足もとから ang の 向きに すすんで、はじめて solid（弾も 止まる 障害物）に ぶつかる までの 距離
 function rayLen(f, ang, len) {
-  if (flies(f)) return len;   // 飛んでいる ものは 上から うつ
-  const sol = obstacles(false); if (!sol.length) return len;
+  const sol = flies(f) ? (B.wallRects || []) : obstacles(false); if (!sol.length) return len;   // 飛んでいる ものは ステージの 障害物は こえて うつ（わざの かべには さえぎられる）
   const c = Math.cos(ang), s = Math.sin(ang);
   for (let d = 4; d < len; d += 5) { const x = f.x + c * d, y = f.y + s * d; if (sol.some(o => x > o.x0 && x < o.x1 && y > o.y0 && y < o.y1)) return d; }
   return len;
@@ -4781,7 +4780,7 @@ function shellSc(f) { const S = SPR[f.mon.sid], h = S && S.n ? S.n.height * S.ms
 // あいての わざが せまっている（ため中・うちつづけ中・空／地中に かくれている）
 const threatState = (o) => o && (o.state === 'wind' || o.state === 'chan' || o.state === 'hide');
 const inField = (x, y, r) => x >= B.st.fx0 + r && x <= B.st.fx1 - r && y >= B.st.fy0 + r && y <= B.st.fy1 - r;
-function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRects.length)) && !flies(f) && f.state !== 'hide' && f.state !== 'tunnel' && !(f.state === 'dash' && f.cur && f.cur.m.pat === 'leap') /* ジャンプ中（おしつぶし）は 障害物を とびこえる */) pushOut(f); f.x = clamp(f.x, st.fx0 + f.r, st.fx1 - f.r); f.y = clamp(f.y, st.fy0 + f.r, st.fy1 - f.r); }
+function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRects.length)) && !flies(f) && f.state !== 'hide' && f.state !== 'tunnel' && !(f.state === 'dash' && f.cur && f.cur.m.pat === 'leap') /* ジャンプ中（おしつぶし）は 障害物を とびこえる */) pushOut(f); else if (flies(f) && B.wallRects && B.wallRects.length) pushOut(f, true);   /* 飛んでいる こ も わざの かべは こえられない（ステージの 障害物は こえる） */ f.x = clamp(f.x, st.fx0 + f.r, st.fx1 - f.r); f.y = clamp(f.y, st.fy0 + f.r, st.fy1 - f.r); }
 function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.rx, dy = (y - p.y) / p.ry; if (dx * dx + dy * dy < 1) return true; } return false; }
 
 /* ---------- わざが つかえるか ---------- */
@@ -5363,7 +5362,7 @@ function wallBreakFx(w, b) { const k = w.reflect ? 'brk_mirror' : 'brk_' + ({ ic
 // いち（x, y）の まわり r に ある かべの ブロック
 const wallBlocksAt = (x, y, r) => B.wallRects ? B.wallRects.filter(b => circRect(x, y, r, b)) : [];
 // あいてとの あいだを ふさいでいるのが わざの かべ だけ か（ステージの 障害物では ない）
-function losWallOnly(f, o, m) { if (!B.walls || !B.walls.length || flies(f)) return false; const a = Math.atan2(o.y - f.y, o.x - f.x), d = dist(f, o), L = rayLen(f, a, d); if (L >= d - 2) return false;
+function losWallOnly(f, o, m) { if (!B.walls || !B.walls.length) return false; const a = Math.atan2(o.y - f.y, o.x - f.x), d = dist(f, o), L = rayLen(f, a, d); if (L >= d - 2) return false;
   const wb = wallBlocksAt(f.x + Math.cos(a) * (L + 6), f.y + Math.sin(a) * (L + 6), 8); if (!wb.length || (m && !breaksWall(m, wallOf(wb[0])))) return false;   // きかない わざでは うたない
   const sv = B.wallRects; B.wallRects = []; const ok = rayLen(f, a, d) >= d - 2; B.wallRects = sv; return ok; }
 function wallsInArea(x, y, r, m) { for (const i of propsAt(x, y, r)) damageProp(i, m); if (!B.walls || !B.walls.length) return; for (const b of wallBlocksAt(x, y, r)) damageWall(b, m); }
@@ -7547,7 +7546,7 @@ function bStep(dt) {
         else if (p.m.multiHit) { if (!(p.hitCd > 0)) { p.hitCd = p.m.multiHit.cd; p.hits = (p.hits || 0) + 1; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx), { mul: p.m.multiHit.mul, decoy: null }); if (p.hits >= p.m.multiHit.max) p.life = 0; } }   // たつまき：なんども あたる
         else { p.life = 0; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx), { decoy: null }); }
       }
-      const st = B.st, out = p.x < st.fx0 - 10 || p.x > st.fx1 + 10 || p.y < st.fy0 - 40 || p.y > st.fy1 + 4, block = p.life > 0 && !flies(p.f) && obstacles(false).some(o => circRect(p.x, p.y + BODY, p.r, o));
+      const st = B.st, out = p.x < st.fx0 - 10 || p.x > st.fx1 + 10 || p.y < st.fy0 - 40 || p.y > st.fy1 + 4, block = p.life > 0 && (flies(p.f) ? (B.wallRects || []) : obstacles(false)).some(o => circRect(p.x, p.y + BODY, p.r, o));   // 飛んでいる こ の たまも わざの かべでは とまる
       if (block) { const wb = wallBlocksAt(p.x, p.y + BODY, p.r)[0]; if (wb) damageWall(wb, p.m); else damageProp(propsAt(p.x, p.y + BODY, p.r + 2)[0], p.m); }   // かべ・おきものを けずる
       if ((out || block) && p.pat === 'bounce' && (p.bnc || 0) < (p.m.bounces || 3) && p.life > 0) {   // はねかえる（かべ・はしで 3かいまで）
         p.bnc = (p.bnc || 0) + 1; p.x -= p.vx * dt; p.y -= p.vy * dt;
