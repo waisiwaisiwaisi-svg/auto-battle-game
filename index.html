@@ -3345,7 +3345,6 @@ function shopDetail(i) {
     const names = who.filter(x => !seen.has(x.sid) && seen.add(x.sid)).map(x => SPECIES[x.sid].n);
     body = `<div class="dexd"><div class="shgi">${shopIcon(o)}</div><div class="info"><div>${rar}</div><div style="font-size:20px;font-weight:700">${m.n}${mvUseTag(m)}</div><div class="dim">${moveSub(m)}・${CAT_NAMES[m.cat] || ''}</div></div></div>
       <p style="margin-top:10px;line-height:1.7">${moveDesc(m)}</p>
-      <p class="dim" style="margin-top:8px">使うと仲間がこの技を覚える（1回）</p>
       <div style="margin-top:6px"><div class="dim" style="margin-bottom:4px">覚えられる仲間</div>${names.length ? names.map(n => `<span class="chip" style="background:var(--panel2)">${n}</span>`).join(' ') : '<span class="dim">今の仲間にはいない</span>'}</div>`;
   } else {
     body = `<div class="dexd"><div class="shgi">${shopIcon(o)}</div><div class="info"><div style="font-size:20px;font-weight:700">${shopName(o)}</div><p style="margin-top:6px">${o.k === 'item' ? ITEMS[o.id].d : o.k === 'orb' ? 'モンスターを つかまえる ときに つかう' : 'ショップで つかう'}</p></div></div>`;
