@@ -166,6 +166,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .jrc .badge{position:absolute;top:6px;right:8px;font-size:22px;filter:drop-shadow(0 0 4px #000)}
 .jrc.lock{filter:grayscale(1) brightness(.5);cursor:not-allowed}.jrc.next{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
 .jrc.league{grid-column:1/-1;min-height:90px;background:linear-gradient(135deg,#3a2a6a,#1a1430)}
+.jrc.league.tower{background:linear-gradient(135deg,#2a4a7a,#141a30)}
 .bigbtns .btn{padding:14px 8px;display:flex;flex-direction:column;gap:3px;align-items:center}
 .bigbtns .btn span{font-size:10.5px;font-weight:400;opacity:.85}
 .cupinfo{font-size:13px;line-height:1.7}
@@ -473,6 +474,7 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 .bmon .bh{height:5px;background:#0d0b14;margin-top:3px;border-radius:1px}
 .bmon .bh i{display:block;height:100%;background:var(--good)}
 .bmon .bs{font-size:9.5px;color:var(--dim)}
+#bench.many .bmon .bn{display:none} #bench.many .bmon{flex-direction:column!important;justify-content:center;gap:2px;padding:3px 4px!important} #bench.many .bmon > span{width:100%;flex:none!important}
 .bmon.out{opacity:.35;filter:grayscale(1)}
 .bmon .sw{color:var(--acc);font-size:10px}
 #bbar #cCap,#bbar #cRun{flex:0 0 auto;min-width:72px}
@@ -1338,6 +1340,10 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
   </section>
 
   <!-- アーケード -->
+  <section class="screen" id="scTower" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">バトルタワー</span><button class="btn sub" id="btnTwBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <div id="twBody" class="acbody"></div>
+  </section>
   <section class="screen" id="scArcade" hidden>
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">アーケード</span><button class="btn sub" id="btnAcBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <div id="acBody" class="acbody"></div>
@@ -7665,6 +7671,7 @@ function endBattle(res) {
   } else if (B.cfg.tutorial) tutEnd(res, lines);
   else if (B.cfg.journey) journeyResult(res, lines);
   else if (B.cfg.arcade) arcadeResult(res, lines);
+  else if (B.cfg.tower) towerResult(res, lines);
   else {
     if (res === 'win') {
       S.wins++;
@@ -7996,7 +8003,7 @@ function cmdDodge() {
 }
 // ひかえの モンスター：タップで こうたい（ボタンが 交代の かわり）
 function renderBench() {
-  const sd = B.sides[B.my || 0], L = $('bench'); L.innerHTML = '';
+  const sd = B.sides[B.my || 0], L = $('bench'); L.innerHTML = ''; L.classList.toggle('many', sd.fs.length > 4);   // ひかえが 4たい いじょう：なまえを けして え と HP だけ
   sd.fs.forEach((x, i) => {
     if (i === sd.act) return;
     const b = document.createElement('button'); b.className = 'cmd bmon'; b.dataset.i = i; b.title = x.sp.n;
@@ -9872,8 +9879,9 @@ $('btnCup').onclick = startCup;
 $('btnJourney').onclick = renderJourney;
 $('btnArcade').onclick = renderArcade;
 $('btnAcBack').onclick = () => renderHub();
+$('btnTwBack').onclick = () => renderJourney();
 $('btnJrBack').onclick = () => renderHub();
-$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else renderHub(); };
+$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade, twr = B && B.cfg && B.cfg.tower; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else if (twr) renderTower(); else renderHub(); };
 
 document.querySelectorAll('.cmd.mv').forEach(b => b.addEventListener('pointerdown', (e) => { e.preventDefault(); cmdMove(+b.dataset.mv); }));
 $('bAuto').onclick = cmdAuto;
@@ -9963,7 +9971,7 @@ function startJourney(gi) {
   const others = TR_NPC.filter(t => t[0] !== G.lead && t[0] !== myLook());
   const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${FIELD_NAMES[G.f]}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
   startBattle({
-    kind: 'cup', field: G.f, enemies: gymTeam(G.f, gi === 0 ? (leader ? 2 : 1) : leader ? 3 : (gi < 3 ? 2 : 3), jProg(gi, step), gi >= 5), trainer: tr, boss: leader,   // さいしょの ジムは すくなめ journey: { gi, step },
+    kind: 'cup', field: G.f, p0: S.party.slice(0, 6), enemies: gymTeam(G.f, leader ? Math.min(6, 3 + Math.floor(gi / 3)) : gi < 2 ? 2 : gi < 5 ? 3 : 4, jProg(gi, step), gi >= 5), trainer: tr, boss: leader,   // パーティの 6たいで ちょうせん。あいては ジムが すすむほど ふえる   // さいしょの ジムは すくなめ journey: { gi, step },
     title: `${FIELD_NAMES[G.f]}ジム　${leader ? 'ジムリーダー' : `トレーナー ${step + 1}`}`,
     intro: leader ? `${G.ln}「${G.say}」` : `${tr.name}が しょうぶを しかけてきた！`,
   });
@@ -9972,7 +9980,7 @@ function startJourney(gi) {
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
-  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), enemies: gymTeam(lt, 3, jProg(10 + k, 2), true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
+  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), p0: S.party.slice(0, 6), enemies: gymTeam(lt, k === 3 ? 6 : 5, jProg(10 + k, 2), true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
@@ -10010,12 +10018,64 @@ function sortPartyFor(t) {
   S.party = top.concat(rest).slice(0, 6); S.box = all.filter(m => !S.party.includes(m)); save();
   return top;
 }
+/* =====================================================================
+   バトルタワー：でんどういり した 人の ための かちぬき。パーティの 上3体で なんれんしょう できるか
+   ・まいかい HP は ぜんかい・まけたら れんしょうは 0 から
+   ・7せんごとに ボス（7れんしょうで ごほうび）、21れんしょうごとに タワータイクーン
+   ===================================================================== */
+const TW_SET = 7, TW_TYCOON = 21;
+const tw = () => { S.tower = S.tower || { best: 0, sets: 0, run: null }; return S.tower; };
+const towerOpen = () => !!jr().champ;
+function towerTeam() { const T = tw(); if (!T.run) return null; const all = S.party.concat(S.box); const t = T.run.uids.map(u => all.find(m => m.uid === u)); return t.every(Boolean) ? t : null; }
+function renderTower() {
+  if (!towerOpen()) { renderJourney(); return; }
+  show('scTower'); const T = tw(), R = T.run, body = $('twBody');
+  const head = `<div class="card acscore"><span>さいこう <b>${T.best}</b> れんしょう</span><span class="dim">7れんしょう たっせい ${T.sets}かい</span></div>`;
+  const dots = (n) => Array.from({ length: TW_SET }, (_, i) => `<i class="${i < n % TW_SET ? 'done' : i === n % TW_SET ? 'now' : ''} ${i === TW_SET - 1 ? 'boss' : ''}"><em>${Math.floor(n / TW_SET) * TW_SET + i + 1}</em></i>`).join('<s></s>');
+  if (!R) {
+    const team = S.party.slice(0, 3);
+    body.innerHTML = head + `<div class="card acintro"><div class="achero"><b>バトルタワー</b><span>パーティの 上3体で かちぬけ！</span></div>
+      <div class="acpath">${dots(0)}</div>
+      <div class="acrules"><span><b>❤</b>まいかい HPは ぜんかい</span><span><b>★</b>7れんしょうごとに ごほうび・21れんしょうごとに タワータイクーン</span><span><b>✖</b>まけたら れんしょうは 0から</span></div></div>
+      <div class="card acteam">${team.map(m => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b></div>`).join('')}</div>
+      <button class="btn" id="twGo">ちょうせん する</button>`;
+    body.querySelector('#twGo').onclick = () => { SND.se('ok'); T.run = { streak: 0, uids: S.party.slice(0, 3).map(m => m.uid) }; save(); renderTower(); };
+  } else {
+    const team = towerTeam() || [], n = R.streak, nx = n + 1, tyc = nx % TW_TYCOON === 0, boss = nx % TW_SET === 0;
+    body.innerHTML = head + `<div class="card"><div class="acscore" style="margin-bottom:8px"><span>いま <b style="font-size:20px">${n}</b> れんしょう</span><span class="dim">つぎは ${nx}せんめ</span></div><div class="acpath">${dots(n)}</div></div>
+      <div class="card acteam">${team.map(m => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b></div>`).join('')}</div>
+      <div class="row" style="gap:10px"><button class="btn" id="twGo" style="flex:2">${tyc ? 'タワータイクーンに ちょうせん！' : boss ? 'ボスに ちょうせん！' : 'つぎの たたかいへ'}</button><button class="btn sub" id="twQuit" style="flex:1">やめる</button></div>`;
+    body.querySelector('#twGo').onclick = () => { SND.se('ok'); towerStart(); };
+    body.querySelector('#twQuit').onclick = async () => { if (!(await ask(`バトルタワーを やめますか？\n${n}れんしょうで きろくします。`))) return; T.best = Math.max(T.best, n); T.run = null; save(); renderTower(); };
+  }
+  body.querySelectorAll('canvas[data-sid]').forEach(c => c.replaceWith(spriteCanvas(c.dataset.sid, 72)));
+}
+function towerStart() {
+  const T = tw(), R = T.run; if (!R) return; const team = towerTeam(); if (!team) { T.run = null; save(); renderTower(); return; }
+  const n = R.streak, nx = n + 1, tyc = nx % TW_TYCOON === 0, boss = nx % TW_SET === 0;
+  const p = clamp(.7 + n * .025 + (boss ? .1 : 0), .7, 1), ids = poolIds().filter(id => n >= TW_SET || !SPECIES[id].rare), en = [];
+  for (let k = 0; k < 3; k++) { let sid, g = 0; do { sid = choice(ids); } while (en.some(e => e.sid === sid) && g++ < 20); en.push(foeMon(sid, p, -1 - k)); }
+  const t = TR_NPC[(n * 7 + 3) % TR_NPC.length], f = choice(FIELDS);
+  startBattle({ kind: 'cup', field: f, enemies: en, p0: team, boss, tower: { n },
+    trainer: tyc ? { name: 'タワータイクーン', spr: trArt('girl') } : { name: boss ? `タワーの ボス ${t[1].split(' ')[1]}` : t[1], spr: trArt(t[0]) },
+    title: `バトルタワー　${nx}せんめ${tyc ? '　タイクーン' : boss ? '　BOSS' : ''}`,
+    intro: tyc ? 'タワータイクーン「ここまで のぼって きたのね。ほんきで いくわ！」' : `${nx}せんめ！ ${t[1]}が しょうぶを しかけてきた！` });
+}
+function towerResult(res, lines) {
+  const T = tw(), R = T.run; if (!R) return;
+  if (res !== 'win') { lines.unshift(`<b style="color:var(--bad)">れんしょう ストップ</b>　${R.streak}れんしょう`); if (R.streak > T.best) { T.best = R.streak; lines.push('<b style="color:var(--acc)">さいこう きろく こうしん！</b>'); } T.run = null; return; }
+  S.wins++; R.streak++; const n = R.streak; S.gems = (S.gems || 0) + 1; let msg = `${n}れんしょう！　💎+1`;
+  if (n % TW_SET === 0) { T.sets++; S.gems += 10; S.capsules += 3; msg = `<b style="color:var(--acc)">${n}れんしょう たっせい！</b>　💎+11・オーブ+3`; }
+  if (n % TW_TYCOON === 0) { S.gems += 30; S.trophies++; msg = `<b style="color:var(--acc)">👑 タワータイクーンに かった！ ${n}れんしょう</b>　💎+41・トロフィー+1`; }
+  if (n > T.best) T.best = n;
+  lines.unshift(msg);
+}
 function renderJourney() {
   show('scJourney'); const J = jr();
   $('jrBadges').textContent = J.badges.length;
   { const nt = J.champ ? null : J.badges.length >= GYMS.length ? LEAGUE[J.league][3] : GYMS[J.gym].f;
     $('jrStory').innerHTML = '<span></span><button class="btn sub" id="jrSort" style="display:block;margin-top:6px;padding:6px 12px;font-size:12px">' + (nt ? (J.badges.length >= GYMS.length ? `${LEAGUE[J.league][1]}（${FIELD_NAMES[nt]}）に あわせて へんせい` : `${FIELD_NAMES[nt]}ジムに あわせて へんせい`) : 'つよい じゅんに へんせい') + '</button>';
-    $('jrSort').onclick = () => { SND.se('ok'); const top = sortPartyFor(nt); say0(`せんとうの 3たいを ${top.map(m => SPECIES[m.sid].n).join('・')} に したよ`); }; }
+    $('jrSort').onclick = () => { SND.se('ok'); const top = sortPartyFor(nt); say0(`パーティを ならべかえたよ（せんとう：${top.map(m => SPECIES[m.sid].n).join('・')}）`); }; }
   $('jrStory').firstChild.textContent = J.champ ? `でんどういり ${J.champ}かい！ ジムリーダーたちは つよく なって まっている。` : J.badges.length >= GYMS.length ? 'バッジが そろった！ チャンピオンリーグに いどもう。' : '10の とうぎじょうを めぐって ジムリーダーに かち、バッジを あつめよう。ぜんぶ そろうと チャンピオンリーグへ。';
   const g = $('jrGrid'); g.innerHTML = '';
   GYMS.forEach((G, i) => {
@@ -10031,6 +10091,9 @@ function renderJourney() {
   L.innerHTML = `${J.champ ? '<span class="badge">👑</span>' : ''}<div class="in"><b>チャンピオンリーグ</b><small>${lo ? `してんのう 3人と チャンピオン（${J.league + 1}/4 せんめ：${LEAGUE[J.league][1].split(' ')[1]}${LEAGUE[J.league][3] ? '・' + TYPES[LEAGUE[J.league][3]].n + 'タイプ' : ''}）` : 'バッジを 10こ あつめると ちょうせんできる'}</small></div>`;
   if (lo) L.onclick = () => { SND.se('ok'); startLeague(); };
   g.appendChild(L);
+  { const T = tw(), op = towerOpen(), b = document.createElement('button'); b.className = 'jrc league tower' + (op ? ' next' : ' lock');
+    b.innerHTML = `<div class="in"><b>バトルタワー</b><small>${op ? (T.run ? `ちょうせん中：${T.run.streak}れんしょう・` : '') + `さいこう ${T.best}れんしょう` : 'でんどういり すると ちょうせん できる'}</small></div>`;
+    if (op) b.onclick = () => { SND.se('ok'); renderTower(); }; g.appendChild(b); }
 }
 /* =====================================================================
    アーケード：パーティの 上3体で 10れんせん。HP は ひきつぎ（かつと 40% かいふく、5せんめの あとは ひんしも 50% で ふっかつ）
