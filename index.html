@@ -4095,7 +4095,7 @@ function openBoost(m) {
     renderTeam();
   });
 })();
-const CAT_NAMES = { phys: '物理', spec: '属性', stat: '変化' };
+const CAT_NAMES = { phys: '物理技', spec: '属性技', stat: '変化技' };
 function moveEditor(m) {   // おぼえている わざ（獲得した ときに 確定・変えられない）と その 効果
   const box = document.createElement('div'); box.className = 'medit';
   box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります。スクロールで いれかえられます</div>` + equipped(m).map(id => {
