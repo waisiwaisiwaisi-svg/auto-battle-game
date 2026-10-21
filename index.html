@@ -772,6 +772,8 @@ html.land.tabs .screen:not(#scBattle){padding-bottom:12px;padding-left:calc(84px
 .gdchat{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto;padding:8px;font-size:12.5px;touch-action:pan-y}
 .gdchat .m{line-height:1.4;word-break:break-all} .gdchat .m b{color:var(--acc);margin-right:6px} .gdchat .m small{color:var(--dim);margin-left:6px;font-size:10px}
 .gdsend{display:flex;gap:6px} .gdsend input{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2);padding:6px 8px}
+html.land .askbox:has(.gdmk){max-width:min(720px,94vw)!important;padding:12px 16px!important}html.land .gdmk{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"a b" "d b" "c b";column-gap:16px;align-items:start}
+html.land .gdmk .gA{grid-area:a}html.land .gdmk .gB{grid-area:b}html.land .gdmk .gC{grid-area:c}html.land .gdmk .gD{grid-area:d}html.land .gdmk .gB > div:first-child{margin-top:0!important}html.land .askbox:has(.gdmk) h3{margin-bottom:6px!important}   /* よこ画面：ギルドを つくる を 2れつに して ボタンまで 1がめんに */
 .gdpick{display:flex;flex-wrap:wrap;gap:6px} .gdpick button{width:40px;height:40px;font-size:20px;border:2px solid #0b0914;background:#2a2346;padding:0;overflow:hidden} .gdpick button.on{outline:3px solid var(--acc)}
 .gdpick.col button{width:32px;height:32px}
 /* ===== メイキング（ドット絵エディタ） ===== */
@@ -7252,11 +7254,12 @@ async function guildJoin(R, gid) {
 }
 function guildCreate(R) {
   const D = GUILD.draft || {}; let emb = D.emb || G_EMB[0], col = D.col || G_COL[0], art = D.art || null;
-  const bg = modal(`<h3 style="margin-bottom:10px">ギルドを つくる</h3>
-    <div class="mkrow"><input type="text" id="gdName" maxlength="10" placeholder="ギルドの なまえ（10もじ まで）" style="flex:1;font:inherit;font-size:15px;padding:6px 8px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"></div>
-    <div style="margin:10px 0 4px">もんしょう</div><div class="gdpick" id="gdEmb"><button id="gdArt" title="じぶんで かく" style="font-size:12px">✏</button>${G_EMB.map(e => `<button data-e="${e}">${uiImg(EMB_KEY[e], 'emb') || e}</button>`).join('')}</div>
-    <div style="margin:10px 0 4px">いろ</div><div class="gdpick col" id="gdCol">${G_COL.map(c => `<button data-c="${c}" style="background:${c}"></button>`).join('')}</div>
-    <div style="margin:10px 0 4px">ひとこと</div><div class="mkrow"><input type="text" id="gdMsg" maxlength="24" placeholder="ぼしゅう ちゅう！ など（24もじ まで）" style="flex:1;font:inherit;font-size:14px;padding:6px 8px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"></div>
+  const bg = modal(`<h3 style="margin-bottom:10px">ギルドを つくる</h3><div class="gdmk">
+    <div class="gA mkrow"><input type="text" id="gdName" maxlength="10" placeholder="ギルドの なまえ（10もじ まで）" style="flex:1;font:inherit;font-size:15px;padding:6px 8px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"></div>
+    <div class="gB"><div style="margin:10px 0 4px">もんしょう</div><div class="gdpick" id="gdEmb"><button id="gdArt" title="じぶんで かく" style="font-size:12px">✏</button>${G_EMB.map(e => `<button data-e="${e}">${uiImg(EMB_KEY[e], 'emb') || e}</button>`).join('')}</div>
+    </div><div class="gC"><div style="margin:10px 0 4px">いろ</div><div class="gdpick col" id="gdCol">${G_COL.map(c => `<button data-c="${c}" style="background:${c}"></button>`).join('')}</div>
+    </div><div class="gD"><div style="margin:10px 0 4px">ひとこと</div><div class="mkrow"><input type="text" id="gdMsg" maxlength="24" placeholder="ぼしゅう ちゅう！ など（24もじ まで）" style="flex:1;font:inherit;font-size:14px;padding:6px 8px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"></div>
+    </div></div>
     <div class="row" style="margin-top:14px;justify-content:flex-end;gap:8px"><button class="btn sub" id="gdCancel">やめる</button><button class="btn" id="gdMake">つくる</button></div>`);
   if (D.name) bg.querySelector('#gdName').value = D.name; if (D.msg) bg.querySelector('#gdMsg').value = D.msg;
   const artBtn = bg.querySelector('#gdArt');
