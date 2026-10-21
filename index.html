@@ -4330,7 +4330,7 @@ function makeArena(key) {
 // 道さがしの マス目を つくる（ステージの 障害物が こわれた ときも つくりなおす）
 function buildNav(st) {
   // 道さがし用の マス目（NAV ごと）：体の 半径 NAV_R で 通れる マス
-  const { fx0, fy0, fx1, fy1 } = st, nw = Math.ceil(st.W / NAV), nh = Math.ceil(st.H / NAV), walk = new Uint8Array(nw * nh), all = st.solid.concat(st.low);
+  const { fx0, fy0, fx1, fy1 } = st, nw = Math.ceil(st.W / NAV), nh = Math.ceil(st.H / NAV), walk = new Uint8Array(nw * nh), all = (st.solid || []).concat(st.low || []);
   for (let j = 0; j < nh; j++) for (let i = 0; i < nw; i++) {
     const x = (i + .5) * NAV, y = (j + .5) * NAV;
     walk[j * nw + i] = x > fx0 + NAV_R && x < fx1 - NAV_R && y > fy0 + NAV_R && y < fy1 - NAV_R && !all.some(o => circRect(x, y, NAV_R, o)) ? 1 : 0;
@@ -4352,7 +4352,7 @@ function buildNav(st) {
 const MATCH_T = 240;   // 1しあいの じかん（びょう）。すぎたら タイムアップで はんてい（3たい どうしの ふつうの しあいは 4ふん いないに おわる）
 const CAM_MAX = 1.6, CAM_PAD = 170, CAM_TALL_LO = .44, CAM_TALL_UP = .28;   // たて画面：みえる よこはばは フィールドの 44%〜28%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
-const WALL_GAP = 8, WALL_ART = 10, WALL_UP = 30;   // WALL_ART：かべの 絵が ブロックより よこに はみだす ぶん、WALL_UP：うえに のびる ぶん
+const WALL_GAP = 8, WALL_ART = 10, WALL_UP = 30, WALL_COMFY = 52;   // WALL_COMFY：まわりこむ 道を かべから よこに どれだけ はなすか   // WALL_ART：かべの 絵が ブロックより よこに はみだす ぶん、WALL_UP：うえに のびる ぶん
 const _wg = 0;   // わざで つくった かべからは あるいて この きょり いじょう はなれる
 const OBST_GAP = 18;   // ふつうに あるく ときは 障害物から この きょり（ゲーム内の ドット）いじょう はなれる。せまい すきまは しかたなく とおる
 // 障害物との 当たりは 足もとだけ（当たり判定が 絵の 足もとに あわせて あるので、体の 円より 小さく）
@@ -4368,6 +4368,8 @@ function wallKeep(f, gap) { if (!B.wallRects || !B.wallRects.length) return; con
     const pl = f.x - X0, pr = X1 - f.x, pu = f.y - Y0, pd = Y1 - f.y, m = Math.min(pl, pr, pu, pd);
     if (m === pl) f.x = X0; else if (m === pr) f.x = X1; else if (m === pu) f.y = Y0; else f.y = Y1; } }
 // f から（tx, ty）へ 向かう 次の 目じるしを 返す（はば優先で 道を さがし、まっすぐ 行ける いちばん 先の 点へ）
+// みちさがしを つかうか：ふつうは 地上の こ。わざの かべが ある ときは うかんで いる こ も（かべは こえられない）
+const useNav = (f) => !!(B.st.nav && (!flies(f) || (B.wallRects && B.wallRects.length)));
 function navDir(f, tx, ty, tight) {
   const st = B.st, N = st.nav; if (!N) return Math.atan2(ty - f.y, tx - f.x);
   f.navT = (f.navT || 0) - 1;
@@ -4793,7 +4795,7 @@ function shellSc(f) { const S = SPR[f.mon.sid], h = S && S.n ? S.n.height * S.ms
 // あいての わざが せまっている（ため中・うちつづけ中・空／地中に かくれている）
 const threatState = (o) => o && (o.state === 'wind' || o.state === 'chan' || o.state === 'hide');
 const inField = (x, y, r) => x >= B.st.fx0 + r && x <= B.st.fx1 - r && y >= B.st.fy0 + r && y <= B.st.fy1 - r;
-function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRects.length)) && !flies(f) && f.state !== 'hide' && f.state !== 'tunnel' && !(f.state === 'dash' && f.cur && f.cur.m.pat === 'leap') /* ジャンプ中（おしつぶし）は 障害物を とびこえる */) pushOut(f); else if (flies(f) && B.wallRects && B.wallRects.length) pushOut(f, true); if (B.wallRects && B.wallRects.length && f.state !== 'hide' && f.state !== 'tunnel' && !(f.state === 'dash' && f.cur && f.cur.m.pat === 'leap') && !(f.order && f.order.k === 'hide')) wallKeep(f, 4);   /* 飛んでいる こ も わざの かべは こえられない（ステージの 障害物は こえる） */ f.x = clamp(f.x, st.fx0 + f.r, st.fx1 - f.r); f.y = clamp(f.y, st.fy0 + f.r, st.fy1 - f.r); }
+function clampF(f) { const st = B.st; if ((st.solid || (B.wallRects && B.wallRects.length)) && !flies(f) && f.state !== 'hide' && f.state !== 'tunnel' && !(f.state === 'dash' && f.cur && f.cur.m.pat === 'leap') /* ジャンプ中（おしつぶし）は 障害物を とびこえる */) pushOut(f); else if (flies(f) && B.wallRects && B.wallRects.length) pushOut(f, true); if (B.wallRects && B.wallRects.length && f.state !== 'hide' && f.state !== 'tunnel' && !(f.state === 'dash' && f.cur && f.cur.m.pat === 'leap') && !(f.order && f.order.k === 'hide') && !(f.wallLoose > 0)) wallKeep(f, 4);   /* 飛んでいる こ も わざの かべは こえられない（ステージの 障害物は こえる） */ f.x = clamp(f.x, st.fx0 + f.r, st.fx1 - f.r); f.y = clamp(f.y, st.fy0 + f.r, st.fy1 - f.r); }
 function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.rx, dy = (y - p.y) / p.ry; if (dx * dx + dy * dy < 1) return true; } return false; }
 
 /* ---------- わざが つかえるか ---------- */
@@ -5382,9 +5384,12 @@ function wallsInArea(x, y, r, m) { for (const i of propsAt(x, y, r)) damageProp(
 function wallsChanged() {
   B.wallRects = []; for (const w of B.walls) for (const b of w.blocks) if (!b.gone) B.wallRects.push(b);
   // 道さがしの マス目にも はんえい（もとの マスを おぼえておいて 毎回 つくりなおす）
+  if (!B.st.nav && B.wallRects.length) buildNav(B.st);   // くさむら など 障害物の ない ステージ：かべが できたら はじめて つくる
   const N = B.st.nav; if (!N) return;
-  if (!N.walk0) N.walk0 = N.walk.slice();
-  N.walk.set(N.walk0);
+  if (!N.walk0) { N.walk0 = N.walk.slice(); N.comfy0 = N.comfy.slice(); }
+  N.walk.set(N.walk0); N.comfy.set(N.comfy0);
+  for (const b of B.wallRects) for (let j = Math.max(0, Math.floor((b.y0 - WALL_UP - NAV_R) / NAV)); j <= Math.min(N.nh - 1, Math.floor((b.y1 + NAV_R + WALL_GAP) / NAV)); j++)   // ゆとりの ある 道：かべの 絵と からだの はばの ぶん はなれる
+    for (let i = Math.max(0, Math.floor((b.x0 - WALL_COMFY) / NAV)); i <= Math.min(N.nw - 1, Math.floor((b.x1 + WALL_COMFY) / NAV)); i++) N.comfy[j * N.nw + i] = 0;
   for (const b of B.wallRects) for (let j = Math.max(0, Math.floor((b.y0 - NAV_R) / NAV)); j <= Math.min(N.nh - 1, Math.floor((b.y1 + NAV_R) / NAV)); j++)
     for (let i = Math.max(0, Math.floor((b.x0 - NAV_R) / NAV)); i <= Math.min(N.nw - 1, Math.floor((b.x1 + NAV_R) / NAV)); i++) if (circRect((i + .5) * NAV, (j + .5) * NAV, NAV_R, b)) N.walk[j * N.nw + i] = 0;
   for (const sd of B.sides) for (const x of sd.fs) x.navT = 0;
@@ -6238,11 +6243,11 @@ function aiMove(f, o, dt, autoSpecial) {
       // ひっかかって すすめない（わざの かべ など）：しばらく よこへ すべって まわりこむ
       const st = f.ordSt || (f.ordSt = { x: f.x, y: f.y, t: B.t, slide: 0, sgn: 1 });
       if (B.t - st.t > .45) { if (Math.hypot(f.x - st.x, f.y - st.y) < 10 && !st.slide) { st.slide = .8; st.sgn = Math.random() < .5 ? 1 : -1; f.navT = 0; } st.x = f.x; st.y = f.y; st.t = B.t; }
-      let a = B.st.nav && !flies(f) ? navDir(f, o.x, o.y) : ang;
+      let a = useNav(f) ? navDir(f, o.x, o.y) : ang;
       if (st.slide > 0) { st.slide = Math.max(0, st.slide - dt); a = ang + st.sgn * 1.35; }
       return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
     }
-    if (stalled() && B.st.nav && !flies(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
+    if (stalled() && useNav(f)) {   // ながく 動きが ない：道を さがして まっすぐ あいてへ
       f.aiMode = 'attack'; if (close) f.paceT = 2.3 * per.rush; const a = navDir(f, o.x, o.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
     }
     want = { R: (close ? Math.min(reach * .8, idealRange(f, m, reach, per)) : idealRange(f, m, reach, per)) * roamK, los: shot, cover: INDIRECT(m) && per.cover > .3, flank: per.flank > .25 && !shot, mode: 'attack' };   // かべごしの わざは かくれた まま
@@ -6261,7 +6266,7 @@ function aiMove(f, o, dt, autoSpecial) {
   f.aiMode = want.mode;
   const gd = Math.hypot(g.x - f.x, g.y - f.y);
   if (gd > 14) {
-    if (B.st.nav && !flies(f)) { const a = navDir(f, g.x, g.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, f.navPath && f.navPath.length > 0); }
+    if (useNav(f)) { const a = navDir(f, g.x, g.y); return moveDir(f, Math.cos(a), Math.sin(a), dt, f.navPath && f.navPath.length > 0); }
     const a = Math.atan2(g.y - f.y, g.x - f.x); return moveDir(f, Math.cos(a), Math.sin(a), dt);
   }
   // 着いたら 少しだけ 横に ゆれる（棒立ちに しない）
@@ -6303,7 +6308,7 @@ function flankStep(f, o, reach, d, per, dt) {
   let wx = o.x + Math.cos(as) * R, wy = o.y + Math.sin(as) * R;
   if (!spotOk(f, wx, wy)) { wx = o.x + Math.cos(F.a) * F.R; wy = o.y + Math.sin(F.a) * F.R; }
   f.paceT = 1.9 * per.rush; f.aiMode = 'flank';
-  const nav = B.st.nav && !flies(f) && !walkClear(f, wx, wy), a = nav ? navDir(f, wx, wy) : Math.atan2(wy - f.y, wx - f.x);
+  const nav = useNav(f) && !walkClear(f, wx, wy), a = nav ? navDir(f, wx, wy) : Math.atan2(wy - f.y, wx - f.x);
   moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0);
   return true;
 }
@@ -6470,7 +6475,13 @@ function moveDir(f, mx, my, dt, nav) {
   }
   f.x += mx * sp * dt; f.y += my * sp * dt;
   // わざで つくった かべには あるいて WALL_GAP より ちかづかない（かべの かげに かくれる ときは べつ）
-  if (B.wallRects && B.wallRects.length && !(f.order && f.order.k === 'hide')) wallKeep(f, WALL_GAP);
+  if (f.wallLoose > 0) f.wallLoose -= dt;
+  if (B.wallRects && B.wallRects.length && !(f.order && f.order.k === 'hide') && !(f.wallLoose > 0)) {
+    const px = f.x, py = f.y, want = Math.hypot(mx, my) * sp * dt; wallKeep(f, WALL_GAP);
+    const back = Math.hypot(f.x - px, f.y - py);   // かべに おしもどされた ぶん
+    f.wallPush = want > .1 && back > want * .5 ? (f.wallPush || 0) + dt : Math.max(0, (f.wallPush || 0) - dt * 2);
+    if (f.wallPush > .7) { f.wallPush = 0; f.wallLoose = 2.5; f.navT = 0; }   // なかなか すすめない：しばらく かべに ふれても よい
+  }
   f.moving = Math.hypot(mx, my) > .15; if (f.moving) f.walk += dt * clamp(f.pace, .7, 1.8);
   // すすもうと しているのに 3びょう ほとんど うごけて いない（かべや すみに はさまった など）→ ダッシュで ぬける
   if (Math.hypot(mx, my) > .3) { const k = f.stk || (f.stk = { x: f.x, y: f.y, t: 0 });
@@ -7964,14 +7975,14 @@ function orderStep(f, o, dt) {
     if (Math.abs(diff) < .3) { f.order = null; f.aiT = 0; return false; }
     const as = cur + Math.sign(diff) * Math.min(.75, Math.abs(diff)); let wx = o.x + Math.cos(as) * R.R, wy = o.y + Math.sin(as) * R.R;
     if (!spotOk(f, wx, wy)) { wx = o.x + Math.cos(as) * R.R * .7; wy = o.y + Math.sin(as) * R.R * .7; }
-    f.paceT = 1.9; const nav = B.st.nav && !flies(f) && !walkClear(f, wx, wy), a = nav ? navDir(f, wx, wy) : Math.atan2(wy - f.y, wx - f.x);
+    f.paceT = 1.9; const nav = useNav(f) && !walkClear(f, wx, wy), a = nav ? navDir(f, wx, wy) : Math.atan2(wy - f.y, wx - f.x);
     moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); return true;
   }
   if (R.k === 'hide' && Math.hypot(o.x - R.ox, o.y - R.oy) > 60) { R.re = 0; R.ox = o.x; R.oy = o.y; }   // あいてが うごいたら すぐ みなおす
   if (R.re <= 0) { R.re = .5; const sp = orderSpot(f, o, R.k); if (sp && (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o))) R.spot = sp; }   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
   const d = Math.hypot(R.spot.x - f.x, R.spot.y - f.y);
   if (R.k === 'flank' && (d < 50 || R.t < ORDER_T.flank - 1.2) && losFrom(f.x, f.y, o) && Math.hypot(f.x - o.x, f.y - o.y) < 330) { f.order = null; f.aiT = 0; return false; }
-  if (d > 10) { f.paceT = 1.7; const tight = R.k === 'hide', nav = B.st.nav && !flies(f) && !walkClear(f, R.spot.x, R.spot.y, tight ? 0 : OBST_GAP), a = nav ? navDir(f, R.spot.x, R.spot.y, tight) : Math.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
+  if (d > 10) { f.paceT = 1.7; const tight = R.k === 'hide', nav = useNav(f) && !walkClear(f, R.spot.x, R.spot.y, tight ? 0 : OBST_GAP), a = nav ? navDir(f, R.spot.x, R.spot.y, tight) : Math.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
   return true;
 }
 const DODGE_CMD_CD = 5;   // かわすの 指示は 1かい つかうと 5びょう つかえない
