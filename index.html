@@ -6618,11 +6618,11 @@ function updateFighter(f, dt) {
       if (pat === 'orbit') {   // すいりゅうターン：あいての まわりを ぐるっと まわって うずを つくる
         const R = 92;
         if (!cur.oc) {
-          if (oT && dist(f, o) > R + 10 && cur.d < 300) { cur.ang = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(cur.ang) * sp * dt; f.y += Math.sin(cur.ang) * sp * dt; cur.d += sp * dt; f.moving = true; f.walk += dt * 3; clampF(f); break; }
+          if (oT && dist(f, o) > R + 10 && cur.d < 300) { cur.ang = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(cur.ang) * sp * dt; f.y += Math.sin(cur.ang) * sp * dt; cur.d += sp * dt; f.moving = true; f.walk += dt * 1.5; clampF(f); break; }
           const c = oT ? { x: o.x, y: o.y } : { x: f.x + Math.cos(cur.ang) * R, y: f.y + Math.sin(cur.ang) * R }; cur.oc = c; cur.oa = Math.atan2((f.y - c.y) / .7, f.x - c.x); cur.os = 0;
         }
         cur.os += dt * 7.5; const a = cur.oa + cur.os * (f.side ? -1 : 1);
-        f.x = cur.oc.x + Math.cos(a) * R; f.y = cur.oc.y + Math.sin(a) * R * .7; f.face = Math.cos(a + Math.PI / 2 * (f.side ? -1 : 1)) >= 0 ? 1 : -1; f.moving = true; f.walk += dt * 4; clampF(f);
+        f.x = cur.oc.x + Math.cos(a) * R; f.y = cur.oc.y + Math.sin(a) * R * .7; f.face = Math.cos(a + Math.PI / 2 * (f.side ? -1 : 1)) >= 0 ? 1 : -1; f.moving = true; f.walk += dt * 2; clampF(f);
         for (let i = 0; i < 2; i++) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + rand(-4, 2), vx: rand(-30, 30), vy: -rand(20, 60), life: .45, max: .45, col: choice(['#bfe4ff', '#4aa8ff', '#ffffff']), size: 3, g: 120 });
         if (cur.os >= Math.PI * 2) { addWhirl(f, m, cur.oc.x, cur.oc.y, R); fxPush({ type: 'shock', x: cur.oc.x, y: cur.oc.y, rad: R, col: '#4aa8ff', life: .4, max: .4 }); SND.se('beam');
           if (o && o.clones) hitClones(o, c => Math.hypot(c.x - cur.oc.x, (c.y - cur.oc.y) / .7) < R + 10);
@@ -6634,7 +6634,7 @@ function updateFighter(f, dt) {
       let vx = Math.cos(cur.ang) * sp, vy = Math.sin(cur.ang) * sp;
       if (pat === 'zigzag') { const z = Math.sign(Math.sin(cur.d / 55 * Math.PI)) || 1; vx += -Math.sin(cur.ang) * sp * 1.15 * z; vy += Math.cos(cur.ang) * sp * 1.15 * z; }   // ジグザグに はしる
       if (pat === 'leap') { f.hop = Math.sin(clamp(cur.d / L, 0, 1) * Math.PI) * 70; f.inv = Math.max(f.inv, .05); }   // とびあがって のしかかる（空中は むてき・障害物を こえる）
-      f.x += vx * dt; f.y += vy * dt; cur.d += sp * dt; f.moving = true; f.walk += dt * 3; dashTrailPt(f, cur);
+      f.x += vx * dt; f.y += vy * dt; cur.d += sp * dt; f.moving = true; f.walk += dt * 1.5; dashTrailPt(f, cur);
       if (PLFX.d_dust && pat !== 'leap' && (cur.dustT = (cur.dustT || 0) - dt) <= 0) { cur.dustT = .3; const a = Math.atan2(vy, vx); fxp({ type: 'pl', k: 'd_dust', x: f.x - Math.cos(a) * f.r, y: f.y - 4, s: .7, ang: a, fy: Math.cos(a) < 0, life: .45 }); }   // あしもとの すなけむり
       if (m.trail && Math.random() < .8) B.parts.push({ x: f.x + rand(-8, 8), y: f.y, vx: rand(-10, 10), vy: -rand(30, 70), life: .4, max: .4, col: choice(['#ffd166', '#ff8a3d']), size: 5, g: -20, shape: 'ember' });
       if (o && o.clones && !cur.back) hitClones(o, c => Math.hypot(c.x - f.x, c.y - f.y) < f.r + o.r + 4);
@@ -6699,7 +6699,7 @@ function updateFighter(f, dt) {
       if (f.stT <= 0) { f.state = 'free'; if (B.st.solid && !flies(f) && blockedAt(f.x, f.y, footR(f))) freeSpot(f); }   // かべの なかで とまらない
       break;
   }
-  if (f.scareT > 0) { f.scareT -= dt; if (f.state === 'stun') { f.x += f.scareV[0] * dt; f.y += f.scareV[1] * dt; f.moving = true; f.walk += dt * 1.5; if (Math.random() < dt * 8) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: 0, vy: -12, life: .3, max: .3, col: '#d8c8a8', size: 3, g: 60 }); } else f.scareT = 0; }
+  if (f.scareT > 0) { f.scareT -= dt; if (f.state === 'stun') { f.x += f.scareV[0] * dt; f.y += f.scareV[1] * dt; f.moving = true; f.walk += dt * .75; if (Math.random() < dt * 8) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: 0, vy: -12, life: .3, max: .3, col: '#d8c8a8', size: 3, g: 60 }); } else f.scareT = 0; }
   f.x += f.kx * dt; f.y += f.ky * dt; f.kx *= Math.pow(.002, dt); f.ky *= Math.pow(.002, dt);
   const ex = f.x, ey = f.y; clampF(f);
   if (f.slapT > 0) { f.slapT -= dt;   // ひっぱたき：かべに たたきつけられたら 3びょう スタン
@@ -9041,7 +9041,8 @@ function drawConditions(f, top, oy, img) {
 }
 
 // いまの 状態に あう アニメの コマ
-const WALK_FPS = 5.5;   // 走りの コマ送り（1びょうに なんコマ）。移動の はやさとは べつ
+const WALK_FPS = 1 / .15;   // 歩きの コマ送り（1コマ 0.15びょう）：ロビーを あるく 子
+const RUN_FPS = 1 / .09;   // 走りの コマ送り（1コマ 0.09びょう）：たたかいで うごく 子。移動の はやさとは べつ
 function monFrame(f) {
   switch (f.state) {
     case 'faint': return 'ko';
@@ -9053,7 +9054,7 @@ function monFrame(f) {
     case 'dodge': return hovers(f) ? 'idle1' : 'walk1';
     case 'lag': return 'idle' + (Math.floor(B.t * 3) % 4);
   }
-  if (f.moving) return hovers(f) && !AISpr.ANIM[f.mon.sid] ? 'idle' + (Math.floor(B.t * 6 + f.side * 2) % 4) : 'walk' + (Math.floor(f.walk * WALK_FPS) % 4);   // 浮かぶ ものは 足を うごかさない（走りの 絵が ある 子は その 絵で）
+  if (f.moving) return hovers(f) && !AISpr.ANIM[f.mon.sid] ? 'idle' + (Math.floor(B.t * 6 + f.side * 2) % 4) : 'walk' + (Math.floor(f.walk * RUN_FPS) % 4);   // 浮かぶ ものは 足を うごかさない（走りの 絵が ある 子は その 絵で）
   if ((B.t + f.side * 1.7) % 3.6 < .14) return 'blink';
   return 'idle' + (Math.floor(B.t * 5 + f.side * 2) % 4);
 }
