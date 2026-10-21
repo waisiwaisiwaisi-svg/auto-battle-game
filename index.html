@@ -9508,7 +9508,9 @@ $('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') 
   if (!titleArmed && !SND.opt.mute) { titleArmed = true; SND.init(); SND.play('hub'); const t = $('tapStart'); if (t) t.classList.add('armed'); }   // 1かいの タップで おとも ならして そのまま すすむ
   if (titleGo) return; titleGo = true; titleArmed = true; SND.se('ok');
   // 金色の パルス：TAP TO START から わっと ひろがってから ホームへ
-  const A = $('app'), ar = A.getBoundingClientRect(), t = $('tapStart'), tr = t ? t.getBoundingClientRect() : null, cx = tr ? tr.left + tr.width / 2 - ar.left : e.clientX - ar.left, cy = tr ? tr.top + tr.height / 2 - ar.top : e.clientY - ar.top;
+  // #app の なかの 位置で もとめる（PCの 拡大・90度 回転でも ずれない ように、画面上の 座標ではなく レイアウトの 位置を たどる）
+  const A = $('app'), t = $('tapStart'), pin = (el) => { let x = el.offsetWidth / 2, y = el.offsetHeight / 2; for (let q = el; q !== A; q = q.offsetParent) { if (!q) return null; x += q.offsetLeft; y += q.offsetTop; } return { x, y }; };
+  const ar = A.getBoundingClientRect(), k = A.clientWidth / (ar.width || 1), pt = (t && pin(t)) || { x: (e.clientX - ar.left) * k, y: (e.clientY - ar.top) * k }, cx = pt.x, cy = pt.y;
   if (t) { t.classList.remove('hit'); void t.offsetWidth; t.classList.add('hit'); }
   dotPulse(A, cx, cy, () => { titleGo = false; S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else renderStarter(); });   // パルスが きえてから ホームへ
 });
