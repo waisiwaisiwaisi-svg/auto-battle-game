@@ -9994,7 +9994,7 @@ function journeyResult(res, lines) {
   const G = GYMS[c.gi];
   if (res !== 'win') { if (res === 'lose') lines.unshift('まけてしまった… また ちょうせんしよう', `<span class="dim">ヒント：${FIELD_NAMES[G.f]}ジムには ${strongVs(G.f).map(t => TYPES[t].n).join('・')}タイプが つよい。アーケードの「へんせい」ボタンや、きょうか・スクロールで つよく しよう</span>`); return; }
   S.wins++; S.capsules += 1;
-  if (c.step < 2) { if (c.gi === J.gym) J.step = c.step + 1; lines.unshift(`トレーナーに かった！ ${J.step >= 2 ? 'つぎは ジムリーダー！' : ''}`); return; }
+  if (c.step < 2) { if (c.gi === J.gym) J.step = c.step + 1; lines.unshift(`トレーナーに かった！ ${c.step + 1 >= 2 ? 'つぎは ジムリーダー！' : 'つぎは 2人めの トレーナー'}`); return; }
   // ジムリーダーに かった
   S.gems = (S.gems || 0) + 5;
   if (!J.badges.includes(G.f)) { J.badges.push(G.f); lines.unshift(`<b style="color:var(--acc)">🏅 ${FIELD_NAMES[G.f]}バッジを てにいれた！</b>`); }
@@ -10029,7 +10029,7 @@ const towerOpen = () => !!jr().champ;
 function towerTeam() { const T = tw(); if (!T.run) return null; const all = S.party.concat(S.box); const t = T.run.uids.map(u => all.find(m => m.uid === u)); return t.every(Boolean) ? t : null; }
 function renderTower() {
   if (!towerOpen()) { renderJourney(); return; }
-  show('scTower'); const T = tw(), R = T.run, body = $('twBody');
+  show('scTower'); const T = tw(), R = T.run, body = $('twBody'); if (R && R.streak > T.best) T.best = R.streak;   // いまの れんしょうが きろくを こえたら すぐ はんえい
   const head = `<div class="card acscore"><span>さいこう <b>${T.best}</b> れんしょう</span><span class="dim">7れんしょう たっせい ${T.sets}かい</span></div>`;
   const dots = (n) => Array.from({ length: TW_SET }, (_, i) => `<i class="${i < n % TW_SET ? 'done' : i === n % TW_SET ? 'now' : ''} ${i === TW_SET - 1 ? 'boss' : ''}"><em>${Math.floor(n / TW_SET) * TW_SET + i + 1}</em></i>`).join('<s></s>');
   if (!R) {
@@ -10053,8 +10053,11 @@ function renderTower() {
 function towerStart() {
   const T = tw(), R = T.run; if (!R) return; const team = towerTeam(); if (!team) { T.run = null; save(); renderTower(); return; }
   const n = R.streak, nx = n + 1, tyc = nx % TW_TYCOON === 0, boss = nx % TW_SET === 0;
-  const p = clamp(.7 + n * .025 + (boss ? .1 : 0), .7, 1), ids = poolIds().filter(id => n >= TW_SET || !SPECIES[id].rare), en = [];
-  for (let k = 0; k < 3; k++) { let sid, g = 0; do { sid = choice(ids); } while (en.some(e => e.sid === sid) && g++ < 20); en.push(foeMon(sid, p, -1 - k)); }
+  const p = clamp(.3 + n * .025 + (boss ? .08 : 0), .3, 1) /* はじめは よわめ、れんしょう するほど つよい こたい */, ids = poolIds().filter(id => n >= TW_SET || !SPECIES[id].rare), en = [];
+  // あいての しゅぞくは じぶんの 3たいの つよさ（きほんの のうりょくの ごうけい）に ちかい ものから。れんしょう するほど すこし つよい しゅぞく
+  const tot = (id) => { const b = base6(id); return STAT6.reduce((a, k) => a + (b[k] || 0), 0); }, me = team.reduce((a, m) => a + tot(m.sid), 0) / team.length, want = me * (.92 + Math.min(n, 30) * .012);
+  const near = ids.slice().sort((a, b) => Math.abs(tot(a) - want) - Math.abs(tot(b) - want)).slice(0, 30);
+  for (let k = 0; k < 3; k++) { let sid, g = 0; do { sid = choice(near); } while (en.some(e => e.sid === sid) && g++ < 20); en.push(foeMon(sid, p, -1 - k)); }
   const t = TR_NPC[(n * 7 + 3) % TR_NPC.length], f = choice(FIELDS);
   startBattle({ kind: 'cup', field: f, enemies: en, p0: team, boss, tower: { n },
     trainer: tyc ? { name: 'タワータイクーン', spr: trArt('girl') } : { name: boss ? `タワーの ボス ${t[1].split(' ')[1]}` : t[1], spr: trArt(t[0]) },
@@ -10064,7 +10067,7 @@ function towerStart() {
 function towerResult(res, lines) {
   const T = tw(), R = T.run; if (!R) return;
   if (res !== 'win') { lines.unshift(`<b style="color:var(--bad)">れんしょう ストップ</b>　${R.streak}れんしょう`); if (R.streak > T.best) { T.best = R.streak; lines.push('<b style="color:var(--acc)">さいこう きろく こうしん！</b>'); } T.run = null; return; }
-  S.wins++; R.streak++; const n = R.streak; S.gems = (S.gems || 0) + 1; let msg = `${n}れんしょう！　💎+1`;
+  S.wins++; R.streak++; const n = R.streak; if (n > T.best) T.best = n; S.gems = (S.gems || 0) + 1; let msg = `${n}れんしょう！　💎+1`;
   if (n % TW_SET === 0) { T.sets++; S.gems += 10; S.capsules += 3; msg = `<b style="color:var(--acc)">${n}れんしょう たっせい！</b>　💎+11・オーブ+3`; }
   if (n % TW_TYCOON === 0) { S.gems += 30; S.trophies++; msg = `<b style="color:var(--acc)">👑 タワータイクーンに かった！ ${n}れんしょう</b>　💎+41・トロフィー+1`; }
   if (n > T.best) T.best = n;
