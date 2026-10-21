@@ -9971,7 +9971,7 @@ function startJourney(gi) {
   const others = TR_NPC.filter(t => t[0] !== G.lead && t[0] !== myLook());
   const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${FIELD_NAMES[G.f]}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
   startBattle({
-    kind: 'cup', field: G.f, p0: S.party.slice(0, 6), enemies: gymTeam(G.f, leader ? Math.min(6, 3 + Math.floor(gi / 3)) : gi < 2 ? 2 : gi < 5 ? 3 : 4, jProg(gi, step), gi >= 5), trainer: tr, boss: leader,   // パーティの 6たいで ちょうせん。あいては ジムが すすむほど ふえる   // さいしょの ジムは すくなめ journey: { gi, step },
+    kind: 'cup', field: G.f, p0: S.party.slice(0, 6), enemies: gymTeam(G.f, 3, jProg(gi, step), gi >= 5), trainer: tr, boss: leader, journey: { gi, step },   // パーティの 6たいで ちょうせん、あいては 3たい
     title: `${FIELD_NAMES[G.f]}ジム　${leader ? 'ジムリーダー' : `トレーナー ${step + 1}`}`,
     intro: leader ? `${G.ln}「${G.say}」` : `${tr.name}が しょうぶを しかけてきた！`,
   });
@@ -9980,7 +9980,7 @@ function startJourney(gi) {
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
-  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), p0: S.party.slice(0, 6), enemies: gymTeam(lt, k === 3 ? 6 : 5, jProg(10 + k, 2), true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
+  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), p0: S.party.slice(0, 6), enemies: gymTeam(lt, 3, jProg(10 + k, 2), true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
