@@ -5699,7 +5699,7 @@ function hit(att, def, m, ang, opt) {
     popText(att.x, att.y - 66, String(back), '#ffd166', true); say(`${def.sp.n}は ダメージを はねかえした！`);
     if (att.hp <= 0) faint(att, def);
   }
-  if (stance && def.hp > 0 && targetable(att) && att !== def) {   // だしぬき：うけたら すぐ つっこむ
+  if (stance && def.cur && def.state === 'stance' && def.hp > 0 && targetable(att) && att !== def) {   // だしぬき：うけたら すぐ つっこむ
     const c = def.cur; c.decoy = null; c.ang = Math.atan2(att.y - def.y, att.x - def.x); c.d = 0; c.hit = false; c.dlen = Math.min(dist(def, att) + 30, 420); c.sx = def.x; c.sy = def.y; def.state = 'dash'; def.kx = def.ky = 0;
     popText(def.x, def.y - 96, 'カウンター！', '#ffd166', 'comic'); SND.se('dash');
   }
