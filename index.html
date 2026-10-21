@@ -4698,11 +4698,12 @@ function healFx(f) {
 function tickFx(f) {
   SND.se('hit', 1.6);
   const x = f.x, y = f.y - BODY, v = f.v;
-  f.flash = Math.max(f.flash, .15); B.shake = Math.max(B.shake, 2);
+  const onlySeed = v.seed && !v.curse && !['brn', 'psn', 'tox'].includes(f.status);   // やどりぎ だけの ときは からだを ひからせない
+  if (!onlySeed) { f.flash = Math.max(f.flash, .15); B.shake = Math.max(B.shake, 2); }
   if (f.status === 'brn') { sheetFx('fire', x, y, .8); typeFx(x, y, 'fire', 4, 60, .5, { ang: -Math.PI / 2, spread: .6 }); }
   if (f.status === 'psn' || f.status === 'tox') { sheetFx('psn', x, y, .8); typeFx(x, y, 'poison', 3, 50, .6, { ang: -Math.PI / 2, spread: .9 }); if (f.status === 'tox') fxp({ type: 'skull', x, y: y - 46, col: '#8a3ab0', life: .6 }); }
   if (v.curse) sheetFx('curse', x, y, 1);
-  if (v.seed) { const t = active(v.seed - 1); if (plOk('seed_drain')) plFx('seed_drain', x, y, 1.1, .6); else sheetFx('bug', x, y, .9); if (t && t !== f) fxp({ type: 'drain', x0: x, y0: y, x1: t.x, y1: t.y - BODY, col: '#62d26f', life: .7 }); }
+  if (v.seed) { const t = active(v.seed - 1); if (t && t !== f) fxp({ type: 'drain', x0: x, y0: y, x1: t.x, y1: t.y - BODY, col: '#62d26f', life: .7 }); }
 }
 function statusFx(f, s) {
   SND.se('status');
@@ -6567,9 +6568,8 @@ function updateFighter(f, dt) {
         }
         if (m.k === 'strike' && cur.t < cur.wind * .55) { cur.tx += (o.x - cur.tx) * Math.min(1, dt * 8); cur.ty += (o.y - cur.ty) * Math.min(1, dt * 8); }
       }
-      if ((m.k === 'melee' || m.k === 'swipe') && oT && dist(f, o) > f.r + o.r + 6) { const a = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(a) * 120 * dt; f.y += Math.sin(a) * 120 * dt; }
+      // ための あいだは その ばに とまる（うごきながら だす わざ は それぞれの じょうたいで うごく）
       if (cur.t >= cur.wind) fireMove(f);
-      if (f.side !== 0) aiDodgeCheck(f, o);
       break;
     }
     case 'tunnel': {   // 穴の 中を とおって もう ひとつの 穴へ
@@ -8498,7 +8498,7 @@ function drawFxDot(fx, k) {
     case 'curseFx': { const K = 'fx_nail'; if (!plOk(K)) return false; const t = Math.min(1, u * 2.5), x = fx.x0 + (fx.x1 - fx.x0) * t, y = fx.y0 + (fx.y1 - fx.y0) * t - Math.sin(t * Math.PI) * 50;
       return plDraw(K, plOnce(K, u), x, y, 1.1); }
     case 'drain': { const K = 'fx_drain'; if (!plOk(K)) return false; const L = Math.hypot(fx.x1 - fx.x0, fx.y1 - fx.y0); if (L < 4) return true;
-      return plStretch(K, plOnce(K, u), fx.x0, fx.y0, Math.atan2(fx.y1 - fx.y0, fx.x1 - fx.x0), L, L * PLFX[K].h / PLFX[K].w, null, fx.x1 < fx.x0); }
+      return plStretch(K, plOnce(K, u), fx.x0, fx.y0, Math.atan2(fx.y1 - fx.y0, fx.x1 - fx.x0), L, Math.min(L * PLFX[K].h / PLFX[K].w, 34), null, fx.x1 < fx.x0); }   // たかさは きょりに よらず ほそく（とおいと きょだいに なっていた）
     case 'sound': { const K = 'fx_sound'; if (!plOk(K)) return false; return plDraw(K, plLoop(K, B.t), fx.x, fx.y, fx.rad * 1.15 / plW(K), fx.ang, 0, null, Math.cos(fx.ang) < 0, 0, T(K)); }
     case 'swap': { const K = 'fx_swap'; if (!plOk(K)) return false; ctx.globalAlpha = k; return plDraw(K, plLoop(K, B.t), fx.x, fx.y, 96 / plW(K), 0, null, null, 0, 0, T(K)); }
     case 'roots': { const K = 'fx_roots'; if (!plOk(K)) return false; ctx.globalAlpha = Math.min(1, k * 4); return plDraw(K, plOnce(K, u), fx.x, fx.y + 4, 84 / plW(K)); }
