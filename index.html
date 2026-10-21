@@ -4351,6 +4351,7 @@ function buildNav(st) {
 const MATCH_T = 240;   // 1しあいの じかん（びょう）。すぎたら タイムアップで はんてい（3たい どうしの ふつうの しあいは 4ふん いないに おわる）
 const CAM_MAX = 1.6, CAM_PAD = 170, CAM_TALL_LO = .44, CAM_TALL_UP = .28;   // たて画面：みえる よこはばは フィールドの 44%〜28%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
+const WALL_GAP = 30;   // わざで つくった かべからは あるいて この きょり いじょう はなれる
 const OBST_GAP = 18;   // ふつうに あるく ときは 障害物から この きょり（ゲーム内の ドット）いじょう はなれる。せまい すきまは しかたなく とおる
 // 障害物との 当たりは 足もとだけ（当たり判定が 絵の 足もとに あわせて あるので、体の 円より 小さく）
 const footR = (f) => Math.max(10, f.r * .6);
@@ -6422,9 +6423,9 @@ function pickSpot(f, o, w, dt) {
 }
 function moveDir(f, mx, my, dt, nav) {
   if (f.v.confuse > 0) { const a = Math.atan2(my, mx) + Math.sin(B.t * 3 + f.side) * 2.2; const L = Math.hypot(mx, my); mx = Math.cos(a) * L; my = Math.sin(a) * L; }
-  if ((mx || my) && B.st.solid && !flies(f) && !(f.order && f.order.k === 'hide')) {   // 障害物に OBST_GAP より ちかい ときは そっと はなれる むきへ
+  if ((mx || my) && (B.st.solid || (B.wallRects && B.wallRects.length)) && !(flies(f) && !(B.wallRects && B.wallRects.length)) && !(f.order && f.order.k === 'hide')) {   // 障害物・わざの かべに OBST_GAP より ちかい ときは そっと はなれる むきへ
     const R = footR(f) + OBST_GAP; let rx = 0, ry = 0;
-    for (const o of obstacles(true)) { const cx = clamp(f.x, o.x0, o.x1), cy = clamp(f.y, o.y0, o.y1), dx = f.x - cx, dy = f.y - cy, d = Math.hypot(dx, dy); if (d >= R || d < .01) continue; const w = (1 - d / R) * 1.6; rx += dx / d * w; ry += dy / d * w; }
+    for (const o of (flies(f) ? B.wallRects : obstacles(true))) { const cx = clamp(f.x, o.x0, o.x1), cy = clamp(f.y, o.y0, o.y1), dx = f.x - cx, dy = f.y - cy, d = Math.hypot(dx, dy); if (d >= R || d < .01) continue; const w = (1 - d / R) * 1.6; rx += dx / d * w; ry += dy / d * w; }
     if (rx || ry) { const L = Math.hypot(mx, my), nx = mx / L + rx, ny = my / L + ry, n2 = Math.hypot(nx, ny) || 1; mx = nx / n2 * L; my = ny / n2 * L; }
   }
   let sp = speedOf(f);
@@ -6455,6 +6456,9 @@ function moveDir(f, mx, my, dt, nav) {
     } else if (Math.random() < dt * .3) f.avoid = 0;
   }
   f.x += mx * sp * dt; f.y += my * sp * dt;
+  // わざで つくった かべには あるいて WALL_GAP より ちかづかない（かべの かげに かくれる ときは べつ）
+  if (B.wallRects && B.wallRects.length && !(f.order && f.order.k === 'hide')) { const R = footR(f) + WALL_GAP;
+    for (const o of B.wallRects) { const cx = clamp(f.x, o.x0, o.x1), cy = clamp(f.y, o.y0, o.y1), dx = f.x - cx, dy = f.y - cy, d = Math.hypot(dx, dy); if (d >= R || d < .01) continue; f.x = cx + dx / d * R; f.y = cy + dy / d * R; } }
   f.moving = Math.hypot(mx, my) > .15; if (f.moving) f.walk += dt * clamp(f.pace, .7, 1.8);
   // すすもうと しているのに 3びょう ほとんど うごけて いない（かべや すみに はさまった など）→ ダッシュで ぬける
   if (Math.hypot(mx, my) > .3) { const k = f.stk || (f.stk = { x: f.x, y: f.y, t: 0 });
