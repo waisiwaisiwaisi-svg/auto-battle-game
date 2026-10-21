@@ -4802,7 +4802,7 @@ function autoGuard(att, def, m, opt) {
   if (opt.throw || (opt.tick && !opt.first) || att === def || def.hp <= 0 || !isDamaging(m)) return;
   const r = rpsOf(m); if (!r || ['slp', 'frz'].includes(def.status) || ['faint', 'enter', 'return'].includes(def.state)) return;
   if (def.v.protect > 0 || def.v.counter || def.state === 'stance') return;
-  const id = def.moves.find(k => AUTO_GUARD[MOVES[k].k] === r && !((def.cd[k] || 0) > 0) && !(healMax(MOVES[k]) && healLeft(def, k) <= 0) && !(def.v.taunt > 0 && MOVES[k].cat === 'stat'));
+  const id = def.moves.find(k => (MOVES[k].psnGuard ? 'rock' : AUTO_GUARD[MOVES[k].k]) === r && !((def.cd[k] || 0) > 0) && !(healMax(MOVES[k]) && healLeft(def, k) <= 0) && !(def.v.taunt > 0 && MOVES[k].cat === 'stat'));
   if (!id) return; const g = MOVES[id];
   if (healMax(g) && !TUT) { def.uses = def.uses || {}; def.uses[id] = (def.uses[id] || 0) + 1; }
   const cdv = g.cd * cdScale(def); def.cdMax = def.cdMax || {}; def.cdMax[id] = cdv; def.cd[id] = cdv;
@@ -5565,11 +5565,16 @@ function hit(att, def, m, ang, opt) {
   autoGuard(att, def, m, opt);
   if (def.state === 'dash' && def.cur && def.cur.m.guardDash && !opt.throw && !def.cur.hit) {   // こうらおし：まもりながら すすむ
     SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); if (plOk('g_hit')) fxp({ type: 'pl', k: 'parry', x: def.x + def.face * 18, y: def.y - BODY, s: .9, life: .4 }); else fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 }); return false; }
-  if (def.v.protect > 0 && !opt.throw && rpsOf(m) === 'rock' && !opt.tick) {   // ✊ は ガードシェルを わって とおる
+  if (def.v.protect > 0 && def.v.pg && !opt.throw && rpsOf(m) === 'rock') {   // どくのトゲ：✊（近接・突進など からだで ぶつかる わざ）を 1かい ふせいで、こうげきした あいてを どくに する
+    if (opt.tick && !opt.first) return false;
+    SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#c88ae8'); if (plOk('g_break')) plFx('brk_mirror', def.x, def.y - BODY, shellSc(def), .5); else fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#c88ae8', life: .3, max: .3 });
+    def.v.protect = 0; if (targetable(att) && att.hp > 0) setStatus(att, 'psn', def); return false;
+  }
+  if (def.v.protect > 0 && !def.v.pg && !opt.throw && rpsOf(m) === 'rock' && !opt.tick) {   // ✊ は ガードシェルを わって とおる
     def.v.protect = 0; SND.se('crit'); popText(def.x, def.y - 84, 'シェルを わった！', '#ff8a6a', 'comic'); say(`${att.sp.n}は ${def.sp.n}の ガードシェルを わった！`); if (TUT && def.side === 1) TUT.f.brk = true;
     if (plOk('g_break')) plFx('g_break', def.x, def.y - BODY, shellSc(def)); else burst(def.x, def.y - BODY, '#9ff0ff', 14, 140, .4); B.hitstop = Math.max(B.hitstop, .1);
   }
-  if (def.v.protect > 0 && !opt.throw && rpsOf(m) === 'scissors') {   // ガードシェル：✌️（弾・ビーム・はんい）だけを 1かい うちけす（へんかわざ・✊ は とおる）
+  if (def.v.protect > 0 && !def.v.pg && !opt.throw && rpsOf(m) === 'scissors') {   // ガードシェル：✌️（弾・ビーム・はんい）だけを 1かい うちけす（へんかわざ・✊ は とおる）
     if (opt.tick) { if (opt.first) { SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); const a = Math.atan2(att.y - def.y, att.x - def.x); if (plOk('g_hit')) fxp({ type: 'pl', k: 'g_hit', x: def.x, y: def.y - BODY, s: shellSc(def), ang: Math.cos(a) > 0 ? Math.PI : 0, fy: Math.cos(a) > 0, life: .4 }); } return false; }   // つづけて あたる わざ（ビーム・ゆか など）は かまえて いる あいだ ずっと ふせぐ
     const r = rpsOf(m);
     { SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); if (plOk('g_break')) plFx(def.v.pg ? 'brk_mirror' : 'g_break', def.x, def.y - BODY, shellSc(def), .5); else fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 });
@@ -5851,7 +5856,7 @@ function smartScore(f, o, id) {
     if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat) && !losClear(f, o)) p *= .3;   // やまなり・じわれ・ジャンプは 障害物を こえる
     const rps = rpsOf(m);
     if (o.inv > .2 || (o.hurtInv > .3 && o.state !== 'stun')) p *= .2;
-    if (o.v.protect > 0) { const pw = m.power || (m.pow || 0) * 5; p *= rps === 'rock' ? .15 : pw <= 70 ? .9 : .35; }   // ガードシェル：1かいで きえるので、かるい しゃげきで はがしに いく（だげきは はじかれる）
+    if (o.v.protect > 0) { const pw = m.power || (m.pow || 0) * 5; p *= o.v.pg ? (rps === 'rock' ? .15 : 1) : rps === 'rock' ? .15 : pw <= 70 ? .9 : .35; }   // どくのトゲには ✊ を うたない   // ガードシェル：1かいで きえるので、かるい しゃげきで はがしに いく（だげきは はじかれる）
     else if (o.v.counter && o.v.counter.t > 0) p *= rps === 'scissors' ? 1.3 : .1;   // かまえ：✌️ で くずす、✊ は はじかれる
     if (charging(o) && rpsOf(o.cur.m) === 'scissors') p *= rps === 'rock' ? 1.6 : .8;   // ✌️ を ためている：✊ で わりこむ
     if (o.state === 'wind' && o.cur && o.cur.boost) p = Math.min(1, p * 1.3);   // ため中は ねらいどき
@@ -7808,7 +7813,7 @@ function moveDesc(m) {
   if (m.k === 'vault') add(m.hide === 'fly' ? '空へ飛び上がり、相手の所へ降りて攻撃（飛んでいる間は攻撃を受けない）' : '地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。掘った穴は残り、自分より大きくないモンスターは穴から穴へくぐれる');
   if (m.k === 'floor') add(`相手の足元に${m.n}を作る（消えない）。${[m.noDmg ? '' : '踏むと1ダメージ', m.slow ? '足が遅くなる' : '', m.pull ? '中心へ引き込まれる' : ''].filter(Boolean).join('・')}`);
   const K = {
-    protect: `自動：飛び道具・ビーム・範囲技を受けた瞬間に1回打ち消す${m.psnGuard ? '。撃った相手はどくになる' : ''}`,
+    protect: m.psnGuard ? '自動：近接・突進など体でぶつかる技を受けた瞬間に1回防ぎ、攻撃した相手をどくにする' : '自動：飛び道具・ビーム・範囲技を受けた瞬間に1回打ち消す',
     sub: 'HPを1/4使ってデコイ人形を置く（相手の攻撃を引きつけ、2回受けると壊れる）', dbond: 'この後倒されたら、相手も一緒に倒れる',
     curse: 'HPを1/4使って、相手のHPを20%削る（交代するまでその分は回復できない）', baton: '能力の変化を引き継いで控えと交代',
     flip: '自分の能力の変化を反対にする（下がったものが上がる）', leaves: '8秒間、自分の周りを木の葉が回って攻撃（交代しても残る）',
