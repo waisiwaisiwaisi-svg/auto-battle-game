@@ -4309,6 +4309,7 @@ function makeArena(key) {
   const st = { W: a.W, H: a.H, fx0, fy0, fx1, fy1, kind: 'stadium', field: key, pools: [], crowd: [], cracks: false,
     solid: a.solid.map(r => ({ x0: r[0], y0: r[1], x1: r[2], y1: r[3] })), low: a.low.map(r => ({ x0: r[0], y0: r[1], x1: r[2], y1: r[3] })) };
   st.trainers = a.trainers.map(([x, y]) => ({ x, y }));
+  { const h = STAGE.hole, cy = (h[1] + h[3]) / 2; st.spawn = [.249, .751].map(u => ({ x: h[0] + (h[2] - h[0]) * u, y: cy })); }   // さいしょの でる ばしょ：床の 線が まじわる ところ（まんなかの よこ線 × ひだり・みぎの たて線）
   const c = document.createElement('canvas'); c.width = a.W; c.height = a.H; const g = c.getContext('2d');
   if (STG && STG.floors[key]) {   // かさねる ステージ：床・枠・観客・旗・置きもの を べつべつに かく
     st.layered = true; st.props = STG.props[key] || [];
@@ -4563,6 +4564,7 @@ function sendOut(side, idx, pass, lag, at, ko) {
   const sd = B.sides[side]; sd.act = idx;
   const f = sd.fs[idx], st = B.st;
   if (at) { f.x = at.x; f.y = at.y; }   // 交代：もどった モンスターが いた 場所に 出す
+  else if (st.spawn) { f.x = st.spawn[side ? 1 : 0].x; f.y = st.spawn[side ? 1 : 0].y + rand(-8, 8); if (blockedAt(f.x, f.y, footR(f))) freeSpot(f); }   // 闘技場：床の しるしの うえ
   else { f.x = side ? st.fx1 - 120 : st.fx0 + 120; f.y = (st.fy0 + st.fy1) / 2 + rand(-20, 20); }   // はじめ・たおれた あと：初期位置
   clampF(f); if (st.solid) freeSpot(f);
   f.hurtInv = ko ? KO_INV : 0; f.hurtBy = null;
