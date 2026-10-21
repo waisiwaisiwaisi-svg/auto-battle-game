@@ -3798,8 +3798,9 @@ function trSimShow(m, W, log) {
     <div class="dim" style="font-size:11px;margin-top:6px">あいて：${log.foes.map(([nm, w]) => `${nm}${w ? '○' : '×'}`).join('　')}</div>
     <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" data-x="close">とじる</button></div>`).querySelector('[data-x="close"]').onclick = (ev) => ev.target.closest('.askbg').remove();
 }
-function trDraft() { const m = trMon(TRN.uid); if (!m) return; m.tr = m.tr || {}; m.tr.draft = trClone(TRN.W, m); TRN.dirty = false; save(); }
-function trLeave(go) { if (!TRN || !TRN.dirty) return go(); ask('変更が保存されていません。\n仮保存してから移動しますか？', '仮保存', '保存しない').then(y => { if (y) trDraft(); TRN.dirty = false; go(); }); }
+function trDraft() { if (!TRN) return; const m = trMon(TRN.uid); if (!m) return; m.tr = m.tr || {}; m.tr.draft = trClone(TRN.W, m); TRN.dirty = false; save(); }
+let TR_ASKING = false;   // 「仮保存しますか？」を きいている あいだは かさねて きかない
+function trLeave(go) { if (!TRN || !TRN.dirty) return go(); if (TR_ASKING && document.querySelector('.askbg')) return; TR_ASKING = true; ask('変更が保存されていません。\n仮保存してから移動しますか？', '仮保存', '保存しない').then(y => { TR_ASKING = false; if (y) trDraft(); if (TRN) TRN.dirty = false; go(); }); }
 // 訓練の とちゅうで 下の タブを おした：ほぞん して いなければ きいてから うつる
 document.addEventListener('click', (ev) => { const b = ev.target.closest && ev.target.closest('#tabbar button'); if (!b || b.dataset.tab === 'train' || !TRN || !TRN.dirty || $('scTrain').hidden) return;
   ev.stopPropagation(); ev.preventDefault(); trLeave(() => b.click()); }, true);
@@ -3820,11 +3821,11 @@ const TRT_STEPS = [
   { sel: '#trMode', allow: () => ['#trMode'], tx: '⑧ さいごに <b>訓練モード</b>を ON に すると、試合で この せっていどおりに たたかうよ。<br>（OFFの ときは きみが わざを しじ する）　これで おしまい！', next: 1, end: 1 },
 ];
 // チュートリアル中は いま あんない している ところ（と ふきだし）しか さわれない。スクロールは できる
-const trtAllowed = (el) => { if (!TRT || !el || !el.closest) return true; if (el.closest('#trtut .bub')) return true; if ($('scTrain').hidden) return true;
+const trtAllowed = (el) => { if (!TRT || !el || !el.closest) return true; if (el.closest('#trtut .bub') || el.closest('.askbg')) return true; /* かくにんの まどは いつでも おせる（おせないと すすめなく なる） */ if ($('scTrain').hidden) return true;
   const st = TRT_STEPS[TRT.i], q = st.allow ? st.allow() : st.sel ? [typeof st.sel === 'function' ? st.sel() : st.sel] : [];
   return q.some(x => { const t = el.closest(x); return !!t; }); };
 for (const ev of ['pointerdown', 'mousedown', 'click']) window.addEventListener(ev, (e) => { if (TRT && !trtAllowed(e.target)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } }, true);
-function trtStart() { trtStop(); TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1 }; TRT.el.id = 'trtut'; TRT.el.innerHTML = '<svg class="dim"><path fill-rule="evenodd"></path></svg><div class="hls"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; document.body.appendChild(TRT.el);
+function trtStart() { trtStop(); document.querySelectorAll('.askbg').forEach(e => e.remove()); /* ほかの がめんの まどが のこって いたら とじる */ TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1 }; TRT.el.id = 'trtut'; TRT.el.innerHTML = '<svg class="dim"><path fill-rule="evenodd"></path></svg><div class="hls"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; document.body.appendChild(TRT.el);
   TRT.el.querySelector('.skip').onclick = () => { SND.se('back'); trtEnd(); };
   TRT.el.querySelector('.nx').onclick = () => { const st = TRT_STEPS[TRT.i]; if (st.onNext) st.onNext(); if (st.end) { SND.se('ok'); trtEnd(); return; } SND.se('click'); trtGo(TRT.i + 1); };
   trtGo(0); trtLoop(); }
@@ -3852,7 +3853,7 @@ function trtLoop() {
   bub.style.left = x + 'px'; bub.style.top = y + 'px';
 }
 function renderTrain(uid) {
-  if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { ask('今の設定を仮保存しますか？', '仮保存', 'しない').then(y => { if (y) trDraft(); TRN.dirty = false; renderTrain(uid); }); return; }
+  if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { if (TR_ASKING && document.querySelector('.askbg')) return; TR_ASKING = true; ask('今の設定を仮保存しますか？', '仮保存', 'しない').then(y => { TR_ASKING = false; if (y) trDraft(); if (TRN) TRN.dirty = false; renderTrain(uid); }); return; }
   const all = [...S.party, ...S.box];
   if (uid == null) uid = TRN && trMon(TRN.uid) ? TRN.uid : (all[0] && all[0].uid);
   const m = trMon(uid); if (!m) return;
@@ -3964,7 +3965,7 @@ function renderTrain(uid) {
   act('sim', async () => { if (TR_SIM) return; if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok');
     const bg = modal('<h3>模擬戦ちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'); const log = await trSim(m, W, 5); bg.remove(); if (log) trSimShow(m, W, log); });
   act('draft', () => { trDraft(); SND.se('ok'); say0('仮保存しました（試合ではまだ使いません）').then(() => { redo(); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.dr`)); }); });
-  act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; TRN.dirty = false; save(); SND.se('ok'); redo(); MO.stamp($('trBody').querySelector('.trstat')); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.ok`)); }));
+  act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; if (TRN) TRN.dirty = false; save(); SND.se('ok'); redo(); MO.stamp($('trBody').querySelector('.trstat')); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.ok`)); }));
   act('revert', () => { TRN.W = trClone(T.draft || T.prog, m); TRN.dirty = false; TRN.sel = null; redo(); });
   act('clr', () => { TRN.W = trBlank(m); TRN.sel = null; touch(); });
   act('load', () => trLoadFrom(m));
@@ -3996,7 +3997,7 @@ function trLoadFrom(m) {
     <div class="tmlist">${src.map(x => [x.tr.prog && x.tr.prog.mv ? ['prog', '確定'] : null, x.tr.draft && x.tr.draft.mv ? ['draft', '仮保存'] : null].filter(Boolean).map(([k, n]) => `<button data-u="${x.uid}" data-k="${k}"><b>${SPECIES[x.sid].n}</b> <span class="dim">${n}</span></button>`).join('')).join('')}</div>
     <button class="btn sub" data-a="x" style="margin-top:8px">やめる</button></div>`;
   bg.querySelector('[data-a="x"]').onclick = () => bg.remove();
-  bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => { const x = trMon(+b.dataset.u); TRN.W = trClone(x.tr[b.dataset.k], m); TRN.dirty = true; TRN.sel = null; bg.remove(); SND.se('ok'); renderTrain(m.uid); });
+  bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => { const x = trMon(+b.dataset.u); if (!TRN || TRN.uid !== m.uid || !x) { bg.remove(); return; } TRN.W = trClone(x.tr[b.dataset.k], m); TRN.dirty = true; TRN.sel = null; bg.remove(); SND.se('ok'); renderTrain(m.uid); });
   $('app').appendChild(bg);
 }
 function updTrainBtn() { const b = $('btnTrain'); if (!b) return; b.textContent = '訓練モード：' + (S.train ? 'ON' : 'OFF'); b.classList.toggle('on', !!S.train);
@@ -5666,7 +5667,7 @@ function hit(att, def, m, ang, opt) {
   }
   SND.se(crit ? 'crit' : 'hit', heavy ? .8 : opt.tick ? 1.5 : 1.2); if (big) { if (eff > 1) SND.se('super'); else if (eff < 1) SND.se('weak'); }
   B.shake = Math.max(B.shake, tier === 2 ? 11 : tier === 1 ? 6 : 1.5);
-  if (tier === 2) { impactBeat(def.x, def.y - BODY, .55, .28); }   // ばつぐんでも がめんは ひからせない else if (tier === 1) impactBeat(def.x, def.y - BODY, .25, 0);
+  if (tier === 2) { impactBeat(def.x, def.y - BODY, .55, .28); } /* ばつぐんでも がめんは ひからせない */ else if (tier === 1) impactBeat(def.x, def.y - BODY, .25, 0);
   B.cheer = Math.min(1, B.cheer + (heavy ? .7 : .3));
   popText(def.x + rand(-6, 6), def.y - 66, String(dmg), eff > 1 ? '#ffd166' : eff < 1 ? '#a49ac0' : '#ffffff', eff > 1 || heavy);
   burst(def.x, def.y - BODY, id2col(m), heavy ? 16 : 8, 110, .4);
