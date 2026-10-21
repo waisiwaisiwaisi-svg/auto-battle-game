@@ -366,6 +366,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 }
 .cmd .a{font-size:12.5px;font-weight:700;line-height:1.2;white-space:nowrap}
 .cmd .b{font-size:9px;color:var(--dim);white-space:nowrap}
+.mvu{font-style:normal;font-size:.72em;font-weight:400;color:var(--dim);margin-left:5px;font-variant-numeric:tabular-nums;white-space:nowrap}   /* 技名の よこの「のこり/最大」 */
 .cmd.mv{border-left:5px solid var(--c)}
 .cmd .cdv{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);height:0;pointer-events:none}
 .cmd.hot{box-shadow:0 0 0 2px var(--acc),0 3px 0 #0d0b14}
@@ -3338,14 +3339,14 @@ function shopDetail(i) {
     const sp = SPECIES[o.id], mv = [...new Set((LEARN[o.id] || []).map(([, x]) => x))].filter(x => MOVES[x]);
     body = `<div class="dexd"><div class="shdsp"></div><div class="info"><div>${rar}</div><div style="font-size:20px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div><p style="margin-top:6px">${sp.desc || ''}</p></div></div>
       <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">${statBars(base6(o.id), avgBase(), { hp: 150, atk: 150, def: 150, spa: 150, spd: 150, spe: 150, eva: 150 })}</div>
-      ${mv.length ? `<div style="margin-top:10px"><div class="dim" style="margin-bottom:4px">おぼえる わざ（おすと こうか）</div><div class="shmv">${mv.map(x => `<button class="chip" data-mv="${x}" style="background:${TYPES[MOVES[x].t].c}">${MOVES[x].n}</button>`).join('')}</div><div class="shmvd dim"></div></div>` : ''}`;
+      ${mv.length ? `<div style="margin-top:10px"><div class="dim" style="margin-bottom:4px">覚える技（押すと効果）</div><div class="shmv">${mv.map(x => `<button class="chip" data-mv="${x}" style="background:${TYPES[MOVES[x].t].c}">${MOVES[x].n}</button>`).join('')}</div><div class="shmvd dim"></div></div>` : ''}`;
   } else if (o.k === 'tm') {
     const m = MOVES[o.id], who = [...S.party, ...(S.box || [])].filter(x => canLearn(x.sid, o.id)), seen = new Set();
     const names = who.filter(x => !seen.has(x.sid) && seen.add(x.sid)).map(x => SPECIES[x.sid].n);
-    body = `<div class="dexd"><div class="shgi">${shopIcon(o)}</div><div class="info"><div>${rar}</div><div style="font-size:20px;font-weight:700">${m.n}</div><div class="dim">${moveSub(m)}・${CAT_NAMES[m.cat] || ''}</div></div></div>
+    body = `<div class="dexd"><div class="shgi">${shopIcon(o)}</div><div class="info"><div>${rar}</div><div style="font-size:20px;font-weight:700">${m.n}${mvUseTag(m)}</div><div class="dim">${moveSub(m)}・${CAT_NAMES[m.cat] || ''}</div></div></div>
       <p style="margin-top:10px;line-height:1.7">${moveDesc(m)}</p>
-      <p class="dim" style="margin-top:8px">つかうと なかまが この わざを おぼえる（1かい）</p>
-      <div style="margin-top:6px"><div class="dim" style="margin-bottom:4px">おぼえられる なかま</div>${names.length ? names.map(n => `<span class="chip" style="background:var(--panel2)">${n}</span>`).join(' ') : '<span class="dim">いまの なかまには いない</span>'}</div>`;
+      <p class="dim" style="margin-top:8px">使うと仲間がこの技を覚える（1回）</p>
+      <div style="margin-top:6px"><div class="dim" style="margin-bottom:4px">覚えられる仲間</div>${names.length ? names.map(n => `<span class="chip" style="background:var(--panel2)">${n}</span>`).join(' ') : '<span class="dim">今の仲間にはいない</span>'}</div>`;
   } else {
     body = `<div class="dexd"><div class="shgi">${shopIcon(o)}</div><div class="info"><div style="font-size:20px;font-weight:700">${shopName(o)}</div><p style="margin-top:6px">${o.k === 'item' ? ITEMS[o.id].d : o.k === 'orb' ? 'モンスターを つかまえる ときに つかう' : 'ショップで つかう'}</p></div></div>`;
   }
@@ -3677,7 +3678,7 @@ function renderTeamDetail() {
       <div>たいかく：<b style="color:var(--acc)">${bodyTxt(SPECIES[m.sid])[0]}</b> <span class="dim">${bodyTxt(SPECIES[m.sid])[1]}</span></div>
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim" style="display:inline-block">${NATURES[m.nat].d}</span></div><div>さくせん：<b style="color:var(--acc)">${planName(m)}</b><div class="dim" style="font-size:11px">${natRelText(planOfMon(m))}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
-    <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
+    <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}・${CAT_NAMES[mv.cat]}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button><button class="btn sub" data-a="train" style="color:var(--acc)">訓練</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn danger" data-a="release">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.classList.toggle('open', teamSheet); D.querySelectorAll('[data-a="close"]').forEach(b => b.onclick = () => { teamSheet = false; D.classList.remove('open'); SND.se('back'); });
@@ -3851,7 +3852,7 @@ function renderTrain(uid) {
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
   const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '<small>＋ ほかの条件（ここへ）</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・まち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}びょう</b><br>${moveDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${moveDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
   const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>どの 条件も 合わないときは、いつもの AIが 相性を 見て えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
     <div class="trbtns"><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
@@ -3860,7 +3861,7 @@ function renderTrain(uid) {
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
   const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
   let ins = '';
-  const mvInfo = (id) => { const M = MOVES[id]; if (!M) return ''; return `<div class="trmvinfo" style="--c:${tcol(id)}"><div><b>${M.n}</b> <span class="dim">${moveSub(M)}・${CAT_NAMES[M.cat] || ''}・まち${(+M.cd).toFixed(1).replace(/\.0$/, '')}びょう</span></div><div>${moveDesc(M)}</div></div>`; };   // 技の 内容
+  const mvInfo = (id) => { const M = MOVES[id]; if (!M) return ''; return `<div class="trmvinfo" style="--c:${tcol(id)}"><div><b>${M.n}</b>${mvUseTag(M)} <span class="dim">${moveSub(M)}・${CAT_NAMES[M.cat] || ''}・待ち${(+M.cd).toFixed(1).replace(/\.0$/, '')}秒</span></div><div>${moveDesc(M)}</div></div>`; };   // 技の 内容
   const infoId = pk && pk.k === 'mv' ? pk.v : !pk && !sc ? TRN.info : null;
   if (sc) { const K = CONDS[sc.t], seg = (opts, cur) => `<div class="trseg" data-k="cp">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
     ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
@@ -3994,7 +3995,7 @@ function itemMenu(m) {
     const box = bg.querySelector('#itm');
     if (pickFor) {   // わざを えらぶ
       box.innerHTML = `<h3 style="margin-bottom:6px">${ITEMS[pickFor].ic} ${ITEMS[pickFor].n}</h3><p class="dim" style="margin-bottom:8px">おぼえなおす わざを えらんでね</p><div class="tmlist">${m.moves.map((id, i) => { const mv = MOVES[id], n = rerollPool(m, i, pickFor === 'retype').length;
-        return `<button data-i="${i}" style="--c:${TYPES[mv.t].c}" ${n ? '' : 'disabled'}><b>${mv.n}</b> <span class="dim">${TYPES[mv.t].n}・こうほ ${n}こ</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div>
+        return `<button data-i="${i}" style="--c:${TYPES[mv.t].c}" ${n ? '' : 'disabled'}><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}・こうほ ${n}こ</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div>
         <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn sub" id="iBack">もどる</button></div>`;
       box.querySelector('#iBack').onclick = () => draw();
       box.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => {
@@ -4094,12 +4095,12 @@ function openBoost(m) {
     renderTeam();
   });
 })();
-const CAT_NAMES = { phys: 'ぶつり', spec: 'ぞくせい', stat: 'へんか' };
+const CAT_NAMES = { phys: '物理', spec: '属性', stat: '変化' };
 function moveEditor(m) {   // おぼえている わざ（獲得した ときに 確定・変えられない）と その 効果
   const box = document.createElement('div'); box.className = 'medit';
   box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります。スクロールで いれかえられます</div>` + equipped(m).map(id => {
     const mv = MOVES[id];
-    return `<div class="mrow on" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b> <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${CAT_NAMES[mv.cat]}</span><div class="desc">${moveDesc(mv)}</div></div>`;
+    return `<div class="mrow on" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b>${mvUseTag(mv)} <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${moveSub(mv)}・${CAT_NAMES[mv.cat]}</span><div class="desc">${moveDesc(mv)}</div></div>`;
   }).join('');
   return box;
 }
@@ -7782,85 +7783,85 @@ $('tutNext').onclick = () => { if (!TUT) return; tutHide(); $('tutBox').hidden =
 $('tutSkip').onclick = async () => { if (!TUT || !B) return; B.paused = true; if (await ask('チュートリアルを スキップしますか？', 'スキップ', 'つづける')) { const lines = []; tutEnd('skip', lines); B = null; renderHub(); } else if (TUT) { const st = TUT_STEPS[TUT.i]; B.paused = !!(st && st.pause) || !!TUT.frozen; } };
 
 /* ---------- コマンド ---------- */
-const KIND_LABEL = { gshift: 'すりぬけ', scare: 'いかく', mines: 'じらい', trap: 'わな', leaves: 'まとう', wave: 'なみ', stance: 'まちぶせ', rage: 'あばれる', warp: 'ワープ', flip: 'はんてん', proj: 'とびどうぐ', beam: 'ちょくせん', aoe: 'まわり', strike: 'あしもと', dash: 'とっしん', melee: 'せっきん', swipe: 'まえ', cone: 'おうぎ', multi: 'はんい', ray: 'ほじょ', self: 'じぶん', heal: 'かいふく', protect: 'まもる', sub: 'デコイ', clone: 'ぶんしん', dbond: 'ほじょ', counter: 'カウンター', curse: 'ほじょ', field: 'ば', hazard: 'しかけ', baton: 'いれかえ' };
+const KIND_LABEL = { gshift: 'すり抜け', scare: '威嚇', mines: '地雷', trap: '罠', leaves: 'まとう', wave: '波', stance: '待ち伏せ', rage: '暴れる', warp: 'ワープ', flip: '反転', proj: '飛び道具', beam: '直線', aoe: '周囲', strike: '足元', dash: '突進', melee: '近接', swipe: '前方', cone: '扇', multi: '範囲', ray: '補助', self: '自分', heal: '回復', protect: 'まもる', sub: 'デコイ', clone: '分身', dbond: '補助', counter: 'カウンター', curse: '補助', field: '場', hazard: '設置', baton: '交代' };
 // わざの 効果の 説明
-// わざの せつめい文（データから じどうで つくる）：いりょく → うごき → こうか → つかえる かいすう の じゅん
+// 技の説明文（データから自動で作る）：威力 → 動き → 効果 の順。使える回数は 技名の横に「のこり/最大」で出す（mvUses）
 function moveDesc(m) {
   const e = m.e || {}, out = [], ST = { brn: 'やけど', par: 'まひ', psn: 'どく', tox: 'もうどく', frz: 'こおり', slp: 'ねむり' };
-  const stg = (o) => Object.entries(o).map(([k, v]) => `${STAGE_NAMES[k]}${v > 0 ? '+' : ''}${v}`).join('・');
-  const per = (c, x) => !c || c >= 100 ? `かならず ${x}` : `${c}%で ${x}`;
+  const SN = { atk: '攻撃', def: '防御', spa: '属性攻撃', spd: '属性防御', spe: '素早さ', eva: '回避' };
+  const stg = (o) => Object.entries(o).map(([k, v]) => `${SN[k]}${v > 0 ? '+' : ''}${v}`).join('・');
+  const per = (c, x) => !c || c >= 100 ? `必ず${x}` : `${c}%で${x}`;
   const pw = m.power || (m.pow ? Math.round(m.pow * 5) : 0), add = (x) => { if (x) out.push(x); };
-  // いりょく・めいちゅう
-  if (m.cat !== 'stat' && m.k !== 'counter' && !m.ohko) add(`いりょく${pw}`);
-  if (m.cat !== 'stat' && m.acc && m.acc < 100) add(`めいちゅう${m.acc}`);
-  if (m.prio > 0) add('すばやく だせる');
-  // うごき
-  if (m.k === 'counter') add(`じどう：とっしん・だげきを うけた しゅんかんに、うけた ダメージを ${m.mult}ばいで かえす`);
-  if (m.k === 'wall') add(`あいてとの あいだに かべを つくる（${m.life}びょう）。わざも とおさない${m.thorn ? '・さわると ダメージ' : ''}。そらから ふる わざ・じわれは とめられない。こわせるのは ${wallBreakers({ t: m.t, reflect: m.reflect }).map(t => TYPES[t].n).join('・')}の わざ だけ`);
-  if (m.k === 'vault') add(m.hide === 'fly' ? 'そらへ とびあがり、あいての ところへ おりて こうげき（とんでいる あいだは うたれない）' : 'じめんに もぐり、あいての あしもとから こうげき（もぐっている あいだは うたれない）。ほった あなは のこり、じぶんより 大きくない モンスターは あなから あなへ くぐれる');
-  if (m.k === 'floor') add(`あいての あしもとに ${m.n}を つくる（きえない）。${[m.noDmg ? '' : 'ふむと 1ダメージ', m.slow ? 'あしが おそくなる' : '', m.pull ? 'まんなかへ ひきこまれる' : ''].filter(Boolean).join('・')}`);
+  const TN = (t) => TYPES[t].n;
+  // 威力・命中
+  if (m.cat !== 'stat' && m.k !== 'counter' && !m.ohko) add(`威力${pw}`);
+  if (m.cat !== 'stat' && m.acc && m.acc < 100) add(`命中${m.acc}`);
+  if (m.prio > 0) add('素早く出せる');
+  // 動き
+  if (m.k === 'counter') add(`自動：突進・打撃を受けた瞬間に、受けたダメージを${m.mult}倍で返す`);
+  if (m.k === 'wall') add(`相手との間に壁を作る（${m.life}秒）。技も通さない${m.thorn ? '・触れるとダメージ' : ''}。空から降る技・地割れは防げない。壊せるのは${wallBreakers({ t: m.t, reflect: m.reflect }).map(TN).join('・')}の技だけ`);
+  if (m.k === 'vault') add(m.hide === 'fly' ? '空へ飛び上がり、相手の所へ降りて攻撃（飛んでいる間は攻撃を受けない）' : '地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。掘った穴は残り、自分より大きくないモンスターは穴から穴へくぐれる');
+  if (m.k === 'floor') add(`相手の足元に${m.n}を作る（消えない）。${[m.noDmg ? '' : '踏むと1ダメージ', m.slow ? '足が遅くなる' : '', m.pull ? '中心へ引き込まれる' : ''].filter(Boolean).join('・')}`);
   const K = {
-    protect: `じどう：とびどうぐ・ビーム・はんいわざを うけた しゅんかんに 1かい うちけす${m.psnGuard ? '。うった あいては どくに なる' : ''}`,
-    sub: 'HPを 1/4 つかって デコイにんぎょうを おく（あいての こうげきを ひきつけ、2かい うけると こわれる）', dbond: 'このあと たおされたら、あいても いっしょに たおれる',
-    curse: 'HPを 1/4 つかって、あいての HPを 20% けずる（こうたいするまで その ぶんは かいふく できない）', baton: 'のうりょくの へんかを ひきついで ひかえと こうたい',
-    flip: 'じぶんの のうりょくの へんかを はんたいに する（さがった ものが あがる）', leaves: '8びょう じぶんの まわりを このはが まわって こうげき（こうたいしても のこる）',
-    mines: '5この ほうしを ばらまく。ふむと ばくはつ', trap: 'あいての あしもとに みえない わなを しかける（みかたには みえる）。ふむと 2.4びょう うごけない',
-    warp: 'かげに もぐり、あいての うしろへ ワープして こうげき（きょりは かんけいない）', rage: '3びょう あいてを おいかけて まわりを こうげきしつづける。おわると じぶんの こうげき-2',
-    stance: 'じどう：とっしん・だげきを うけた しゅんかんに あいてへ つっこむ', gshift: 'からだが すけて、ノーマル・かくとうの わざが すりぬける（こうたいすると きれる）',
-    scare: 'あいてを うしろへ あとずさりさせる', wave: 'まえへ ゆっくり すすむ なみ。なみの とおった あとは みかたが はやく うごける',
-    clone: 'ぶんしんを 2たい だす（10びょう）。あいての こうげきが ぶんしんに いく ことが あり、ときどき ほんものと いれかわる' };
+    protect: `自動：飛び道具・ビーム・範囲技を受けた瞬間に1回打ち消す${m.psnGuard ? '。撃った相手はどくになる' : ''}`,
+    sub: 'HPを1/4使ってデコイ人形を置く（相手の攻撃を引きつけ、2回受けると壊れる）', dbond: 'この後倒されたら、相手も一緒に倒れる',
+    curse: 'HPを1/4使って、相手のHPを20%削る（交代するまでその分は回復できない）', baton: '能力の変化を引き継いで控えと交代',
+    flip: '自分の能力の変化を反対にする（下がったものが上がる）', leaves: '8秒間、自分の周りを木の葉が回って攻撃（交代しても残る）',
+    mines: '胞子を5個ばらまく。踏むと爆発', trap: '相手の足元に見えない罠を仕掛ける（味方には見える）。踏むと2.4秒動けない',
+    warp: '影に潜り、相手の後ろへワープして攻撃（距離は関係ない）', rage: '3秒間、相手を追いかけて周りを攻撃し続ける。終わると自分の攻撃-2',
+    stance: '自動：突進・打撃を受けた瞬間に相手へ突っ込む', gshift: '体が透けて、ノーマル・かくとうの技がすり抜ける（交代すると切れる）',
+    scare: '相手を後ろへ後ずさりさせる', wave: '前へゆっくり進む波。波の通った後は味方が速く動ける',
+    clone: '分身を2体出す（10秒）。相手の攻撃が分身に向かうことがあり、時々本物と入れ替わる' };
   add(K[m.k]);
-  if (m.k === 'field') add(m.fld === 'trickroom' ? '9びょう、おそい モンスターほど はやく うごける ばに する' : 'しばらく みかたの すばやさが あがる');
-  if (m.k === 'hazard') add({ rocks: 'あいての ばに いわを うかべる。こうたいで でてきた あいてに ダメージ', spikes: 'あいての ばに まきびしを まく（3かいまで かさなる）。こうたいで でてきた あいてに ダメージ（とんでいる あいてには きかない）', tspikes: 'あいての ばに どくの トゲを まく。こうたいで でてきた あいてを どくに する' }[m.hz]);
-  if (m.sp) add({ taunt: '6びょう、あいては へんかわざが つかえない', encore: '5びょう、あいてに おなじ わざを くりかえさせる', yawn: 'しばらくして あいてを ねむらせる', trick: 'あいての のうりょくアップを うばう', roar: 'あいてを むりやり ひかえと こうたいさせる（やせいは にげる）' }[m.sp]);
-  if (m.guardDash) add('ガードしながら ゆっくり すすむ'); if (m.grab) add('なげわざ：つかんで 5れんだ（まもる・カウンターでは ふせげない）');
-  if (m.slap) add('よこに ふきとばす。かべに ぶつかると 3びょう うごけない'); if (m.bigKb) add('あたった あいてを とおくへ ふきとばす'); if (m.noKb) add('あいてを ふきとばさない');
-  if (m.back) add('あてたら もとの ばしょへ もどる'); if (m.pat === 'orbit') add('あいての まわりを まわって うずを つくる（ながされる）'); if (m.trail) add('とおった みちが 3びょう もえる');
-  if (m.chain) add('あたると もういちど とっしん。そのあとも あたるたびに 50%で つづく'); if (m.charge2) add('1かいめは ちからを ためる。2かいめで ほそい ビームを はなつ');
-  if (m.multiHit) add(`はねかえりながら ${m.life}びょう のこる`); if (m.blastR) add('ひろい はんいに おちる'); if (m.whip) add('みぎ・ひだりと 2かい ふる');
-  if (m.hits && !m.whip) add(`${m.hits}かい つづけて こうげき（だんだん つよく なる）`);
-  if (m.cnt > 1 && m.burst) add(`${m.cnt}ほうこうに ${m.burst[0]}かい れんしゃ`);
-  else if (m.burst) add(m.burst[0] === m.burst[1] ? `${m.burst[0]}はつ れんしゃ` : `${m.burst[0]}〜${m.burst[1]}はつ れんしゃ`);
-  else if (m.cnt > 1 && m.k !== 'mines') add(`${m.cnt}はつ`);
-  if (m.chan) add(`${m.chan}びょう うちつづける${m.chanMove ? '（うちながら うごける）' : ''}`);
-  if (m.homing) add('あいてを おいかける'); if (m.sure) add('かならず あたる');
-  // こうか
-  if (e.st) add(per(e.stCh, `${ST[e.st]}に する`));
-  if (e.yawn) add('あたると しばらくして ねむる');
+  if (m.k === 'field') add(m.fld === 'trickroom' ? '9秒間、遅いモンスターほど速く動ける場にする' : 'しばらく味方の素早さが上がる');
+  if (m.k === 'hazard') add({ rocks: '相手の場に岩を浮かべる。交代で出てきた相手にダメージ', spikes: '相手の場にまきびしをまく（3回まで重なる）。交代で出てきた相手にダメージ（飛んでいる相手には効かない）', tspikes: '相手の場に毒のトゲをまく。交代で出てきた相手をどくにする' }[m.hz]);
+  if (m.sp) add({ taunt: '6秒間、相手は変化技が使えない', encore: '5秒間、相手に同じ技を繰り返させる', yawn: 'しばらくして相手を眠らせる', trick: '相手の能力アップを奪う', roar: '相手を無理やり控えと交代させる（野生は逃げる）' }[m.sp]);
+  if (m.guardDash) add('ガードしながらゆっくり進む'); if (m.grab) add('投げ技：つかんで5連打（まもる・カウンターでは防げない）');
+  if (m.slap) add('横に吹き飛ばす。壁にぶつかると3秒動けない'); if (m.bigKb) add('当たった相手を遠くへ吹き飛ばす'); if (m.noKb) add('相手を吹き飛ばさない');
+  if (m.back) add('当てたら元の場所へ戻る'); if (m.pat === 'orbit') add('相手の周りを回って渦を作る（流される）'); if (m.trail) add('通った道が3秒燃える');
+  if (m.chain) add('当たるともう一度突進。その後も当たるたびに50%で続く'); if (m.charge2) add('1回目は力をためる。2回目で細いビームを放つ');
+  if (m.multiHit) add(`跳ね返りながら${m.life}秒残る`); if (m.blastR) add('広い範囲に落ちる'); if (m.whip) add('右・左と2回振る');
+  if (m.hits && !m.whip) add(`${m.hits}回続けて攻撃（だんだん強くなる）`);
+  if (m.cnt > 1 && m.burst) add(`${m.cnt}方向に${m.burst[0]}回連射`);
+  else if (m.burst) add(m.burst[0] === m.burst[1] ? `${m.burst[0]}発連射` : `${m.burst[0]}〜${m.burst[1]}発連射`);
+  else if (m.cnt > 1 && m.k !== 'mines') add(`${m.cnt}発`);
+  if (m.chan) add(`${m.chan}秒間撃ち続ける${m.chanMove ? '（撃ちながら動ける）' : ''}`);
+  if (m.homing) add('相手を追いかける'); if (m.sure) add('必ず当たる');
+  // 効果
+  if (e.st) add(per(e.stCh, `${ST[e.st]}にする`));
+  if (e.yawn) add('当たるとしばらくして眠る');
   if (e.flinch) add(per(e.flinch, 'ひるませる'));
-  if (m.confuse) add('あいてを こんらん させる（しじと ちがう うごきを する）');
-  if (e.foe) add(per(e.foeCh, `あいての ${stg(e.foe)}`));
-  if (e.self) add(`じぶんの ${stg(e.self)}`);
-  if (e.drain) add(`あたえた ダメージの ${e.drain}%を かいふく（かいふくは 1せん ${m.drainMax || DRAIN_MAX}かいまで）`);
-  if (e.recoil) add(`あたえた ダメージの ${e.recoil}%を じぶんも うける`);
-  if (e.heal) add(`HPを ${e.heal}% かいふく`);
-  if (e.seed) add('あたると タネが つき、まいびょう HPを すいとる');
-  if (e.web) add(`あたると ${e.web}びょう、こうげきを うけるたびに ついかで ダメージ`);
-  if (m.healBlock) add('6びょう、あいての かいふくを ふうじる');
-  if (m.switchOut) add('あてたら ひかえと こうたい');
-  if (m.fakeout) add('ばに でてから 1かい だけ つかえる（こうたいすると また つかえる）');
-  if (m.ohko) add('あたれば いちげきで たおす');
-  if (m.crit) add('きゅうしょに あたりやすい');
-  if (m.ramp) add(`あてるたびに いりょくが ${Math.round(m.ramp * 100)}%ずつ あがる（6かいまで）`);
-  if (m.sizeDmg) add('からだが 大きいほど つよい');
-  if (m.useDef) add('じぶんの ぼうぎょの たかさで ダメージが きまる'); if (m.hitDef) add('あいての 属性防御ではなく ぼうぎょで ダメージを うける'); if (m.useFoeAtk) add('あいての こうげきの たかさで ダメージが きまる');
-  if (m.superVsWater) add('みずタイプにも こうかばつぐん'); if (m.rapidSpin) add('じぶんの ばの しかけ・タネを はらう');
-  if (m.wallBreak) add('おかれた かべを こわす'); if (m.crash) add('かべに ぶつかると じぶんが ダメージ'); if (m.reflect) add('とびどうぐを はねかえす');
-  if (m.selfConfuse) add(`あてると じぶんが ${m.selfConfuse}びょう こんらん`); if (m.bugHeal) add('みかたの むしタイプは うえに いると かいふく');
-  // つかえる かいすう
-  if (!healMax(m)) add('なんかいでも つかえる');
-  if (healMax(m)) add(`${bigMax(m) && healMax(m) === bigMax(m) && m.cat !== 'stat' && (m.ohko || movePower(m) >= 100) ? '大わざ：' : ''}1せん ${healMax(m)}かいまで`);
+  if (m.confuse) add('相手を混乱させる（指示と違う動きをする）');
+  if (e.foe) add(per(e.foeCh, `相手の${stg(e.foe)}`));
+  if (e.self) add(`自分の${stg(e.self)}`);
+  if (e.drain) add(`与えたダメージの${e.drain}%を回復（回復は1戦${m.drainMax || DRAIN_MAX}回まで）`);
+  if (e.recoil) add(`与えたダメージの${e.recoil}%を自分も受ける`);
+  if (e.heal) add(`HPを${e.heal}%回復`);
+  if (e.seed) add('当たると種がつき、毎秒HPを吸い取る');
+  if (e.web) add(`当たると${e.web}秒間、攻撃を受けるたびに追加ダメージ`);
+  if (m.healBlock) add('6秒間、相手の回復を封じる');
+  if (m.switchOut) add('当てたら控えと交代');
+  if (m.fakeout) add('場に出てから1回だけ使える（交代するとまた使える）');
+  if (m.ohko) add('当たれば一撃で倒す');
+  if (m.crit) add('急所に当たりやすい');
+  if (m.ramp) add(`当てるたびに威力が${Math.round(m.ramp * 100)}%ずつ上がる（6回まで）`);
+  if (m.sizeDmg) add('体が大きいほど強い');
+  if (m.useDef) add('自分の防御の高さでダメージが決まる'); if (m.hitDef) add('相手の属性防御ではなく防御でダメージを受ける'); if (m.useFoeAtk) add('相手の攻撃の高さでダメージが決まる');
+  if (m.superVsWater) add('みずタイプにも効果ばつぐん'); if (m.rapidSpin) add('自分の場の仕掛け・種を払う');
+  if (m.wallBreak) add('置かれた壁を壊す'); if (m.crash) add('壁にぶつかると自分がダメージ'); if (m.reflect) add('飛び道具を跳ね返す');
+  if (m.selfConfuse) add(`当てると自分が${m.selfConfuse}秒混乱`); if (m.bugHeal) add('味方のむしタイプは上にいると回復');
+  if (isBigMove(m)) add('大技');
   return out.join('・');
 }
-const PAT_DESC = { scatter: 'あいての まわりに ばらばらに おちる', swarm: 'むれが つぎつぎ おそう', big: 'おおきな はんいに おそく おちる', line: 'てまえから あいてへ じゅんに ふきあがる', row: 'よこ 1れつに おちる', cross: '✕の かたちに おちる', double: 'おなじ ところに 2かい（よけた あとも ちゅうい）', cage: 'おちた まわりを いわで かこむ', ring: 'そとの わ → まんなかへ とじる',
-  donut: 'まわりの わ だけ（すぐ そばは あんぜん）', pulse: 'なみが 2かい ひろがる', pulse3: 'なみが 3かい ひろがる', front: 'まえに おおきな なみ', split: '3ぼんに わかれる', wide: 'ふとくて みじかい', erupt: 'じめんが じゅんに さける（しょうがいぶつを こえる）',
-  spread: '3ほうこうに とぶ', bounce: 'かべで はねかえる', boomerang: 'つきぬけて もどってくる', homing: 'あいてを おいかける', zigzag: 'ジグザグに とぶ', wave: 'うねって とぶ', lob: 'やまなりに なげる（しょうがいぶつを こえる）', orb: 'おおきく ゆっくり', blast: 'あたると ばくはつ', triple: '3はつ れんしゃ',
-  blob: 'いびつに ひろがる ぬま', strip: 'あいてへ のびる 1ぽんの みち', grid: '＋の かたちの ゆか', pull: 'まんなかへ ひきこむ', arc: 'じぶんを まもる ゆみなり', vee: 'あいてに むけた くの字', leap: 'とびあがって のしかかる（空中は むてき）', spin: 'まわり ぜんぶを こうげき', combo: 'すばやく 2れんげき' };
-const PAT_LABEL = { scatter: 'ばらまき', swarm: 'むれ', big: 'きょだい', line: 'れんぞく', row: 'よこならび', cross: 'クロス', double: '2れんだ', cage: 'おり', ring: 'わ→なか', donut: 'わ', pulse: 'なみ×2', pulse3: 'なみ×3', front: 'まえなみ', split: '3ぼん', wide: 'ふとい', erupt: 'じわれ',
-  spread: '3way', bounce: 'はねかえり', boomerang: 'ブーメラン', homing: 'ついび', zigzag: 'ジグザグ', wave: 'うねり', lob: 'やまなり', orb: 'おおだま', blast: 'ばくはつ', triple: 'れんしゃ', blob: 'ぬま', strip: 'みち', grid: '＋マス', pull: 'ひきこみ', arc: 'ゆみなり', vee: 'くの字', leap: 'ジャンプ', spin: 'かいてん', combo: '2れんげき' };
+// 1戦で 使える 回数：「のこり/最大」（使い放題は ∞）
+const isBigMove = (m) => m.cat !== 'stat' && (m.ohko || movePower(m) >= 100);
+function mvUses(m, left) { const mx = healMax(m); return mx ? `${left == null ? mx : Math.max(0, left)}/${mx}` : '∞'; }
+const mvUseTag = (m, left) => `<em class="mvu">${mvUses(m, left)}</em>`;
+const PAT_LABEL = { scatter: '散布', swarm: '群れ', big: '巨大', line: '連続', row: '横並び', cross: 'クロス', double: '2連打', cage: '檻', ring: '輪→中', donut: '輪', pulse: '波×2', pulse3: '波×3', front: '前方波', split: '3本', wide: '極太', erupt: '地割れ',
+  spread: '3way', bounce: '反射', boomerang: 'ブーメラン', homing: '追尾', zigzag: 'ジグザグ', wave: 'うねり', lob: '山なり', orb: '大玉', blast: '爆発', triple: '連射', blob: '沼', strip: '道', grid: '＋マス', pull: '引き込み', arc: '弓なり', vee: 'くの字', leap: 'ジャンプ', spin: '回転', combo: '2連撃' };
 function moveSub(m) {
   const aim = m.cat === 'stat' ? '' : (m.aim === 'dir' ? '◎' : '');
-  const k = (PAT_LABEL[m.pat] || KIND_LABEL[m.k] || { wall: 'かべ', floor: 'ゆか', vault: m.hide === 'fly' ? 'そら' : 'もぐる' }[m.k] || '') + aim; return k ? `${TYPES[m.t].n}・${k}` : TYPES[m.t].n;   // ラベルが ない ときに「いわ・」と なっていた
+  const k = (PAT_LABEL[m.pat] || KIND_LABEL[m.k] || { wall: '壁', floor: '床', vault: m.hide === 'fly' ? '空中' : '地中' }[m.k] || '') + aim; return k ? `${TYPES[m.t].n}・${k}` : TYPES[m.t].n;   // ラベルが ない ときに「いわ・」と なっていた
 }
 function setupCmds() {
   const f = B && active(B.my || 0); if (!f) return;
@@ -7869,7 +7870,7 @@ function setupCmds() {
     b.hidden = !id;
     if (!id) return;
     const m = MOVES[id];
-    b.querySelector('.a').textContent = m.n; b.dataset.rps = rpsOf(m);
+    b.querySelector('.a').innerHTML = `${m.n}<em class="mvu"></em>`; b.dataset.rps = rpsOf(m);
     b.querySelector('.a').style.fontSize = m.n.length > 8 ? '10.5px' : m.n.length > 6 ? '11.5px' : '';
     b.querySelector('.b').textContent = moveSub(m); b.querySelector('.b')._t = null; b.dataset.eff = '';
     b.querySelector('.d').textContent = moveDesc(m);
@@ -8093,10 +8094,10 @@ function updHUD() {
     const o = active(1); let eff = '';
     if (o && m.cat !== 'stat') { const v = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1); eff = v >= 2 ? '2' : v === 0 ? '0' : v < 1 ? '0.5' : ''; }
     if (b.dataset.eff !== eff) b.dataset.eff = eff;
-    const left = healMax(m) ? `（のこり ${Math.max(0, healLeft(f, id))}）` : m.e && m.e.drain ? `（かいふく ${Math.max(0, drainLeft(f, id))}）` : '';
-    if (why) { setText(b.querySelector('.b'), `つかえない：${why}`); return; }
-    if (auto) { setText(b.querySelector('.b'), ((f.cd[id] || 0) > 0 ? `じどう・あと ${Math.ceil(f.cd[id])}びょう` : 'じどう・まちかまえ中') + left); return; }
-    setText(b.querySelector('.b'), (eff ? `${TYPES[m.t].n}・${eff === '2' ? 'ばつぐん！' : eff === '0' ? 'きかない' : 'いまいち'}` : moveSub(m)) + left);
+    setText(b.querySelector('.mvu'), mvUses(m, healMax(m) ? healLeft(f, id) : null)); const left = m.e && m.e.drain ? `（回復あと${Math.max(0, drainLeft(f, id))}）` : '';
+    if (why) { setText(b.querySelector('.b'), `使えない：${why}`); return; }
+    if (auto) { setText(b.querySelector('.b'), ((f.cd[id] || 0) > 0 ? `自動・あと${Math.ceil(f.cd[id])}秒` : '自動・待ち構え中') + left); return; }
+    setText(b.querySelector('.b'), (eff ? `${TYPES[m.t].n}・${eff === '2' ? '効果ばつぐん！' : eff === '0' ? '効果なし' : 'いまひとつ'}` : moveSub(m)) + left);
   });
   $('cDodge').querySelector('.cdv').style.height = ((B.sides[my].dodgeCmd || 0) / DODGE_CMD_CD * 100) + '%';
   setText($('cDodge').querySelector('.b'), (B.sides[my].dodgeCmd || 0) > 0 ? `あと ${Math.ceil(B.sides[my].dodgeCmd)}びょう` : `じどう ${Math.round(autoDodgeP(f) * 100)}%`);
