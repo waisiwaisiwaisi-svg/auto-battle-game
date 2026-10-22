@@ -5590,7 +5590,7 @@ function benchIdx(side, random) {
 }
 // いれかえ（バトンタッチ・とんぼがえり系・ふきとばし）
 function doSwitch(f, idx, pass, forced, byMove) {
-  SND.se('swapOut'); B.swapNoLag = !!byMove; if (plOk('sum_return')) plFx('sum_return', f.x, f.y - BODY, 1.1, .45); else sheetFx('teleport', f.x, f.y - 30, 1.2);   // わざで 交代（とんぼがえり・バトンタッチ）した ときは スキなし
+  SND.se('swapOut'); B.swapNoLag = !!(byMove || forced); /* 交代技・ふきとばし（強制交代）では スキなし */ if (plOk('sum_return')) plFx('sum_return', f.x, f.y - BODY, 1.1, .45); else sheetFx('teleport', f.x, f.y - 30, 1.2);   // わざで 交代（とんぼがえり・バトンタッチ）した ときは スキなし
   f.state = 'return'; f.stT = .3; f.cur = null; f.queued = null;
   B.swapTo = idx; B.swapPass = pass || null;
   B.sides[f.side].swapCd = SWAP_CD;
