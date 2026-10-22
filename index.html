@@ -3628,7 +3628,7 @@ function statTone(v, avg) { const r = v / avg; return r >= 1.08 ? { c: '#5ee08a'
 function statBars(vals, avg, maxes, m) {
   const rows = STAT6.map(k => { const v = Math.round(vals[k]), t = statTone(vals[k], avg[k]), mx = maxes[k] || maxes.atk, mk = Math.min(100, avg[k] / mx * 100);
     const nm = m ? natMod(m.nat, k) : 1, nc = nm > 1 ? '#ff8a7a' : nm < 1 ? '#7ab8ff' : '';
-    return `<div class="sbar"><span style="${nc ? `color:${nc}` : ''}">${STAT6_N[k]}${nm > 1 ? '↑' : nm < 1 ? '↓' : ''}</span><span style="color:${t.c}">${v}${t.m}</span><i style="position:relative"><b style="width:${Math.min(100, v / mx * 100)}%;background:${t.c}"></b><u style="left:${mk}%"></u></i>${m ? `<em title="こたいち／きょうか">${m.iv[k]}${evBonus(m, k) ? `<b class="evb">+${evBonus(m, k)}</b>` : ''}</em>` : ''}</div>`; }).join('');
+    return `<div class="sbar"><span style="${nc ? `color:${nc}` : ''}"><span class="kw" data-kw="sv:${k}">${STAT6_N[k]}</span>${nm > 1 ? '↑' : nm < 1 ? '↓' : ''}</span><span style="color:${t.c}">${v}${t.m}</span><i style="position:relative"><b style="width:${Math.min(100, v / mx * 100)}%;background:${t.c}"></b><u style="left:${mk}%"></u></i>${m ? `<em title="こたいち／きょうか">${m.iv[k]}${evBonus(m, k) ? `<b class="evb">+${evBonus(m, k)}</b>` : ''}</em>` : ''}</div>`; }).join('');
   const tot = STAT6.reduce((a, k) => a + Math.round(vals[k]), 0);
   return rows + `<div class="dim" style="font-size:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><span>ごうけい ${tot}${m ? `　こたいち ${ivTotal(m)}/${31 * STAT6.length}　きょうか ${evFed(m)}/${EV_MAX}` : ''}</span><span>｜＝へいきん <span style="color:#5ee08a">▲たかい</span> <span style="color:#ff7a6a">▼ひくい</span>${m ? ' <span style="color:#ff8a7a">↑</span><span style="color:#7ab8ff">↓</span>＝せいかく' : ''}</span></div>`;
 }
@@ -3875,9 +3875,9 @@ function renderTrain(uid) {
   const mvCls = (id) => eq.includes(id) ? '' : tm.includes(id) ? ' tmv' : ' bad';
   const where = (x) => (x.tr && x.tr.prog && x.tr.prog.mv && x.tr.mode === 'chip' ? '<em class="ok">設定済み</em>' : '') + (x.tr && x.tr.draft && x.tr.draft.mv ? '<em class="dr">仮</em>' : '');
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
-  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '<small>＋ ほかの条件（ここへ）</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`).join('');
+  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-kwh="c:${c.t}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '<small>＋ ほかの条件（ここへ）</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
   const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
     <div class="trbtns"><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
@@ -3893,8 +3893,8 @@ function renderTrain(uid) {
   else if (pk) ins = '<div class="dim">置く場所をタップ（技は技の枠・立ち回りは「〜撃つ」の枠・条件は右の枠）</div>';
   else ins = '<div class="dim">ドラッグで 左へ 置く（タップ → 置き場所タップ でもOK）<br>置いた 条件：タップで 設定・外へ ドラッグで 削除</div>';
   const side = `<h3>技 <span class="dim">→ 技の 枠へ（★＝スクロール）</span></h3><div class="trpal">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${(tmFree() ? '∞' : S.tms[id])}</small></div>`).join('')}</div>${infoId && MOVES[infoId] ? mvInfo(infoId) : ''}
-    <h3>撃ち方 <span class="dim">→「〜撃つ」の 枠へ</span></h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
-    <h3>条件 <span class="dim">→「使うとき」の 枠へ</span></h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
+    <h3>撃ち方 <span class="dim">→「〜撃つ」の 枠へ</span></h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-kwh="g:${a}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
+    <h3>条件 <span class="dim">→「使うとき」の 枠へ</span></h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-kwh="c:${t}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
     <div class="trins">${ins}</div>`;
   const scr = $('scTrain'), keep = !scr.hidden && [scr, ...['.trside', '.trmons'].map(q => $('trBody').querySelector(q))].map(e => e ? [e.scrollTop, e.scrollLeft] : [0, 0]);   // いまの スクロールを おぼえておく
   const trB0 = $('trBody'), trSame = !$('scTrain').hidden && MO.trUid === uid, trRows0 = trSame ? MO.rects(trB0, '.trr[data-key]') : new Map(), trC0 = trSame ? MO.rects(trB0, '.cnd[data-key]') : new Map();
@@ -4063,7 +4063,7 @@ function openBoost(m) {
     bg.querySelector('#bst').innerHTML = `<h3 style="margin-bottom:6px">${sp.n}を きょうか</h3>
       <p class="dim" style="font-size:12px">おなじ しゅるいの モンスターを 1たい つかうと きょうかポイント +${BOOST_SAME}（さいだい ${EV_MAX}）。ポイントを すきな のうりょくに ふりわけて「確定する」で きまる（1つ ${EV_STAT_MAX} まで・1ポイントで +${EV_K}）。</p>
       <div class="bsum"><span>あつめた <b>${m.fed}</b>/${EV_MAX}</span><span>のこり ポイント <b style="color:var(--acc)">${free}</b></span></div>
-      <div class="bgrid">${STAT6.map(k => `<div class="brow"><span>${STAT6_N[k]}</span><b style="${pend[k] ? 'color:var(--acc)' : ''}">${st[k]}</b><span class="dim">+${evBonus(pv, k)}</span><i><u style="width:${pv.ev[k] / EV_STAT_MAX * 100}%"></u></i><span style="${pend[k] ? 'color:var(--acc)' : ''}">${pv.ev[k]}/${EV_STAT_MAX}</span><button data-k="${k}" data-d="-1" ${pend[k] ? '' : 'disabled'}>－</button><button data-k="${k}" data-d="1" ${free > 0 && pv.ev[k] < EV_STAT_MAX ? '' : 'disabled'}>＋</button></div>`).join('')}</div>
+      <div class="bgrid">${STAT6.map(k => `<div class="brow"><span class="kw" data-kw="sv:${k}">${STAT6_N[k]}</span><b style="${pend[k] ? 'color:var(--acc)' : ''}">${st[k]}</b><span class="dim">+${evBonus(pv, k)}</span><i><u style="width:${pv.ev[k] / EV_STAT_MAX * 100}%"></u></i><span style="${pend[k] ? 'color:var(--acc)' : ''}">${pv.ev[k]}/${EV_STAT_MAX}</span><button data-k="${k}" data-d="-1" ${pend[k] ? '' : 'disabled'}>－</button><button data-k="${k}" data-d="1" ${free > 0 && pv.ev[k] < EV_STAT_MAX ? '' : 'disabled'}>＋</button></div>`).join('')}</div>
       <div class="row" style="justify-content:space-between;gap:6px;margin-top:6px;flex-wrap:wrap"><span class="dim" style="font-size:11px;flex:1 1 180px;min-width:0">確定した ポイントは もどせません（${ITEMS.respec.ic}${ITEMS.respec.n}で ふりなおし）</span><span style="display:flex;gap:6px"><button class="btn ok" id="bOk" style="font-size:13px;padding:6px 14px;white-space:nowrap" ${pendN() ? '' : 'disabled'}>確定する${pendN() ? `（${pendN()}）` : ''}</button><button class="btn sub" id="bReset" style="font-size:12px;padding:6px 10px;white-space:nowrap" ${evUsed(m) && itemN('respec') ? '' : 'disabled'}>${ITEMS.respec.ic} ふりなおす ×${itemN('respec')}</button></span></div>
       <div class="sec-title" style="margin-top:10px"><span>つかう モンスター</span><span class="dim">${dups.length}たい</span></div>
       ${dups.length ? `<div class="bdups">${dups.map((o, j) => `<button class="bdup ${pick.has(j) ? 'on' : ''}" data-j="${j}"><i data-sid="${o.x.sid}"></i><small>${o.w === 'p' ? 'パーティ' : 'ボックス'}</small><small>${o.x.nat && NATURES[o.x.nat] ? NATURES[o.x.nat].n : '－'}</small><small style="color:${o.x.fed ? 'var(--acc)' : 'var(--dim)'}">+${o.x.fed || 0}</small></button>`).join('')}</div>` : `<p class="dim">${sp.n}が ほかに いません（おなじ しゅるいを くさむら・たからばこで あつめよう）</p>`}
@@ -4507,7 +4507,7 @@ let B = null;
 
 const STAGE_KEYS = ['atk', 'def', 'spa', 'spd', 'spe', 'eva'];
 const STAGE_NAMES = { atk: 'こうげき', def: 'ぼうぎょ', spa: '属性攻撃', spd: '属性防御', spe: 'すばやさ', eva: 'かいひ' };
-const STATUS_NAMES = { brn: 'やけど', par: 'まひ', psn: 'どく', tox: 'もうどく', slp: 'ねむり', frz: 'こおり' };
+const STATUS_NAMES = { brn: 'やけど', par: 'まひ', psn: 'どく', tox: 'もうどく', slp: '睡眠', frz: '凍結' };
 const stageMul = (s) => s >= 0 ? (2 + s) / 2 : 2 / (2 - s);
 const TICK = 3; // 状態異常ダメージの間隔（秒）＝ポケモンの「1ターン」相当
 
@@ -5577,9 +5577,9 @@ function setStatus(f, s, by) {
   if (by && f.v.sub > 0) return false;
   if ((s === 'brn' && hasType(f, 'fire')) || (s === 'par' && hasType(f, 'elec')) || ((s === 'psn' || s === 'tox') && (hasType(f, 'poison') || hasType(f, 'steel'))) || (s === 'frz' && hasType(f, 'ice'))) return false;
   f.status = s; f.toxN = 1; f.tickT = TICK; statusFx(f, s);
-  if (s === 'slp') { f.statusT = 3; f.cur = null; f.queued = null; if (['wind', 'chan', 'dash', 'hide', 'rage', 'grab', 'stance'].includes(f.state)) f.state = 'free'; }
-  if (s === 'frz') { f.statusT = 2.5; f.cur = null; f.queued = null; if (['wind', 'chan', 'dash', 'hide', 'rage', 'grab', 'stance'].includes(f.state)) f.state = 'free'; }
-  say(`${prefix(f)}${f.sp.n}は ${{ brn: 'やけどを おった', par: 'まひして うごきにくくなった', psn: 'どくを あびた', tox: 'もうどくを あびた', slp: 'ねむってしまった', frz: 'こおりついた' }[s]}！`);
+  if (s === 'slp') { f.statusT = 5; f.cur = null; f.queued = null; if (['wind', 'chan', 'dash', 'hide', 'rage', 'grab', 'stance'].includes(f.state)) f.state = 'free'; }
+  if (s === 'frz') { f.statusT = 3; f.cur = null; f.queued = null; if (['wind', 'chan', 'dash', 'hide', 'rage', 'grab', 'stance'].includes(f.state)) f.state = 'free'; }
+  say(`${prefix(f)}${f.sp.n}は ${{ brn: 'やけどを おった', par: 'まひして うごきにくくなった', psn: 'どくを あびた', tox: 'もうどくを あびた', slp: '睡眠状態に なった', frz: '凍結した' }[s]}！`);
   return true;
 }
 
@@ -5641,7 +5641,7 @@ function hit(att, def, m, ang, opt) {
   const lagHit = def.state === 'lag' || boostHit;
   // ポケモンの ダメージ式：((2×Lv÷5＋2)×いりょく×A÷D÷50＋2)×タイプ一致×あいしょう×きゅうしょ×乱数(0.85〜1.00)。リアルタイム用に DMG_K を かける
   const P = pow * 5 * (KIND_DMG[m.k] || 1), base = Math.floor(Math.floor(Math.floor(2 * STAT_LV / 5 + 2) * P * A / D) / 50) + 2;
-  let dmg = Math.max(1, Math.round(DMG_K * base * (opt.mul || 1) * stab * eff * (crit ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
+  let dmg = Math.max(1, Math.round(DMG_K * base * (opt.mul || 1) * stab * eff * (crit ? 1.5 : 1) * (def.status === 'frz' && m.t === 'fighting' && isDamaging(m) ? 1.5 : 1) * (lagHit ? LAG_DMG : 1) * rand(.85, 1)));
   if (crit || eff > 1 || dmg > def.maxHp * .3) B.cheerT = Math.max(B.cheerT || 0, 1.6);   // かんきゃくが もりあがる
   const heavy = !opt.tick && pow >= 19, big = !opt.tick || opt.first;
   const tier = opt.tick ? 0 : (crit && (heavy || eff > 1)) || (heavy && eff > 1) ? 2 : heavy || eff > 1 || crit ? 1 : 0;   // ヒットの 大きさ 3だんかい   // うちつづける わざは 1回ごとは かるい
@@ -5689,7 +5689,7 @@ function hit(att, def, m, ang, opt) {
   if (big && (heavy || eff > 1 || crit)) { def.dizzy = 1.0; }
   if (big && eff > 1) say('ばつぐんの いりょくだ！');
   else if (big && eff < 1) say('あまり きいていない ようだ…');
-  if (def.status === 'frz' && m.t === 'fire') { def.status = ''; say(`${def.sp.n}の こおりが とけた！`); }
+  if (def.status === 'frz' && (m.t === 'fire' || m.t === 'fighting') && isDamaging(m)) { def.status = ''; say(`${def.sp.n}の 凍結が とけた！${m.t === 'fighting' ? '（くだけて 1.5ばいの ダメージ）' : ''}`); }   // 凍結：ほのお・かくとうの 技で とける（かくとうは 1.5ばい）
   // 追加効果
   const e = m.e || {};
   if (def.hp > 0 && big) {
@@ -5974,7 +5974,7 @@ const CONDS = {
   myhp:  { n: '自分のHP', ps: CHIP_PCT.map(([v, n]) => [v, n + '未満']) },
   ophp:  { n: '相手のHP', ps: CHIP_PCT.map(([v, n]) => [v, n + '未満']) },
   aff:   { n: 'タイプ相性', ps: [['adv', '有利'], ['even', '互角'], ['dis', '不利']] },   // 自分のタイプ と 相手のタイプ を くらべる
-  opsts: { n: '相手の状態異常', ps: [['any', 'どれか'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['slp', '眠り'], ['frz', '凍結']] },
+  opsts: { n: '相手の状態異常', ps: [['any', 'どれか'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['slp', '睡眠'], ['frz', '凍結']] },
   foe:   { n: '相手が溜め中' },
   see:   { n: '相手が見える' },
   after: { n: '技を撃った後', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']] },   // 直前に 撃った 技が その技
@@ -6540,7 +6540,7 @@ function updateEffects(f, dt) {
   if (v.yawn > 0) { v.yawn -= dt; if (v.yawn <= 0) { v.yawn = 0; setStatus(f, 'slp', null); } }
   if (f.status === 'slp' || f.status === 'frz') {
     f.statusT -= dt;
-    if (f.statusT <= 0) { say(`${prefix(f)}${f.sp.n}は ${f.status === 'slp' ? 'めを さました' : 'こおりが とけた'}！`); f.status = ''; }
+    if (f.statusT <= 0) { say(`${prefix(f)}${f.sp.n}は ${f.status === 'slp' ? 'めを さました' : '凍結が とけた'}！`); f.status = ''; }
   }
   if (f.status === 'par') { f.parT -= dt; if (f.parT <= 0) { f.parT = 2.5; if (Math.random() < .25 && ['free', 'act'].includes(f.state)) { f.state = 'stun'; f.stT = .8; popText(f.x, f.y - 80, 'しびれて うごけない！', '#ffd84a'); } } }
   // TICK 秒ごとの ダメージ
@@ -7854,7 +7854,7 @@ const KIND_LABEL = { gshift: 'すり抜け', scare: '威嚇', mines: '地雷', t
 // わざの 効果の 説明
 // 技の説明文（データから自動で作る）：威力 → 動き → 効果 の順。使える回数は 技名の横に「のこり/最大」で出す（mvUses）
 function moveDesc(m) {
-  const e = m.e || {}, out = [], ST = { brn: 'やけど', par: 'まひ', psn: 'どく', tox: 'もうどく', frz: 'こおり', slp: 'ねむり' };
+  const e = m.e || {}, out = [], ST = { brn: 'やけど', par: 'まひ', psn: 'どく', tox: 'もうどく', frz: '凍結', slp: '睡眠' };
   const SN = { atk: '攻撃', def: '防御', spa: '属性攻撃', spd: '属性防御', spe: '素早さ', eva: '回避' };
   const stg = (o) => Object.entries(o).map(([k, v]) => `${SN[k]}${v > 0 ? '+' : ''}${v}`).join('・');
   const per = (c, x) => !c || c >= 100 ? `必ず${x}` : `${c}%で${x}`;
@@ -7926,32 +7926,66 @@ const KW = {
   'まひ': ['まひ（状態異常）', '素早さが 半分。2.5秒ごとに 25%で 0.8秒 しびれて 動けない。でんきタイプは ならない。'],
   'もうどく': ['もうどく（状態異常）', '3秒ごとに ダメージ。最大HPの 1/48 から はじまり、そのたびに ふえて 1/12 まで。交代すると ふえかたが もどる。どく・はがねタイプは ならない。'],
   'どく': ['どく（状態異常）', '3秒ごとに 最大HPの 1/24 の ダメージ。どく・はがねタイプは ならない。'],
-  'こおり': ['こおり（状態異常）', '2.5秒 動けない。ほのおの 技を うけると すぐ とける。こおりタイプは ならない。'],
-  'ねむり': ['ねむり（状態異常）', '3秒 動けない。'],
-  '眠': ['ねむり（状態異常）', '3秒 動けない。'],
+  '凍結': ['凍結（状態異常）', '3秒 動けない。ほのおの 技を うけると すぐ とける。かくとうの 技でも とけるが、その技の ダメージは 1.5倍。こおりタイプは ならない。'],
+  '睡眠': ['睡眠（状態異常）', '5秒 動けない。'],
+  '眠': ['睡眠（状態異常）', '5秒 動けない。'],
   'ひるませる': ['ひるみ', '0.7秒 動けなくなる。'],
   '混乱': ['こんらん', 'しばらくの あいだ、技を 出そうと すると ときどき ころんだり、かってに よけたり する（指示と ちがう 動き）。'],
   '急所': ['急所', 'ダメージが 1.5倍。'],
   '効果ばつぐん': ['効果ばつぐん', 'タイプの 相性が よく、ダメージが 2倍（2つの タイプ どちらにも ばつぐんなら 4倍）。'],
   '大技': ['大技', '威力100 以上の 技。1戦で 使える 回数に かぎりが ある（技名の よこの のこり/最大）。'],
-  '自動': ['自動の 技', 'えらばなくても、相手の 技を うけた しゅんかんに 自分で 出る。訓練で 設定しなくても 出る。'],
+  '自動': ['自動の 技', '相手の 技を 受けた 瞬間に 自動で 出る。'],
 };
-const KW_ST = { 攻撃: '物理技の ダメージ', 防御: '物理技から うける ダメージの へりかた', 属性攻撃: '属性技の ダメージ', 属性防御: '属性技から うける ダメージの へりかた', 素早さ: '動く はやさ・技を 出す はやさ', 回避: '技の よけやすさ' };
+const KW_SV = {   // のうりょくが なにに きくか
+  hp: ['HP', '体力。0に なると たおれる。'],
+  atk: ['こうげき', '物理技（分類が 物理の 技）の ダメージが ふえる。'],
+  def: ['ぼうぎょ', '物理技から うける ダメージが へる。'],
+  spa: ['属性攻撃', '属性技（分類が 属性の 技）の ダメージが ふえる。'],
+  spd: ['属性防御', '属性技から うける ダメージが へる。'],
+  spe: ['すばやさ', '歩く はやさ と、技の 待ち時間（高いほど みじかい：0.6〜1.6倍）。さかさまフィールドの あいだは 遅いほど はやく 歩ける。'],
+  eva: ['かいひ', '指示なしで 自動で よける 確率（平均で 約15%）。かげぶんしん などの 回避の 段階でも ふえる。'],
+};
+const KW_C = {   // 訓練の 条件
+  dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
+  myhp: ['条件：自分のHP', '自分の HPが えらんだ 割合より 少ない とき。'],
+  ophp: ['条件：相手のHP', '相手の HPが えらんだ 割合より 少ない とき。'],
+  aff: ['条件：タイプ相性', '自分の タイプと 相手の タイプを くらべて、有利・互角・不利 の どれか。'],
+  opsts: ['条件：相手の状態異常', '相手が 状態異常（やけど・まひ・どく・凍結・睡眠）の とき。どれか、または 1つを えらぶ。'],
+  foe: ['条件：相手が溜め中', '相手が 攻撃技を 出す 直前の ため（溜め）を して いる とき。'],
+  see: ['条件：相手が見える', '壁や 障害物に さえぎられず、相手が 見えて いる とき。'],
+  after: ['条件：技を撃った後', '直前に 撃った 技が えらんだ 技の とき（つなげ技に）。'],
+  off: ['条件：技の効果が切れた', 'えらんだ 技を 撃った ことが あり、その 効果（能力の 変化・状態異常・まもり・壁 など）が もう ない とき。'],
+  enter: ['条件：出場時', '場に 出てから、この 技を まだ 撃って いない とき。ほかの 条件より 先に 撃つ。'],
+  swap: ['条件：交代時', '相手が 交代して 出てきてから、この 技を まだ 撃って いない とき（10秒まで）。ほかの 条件より 先に 撃つ。'],
+};
+const KW_G = {   // 訓練の 撃ち方
+  auto: ['撃ち方：お任せ', 'いつもの 動きの まま 撃つ。'],
+  near: ['撃ち方：近づいて', '距離150未満まで 近づいてから 撃つ（3秒 たったら 撃つ）。'],
+  far: ['撃ち方：離れて', '260以上 離れてから 撃つ（3秒 たったら 撃つ）。'],
+  hide: ['撃ち方：隠れて', '障害物の 陰に 隠れてから 撃つ。'],
+  flank: ['撃ち方：回り込んで', '相手の 横へ 回り込んでから 撃つ。'],
+};
+const KW_ST = { 攻撃: '物理技の ダメージ', 防御: '物理技から うける ダメージの へりかた', 属性攻撃: '属性技の ダメージ', 属性防御: '属性技から うける ダメージの へりかた', 素早さ: '歩く はやさ・技の 待ち時間', 回避: '自動で よける 確率' };
 const KW_RE = new RegExp(`(属性攻撃|属性防御|攻撃|防御|素早さ|回避)([+-]\\d)|(${Object.keys(KW).sort((a, b) => b.length - a.length).join('|')})(?!タイプ|びし)`, 'g');
 const kw = (t) => String(t).replace(KW_RE, (all, st, v, k) => st ? `<span class="kw" data-kw="st:${st}">${st}${v}</span>` : (k === '自動' && !/^自動[：:]/.test(t.slice(t.indexOf(all))) ? all : `<span class="kw" data-kw="${k}">${k}</span>`));
 const kwDesc = (m) => kw(moveDesc(m));
 function kwInfo(k) {
+  if (k.startsWith('sv:')) return KW_SV[k.slice(3)] || null;
+  if (k.startsWith('c:')) return KW_C[k.slice(2)] || null;
+  if (k.startsWith('g:')) return KW_G[k.slice(2)] || null;
   if (k.startsWith('st:')) { const n = k.slice(3); return [`${n}の 段階`, `${KW_ST[n] || n}が かわる。+1で 1.5倍・+2で 2倍 … 最大 +6（4倍）。下がると -1で 2/3倍 … 最大 -6（1/4倍）。交代すると もとに もどる。`]; }
   return KW[k] || null;
 }
 { let tip = null, at = null;
   const hide = () => { if (tip) tip.hidden = true; at = null; };
-  const show = (el) => { const I = kwInfo(el.dataset.kw); if (!I) return; if (!tip) { tip = document.createElement('div'); tip.id = 'kwTip'; document.body.appendChild(tip); }
+  const show = (el) => { const I = kwInfo(el.dataset.kw || el.dataset.kwh); if (!I) return; if (!tip) { tip = document.createElement('div'); tip.id = 'kwTip'; document.body.appendChild(tip); }
     tip.innerHTML = `<b>${I[0]}</b><div>${I[1]}</div>`; tip.hidden = false; at = el;
     const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, vw = innerWidth, vh = innerHeight;
     let x = clamp(r.left + r.width / 2 - w / 2, 8, vw - w - 8), y = r.top - h - 8; if (y < 8) y = Math.min(r.bottom + 8, vh - h - 8);
     tip.style.left = x + 'px'; tip.style.top = y + 'px'; };
-  document.addEventListener('pointerover', (e) => { if (e.pointerType !== 'mouse') return; const k = e.target.closest && e.target.closest('.kw'); if (k) show(k); else if (at) hide(); }, true);
+  document.addEventListener('pointerover', (e) => { if (e.pointerType !== 'mouse') return; const k = e.target.closest && e.target.closest('.kw,[data-kwh]'); if (k) show(k); else if (at) hide(); }, true);
+  // 訓練の 条件・撃ち方：タップ（つかむ）でも せつめいを だす（そうさは そのまま）
+  document.addEventListener('pointerup', (e) => { if (e.pointerType === 'mouse') return; const k = e.target.closest && e.target.closest('[data-kwh]'); if (k && !k.closest('.kw')) setTimeout(() => { if (document.body.contains(k)) show(k); else { const n = document.querySelector(`[data-kwh="${k.dataset.kwh}"].sel, .pal.on[data-kwh="${k.dataset.kwh}"]`); if (n) show(n); } }, 30); }, true);
   // タップ：リンクの うえなら せつめいだけ 出す（したの ボタンは おさない）。ほかを さわったら けす
   const tap = (e) => { const k = e.target.closest && e.target.closest('.kw'); if (k) { e.preventDefault(); e.stopPropagation(); if (e.type === 'click') { if (at === k && e.pointerType !== 'mouse') hide(); else show(k); } } else if (e.type === 'pointerdown' && at && !(tip && tip.contains(e.target))) hide(); };
   ['pointerdown', 'click'].forEach(t => document.addEventListener(t, tap, true));
@@ -8122,7 +8156,7 @@ const plCache = {};
 // じょうたい タイマー：かかっている こうか と、あと なんびょうで きれるか
 const STAGE_SHORT = { atk: '攻撃', def: '防御', spa: '属攻', spd: '属防', spe: '素早', eva: '回避' };
 const COND_COL = { brn: '#ff8a5a', par: '#ffd84a', psn: '#c07be0', tox: '#a64fd0', slp: '#9aa6ff', frz: '#8fe6ff' };
-const ST_KANJI = { brn: '火傷', par: '麻痺', psn: '毒', tox: '猛毒', slp: '眠り', frz: '凍結' };
+const ST_KANJI = { brn: '火傷', par: '麻痺', psn: '毒', tox: '猛毒', slp: '睡眠', frz: '凍結' };
 function condList(f) {
   const v = f.v, a = [], T = (k, n, c, t, bad = 1) => a.push({ k, n, c, t, bad });
   if (f.status) T('st', ST_KANJI[f.status] || STATUS_NAMES[f.status], COND_COL[f.status] || '#fff', f.status === 'slp' || f.status === 'frz' ? Math.max(0, f.statusT) : null);
