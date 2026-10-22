@@ -10286,6 +10286,17 @@ function gymTeam(type, n, p, rare) {
   for (let k = 0; k < n; k++) { let sid, g = 0; do { sid = choice(pool); } while (out.some(e => e.sid === sid) && g++ < 20); out.push(foeMon(sid, p, -1 - k)); }
   return out;
 }
+// 防御・回避の 技（まもる・しかえし・かべ・デコイ・ぶんしん・すりぬけ・ぼうぎょ／かいひ だけ あげる）
+const DEF_KINDS = ['protect', 'counter', 'stance', 'wall', 'sub', 'clone', 'gshift'];
+const isDefMove = (m) => !!m && (DEF_KINDS.includes(m.k) || (m.k === 'self' && m.e && m.e.self && Object.keys(m.e.self).every(k => ['def', 'spd', 'eva'].includes(k))));
+const EARLY_GYMS = 3;   // じょばんの ジム：リーダー いがいは 防御・回避の 技を つかわない
+function noDefMoves(em) {
+  const keep = em.moves.filter(id => !isDefMove(MOVES[id])); if (keep.length === em.moves.length) return em;
+  const add = learned(em).filter(id => MOVES[id] && isDamaging(MOVES[id]) && !isDefMove(MOVES[id]) && !keep.includes(id)).sort((a, b) => (MOVES[b].power || 0) - (MOVES[a].power || 0));
+  while (keep.length < 4 && add.length) keep.push(add.shift());
+  if (!keep.length) keep.push('tackle');
+  em.moves = keep; return em;
+}
 function startJourney(gi) {
   const J = jr(), G = GYMS[gi];
   if (gi > J.gym && !J.champ) return;
@@ -10293,7 +10304,7 @@ function startJourney(gi) {
   const others = TR_NPC.filter(t => t[0] !== G.lead && t[0] !== myLook());
   const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${FIELD_NAMES[G.f]}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
   startBattle({
-    kind: 'cup', field: G.f, p0: S.party.slice(0, 6), enemies: gymTeam(G.f, 3, jProg(gi, step), gi >= 5), trainer: tr, boss: leader, journey: { gi, step },   // パーティの 6たいで ちょうせん、あいては 3たい
+    kind: 'cup', field: G.f, p0: S.party.slice(0, 6), enemies: gymTeam(G.f, 3, jProg(gi, step), gi >= 5).map(em => gi < EARLY_GYMS && !leader && !jr().champ ? noDefMoves(em) : em), trainer: tr, boss: leader, journey: { gi, step },   // パーティの 6たいで ちょうせん、あいては 3たい
     title: `${FIELD_NAMES[G.f]}ジム　${leader ? 'ジムリーダー' : `トレーナー ${step + 1}`}`,
     intro: leader ? `${G.ln}「${G.say}」` : `${tr.name}が しょうぶを しかけてきた！`,
   });
@@ -10558,7 +10569,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 document.documentElement.classList.add('booted');
 })();
