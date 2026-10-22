@@ -4906,6 +4906,7 @@ const healLeft = (f, id) => healMax(MOVES[id]) - ((f.uses && f.uses[id]) || 0);
 function moveBlocked(f, id) {
   const m = MOVES[id];
   if (AUTO_GUARD[m.k]) return 'じどうで でる';
+  if (m.sp === 'roar' && B && B.kind === 'wild') return 'やせいでは つかわない';   // くさむら：とおぼえで にがしたり にげられたり しない（どちらも）
   if (healMax(m) && healLeft(f, id) <= 0) return 'つかいきった';
   if (f.v.taunt > 0 && m.cat === 'stat') return 'ちょうはつ中';
   if (f.v.encore && f.v.encore.id !== id) return 'アンコール中';
