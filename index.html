@@ -1666,7 +1666,7 @@ Object.assign(MOVES, MOVES100);
 // うちつづける わざ（ビーム・ひろがる系）：chan びょうの あいだ はなちつづけ、CHAN_TICK ごとに あたり判定。
 // うっている あいだは ゆっくりしか むきを かえられないので、よこへ にげれば ぬけられる
 const CHAN = { flamethrower: 1.2, 'hydro-pump': 1.4, 'giga-drain': 1.2, blizzard: 1.5, 'icy-wind': 1.0 };
-const CHAN_TICK = .25, CHAN_SUM = 1.1;   // ぜんぶ あてたときの 合計は ふつうの 1.1ばい（あてつづけるのは むずかしい ぶん）
+const CHAN_TICK = .25, CHAN_HIT = 2, CHAN_SUM = 1.1;   // ダメージは CHAN_HIT かいに 1かい（みため・おとは まいかい）   // ぜんぶ あてたときの 合計は ふつうの 1.1ばい（あてつづけるのは むずかしい ぶん）
 for (const id in CHAN) if (MOVES[id]) MOVES[id].chan = CHAN[id];
 // ダメージを かえす わざ（はんしゃのまく・はがねのしかえし）：かまえは ながく（3びょう）、つかえる 回数は 1戦 2回まで
 const COUNTER_T = 3;
@@ -5352,9 +5352,11 @@ function chanTick(f, o, oT) {
     if (L < m.len - 1) impactFx(f.x + c * L, f.y + s * L - BODY * .5, m.t, .3);
   } else typeFx(f.x, f.y - BODY, m.t, 7, m.rad * 2.2, .4, { ang: cur.ang, spread: m.half });
   if (cur.n-- % 2 === 0) SND.se('beam', 1.4);
+  const nh = Math.ceil(Math.round(m.chan / CHAN_TICK) / CHAN_HIT);   // ダメージの かいすう
+  if ((cur.hk = (cur.hk || 0) + 1) % CHAN_HIT !== 1 % CHAN_HIT || (cur.ha = (cur.ha || 0) + 1) > nh) return;
   if (!oT || !inZone(cur, f, o.x, o.y, o.r)) return;
   if (m.k === 'cone' && !losClear(f, o)) return;
-  if (hit(f, o, m, cur.ang, { mul: CHAN_SUM / Math.round(m.chan / CHAN_TICK), tick: true, first: !cur.landed })) cur.landed++;
+  if (hit(f, o, m, cur.ang, { mul: CHAN_SUM / nh, tick: true, first: !cur.landed })) cur.landed++;
 }
 function failMove(f, msg) { say(msg); popText(f.x, f.y - 66, 'しっぱい', '#a49ac0'); endAct(f, .3); }
 // げきりん系：つづけて あばれた あと こんらん
@@ -6757,7 +6759,7 @@ function updateFighter(f, dt) {
     case 'chan': {   // うちつづける：ゆっくり あいてへ むきを あわせながら はなつ
       const cur = f.cur; if (!cur) { f.state = 'free'; break; }
       const m = cur.m; cur.ch += dt;
-      if (oT) { const tr = (m.aim === 'lock' ? .9 : .35) * dt; cur.ang += clamp(wrapAng(Math.atan2(o.y - f.y, o.x - f.x) - cur.ang), -tr, tr); }
+      if (oT) { const tr = (m.aim === 'lock' ? .55 : .2) * dt; /* 照射中は ゆっくりしか むきを かえられない */ cur.ang += clamp(wrapAng(Math.atan2(o.y - f.y, o.x - f.x) - cur.ang), -tr, tr); }
       if (m.k === 'beam') cur.len = rayLen(f, cur.ang, m.len);
       if (m.chanMove && oT) { const a = Math.atan2(o.y - f.y, o.x - f.x), dd = dist(f, o), pr = dd > 150 ? 1 : dd < 90 ? -1 : 0, sd = f.side ? -1 : 1; f.paceT = .8; moveDir(f, Math.cos(a) * pr - Math.sin(a) * .7 * sd, Math.sin(a) * pr + Math.cos(a) * .7 * sd, dt); }   // ドラゴンブレス：はきながら うごく
       if (cur.ch >= cur.next) { cur.next += CHAN_TICK; chanTick(f, o, oT); if (f.state !== 'chan') break; }
