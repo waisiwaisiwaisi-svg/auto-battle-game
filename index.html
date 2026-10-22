@@ -6293,6 +6293,11 @@ function moveLock(f, t) { f.cdMax = f.cdMax || {}; for (const k of f.moves || []
 let CD_SHARED_K = 1;   // クールダウンの ばいりつ（わざごと）
 function aiMove(f, o, dt, autoSpecial) {
   const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
+  if (f.dummy) {   // 木人戦の 身代わり人形：ゆっくり うろうろ（にげたり ちかづいたり しない）
+    f.wT = (f.wT || 0) - dt; const st = B.st;
+    if (f.wT <= 0 || !f.wTo || Math.hypot(f.wTo.x - f.x, f.wTo.y - f.y) < 12) { f.wT = rand(2.5, 4.5); for (let i = 0; i < 12; i++) { const x = rand(st.fx0 + 80, st.fx1 - 80), y = rand(st.fy0 + 60, st.fy1 - 60); if (spotOk(f, x, y)) { f.wTo = { x, y }; break; } } }
+    if (!f.wTo) return; f.paceT = .55; const a = useNav(f) ? navDir(f, f.wTo.x, f.wTo.y) : Math.atan2(f.wTo.y - f.y, f.wTo.x - f.x); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
+  }
   f.paceT = 1;
   if (f.side === 1 && aiSwitch(f, o, dt)) return;
   const trP = autoSpecial && trProg(f), chipOn = !!(trP && chipTick(f, o, dt));   // くんれんの ルール：わざは ルール まかせ（たちまわりは trGo・めいれい）
@@ -6373,6 +6378,18 @@ function aiMove(f, o, dt, autoSpecial) {
   }
   if (f.trGo === 'near') { want = { R: 55, los: true, cover: false, flank: false, mode: 'attack' }; f.paceT = Math.max(f.paceT || 1, 1.8); }   // チップ：ちかづく
   else if (f.trGo === 'far') { want = { R: Math.max(want.R + 160, 330), los: false, cover: false, flank: false, mode: 'rest' }; f.paceT = Math.max(f.paceT || 1, 1.6); }   // チップ：はなれる
+  { // 作戦の 間合いに いる（技を 撃たない とき）：あいての まわりを 円を えがいて まわる
+    const pl = natOf(f), pR = PLAN_R[pl], inBand = pl === 'yuukan' ? d < 150 : pl === 'nonki' ? d >= 150 && d < 290 : pl === 'reisei' ? d >= 290 && d < 470 : false;
+    if (pR && inBand && !f.queued && !f.trGo && !(f.order) && want.mode !== 'rest') {
+      f.orbDir = f.orbDir || (Math.random() < .5 ? 1 : -1);
+      const Ro = { yuukan: 105, nonki: 220, reisei: 370 }[pl], ta = ang + f.orbDir * Math.PI / 2, rad = clamp((d - Ro) / 60, -1, 1),   /* まわる はんけい へ もどす ちから */ mx = Math.cos(ta) + Math.cos(ang) * rad, my = Math.sin(ta) + Math.sin(ang) * rad, L = Math.hypot(mx, my) || 1;
+      const nx = f.x + mx / L * 40, ny = f.y + my / L * 40;
+      if (!spotOk(f, nx, ny)) { f.orbDir *= -1; f.orbT = 0; }   // かべ・障害物に ぶつかる：はんたいまわり
+      else { f.orbT = (f.orbT || 0) + dt; if (f.orbT > rand(4, 7)) { f.orbT = 0; if (Math.random() < .35) f.orbDir *= -1; } }   // ときどき むきを かえる
+      f.aiMode = 'orbit'; f.paceT = Math.max(.8, (per.idle + 1) / 2);
+      return moveDir(f, mx / L * .8, my / L * .8, dt);
+    }
+  }
   const g = pickSpot(f, o, want, dt);
   f.aiMode = want.mode;
   const gd = Math.hypot(g.x - f.x, g.y - f.y);
