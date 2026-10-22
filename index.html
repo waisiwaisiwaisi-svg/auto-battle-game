@@ -1250,6 +1250,8 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
 .kw{color:#ffd84a;text-decoration:underline;text-decoration-color:rgba(255,216,74,.55);text-underline-offset:2px;cursor:help;pointer-events:auto}
 #kwTip{position:fixed;z-index:10000;max-width:min(280px,calc(100vw - 16px));padding:8px 10px;background:#141030;color:#f3eefc;font-size:12px;line-height:1.55;border:2px solid #ffd84a;box-shadow:0 4px 0 rgba(0,0,0,.5);pointer-events:none;text-align:left}
 #kwTip b{display:block;color:#ffd84a;margin-bottom:2px;font-size:13px}
+.trflt{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px}.trflt select,.trflt input{font:inherit;font-size:11px;padding:3px 4px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);min-width:0}.trflt input{flex:1 1 90px}
+.trmvs[data-none="1"]::after{content:'あてはまる 技が ない';font-size:11px;color:var(--dim)}
 </style>
 </head>
 <body>
@@ -2688,9 +2690,9 @@ function stats(m) {
   }
   return o;
 }
-/* 強化（努力値の かわり）：ほかの モンスターを 1たい つかう ごとに 強化ポイント +1（おなじ しゅるいなら +3。1たいに つき 50 まで）。
+/* 強化（努力値の かわり）：おなじ しゅるいの モンスターを 1たい つかう ごとに 強化ポイント +1（1たいに つき 50 まで）。
    ポイントは すきな のうりょくに ふりわける（1つの のうりょくに 25 まで）。1ポイントで 実数値 +1.3 */
-const EV_MAX = 50, EV_STAT_MAX = 25, EV_K = 1.3, BOOST_SAME = 3;   // きょうか：おなじ しゅるいの モンスターだけ つかえる（1たいで +3）
+const EV_MAX = 50, EV_STAT_MAX = 25, EV_K = 1.3, BOOST_SAME = 1;   // きょうか：おなじ しゅるいの モンスターだけ つかえる（1たいで +1）
 const evBonus = (m, k) => m.ev ? Math.floor((m.ev[k] || 0) * EV_K) : 0;
 const evUsed = (m) => m.ev ? STAT6.reduce((a, k) => a + (m.ev[k] || 0), 0) : 0;
 const evFed = (m) => m.fed || 0;
@@ -3755,7 +3757,8 @@ const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trBlank = (m) => ({ mv: equipped(m).map(id => ({ id, go: 'auto', c: [] })) });
 const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ nat: p.nat && NATURES[p.nat] ? p.nat : undefined, mv: p.mv.map(r => ({ id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: trLines(r.c).map(l => l.filter(c => CONDS[c.t]).map(c => ({ t: c.t, p: c.p }))).filter(l => l.length) })) })) : trBlank(m);
 // 使える技：覚えている4つ ＋ 持っているスクロールで覚えられる技
-let TR_MINI = false;   // くんれんの パレットを たたんで いるか
+let TR_MINI = false;
+const TR_FLT = { t: '', c: '', q: '' };   // 訓練の 技パレットの しぼりこみ（タイプ・分類・なまえ）   // くんれんの パレットを たたんで いるか
 function trMoves(m) { const eq = equipped(m).slice(), tm = tmIds().filter(id => MOVES[id] && id !== 'tackle' && !eq.includes(id) && canLearn(m.sid, id)); return { eq, tm }; }
 const trMvIds = (W) => [...new Set(W.mv.map(r => r.id).filter(id => MOVES[id]))];
 const trCondNew = (t) => ({ t, p: CONDS[t].ps ? CONDS[t].ps[0][0] : undefined });
@@ -3894,7 +3897,9 @@ function renderTrain(uid) {
     ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
   else if (pk) ins = '<div class="dim">置く場所をタップ（技は技の枠・立ち回りは「〜撃つ」の枠・条件は右の枠）</div>';
   else ins = '<div class="dim">ドラッグで 左へ 置く（タップ → 置き場所タップ でもOK）<br>置いた 条件：タップで 設定・外へ ドラッグで 削除</div>';
-  const side = `<h3>技 <span class="dim">→ 技の 枠へ（★＝スクロール）</span></h3><div class="trpal">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${(tmFree() ? '∞' : S.tms[id])}</small></div>`).join('')}</div>${infoId && MOVES[infoId] ? mvInfo(infoId) : ''}
+  const fts = [...new Set(eq.concat(tm).map(id => MOVES[id].t))], fsel = (k, opts) => `<select data-flt="${k}"><option value="">${k === 't' ? 'タイプ：ぜんぶ' : '分類：ぜんぶ'}</option>${opts.map(([v, n]) => `<option value="${v}"${TR_FLT[k] === v ? ' selected' : ''}>${n}</option>`).join('')}</select>`;
+  const fattr = (id) => `data-ft="${MOVES[id].t}" data-fc="${MOVES[id].cat}" data-fn="${MOVES[id].n}"`;
+  const side = `<h3>技 <span class="dim">→ 技の 枠へ（★＝スクロール）</span></h3><div class="trflt">${fsel('t', fts.map(t => [t, TYPES[t].n]))}${fsel('c', Object.entries(CAT_NAMES))}<input type="search" data-flt="q" placeholder="技名で さがす" value="${TR_FLT.q.replace(/"/g, '')}"></div><div class="trpal trmvs">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" ${fattr(id)} data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" ${fattr(id)} data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${(tmFree() ? '∞' : S.tms[id])}</small></div>`).join('')}</div>${infoId && MOVES[infoId] ? mvInfo(infoId) : ''}
     <h3>撃ち方 <span class="dim">→「〜撃つ」の 枠へ</span></h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-kwh="g:${a}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
     <h3>条件 <span class="dim">→「使うとき」の 枠へ</span></h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-kwh="c:${t}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
     <div class="trins">${ins}</div>`;
@@ -3905,6 +3910,9 @@ function renderTrain(uid) {
       <div class="trmain"><div class="trhead"><i data-big="${m.sid}"></i><div class="trhn"><b>${sp.n}</b><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><span class="dim">体格：${bodyTxt(sp)[0]}　性格：${NATURES[m.nat] ? `${NATURES[m.nat].n}（${NATURES[m.nat].d}）` : ''}</span></div></div>${trNatCard(nk, W, m)}${main}</div>
       <div class="trside${TR_MINI ? ' mini' : ''}"><button class="trmini" type="button">${TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'}</button>${side}</div></div>`;
   const B = $('trBody');
+  { const run = () => { let n = 0; B.querySelectorAll('.trmvs .pal').forEach(p => { const ok = (!TR_FLT.t || p.dataset.ft === TR_FLT.t) && (!TR_FLT.c || p.dataset.fc === TR_FLT.c) && (!TR_FLT.q || p.dataset.fn.includes(TR_FLT.q)); p.hidden = !ok; if (ok) n++; });
+      const pal = B.querySelector('.trmvs'); if (pal) pal.dataset.none = n ? '' : '1'; };
+    B.querySelectorAll('[data-flt]').forEach(el => el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', () => { TR_FLT[el.dataset.flt] = el.value.trim(); run(); })); run(); }   // 技の しぼりこみ（えらび なおしても 入力中の 文字は きえない）
   { const sd = B.querySelector('.trside'), mb = sd && sd.querySelector('.trmini'); if (mb) mb.onclick = () => { TR_MINI = !TR_MINI; sd.classList.toggle('mini', TR_MINI); mb.textContent = TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'; SND.se('click'); }; }   // パレットを たたんで したの らんを ひろく みる
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
   B.querySelectorAll('.trhead i[data-big]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.big, 64)));
@@ -9965,7 +9973,7 @@ $('btnHelp').onclick = () => {
     <p><b>くさむら</b>で よわらせて <b>ふういんオーブ</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
     <p><b>たからばこ</b>は 勝つと ときどき もらえる（ジムリーダー・チャンピオンリーグは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・オーブ・スクロールが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
     <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ・かいひ の 7つ。すばやさが 高いほど わざを はやく くりだし、かいひが 高いほど 指示なしで よける。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。<b>ぶつりわざ</b>（格闘・とっしん・ひっかき など からだで ぶつかる わざ）は こうげき→ぼうぎょ、<b>ぞくせいわざ</b>（ビーム・弾・ほのお・らくらい・はんい など はなれて とどく わざ）は 属性攻撃→属性防御 で ダメージが きまる。</p>
-    <p><b>きょうか</b>：へんせい → きょうか で ほかの モンスターを つかうと ポイントが ふえる（1たい +1、おなじ しゅるいなら +3。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりなおしのくすり）。</p>
+    <p><b>きょうか</b>：へんせい → きょうか で おなじ しゅるいの モンスターを つかうと ポイントが ふえる（1たい +1。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりなおしのくすり）。</p>
     <p><b>どうぐ</b>：ふりなおしのくすり・すべてわすれのかね・ひとつわすれのは・おなじタイプのいし。たからばこから でる。へんせい → どうぐ で つかう。</p>
     <p><b>スクロール</b>で すきな わざを おぼえさせよう（てもち → スクロール）。</p>
     <p class="dim">PC：Space＝かわす　X＝こうたい</p></div>
