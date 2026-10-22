@@ -480,7 +480,14 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 #bench.many .bmon .bn{display:none} #bench.many .bmon{flex-direction:column!important;justify-content:center;gap:2px;padding:3px 4px!important} #bench.many .bmon > span{width:100%;flex:none!important}
 .bmon.out{opacity:.35;filter:grayscale(1)}
 .bmon .sw{color:var(--acc);font-size:10px}
-#bbar #cCap,#bbar #cRun{flex:0 0 auto;min-width:72px}
+#wildBtns{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:8px;z-index:6;pointer-events:none}
+#wildBtns .cmd{pointer-events:auto;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;min-width:96px;min-height:44px;padding:4px 12px;text-align:left}
+#wildBtns .wt{display:flex;flex-direction:column;line-height:1.2}#wildBtns .a{font-size:15px;font-weight:700}#wildBtns .b{font-size:10.5px;opacity:.85;white-space:nowrap}
+#wildBtns .orbic{width:36px;height:auto;image-rendering:pixelated}
+#cCap.hot{animation:caphot .8s ease-in-out infinite;box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px #ffe27a,0 0 16px 4px rgba(255,216,74,.85)!important;background:linear-gradient(180deg,#7a5a14,#3a2a08)!important}
+#cCap.hot .b{color:#ffe27a;opacity:1;font-weight:700}
+@keyframes caphot{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.orbi{image-rendering:pixelated;vertical-align:middle}.rwic .orbi{width:72px;height:auto;display:block;margin:4px auto}.clt .orbs{width:16px;height:auto;margin-right:2px}.rtile .orbi.rti{width:auto}
 #bside{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
 #chooseOv .swaplist button{padding:6px 10px;font-size:14px}
 #chooseOv .swaplist canvas{width:48px;height:48px}
@@ -1426,14 +1433,13 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
       </div>
       <div class="ov" id="pauseOv" hidden><h2>PAUSE</h2><button class="btn" id="btnResume">つづける</button><button class="btn sub" id="btnQuit" style="font-size:13px">しあいを やめる（まけ あつかい）</button></div>
       <div class="ov" id="chooseOv" hidden><h2 style="font-size:22px">つぎは だれを だす？</h2><div class="swaplist" id="chooseList"></div></div>
+      <div id="wildBtns" hidden><button class="cmd" id="cCap"><img class="orbic pix" alt=""><span class="wt"><span class="a">オーブ</span><span class="b" id="capN"></span></span></button><button class="cmd" id="cRun"><span class="wt"><span class="a">にげる</span><span class="b">くさむらのみ</span></span></button></div>
       <div class="ov" id="resultOv" hidden><h2 id="resTitle"></h2><div class="lines" id="resLines"></div><button class="btn" id="resNext">つぎへ</button></div>
     </div>
     <div id="bpanel">
     <div id="mvCmds"><button class="cmd" id="cDodge"><span class="a">かわす</span><span class="b">むてき</span><i class="cdv"></i></button><button class="cmd" id="cHide"><span class="a">かくれろ</span><span class="b">しょうがいぶつへ</span></button><button class="cmd" id="cFlank"><span class="a">まわりこめ</span><span class="b">うしろへ</span></button></div>
     <div id="bbar">
       <div id="bench"></div>
-      <button class="cmd" id="cCap"><span class="a">オーブ</span><span class="b" id="capN"></span></button>
-      <button class="cmd" id="cRun"><span class="a">にげる</span><span class="b">くさむらのみ</span></button>
     </div>
     <div id="bside">
       <div id="banner"></div>
@@ -2600,10 +2606,15 @@ const ICONS = {
   note: ['....yyyyyy..', '....yyyyyy..', '....y....y..', '....y....y..', '....y....y..', '..yyy..yyy..', '.yyyy.yyyy..', '.yyyy.yyyy..', '..yy...yy...'],
 };
 const ICON_URL = {};
+// ふういんオーブの アイコン：くさむらで なげる オーブの 絵（ゆれる まえの 1まいめ）
+let ORB_URL = null;
+function orbURL() { if (ORB_URL) return ORB_URL; const P = typeof PLFX !== 'undefined' && PLFX.cap_shake; if (!P || !P.img || !P.img.complete || !P.img.naturalWidth) return null;
+  const c = document.createElement('canvas'); c.width = P.w; c.height = P.h; c.getContext('2d').drawImage(P.img, 0, 0, P.w, P.h, 0, 0, P.w, P.h); return (ORB_URL = c.toDataURL()); }
+const orbImg = (cls) => { const u = orbURL(); return u ? `<img class="pxe orbi${cls ? ' ' + cls : ''}" src="${u}" alt="" draggable="false">` : ''; };
 function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
   if (name === 'shop' && typeof UIA !== 'undefined' && UIA.chest) return (ICON_URL[name] = UIA.chest.src);   // ショップ：たからばこの 絵
-  if (name === 'capcr' && typeof UIA !== 'undefined' && UIA.crystal) return (ICON_URL[name] = UIA.crystal.src);   // ふういんオーブ（リザルトと おなじ 絵）
+  if (name === 'capcr') { const u = orbURL(); if (u) return (ICON_URL[name] = u); if (typeof UIA !== 'undefined' && UIA.crystal) return UIA.crystal.src; }   // ふういんオーブ：くさむらで なげる 絵
   if (typeof UIA !== 'undefined' && UIA['ic_' + name]) return (ICON_URL[name] = UIA['ic_' + name].src);   // ChatGPT の アイコン（I1）
   const raw = ICONS[name]; if (!raw) return '';
   // まわりの あき（.）を けずって、え が まんなかに くるように する
@@ -3549,7 +3560,7 @@ function openChest(i) {
   S.chLog = [{ t: Date.now(), k: c.kind, mons: R.mons.slice(), cr: R.cr, tms: R.tms.slice(), items: (R.items || []).slice() }, ...(S.chLog || [])].slice(0, 20);   // さいきん 20けんの りれき
   save();
   const cards = [`<div class="reward"><div class="chbox">${chestIcon(c.kind, false, 4)}</div><div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
-    ...monCards, `<div class="reward"><div class="big">オーブ ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
+    ...monCards, `<div class="reward"><div class="rwic">${orbImg()}</div><div class="big">オーブ ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
   for (const k of R.items || []) cards.push(`<div class="reward"><div style="font-size:46px">${ITEMS[k].ic}</div><div class="big">${ITEMS[k].n}</div><div class="dim">${ITEMS[k].d}</div></div>`);
   for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="chip" style="background:${TYPES[m.t].c};font-size:13px;padding:2px 10px">${TYPES[m.t].n}</span><div class="big"><i class="ico ico-s" data-ico="scroll"></i>${m.n}</div><span style="color:${r.c};font-size:11px;opacity:.8">${r.n}</span><div class="dim">${kwDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
@@ -4626,7 +4637,7 @@ function startBattle(cfg) {
   }
   $('resultOv').hidden = true; $('chooseOv').hidden = true; $('pauseOv').hidden = true;
   $('bTitle').textContent = cfg.title;
-  for (const id of ['cCap', 'cRun']) $(id).hidden = cfg.kind !== 'wild';
+  $('wildBtns').hidden = cfg.kind !== 'wild'; { const im = $('cCap').querySelector('.orbic'), u = orbURL(); if (u) im.src = u; im.hidden = !u; }   // くさむら：オーブ・にげるは せんじょうの うえに うかべる（ひかえの ならびは ふつうの バトルと おなじ）
 
   say(cfg.intro);
   show('scBattle');
@@ -6893,6 +6904,7 @@ function updateFighter(f, dt) {
 }
 
 /* ---------- 捕獲 ---------- */
+const CATCH_HOT = .45;   // この かくりつ いじょうで オーブの ボタンを ひからせる
 function catchProb(e) { return clamp(e.sp.catch * (1.6 - 1.3 * e.hp / e.maxHp) * (e.state === 'stun' ? 1.15 : 1) * (e.status === 'slp' || e.status === 'frz' ? 2 : e.status ? 1.5 : 1), .04, .95); }
 function cmdCapsule() {
   if (!B || B.kind !== 'wild' || B.mode !== 'fight' || B.catchO || B.paused) return;
@@ -7874,7 +7886,7 @@ function showResult() {
     if (B.timeUpLine) L.unshift(B.timeUpLine);
     const R = B.rewards || {}, sd = B.sides[B.my || 0];
     const tile = (k, n, lab, d) => UIA[k] ? `<div class="rtile" style="animation-delay:${d}s">${uiImg(k, 'rti')}<b>${n}</b><small>${lab}</small></div>` : '';
-    const tiles = [R.cr > 0 ? tile('crystal', '+' + R.cr, 'オーブ', .5) : '', R.gem > 0 ? tile('gem', '+' + R.gem, 'ジェム', .62) : '', R.chest ? tile('chest', '+1', CHESTS[R.chest].n, .74) : ''].join('');
+    const tiles = [R.cr > 0 ? (orbURL() ? `<div class="rtile" style="animation-delay:.5s">${orbImg('rti')}<b>+${R.cr}</b><small>オーブ</small></div>` : tile('crystal', '+' + R.cr, 'オーブ', .5)) : '', R.gem > 0 ? tile('gem', '+' + R.gem, 'ジェム', .62) : '', R.chest ? tile('chest', '+1', CHESTS[R.chest].n, .74) : ''].join('');
     $('resLines').innerHTML = `${head ? `<div class="rhead">${head}</div>` : ''}<div class="rteam" id="resTeam"></div>${tiles ? `<div class="rtiles">${tiles}</div>` : ''}${L.map((l, i) => `<div class="rl" style="animation-delay:${.85 + i * .15}s">${l}</div>`).join('')}`;
     const tm = $('resTeam'); for (const f of (sd && sd.fs) || []) { if (!f || !SPR[f.mon.sid]) continue; const d = document.createElement('div'); d.className = 'rmon' + (f.hp <= 0 ? ' ko' : ''); d.appendChild(spriteCanvas(f.mon.sid, 52)); const k = Math.max(0, f.hp / f.maxHp);
       d.insertAdjacentHTML('beforeend', `<small>${f.sp.n}</small><i><u style="width:${k * 100}%;background:${k > .5 ? '#7bd88f' : k > .2 ? '#ffd166' : '#ff6b5b'}"></u></i>`); tm.appendChild(d); }
@@ -8466,6 +8478,10 @@ function updHUD() {
   { const od = f.order ? f.order.k : B.remote ? B.myOrder : null; $('cHide').classList.toggle('on', od === 'hide'); $('cFlank').classList.toggle('on', od === 'flank'); const cd = (B.sides[my].orderCd || 0) > 0; $('cHide').classList.toggle('cd', cd); $('cFlank').classList.toggle('cd', cd); }
   updBench();
   setText($('capN'), `のこり ${S.capsules}`);
+  if (B.kind === 'wild') { { const wb = $('wildBtns'), bp = $('bpanel').getBoundingClientRect(), wr = $('cvWrap').getBoundingClientRect(), land = document.documentElement.classList.contains('land');   // たて：したの パネルの うえ／よこ：ひかえと わざの あいだ
+      wb.style.bottom = (land ? 10 : Math.max(10, Math.round(wr.bottom - bp.top + 8))) + 'px'; }
+    const e = active(1), hot = B.mode === 'fight' && !B.catchO && S.capsules > 0 && targetable(e) && catchProb(e) >= CATCH_HOT;   // つかまえられそう：オーブを ひからせる
+    $('cCap').classList.toggle('hot', hot); setText($('capN'), hot ? `チャンス！ のこり ${S.capsules}` : `のこり ${S.capsules}`); }
 }
 
 /* =====================================================================
@@ -9966,7 +9982,7 @@ function showChestLog() {
   const ago = (t) => { const m = Math.floor((Date.now() - t) / 60000); return m < 1 ? 'いま' : m < 60 ? `${m}ぷんまえ` : m < 1440 ? `${Math.floor(m / 60)}じかんまえ` : `${Math.floor(m / 1440)}にちまえ`; };
   const row = (e) => { const C = CHESTS[e.k] || { n: 'たからばこ' }, parts = [];
     for (const sid of e.mons) if (SPECIES[sid]) { const r = RARITY[monRarity(sid)]; parts.push(`<span class="clm"><img class="pix" src="${spriteCanvas(sid, 32).toDataURL()}" alt=""><b>${SPECIES[sid].n}</b><i style="background:${r.c}">${r.n}</i></span>`); }
-    if (e.cr) parts.push(`<span class="clt">オーブ ×${e.cr}</span>`);
+    if (e.cr) parts.push(`<span class="clt">${orbImg('orbs')}オーブ ×${e.cr}</span>`);
     for (const k of e.items) if (ITEMS[k]) parts.push(`<span class="clt">${ITEMS[k].ic}${ITEMS[k].n}</span>`);
     for (const id of e.tms) if (MOVES[id]) parts.push(`<span class="clt"><i class="ico ico-s" data-ico="scroll"></i>${MOVES[id].n}</span>`);
     return `<div class="clrow"><div class="clh"><span class="clic">${chestIcon(e.k, false, 2)}</span><b>${C.n}</b><small>${ago(e.t)}</small></div><div class="clb">${parts.join('')}</div></div>`; };
@@ -10584,7 +10600,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 document.documentElement.classList.add('booted');
 })();
