@@ -1157,8 +1157,8 @@ html.tabs:not(.land) .trside{bottom:calc(70px + var(--sab))}   /* たて画面�
 .rb button{border-radius:0!important;background:#3a2a4a!important;box-shadow:0 2px 0 #0b0914}
 .simcs{display:flex;flex-direction:column;gap:6px;margin-top:8px}.simc{display:flex;flex-direction:column;gap:3px;padding:6px 8px;background:rgba(0,0,0,.25)}.simc>b{font-size:12px}
 .simln{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:11px}.simln .lb{font-size:10px;color:#9ec2ff;min-width:4em}.simln i{font-style:normal;font-size:10px;opacity:.7}
-.simln .sc{padding:2px 6px;border:2px solid;box-shadow:0 2px 0 #0b0914}.simln .sc.on{background:#24584a;border-color:#6adab0}.simln .sc.off{background:#4a2230;border-color:#ff6a7a;opacity:.85}.simln .sc small{opacity:.75}
-.simln .res{margin-left:4px;font-weight:700}.simln .res.ok{color:#7be0a8}.simln .res.mid{color:#ffd166}.simln .res.ng{color:#ff8a7a}
+.simln .sc{padding:2px 6px;border:2px solid;box-shadow:0 2px 0 #0b0914}.simln .sc.on{background:#24584a;border-color:#6adab0}.simln .sc.off{background:#4a2230;border-color:#ff6a7a;opacity:.85}.simln .sc.na{background:#24203a;border-color:#6a6488;opacity:.85}.simln .sc small{opacity:.75}
+.simln .res{margin-left:4px;font-weight:700}.simln .res.ok{color:#7be0a8}.simln .res.mid{color:#ffd166}.simln .res.ng{color:#ff8a7a}.res.na{color:#a9a3c8}
 .simtbl td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}.simtbl td.n{text-align:right;font-variant-numeric:tabular-nums}.simtbl tr:not(.dim):nth-child(even){background:rgba(255,255,255,.04)}.simtbl td:last-child{white-space:normal}
 .gs.autog{border:2px solid #9ff0ff;background:#1f4a5a;color:#d8faff;cursor:default}.rc.autoc{border-style:solid!important;background:rgba(40,90,110,.2)}.rc.autoc .any{opacity:1;color:#bfeaf5}
 #trtut{position:fixed;inset:0;z-index:100000;pointer-events:none}
@@ -3804,7 +3804,7 @@ function trSimShow(m, W, log) {
     ${(() => { const T = log.ticks || 1, ct = log.ct || {}, lf = log.lf || {}, pc = (v) => Math.round((v || 0) / T * 100);
       const out = W.mv.map((r, i) => { if (!MOVES[r.id] || AUTO_GUARD[MOVES[r.id].k]) return ''; const ls = trLines(r.c).filter(l => l.length); if (!ls.length) return '';
         return `<div class="simc"><b>${i + 1} ${MOVES[r.id].n}</b>${ls.map((l, li) => { const all = ct[`${i}:${li}`] || 0, n = lf[`${i}:${li}`] || 0;
-          return `<div class="simln"><span class="lb">${li ? 'または' : '使うとき'}</span>${l.map((c, j) => { const v = ct[`${i}:${li}:${j}`] || 0; return `<span class="sc ${v ? 'on' : 'off'}">${v ? '○' : '×'} ${trCondTx(c, W)} <small>${pc(v)}%</small></span>`; }).join('<i>かつ</i>')}<span class="res ${n ? 'ok' : all ? 'mid' : 'ng'}">${n ? `→ ${n}かい 撃った` : all ? '→ 合ったが 撃てなかった' : '→ いちども 合わなかった'}</span></div>`; }).join('')}</div>`; }).join('');
+          return `<div class="simln"><span class="lb">${li ? 'または' : '使うとき'}</span>${l.map((c, j) => { const v = ct[`${i}:${li}:${j}`] || 0; return `<span class="sc ${v ? 'on' : c.t === 'swap' ? 'na' : 'off'}">${v ? '○' : c.t === 'swap' ? '－' : '×'} ${trCondTx(c, W)} <small>${pc(v)}%</small></span>`; }).join('<i>かつ</i>')}<span class="res ${n ? 'ok' : all ? 'mid' : l.some(c => c.t === 'swap') ? 'na' : 'ng'}">${n ? `→ ${n}かい 撃った` : all ? '→ 合ったが 撃てなかった' : l.some(c => c.t === 'swap') ? '→ 模擬戦は 1たい どうし なので 相手の 交代は ない（3たい戦では はたらく）' : '→ いちども 合わなかった'}</span></div>`; }).join('')}</div>`; }).join('');
       return out ? `<div class="simcs"><div class="dim" style="font-size:11px">条件の はつどう（○＝なりたった ことが ある・％＝なりたって いた じかん）</div>${out}</div>` : ''; })()}
     <div class="dim" style="font-size:11px;margin-top:6px">あいて：${log.foes.map(([nm, w]) => `${nm}${w ? '○' : '×'}`).join('　')}</div>
     <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" data-x="close">とじる</button></div>`).querySelector('[data-x="close"]').onclick = (ev) => ev.target.closest('.askbg').remove();
