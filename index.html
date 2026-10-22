@@ -5997,7 +5997,7 @@ const CONDS = {
   myhp:  { n: '自分のHP', ps: CHIP_PCT.map(([v, n]) => [v, n + '未満']) },
   ophp:  { n: '相手のHP', ps: CHIP_PCT.map(([v, n]) => [v, n + '未満']) },
   aff:   { n: 'タイプ相性', ps: [['adv', '有利'], ['even', '互角'], ['dis', '不利']] },   // 自分のタイプ と 相手のタイプ を くらべる
-  opsts: { n: '相手の状態異常', ps: [['any', 'どれか'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['slp', '睡眠'], ['frz', '凍結']] },
+  opsts: { n: '相手の状態異常', ps: [['any', 'どれか'], ['none', 'なし（ふつう）'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['slp', '睡眠'], ['frz', '凍結']] },
   foe:   { n: '相手が溜め中' },
   see:   { n: '相手が見える' },   // そのまま 当てられる 技が ある
   nosee: { n: '相手が見えない' },   // 障害物・技の かべに さえぎられて、そのままでは 当てられる 技が ない
@@ -6021,7 +6021,7 @@ function condOk(f, o, c, id0) {
     case 'myhp': return hpk(f) < (c.p || 50);
     case 'ophp': return hpk(o) < (c.p || 50);
     case 'aff': return typeAff(f.sp, o.sp) === c.p;
-    case 'opsts': return !!o.status && (c.p === 'any' || o.status === c.p || (c.p === 'psn' && o.status === 'tox'));
+    case 'opsts': return c.p === 'none' ? !o.status : !!o.status && (c.p === 'any' || o.status === c.p || (c.p === 'psn' && o.status === 'tox'));
     case 'foe': return !!(threatState(o) && o.cur && isDamaging(o.cur.m));
     case 'see': return canReach(f, o);
     case 'nosee': return !canReach(f, o);
@@ -7987,7 +7987,7 @@ const KW_C = {   // 訓練の 条件
   myhp: ['条件：自分のHP', '自分の HPが えらんだ 割合より 少ない とき。'],
   ophp: ['条件：相手のHP', '相手の HPが えらんだ 割合より 少ない とき。'],
   aff: ['条件：タイプ相性', '自分の タイプと 相手の タイプを くらべて、有利・互角・不利 の どれか。'],
-  opsts: ['条件：相手の状態異常', '相手が 状態異常（やけど・まひ・どく・凍結・睡眠）の とき。どれか、または 1つを えらぶ。'],
+  opsts: ['条件：相手の状態異常', '相手の 状態異常（やけど・まひ・どく・凍結・睡眠）。「どれか」「なし（ふつうの 状態）」または 1つを えらぶ。'],
   foe: ['条件：相手が溜め中', '相手が 攻撃技を 出す 直前の ため（溜め）を して いる とき。'],
   see: ['条件：相手が見える', 'そのまま 当てられる 技が ある とき（障害物・技の かべに さえぎられて いない か、かべごしに とどく 技を もって いる）。'],
   nosee: ['条件：相手が見えない', '障害物・技の かべに さえぎられて、そのままでは 当てられる 技が ない とき（回り込む・かべを こわす 技を 撃つ ときに）。'],
