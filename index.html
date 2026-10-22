@@ -29,7 +29,7 @@ body{word-break:keep-all;overflow-wrap:anywhere;line-break:strict;
   padding:calc(10px + var(--sat)) 12px calc(12px + var(--sab));
 }
 .screen[hidden]{display:none}
-#boot{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:radial-gradient(ellipse at 50% 38%,#2c2350 0%,#141022 62%,#0b0914 100%);color:#f3eefc;font-family:'DotGothic16',ui-monospace,monospace;transition:opacity .45s ease;padding:calc(16px + var(--sat)) 16px calc(16px + var(--sab))}
+#boot{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 38%,#2c2350 0%,#141022 62%,#0b0914 100%);color:#f3eefc;font-family:'DotGothic16',ui-monospace,monospace;transition:opacity .45s ease;padding:calc(16px + var(--sat)) 16px calc(16px + var(--sab))}
 #boot.out{opacity:0;pointer-events:none}
 #boot .bl{text-align:center;line-height:1;letter-spacing:.06em;text-shadow:0 3px 0 #0b0914,0 0 18px rgba(255,209,102,.35)}
 #boot .bl b{display:block;font-size:clamp(20px,6vw,34px);color:#ffd166}#boot .bl i{display:block;font-style:normal;font-size:clamp(30px,10vw,58px);color:#ffe9a8;margin-top:6px}
@@ -1287,16 +1287,16 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
 </style>
 </head>
 <body>
-<div id="boot" aria-label="よみこみちゅう"><div class="bl"><b>PIXEL MONSTER</b><i>ARENA</i><div class="bs">ピクセル モンスター アリーナ</div></div><div class="orb"></div><div class="bar"><i id="bootBar"></i></div><div class="bt" id="bootTx">よみこみちゅう… 0%</div><div class="tip" id="bootTip"></div></div>
+<div id="boot" aria-label="よみこみちゅう"><div class="bar"><i id="bootBar"></i></div><div class="tip" id="bootTip"></div></div>
 <script>
 /* ロード画面：本体（おおきい スクリプト）を よみこむ あいだ だす。すすみは じかんで よそく（おわったら 100%） */
 (function () {
-  var t0 = Date.now(), bar = document.getElementById('bootBar'), tx = document.getElementById('bootTx'), tip = document.getElementById('bootTip'), done = false, p = 0;
+  var t0 = Date.now(), bar = document.getElementById('bootBar'),  tip = document.getElementById('bootTip'), done = false, p = 0;
   var TIPS = ['ヒント：訓練で 技の 条件を きめると ぐんと つよく なる', 'ヒント：くさむらで よわらせて オーブを なげよう', 'ヒント：ひかえを タップすると こうたい できる', 'ヒント：タイプの あいしょうを ジムに あわせよう', 'ヒント：模擬戦で 訓練の ききめを ためせる'];
   var k = Math.floor(Math.random() * TIPS.length); tip.textContent = TIPS[k];
   var tipIv = setInterval(function () { k = (k + 1) % TIPS.length; tip.textContent = TIPS[k]; }, 3200);
-  var iv = setInterval(function () { if (done) return; var t = (Date.now() - t0) / 1000; p = Math.min(95, Math.round(95 * (1 - Math.exp(-t / 3.2)))); bar.style.width = p + '%'; tx.textContent = 'よみこみちゅう… ' + p + '%'; }, 120);
-  window.__bootDone = function () { if (done) return; done = true; clearInterval(iv); bar.style.width = '100%'; tx.textContent = 'じゅんび OK！';
+  var iv = setInterval(function () { if (done) return; var t = (Date.now() - t0) / 1000; p = Math.min(95, Math.round(95 * (1 - Math.exp(-t / 3.2)))); bar.style.width = p + '%'; }, 120);
+  window.__bootDone = function () { if (done) return; done = true; clearInterval(iv); bar.style.width = '100%';
     var el = document.getElementById('boot'); setTimeout(function () { el.classList.add('out'); clearInterval(tipIv); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500); }, 260); };
 })();
 </script>
