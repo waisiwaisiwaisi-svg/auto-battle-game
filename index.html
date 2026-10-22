@@ -6310,7 +6310,7 @@ function moveLock(f, t) { f.cdMax = f.cdMax || {}; for (const k of f.moves || []
   f.cd[k] = t; f.cdMax[k] = t; } }
 let CD_SHARED_K = 1;   // クールダウンの ばいりつ（わざごと）
 function aiMove(f, o, dt, autoSpecial) {
-  const d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
+  let d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
   if (f.dummy) {   // 木人戦の 身代わり人形：ゆっくり うろうろ（にげたり ちかづいたり しない）
     f.wT = (f.wT || 0) - dt; const st = B.st;
     if (f.wT <= 0 || !f.wTo || Math.hypot(f.wTo.x - f.x, f.wTo.y - f.y) < 12) { f.wT = rand(2.5, 4.5); for (let i = 0; i < 12; i++) { const x = rand(st.fx0 + 80, st.fx1 - 80), y = rand(st.fy0 + 60, st.fy1 - 60); if (spotOk(f, x, y)) { f.wTo = { x, y }; break; } } }
@@ -6344,6 +6344,8 @@ function aiMove(f, o, dt, autoSpecial) {
   if (!rushIn && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < 1 + persona(f).dodge) {
     const t = threatDir(f, o); f.paceT = 1.5; return moveDir(f, Math.cos(t.base), Math.sin(t.base), dt);
   }
+  { const dl = o.clones && o.clones.find(c => c.doll);   // デコイにんぎょう：ここから さきの たちまわりは にんぎょうを あいてと して うごく（よちょうの はんいは 本物で よける）
+    if (dl) { const p = Object.create(o); p.x = dl.x; p.y = dl.y; p.real = o; o = p; d = dist(f, o); ang = Math.atan2(o.y - f.y, o.x - f.x); } }
   const per = persona(f), hurt = f.hp < f.maxHp * per.flee;
   if (f.moodPop) { const M = f.moodPop; f.moodPop = null; if (!B.headless) popText(f.x, f.y - 86, M.n, M.col, true); }
   if (f.moodyNow) {   // むらっけ：ひとつ ぐーんと 上がり、べつの ひとつが 下がる
@@ -6359,7 +6361,7 @@ function aiMove(f, o, dt, autoSpecial) {
   f.awayT = Math.max(0, (f.awayT || 0) - dt);
   let want;   // 立ち位置の ねらい：{ R: 間合い, los: 見える場所, cover: 陰に かくれる, flank: 横から }
   if (f.queued) {
-    const m = MOVES[f.queued], reach = moveReach(f, o, m), shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat);
+    const m = MOVES[f.queued], reach = o.real && isDamaging(m) ? Math.min(moveReach(f, o, m), DOLL_R * .8) : moveReach(f, o, m),   /* にんぎょうを ねらう：わの なかに はいってから うつ */ shot = ['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !['lob', 'erupt', 'leap'].includes(m.pat);
     const close = CLOSE_KINDS.includes(m.k);
     const see = !shot || losClear(f, o) || (!close && isDamaging(m) && losWallOnly(f, o, m));   // わざの かべ だけが じゃま：かべごと うって こわす
     if (close && isDamaging(m) && !(f.want && B.t - f.want.t > 1.2) && flankStep(f, o, reach, d, per, dt)) return;   // しじが ながびいたら まっすぐ つっこむ   // まわりこみ：よこへ まわって から つっこむ
@@ -6577,7 +6579,7 @@ function pickSpot(f, o, w, dt) {
     if (w.los || w.cover) { const see = !hasObs || losFrom(x, y, o); if (w.los && !see) sc += 220; if (w.cover && see && hasObs) sc += 160 * per.cover; }
     if (w.flank) { const da = Math.abs(wrapAng(Math.atan2(y - o.y, x - o.x) - baseA)); sc += Math.abs(da - 1.1) * 45 * per.flank; }   // 正面より 斜め横から
     const edge = Math.min(x - st.fx0, st.fx1 - x, y - st.fy0, st.fy1 - y); if (edge < 60) sc += (60 - edge) * 1.2;   // 壁ぎわは きらう
-    if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, x, y, f.r)) sc += 400;   // 相手の わざの はんいは さける
+    if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o.real || o, x, y, f.r)) sc += 400;   // 相手の わざの はんいは さける
     if (onFoeFloor(f, x, y)) sc += 260;   // あいての ゆかも さける
     if (f.spot && Math.hypot(x - f.spot.x, y - f.spot.y) < 8) sc -= 18;   // 少し 前の ねらいを つづける（ふらふら しない）
     sc += ((per.seed * 7 + x * 3 + y) % 13);   // 性格で 少し ばらつき
@@ -6688,8 +6690,8 @@ function updateFighter(f, dt) {
   f.dodgeCd = Math.max(0, f.dodgeCd - dt); f.inv = Math.max(0, f.inv - dt); if (f.hurtInv > 0) f.hurtInv = Math.max(0, f.hurtInv - dt); f.flash -= dt; f.dizzy = Math.max(0, (f.dizzy || 0) - dt);
   f.moving = false;
   const o = opp(f), oT = targetable(o);
-  if (oT && !['dodge', 'dash'].includes(f.state)) {   // あいてを 見る。デコイにんぎょうが ひきつけて いる ときは にんぎょうを 見る
-    const dl = o.clones && o.clones.find(c => c.doll && Math.hypot(c.x - f.x, c.y - f.y) <= DOLL_R), lx = dl ? dl.x : o.x;
+  if (oT && !['dodge', 'dash'].includes(f.state)) {   // あいてを 見る。デコイにんぎょうが ある ときは にんぎょうを 見る（にんぎょうへ むかって あるく）
+    const dl = o.clones && o.clones.find(c => c.doll), lx = dl ? dl.x : o.x;
     if (Math.abs(lx - f.x) > 2) f.face = lx >= f.x ? 1 : -1; }
   if (targetable(f)) { f.enterT += dt; updateEffects(f, dt); if (f.state === 'faint') return; }
   // いしつぶてれんぱつ：つづけて うつ
