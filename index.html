@@ -4827,7 +4827,7 @@ function inZone(cur, owner, x, y, r) {
   if (m.k === 'strike') return cur.pts ? cur.pts.some(p => { const d = Math.hypot(x - p.x, y - p.y); return d <= p.r + r && d >= p.ring - r; }) : Math.hypot(x - cur.tx, y - cur.ty) <= m.rad + r;
   if (m.k === 'aoe' && m.pat === 'donut') { const d = Math.hypot(x - owner.x, y - owner.y); return d <= m.rad + r && d >= m.rad * .45 - r; }
   if (m.k === 'aoe' && m.pat === 'front') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, 1.1, r);
-  if (m.k === 'vault') return Math.hypot(x - cur.tx, y - cur.ty) <= m.rad + r * .5;
+  if (m.k === 'vault') return Math.hypot(x - cur.tx, y - cur.ty) <= vaultRad(owner, m) + r * .5;
   if (m.k === 'multi') return cur.pts.some(p => Math.hypot(x - p.x, y - p.y) <= m.rad + r);
   if (m.k === 'aoe') return Math.hypot(x - owner.x, y - owner.y) <= m.rad + r;   // pulse など：まずは ふつうの まる
   if (m.k === 'cone') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, m.half, r);
@@ -5379,6 +5379,7 @@ function addHole(x, y, sz, side) {
   return h;
 }
 const holeR = (h) => 14 + h.sz * 12;
+const vaultRad = (f, m) => m.hide === 'dig' && f && f.r ? Math.round(f.r * 1.4) : m.rad;   // あなをほる：でてくる ときの はんいは からだの 大きさ（ふつうの 大きさで 32）
 const canTunnel = (f, h) => !hovers(f) && bodySz(f.sp) <= h.sz + 1e-6;
 // AI：近くの 穴に はいると のぞみの きょりに ちかづくなら くぐる
 function tryTunnel(f, o, R) {
@@ -6751,7 +6752,7 @@ function updateFighter(f, dt) {
         const m = cur.m; f.x = cur.tx; f.y = cur.ty; if (blockedAt(f.x, f.y, footR(f))) freeSpot(f);
         if (m.hide === 'dig' && plOk('dig_out')) plFx('dig_out', f.x, f.y + 4, digSc(f) * 1.2); else sheetFx(m.hide === 'fly' ? 'slam' : 'st_ground', f.x, f.y - 20, 1.3); B.shake = Math.max(B.shake, 7); SND.se('boom');
         if (m.hide === 'dig') { const h = addHole(f.x, f.y, bodySz(f.sp), f.side); if (cur.hole) { h.to = cur.hole.uid; cur.hole.to = h.uid; } }   // でてきた 穴：もぐった 穴と つながる
-        if (oT && Math.hypot(o.x - cur.tx, o.y - cur.ty) <= m.rad + o.r * .5) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x));
+        if (oT && Math.hypot(o.x - cur.tx, o.y - cur.ty) <= vaultRad(f, m) + o.r * .5) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x));
         f.state = 'wind'; endAct(f, .4);
       }
       break;
@@ -7957,7 +7958,7 @@ function moveDesc(m) {
   // 動き
   if (m.k === 'counter') add(`自動：突進・打撃を受けた瞬間に、受けたダメージを${m.mult}倍で返す`);
   if (m.k === 'wall') add(`相手との間に壁を作る（${m.life}秒）。技も通さない${m.thorn ? '・触れるとダメージ' : ''}。空から降る技・地割れは防げない。壊せるのは${wallBreakers({ t: m.t, reflect: m.reflect }).map(TN).join('・')}の技だけ`);
-  if (m.k === 'vault') add(m.hide === 'fly' ? '空へ飛び上がり、相手の所へ降りて攻撃（飛んでいる間は攻撃を受けない）' : '地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。掘った穴は残り、自分より大きくないモンスターは穴から穴へくぐれる');
+  if (m.k === 'vault') add(m.hide === 'fly' ? '空へ飛び上がり、相手の所へ降りて攻撃（飛んでいる間は攻撃を受けない）' : '地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。出てくる所の攻撃範囲は体の大きさで決まる。掘った穴は残り、自分より大きくないモンスターは穴から穴へくぐれる');
   if (m.k === 'floor') add(`相手の足元に${m.n}を作る（消えない）。${[m.noDmg ? '' : '踏むと1ダメージ', m.slow ? '足が遅くなる' : '', m.pull ? '中心へ引き込まれる' : ''].filter(Boolean).join('・')}`);
   const K = {
     protect: m.psnGuard ? '自動：近接・突進など体でぶつかる技を受けた瞬間に1回防ぎ、攻撃した相手をどくにする' : '自動：飛び道具・ビーム・範囲技を受けた瞬間に1回打ち消す',
@@ -9666,7 +9667,7 @@ function render() {
     drawBlasts();
     for (const f of [a, e]) if (f && f.state === 'chan' && f.cur) drawChan(f);
     for (const f of [a, e]) if (f && f.state === 'hide' && f.cur) {   // おりてくる ばしょ
-      const cur = f.cur, prog = clamp(cur.t / cur.wind, 0, 1), base = f.side === 1 ? '255,60,70' : '90,190,255', R = cur.m.rad;
+      const cur = f.cur, prog = clamp(cur.t / cur.wind, 0, 1), base = f.side === 1 ? '255,60,70' : '90,190,255', R = vaultRad(f, cur.m);
       ctx.lineWidth = 2; ctx.fillStyle = `rgba(${base},.15)`; ctx.strokeStyle = prog > .5 && Math.floor(B.t * 18) % 2 ? '#ffffff' : `rgba(${base},.9)`;
       ctx.beginPath(); ctx.ellipse(cur.tx, cur.ty, R, R * .6, 0, 0, 7); ctx.fill(); ctx.stroke();
       ctx.fillStyle = `rgba(${base},${.2 + prog * .3})`; ctx.beginPath(); ctx.ellipse(cur.tx, cur.ty, R * prog, R * .6 * prog, 0, 0, 7); ctx.fill();
