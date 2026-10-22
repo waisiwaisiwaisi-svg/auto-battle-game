@@ -1723,7 +1723,7 @@ const MOVE_FIX = {
   protect: { cd: 12, wind: .1 }, 'toxic-spikes': { k: 'protect', hz: '', psnGuard: 1, cd: 12, wind: .15 },
   'fake-out': { prio: 1 },
   'body-slam': { sizeDmg: 1 }, 'brave-bird': { e: { recoil: 30 }, crash: .3 },
-  'body-press': { guardDash: 1, dashSpd: 115, len: 230, wind: .3 },
+  'body-press': { guardDash: 1, dashSpd: 62, stomp: 1, len: 200, wind: .3 },   // のしのし すすむ（すばやさで すこし はやく）
   'close-combat': { grab: 1, pat: '' },
   'flare-blitz': { trail: 1 }, 'iron-head': { wallBreak: 1 }, spark: { len: 240 },
   'flip-turn': { pat: 'orbit', len: 120 }, 'u-turn': { back: 1, switchOut: 0, len: 300 },
@@ -5565,7 +5565,8 @@ function rayEffect(f, o, m) {
     case 'roar':
       for (let i = 0; i < 4; i++) fxp({ type: 'shock', x: f.x, y: f.y - BODY, rad: 50 + i * 28, col: '#ffffff', life: .3 + i * .12 }); B.shake = Math.max(B.shake, 6);
       if (B.kind === 'wild') { say(`${o.sp.n}は おどろいて にげだした！`); B.fled = o.sp.n; endBattle(o.side === 1 ? 'run' : 'lose'); return; }
-      { const idx = benchIdx(o.side, true); if (idx < 0) { say('でも かわりが いない！'); return; } if (plOk('sum_swap')) plFx('sum_swap', o.x, o.y - BODY, 1.2, .6); else fxp({ type: 'swap', x: o.x, y: o.y - BODY, col: '#ffffff', life: .7 }); doSwitch(o, idx, null, true); }
+      { const idx = benchIdx(o.side, true); if (idx < 0) { say('でも かわりが いない！'); return; } if (plOk('sum_swap')) plFx('sum_swap', o.x, o.y - BODY, 1.2, .6); else fxp({ type: 'swap', x: o.x, y: o.y - BODY, col: '#ffffff', life: .7 });
+        if (canPickSwap(o.side)) { const o0 = o; setTimeout(() => { if (B && active(0) === o0 && o0.hp > 0) chooseSwap(i => doSwitch(o0, i, null, true), 'ふきとばされた！ だれを だす？', { skip: B.sides[0].act }); }, 0); } else doSwitch(o, idx, null, true); }
       break;
   }
 }
@@ -5749,7 +5750,7 @@ function afterHitSelf(att, def, m, dmg, opt) {
   if (e.recoil && att.hp > 0) { const r = Math.max(1, Math.round(dmg * e.recoil / 100)); att.hp = Math.max(0, att.hp - r); popText(att.x, att.y - 66, `-${r}`, '#ff9a8a'); if (att.hp <= 0) faint(att, def); }
   if (e.self && att.hp > 0 && (!opt || !opt.tick || opt.first)) changeStages(att, e.self, true);
   if (m.rapidSpin) { const hz = B.sides[att.side].hz; hz.rocks = hz.spikes = hz.tspikes = 0; att.v.seed = 0; }
-  if (m.switchOut && att.hp > 0 && (B.kind === 'cup' || B.kind === 'online') && att === active(att.side)) { const idx = benchIdx(att.side); if (idx >= 0) { att.pendingOut = idx; popText(att.x, att.y - 100, 'こうたい！', '#7fd8ff', 'comic'); fxp({ type: 'swap', x: att.x, y: att.y - BODY, col: '#7fd8ff', life: .7 }); } }
+  if (m.switchOut && att.hp > 0 && (B.kind === 'cup' || B.kind === 'online') && att === active(att.side)) { const idx = benchIdx(att.side); if (idx >= 0) { att.pendingOut = idx; if (canPickSwap(att.side)) { const a0 = att; setTimeout(() => { if (B && a0.pendingOut != null) chooseSwap(i => { a0.pendingOut = i; }, 'こうたいさきを えらぶ', { skip: B.sides[0].act }); }, 0); } popText(att.x, att.y - 100, 'こうたい！', '#7fd8ff', 'comic'); fxp({ type: 'swap', x: att.x, y: att.y - BODY, col: '#7fd8ff', life: .7 }); } }
   if (m.selfConfuse && att.hp > 0) att.v.confuse = Math.max(att.v.confuse || 0, m.selfConfuse);   // さんれんスピン：めが まわる
 }
 // どくどく・おにび など「あたれば状態異常」の弾
@@ -6702,7 +6703,7 @@ function updateFighter(f, dt) {
     }
     case 'dash': {
       if (!f.cur) { f.state = 'free'; break; }
-      const cur = f.cur, m = cur.m, pat = cur.back ? '' : m.pat, sp = (cur.back ? 560 : m.dashSpd || (m.prio > 0 || cur.dlen ? 420 : 300)) * K, L = cur.dlen || m.len;
+      const cur = f.cur, m = cur.m, pat = cur.back ? '' : m.pat, sp = (cur.back ? 560 : m.dashSpd || (m.prio > 0 || cur.dlen ? 420 : 300)) * K * (m.stomp && !cur.back ? clamp(Math.pow((f.speStat || 70) * stageMul(f.st.spe) / avgStats().spe, .35), .85, 1.2) * (.45 + .9 * Math.abs(Math.sin(B.t * 5.5))) : 1), L = cur.dlen || m.len;   // こうらおし：のしのし（いっぽずつ ふみだす）
       if (pat === 'orbit') {   // すいりゅうターン：あいての まわりを ぐるっと まわって うずを つくる
         const R = 92;
         if (!cur.oc) {
@@ -8230,25 +8231,32 @@ function updBench() {
   });
 }
 // たおれた ときは とめて つぎの モンスターを えらぶ
-function chooseNext(f) {
-  const sd = B.sides[0], alive = sd.fs.map((x, i) => i).filter(i => !sd.fs[i].fainted && sd.fs[i].hp > 0);
-  if (alive.length === 1) { B.pendingSend = { side: 0, idx: alive[0], t: .5, ko: 1 }; return; }
+const AUTO_PICK_T = 10;   // 訓練・AUTO：この びょう えらばなければ じどうで だす
+function chooseNext(f) { chooseSwap(i => { B.pendingSend = { side: 0, idx: i, t: .2, ko: 1 }; }, 'つぎは だれを だす？', { t1: .5 }); }
+// こうたいさきを えらぶ（たおれた とき・交代技・ふきとばされた とき）。pick(i) で きまった あとの ことを する
+function chooseSwap(pick, title, opt = {}) {
+  const sd = B.sides[0], alive = sd.fs.map((x, i) => i).filter(i => i !== (opt.skip ?? -1) && !sd.fs[i].fainted && sd.fs[i].hp > 0);
+  if (!alive.length) return;
+  if (alive.length === 1) { pick(alive[0]); return; }
   B.paused = true; B.choosing = true;
+  const T = $('chooseOv').querySelector('h2'); if (T) T.textContent = title;
   const L = $('chooseList'); L.innerHTML = '';
   for (const i of alive) {
     const x = sd.fs[i], b = document.createElement('button');
     b.appendChild(spriteCanvas(x.mon.sid, 48));
-    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}${x.sp.type2 ? typeChip(x.sp.type2) : ''}<div class="hpb" style="height:5px;background:#0d0b14;margin-top:4px"><i style="display:block;height:100%;width:${x.hp / x.maxHp * 100}%;background:var(--good)"></i></div><small class="dim">HP ${Math.ceil(x.hp)}/${x.maxHp}</small></span>`);
-    b.onclick = () => { $('chooseOv').hidden = true; B.paused = false; B.choosing = false; B.pendingSend = { side: 0, idx: i, t: .2, ko: 1 }; };
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}${x.sp.type2 ? typeChip(x.sp.type2) : ''}<div class="hpb" style="height:5px;background:#0d0b14;margin-top:4px"><i style="display:block;height:100%;width:${x.hp / x.maxHp * 100}%;background:var(--good)"></i></div></span>`);
+    b.onclick = () => { $('chooseOv').hidden = true; B.paused = false; B.choosing = false; pick(i); };
     L.appendChild(b);
   }
   $('chooseOv').hidden = false;
-  if (B.train || S.auto) {   // 訓練（見るだけ）・AUTO：3びょう まって えらばなければ じどうで だす
+  if (B.train || S.auto) {   // 訓練（見るだけ）・AUTO：えらばなければ じどうで だす
     const myB = B, o = active(1), score = (i) => { const x = sd.fs[i]; return Math.max(...x.moves.map(id => MOVES[id] && isDamaging(MOVES[id]) && o ? effVs(MOVES[id].t, o.sp) : 0), .1) * (x.hp / x.maxHp + .2); };
-    const best = alive.slice().sort((a, b) => score(b) - score(a))[0]; let n = 3; const tip = document.createElement('div'); tip.className = 'dim'; tip.style.cssText = 'font-size:12px;margin-top:6px;text-align:center'; L.appendChild(tip);
+    const best = alive.slice().sort((a, b) => score(b) - score(a))[0]; let n = AUTO_PICK_T; const tip = document.createElement('div'); tip.className = 'dim'; tip.style.cssText = 'font-size:12px;margin-top:6px;text-align:center'; L.appendChild(tip);
     const tick = () => { if (B !== myB || !B.choosing) return; if (n <= 0) { L.querySelectorAll('button')[alive.indexOf(best)].click(); return; } tip.textContent = `${n}びょうで ${sd.fs[best].sp.n}を じどうで だします`; n--; setTimeout(tick, 1000); }; tick();
   }
 }
+// じぶんの こうたいを プレイヤーが えらべる ときか（うらで うごく 試合・オンライン・チュートリアルでは えらばない）
+const canPickSwap = (side) => side === 0 && B && !B.headless && !B.autoChoose && B.kind !== 'online' && !TUT && !B.cfg.tutorial;
 function cmdRun() { if (!canCommand() || B.kind !== 'wild') return; say('うまく にげきれた！'); endBattle('run'); }
 function cmdAuto() { S.auto = !S.auto; save(); updAutoBtn(); SND.se('click'); if (B && B.remote) netSendInput(); if (B && B.mode === 'fight') say(S.auto ? 'AUTO：わざを じどうで だすよ' : 'わざボタンで しじしよう！'); }
 function updAutoBtn() { const b = $('bAuto'); if (!b) return; const on = !!(S && S.auto); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'AUTO ON' : 'AUTO'; }
