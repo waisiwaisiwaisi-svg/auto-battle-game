@@ -1245,6 +1245,11 @@ html.land #scHub{container-type:inline-size;container-name:hub}
 /* おなじ ものを JS の クラスでも（container query が きかない ブラウザ むけ） */
 html.lnar #scHub .hbar{gap:6px;flex-wrap:nowrap}html.lnar #scHub .hres{gap:4px;min-width:0}html.lnar #scHub .hres>span{padding:2px 6px 2px 3px}html.lnar #scHub .hrv small{display:none}html.lnar #scHub .hicons{gap:4px}html.lnar #scHub .hicon{width:34px;height:34px}html.lnar #scHub .hicon .ico{width:20px;height:20px}html.lnar #scHub .hubgrid{grid-template-columns:minmax(0,1fr) clamp(250px,42%,460px);gap:8px 12px}
 html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{width:18px;height:18px}html.lnar2 #scHub .hres>span{font-size:12px}html.lnar2 #scHub .hicon{width:30px;height:30px}html.lnar2 #scHub .hmode small{display:none}html.lnar2 #scHub .hmode{min-height:46px}
+
+/* ことばの リンク と せつめいの ふきだし */
+.kw{color:#ffd84a;text-decoration:underline;text-decoration-color:rgba(255,216,74,.55);text-underline-offset:2px;cursor:help;pointer-events:auto}
+#kwTip{position:fixed;z-index:10000;max-width:min(280px,calc(100vw - 16px));padding:8px 10px;background:#141030;color:#f3eefc;font-size:12px;line-height:1.55;border:2px solid #ffd84a;box-shadow:0 4px 0 rgba(0,0,0,.5);pointer-events:none;text-align:left}
+#kwTip b{display:block;color:#ffd84a;margin-bottom:2px;font-size:13px}
 </style>
 </head>
 <body>
@@ -3358,15 +3363,15 @@ function shopDetail(i) {
     const m = MOVES[o.id], who = [...S.party, ...(S.box || [])].filter(x => canLearn(x.sid, o.id)), seen = new Set();
     const names = who.filter(x => !seen.has(x.sid) && seen.add(x.sid)).map(x => SPECIES[x.sid].n);
     body = `<div class="dexd"><div class="shgi">${shopIcon(o)}</div><div class="info"><div>${rar}</div><div style="font-size:20px;font-weight:700">${m.n}${mvUseTag(m)}</div><div class="dim">${moveSub(m)}・${CAT_NAMES[m.cat] || ''}</div></div></div>
-      <p style="margin-top:10px;line-height:1.7">${moveDesc(m)}</p>
+      <p style="margin-top:10px;line-height:1.7">${kwDesc(m)}</p>
       <div style="margin-top:6px"><div class="dim" style="margin-bottom:4px">覚えられる仲間</div>${names.length ? names.map(n => `<span class="chip" style="background:var(--panel2)">${n}</span>`).join(' ') : '<span class="dim">今の仲間にはいない</span>'}</div>`;
   } else {
-    body = `<div class="dexd"><div class="shgi">${shopIcon(o)}</div><div class="info"><div style="font-size:20px;font-weight:700">${shopName(o)}</div><p style="margin-top:6px">${o.k === 'item' ? ITEMS[o.id].d : o.k === 'orb' ? 'モンスターを つかまえる ときに つかう' : 'ショップで つかう'}</p></div></div>`;
+    body = `<div class="dexd"><div class="shgi">${shopIcon(o)}</div><div class="info"><div style="font-size:20px;font-weight:700">${shopName(o)}</div><p style="margin-top:6px">${o.k === 'item' ? kw(ITEMS[o.id].d) : o.k === 'orb' ? 'モンスターを つかまえる ときに つかう' : 'ショップで つかう'}</p></div></div>`;
   }
   const bg = modal(`${body}<div class="row" style="justify-content:flex-end;gap:8px;margin-top:12px"><button class="btn sub" data-x="c">とじる</button>${sold ? '<button class="btn" disabled>うりきれ</button>' : `<button class="btn${o.p ? '' : ' ok'}" data-x="b">${o.p ? `💎 ${o.p} で かう` : 'うけとる'}</button>`}</div>`);
   const sl = bg.querySelector('.shdsp'); if (sl) sl.replaceWith(spriteCanvas(o.id, 128));
   shopPaint(bg); bg.querySelector('[data-x="c"]').onclick = () => bg.remove();
-  bg.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const m = MOVES[b.dataset.mv]; bg.querySelectorAll('[data-mv]').forEach(x => x.classList.toggle('on', x === b)); bg.querySelector('.shmvd').innerHTML = `<b style="color:var(--ink)">${m.n}</b>　${moveDesc(m)}`; });
+  bg.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => { const m = MOVES[b.dataset.mv]; bg.querySelectorAll('[data-mv]').forEach(x => x.classList.toggle('on', x === b)); bg.querySelector('.shmvd').innerHTML = `<b style="color:var(--ink)">${m.n}</b>　${kwDesc(m)}`; });
   const bb = bg.querySelector('[data-x="b"]'); if (bb) bb.onclick = () => { bg.remove(); shopBuyDeal(i, true); };
 }
 async function shopBuyDeal(i, ok) {
@@ -3374,7 +3379,7 @@ async function shopBuyDeal(i, ok) {
   if (o.p > 0) { if ((S.gems || 0) < o.p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${o.p}・もっている 💎${S.gems || 0}）`); return; }
     if (!ok && !(await ask(`${shopName(o)}を 💎${o.p} で かいますか？`, 'かう', 'やめる'))) return; S.gems -= o.p; }
   st.bought = [...(st.bought || []), i]; shopGive(o); save(); SND.se(o.p ? 'ok' : 'card');
-  const bg = modal(`<div class="shgot"><div class="shgi">${shopIcon(o)}</div><b>${shopName(o)}</b><div class="dim">${o.k === 'item' ? ITEMS[o.id].d : o.k === 'tm' ? moveDesc(MOVES[o.id]) : o.k === 'mon' ? (S.party.includes(S.party[S.party.length - 1]) ? 'なかまに なった！' : '') : 'てに いれた！'}</div><button class="btn" data-x="c" style="margin-top:10px">OK</button></div>`);
+  const bg = modal(`<div class="shgot"><div class="shgi">${shopIcon(o)}</div><b>${shopName(o)}</b><div class="dim">${o.k === 'item' ? kw(ITEMS[o.id].d) : o.k === 'tm' ? kwDesc(MOVES[o.id]) : o.k === 'mon' ? (S.party.includes(S.party[S.party.length - 1]) ? 'なかまに なった！' : '') : 'てに いれた！'}</div><button class="btn" data-x="c" style="margin-top:10px">OK</button></div>`);
   shopPaint(bg); bg.querySelector('[data-x="c"]').onclick = () => bg.remove(); renderShop();
 }
 async function shopBuyChest(kind, p) {
@@ -3510,7 +3515,7 @@ function openChest(i) {
   const cards = [`<div class="reward"><div class="chbox">${chestIcon(c.kind, false, 4)}</div><div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
     ...monCards, `<div class="reward"><div class="big">オーブ ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
   for (const k of R.items || []) cards.push(`<div class="reward"><div style="font-size:46px">${ITEMS[k].ic}</div><div class="big">${ITEMS[k].n}</div><div class="dim">${ITEMS[k].d}</div></div>`);
-  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="chip" style="background:${TYPES[m.t].c};font-size:13px;padding:2px 10px">${TYPES[m.t].n}</span><div class="big"><i class="ico ico-s" data-ico="scroll"></i>${m.n}</div><span style="color:${r.c};font-size:11px;opacity:.8">${r.n}</span><div class="dim">${moveDesc(m)}</div></div>`); }
+  for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="chip" style="background:${TYPES[m.t].c};font-size:13px;padding:2px 10px">${TYPES[m.t].n}</span><div class="big"><i class="ico ico-s" data-ico="scroll"></i>${m.n}</div><span style="color:${r.c};font-size:11px;opacity:.8">${r.n}</span><div class="dim">${kwDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
   bg.innerHTML = `<div class="askbox"><div id="rwBody"></div><div class="dim" id="rwCount" style="margin-top:6px"></div><button class="btn" id="rwNext" style="margin-top:10px;width:100%">つぎへ</button></div>`;
   $('app').appendChild(bg);
@@ -3546,14 +3551,14 @@ function useTM(m) {
     const ok = (id) => canLearn(m.sid, id) && !m.moves.includes(id);
     const list = ids.slice().sort((a, b) => ok(b) - ok(a));
     bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>${SPECIES[m.sid].n}</b>に おぼえさせる わざを えらぶ<div class="dim">タイプや すがたに あう わざだけ おぼえられます</div></div><div class="tmlist">${list.map(id => { const mv = MOVES[id], r = RARITY[tmRarity(id)], has = m.moves.includes(id), can = canLearn(m.sid, id);
-      return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}" ${has || !can ? 'disabled' : ''}><span class="chip" style="background:${TYPES[mv.t].c};font-size:12px;padding:1px 8px">${TYPES[mv.t].n}</span> <b>${mv.n}</b> ${tmFree() ? '∞' : '×' + S.tms[id]} <span style="color:${r.c};font-size:10px;opacity:.75">${r.n}</span><span class="dim">${has ? '・おぼえている' : !can ? '・<b style="color:var(--bad)">おぼえられない</b>' : ''}</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">やめる</button></div>`;
+      return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}" ${has || !can ? 'disabled' : ''}><span class="chip" style="background:${TYPES[mv.t].c};font-size:12px;padding:1px 8px">${TYPES[mv.t].n}</span> <b>${mv.n}</b> ${tmFree() ? '∞' : '×' + S.tms[id]} <span style="color:${r.c};font-size:10px;opacity:.75">${r.n}</span><span class="dim">${has ? '・おぼえている' : !can ? '・<b style="color:var(--bad)">おぼえられない</b>' : ''}</span><div class="desc">${kwDesc(mv)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">やめる</button></div>`;
     bg.querySelector('.btn.sub').onclick = close;
     bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => step2(b.dataset.id));
   };
   const step2 = (id) => {
     const mv = MOVES[id];
     bg.innerHTML = `<div class="askbox"><div style="margin-bottom:8px"><b>${mv.n}</b>を おぼえる かわりに わすれる わざ</div><div class="tmlist">${m.moves.map((x, i) => { const o = MOVES[x];
-      return `<button data-i="${i}" style="--c:${TYPES[o.t].c}"><b>${o.n}</b> <span class="dim">${TYPES[o.t].n}</span><div class="desc">${moveDesc(o)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">もどる</button></div>`;
+      return `<button data-i="${i}" style="--c:${TYPES[o.t].c}"><b>${o.n}</b> <span class="dim">${TYPES[o.t].n}</span><div class="desc">${kwDesc(o)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">もどる</button></div>`;
     bg.querySelector('.btn.sub').onclick = step1;
     bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => {
       const old = MOVES[m.moves[+b.dataset.i]].n; m.moves[+b.dataset.i] = id; tmTake(id);
@@ -3696,7 +3701,7 @@ function renderTeamDetail() {
       <div>たいかく：<b style="color:var(--acc)">${bodyTxt(SPECIES[m.sid])[0]}</b> <span class="dim">${bodyTxt(SPECIES[m.sid])[1]}</span></div>
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim" style="display:inline-block">${NATURES[m.nat].d}</span></div><div>さくせん：<b style="color:var(--acc)">${planName(m)}</b><div class="dim" style="font-size:11px">${natRelText(planOfMon(m))}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
-    <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}・${CAT_NAMES[mv.cat]}</span><small>${moveDesc(mv)}</small></div>`; }).join('')}</div>
+    <div class="mvl">${equipped(m).map(id => { const mv = MOVES[id]; return `<div style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}・${CAT_NAMES[mv.cat]}</span><small>${kwDesc(mv)}</small></div>`; }).join('')}</div>
     <div class="acts"><button class="btn sub" data-a="boost" style="color:var(--acc);position:relative">${canBoost(m) ? '<i class="bdot"></i>' : ''}きょうか ${evFed(m)}/${EV_MAX}</button><button class="btn sub" data-a="tm"><i class="ico ico-s" data-ico="scroll"></i>スクロール</button><button class="btn sub" data-a="item">どうぐ</button><button class="btn sub" data-a="train" style="color:var(--acc)">訓練</button>${inParty ? `<button class="btn sub" data-a="box" ${S.party.length <= 1 ? 'disabled' : ''}>あずける</button>` : `<button class="btn sub" data-a="party" ${S.party.length >= 6 ? 'disabled' : ''}>パーティへ</button><button class="btn danger" data-a="release">にがす</button>`}</div>`;
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.classList.toggle('open', teamSheet); D.querySelectorAll('[data-a="close"]').forEach(b => b.onclick = () => { teamSheet = false; D.classList.remove('open'); SND.se('back'); });
@@ -3872,7 +3877,7 @@ function renderTrain(uid) {
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
   const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '<small>＋ ほかの条件（ここへ）</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${moveDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
   const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
     <div class="trbtns"><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
@@ -3881,7 +3886,7 @@ function renderTrain(uid) {
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
   const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
   let ins = '';
-  const mvInfo = (id) => { const M = MOVES[id]; if (!M) return ''; return `<div class="trmvinfo" style="--c:${tcol(id)}"><div><b>${M.n}</b>${mvUseTag(M)} <span class="dim">${moveSub(M)}・${CAT_NAMES[M.cat] || ''}・待ち${(+M.cd).toFixed(1).replace(/\.0$/, '')}秒</span></div><div>${moveDesc(M)}</div></div>`; };   // 技の 内容
+  const mvInfo = (id) => { const M = MOVES[id]; if (!M) return ''; return `<div class="trmvinfo" style="--c:${tcol(id)}"><div><b>${M.n}</b>${mvUseTag(M)} <span class="dim">${moveSub(M)}・${CAT_NAMES[M.cat] || ''}・待ち${(+M.cd).toFixed(1).replace(/\.0$/, '')}秒</span></div><div>${kwDesc(M)}</div></div>`; };   // 技の 内容
   const infoId = pk && pk.k === 'mv' ? pk.v : !pk && !sc ? TRN.info : null;
   if (sc) { const K = CONDS[sc.t], seg = (opts, cur) => `<div class="trseg" data-k="cp">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
     ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
@@ -4015,7 +4020,7 @@ function itemMenu(m) {
     const box = bg.querySelector('#itm');
     if (pickFor) {   // わざを えらぶ
       box.innerHTML = `<h3 style="margin-bottom:6px">${ITEMS[pickFor].ic} ${ITEMS[pickFor].n}</h3><p class="dim" style="margin-bottom:8px">おぼえなおす わざを えらんでね</p><div class="tmlist">${m.moves.map((id, i) => { const mv = MOVES[id], n = rerollPool(m, i, pickFor === 'retype').length;
-        return `<button data-i="${i}" style="--c:${TYPES[mv.t].c}" ${n ? '' : 'disabled'}><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}・こうほ ${n}こ</span><div class="desc">${moveDesc(mv)}</div></button>`; }).join('')}</div>
+        return `<button data-i="${i}" style="--c:${TYPES[mv.t].c}" ${n ? '' : 'disabled'}><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}・こうほ ${n}こ</span><div class="desc">${kwDesc(mv)}</div></button>`; }).join('')}</div>
         <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn sub" id="iBack">もどる</button></div>`;
       box.querySelector('#iBack').onclick = () => draw();
       box.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => {
@@ -4120,7 +4125,7 @@ function moveEditor(m) {   // おぼえている わざ（獲得した ときに
   const box = document.createElement('div'); box.className = 'medit';
   box.innerHTML = `<div class="dim">わざは つかまえた ときに きまります。スクロールで いれかえられます</div>` + equipped(m).map(id => {
     const mv = MOVES[id];
-    return `<div class="mrow on" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b>${mvUseTag(mv)} <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${moveSub(mv)}・${CAT_NAMES[mv.cat]}</span><div class="desc">${moveDesc(mv)}</div></div>`;
+    return `<div class="mrow on" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b>${mvUseTag(mv)} <span class="chip" style="background:${TYPES[mv.t].c}">${TYPES[mv.t].n}</span> <span class="dim">${moveSub(mv)}・${CAT_NAMES[mv.cat]}</span><div class="desc">${kwDesc(mv)}</div></div>`;
   }).join('');
   return box;
 }
@@ -7915,6 +7920,42 @@ function moveDesc(m) {
   if (isBigMove(m)) add('大技');
   return out.join('・');
 }
+// ことばの せつめい（シャドウバース ふう）：せつめい文の なかの 状態異常・効果に リンクを つけ、さわる／カーソルを あわせると くわしく だす
+const KW = {
+  'やけど': ['やけど（状態異常）', '3秒ごとに 最大HPの 1/32 の ダメージ。物理技の ダメージが 半分に なる。ほのおタイプは ならない。'],
+  'まひ': ['まひ（状態異常）', '素早さが 半分。2.5秒ごとに 25%で 0.8秒 しびれて 動けない。でんきタイプは ならない。'],
+  'もうどく': ['もうどく（状態異常）', '3秒ごとに ダメージ。最大HPの 1/48 から はじまり、そのたびに ふえて 1/12 まで。交代すると ふえかたが もどる。どく・はがねタイプは ならない。'],
+  'どく': ['どく（状態異常）', '3秒ごとに 最大HPの 1/24 の ダメージ。どく・はがねタイプは ならない。'],
+  'こおり': ['こおり（状態異常）', '2.5秒 動けない。ほのおの 技を うけると すぐ とける。こおりタイプは ならない。'],
+  'ねむり': ['ねむり（状態異常）', '3秒 動けない。'],
+  '眠': ['ねむり（状態異常）', '3秒 動けない。'],
+  'ひるませる': ['ひるみ', '0.7秒 動けなくなる。'],
+  '混乱': ['こんらん', 'しばらくの あいだ、技を 出そうと すると ときどき ころんだり、かってに よけたり する（指示と ちがう 動き）。'],
+  '急所': ['急所', 'ダメージが 1.5倍。'],
+  '効果ばつぐん': ['効果ばつぐん', 'タイプの 相性が よく、ダメージが 2倍（2つの タイプ どちらにも ばつぐんなら 4倍）。'],
+  '大技': ['大技', '威力100 以上の 技。1戦で 使える 回数に かぎりが ある（技名の よこの のこり/最大）。'],
+  '自動': ['自動の 技', 'えらばなくても、相手の 技を うけた しゅんかんに 自分で 出る。訓練で 設定しなくても 出る。'],
+};
+const KW_ST = { 攻撃: '物理技の ダメージ', 防御: '物理技から うける ダメージの へりかた', 属性攻撃: '属性技の ダメージ', 属性防御: '属性技から うける ダメージの へりかた', 素早さ: '動く はやさ・技を 出す はやさ', 回避: '技の よけやすさ' };
+const KW_RE = new RegExp(`(属性攻撃|属性防御|攻撃|防御|素早さ|回避)([+-]\\d)|(${Object.keys(KW).sort((a, b) => b.length - a.length).join('|')})(?!タイプ|びし)`, 'g');
+const kw = (t) => String(t).replace(KW_RE, (all, st, v, k) => st ? `<span class="kw" data-kw="st:${st}">${st}${v}</span>` : (k === '自動' && !/^自動[：:]/.test(t.slice(t.indexOf(all))) ? all : `<span class="kw" data-kw="${k}">${k}</span>`));
+const kwDesc = (m) => kw(moveDesc(m));
+function kwInfo(k) {
+  if (k.startsWith('st:')) { const n = k.slice(3); return [`${n}の 段階`, `${KW_ST[n] || n}が かわる。+1で 1.5倍・+2で 2倍 … 最大 +6（4倍）。下がると -1で 2/3倍 … 最大 -6（1/4倍）。交代すると もとに もどる。`]; }
+  return KW[k] || null;
+}
+{ let tip = null, at = null;
+  const hide = () => { if (tip) tip.hidden = true; at = null; };
+  const show = (el) => { const I = kwInfo(el.dataset.kw); if (!I) return; if (!tip) { tip = document.createElement('div'); tip.id = 'kwTip'; document.body.appendChild(tip); }
+    tip.innerHTML = `<b>${I[0]}</b><div>${I[1]}</div>`; tip.hidden = false; at = el;
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, vw = innerWidth, vh = innerHeight;
+    let x = clamp(r.left + r.width / 2 - w / 2, 8, vw - w - 8), y = r.top - h - 8; if (y < 8) y = Math.min(r.bottom + 8, vh - h - 8);
+    tip.style.left = x + 'px'; tip.style.top = y + 'px'; };
+  document.addEventListener('pointerover', (e) => { if (e.pointerType !== 'mouse') return; const k = e.target.closest && e.target.closest('.kw'); if (k) show(k); else if (at) hide(); }, true);
+  // タップ：リンクの うえなら せつめいだけ 出す（したの ボタンは おさない）。ほかを さわったら けす
+  const tap = (e) => { const k = e.target.closest && e.target.closest('.kw'); if (k) { e.preventDefault(); e.stopPropagation(); if (e.type === 'click') { if (at === k && e.pointerType !== 'mouse') hide(); else show(k); } } else if (e.type === 'pointerdown' && at && !(tip && tip.contains(e.target))) hide(); };
+  ['pointerdown', 'click'].forEach(t => document.addEventListener(t, tap, true));
+  addEventListener('scroll', hide, true); }
 // 1戦で 使える 回数：「のこり/最大」（使い放題は ∞）
 const isBigMove = (m) => m.cat !== 'stat' && (m.ohko || movePower(m) >= 100);
 function mvUses(m, left) { const mx = healMax(m); return mx ? `${left == null ? mx : Math.max(0, left)}/${mx}` : '∞'; }
