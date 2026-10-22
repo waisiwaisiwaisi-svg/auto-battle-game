@@ -1601,7 +1601,7 @@ const effVs = (mt, sp) => sp.dummy ? 1 : effOf(mt, sp.type) * (sp.type2 ? effOf(
 const MOVES = {
   tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 10, cd: 2.0, wind: 0.12, lunge: 70 },   // こうかの ある わざが ない ときの つなぎ（連打しすぎない）
   ember:   { n: 'ひのたま',       t: 'fire',  k: 'proj',   pow: 13, cd: 2.4, wind: .3,  spd: 190, cnt: 1, r: 5 },
-  flame:   { n: 'かえんうず',     t: 'fire',  k: 'aoe',    pow: 24, cd: 7,   wind: .85, rad: 62 },
+  flame:   { n: 'かえんうず',     t: 'fire',  k: 'aoe',    pow: 24, cd: 7,   wind: .6, rad: 62 },   // ため：.85 → .6（ほかの まわり わざと おなじ）
   blaze:   { n: 'バーンラッシュ', t: 'fire',  k: 'dash',   pow: 22, cd: 5,   wind: .5,  len: 160 },
   bubble:  { n: 'バブルショット', t: 'water', k: 'proj',   pow: 7,  cd: 2.8, wind: .3,  spd: 160, cnt: 3, spread: .22, r: 4 },
   tide:    { n: 'アクアキャノン', t: 'water', k: 'beam',   pow: 25, cd: 7.5, wind: .9,  len: 240, wid: 28 },
@@ -8527,10 +8527,10 @@ function drawTele(f) {
   if (!ZONE_KINDS.includes(m.k) && m.k !== 'melee') { // 補助わざ：じぶんの まわりに ひかる輪
     ctx.strokeStyle = `rgba(255,209,102,${.4 + prog * .5})`; ctx.beginPath(); ctx.ellipse(f.x, f.y, 26 + prog * 10, 12 + prog * 4, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); return;
   }
-  path(1); ctx.fillStyle = `rgba(${base},.14)`; ctx.fill('evenodd'); ctx.strokeStyle = blink ? 'rgba(255,255,255,.95)' : `rgba(${base},.9)`; ctx.stroke();
-  path(prog); ctx.fillStyle = `rgba(${base},${.2 + prog * .25})`; ctx.fill('evenodd');
+  path(1); ctx.fillStyle = `rgba(${base},.14)`; ctx.fill(); ctx.strokeStyle = blink ? 'rgba(255,255,255,.95)' : `rgba(${base},.9)`; ctx.stroke();
+  path(prog); ctx.fillStyle = `rgba(${base},${.2 + prog * .25})`; ctx.fill();
   if (m.ohko) {   // いちげきわざ：きけんな ことが ひとめで わかる
-    const fl = Math.floor(B.t * 10) % 2; path(1); ctx.fillStyle = fl ? 'rgba(255,30,30,.35)' : 'rgba(40,0,0,.35)'; ctx.fill('evenodd'); ctx.lineWidth = 4; ctx.strokeStyle = fl ? '#ff2a2a' : '#ffd84a'; ctx.stroke();
+    const fl = Math.floor(B.t * 10) % 2; path(1); ctx.fillStyle = fl ? 'rgba(255,30,30,.35)' : 'rgba(40,0,0,.35)'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = fl ? '#ff2a2a' : '#ffd84a'; ctx.stroke();
     const c = Math.cos(cur.ang), s = Math.sin(cur.ang), L = rayLen(f, cur.ang, m.len);
     for (let d = 40; d < L; d += 70) { const x = f.x + c * d, y = f.y + s * d; ctx.fillStyle = '#120e1c'; ctx.beginPath(); ctx.moveTo(x, y - 14); ctx.lineTo(x + 12, y + 8); ctx.lineTo(x - 12, y + 8); ctx.closePath(); ctx.fill(); ctx.fillStyle = fl ? '#ffd84a' : '#ff5a2a'; ctx.beginPath(); ctx.moveTo(x, y - 11); ctx.lineTo(x + 9, y + 6); ctx.lineTo(x - 9, y + 6); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 1, y - 5, 2, 6); ctx.fillRect(x - 1, y + 2, 2, 2); }
     ctx.font = 'bold 14px monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = '#120e1c'; const ty = f.y - BODY - 52 - Math.abs(Math.sin(B.t * 8)) * 4; ctx.strokeText('いちげき ひっさつ！', f.x, ty); ctx.fillStyle = fl ? '#ff4a4a' : '#ffd84a'; ctx.fillText('いちげき ひっさつ！', f.x, ty);
@@ -8589,7 +8589,7 @@ function drawBlasts() {
   for (const b of B.blasts) { if (b.done || b.t <= 0) continue;
     const base = b.side === 1 ? '255,60,70' : '90,190,255', k = 1 - clamp(b.t / Math.max(.05, b.t0), 0, 1);
     ctx.beginPath(); ctx.ellipse(b.x, b.y, b.r, b.r * .8, 0, 0, 7); if (b.ring) ctx.ellipse(b.x, b.y, b.ring, b.ring * .8, 0, 7, 0, true);
-    ctx.fillStyle = `rgba(${base},${.12 + k * .25})`; ctx.fill('evenodd'); ctx.strokeStyle = `rgba(${base},.85)`; ctx.stroke();
+    ctx.fillStyle = `rgba(${base},${.12 + k * .25})`; ctx.fill(); ctx.strokeStyle = `rgba(${base},.85)`; ctx.stroke();
     if (b.look === 'meteor') { const q = 1 - k, mx = b.x - q * 230, my = b.y - 24 - q * 360;   // ななめ うえから おちてくる いんせき
       ctx.save(); ctx.lineCap = 'round'; for (const [w, c, a] of [[16, '#ff5a2a', .35], [9, '#ffb040', .6], [4, '#fff2a0', .9]]) { ctx.globalAlpha = a; ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(mx - 70, my - 110); ctx.lineTo(mx, my); ctx.stroke(); } ctx.restore();
       glowDot(mx, my, 26, '#ff8a3d', .7); drawRock(mx, my, 12, B.t * 8, '#8a6ab8'); } }
