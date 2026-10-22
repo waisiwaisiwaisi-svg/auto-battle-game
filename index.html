@@ -277,12 +277,15 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .macts button{font-size:11px;background:var(--panel2);box-shadow:0 0 0 1px var(--edge);padding:5px 6px;min-width:56px}
 .list{display:flex;flex-direction:column;gap:8px}
 #chartWrap table{border-collapse:collapse;font-size:10px;margin:0 auto}
-#chartWrap td,#chartWrap th{width:19px;height:19px;text-align:center;padding:0;border:1px solid #2a2340}
+#chartWrap td,#chartWrap th{width:var(--cs,19px);height:var(--cs,19px);text-align:center;padding:0;border:1px solid #2a2340;font-size:calc(var(--cs,19px) * .52)}
+#chartWrap{--cs:clamp(19px,calc((min(100vw,var(--appW,100vw)) - 60px) / 17),34px)}
+html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px)}
+#chartWrap td.hl,#chartWrap th.hl{box-shadow:inset 0 0 0 99px rgba(255,255,255,.12)}#chartWrap td.on{outline:2px solid #ffd84a;outline-offset:-2px}
+#chartInfo{text-align:center;min-height:1.6em;margin:6px 0 2px;font-size:13px}#chartInfo b{color:#ffd84a}
 #chartWrap th{color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;font-weight:700}
 #chartWrap td.x2{background:#5a2a2a;color:#ff8a6a;font-weight:700}
 #chartWrap td.x05{background:#1e2a44;color:#7fb2ff}
 #chartWrap td.x0{background:#111;color:#888}
-#chartWrap tr:hover td{outline:1px solid #fff3}
 .plate .types{display:flex;gap:3px;margin-top:2px}
 #plE .types{justify-content:flex-end}
 .plate .types .chip{font-size:9px;padding:0 4px}
@@ -1376,7 +1379,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
   <!-- チーム -->
   <section class="screen" id="scChart" hidden>
     <div class="sec-title"><span style="font-size:16px;color:var(--ink)">タイプあいしょう表</span><button class="btn sub" id="btnChartBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
-    <p class="dim">たて＝わざの タイプ／よこ＝うける モンスターの タイプ。<b style="color:#ff8a6a">◎</b>=2ばい（ばつぐん） <b style="color:#7fb2ff">△</b>=0.5ばい <b style="color:#888">×</b>=こうかなし。2タイプの モンスターには 2つを かけ算。わざと 同じタイプの モンスターが つかうと 1.25ばい。</p>
+    <p class="dim">たて＝わざの タイプ／よこ＝うける モンスターの タイプ。<b style="color:#ff8a6a">◎</b>=2ばい（ばつぐん） <b style="color:#7fb2ff">△</b>=0.5ばい <b style="color:#888">×</b>=こうかなし。2タイプの モンスターには 2つを かけ算。わざと 同じタイプの モンスターが つかうと 1.5ばい。マスを タップ（カーソル）すると くわしく 出る。</p>
     <div id="chartWrap" style="overflow-x:auto;display:block"></div>
   </section>
 
@@ -3624,8 +3627,15 @@ function renderChart() {
     for (const d of ts) { const v = effOf(a, d); h += v === 2 ? '<td class="x2">◎</td>' : v === .5 ? '<td class="x05">△</td>' : v === 0 ? '<td class="x0">×</td>' : '<td></td>'; }
     h += '</tr>';
   }
-  h += '</table><p class="dim" style="margin-top:8px">' + ts.map(t => `${TYPE_SHORT[t]}=${TYPES[t].n}`).join('　') + '</p>';
+  h += '</table><div id="chartInfo" class="dim">マスを えらぶと ここに 出る</div><p class="dim" style="margin-top:4px">' + ts.map(t => `${TYPE_SHORT[t]}=${TYPES[t].n}`).join('　') + '</p><p class="dim" style="font-size:11px">かぜ は ポケモンの ひこう に あたる。あく・はがね・フェアリー は ない（あくの わざは ゴーストタイプ）。</p>';
   $('chartWrap').innerHTML = h;
+  // マスを えらぶ：その 行（わざ）と 列（うける がわ）を ひからせて ばいりつを 出す
+  const tb = $('chartWrap').querySelector('table'), pick = (td) => { tb.querySelectorAll('.hl,.on').forEach(e => e.classList.remove('hl', 'on')); if (!td || td.tagName !== 'TD') return;
+    const tr = td.parentElement, ci = td.cellIndex, ri = tr.rowIndex; if (ri < 1 || ci < 1) return; const a = ts[ri - 1], d = ts[ci - 1], v = effOf(a, d);
+    [...tr.cells].forEach(c => c.classList.add('hl')); [...tb.rows].forEach(r => r.cells[ci] && r.cells[ci].classList.add('hl')); td.classList.add('on');
+    $('chartInfo').innerHTML = `<b style="color:${TYPES[a].c}">${TYPES[a].n}</b>の わざ → <b style="color:${TYPES[d].c}">${TYPES[d].n}</b>の モンスター：<b>${v === 0 ? 'こうかなし（0ばい）' : v + 'ばい' + (v > 1 ? '（ばつぐん）' : v < 1 ? '（いまひとつ）' : '')}</b>`; };
+  tb.addEventListener('pointerover', (e) => { if (e.pointerType === 'mouse') pick(e.target.closest('td')); });
+  tb.addEventListener('click', (e) => pick(e.target.closest('td')));
   show('scChart');
 }
 // ステータスの 色：ゲームに いる モンスターの 平均より 高い＝みどり ▲、低い＝あか ▼、だいたい 平均＝しろ
