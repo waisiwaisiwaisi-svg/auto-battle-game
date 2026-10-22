@@ -9667,7 +9667,8 @@ function layout() {
   { const ic = document.querySelector('#scHub .hicons'), hb = document.querySelector('#scHub .hbar'); if (ic && hb) { if (r.classList.contains('land')) { if (ic.parentNode !== hb) hb.insertBefore(ic, hb.querySelector('.hres')); } else if (ic.parentNode === hb) hb.after(ic); } }
 }
 // 画面の 座標 → 回した #app の 中の 座標
-function toApp(cx, cy) { return document.documentElement.classList.contains('rot') ? { x: cy, y: window.innerWidth - cx } : { x: cx, y: cy }; }
+// 画面の 座標 → #app の なかの 座標（90度 まわした ときと、PCで 拡大（zoom） して いる ときの ぶんを もどす）
+function toApp(cx, cy) { if (document.documentElement.classList.contains('rot')) return { x: cy, y: window.innerWidth - cx }; const z = +$('app').style.zoom || 1; return { x: cx / z, y: cy / z }; }
 function toggleLand() {
   LAND_PREF = !LAND_PREF; try { localStorage.setItem('pma_land', LAND_PREF ? '1' : '0'); } catch (e) { }
   // Android などは 全画面＋向きの 固定が できる（できない ときは 90度 回して 表示）
