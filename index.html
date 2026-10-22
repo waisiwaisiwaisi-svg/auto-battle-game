@@ -688,7 +688,7 @@ html:not(.land) #scHub .hbar{flex-wrap:wrap;row-gap:8px} html:not(.land) #scHub 
 #scHub .hicon .ico{width:24px;height:24px}
 #scHub .hubgrid{gap:12px}
 .hstage{position:relative;width:100%;padding:0;background:radial-gradient(ellipse at 50% 90%,rgba(255,209,102,.18),rgba(20,16,34,.35) 70%)!important}
-.hstage canvas{width:100%;height:auto;display:block;image-rendering:pixelated;aspect-ratio:2/1}
+.hstage canvas{width:100%;height:auto;display:block;image-rendering:pixelated;aspect-ratio:2/1;object-fit:contain;object-position:center bottom}
 .hsname{position:absolute;left:8px;top:6px;font-size:13px;font-weight:700;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
 .hcta{width:100%;display:grid!important;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;padding:12px 16px!important;min-height:76px;background:linear-gradient(180deg,#ffd27a,#ffb547 55%,#f2962d)!important}
 .hcta .ico{grid-row:1/3}
@@ -1229,7 +1229,7 @@ html.land #scHub .hubgrid{flex:1;min-height:0;display:grid;grid-template-columns
 html.land #scHub .hubgrid>.hcol:nth-child(1){grid-area:st;justify-content:flex-end;min-height:0}
 html.land #scHub .hstage{flex:1;min-height:0;background:none!important;border:0!important;border-image:none!important;box-shadow:none!important;display:flex;align-items:flex-end;justify-content:center}
 html.land #scHub .hstage::before{content:none}   /* よこ画面は がめん ぜんたいが はいけい */
-html.land #scHub .hstage canvas{width:auto;height:min(100%,calc(62 * var(--vh)));max-width:100%;aspect-ratio:2/1;filter:drop-shadow(0 6px 0 rgba(0,0,0,.35))}
+html.land #scHub .hstage canvas{width:auto;height:min(100%,calc(62 * var(--vh)));max-width:100%;aspect-ratio:2/1;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 6px 0 rgba(0,0,0,.35))}
 html.land #scHub .hsname{left:50%;top:auto;bottom:4px;transform:translateX(-50%);padding:2px 10px;background:rgba(10,8,22,.6);box-shadow:0 0 0 2px #0b0914;white-space:nowrap}
 html.land #scHub .hubgrid>.hcol:nth-child(2){grid-area:bt;justify-content:flex-end;height:auto!important;align-self:end}
 html.land #scHub .hmodes{flex:none;grid-template-columns:1fr 1fr;grid-auto-rows:auto;gap:8px}

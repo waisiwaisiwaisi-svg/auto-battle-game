@@ -34,7 +34,7 @@ jobs:
           touch _site/.nojekyll
           SHORT=$(git rev-parse --short HEAD); DATE=$(TZ=Asia/Tokyo date '+%m/%d %H:%M')
           # ホームがめんに ついか した とき アプリの ように ひらく（アイコン・ぜんがめん）・タイトルに いつの はんか を だす
-          sed -i "s#<meta name=\"theme-color\" content=\"\#141022\">#<meta name=\"theme-color\" content=\"\#141022\"><link rel=\"manifest\" href=\"manifest.webmanifest\"><link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\"><meta name=\"apple-mobile-web-app-title\" content=\"モンスターアリーナ\">#" _site/index.html
+          sed -i "s#<meta name=\"theme-color\" content=\"\#141022\">#<meta name=\"theme-color\" content=\"\#141022\"><link rel=\"manifest\" href=\"manifest.webmanifest\"><link rel=\"icon\" type=\"image/png\" href=\"icon-192.png\"><link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\"><meta name=\"apple-mobile-web-app-title\" content=\"モンスターアリーナ\">#" _site/index.html
           sed -i "s#>ver 1.0<#>ver 1.0（${DATE}・${SHORT}）<#" _site/index.html
           grep -q 'rel="manifest"' _site/index.html
       - name: gh-pages に おく
