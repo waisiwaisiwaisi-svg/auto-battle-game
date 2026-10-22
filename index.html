@@ -5423,6 +5423,7 @@ function wallBreakers(w) { return Object.keys(TYPES).filter(t => ((CHART[t] || {
 // ステージの おきもの：どんな こうげきでも けずれて、0 で こわれる（その ばしょが とおれる ように なる）
 const propHpMax = (p) => clamp(Math.round(p.w * p.h / 5000), 6, 12);
 function propsAt(x, y, r) { const st = B.st, out = []; if (!st.propSol) return out; st.props.forEach((p, i) => { if (!st.propGone[i] && st.propSol[i].some(o => circRect(x, y, r, o))) out.push(i); }); return out; }
+const RUBBLE_T = .8;   // こわれた しょうがいぶつの がれきが のこる じかん（びょう）
 function damageProp(i, m, n) {
   const st = B.st; if (i == null || i < 0 || !st.propSol || st.propGone[i] || !st.propSol[i].length) return; const p = st.props[i];
   if (st.propHp[i] == null) st.propHp[i] = propHpMax(p);
@@ -9726,7 +9727,7 @@ function render() {
       ctx.save(); ring(R0); ctx.clip(); ctx.globalAlpha = 1 - .72 * p.fade; ctx.drawImage(p.img, X, Y, p.w, p.h); ctx.restore();   // まんなか：よく すける
     } }; list.push({ y: p.y - 4, d: () => { pd.d0(); drawPropDmg(st, p, pi); } });
   });
-  if (st.rubble) for (const r of st.rubble) if (B.t >= r.t0) list.push({ y: r.y - 40, d: () => { ctx.save(); ctx.globalAlpha = Math.min(1, (B.t - r.t0) / .3); plDraw('rubble', r.v, r.x, r.y + 4, r.sc, 0); ctx.restore(); } });   // こわれた あとの がれき
+  if (st.rubble) { st.rubble = st.rubble.filter(r => B.t < r.t0 + RUBBLE_T); for (const r of st.rubble) if (B.t >= r.t0) list.push({ y: r.y - 40, d: () => { const u = B.t - r.t0; ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, u / .2, (RUBBLE_T - u) / .4)); plDraw('rubble', r.v, r.x, r.y + 4, r.sc, 0); ctx.restore(); } }); }   // こわれた あとの がれき：すぐ きえる
   for (const f of fs_) {   // うかんで いる こは、かさなった おきものより てまえに かく（うえを とんで いる）
     let y = f.y; if (hovers(f) && st.layered) st.props.forEach((p, pi) => { if (!(st.propGone && st.propGone[pi]) && over(body(f), p)) y = Math.max(y, p.y - 3); });
     list.push({ y, d: () => drawFighter(f) }); }
@@ -10557,7 +10558,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 document.documentElement.classList.add('booted');
 })();
