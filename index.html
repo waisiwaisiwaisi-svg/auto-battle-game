@@ -5716,7 +5716,7 @@ function hit(att, def, m, ang, opt) {
   const e = m.e || {};
   if (def.hp > 0 && big) {
     if (e.st && Math.random() * 100 < e.stCh) setStatus(def, e.st, att);
-    if (e.flinch && !lagHit && Math.random() * 100 < e.flinch) { def.state = 'stun'; def.stT = Math.max(def.stT, .7); popText(def.x, def.y - 80, 'ひるんだ！', '#ffffff'); }
+    if (e.flinch && !lagHit && Math.random() * 100 < e.flinch) { def.state = 'stun'; def.stT = Math.max(def.stT, .7); def.flinchTo = Math.max(def.flinchTo || 0, B.t + def.stT); popText(def.x, def.y - 80, 'ひるんだ！', '#ffffff'); }
     if (e.foe && Math.random() * 100 < e.foeCh) changeStages(def, e.foe);
     if (m.healBlock) { def.v.healBlock = 6; }
     if (m.confuseIfBoosted && STAGE_KEYS.some(k => def.st[k] > 0)) { def.v.confuse = 3; say(`${def.sp.n}は こんらんした！`); }
@@ -5997,7 +5997,7 @@ const CONDS = {
   myhp:  { n: '自分のHP', ps: CHIP_PCT.map(([v, n]) => [v, n + '未満']) },
   ophp:  { n: '相手のHP', ps: CHIP_PCT.map(([v, n]) => [v, n + '未満']) },
   aff:   { n: 'タイプ相性', ps: [['adv', '有利'], ['even', '互角'], ['dis', '不利']] },   // 自分のタイプ と 相手のタイプ を くらべる
-  opsts: { n: '相手の状態異常', ps: [['any', 'どれか'], ['none', 'なし（ふつう）'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['slp', '睡眠'], ['frz', '凍結']] },
+  opsts: { n: '相手の状態異常', ps: [['any', 'どれか'], ['none', 'なし（ふつう）'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['slp', '睡眠'], ['frz', '凍結'], ['flinch', 'ひるみ']] },
   foe:   { n: '相手が溜め中' },
   see:   { n: '相手が見える' },   // そのまま 当てられる 技が ある
   nosee: { n: '相手が見えない' },   // 障害物・技の かべに さえぎられて、そのままでは 当てられる 技が ない
@@ -6021,7 +6021,8 @@ function condOk(f, o, c, id0) {
     case 'myhp': return hpk(f) < (c.p || 50);
     case 'ophp': return hpk(o) < (c.p || 50);
     case 'aff': return typeAff(f.sp, o.sp) === c.p;
-    case 'opsts': return c.p === 'none' ? !o.status : !!o.status && (c.p === 'any' || o.status === c.p || (c.p === 'psn' && o.status === 'tox'));
+    case 'opsts': if (c.p === 'flinch') return o.state === 'stun' && (o.flinchTo || 0) > B.t;   // ひるみ：ひるんで 動けない あいだ
+      return c.p === 'none' ? !o.status : !!o.status && (c.p === 'any' || o.status === c.p || (c.p === 'psn' && o.status === 'tox'));
     case 'foe': return !!(threatState(o) && o.cur && isDamaging(o.cur.m));
     case 'see': return canReach(f, o);
     case 'nosee': return !canReach(f, o);
@@ -6790,7 +6791,7 @@ function updateFighter(f, dt) {
   f.x += f.kx * dt; f.y += f.ky * dt; f.kx *= Math.pow(.002, dt); f.ky *= Math.pow(.002, dt);
   const ex = f.x, ey = f.y; clampF(f);
   if (f.slapT > 0) { f.slapT -= dt;   // ひっぱたき：かべに たたきつけられたら 3びょう スタン
-    if (Math.hypot(f.x - ex, f.y - ey) > 1.5 && Math.hypot(f.kx, f.ky) > 120 && f.hp > 0 && targetable(f)) { f.slapT = 0; f.kx = f.ky = 0; f.state = 'stun'; f.stT = 3; f.cur = null; f.queued = null; f.dizzy = 3; B.shake = Math.max(B.shake, 8); addDecal(f.x, f.y, 16, 'crater'); sheetFx('slam', f.x, f.y - BODY, 1.1); SND.se('hit', .7); popText(f.x, f.y - 96, 'げきとつ！', '#ff9a8a', 'comic'); say(`${f.sp.n}は かべに たたきつけられた！`); } }
+    if (Math.hypot(f.x - ex, f.y - ey) > 1.5 && Math.hypot(f.kx, f.ky) > 120 && f.hp > 0 && targetable(f)) { f.slapT = 0; f.kx = f.ky = 0; f.state = 'stun'; f.stT = 3; f.flinchTo = B.t + 3; f.cur = null; f.queued = null; f.dizzy = 3; B.shake = Math.max(B.shake, 8); addDecal(f.x, f.y, 16, 'crater'); sheetFx('slam', f.x, f.y - BODY, 1.1); SND.se('hit', .7); popText(f.x, f.y - 96, 'げきとつ！ ひるんだ！', '#ff9a8a', 'comic'); say(`${f.sp.n}は かべに たたきつけられて ひるんだ！`); } }
 }
 
 /* ---------- 捕獲 ---------- */
@@ -7921,7 +7922,7 @@ function moveDesc(m) {
   if (m.k === 'hazard') add({ rocks: '相手の場に岩を浮かべる。交代で出てきた相手にダメージ', spikes: '相手の場にまきびしをまく（3回まで重なる）。交代で出てきた相手にダメージ（飛んでいる相手には効かない）', tspikes: '相手の場に毒のトゲをまく。交代で出てきた相手をどくにする' }[m.hz]);
   if (m.sp) add({ taunt: '6秒間、相手は変化技が使えない', encore: '5秒間、相手に同じ技を繰り返させる', yawn: 'しばらくして相手を眠らせる', trick: '相手の能力アップを奪う', roar: '相手を無理やり控えと交代させる（野生は逃げる）' }[m.sp]);
   if (m.guardDash) add('ガードしながらゆっくり進む'); if (m.grab) add('投げ技：つかんで5連打（まもる・カウンターでは防げない）');
-  if (m.slap) add('横に吹き飛ばす。壁にぶつかると3秒動けない'); if (m.bigKb) add('当たった相手を遠くへ吹き飛ばす'); if (m.noKb) add('相手を吹き飛ばさない');
+  if (m.slap) add('横に吹き飛ばす。壁にぶつかるとひるむ（3秒）'); if (m.bigKb) add('当たった相手を遠くへ吹き飛ばす'); if (m.noKb) add('相手を吹き飛ばさない');
   if (m.back) add('当てたら元の場所へ戻る'); if (m.pat === 'orbit') add('相手の周りを回って渦を作る（流される）'); if (m.trail) add('通った道が3秒燃える');
   if (m.chain) add('当たるともう一度突進。その後も当たるたびに50%で続く'); if (m.charge2) add('1回目は力をためる。2回目で細いビームを放つ');
   if (m.multiHit) add(`跳ね返りながら${m.life}秒残る`); if (m.blastR) add('広い範囲に落ちる'); if (m.whip) add('右・左と2回振る');
@@ -7966,7 +7967,8 @@ const KW = {
   '凍結': ['凍結（状態異常）', '3秒 動けない。ほのおの 技を うけると すぐ とける。かくとうの 技でも とけるが、その技の ダメージは 1.5倍。こおりタイプは ならない。'],
   '睡眠': ['睡眠（状態異常）', '5秒 動けない。'],
   '眠': ['睡眠（状態異常）', '5秒 動けない。'],
-  'ひるませる': ['ひるみ', '0.7秒 動けなくなる。'],
+  'ひるませる': ['ひるみ', 'しばらく 動けなくなる（ふつうは 0.7秒。ひっぱたきで 壁に ぶつかると 3秒）。'],
+  'ひるむ': ['ひるみ', 'しばらく 動けなくなる（ふつうは 0.7秒。ひっぱたきで 壁に ぶつかると 3秒）。'],
   '混乱': ['こんらん', 'しばらくの あいだ、技を 出そうと すると ときどき ころんだり、かってに よけたり する（指示と ちがう 動き）。'],
   '急所': ['急所', 'ダメージが 1.5倍。'],
   '効果ばつぐん': ['効果ばつぐん', 'タイプの 相性が よく、ダメージが 2倍（2つの タイプ どちらにも ばつぐんなら 4倍）。'],
@@ -7987,7 +7989,7 @@ const KW_C = {   // 訓練の 条件
   myhp: ['条件：自分のHP', '自分の HPが えらんだ 割合より 少ない とき。'],
   ophp: ['条件：相手のHP', '相手の HPが えらんだ 割合より 少ない とき。'],
   aff: ['条件：タイプ相性', '自分の タイプと 相手の タイプを くらべて、有利・互角・不利 の どれか。'],
-  opsts: ['条件：相手の状態異常', '相手の 状態異常（やけど・まひ・どく・凍結・睡眠）。「どれか」「なし（ふつうの 状態）」または 1つを えらぶ。'],
+  opsts: ['条件：相手の状態異常', '相手の 状態異常（やけど・まひ・どく・凍結・睡眠）。「どれか」「なし（ふつうの 状態）」または 1つを えらぶ。「ひるみ」は ひるんで 動けない あいだ。'],
   foe: ['条件：相手が溜め中', '相手が 攻撃技を 出す 直前の ため（溜め）を して いる とき。'],
   see: ['条件：相手が見える', 'そのまま 当てられる 技が ある とき（障害物・技の かべに さえぎられて いない か、かべごしに とどく 技を もって いる）。'],
   nosee: ['条件：相手が見えない', '障害物・技の かべに さえぎられて、そのままでは 当てられる 技が ない とき（回り込む・かべを こわす 技を 撃つ ときに）。'],
