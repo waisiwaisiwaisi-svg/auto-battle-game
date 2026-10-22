@@ -1252,6 +1252,15 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
 #kwTip b{display:block;color:#ffd84a;margin-bottom:2px;font-size:13px}
 .trflt{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px}.trflt select,.trflt input{font:inherit;font-size:11px;padding:3px 4px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);min-width:0}.trflt input{flex:1 1 90px}
 .trmvs[data-none="1"]::after{content:'あてはまる 技が ない';font-size:11px;color:var(--dim)}
+
+/* 木人戦の まど */
+#dumHud{position:absolute;left:8px;top:calc(96px + var(--sat, 0px));z-index:30;width:min(300px,46%);max-height:70%;overflow:auto;background:rgba(14,11,34,.86);border:2px solid #ffd84a;font-size:11px;line-height:1.45;padding:6px 8px;color:#f3eefc;pointer-events:auto}
+#dumHud .dh{display:flex;gap:4px;align-items:center;margin-bottom:4px}#dumHud .dh b{color:#ffd84a;flex:1;white-space:nowrap}#dumHud.mini{width:auto;max-width:min(300px,70%)}#dumHud.mini .dlog{margin-top:0;border-top:0;padding-top:0}#dumHud .dh button{font:inherit;font-size:11px;padding:2px 8px;color:#f3eefc;background:#2a2450;border:1px solid #6a6488}
+#dumHud .dst{margin-bottom:4px;color:#cfc8ea}#dumHud .dst .ok{color:#5ee08a}#dumHud .dst .ng{color:#ff8a9a}
+#dumHud .dr{padding:3px 4px;margin:2px 0;border-left:3px solid #4a4466;background:rgba(255,255,255,.03)}#dumHud .dr.q{border-left-color:#6ab0ff}#dumHud .dr.fire{border-left-color:#ffd84a;background:rgba(255,216,74,.18)}
+#dumHud .dr i{font-style:normal;float:right;font-size:10px}#dumHud .dcd{color:#a9a3c8}#dumHud .dok{color:#5ee08a}
+#dumHud .dc{display:inline-block;margin:1px 2px 0 0;padding:0 4px;border:1px solid #6a4a5a;color:#d8b0b8}#dumHud .dc.on{border-color:#5ee08a;color:#9ff0c0;background:rgba(94,224,138,.15)}#dumHud .dc.any{border-color:#4a4466;color:#a9a3c8}#dumHud em{font-style:normal;color:#a9a3c8;margin:0 2px}
+#dumHud .dlog{margin-top:4px;border-top:1px solid #3a3460;padding-top:3px;color:#cfc8ea}#dumHud .dlog .on{color:#5ee08a}
 </style>
 </head>
 <body>
@@ -1582,7 +1591,7 @@ const MOVES100 = {
 /* ---- ここまで自動生成 ---- */
 // こうげき側 → ぼうぎょ側 の倍率（書いていない組み合わせは ×1）。2タイプなら掛け算
 const effOf = (mt, dt) => { const v = CHART[mt] && CHART[mt][dt]; return v === undefined ? 1 : v; };
-const effVs = (mt, sp) => effOf(mt, sp.type) * (sp.type2 ? effOf(mt, sp.type2) : 1);
+const effVs = (mt, sp) => sp.dummy ? 1 : effOf(mt, sp.type) * (sp.type2 ? effOf(mt, sp.type2) : 1);   // 身代わり人形は どの タイプも ふつう
 
 /* k: melee=近接 / proj=弾 / beam=直線 / aoe=自分の周囲 / strike=相手の足元 / dash=突進
    ここはオリジナルのわざ（命中100あつかい）。ランキング上位100のわざは MOVES100（自動生成）。 */
@@ -3886,7 +3895,7 @@ function renderTrain(uid) {
   const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
   const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
-    <div class="trbtns"><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
+    <div class="trbtns"><button class="btn sub trsim" data-a="dummy">🎯 木人戦</button><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
     <div class="trbtns2"><button data-a="draft">仮保存</button><button data-a="load">他からコピー</button><button data-a="revert">保存時に戻す</button><button data-a="clr">リセット</button></div>
     <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${!S.train ? '使わない（訓練モードがOFF）' : T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
@@ -3986,6 +3995,7 @@ function renderTrain(uid) {
   act('cdel', () => { W.mv[+sel[0]].c[+sel[1]].splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
   act('sim', async () => { if (TR_SIM) return; if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok');
     const bg = modal('<h3>模擬戦ちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'); const log = await trSim(m, W, 5); bg.remove(); if (log) trSimShow(m, W, log); });
+  act('dummy', () => { if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok'); dummyStart(m, W); });
   act('draft', () => { trDraft(); SND.se('ok'); say0('仮保存しました（試合ではまだ使いません）').then(() => { redo(); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.dr`)); }); });
   act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; if (TRN) TRN.dirty = false; save(); SND.se('ok'); redo(); MO.stamp($('trBody').querySelector('.trstat')); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.ok`)); }));
   act('revert', () => { TRN.W = trClone(T.draft || T.prog, m); TRN.dirty = false; TRN.sel = null; redo(); });
@@ -4560,7 +4570,7 @@ function startBattle(cfg) {
   const ef = cfg.enemies.map(m => mkFighter(m, 1));
   if (!cfg.sim) for (const m of cfg.enemies) dexMark(m.sid, 1);
   B = {
-    kind: cfg.kind, st, cfg, t: 0, mode: 'intro', modeT: 0, paused: false, uidc: 0, vsT: cfg.kind === 'wild' || cfg.tut || TUT || cfg.title === 'チュートリアル' ? 0 : VS_T,
+    kind: cfg.kind, st, cfg, t: 0, mode: 'intro', modeT: 0, paused: false, uidc: 0, vsT: cfg.kind === 'wild' || cfg.tut || TUT || cfg.title === 'チュートリアル' || cfg.dummy ? 0 : VS_T,
     sides: [
       { fs: pf, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: { name: myName(), spr: trArt(myLook()), x: st.trainers[0].x, y: st.trainers[0].y, shout: 0 } },
       { fs: ef, act: 0, hz: { rocks: 0, spikes: 0, tspikes: 0 }, tail: 0, swapCd: 0, trainer: cfg.trainer ? { name: cfg.trainer.name, spr: cfg.trainer.spr, x: st.trainers[1].x, y: st.trainers[1].y, shout: 0 } : null },
@@ -4571,7 +4581,7 @@ function startBattle(cfg) {
   // AI の かしこさ：お任せAIは ほどほど（いりょく・相性で だいたいの あたりを つけて くじびき）。かしこく たたかわせたい ときは 訓練で きめる
   B.smart = [false, false]; B.smartDodge = false;
   // くんれんモード：みかたは くんれん どおりに うごく（しあい中の しじは なし）。オンライン・チュートリアルでは つかわない
-  B.train = !!S.train && cfg.kind !== 'online' && !cfg.tut && !TUT && !cfg.headless;
+  B.train = (!!S.train || !!cfg.dummy) && cfg.kind !== 'online' && !cfg.tut && !TUT && !cfg.headless;
   if (cfg.sim) { B.train = true; B.headless = true; B.autoChoose = true; B.vsT = 0; return; }   // 模擬戦：がめんは そのまま、うらで うごかす
   $('scBattle').classList.toggle('watch', B.train);
   if (cfg.hpCarry) {   // アーケード：まえの たたかいの HP を ひきつぐ
@@ -4902,6 +4912,7 @@ function beginMove(f, id) {
   if (B.log) B.log.push(id); if (B.logS) B.logS.push([f.side, id]);
   if (m.k !== 'melee' || id !== 'tackle') {
     say(`${prefix(f)}${f.sp.n}の ${m.n}！`);
+    if (B.cfg.dummy) dummyLog(f, id);
     if (f.trTag === id) { f.trTag = null; if (!B.headless) popText(f.x, f.y - 104, '条件', '#7be0a8'); }   // 訓練の 条件で えらんだ 技
     if (B.sides[f.side].trainer) cmdPose(f.side);
   }
@@ -5765,6 +5776,7 @@ function impactBeat(x, y, k, slowT) {
   if (slowT) { B.slowT = Math.max(B.slowT || 0, slowT); B.slowK = .3; }
 }
 function faint(f, by) {
+  if (B.cfg.dummy) { f.hp = f.maxHp; f.status = ''; f.v.curse = 0; burst(f.x, f.y - 20, '#e8d8a8', 16, 120, .5); popText(f.x, f.y - 100, f.dummy ? '人形が もとに もどった' : 'HPが もどった', '#ffd84a'); return; }   // 木人戦：たおれない
   B.cheerT = 3;
   if (f.state === 'faint' || f.fainted) return;
   f.state = 'faint'; f.stT = 1.2; f.cur = null; f.queued = null; SND.se('ko');
@@ -6107,6 +6119,7 @@ const AI_RANDOM = .25, AI_FLAT = .35;   // お任せAIの あたまの よさ（
 const aiWait = (f) => { const atkReady = f.moves.some(id => isDamaging(MOVES[id]) && !(f.cd[id] > 0) && !moveBlocked(f, id)); return (atkReady ? rand(.5, 1.1) : rand(.7, 1.3)) * persona(f).react; };
 const aiBan = (f, id) => !!(f.trBan && f.trBan.length && trProg(f) && f.trBan.includes(id));
 function aiPickMove(f, o) {
+  if (f.dummy) return null;   // 身代わり人形は 技を 出さない
   if (!f.moves.some(id => MOVES[id] && isDamaging(MOVES[id]) && !moveBlocked(f, id))) return (f.cd.tackle || 0) > 0 ? null : 'tackle';   // こうげきわざを つかいきった：たいあたりで ねばる
   if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
     let best = null, bv = 0;
@@ -7544,6 +7557,7 @@ function bStep(dt) {
   if (B && B.decals && B.decals.length && B.t - B.decals[0].t0 > DECAL_LIFE) B.decals = B.decals.filter(d => B.t - d.t0 < DECAL_LIFE);
   if (B && B.remote) { netGuestStep(dt); bVisual(dt); return; }
   if (TUT) tutTick(dt);
+  if (B && B.cfg.dummy) dummyTick(dt);
   if (B && B.slowT > 0) { B.slowT -= dt; dt *= B.slowK || .3; }   // スロー
   if (!B || B.paused) { if (B && B.net === 'host') netHostTick(dt); return; }
   if (sayTimer > 0) sayTimer -= dt;
@@ -7572,7 +7586,7 @@ function bStep(dt) {
     else if (f.fainted && f.state === 'bench') afterFaint(f);
   }
   // せいげんじかん：MATCH_T びょう たったら タイムアップ。のこり HP（チーム ぜんたいの わりあい）が おおい ほうの かち
-  if (B.mode === 'fight' && !B.remote && !TUT && !B.cfg.tutorial) {
+  if (B.mode === 'fight' && !B.remote && !TUT && !B.cfg.tutorial && !B.cfg.dummy) {
     B.fightT = (B.fightT || 0) + dt;
     if (B.fightT >= MATCH_T && !B.timeUp) { B.timeUp = true;
       const sc = (sd) => sd.fs.reduce((t, x) => t + (x.fainted ? 0 : Math.max(0, x.hp) / x.maxHp), 0), s0 = sc(B.sides[0]), s1 = sc(B.sides[1]);
@@ -7697,6 +7711,7 @@ function learnLines(m, before) {
 function endBattle(res) {
   if (B.mode === 'end') return;
   if (B.cfg.sim) { B.mode = 'end'; B.result = res; return; }   // 模擬戦：ごほうび・きろくは なし
+  if (B.cfg.dummy) { setTimeout(dummyQuit, 0); B.mode = 'end'; B.result = res; return; }   // 木人戦：そのまま 訓練へ
   SND.play(res === 'win' || res === 'caught' ? 'win' : res === 'lose' ? 'lose' : '');
   B.mode = 'end'; B.result = res; B.endT = res === 'caught' ? 1.6 : 1.4;
   if (res === 'win' && B.kind !== 'wild' && !B.cfg.tutorial) guildWin(B.kind === 'online' ? 3 : 1);   // ギルドに ポイント
@@ -8016,6 +8031,66 @@ function kwInfo(k) {
   const tap = (e) => { const k = e.target.closest && e.target.closest('.kw'); if (k) { e.preventDefault(); e.stopPropagation(); if (e.type === 'click') { if (at === k && e.pointerType !== 'mouse') hide(); else show(k); } } else if (e.type === 'pointerdown' && at && !(tip && tip.contains(e.target))) hide(); };
   ['pointerdown', 'click'].forEach(t => document.addEventListener(t, tap, true));
   addEventListener('scroll', hide, true); }
+
+/* ---------- 木人戦：いまの 訓練（ほぞん まえでも）で 身代わり人形と たたかい、条件の はんいと はつどうを 見る ---------- */
+let DUM = null;   // { uid, keep: TRN, rows: 訓練の 行, log: [], stop, hudT }
+function dummyStart(m, W) {
+  const sm = Object.assign({}, m, { moves: trMvIds(W).slice(0, 4), tr: Object.assign({}, m.tr, { mode: 'chip', prog: trClone(W, m) }) });
+  const dm = Object.assign(foeMon(m.sid, .3, -777), { uid: -777 });
+  DUM = { uid: m.uid, keep: TRN, prog: sm.tr.prog, log: [], stop: false, hudT: 0 };
+  startBattle({ kind: 'cup', field: choice(FIELDS), p0: [sm], enemies: [dm], title: '木人戦', dummy: true });
+  const d = B.sides[1].fs[0]; d.dummy = true; d.moves = []; d.sp = Object.assign({}, d.sp, { n: '身代わり人形', type: 'normal', type2: null, dummy: true });
+  dummyHud(true);
+}
+function dummyQuit() {
+  const D = DUM; if (!D) return; B = null; DUM = null; dummyHud(false);
+  TRN = D.keep; renderTrain(D.uid);   // 訓練の 画面へ（ほぞん まえの 設定も そのまま）
+}
+// 毎フレーム：人形を とめる・HPが なくなったら もどす・まどの 中身を かきかえる
+function dummyTick(dt) {
+  if (!DUM || !B || !B.cfg.dummy) return;
+  const d = active(1); if (d && DUM.stop) { if (DUM.px == null) { DUM.px = d.x; DUM.py = d.y; } d.x = DUM.px; d.y = DUM.py; d.vx = d.vy = 0; } else DUM.px = null;
+  DUM.hudT -= dt; if (DUM.hudT <= 0) { DUM.hudT = .2; dummyHudUpd(); }
+}
+function dummyLog(f, id) {   // 技を 撃った：条件で えらんだ ものは その 条件も
+  if (!DUM || f.side !== 0) return; const P = DUM.prog, ri = P.mv.findIndex(r => r.id === id), r = P.mv[ri];
+  const by = f.trTag === id && r && f.trLine >= 0 ? trLines(r.c)[f.trLine] : null;
+  DUM.log.unshift({ t: B.t, id, by: by ? by.map(c => trCondTx(c, P)).join('かつ') : '', auto: !!AUTO_GUARD[MOVES[id] && MOVES[id].k] }); DUM.log.length = Math.min(DUM.log.length, 5);
+  if (by) popText(f.x, f.y - 120, '条件：' + by.map(c => trCondTx(c, P)).join('かつ'), '#7be0a8');
+  DUM.flash = { id, t: B.t };
+}
+function dummyHud(on) {
+  let h = $('dumHud'); if (!on) { if (h) h.remove(); return; }
+  if (!h) { h = document.createElement('div'); h.id = 'dumHud'; $('scBattle').appendChild(h); }
+  h.innerHTML = `<div class="dh"><b>木人戦</b><button data-d="min">たたむ</button><button data-d="stop">人形：うごく</button><button data-d="quit">おわる</button></div><div class="dbody"></div>`;
+  h.classList.toggle('mini', innerWidth < 600);   // たて画面は たたんで はじめる（モンスターが かくれない）
+  h.querySelector('[data-d="min"]').onclick = (e) => { h.classList.toggle('mini'); SND.se('click'); dummyHudUpd(); };
+  h.querySelector('[data-d="stop"]').onclick = (e) => { DUM.stop = !DUM.stop; e.target.textContent = DUM.stop ? '人形：とまる' : '人形：うごく'; SND.se('click'); };
+  h.querySelector('[data-d="quit"]').onclick = () => { SND.se('back'); dummyQuit(); };
+}
+function dummyHudUpd() {
+  const h = $('dumHud'), f = active(0), o = active(1); if (!h || !f || !o) return; const P = DUM.prog;
+  const rows = P.mv.map((r, i) => { const M = MOVES[r.id]; if (!M) return ''; const cd = f.cd[r.id] > 0 ? `<i class="dcd">${f.cd[r.id].toFixed(1)}s</i>` : '<i class="dok">OK</i>', ls = trLines(r.c).filter(l => l.length);
+      const fl = DUM.flash && DUM.flash.id === r.id && B.t - DUM.flash.t < .8 ? ' fire' : '', q = f.queued === r.id ? ' q' : '';
+      const cs = AUTO_GUARD[M.k] ? '<span class="dc">自動</span>' : ls.length ? ls.map((l, li) => (li ? '<em>または</em>' : '') + l.map(c => { const ok = condOk(f, o, c, r.id); return `<span class="dc ${ok ? 'on' : ''}">${ok ? '○' : '×'} ${trCondTx(c, P)}</span>`; }).join('<em>かつ</em>')).join('') : '<span class="dc any">いつでも（お任せ）</span>';
+      return `<div class="dr${fl}${q}"><b>${i + 1} ${M.n}</b>${cd}<div>${cs}</div></div>`; }).join('');
+  const lg = DUM.log.map(x => `<div>${x.by ? `<span class="on">条件</span> ${x.by} → ` : x.auto ? '自動 → ' : 'お任せ → '}<b>${MOVES[x.id].n}</b></div>`).join('');
+  h.querySelector('[data-d="min"]').textContent = h.classList.contains('mini') ? 'ひらく' : 'たたむ';
+  h.querySelector('.dbody').innerHTML = h.classList.contains('mini') ? `<div class="dlog">${DUM.log.slice(0, 2).map(x => `<div>${x.by ? `<span class="on">条件</span> ${x.by} → ` : x.auto ? '自動 → ' : 'お任せ → '}<b>${MOVES[x.id].n}</b></div>`).join('') || '<span class="dim">まだ 撃って いない</span>'}</div>` : `<div class="dst">距離 <b>${Math.round(dist(f, o))}</b>（${dist(f, o) < 150 ? '近い' : dist(f, o) < 290 ? '普通' : '遠い'}）・相手が <b class="${canReach(f, o) ? 'ok' : 'ng'}">${canReach(f, o) ? '見える' : '見えない'}</b>・人形HP ${Math.round(o.hp / o.maxHp * 100)}%</div>${rows}<div class="dlog">${lg || '<span class="dim">まだ 撃って いない</span>'}</div>`;
+}
+// フィールドに：距離の わ（150・290）と 相手への 見とおし線
+function drawDummyViz(f, o) {
+  if (!f || !o) return; const d = dist(f, o), zone = d < 150 ? 0 : d < 290 ? 1 : 2, see = canReach(f, o);
+  ctx.save(); ctx.lineWidth = 2;
+  [[290, '255,216,74', '普通 〜290', 1], [150, '94,224,138', '近い 〜150', 0]].forEach(([r, c, lb, z]) => { ctx.fillStyle = `rgba(${c},${zone === z ? .14 : .05})`; ctx.strokeStyle = `rgba(${c},${zone === z ? .95 : .45})`; ctx.setLineDash([8, 6]);
+    ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, 7); ctx.fill(); ctx.stroke(); ctx.setLineDash([]); ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = `rgba(${c},.95)`; ctx.textAlign = 'center'; ctx.fillText(lb, f.x, f.y - r - 6); });
+  const L = Math.hypot(o.x - f.x, o.y - f.y), a = Math.atan2(o.y - f.y, o.x - f.x), hitL = Math.min(L, rayLen(f, a, L));
+  ctx.strokeStyle = see ? 'rgba(94,224,138,.9)' : 'rgba(255,106,122,.95)'; ctx.lineWidth = 3; ctx.setLineDash(see ? [] : [10, 6]);
+  ctx.beginPath(); ctx.moveTo(f.x, f.y - 20); ctx.lineTo(f.x + Math.cos(a) * hitL, f.y - 20 + Math.sin(a) * hitL); ctx.stroke(); ctx.setLineDash([]);
+  if (hitL < L - 2) { const x = f.x + Math.cos(a) * hitL, y = f.y - 20 + Math.sin(a) * hitL; ctx.fillStyle = see ? 'rgba(94,224,138,.95)' : '#ff6a7a'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('✕', x, y + 6); }
+  ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = see ? '#5ee08a' : '#ff8a9a'; ctx.fillText(see ? '見える' : '見えない', (f.x + o.x) / 2, (f.y + o.y) / 2 - 30);
+  ctx.restore();
+}
 // 1戦で 使える 回数：「のこり/最大」（使い放題は ∞）
 const isBigMove = (m) => m.cat !== 'stat' && (m.ohko || movePower(m) >= 100);
 function mvUses(m, left) { const mx = healMax(m); return mx ? `${left == null ? mx : Math.max(0, left)}/${mx}` : '∞'; }
@@ -8242,7 +8317,7 @@ function updPlate(id, side) {
 }
 function updHUD() {
   if (!B) return;
-  { const el = $('bTimer'), on = !TUT && !B.cfg.tutorial && !B.remote; if (el) { const sec = Math.ceil(Math.max(0, MATCH_T - (B.fightT || 0))); setText(el, on ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : ''); el.classList.toggle('hurry', on && sec <= 30); } }   // のこり じかん（オンラインの ゲストは ださない）
+  { const el = $('bTimer'), on = !TUT && !B.cfg.tutorial && !B.remote && !B.cfg.dummy; if (el) { const sec = Math.ceil(Math.max(0, MATCH_T - (B.fightT || 0))); setText(el, on ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : ''); el.classList.toggle('hurry', on && sec <= 30); } }   // のこり じかん（オンラインの ゲストは ださない）
   const my = B.my || 0;
   updPlate('plP', my); updPlate('plE', 1 - my);
   const f = active(my); if (!f) return;
@@ -9261,6 +9336,7 @@ function drawBoned(img, f, x, y, face, scale, alpha, sx, sy, fly) {
 const boneTop = {};
 function topRow(img) { try { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); const d = g.getImageData(0, 0, img.width, img.height).data; for (let y = 0; y < img.height; y++) for (let x = 0; x < img.width; x++) if (d[(y * img.width + x) * 4 + 3] > 0) return y; } catch (e) { } return 0; }
 function drawFighter(f) {
+  if (f && f.dummy) { if (f.state !== 'bench') drawDoll(f.x, f.y, f.hp / f.maxHp < .35 ? 1 : 2); return; }   // 木人戦の 身代わり人形
   if (f && f.clones && !f.isClone) for (const c of f.clones) { if (c.doll) { drawDoll(c.x, c.y, c.hp); continue; } const g = Object.create(f); g.isClone = true; g.x = c.x; g.y = c.y; g.clones = null; drawFighter(g); }   // ぶんしん（ほんものと おなじ みため）
   if (!f || f.state === 'bench' || f.state === 'capt') return;
   if (f.state === 'tunnel') { burrowPt(f); drawMound(f.x, f.y, bodySz(f.sp), f.uid || 0); return; }   // 穴の 中：もりあがった つちが すすむ
@@ -9514,6 +9590,7 @@ function render() {
     }
   });
 
+  if (B.cfg.dummy) drawDummyViz(a, e);
   for (const fx of B.fx) if (fx.type === 'ghost' && fx.sid) drawSprite(SPR[fx.sid].fr.walk1.w, fx.x, fx.y + 3, fx.face, SPR[fx.sid].ms, .3 * fx.life / fx.max);
 
   // 奥→手前の順
