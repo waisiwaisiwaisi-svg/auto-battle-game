@@ -4828,6 +4828,7 @@ function inZone(cur, owner, x, y, r) {
   if (m.k === 'aoe' && m.pat === 'donut') { const d = Math.hypot(x - owner.x, y - owner.y); return d <= m.rad + r && d >= m.rad * .45 - r; }
   if (m.k === 'aoe' && m.pat === 'front') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, 1.1, r);
   if (m.k === 'vault') return Math.hypot(x - cur.tx, y - cur.ty) <= vaultRad(owner, m) + r * .5;
+  if (m.k === 'melee') return Math.hypot(x - owner.x, y - owner.y) < MELEE_R;   // 近接：ふみこんで とどく きょり
   if (m.k === 'multi') return cur.pts.some(p => Math.hypot(x - p.x, y - p.y) <= m.rad + r);
   if (m.k === 'aoe') return Math.hypot(x - owner.x, y - owner.y) <= m.rad + r;   // pulse など：まずは ふつうの まる
   if (m.k === 'cone') return inSector(x, y, owner.x, owner.y, cur.ang, m.rad, m.half, r);
@@ -5924,7 +5925,7 @@ function autoDodgeP(f) {
 function aiDodgeCheck(f, o) {
   const skill = autoDodgeP(f);   // かわす かくりつは みかたも あいても かいひ しだい（あいての つよさ・かしこさ では かえない）
   if (skill <= 0 || f.dodgeCd > 0 || !['free', 'act'].includes(f.state) || !canAct(f)) return;
-  if (o && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && isDamaging(o.cur.m)) {
+  if (o && threatState(o) && o.cur && (ZONE_KINDS.includes(o.cur.m.k) || o.cur.m.k === 'melee') && isDamaging(o.cur.m)) {   // 近接わざも おなじ かくりつで ステップで よける
     if (f.planFor !== o.cur.uid) {
       f.planFor = o.cur.uid;
       // ガード系の わざを もっていれば たまに それで うける
@@ -8487,7 +8488,7 @@ function zigPath(f, ang, L, w) {
 }
 function drawTele(f) {
   const cur = f.cur, m = cur.m;
-  if (m.k === 'melee' && cur.id === 'tackle') return;
+  if (m.k === 'melee') return;   // 近接わざの はんいは 見せない
   const prog = clamp(cur.t / cur.wind, 0, 1);
   if (m.charge2 && !f.v.charged) { ctx.save(); ctx.strokeStyle = `rgba(184,160,255,${.4 + prog * .5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(f.x, f.y, 26 + prog * 14, 12 + prog * 6, 0, 0, 7); ctx.stroke(); ctx.restore(); return; }
   const enemy = f.side === 1;
@@ -8507,7 +8508,6 @@ function drawTele(f) {
     else if (m.k === 'strike') ctx.arc(cur.tx, cur.ty, m.rad * k, 0, Math.PI * 2);
     else if (m.k === 'multi') for (const p of cur.pts) { ctx.moveTo(p.x + m.rad * k, p.y); ctx.arc(p.x, p.y, m.rad * k, 0, Math.PI * 2); }
     else if (m.k === 'cone') sector(f.x, f.y, cur.ang, m.rad, m.half, k);
-    else if (m.k === 'melee') circ(f.x, f.y, MELEE_R * k, 0);   // 近接：この わの なかなら ふみこんで あたる
     else if (m.k === 'swipe') sector(f.x, f.y, cur.ang, (m.rad || 40) + f.r, m.half || .95, k);
     else if (m.k === 'dash' && m.pat === 'zigzag') zigPath(f, cur.ang, m.len * k, f.r * 2 + 8);
     else if (m.k === 'beam' || m.k === 'dash') {
