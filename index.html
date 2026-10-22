@@ -6131,6 +6131,7 @@ function runRules(f, o) {
 // いま つかっても いみが ない 技（ゴーストシフト中の かけなおし・ゴーストシフト中の あいてに ノーマル／かくとう・まったく きかない タイプ）
 function moveUseless(f, o, id) { const m = MOVES[id]; if (!m || !o) return false;
   if (m.k === 'gshift' && gshiftOn(f)) return true;
+  if (m.k === 'baton' && benchIdx(f.side) < 0) return true;   // うけわたし：ひかえが いない
   { const up = m.e && m.e.self; if (!isDamaging(m) && up && Object.keys(up).some(k => up[k] > 0) && Object.keys(up).every(k => up[k] <= 0 || f.st[k] >= 6)) return true; }   // のうりょくアップ：あがる ものが ぜんぶ さいだい（+6）なら うたない
   if (m.sp === 'roar' && B.kind === 'wild' && f.side === 0) return true;   // くさむらで とおぼえ：つかまえる まえに にがして しまう
   if (isDamaging(m) && GSHIFT_T.includes(m.t) && gshiftOn(o)) return true;
@@ -6159,9 +6160,10 @@ const aiWait = (f) => { const atkReady = f.moves.some(id => isDamaging(MOVES[id]
 const aiBan = (f, id) => !!(f.trBan && f.trBan.length && trProg(f) && f.trBan.includes(id));
 function aiPickMove(f, o) {
   if (f.dummy) return null;   // 身代わり人形は 技を 出さない
-  // 通常攻撃（たいあたり）は もう 撃てる 技が ない ときだけ：こうげき技が ぜんぶ つかえない（つかいきった・きかない・条件まち）うえ、ほかに いま 撃つ ねうちの ある 技も ない
-  const anyAtk = f.moves.some(id => MOVES[id] && isDamaging(MOVES[id]) && !moveBlocked(f, id) && !moveUseless(f, o, id) && !aiBan(f, id));
-  const pk = aiPick0(f, o); if (pk || anyAtk) return pk;
+  // 通常攻撃（たいあたり）は もう 撃てる 技が ない ときだけ：こうげき技が ぜんぶ つかいきった・きかない うえ、ほかに いま 撃つ ねうちの ある 技も ない
+  //   （条件まちの こうげき技が のこって いる ときは 撃たずに 作戦の 間合いで まつ）
+  const atkLeft = f.moves.some(id => MOVES[id] && isDamaging(MOVES[id]) && !moveBlocked(f, id) && !moveUseless(f, o, id));
+  const pk = aiPick0(f, o); if (pk || atkLeft) return pk;
   return (f.cd.tackle || 0) > 0 ? null : 'tackle';
 }
 function aiPick0(f, o) {
