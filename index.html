@@ -1595,11 +1595,13 @@ const MOVES100 = {
 // こうげき側 → ぼうぎょ側 の倍率（書いていない組み合わせは ×1）。2タイプなら掛け算
 const effOf = (mt, dt) => { const v = CHART[mt] && CHART[mt][dt]; return v === undefined ? 1 : v; };
 const effVs = (mt, sp) => sp.dummy ? 1 : effOf(mt, sp.type) * (sp.type2 ? effOf(mt, sp.type2) : 1);   // 身代わり人形は どの タイプも ふつう
+// わざの あいしょう：たいあたり（ghostOk）は ゴーストにも ふつうに あたる
+const effMv = (m, sp) => { const e = effVs(m.t, sp); if (e || !m.ghostOk || sp.dummy) return e; const g = (t) => t === 'ghost' ? 1 : effOf(m.t, t); return g(sp.type) * (sp.type2 ? g(sp.type2) : 1); };
 
 /* k: melee=近接 / proj=弾 / beam=直線 / aoe=自分の周囲 / strike=相手の足元 / dash=突進
    ここはオリジナルのわざ（命中100あつかい）。ランキング上位100のわざは MOVES100（自動生成）。 */
 const MOVES = {
-  tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 10, cd: 2.0, wind: 0.12, lunge: 70 },   // こうかの ある わざが ない ときの つなぎ（連打しすぎない）
+  tackle:  { n: 'たいあたり',     t: 'normal', k: 'melee',  pow: 10, cd: 2.0, wind: 0.12, lunge: 70, ghostOk: 1 },   // こうかの ある わざが ない ときの つなぎ（連打しすぎない）
   ember:   { n: 'ひのたま',       t: 'fire',  k: 'proj',   pow: 13, cd: 2.4, wind: .3,  spd: 190, cnt: 1, r: 5 },
   flame:   { n: 'かえんうず',     t: 'fire',  k: 'aoe',    pow: 24, cd: 7,   wind: .6, rad: 62 },   // ため：.85 → .6（ほかの まわり わざと おなじ）
   blaze:   { n: 'バーンラッシュ', t: 'fire',  k: 'dash',   pow: 22, cd: 5,   wind: .5,  len: 160 },
@@ -5704,6 +5706,7 @@ function hit(att, def, m, ang, opt) {
   }
   if (m.cat === 'stat') return statusHit(att, def, m);
   let eff = m.t === 'normal' ? effOf('normal', def.sp.type) * (def.sp.type2 ? effOf('normal', def.sp.type2) : 1) : effVs(m.t, def.sp);
+  if (!eff && m.ghostOk) eff = effMv(m, def.sp);
   if (m.superVsWater && hasType(def, 'water')) eff = eff / effOf('ice', 'water') * 2;
   if (eff === 0 && desperate(att, def)) { eff = .25; }
   if (eff === 0) { popText(def.x, def.y - 66, 'こうかなし', '#a49ac0'); say(`${def.sp.n}には こうかが ないようだ…`); return false; }
@@ -5955,7 +5958,7 @@ const KIND_P = { melee: .95, swipe: .78, strike: .8, multi: .8, proj: .68, beam:
 // わざ m を f が o に あてた ときの ダメージ（へいきん）
 function estDmg(f, o, m) {
   if (!isDamaging(m) || m.ohko || m.k === 'counter') return 0;
-  let eff = effVs(m.t, o.sp); if (m.superVsWater && hasType(o, 'water')) eff = eff / effOf('ice', 'water') * 2; if (!eff && desperate(f, o)) eff = .25; if (!eff) return 0;
+  let eff = effMv(m, o.sp); if (m.superVsWater && hasType(o, 'water')) eff = eff / effOf('ice', 'water') * 2; if (!eff && desperate(f, o)) eff = .25; if (!eff) return 0;
   const phys = m.cat === 'phys'; let A = phys ? f.atk * stageMul(f.st.atk) : f.spa * stageMul(f.st.spa);
   if (m.useDef) A = f.def * stageMul(f.st.def); if (m.useFoeAtk) A = o.atk * stageMul(o.st.atk); if (phys && f.status === 'brn' && !m.useDef) A *= .5;
   const D = (phys || m.hitDef) ? o.def * stageMul(o.st.def) : o.sdef * stageMul(o.st.spd);
@@ -6159,7 +6162,7 @@ function moveUseless(f, o, id) { const m = MOVES[id]; if (!m || !o) return false
   { const up = m.e && m.e.self; if (!isDamaging(m) && up && Object.keys(up).some(k => up[k] > 0) && Object.keys(up).every(k => up[k] <= 0 || f.st[k] >= 6)) return true; }   // のうりょくアップ：あがる ものが ぜんぶ さいだい（+6）なら うたない
   if (m.sp === 'roar' && B.kind === 'wild' && f.side === 0) return true;   // くさむらで とおぼえ：つかまえる まえに にがして しまう
   if (isDamaging(m) && GSHIFT_T.includes(m.t) && gshiftOn(o)) return true;
-  if (isDamaging(m) && !m.ohko && effVs(m.t, o.sp) === 0 && !(m.superVsWater && hasType(o, 'water'))) return true;
+  if (isDamaging(m) && !m.ohko && effMv(m, o.sp) === 0 && !(m.superVsWater && hasType(o, 'water'))) return true;
   return false; }
 function chipTick(f, o, dt) { f.trT = (f.trT || 0) - dt; if (f.trT <= 0) { f.trT = .25; runRules(f, o); } return trProg(f).mv.length > 0; }
 function natPref(f, m) {
@@ -6206,7 +6209,7 @@ function aiPick0(f, o) {
     const m = MOVES[id], e = m.e || {};
     let w = 0;
     if (isDamaging(m)) {
-      const eff = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1);
+      const eff = effMv(m, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1);
       if (eff === 0 && !desperate(f, o)) continue;
       w = (m.pow || 8) / 10 * Math.max(eff, .25) * (hasType(f, m.t) ? 1.3 : 1);
       if (m.ohko && o.lvl > f.lvl) continue;
@@ -8042,6 +8045,7 @@ function moveDesc(m) {
   if (m.sizeDmg) add('体が大きいほど強い');
   if (m.useDef) add('自分の防御の高さでダメージが決まる'); if (m.hitDef) add('相手の属性防御ではなく防御でダメージを受ける'); if (m.useFoeAtk) add('相手の攻撃の高さでダメージが決まる');
   if (m.superVsWater) add('みずタイプにも効果ばつぐん'); if (m.rapidSpin) add('自分の まわり ぜんぶを 攻撃。自分と 相手の 場の 仕掛け（岩・まきびし・どくびし・地雷・罠・床）と 種を すべて 払う');
+  if (m.ghostOk) add('ゴーストタイプにも当たる');
   if (m.wallBreak) add('置かれた壁を壊す'); if (m.crash) add('壁にぶつかると自分がダメージ'); if (m.reflect) add('飛び道具・ビーム（照射も）を跳ね返す');
   if (m.selfConfuse) add(`当てると自分が${m.selfConfuse}秒混乱`); if (m.bugHeal) add('味方のむしタイプは上にいると回復');
   if (isBigMove(m)) add('大技');
@@ -8450,7 +8454,7 @@ function updHUD() {
     b.classList.toggle('blocked', !!why);   // つかえない わざは グレー
     // あいてへの あいしょうを ボタンに 表示
     const o = active(1); let eff = '';
-    if (o && m.cat !== 'stat') { const v = effVs(m.t, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1); eff = v >= 2 ? '2' : v === 0 ? '0' : v < 1 ? '0.5' : ''; }
+    if (o && m.cat !== 'stat') { const v = effMv(m, o.sp) * (m.superVsWater && hasType(o, 'water') ? 4 : 1); eff = v >= 2 ? '2' : v === 0 ? '0' : v < 1 ? '0.5' : ''; }
     if (b.dataset.eff !== eff) b.dataset.eff = eff;
     setText(b.querySelector('.mvu'), mvUses(m, healMax(m) ? healLeft(f, id) : null)); const left = m.e && m.e.drain ? `（回復あと${Math.max(0, drainLeft(f, id))}）` : '';
     if (why) { setText(b.querySelector('.b'), `使えない：${why}`); return; }
