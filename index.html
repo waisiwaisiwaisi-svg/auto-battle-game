@@ -3268,7 +3268,7 @@ function renderStarter() {
     b.appendChild(d);
     b.onclick = () => { S = defaultSave(); pm.uid = S.uid++; S.party.push(pm);
       const bd = buddyFor(id); if (bd) { const bm = newMon(bd.sid); S.party.push(bm); dexMark(bd.sid, 2); }   // 2たいめ：あいぼうの にがてな ジムに つよい なかま
-      save(); renderHub(); setTimeout(async () => { if (!S.pname && !window.PMA_NAME) await askName(true); if (await ask((bd ? `コーチから ${SPECIES[bd.sid].n}を もらった！\n（${FIELD_NAMES[bd.gym]}ジムで たよりに なるよ）\n\n` : '') + 'まずは チュートリアルで バトルの きほんを やってみよう！', 'はじめる', 'あとで')) startTutorial(); }, 350); };   /* はじめての ときは チュートリアル */
+      save(); renderHub(); setTimeout(async () => { if (!S.pname) await askName(true); if (await ask((bd ? `コーチから ${SPECIES[bd.sid].n}を もらった！\n（${FIELD_NAMES[bd.gym]}ジムで たよりに なるよ）\n\n` : '') + 'まずは チュートリアルで バトルの きほんを やってみよう！', 'はじめる', 'あとで')) startTutorial(); }, 350); };   /* はじめての ときは チュートリアル */
     L.appendChild(b);
   }
   show('scStarter');
@@ -3502,7 +3502,7 @@ function renderChests() {
   $('hGems').textContent = S.gems || 0; $('hGuildBonus').hidden = !S.guildOn;
   $('hItems').textContent = Object.values(S.items || {}).reduce((a, b) => a + b, 0);
   { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<b class="hnm"></b><i class="ico" style="background-image:url(${tierBadge(t.i)})"></i><b style="color:${t.c}">${t.n}</b><span style="grid-column:2">${k.r}</span><span class="mb"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></span>`; $('hRank').style.gridTemplateRows = 'auto auto auto auto'; $('hRank').querySelector('.hnm').textContent = myName(); }
-  if (!S.pname && !window.PMA_NAME && !TUT && !renderHub.asked) { renderHub.asked = true;   // なまえが まだ：ほかの まど（コーチの おはなし など）が とじてから いちど だけ きく
+  if (!S.pname && !TUT && !renderHub.asked) { renderHub.asked = true;   // なまえが まだ：ほかの まど（コーチの おはなし など）が とじてから いちど だけ きく
     const tryAsk = () => { if (S.pname || TUT || B) { renderHub.asked = false; return; } if ($('scHub').hidden || document.querySelector('.askbg')) { setTimeout(tryAsk, 800); return; } askName(true); };
     setTimeout(tryAsk, 700); }
   $('hTms').textContent = tmFree() ? '∞' : Object.values(S.tms || {}).reduce((a, b) => a + b, 0);
@@ -4196,7 +4196,7 @@ function askName(first) {
     const go = () => { const raw = inp.value.trim(), v = safeName(raw, NAME_MAX);
       if (!v) { bg.querySelector('#nmErr').textContent = 'なまえを いれてね'; inp.focus(); return; }
       if (v !== raw.replace(/[<>&"'`\\]/g, '').slice(0, NAME_MAX)) { bg.querySelector('#nmErr').textContent = 'つかえない ことばが はいっています'; inp.focus(); return; }
-      S.pname = v; save(); SND.se('ok'); syncName(); done(v); };
+      S.pname = v; save(); SND.se('ok'); if (window.PMA_NAME) window.PMA_NAME.set(v).catch(() => { }); syncName(); done(v); };   // アプリ・サイト版：オンラインの なまえも おなじに
     okb.onclick = go; inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } };
     inp.onkeyup = (e) => { if (e.key === 'Enter') e.preventDefault(); };
     if (!first) bs[0].onclick = () => done(null);
@@ -9961,7 +9961,7 @@ $('btnOpt').onclick = () => {
   if (!window.PMA_NAME) { const P = bg.querySelector('#oPname'); P.textContent = myName(); bg.querySelector('#oPnameEd').onclick = async () => { const v = await askName(false); if (v) P.textContent = myName(); }; }
   if (window.PMA_NAME) {   // アプリ版：なまえ と オンラインの データ けし
     const N = bg.querySelector('#oName'); N.value = window.PMA_NAME.get();
-    bg.querySelector('#oNameSave').onclick = async () => { const ok = await window.PMA_NAME.set(N.value).catch(() => false); if (ok) SND.se('ok'); if (ok) N.value = window.PMA_NAME.get(); };
+    bg.querySelector('#oNameSave').onclick = async () => { const ok = await window.PMA_NAME.set(N.value).catch(() => false); if (ok) SND.se('ok'); if (ok) { N.value = window.PMA_NAME.get(); S.pname = safeName(N.value, NAME_MAX) || S.pname; save(); } };
     bg.querySelector('#oWipe').onclick = async () => { if (!(await ask('ランキング・ギルド・なまえ など、サーバーに ある あなたの データを ぜんぶ けしますか？（この スマホの セーブデータは のこります）', 'けす', 'やめる'))) return; await window.PMA_NAME.wipe().catch(() => { }); RANKDB = null; NET.room = null; GUILD.me = null; await ask('けしました。つぎに オンラインを つかうと あたらしく はじまります。', 'OK', null); };
   }
   m.value = SND.opt.music; x.value = SND.opt.sfx; u.checked = SND.opt.mute;
