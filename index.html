@@ -5278,12 +5278,12 @@ function fireMove(f) {
       if (m.pat === 'erupt' && cur.pts) { addBlasts(f, m, cur.pts, cur.uid, 'spike'); B.shake = Math.max(B.shake, 4); endAct(f, .35); break; }
       if (m.pat === 'split') {   // 3ぼんに わかれる
         let hitOnce = false; const a0 = cur.ang;
-        for (const da of [-.32, 0, .32]) { const a = a0 + da, L = rayLen(f, a, m.len); if (L < m.len - 2) { const hx = f.x + Math.cos(a) * (L + 6), hy = f.y + Math.sin(a) * (L + 6), wb = wallBlocksAt(hx, hy, 8)[0]; if (wb) damageWall(wb, m); else damageProp(propsAt(hx, hy, 8)[0], m); } fxPush(m.look === 'blade' ? { type: 'blade', x: f.x, y: f.y - BODY, ang: a, len: L, col: '#e8ffff', life: .32, max: .32 } : { type: 'beam', x: f.x, y: f.y - BODY, ang: a, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 });
+        for (const da of [-.32, 0, .32]) { const a = a0 + da, L = rayLen(f, a, m.len); if (L < m.len - 2 && !beamMirror(f, m, a, L, { noHit: hitOnce })) { const hx = f.x + Math.cos(a) * (L + 6), hy = f.y + Math.sin(a) * (L + 6), wb = wallBlocksAt(hx, hy, 8)[0]; if (wb) damageWall(wb, m); else damageProp(propsAt(hx, hy, 8)[0], m); } fxPush(m.look === 'blade' ? { type: 'blade', x: f.x, y: f.y - BODY, ang: a, len: L, col: '#e8ffff', life: .32, max: .32 } : { type: 'beam', x: f.x, y: f.y - BODY, ang: a, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 });
           cur.ang = a; cur.len = L; if (!hitOnce && targetable(o) && inZone({ ...cur, m: { ...m, pat: null } }, f, o.x, o.y, o.r)) { hitOnce = true; hit(f, o, m, a); } }
         cur.ang = a0; B.shake = Math.max(B.shake, 3); endAct(f, .35); break; }
       cur.len = rayLen(f, cur.ang, m.len);   // 障害物で とまる
       const L = cur.len, ex = f.x + Math.cos(cur.ang) * L, ey = f.y + Math.sin(cur.ang) * L;
-      if (L < m.len - 2) { const hx = f.x + Math.cos(cur.ang) * (L + 6), hy = f.y + Math.sin(cur.ang) * (L + 6), wb = wallBlocksAt(hx, hy, 8)[0]; if (wb) damageWall(wb, m); else damageProp(propsAt(hx, hy, 8)[0], m); }
+      if (L < m.len - 2 && !beamMirror(f, m, cur.ang, L)) { const hx = f.x + Math.cos(cur.ang) * (L + 6), hy = f.y + Math.sin(cur.ang) * (L + 6), wb = wallBlocksAt(hx, hy, 8)[0]; if (wb) damageWall(wb, m); else damageProp(propsAt(hx, hy, 8)[0], m); }
       fxPush({ type: 'beam', x: f.x, y: f.y - BODY, ang: cur.ang, len: L, wid: m.wid, col, look: m.look, life: .3, max: .3 }); for (let d = 20; d < L; d += 40) typeFx(f.x + Math.cos(cur.ang) * d, f.y - BODY + Math.sin(cur.ang) * d, m.t, 2, 70, .4);
       B.shake = Math.max(B.shake, 3);
       if (L < m.len) { impactFx(ex, ey - BODY * .5, m.t, .6); addDecal(ex, ey, 14, m.t === 'fire' || m.t === 'elec' ? 'scorch' : 'crater'); }
@@ -5352,8 +5352,12 @@ function chanTick(f, o, oT) {
     if (L < m.len - 1) impactFx(f.x + c * L, f.y + s * L - BODY * .5, m.t, .3);
   } else typeFx(f.x, f.y - BODY, m.t, 7, m.rad * 2.2, .4, { ang: cur.ang, spread: m.half });
   if (cur.n-- % 2 === 0) SND.se('beam', 1.4);
+  const mir = m.k === 'beam' && beamMirror(f, m, cur.ang, cur.len, { tick: true, noHit: true });   // はんしゃのかべに あたって いる：もどる ビームを みせる
+  if (mir && !cur.mirSaid) { cur.mirSaid = 1; popText(f.x + c * cur.len, f.y + s * cur.len - 40, 'はねかえした！', '#ff9ad0'); SND.se('guard'); }
   const nh = Math.ceil(Math.round(m.chan / CHAN_TICK) / CHAN_HIT);   // ダメージの かいすう
   if ((cur.hk = (cur.hk || 0) + 1) % CHAN_HIT !== 1 % CHAN_HIT || (cur.ha = (cur.ha || 0) + 1) > nh) return;
+  if (mir && beamMirror(f, m, cur.ang, cur.len, { tick: true, fx: false, mul: CHAN_SUM / nh, first: !cur.mirHit })) cur.mirHit = 1;
+  if (f.hp <= 0 || f.state !== 'chan') return;
   if (!oT || !inZone(cur, f, o.x, o.y, o.r)) return;
   if (m.k === 'cone' && !losClear(f, o)) return;
   if (hit(f, o, m, cur.ang, { mul: CHAN_SUM / nh, tick: true, first: !cur.landed })) cur.landed++;
@@ -5455,6 +5459,17 @@ function damageWall(b, m, n) {
 function wallBreakFx(w, b) { const k = w.reflect ? 'brk_mirror' : 'brk_' + ({ ice: 'ice', grass: 'thorn' }[w.t] || 'rock'); if (PLFX[k]) plFx(k, b.x, b.y + WALL_B / 2 - PLFX[k].h * PIX_D * .45, (WALL_B + 8) / (PLFX[k].w * PIX_D) * 1.1); else sheetFx(w.reflect ? 'barrier' : 'poof', b.x, b.y - 16, .9); }
 // いち（x, y）の まわり r に ある かべの ブロック
 const wallBlocksAt = (x, y, r) => B.wallRects ? B.wallRects.filter(b => circRect(x, y, r, b)) : [];
+// はんしゃのかべ：ビーム（直線・照射）も はねかえす。とまった ところが あいての はんしゃのかべ なら、おなじ 線を もどって うった 本人に あたる
+function beamMirror(f, m, ang, L, opt) {
+  if (L >= m.len - 2) return false;
+  const c = Math.cos(ang), s = Math.sin(ang), wb = wallBlocksAt(f.x + c * (L + 6), f.y + s * (L + 6), 8)[0]; if (!wb) return false;
+  const w = B.walls.find(q => q.reflect && q.side !== f.side && q.blocks.includes(wb)); if (!w) return false;
+  const ex = f.x + c * L, ey = f.y + s * L, back = ang + Math.PI, rem = m.len - L, own = active(w.side) || f;
+  if (!opt || !opt.tick) { damageWall(wb, m, 1); popText(ex, ey - 40, 'はねかえした！', '#ff9ad0'); SND.se('guard'); }
+  if (!opt || opt.fx !== false) { fxPush({ type: 'beam', x: ex, y: ey - BODY, ang: back, len: Math.min(rem, L), wid: m.wid, col: TYPES[m.t].c, look: m.look, life: .3, max: .3 }); fxp({ type: 'glint', x: ex, y: ey - BODY, col: '#ff7ab0', life: .3 }); }
+  if (rem >= L - f.r && targetable(f) && !(opt && opt.noHit)) hit(own, f, m, back, opt && opt.tick ? opt : undefined);
+  return true;
+}
 // あいてとの あいだを ふさいでいるのが わざの かべ だけ か（ステージの 障害物では ない）
 function losWallOnly(f, o, m) { if (!B.walls || !B.walls.length) return false; const a = Math.atan2(o.y - f.y, o.x - f.x), d = dist(f, o), L = rayLen(f, a, d); if (L >= d - 2) return false;
   const wb = wallBlocksAt(f.x + Math.cos(a) * (L + 6), f.y + Math.sin(a) * (L + 6), 8); if (!wb.length || (m && !breaksWall(m, wallOf(wb[0])))) return false;   // きかない わざでは うたない
@@ -8006,7 +8021,7 @@ function moveDesc(m) {
   if (m.sizeDmg) add('体が大きいほど強い');
   if (m.useDef) add('自分の防御の高さでダメージが決まる'); if (m.hitDef) add('相手の属性防御ではなく防御でダメージを受ける'); if (m.useFoeAtk) add('相手の攻撃の高さでダメージが決まる');
   if (m.superVsWater) add('みずタイプにも効果ばつぐん'); if (m.rapidSpin) add('自分の まわり ぜんぶを 攻撃。自分と 相手の 場の 仕掛け（岩・まきびし・どくびし・地雷・罠・床）と 種を すべて 払う');
-  if (m.wallBreak) add('置かれた壁を壊す'); if (m.crash) add('壁にぶつかると自分がダメージ'); if (m.reflect) add('飛び道具を跳ね返す');
+  if (m.wallBreak) add('置かれた壁を壊す'); if (m.crash) add('壁にぶつかると自分がダメージ'); if (m.reflect) add('飛び道具・ビーム（照射も）を跳ね返す');
   if (m.selfConfuse) add(`当てると自分が${m.selfConfuse}秒混乱`); if (m.bugHeal) add('味方のむしタイプは上にいると回復');
   if (isBigMove(m)) add('大技');
   return out.join('・');
@@ -10531,7 +10546,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 document.documentElement.classList.add('booted');
 })();
