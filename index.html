@@ -3763,7 +3763,8 @@ const TR_NAT = { yuukan: ['勇敢', '前へ前へ。ほとんど隠れない'], 
 const TR_STAT = { atk: '攻撃', def: '防御', spa: '属性攻撃', spd: '属性防御', spe: '素早さ' };
 // 作戦（ドラクエの「さくせん」の ような もの）：たちまわりの ほうしんを きめる。中身は 性格の うごき を つかう
 // 作戦は 3つ（性格の 3すくみ と おなじ：🔥せめ・🛡まもり・🌀からめて）。えらばなければ その子の 性格どおり
-const TR_PLAN = [['yuukan', 'どんどん せめる', '前へ 前へ。ほとんど かくれずに こうげき'], ['nonki', 'どっしり かまえる', 'かべ・かいふく・カウンターで まちかまえる'], ['reisei', 'まあいを たもつ', '間合いを まもり、ひまな ときは 陰で まつ']];
+const TR_PLAN = [['yuukan', 'どんどん せめる', '技を 撃たない ときは 近い 距離（〜150）を たもつ。ほとんど かくれない'], ['nonki', 'どっしり かまえる', '技を 撃たない ときは 普通の 距離（150〜290）を たもつ。かべ・かいふく・カウンターで まちかまえる'], ['reisei', 'まあいを たもつ', '技を 撃たない ときは 遠い 距離（290〜）を たもつ。ひまな ときは 陰で まつ']];
+const PLAN_R = { yuukan: 70, nonki: 220, reisei: 350 };   // 作戦ごとの 技を 撃たない ときの 間合い（近い 〜150・普通 150〜290・遠い 290〜 に おさまる ように）
 const trPlanOf = (n) => n && NATURES[n] ? (TR_PLAN.find(p => p[0] === n) || TR_PLAN.find(p => NAT_GRP[p[0]] === NAT_GRP[n]) || [])[0] : undefined;   // むかしの 作戦（いのちだいじに など）は おなじ グループの 作戦に
 const planName = (m) => { const k = planOfMon(m), P = TR_PLAN.find(p => p[0] === k); return (P ? P[1] : '') + (m.tr && m.tr.prog && m.tr.prog.mv && trPlanOf(m.tr.prog.nat) ? '' : '（おすすめ）'); };
 function trNatCard(k, W, m) {
@@ -6339,8 +6340,9 @@ function aiMove(f, o, dt, autoSpecial) {
     const oThreat = o.moves.some(id => isDamaging(MOVES[id]) && (o.cd[id] || 0) < 1);
     const stall = stalled();   // しばらく だれも ダメージを うけて いない：かくれず せめる
     const hide = !stall && (f.awayT > 0 || hurt || (oThreat && Math.random() < per.cover));
-    if (!hide && (soon < .9 || per.hold || stall)) { want = { R: prefRange(f, per) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' }; f.paceT = stall ? 1 : (per.idle + 1) / 2; }
-    else { want = { R: (prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' }; f.paceT = hurt || f.awayT > 0 ? 1.1 : per.idle; }   // ひまな ときは のんびり あるく
+    const pR = PLAN_R[natOf(f)];   // 作戦の 間合い（技を 撃たない とき）：せめる＝近い・かまえる＝普通・たもつ＝遠い
+    if (!hide && (soon < .9 || per.hold || stall)) { want = { R: (pR || prefRange(f, per)) * roamK, los: true, cover: false, flank: per.flank > .5, mode: 'setup' }; f.paceT = stall ? 1 : (per.idle + 1) / 2; }
+    else { want = { R: (pR || prefRange(f, per) + 90 + (hurt ? 60 : 0)) * roamK, los: false, cover: per.cover > .1, flank: false, mode: 'rest' }; f.paceT = hurt || f.awayT > 0 ? 1.1 : per.idle; }   // ひまな ときは のんびり あるく
   }
   if (f.trGo === 'near') { want = { R: 55, los: true, cover: false, flank: false, mode: 'attack' }; f.paceT = Math.max(f.paceT || 1, 1.8); }   // チップ：ちかづく
   else if (f.trGo === 'far') { want = { R: Math.max(want.R + 160, 330), los: false, cover: false, flank: false, mode: 'rest' }; f.paceT = Math.max(f.paceT || 1, 1.6); }   // チップ：はなれる
