@@ -5246,15 +5246,18 @@ function fireMove(f) {
         if (targetable(o) && dist(f, o) <= f.r + o.r + 46) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x)); endAct(f, .3); break; }
       if (m.pat === 'combo' && (cur.hits || 0) < 2) {   // すばやく 2かい（1かい ぶんの ダメージを わけて）
         sheetFx('slash', f.x + Math.cos(cur.ang) * (f.r + 14), f.y - BODY + Math.sin(cur.ang) * (f.r + 14), .8, cur.ang + (cur.hits ? .8 : -.8));
-        if (targetable(o) && dist(f, o) <= f.r + o.r + 22 && losClear(f, o)) hit(f, o, m, cur.ang, { mul: .55, tick: !cur.hits });
+        if (!cur.hits && targetable(o) && dist(f, o) < MELEE_R && losClear(f, o)) { const gap = Math.max(0, dist(f, o) - (f.r + o.r + 6)), px = f.x, py = f.y; cur.ang = Math.atan2(o.y - f.y, o.x - f.x); f.x += Math.cos(cur.ang) * gap; f.y += Math.sin(cur.ang) * gap; clampF(f); if (gap > 4) fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 }); }   // 1かいめ：ふみこむ
+        if (targetable(o) && dist(f, o) <= f.r + o.r + 22 + 30 && losClear(f, o)) hit(f, o, m, cur.ang, { mul: .55, tick: !cur.hits });
         cur.hits = (cur.hits || 0) + 1; if (cur.hits < 2) { cur.t = cur.wind - .12; return; } endAct(f, .22); break; }
       if (!m.punch) sheetFx('slash', f.x + Math.cos(cur.ang) * (f.r + 14), f.y - BODY + Math.sin(cur.ang) * (f.r + 14), .9, cur.ang);
-      if (m.lunge && o) {   // たいあたり：あいてへ むかって ふみこむ
-        const gap = Math.max(0, dist(f, o) - (f.r + o.r + 6)), step = Math.min(m.lunge, gap), px = f.x, py = f.y;
+      const near = targetable(o) && dist(f, o) < MELEE_R && losClear(f, o);
+      if ((m.lunge || near) && o) {   // あいてへ むかって ふみこむ（近い きょりなら とどく まで）
+        const gap = Math.max(0, dist(f, o) - (f.r + o.r + 6)), step = near ? gap : Math.min(m.lunge, gap), px = f.x, py = f.y;
+        if (near) cur.ang = Math.atan2(o.y - f.y, o.x - f.x);
         f.x += Math.cos(cur.ang) * step; f.y += Math.sin(cur.ang) * step; clampF(f);
-        fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 });
+        if (step > 4) fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 });
       }
-      if (targetable(o) && dist(f, o) <= f.r + o.r + 20 && losClear(f, o)) { hit(f, o, m, cur.ang); f.kx -= Math.cos(cur.ang) * 170; f.ky -= Math.sin(cur.ang) * 170; }   // あてたら はねかえって 飛びのく
+      if (near && dist(f, o) <= f.r + o.r + 20 + 30) { hit(f, o, m, cur.ang); f.kx -= Math.cos(cur.ang) * 170; f.ky -= Math.sin(cur.ang) * 170; }   // あてたら はねかえって 飛びのく
       endAct(f, .22); break;
     case 'swipe':
       wallsInArea(f.x + Math.cos(cur.ang) * (f.r + m.rad * .5), f.y + Math.sin(cur.ang) * (f.r + m.rad * .5), m.rad * .5, m);
@@ -6256,9 +6259,10 @@ function aiPick0(f, o) {
   return opts[0][0];
 }
 // わざを だすのに ひつような きょり
+const MELEE_R = 150;   // 近接わざ：この きょり（訓練の「近い」と おなじ）より ちかければ ふみこんで あたる
 function moveReach(f, o, m) {
   switch (m.k) {
-    case 'melee': return f.r + o.r + 18 + (m.lunge || 0);
+    case 'melee': return Math.max(f.r + o.r + 18 + (m.lunge || 0), MELEE_R - 12);
     case 'swipe': return m.rad + f.r + o.r * .5;
     case 'dash': return m.len * .8;
     case 'aoe': return m.rad * .75;
@@ -8499,7 +8503,8 @@ function drawTele(f) {
     else if (m.k === 'strike') ctx.arc(cur.tx, cur.ty, m.rad * k, 0, Math.PI * 2);
     else if (m.k === 'multi') for (const p of cur.pts) { ctx.moveTo(p.x + m.rad * k, p.y); ctx.arc(p.x, p.y, m.rad * k, 0, Math.PI * 2); }
     else if (m.k === 'cone') sector(f.x, f.y, cur.ang, m.rad, m.half, k);
-    else if (m.k === 'swipe' || m.k === 'melee') sector(f.x, f.y, cur.ang, (m.rad || 40) + f.r, m.half || .95, k);
+    else if (m.k === 'melee') circ(f.x, f.y, MELEE_R * k, 0);   // 近接：この わの なかなら ふみこんで あたる
+    else if (m.k === 'swipe') sector(f.x, f.y, cur.ang, (m.rad || 40) + f.r, m.half || .95, k);
     else if (m.k === 'dash' && m.pat === 'zigzag') zigPath(f, cur.ang, m.len * k, f.r * 2 + 8);
     else if (m.k === 'beam' || m.k === 'dash') {
       const c = Math.cos(cur.ang), s = Math.sin(cur.ang), L = (m.k === 'beam' ? rayLen(f, cur.ang, m.len) : m.len) * k, hw = (m.k === 'dash' ? f.r * 2 + 8 : m.wid) / 2;
