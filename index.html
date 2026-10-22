@@ -1123,15 +1123,15 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 .pal[style*="--c"]{border-left:6px solid var(--c)!important}
 .pal.on{outline:3px solid var(--acc);outline-offset:1px}
 .trghost{position:fixed!important;pointer-events:none;z-index:9999;opacity:.85;transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.5);margin:0}
-@media (max-width:860px){.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;bottom:0;z-index:5;max-height:calc(32 * var(--vh));overflow:auto;padding:4px 8px;border-radius:10px;background:#161228;border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}
-.trmini{align-self:flex-end;font-size:11px;color:var(--dim);padding:2px 6px;margin:-2px -4px 0 0}
-.trside.mini{padding:2px 8px}
-.trside.mini > :not(.trmini){display:none}
+/* よこならびの ときは パレットを 右に はりつけ（技の 使い方まで スクロール しても うえに いる）。「たたむ」は したに ドック する ときだけ */
+.trmini{display:none;align-self:flex-end;font-size:11px;color:var(--dim);padding:2px 6px;margin:-2px -4px 0 0}
+.trside{position:sticky;top:0;align-self:start;max-height:calc(calc(100 * var(--vh)) - 16px);overflow:auto}
+@media (max-width:860px){.trmini{display:block}.trside.mini{padding:2px 8px}.trside.mini > :not(.trmini){display:none}.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;top:auto;bottom:0;z-index:5;max-height:calc(32 * var(--vh));overflow:auto;padding:4px 8px;border-radius:10px;background:#161228;border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}
 html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage{grid-template-columns:minmax(0,1fr) 200px}html.land .trmons{grid-column:1/-1}html.land .trside{position:sticky;top:0;bottom:auto;align-self:start;max-height:calc(calc(100 * var(--vh)) - 16px);box-shadow:none}html.land .trmini{display:none}html.land .trside.mini > :not(.trmini){display:revert}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
 /* 訓練：がめんの はばでは なく 訓練の わくの はばで ならびを かえる（中くらいの まどでも くずれない） */
 #trBody{container-type:inline-size}
 @container (max-width:980px){.trpage{grid-template-columns:minmax(0,1fr) 210px}.trmons{grid-column:1/-1;flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}.trside{position:sticky;top:0;align-self:start;max-height:calc(calc(100 * var(--vh)) - 16px);overflow:auto}}
-@container (max-width:620px){.trpage{grid-template-columns:minmax(0,1fr)}.trside{position:sticky;top:auto;bottom:0;z-index:5;max-height:calc(34 * var(--vh));overflow:auto;box-shadow:0 -6px 18px rgba(0,0,0,.5)!important}.trnatsel button b{font-size:12px;white-space:normal}}
+@container (max-width:620px){.trmini{display:block}.trside.mini{padding:2px 8px}.trside.mini > :not(.trmini){display:none}.trpage{grid-template-columns:minmax(0,1fr)}.trside{position:sticky;top:auto;bottom:0;z-index:5;max-height:calc(34 * var(--vh));overflow:auto;box-shadow:0 -6px 18px rgba(0,0,0,.5)!important}.trnatsel button b{font-size:12px;white-space:normal}}
 /* 訓練：ゲームらしい みため（ドット絵の わく） */
 .trnat,.trr,.trside,.trmons button,.trnatsel button,.trhead,.trq>div{border-radius:0!important;border:4px solid transparent!important;border-image:var(--fr-win) 2 / 4px / 0 stretch!important;background-clip:padding-box!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
 .trnat{background:linear-gradient(180deg,#2f2750,#1d1733)!important}
@@ -3772,10 +3772,11 @@ async function trSim(m, W, n) {
   const J = jr(), gi = Math.min(J.gym, GYMS.length - 1), lg = J.badges.length >= GYMS.length && !J.champ, type = lg ? LEAGUE[J.league][3] : GYMS[gi].f, lv = lg ? 10 + J.league : gi;
   const tr0 = m.tr, train0 = S.train, mute0 = SND.opt.mute, log = { n: 0, win: 0, t: 0, hp: 0, dmg: 0, used: {}, cond: {}, foes: [], to: 0 };
   m.tr = Object.assign({}, tr0, { mode: 'chip', prog: trClone(W, m) }); S.train = true; SND.opt.mute = true;
+  const sm = Object.assign({}, m, { moves: trMvIds(W).slice(0, 4) });   // 模擬戦は 設定の 技で（★スクロールの 技も おぼえた つもりで）
   try {
     for (let k = 0; k < n; k++) {
       const en = gymTeam(type, 1, lg ? jProg(10 + J.league, 2) : jProg(gi, J.step || 0), lg || gi >= 5);
-      startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [m], title: '模擬戦' });
+      startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [sm], title: '模擬戦' });
       B.simLog = log; const e0 = B.sides[1].fs[0];
       for (let s2 = 0; s2 < 30 * (MATCH_T + 20) && B.mode !== 'end'; s2++) { bStep(1 / 30); if (s2 % 900 === 899) await new Promise(r => setTimeout(r, 0)); }
       const f = B.sides[0].fs[0], e = B.sides[1].fs[0];
@@ -6053,6 +6054,7 @@ function runRules(f, o) {
 // いま つかっても いみが ない 技（ゴーストシフト中の かけなおし・ゴーストシフト中の あいてに ノーマル／かくとう・まったく きかない タイプ）
 function moveUseless(f, o, id) { const m = MOVES[id]; if (!m || !o) return false;
   if (m.k === 'gshift' && gshiftOn(f)) return true;
+  { const up = m.e && m.e.self; if (!isDamaging(m) && up && Object.keys(up).some(k => up[k] > 0) && Object.keys(up).every(k => up[k] <= 0 || f.st[k] >= 6)) return true; }   // のうりょくアップ：あがる ものが ぜんぶ さいだい（+6）なら うたない
   if (m.sp === 'roar' && B.kind === 'wild' && f.side === 0) return true;   // くさむらで とおぼえ：つかまえる まえに にがして しまう
   if (isDamaging(m) && GSHIFT_T.includes(m.t) && gshiftOn(o)) return true;
   if (isDamaging(m) && !m.ohko && effVs(m.t, o.sp) === 0 && !(m.superVsWater && hasType(o, 'water'))) return true;
@@ -6140,7 +6142,7 @@ function aiPickMove(f, o) {
     if (w > 0) opts.push([id, w]);
   }
   // お任せAIは ほどほど：4かいに 1かいは つかえる わざから でたらめに、ふだんも ねうちの 差を ちいさく して くじびき
-  const any = f.moves.filter(id => MOVES[id] && !AUTO_GUARD[MOVES[id].k] && !((f.cd[id] || 0) > 0) && !moveBlocked(f, id) && !aiBan(f, id));
+  const any = f.moves.filter(id => MOVES[id] && !AUTO_GUARD[MOVES[id].k] && !((f.cd[id] || 0) > 0) && !moveBlocked(f, id) && !aiBan(f, id) && !moveUseless(f, o, id));
   if (any.length && Math.random() < AI_RANDOM) return choice(any);
   if (!opts.length) return null;
   for (const x of opts) x[1] = Math.pow(x[1], AI_FLAT);
