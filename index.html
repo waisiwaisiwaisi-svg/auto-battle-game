@@ -1756,6 +1756,7 @@ for (const id in MOVES) { const m = MOVES[id]; if (m.cat === 'stat') continue; m
 // うちけし・うけかえしの わざ：じぶんでは えらばない。あう こうげきを うけた しゅんかんに じどうで でる（そのぶん クールダウンは ながい）
 const AUTO_GUARD = { protect: 'scissors', counter: 'rock', stance: 'rock' }, AUTO_GUARD_CD = { protect: 20, counter: 18, stance: 14 };
 for (const id in MOVES) { const c = AUTO_GUARD_CD[MOVES[id].k]; if (c) MOVES[id].cd = c; }
+for (const id in MOVES) { const m = MOVES[id], up = m.e && m.e.self; if (m.cat === 'stat' && up && Object.values(up).some(v => v > 0)) m.cd = Math.round(m.cd / 2 * 100) / 100; }   // ステータスアップ技：待ち時間 半分
 const GSHIFT_T = ['normal', 'fighting'];   // ゴーストシフト：すりぬける タイプ
 for (const id in MOVES) if (MOVES[id].k === 'beam') MOVES[id].wind = Math.round((MOVES[id].wind || .5) * 2 * 100) / 100;   // しょうしゃビーム：ため時間 2ばい（みてから かわせるように）
 for (const id in MOVES) if (/こぶし|ナックル|パンチ/.test(MOVES[id].n) && MOVES[id].k === 'melee') MOVES[id].punch = 1;   // こぶしの わざ：グーの ヒット
@@ -6122,7 +6123,7 @@ const aiWait = (f) => { const atkReady = f.moves.some(id => isDamaging(MOVES[id]
 const aiBan = (f, id) => !!(f.trBan && f.trBan.length && trProg(f) && f.trBan.includes(id));
 function aiPickMove(f, o) {
   if (f.dummy) return null;   // 身代わり人形は 技を 出さない
-  if (!f.moves.some(id => MOVES[id] && isDamaging(MOVES[id]) && !moveBlocked(f, id))) return (f.cd.tackle || 0) > 0 ? null : 'tackle';   // こうげきわざを つかいきった：たいあたりで ねばる
+  if (!f.moves.some(id => MOVES[id] && !moveBlocked(f, id) && !moveUseless(f, o, id))) return (f.cd.tackle || 0) > 0 ? null : 'tackle';   // 通常攻撃（たいあたり）は もう 撃てる 技が ない ときだけ
   if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
     let best = null, bv = 0;
     for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id) || moveUseless(f, o, id) || aiBan(f, id)) continue; const tw = trOf(f) ? trW(f, o, id) : -1; if (!tw) continue;   // くんれん：つかわない・じょうけんに あわない わざは だささない
@@ -6550,7 +6551,8 @@ function moveDir(f, mx, my, dt, nav) {
   }
   f.moving = Math.hypot(mx, my) > .15; if (f.moving) f.walk += dt * clamp(f.pace, .7, 1.8);
   // すすもうと しているのに 3びょう ほとんど うごけて いない（かべや すみに はさまった など）→ ダッシュで ぬける
-  if (Math.hypot(mx, my) > .3) { const k = f.stk || (f.stk = { x: f.x, y: f.y, t: 0 });
+  const oo = opp(f), nearO = oo && oo.hp > 0 && dist(f, oo) < footR(f) + footR(oo) + 30;   // あいてに くっついて いる だけ：はさまって いない
+  if (Math.hypot(mx, my) > .5 && !nearO) { const k = f.stk || (f.stk = { x: f.x, y: f.y, t: 0 });   // .5：着いた あとの よこゆれ（.35）は すすもう として いない
     if (Math.hypot(f.x - k.x, f.y - k.y) > 24) { k.x = f.x; k.y = f.y; k.t = 0; } else if ((k.t += dt) >= 3 && f.state === 'free') { k.t = 0; escapeDash(f); } }
   else if (f.stk) f.stk.t = 0;
 }
@@ -8037,7 +8039,9 @@ function kwInfo(k) {
 
 /* ---------- 木人戦：いまの 訓練（ほぞん まえでも）で 身代わり人形と たたかい、条件の はんいと はつどうを 見る ---------- */
 let DUM = null;   // { uid, keep: TRN, rows: 訓練の 行, log: [], stop, hudT }
+const dummyOvClear = () => ['pauseOv', 'chooseOv', 'resultOv'].forEach(id => { const e = $(id); if (e) e.hidden = true; });   // まえの 試合の まどを のこさない
 function dummyStart(m, W) {
+  dummyOvClear(); if (DUM) { dummyHud(false); DUM = null; }
   const sm = Object.assign({}, m, { moves: trMvIds(W).slice(0, 4), tr: Object.assign({}, m.tr, { mode: 'chip', prog: trClone(W, m) }) });
   const dm = Object.assign(foeMon(m.sid, .3, -777), { uid: -777 });
   DUM = { uid: m.uid, keep: TRN, prog: sm.tr.prog, log: [], stop: false, hudT: 0 };
@@ -8046,7 +8050,7 @@ function dummyStart(m, W) {
   dummyHud(true);
 }
 function dummyQuit() {
-  const D = DUM; if (!D) return; B = null; DUM = null; dummyHud(false);
+  const D = DUM; if (!D) return; B = null; DUM = null; dummyHud(false); dummyOvClear();
   TRN = D.keep; renderTrain(D.uid);   // 訓練の 画面へ（ほぞん まえの 設定も そのまま）
 }
 // 毎フレーム：人形を とめる・HPが なくなったら もどす・まどの 中身を かきかえる
@@ -8137,7 +8141,23 @@ function autoMoves(f) {
 }
 /* ---- うごきの しじ：かくれろ（しょうがいぶつの かげへ）・まわりこめ（かべを まわって よこ・うしろから ねらえる ところへ） ---- */
 const ORDER_T = { hide: 6, flank: 4.5 }, ORDER_CD = 2;
+// かくれる ばしょ：あいてから 見て 障害物の まうしろ（よこはばの まんなか）。障害物・技の かべ ごとに ためして いちばん 近い ところ
+function hideSpot(f, o) {
+  const boxes = (B.st.solid || []).slice();
+  for (const w of B.walls || []) { const bl = w.blocks.filter(b => !b.gone); if (bl.length) boxes.push({ x0: Math.min(...bl.map(b => b.x0)), y0: Math.min(...bl.map(b => b.y0)), x1: Math.max(...bl.map(b => b.x1)), y1: Math.max(...bl.map(b => b.y1)) }); }
+  let best = null, bs = 1e9;
+  for (const b of boxes) {
+    const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, L = Math.hypot(cx - o.x, cy - o.y); if (L < 1) continue;
+    const ux = (cx - o.x) / L, uy = (cy - o.y) / L, hw = (b.x1 - b.x0) / 2, hh = (b.y1 - b.y0) / 2;
+    const t = Math.min(Math.abs(ux) > 1e-3 ? hw / Math.abs(ux) : 1e9, Math.abs(uy) > 1e-3 ? hh / Math.abs(uy) : 1e9);
+    for (const gap of [16, 30, 48]) { const r = t + footR(f) + gap, x = cx + ux * r, y = cy + uy * r;
+      if (!spotOk(f, x, y) || losFrom(x, y, o)) continue;
+      const sc = Math.hypot(x - f.x, y - f.y) + gap; if (sc < bs) { bs = sc; best = { x, y }; } break; }
+  }
+  return best;
+}
 function orderSpot(f, o, k) {
+  if (k === 'hide') { const h = hideSpot(f, o); if (h) return h; }
   const base = Math.atan2(f.y - o.y, f.x - o.x); let best = null, bs = 1e9;
   for (let i = 0; i < 28; i++) for (const r of [50, 100, 160, 230, 310, 400]) {
     const a = i / 28 * Math.PI * 2, x = f.x + Math.cos(a) * r, y = f.y + Math.sin(a) * r * .8;
@@ -8183,7 +8203,7 @@ function orderStep(f, o, dt) {
     moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); return true;
   }
   if (R.k === 'hide' && Math.hypot(o.x - R.ox, o.y - R.oy) > 60) { R.re = 0; R.ox = o.x; R.oy = o.y; }   // あいてが うごいたら すぐ みなおす
-  if (R.re <= 0) { R.re = .5; const sp = orderSpot(f, o, R.k); if (sp && (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o))) R.spot = sp; }   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
+  if (R.re <= 0) { R.re = .5; const sp = orderSpot(f, o, R.k); if (sp && (R.k === 'hide' || (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o)))) R.spot = sp; }   // かくれる：いつも あいての まうしろへ   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
   const d = Math.hypot(R.spot.x - f.x, R.spot.y - f.y);
   if (R.k === 'flank' && (d < 50 || R.t < ORDER_T.flank - 1.2) && losFrom(f.x, f.y, o) && Math.hypot(f.x - o.x, f.y - o.y) < 330) { f.order = null; f.aiT = 0; return false; }
   if (d > 10) { f.paceT = 1.7; const tight = R.k === 'hide', nav = useNav(f) && !walkClear(f, R.spot.x, R.spot.y, tight ? 0 : OBST_GAP), a = nav ? navDir(f, R.spot.x, R.spot.y, tight) : Math.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, Math.cos(a), Math.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
@@ -10445,7 +10465,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ cdScale, speedOf, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ cdScale, speedOf, giveOrder, spotOk, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 document.documentElement.classList.add('booted');
 })();
