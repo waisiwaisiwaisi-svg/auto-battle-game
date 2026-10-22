@@ -3761,14 +3761,14 @@ let TR_MINI = false;
 const TR_FLT = { t: '', c: '', q: '' };   // 訓練の 技パレットの しぼりこみ（タイプ・分類・なまえ）   // くんれんの パレットを たたんで いるか
 function trMoves(m) { const eq = equipped(m).slice(), tm = tmIds().filter(id => MOVES[id] && id !== 'tackle' && !eq.includes(id) && canLearn(m.sid, id)); return { eq, tm }; }
 const trMvIds = (W) => [...new Set(W.mv.map(r => r.id).filter(id => MOVES[id]))];
-const trCondNew = (t) => Object.assign({ t, p: CONDS[t].ps ? CONDS[t].ps[0][0] : undefined }, CONDS[t].ns ? { n: 2 } : {});
+const trCondNew = (t) => Object.assign({ t, p: CONDS[t].ps ? CONDS[t].ps[0][0] : undefined }, CONDS[t].ns ? { n: CONDS[t].n0 } : {});
 // 「技n」の じょうけんは いまの 1〜4ばんめの 技を さす：わざめいで みせる
 const trSlotName = (W, n) => { const r = W && W.mv && W.mv[(+n || 1) - 1]; return r && MOVES[r.id] ? MOVES[r.id].n : null; };
 const TR_SLOTC = ['after', 'off', 'cnt'];   // 「技n」を さす 条件
 const trPs = (t, W) => TR_SLOTC.includes(t) ? CONDS[t].ps.map(([v, l]) => [v, `${l}（${trSlotName(W, v) || 'なし'}）`]) : CONDS[t].ps;
 const trCondTx = (c, W) => { const K = CONDS[c.t]; if (!K) return '？';
   if (TR_SLOTC.includes(c.t) && W) { const nm = trSlotName(W, c.p) || '（なし）'; return c.t === 'after' ? `${nm}を撃った後` : c.t === 'cnt' ? `${nm}を${+c.n || 1}回撃った` : `${nm}の効果が切れた`; }
-  const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '：' + p : ''); };
+  const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '：' + p : '') + (K.ns ? K.nf(+c.n || K.n0) : ''); };
 // ならびかえ・さくじょ の あとも「技を撃った後／効果が切れた」が おなじ 技を さしつづける ように 番号を つけなおす（なくなった 技を さす じょうけんは けす）
 function trRemap(W, oldIds) {
   for (const r of W.mv) for (const ls of (r.c || [])) for (let j = ls.length - 1; j >= 0; j--) { const c = ls[j]; if (!TR_SLOTC.includes(c.t)) continue;
@@ -3895,7 +3895,7 @@ function renderTrain(uid) {
   const mvInfo = (id) => { const M = MOVES[id]; if (!M) return ''; return `<div class="trmvinfo" style="--c:${tcol(id)}"><div><b>${M.n}</b>${mvUseTag(M)} <span class="dim">${moveSub(M)}・${CAT_NAMES[M.cat] || ''}・待ち${(+M.cd).toFixed(1).replace(/\.0$/, '')}秒</span></div><div>${kwDesc(M)}</div></div>`; };   // 技の 内容
   const infoId = pk && pk.k === 'mv' ? pk.v : !pk && !sc ? TRN.info : null;
   if (sc) { const K = CONDS[sc.t], seg = (opts, cur) => `<div class="trseg" data-k="cp">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
-    ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}${K.ns ? `<div class="trrow">${seg(K.ns.map(v => [v, v + '回']), sc.n ?? 2).replace('data-k="cp"', 'data-k="cn"')}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
+    ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}${K.ns ? `<div class="trrow">${seg(K.ns.map(v => [v, K.nf(v)]), sc.n ?? K.n0).replace('data-k="cp"', 'data-k="cn"')}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
   else if (pk) ins = '<div class="dim">置く場所をタップ（技は技の枠・立ち回りは「〜撃つ」の枠・条件は右の枠）</div>';
   else ins = '<div class="dim">ドラッグで 左へ 置く（タップ → 置き場所タップ でもOK）<br>置いた 条件：タップで 設定・外へ ドラッグで 削除</div>';
   const fts = [...new Set(eq.concat(tm).map(id => MOVES[id].t))], fsel = (k, opts) => `<select data-flt="${k}"><option value="">${k === 't' ? 'タイプ：ぜんぶ' : '分類：ぜんぶ'}</option>${opts.map(([v, n]) => `<option value="${v}"${TR_FLT[k] === v ? ' selected' : ''}>${n}</option>`).join('')}</select>`;
@@ -5989,7 +5989,9 @@ const CONDS = {
   foe:   { n: '相手が溜め中' },
   see:   { n: '相手が見える' },
   after: { n: '技を撃った後', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']] },   // 直前に 撃った 技が その技
-  cnt:   { n: '技を撃った回数', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']], ns: [1, 2, 3, 4, 5] },   // この 試合で その技を n回 いじょう 撃った
+  cnt:   { n: '技を撃った回数', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']], ns: [1, 2, 3, 4, 5], nf: (v) => v + '回', n0: 2 },
+  mystg: { n: '自分の能力', ps: [['atk', '攻撃'], ['def', '防御'], ['spa', '属性攻撃'], ['spd', '属性防御'], ['spe', '素早さ'], ['eva', '回避']], ns: [1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6], nf: (v) => v > 0 ? `+${v}以上` : `${v}以下`, n0: 1 },   // 能力の 段階が +n いじょう／-n いか
+  opstg: { n: '相手の能力', ps: [['atk', '攻撃'], ['def', '防御'], ['spa', '属性攻撃'], ['spd', '属性防御'], ['spe', '素早さ'], ['eva', '回避']], ns: [1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6], nf: (v) => v > 0 ? `+${v}以上` : `${v}以下`, n0: 1 },   // この 試合で その技を n回 いじょう 撃った
   off:   { n: '技の効果が切れた', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']] },   // その技を 撃ったことが あって、効果が もう ない
   enter: { n: '出場時' },   // 出てから この技を まだ 撃っていない
   swap:  { n: '交代時' },   // 相手が 交代して 出てきてから この技を まだ 撃っていない（10びょう まで）
@@ -6009,6 +6011,7 @@ function condOk(f, o, c, id0) {
     case 'enter': return !!id0 && !(f.usedAt && f.usedAt[id0] != null);
     case 'swap': return !!id0 && !!o.swIn && B.t - (o.inAt || 0) < 10 && !(f.usedAt && f.usedAt[id0] >= (o.inAt || 0));
     case 'after': { const id = trSlot(f, c.p); return !!id && f.lastMove === id; }
+    case 'mystg': case 'opstg': { const v = (((c.t === 'mystg' ? f : o).st || {})[c.p] || 0), n = +c.n || 1; return n > 0 ? v >= n : v <= n; }
     case 'cnt': { const id = trSlot(f, c.p); return !!id && ((f.useN || {})[id] || 0) >= (+c.n || 1); }
     case 'off': { const id = trSlot(f, c.p); return !!id && f.usedAt && f.usedAt[id] != null && !mvLasting(f, o, id); }
   }
@@ -7967,6 +7970,8 @@ const KW_C = {   // 訓練の 条件
   opsts: ['条件：相手の状態異常', '相手が 状態異常（やけど・まひ・どく・凍結・睡眠）の とき。どれか、または 1つを えらぶ。'],
   foe: ['条件：相手が溜め中', '相手が 攻撃技を 出す 直前の ため（溜め）を して いる とき。'],
   see: ['条件：相手が見える', '壁や 障害物に さえぎられず、相手が 見えて いる とき。'],
+  mystg: ['条件：自分の能力', '自分の 能力の 段階（技などで 上下した ぶん）が「+n以上」または「-n以下」の とき。交代すると もとに もどる。'],
+  opstg: ['条件：相手の能力', '相手の 能力の 段階が「+n以上」（つみ技を つまれたら など）または「-n以下」（下げたら など）の とき。'],
   cnt: ['条件：技を撃った回数', 'この 試合で、えらんだ 技を えらんだ 回数 いじょう 撃った とき（交代しても 数は のこる）。'],
   after: ['条件：技を撃った後', '直前に 撃った 技が えらんだ 技の とき（つなげ技に）。'],
   off: ['条件：技の効果が切れた', 'えらんだ 技を 撃った ことが あり、その 効果（能力の 変化・状態異常・まもり・壁 など）が もう ない とき。'],
