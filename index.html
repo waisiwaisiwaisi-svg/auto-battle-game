@@ -1721,7 +1721,7 @@ const MOVE_FIX = {
   flamethrower: { k: 'cone', rad: 250, half: .2, chan: 1.4, pat: '' },
   'dragon-pulse': { k: 'cone', rad: 210, half: .34, chan: 2.4, chanMove: 1, pat: '', homing: 0, wind: .45 },
   'psychic-noise': { k: 'cone', rad: 210, half: .5, pat: 'sound', homing: 0, wind: .45 },
-  'rapid-spin': { k: 'swipe', rad: 115, half: 1.45, pat: '' },
+  'rapid-spin': { k: 'swipe', rad: 170, half: Math.PI, pat: '' },   // ふりはらい：まわり ぜんぶ
   'alluring-voice': { confuseIfBoosted: 0, confuse: 4 },
   protect: { cd: 12, wind: .1 }, 'toxic-spikes': { k: 'protect', hz: '', psnGuard: 1, cd: 12, wind: .15 },
   'fake-out': { prio: 1 },
@@ -4947,6 +4947,7 @@ function beginMove(f, id) {
   if (m.k !== 'melee' || id !== 'tackle') {
     say(`${prefix(f)}${f.sp.n}の ${m.n}！`);
     if (B.cfg.dummy) dummyLog(f, id);
+    if (m.rapidSpin) { for (const sd of B.sides) { const hz = sd.hz; hz.rocks = hz.spikes = hz.tspikes = 0; const x = sd.fs[sd.act]; if (x) x.v.seed = 0; } B.obs = OB().filter(o => o.k !== 'mine' && o.k !== 'snare'); B.zones = []; say('しかけが すべて はらわれた！'); }   // ふりはらい：撃った ときに りょうほうの 場の しかけ（いわ・まきびし・どくびし・じらい・わな・ゆか）と たねを ぜんぶ はらう
     if (f.trTag === id) { f.trTag = null; if (!B.headless) popText(f.x, f.y - 104, '条件', '#7be0a8'); }   // 訓練の 条件で えらんだ 技
     if (B.sides[f.side].trainer) cmdPose(f.side);
   }
@@ -5783,7 +5784,6 @@ function afterHitSelf(att, def, m, dmg, opt) {
   if (e.drain && att.hp > 0 && !(att.v.healBlock > 0)) { const id = MOVE_ID.get(m); att.drains = att.drains || {}; if (drainLeft(att, id) > 0) { att.drains[id] = (att.drains[id] || 0) + 1; healHp(att, dmg * e.drain / 100); } }
   if (e.recoil && att.hp > 0) { const r = Math.max(1, Math.round(dmg * e.recoil / 100)); att.hp = Math.max(0, att.hp - r); popText(att.x, att.y - 66, `-${r}`, '#ff9a8a'); if (att.hp <= 0) faint(att, def); }
   if (e.self && att.hp > 0 && (!opt || !opt.tick || opt.first)) changeStages(att, e.self, true);
-  if (m.rapidSpin) { const hz = B.sides[att.side].hz; hz.rocks = hz.spikes = hz.tspikes = 0; att.v.seed = 0; }
   if (m.switchOut && att.hp > 0 && (B.kind === 'cup' || B.kind === 'online') && att === active(att.side)) { const idx = benchIdx(att.side); if (idx >= 0) { att.pendingOut = idx; if (canPickSwap(att.side)) { const a0 = att; setTimeout(() => { if (B && a0.pendingOut != null) chooseSwap(i => { a0.pendingOut = i; }, 'こうたいさきを えらぶ', { skip: B.sides[0].act }); }, 0); } popText(att.x, att.y - 100, 'こうたい！', '#7fd8ff', 'comic'); fxp({ type: 'swap', x: att.x, y: att.y - BODY, col: '#7fd8ff', life: .7 }); } }
   if (m.selfConfuse && att.hp > 0) att.v.confuse = Math.max(att.v.confuse || 0, m.selfConfuse);   // さんれんスピン：めが まわる
 }
@@ -7996,7 +7996,7 @@ function moveDesc(m) {
   if (m.ramp) add(`当てるたびに威力が${Math.round(m.ramp * 100)}%ずつ上がる（6回まで）`);
   if (m.sizeDmg) add('体が大きいほど強い');
   if (m.useDef) add('自分の防御の高さでダメージが決まる'); if (m.hitDef) add('相手の属性防御ではなく防御でダメージを受ける'); if (m.useFoeAtk) add('相手の攻撃の高さでダメージが決まる');
-  if (m.superVsWater) add('みずタイプにも効果ばつぐん'); if (m.rapidSpin) add('自分の場の仕掛け・種を払う');
+  if (m.superVsWater) add('みずタイプにも効果ばつぐん'); if (m.rapidSpin) add('自分の まわり ぜんぶを 攻撃。自分と 相手の 場の 仕掛け（岩・まきびし・どくびし・地雷・罠・床）と 種を すべて 払う');
   if (m.wallBreak) add('置かれた壁を壊す'); if (m.crash) add('壁にぶつかると自分がダメージ'); if (m.reflect) add('飛び道具を跳ね返す');
   if (m.selfConfuse) add(`当てると自分が${m.selfConfuse}秒混乱`); if (m.bugHeal) add('味方のむしタイプは上にいると回復');
   if (isBigMove(m)) add('大技');
