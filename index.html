@@ -7713,7 +7713,7 @@ function learnLines(m, before) {
 function endBattle(res) {
   if (B.mode === 'end') return;
   if (B.cfg.sim) { B.mode = 'end'; B.result = res; return; }   // 模擬戦：ごほうび・きろくは なし
-  if (B.cfg.dummy) { setTimeout(dummyQuit, 0); B.mode = 'end'; B.result = res; return; }   // 木人戦：そのまま 訓練へ
+  if (B.cfg.dummy) { setTimeout(dummyQuit, 0); B.mode = 'end'; B.result = res; B.endT = 99; B.resLines = []; return; }   // 木人戦：そのまま 訓練へ
   SND.play(res === 'win' || res === 'caught' ? 'win' : res === 'lose' ? 'lose' : '');
   B.mode = 'end'; B.result = res; B.endT = res === 'caught' ? 1.6 : 1.4;
   if (res === 'win' && B.kind !== 'wild' && !B.cfg.tutorial) guildWin(B.kind === 'online' ? 3 : 1);   // ギルドに ポイント
@@ -10096,7 +10096,7 @@ document.querySelectorAll('.cmd.mv').forEach(b => b.addEventListener('pointerdow
 $('bAuto').onclick = cmdAuto;
 $('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { NET.ended = true; B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rankResult(false)]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); netReset(); showResult(); } else { netReset(); endBattle('lose'); } }); return; } B.paused = true; $('pauseOv').hidden = false; };
 $('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
-$('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; B.paused = false; endBattle(B.kind === 'wild' ? 'run' : 'lose'); B.endT = 0; };
+$('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; if (B.cfg.dummy) { dummyQuit(); return; } B.paused = false; endBattle(B.kind === 'wild' ? 'run' : 'lose'); B.endT = 0; };
 document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end' && B.kind !== 'online') { B.paused = true; $('pauseOv').hidden = false; } });
 
 // あいての わざ：おぼえている中から ランダムに4つ（こうげきわざを 2つ以上）
