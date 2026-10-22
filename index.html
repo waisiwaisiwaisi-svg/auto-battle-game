@@ -9725,8 +9725,10 @@ function render() {
   const over = (b, p) => b[2] > p.x - p.w / 2 && b[0] < p.x + p.w / 2 && b[3] > p.y - p.h && b[1] < p.y;
   const fs_ = [a, e].filter(f => f && f.state !== 'bench' && SPR[f.mon.sid]);
   if (st.layered) st.props.forEach((p, pi) => { if (!imgOk(p.img) || (st.propGone && st.propGone[pi])) return;
+    // まえうしろの さかい：あたりの 箱の 下はし（絵の 下はしは 箱より したに はみだして いる ことが ある：そこに たつ こが 絵に かくれて いた）
+    const sol = st.propSol && st.propSol[pi], foot = sol && sol.length ? Math.max(...sol.map(o => o.y1)) - 2 : p.y - 4;
     // うしろに いる こ（あるいて いる こ）に かさなったら すける
-    const hf = fs_.find(f => !hovers(f) && f.y < p.y - 4 && over(body(f), p));
+    const hf = fs_.find(f => !hovers(f) && f.y < foot && over(body(f), p));
     if (hf) { const b = body(hf); p.hx = (b[0] + b[2]) / 2; p.hy = (b[1] + b[3]) / 2; p.hr = Math.max(b[2] - b[0], b[3] - b[1]) * .62 + 10; }
     p.fade = (p.fade || 0) + ((hf ? 1 : 0) - (p.fade || 0)) * .18;   // 1フレームごとに すこしずつ
     const pd = {   // おきもの：あしもとで まえうしろ。うしろの こが いる ときは その まわり だけ すける
@@ -9738,11 +9740,11 @@ function render() {
       ctx.save(); ctx.beginPath(); ctx.rect(X, Y, p.w, p.h); ctx.ellipse(p.hx, p.hy, R1, R1 * 1.05, 0, 0, 7); ctx.clip('evenodd'); ctx.drawImage(p.img, X, Y, p.w, p.h); ctx.restore();   // そと：ふつう
       ctx.save(); ctx.beginPath(); ctx.ellipse(p.hx, p.hy, R1, R1 * 1.05, 0, 0, 7); ctx.ellipse(p.hx, p.hy, R0, R0 * 1.05, 0, 0, 7); ctx.clip('evenodd'); ctx.globalAlpha = 1 - .35 * p.fade; ctx.drawImage(p.img, X, Y, p.w, p.h); ctx.restore();   // ふち：すこし すける
       ctx.save(); ring(R0); ctx.clip(); ctx.globalAlpha = 1 - .72 * p.fade; ctx.drawImage(p.img, X, Y, p.w, p.h); ctx.restore();   // まんなか：よく すける
-    } }; list.push({ y: p.y - 4, d: () => { pd.d0(); drawPropDmg(st, p, pi); } });
+    } }; list.push({ y: foot, d: () => { pd.d0(); drawPropDmg(st, p, pi); } });
   });
   if (st.rubble) { st.rubble = st.rubble.filter(r => B.t < r.t0 + RUBBLE_T); for (const r of st.rubble) if (B.t >= r.t0) list.push({ y: r.y - 40, d: () => { const u = B.t - r.t0; ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, u / .2, (RUBBLE_T - u) / .4)); plDraw('rubble', r.v, r.x, r.y + 4, r.sc, 0); ctx.restore(); } }); }   // こわれた あとの がれき：すぐ きえる
   for (const f of fs_) {   // うかんで いる こは、かさなった おきものより てまえに かく（うえを とんで いる）
-    let y = f.y; if (hovers(f) && st.layered) st.props.forEach((p, pi) => { if (!(st.propGone && st.propGone[pi]) && over(body(f), p)) y = Math.max(y, p.y - 3); });
+    let y = f.y; if (hovers(f) && st.layered) st.props.forEach((p, pi) => { if (!(st.propGone && st.propGone[pi]) && over(body(f), p)) { const sol = st.propSol && st.propSol[pi]; y = Math.max(y, (sol && sol.length ? Math.max(...sol.map(o => o.y1)) - 2 : p.y - 4) + 1); } });
     list.push({ y, d: () => drawFighter(f) }); }
   for (const f of [a, e]) if (f && !fs_.includes(f)) list.push({ y: f.y, d: () => drawFighter(f) });
   for (const w of B.walls) { if (w.one && plOk(wlKey(w))) { const lv = w.blocks.filter(b => !b.gone); if (lv.length) list.push({ y: Math.max(...lv.map(b => b.y)) + WALL_B / 2, d: () => drawWallOne(w) }); continue; }
