@@ -6133,7 +6133,12 @@ const aiWait = (f) => { const atkReady = f.moves.some(id => isDamaging(MOVES[id]
 const aiBan = (f, id) => !!(f.trBan && f.trBan.length && trProg(f) && f.trBan.includes(id));
 function aiPickMove(f, o) {
   if (f.dummy) return null;   // 身代わり人形は 技を 出さない
-  if (!f.moves.some(id => MOVES[id] && !moveBlocked(f, id) && !moveUseless(f, o, id))) return (f.cd.tackle || 0) > 0 ? null : 'tackle';   // 通常攻撃（たいあたり）は もう 撃てる 技が ない ときだけ
+  // 通常攻撃（たいあたり）は もう 撃てる 技が ない ときだけ：こうげき技が ぜんぶ つかえない（つかいきった・きかない・条件まち）うえ、ほかに いま 撃つ ねうちの ある 技も ない
+  const anyAtk = f.moves.some(id => MOVES[id] && isDamaging(MOVES[id]) && !moveBlocked(f, id) && !moveUseless(f, o, id) && !aiBan(f, id));
+  const pk = aiPick0(f, o); if (pk || anyAtk) return pk;
+  return (f.cd.tackle || 0) > 0 ? null : 'tackle';
+}
+function aiPick0(f, o) {
   if (isSmart(f)) {   // かしこい AI：いちばん ねうちの ある わざ（たいあたりも ふくむ）
     let best = null, bv = 0;
     for (const id of f.moves) { if (!MOVES[id] || (f.cd[id] || 0) > 0 || moveBlocked(f, id) || moveUseless(f, o, id) || aiBan(f, id)) continue; const tw = trOf(f) ? trW(f, o, id) : -1; if (!tw) continue;   // くんれん：つかわない・じょうけんに あわない わざは だささない
@@ -8087,7 +8092,7 @@ function dummyHud(on) {
 }
 function dummyHudUpd() {
   const h = $('dumHud'), f = active(0), o = active(1); if (!h || !f || !o) return; const P = DUM.prog;
-  const rows = P.mv.map((r, i) => { const M = MOVES[r.id]; if (!M) return ''; const cd = f.cd[r.id] > 0 ? `<i class="dcd">${f.cd[r.id].toFixed(1)}s</i>` : '<i class="dok">OK</i>', ls = trLines(r.c).filter(l => l.length);
+  const rows = P.mv.map((r, i) => { const M = MOVES[r.id]; if (!M) return ''; const blk = moveBlocked(f, r.id), use = moveUseless(f, o, r.id), cd = blk && !AUTO_GUARD[M.k] ? `<i class="dcd">${blk}</i>` : use ? '<i class="dcd">いまは 意味なし</i>' : f.cd[r.id] > 0 ? `<i class="dcd">${f.cd[r.id].toFixed(1)}s</i>` : '<i class="dok">OK</i>', ls = trLines(r.c).filter(l => l.length);
       const fl = DUM.flash && DUM.flash.id === r.id && B.t - DUM.flash.t < .8 ? ' fire' : '', q = f.queued === r.id ? ' q' : '';
       const cs = AUTO_GUARD[M.k] ? '<span class="dc">自動</span>' : ls.length ? ls.map((l, li) => (li ? '<em>または</em>' : '') + l.map(c => { const ok = condOk(f, o, c, r.id); return `<span class="dc ${ok ? 'on' : ''}">${ok ? '○' : '×'} ${trCondTx(c, P)}</span>`; }).join('<em>かつ</em>')).join('') : '<span class="dc any">いつでも（お任せ）</span>';
       return `<div class="dr${fl}${q}"><b>${i + 1} ${M.n}</b>${cd}<div>${cs}</div></div>`; }).join('');
