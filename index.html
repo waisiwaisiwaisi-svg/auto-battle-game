@@ -66,7 +66,7 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
 .ntabs{display:flex;gap:6px;margin-bottom:10px}.ntabs button{flex:1;padding:7px;border-radius:4px;background:#1b1530;box-shadow:inset 0 0 0 2px var(--rim2)}.ntabs button.on{background:var(--acc);color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;font-weight:700}
 .rankcard{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#15112a;border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}.rankcard .rr{font-size:30px;color:var(--acc);text-shadow:2px 2px 0 #000}
 .lb{display:flex;flex-direction:column;gap:3px;margin-top:6px}.lb div{display:grid;grid-template-columns:26px 1fr auto 44px 48px;gap:6px;align-items:center;font-size:12px;padding:3px 6px;background:#15112a;border-radius:3px}.lb div.me{box-shadow:inset 0 0 0 2px var(--acc)}.lb .lbn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
-.nstat{margin-top:10px;font-size:13px;line-height:1.7;min-height:1.7em}.nstat.err{color:var(--bad)}.ncode{font-size:26px;letter-spacing:.3em;color:var(--acc);display:inline-block;padding:2px 10px;background:#120e1c;border-radius:4px;margin:4px 0}
+.nstat{margin-top:10px;font-size:13px;line-height:1.7;min-height:1.7em}.nstat.err{color:var(--bad)}.ncode{font-size:26px;letter-spacing:.3em;color:var(--acc);display:inline-block;padding:2px 10px;background:#120e1c;border-radius:4px;margin:4px 0;user-select:text;-webkit-user-select:text}.ncopy{padding:4px 12px!important;font-size:13px!important;vertical-align:middle;margin-left:6px}
 .optrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--edge)}
 .looks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;max-height:calc(38 * var(--vh));overflow:auto}.look{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border:2px solid var(--edge);border-radius:6px;background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.look canvas{height:64px;width:auto;max-width:100%;object-fit:contain}.look small{font-size:10px;white-space:nowrap}.look.on{border-color:var(--acc);background:rgba(255,209,102,.15)}
 .optrow input[type=range]{width:55%;accent-color:var(--acc)}
@@ -6964,16 +6964,16 @@ const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   //
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } const tr = trUnpack(o.tr, m); if (tr) m.tr = tr; return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
-function netReset() { SND.onSe = null; NET.ranked = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false }); }
+function netReset() { SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false }); }
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
 async function netOpen(asHost, code, onStatus, opts = {}) {
   const room = await netGetRoom();
   if (!room) { onStatus(onlineHint('オンライン対戦'), true); return; }
-  netReset(); NET.code = code; NET.host = asHost; NET.guest = !asHost; NET.ranked = !!opts.ranked; NET.oppR = opts.oppR; NET.rated = false;
+  netReset(); NET.code = code; NET.host = asHost; NET.guest = !asHost; NET.ranked = !!opts.ranked; NET.pick6 = !!opts.ranked || !!opts.pick6; NET.oppR = opts.oppR; NET.rated = false;
   try { NET.nr = await room.join('pma-' + code); } catch (e) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
   await guildMe().catch(() => { });   // あいてに ギルドめいを みせる
   NET.team6 = teamOf(S.party, 6); NET.myPick = null; NET.preview = null;
-  const me = { role: asHost ? 'host' : 'guest', nm: myName(), team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
+  const me = { role: asHost ? 'host' : 'guest', nm: myName(), team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, p6: NET.pick6 ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
   // じぶんで かいた もの の え（la：トレーナー、ca：モンスター）。あいては はじまる まえに うけとって おぼえる。presence は 4KB まで なので 入りきらない え は おくらない
   for (const o of NET.team6) if (CUSTOM.mon[o.sid] && !me.ca[o.sid]) me.ca[o.sid] = CUSTOM.mon[o.sid];
   const fits = () => presOk(me);
@@ -6983,7 +6983,7 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   if (!fits()) me.ca = {};   // それでも はいらない：え は おくらない（あいてには かわりの すがたで みえる）
   if (!fits()) for (const o of [...NET.team6].reverse()) { if (fits()) break; if (!me.team.some(x => x.sid === o.sid)) delete o.tr; }   // まだ はいらない：見せあい だけの 子の 訓練は おくらない
   try { await NET.nr.presence(me); } catch (e) { onStatus('あいてに じぶんの チームを おくれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
-  onStatus(NET.ranked ? 'たいせんの じゅんびを しています…' : asHost ? `あいことば <b class="ncode">${code}</b> を あいてに つたえてね。<br>あいてが はいるのを まっています…` : 'ホストを さがしています…');
+  onStatus(NET.ranked ? 'たいせんの じゅんびを しています…' : asHost ? `あいことば <b class="ncode">${code}</b> <button class="btn sub ncopy" data-code="${code}">コピー</button><br>あいてに つたえてね。${NET.pick6 ? '<b>6たいから 3たい えらぶ</b> たいせん。' : ''}<br>あいてが はいるのを まっています…` : 'ホストを さがしています…');
   if (NET.ranked) setTimeout(() => { if (!NET.started && !NET.preview && NET.ranked && NET.code === code) { onStatus('あいてと つながりませんでした。もういちど さがしてね', true); netReset(); } }, 20000);
   NET.nr.onPeers((ch) => {
     const others = ch.peers.filter(p => isOther(p) && p.presence);
@@ -6992,7 +6992,7 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
     else if (NET.preview && NET.peer && ch.left.some(p => p.peer === NET.peer)) { rankPreviewClose(); onStatus('あいてが いなくなりました。もういちど さがしてね', true); netReset(); return; }
     if (asHost) {
       const g = others.find(p => p.presence.role === 'guest' && validTeam(p.presence.team));
-      if (g && !NET.started && NET.ranked && g.presence.rk && validTeam6(g.presence.team6)) {   // ランク：見せあい → 3たい えらぶ
+      if (g && !NET.started && NET.pick6 && (!NET.ranked || g.presence.rk) && validTeam6(g.presence.team6)) {   // ランク・フレンドの えらぶ たいせん：見せあい → 3たい えらぶ
         NET.peer = g.peer; if (typeof g.presence.r === 'number') NET.oppR = g.presence.r;
         if (!NET.preview) { onStatus('', false, true); rankPreview(g.presence.team6, g.presence.r); }
         rankPreviewOpp(Array.isArray(g.presence.pick));
@@ -7000,12 +7000,13 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
         if (NET.myPick && gp) { const gteam = gp.map(i => g.presence.team6[i]), mine = NET.myPick.map(i => NET.team6[i]); rankPreviewClose(); netHostStart(gteam, mine); }
         return;
       }
-      if (g && !NET.started && !!g.presence.rk === NET.ranked) { NET.peer = g.peer; if (typeof g.presence.r === 'number') NET.oppR = g.presence.r; netHostStart(g.presence.team); onStatus('', false, true); }
+      if (g && !NET.started && !NET.pick6 && !!g.presence.rk === NET.ranked) { NET.peer = g.peer; if (typeof g.presence.r === 'number') NET.oppR = g.presence.r; netHostStart(g.presence.team); onStatus('', false, true); }
       if (g && NET.started) netHostInput(g.presence);
     } else {
       const h = others.find(p => p.presence.role === 'host');
       if (!h) return;
-      if (!NET.started && NET.ranked && h.presence.rk && validTeam6(h.presence.team6) && !h.presence.start) {
+      if (!NET.started && (NET.ranked ? h.presence.rk : h.presence.p6) && validTeam6(h.presence.team6) && !h.presence.start) {
+        NET.pick6 = true;   // フレンド：ホストが えらぶ たいせんに して いれば あわせる
         NET.peer = h.peer; if (typeof h.presence.r === 'number') NET.oppR = h.presence.r;
         if (!NET.preview) { onStatus('', false, true); rankPreview(h.presence.team6, h.presence.r); }
         rankPreviewOpp(Array.isArray(h.presence.pick));
@@ -7594,7 +7595,7 @@ function rankPreview(oppTeam, oppR) {
   const draw = () => {
     const done = !!NET.myPick, t = tierOf(typeof oppR === 'number' ? oppR : 1000);
     ov.innerHTML = `<div class="askbox pvbox">
-      <div class="pvhead"><h3>ランク対戦　みせあい</h3><span class="pvt">${left}</span></div>
+      <div class="pvhead"><h3>${NET.ranked ? 'ランク対戦' : 'フレンド対戦'}　みせあい</h3><span class="pvt">${left}</span></div>
       <div class="pvlab">あいて <span class="chip" style="background:${t.c}">${t.n}</span> ${typeof oppR === 'number' ? oppR : ''}　<span id="pvOpp" class="dim">${NET.oppPicked ? '✔ えらびおわった' : 'えらんでいます…'}</span></div>
       <div class="pvrow">${oppTeam.map((o, i) => card(o, i, false)).join('')}</div>
       <div class="pvlab">じぶん　<b style="color:var(--acc)">${done ? 'けってい ずみ' : `だす ${need}たいを じゅんばんに タップ（${sel.length}/${need}）`}</b></div>
@@ -7628,6 +7629,7 @@ function onlineMenu() {
     </div>
     <div data-p="friend" hidden>
       <p class="dim">あいことばで ともだちと たいせん（レートは かわりません）</p>
+      <label class="dim" style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px"><input type="checkbox" id="nPick6"> 6たいから 3たい えらぶ（ランクと おなじ 見せあい）</label>
       <button class="btn" id="nHost" style="width:100%;margin-top:8px">へやを つくる</button>
       <div class="row" style="gap:8px;margin-top:10px"><input id="nCode" maxlength="4" placeholder="あいことば" autocomplete="off" style="flex:1;min-width:0;width:0;font:inherit;font-size:18px;padding:9px;text-align:center;letter-spacing:.3em;background:#120e1c;color:var(--ink);border:2px solid var(--rim2);border-radius:4px;text-transform:lowercase"><button class="btn sub" id="nJoin" style="flex:none;white-space:nowrap;padding:0 18px">はいる</button></div>
     </div>
@@ -7638,9 +7640,13 @@ function onlineMenu() {
   bg.querySelectorAll('.ntabs button').forEach(b => b.onclick = () => { bg.querySelectorAll('.ntabs button').forEach(x => x.classList.toggle('on', x === b)); bg.querySelectorAll('[data-p]').forEach(p => p.hidden = p.dataset.p !== b.dataset.t); });
   bg.querySelector('#mmRank').onclick = () => { mmStop(); if (!NET.started) netReset(); bg.remove(); renderRank('p'); };
   bg.querySelector('#nClose').onclick = () => { mmStop(); if (!NET.started) netReset(); bg.remove(); };
+  bg.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('.ncopy'); if (!b) return;   // あいことばを コピー
+    const c = b.dataset.code, ok = () => { b.textContent = 'コピーした！'; SND.se('ok'); setTimeout(() => { if (b.isConnected) b.textContent = 'コピー'; }, 1500); };
+    const fb = () => { const t = document.createElement('textarea'); t.value = c; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); let r = false; try { r = document.execCommand('copy'); } catch (x) { } t.remove(); if (r) ok(); else { const el = b.parentNode.querySelector('.ncode'); if (el) { const rg = document.createRange(); rg.selectNodeContents(el); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg); } b.textContent = 'えらんだ。ながおしで コピー'; } };
+    try { navigator.clipboard.writeText(c).then(ok, fb); } catch (x) { fb(); } });
   bg.querySelector('#mmGo').onclick = () => { bg.querySelector('#mmGo').hidden = true; bg.querySelector('#mmStop').hidden = false; stat('あいてを さがしています…'); mmStart(stat); };
   bg.querySelector('#mmStop').onclick = () => { mmStop(); bg.querySelector('#mmGo').hidden = false; bg.querySelector('#mmStop').hidden = true; stat(''); };
-  bg.querySelector('#nHost').onclick = () => { const A = 'abcdefghjkmnpqrstuvwxyz23456789'; let c = ''; for (let i = 0; i < 4; i++) c += A[Math.floor(Math.random() * A.length)]; stat('へやを つくっています…'); netOpen(true, c, stat); };
+  bg.querySelector('#nHost').onclick = () => { const A = 'abcdefghjkmnpqrstuvwxyz23456789'; let c = ''; for (let i = 0; i < 4; i++) c += A[Math.floor(Math.random() * A.length)]; stat('へやを つくっています…'); netOpen(true, c, stat, { pick6: bg.querySelector('#nPick6').checked }); };
   bg.querySelector('#nJoin').onclick = () => { const c = bg.querySelector('#nCode').value.trim().toLowerCase(); if (!/^[a-z0-9]{4}$/.test(c)) { stat('あいことばは 4もじ です', true); return; } stat('へやに はいっています…'); netOpen(false, c, stat); };
   rankDb().then(() => { const k2 = myRank(), t2 = tierOf(k2.r); const c = bg.querySelector('.rankcard'); if (c) c.innerHTML = `<div class="rkup"><img src="${tierBadge(t2.i)}" alt=""><span class="chip" style="background:${t2.c};font-size:13px;padding:2px 10px">${t2.n}</span></div><div class="rr">${k2.r}</div><div class="dim">${k2.w}かち ${k2.l}まけ</div>`; });
 }
