@@ -5573,7 +5573,9 @@ function useStatusMove(f, o, m) {
       const idx = benchIdx(f.side);
       if (B.kind === 'wild' || idx < 0) { failMove(f, 'でも かわりが いない！'); return; }
       pillarFx(f, '#ffd166', .8); typeFx(f.x, f.y - BODY, 'normal', 20, 120, .7);
-      doSwitch(f, idx, { st: Object.assign({}, f.st), sub: f.v.sub || 0 }, false, true);
+      { const pass = { st: Object.assign({}, f.st), sub: f.v.sub || 0 };
+        if (canPickSwap(f.side)) { const f0 = f; setTimeout(() => { if (B && active(0) === f0 && f0.hp > 0) chooseSwap(i => doSwitch(f0, i, pass, false, true), 'うけわたす あいてを えらぶ', { skip: B.sides[0].act }); }, 0); }   // うけわたし：じぶんの こうたいさきを えらぶ
+        else doSwitch(f, idx, pass, false, true); }
       break;
     }
     case 'ray': {
@@ -6120,8 +6122,8 @@ function runRules(f, o) {
   if (f.state !== 'free') return;
   if (g !== 'auto') {   // 近づいて／離れて／隠れて／回り込んで から 撃つ（3びょう たったら 撃つ）
     if (!f.trPrep || f.trPrep.id !== r.id) { f.trPrep = { id: r.id, t: 0, ord: f.order && f.order.tr ? 1 : 0 }; }
-    f.trPrep.t += .25; const d = dist(f, o), rd = g === 'near' ? d < 150 : g === 'far' ? d >= 260 : f.trPrep.t >= 1.5;
-    if (!rd && f.trPrep.t < 3) return;
+    f.trPrep.t += .25; const d = dist(f, o), rd = g === 'near' ? d < 150 : g === 'far' ? d >= 260 : g === 'hide' ? (!losClear(f, o) || d >= 330) : f.trPrep.t >= 1.5;   // 隠れて：隠れきるか 330 いじょう はなれてから
+    if (!rd && f.trPrep.t < (g === 'hide' ? 5 : 3)) return;
   }
   f.trPrep = null; f.trGo = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t }; f.trAt += ' q'; f.trTag = hit.includes(r) ? r.id : null; f.trRow = P.mv.indexOf(r); f.trLine = f.trTag ? trLines(r.c).findIndex(l => l.length && condsOk(f, o, l, r.id)) : -1;   // 条件で えらんだ 技：うつ ときに しるし
 }
@@ -8183,6 +8185,11 @@ function autoMoves(f) {
 /* ---- うごきの しじ：かくれろ（しょうがいぶつの かげへ）・まわりこめ（かべを まわって よこ・うしろから ねらえる ところへ） ---- */
 const ORDER_T = { hide: 6, flank: 4.5 }, ORDER_CD = 2;
 // かくれる ばしょ：あいてから 見て 障害物の まうしろ（よこはばの まんなか）。障害物・技の かべ ごとに ためして いちばん 近い ところ
+// はなれる ばしょ：あいてから 340〜420 はなれた あるける ところ（いまの ばしょから ちかい ほう）
+function farSpot(f, o) { let best = null, bs = 1e9;
+  for (let i = 0; i < 24; i++) for (const r of [340, 420]) { const a = i / 24 * Math.PI * 2, x = o.x + Math.cos(a) * r, y = o.y + Math.sin(a) * r * .8;
+    if (!spotOk(f, x, y)) continue; const sc = Math.hypot(x - f.x, y - f.y); if (sc < bs) { bs = sc; best = { x, y }; } }
+  return best; }
 function hideSpot(f, o) {
   const boxes = (B.st.solid || []).slice();
   for (const w of B.walls || []) { const bl = w.blocks.filter(b => !b.gone); if (bl.length) boxes.push({ x0: Math.min(...bl.map(b => b.x0)), y0: Math.min(...bl.map(b => b.y0)), x1: Math.max(...bl.map(b => b.x1)), y1: Math.max(...bl.map(b => b.y1)) }); }
@@ -8198,7 +8205,7 @@ function hideSpot(f, o) {
   return best;
 }
 function orderSpot(f, o, k) {
-  if (k === 'hide') { const h = hideSpot(f, o); if (h) return h; }
+  if (k === 'hide') { const h = hideSpot(f, o) || farSpot(f, o); if (h) return h; }   // かくれる ばしょが なければ はなれる
   const base = Math.atan2(f.y - o.y, f.x - o.x); let best = null, bs = 1e9;
   for (let i = 0; i < 28; i++) for (const r of [50, 100, 160, 230, 310, 400]) {
     const a = i / 28 * Math.PI * 2, x = f.x + Math.cos(a) * r, y = f.y + Math.sin(a) * r * .8;
