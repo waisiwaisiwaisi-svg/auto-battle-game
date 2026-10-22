@@ -29,6 +29,18 @@ body{word-break:keep-all;overflow-wrap:anywhere;line-break:strict;
   padding:calc(10px + var(--sat)) 12px calc(12px + var(--sab));
 }
 .screen[hidden]{display:none}
+#boot{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:radial-gradient(ellipse at 50% 38%,#2c2350 0%,#141022 62%,#0b0914 100%);color:#f3eefc;font-family:'DotGothic16',ui-monospace,monospace;transition:opacity .45s ease;padding:calc(16px + var(--sat)) 16px calc(16px + var(--sab))}
+#boot.out{opacity:0;pointer-events:none}
+#boot .bl{text-align:center;line-height:1;letter-spacing:.06em;text-shadow:0 3px 0 #0b0914,0 0 18px rgba(255,209,102,.35)}
+#boot .bl b{display:block;font-size:clamp(20px,6vw,34px);color:#ffd166}#boot .bl i{display:block;font-style:normal;font-size:clamp(30px,10vw,58px);color:#ffe9a8;margin-top:6px}
+#boot .bs{font-size:12px;color:#b9b0d6;letter-spacing:.2em;margin-top:10px}
+#boot .orb{position:relative;width:48px;height:48px;animation:bootb .9s cubic-bezier(.3,0,.5,1) infinite alternate;image-rendering:pixelated}
+#boot .orb::before{content:'';position:absolute;inset:6px;background:radial-gradient(circle at 35% 30%,#bff4ff 0 14%,#4fc3ff 15% 46%,#1f6fd1 47% 74%,#173a8a 75%);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);box-shadow:0 0 0 3px #0b0914}
+#boot .orb::after{content:'';position:absolute;left:50%;bottom:-16px;width:34px;height:8px;margin-left:-17px;border-radius:50%;background:rgba(0,0,0,.45);animation:boots .9s cubic-bezier(.3,0,.5,1) infinite alternate}
+@keyframes bootb{from{transform:translateY(0)}to{transform:translateY(-22px)}}@keyframes boots{from{transform:scale(1);opacity:.55}to{transform:scale(.6) translateY(22px);opacity:.25}}
+#boot .bar{width:min(300px,72vw);height:14px;padding:3px;background:#0b0914;box-shadow:0 0 0 2px #4a3f7a}
+#boot .bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,#ffd166 0 10px,#f2962d 10px 12px);transition:width .25s linear}
+#boot .bt{font-size:13px;color:#cfc4e0;min-height:1.2em;letter-spacing:.08em}#boot .tip{font-size:12px;color:#8f86b0;max-width:min(340px,86vw);text-align:center;line-height:1.6;min-height:3.2em}
 html:not(.booted) .screen:not(#scTitle),html:not(.booted) #tabbar{display:none!important}   /* よみこみ中（スクリプトが うごく まえ）に ほかの 画面が かさなって みえない ように */
 button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 button:disabled{opacity:.4;cursor:default}
@@ -1275,6 +1287,19 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
 </style>
 </head>
 <body>
+<div id="boot" aria-label="よみこみちゅう"><div class="bl"><b>PIXEL MONSTER</b><i>ARENA</i><div class="bs">ピクセル モンスター アリーナ</div></div><div class="orb"></div><div class="bar"><i id="bootBar"></i></div><div class="bt" id="bootTx">よみこみちゅう… 0%</div><div class="tip" id="bootTip"></div></div>
+<script>
+/* ロード画面：本体（おおきい スクリプト）を よみこむ あいだ だす。すすみは じかんで よそく（おわったら 100%） */
+(function () {
+  var t0 = Date.now(), bar = document.getElementById('bootBar'), tx = document.getElementById('bootTx'), tip = document.getElementById('bootTip'), done = false, p = 0;
+  var TIPS = ['ヒント：訓練で 技の 条件を きめると ぐんと つよく なる', 'ヒント：くさむらで よわらせて オーブを なげよう', 'ヒント：ひかえを タップすると こうたい できる', 'ヒント：タイプの あいしょうを ジムに あわせよう', 'ヒント：模擬戦で 訓練の ききめを ためせる'];
+  var k = Math.floor(Math.random() * TIPS.length); tip.textContent = TIPS[k];
+  var tipIv = setInterval(function () { k = (k + 1) % TIPS.length; tip.textContent = TIPS[k]; }, 3200);
+  var iv = setInterval(function () { if (done) return; var t = (Date.now() - t0) / 1000; p = Math.min(95, Math.round(95 * (1 - Math.exp(-t / 3.2)))); bar.style.width = p + '%'; tx.textContent = 'よみこみちゅう… ' + p + '%'; }, 120);
+  window.__bootDone = function () { if (done) return; done = true; clearInterval(iv); bar.style.width = '100%'; tx.textContent = 'じゅんび OK！';
+    var el = document.getElementById('boot'); setTimeout(function () { el.classList.add('out'); clearInterval(tipIv); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 500); }, 260); };
+})();
+</script>
 <div id="app">
 
   <!-- タイトル -->
@@ -10603,6 +10628,8 @@ window.__game = {
   run(fn) { return fn({ openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 document.documentElement.classList.add('booted');
+{ const fin = () => { if (window.__bootDone) window.__bootDone(); };   // ロード画面を とじる：タイトルの 絵と もじ（フォント）が そろってから
+  Promise.race([Promise.all([document.fonts ? document.fonts.ready : 0, new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))]), new Promise(r => setTimeout(r, 1500))]).then(fin, fin); }
 })();
 </script>
 </body>
