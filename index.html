@@ -4923,7 +4923,7 @@ function beginMove(f, id) {
   if (healMax(m) && !TUT && !(m.charge2 && !f.v.charged)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }   // がりょうてんせいは ためる ときは かぞえない
   if (m.fakeout) f.v.fakeUsed = true;   // びっくりてうち：1かい でるごとに 1かい
   let ang = Math.atan2(o.y - f.y, o.x - f.x), tx = o.x, ty = o.y, decoy = null;
-  if (o.clones && o.clones.length && isDamaging(m) && ['melee', 'swipe', 'dash', 'proj', 'beam', 'strike', 'multi', 'cone', 'warp', 'vault'].includes(m.k)) { const dl = o.clones.find(c => c.doll && Math.hypot(c.x - f.x, c.y - f.y) <= DOLL_R), cl = o.clones.filter(c => !c.doll), k = dl ? -1 : Math.floor(Math.random() * (cl.length + 1)); decoy = dl || (k > 0 ? cl[k - 1] : null); if (decoy) { ang = Math.atan2(decoy.y - f.y, decoy.x - f.x); tx = decoy.x; ty = decoy.y; } }   // デコイにんぎょうは ゆうこうはんい（DOLL_R）の なかの あいてだけ ひきつける   // かげぶんしん：どれを ねらうかは うんしだい
+  if (o.clones && o.clones.length && isDamaging(m) && ['melee', 'swipe', 'dash', 'proj', 'beam', 'strike', 'multi', 'cone', 'warp', 'vault'].includes(m.k)) { const dl = o.clones.find(c => c.doll && Math.hypot(c.x - f.x, c.y - f.y) <= DOLL_R), cl = o.clones.filter(c => !c.doll), k = dl ? -1 : Math.floor(Math.random() * (cl.length + 1)); decoy = dl || (k > 0 ? cl[k - 1] : null); if (decoy) { ang = Math.atan2(decoy.y - f.y, decoy.x - f.x); tx = decoy.x; ty = decoy.y; if (Math.abs(decoy.x - f.x) > 2) f.face = decoy.x >= f.x ? 1 : -1; } }   // デコイにんぎょうは ゆうこうはんい（DOLL_R）の なかの あいてだけ ひきつける   // かげぶんしん：どれを ねらうかは うんしだい
   // ◎（命中100未満）の わざ：（スティック廃止のため 通常は あいての いた 方向・いちに 固定）
   if (f.side === 0 && !S.auto && !B.train && m.aim === 'dir') {
     const v = playerVec();
@@ -6688,7 +6688,9 @@ function updateFighter(f, dt) {
   f.dodgeCd = Math.max(0, f.dodgeCd - dt); f.inv = Math.max(0, f.inv - dt); if (f.hurtInv > 0) f.hurtInv = Math.max(0, f.hurtInv - dt); f.flash -= dt; f.dizzy = Math.max(0, (f.dizzy || 0) - dt);
   f.moving = false;
   const o = opp(f), oT = targetable(o);
-  if (oT && !['dodge', 'dash'].includes(f.state)) f.face = o.x >= f.x ? 1 : -1;
+  if (oT && !['dodge', 'dash'].includes(f.state)) {   // あいてを 見る。デコイにんぎょうが ひきつけて いる ときは にんぎょうを 見る
+    const dl = o.clones && o.clones.find(c => c.doll && Math.hypot(c.x - f.x, c.y - f.y) <= DOLL_R), lx = dl ? dl.x : o.x;
+    if (Math.abs(lx - f.x) > 2) f.face = lx >= f.x ? 1 : -1; }
   if (targetable(f)) { f.enterT += dt; updateEffects(f, dt); if (f.state === 'faint') return; }
   // いしつぶてれんぱつ：つづけて うつ
   if (f.shots.length) { for (const s of f.shots) s.t -= dt; for (const s of f.shots.filter(s => s.t <= 0)) spawnProj(f, s.m, s.ang); f.shots = f.shots.filter(s => s.t > 0); }
