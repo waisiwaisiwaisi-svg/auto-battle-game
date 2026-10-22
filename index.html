@@ -5987,7 +5987,8 @@ const CONDS = {
   aff:   { n: 'タイプ相性', ps: [['adv', '有利'], ['even', '互角'], ['dis', '不利']] },   // 自分のタイプ と 相手のタイプ を くらべる
   opsts: { n: '相手の状態異常', ps: [['any', 'どれか'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['slp', '睡眠'], ['frz', '凍結']] },
   foe:   { n: '相手が溜め中' },
-  see:   { n: '相手が見える' },
+  see:   { n: '相手が見える' },   // そのまま 当てられる 技が ある
+  nosee: { n: '相手が見えない' },   // 障害物・技の かべに さえぎられて、そのままでは 当てられる 技が ない
   after: { n: '技を撃った後', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']] },   // 直前に 撃った 技が その技
   cnt:   { n: '技を撃った回数', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']], ns: [1, 2, 3, 4, 5], nf: (v) => v + '回', n0: 2 },
   mystg: { n: '自分の能力', ps: [['atk', '攻撃'], ['def', '防御'], ['spa', '属性攻撃'], ['spd', '属性防御'], ['spe', '素早さ'], ['eva', '回避']], ns: [1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6], nf: (v) => v > 0 ? `+${v}以上` : `${v}以下`, n0: 1 },   // 能力の 段階が +n いじょう／-n いか
@@ -5998,6 +5999,9 @@ const CONDS = {
 };
 const TR_GO = { auto: 'お任せ', near: '近づいて', far: '離れて', hide: '隠れて', flank: '回り込んで' };   // よける のは いつもの AI が じぶんで する
 const trProg = (f) => { const T = trOf(f); return T && T.mode === 'chip' && T.prog && T.prog.mv ? T.prog : null; };
+// 相手が「見える」：まっすぐ とおる（障害物・技の かべに さえぎられない）か、かべごしに とどく 攻撃技（上から 落とす・とびかかる・ワープ）を もっている
+const OVER_WALL = (m) => INDIRECT(m) || (isDamaging(m) && ['vault', 'warp'].includes(m.k));
+const canReach = (f, o) => losClear(f, o) || f.moves.some(id => MOVES[id] && OVER_WALL(MOVES[id]));
 function condOk(f, o, c, id0) {
   const hpk = (x) => x.hp / x.maxHp * 100, d = dist(f, o);
   switch (c.t) {
@@ -6007,7 +6011,8 @@ function condOk(f, o, c, id0) {
     case 'aff': return typeAff(f.sp, o.sp) === c.p;
     case 'opsts': return !!o.status && (c.p === 'any' || o.status === c.p || (c.p === 'psn' && o.status === 'tox'));
     case 'foe': return !!(threatState(o) && o.cur && isDamaging(o.cur.m));
-    case 'see': return losClear(f, o);
+    case 'see': return canReach(f, o);
+    case 'nosee': return !canReach(f, o);
     case 'enter': return !!id0 && !(f.usedAt && f.usedAt[id0] != null);
     case 'swap': return !!id0 && !!o.swIn && B.t - (o.inAt || 0) < 10 && !(f.usedAt && f.usedAt[id0] >= (o.inAt || 0));
     case 'after': { const id = trSlot(f, c.p); return !!id && f.lastMove === id; }
@@ -7969,7 +7974,8 @@ const KW_C = {   // 訓練の 条件
   aff: ['条件：タイプ相性', '自分の タイプと 相手の タイプを くらべて、有利・互角・不利 の どれか。'],
   opsts: ['条件：相手の状態異常', '相手が 状態異常（やけど・まひ・どく・凍結・睡眠）の とき。どれか、または 1つを えらぶ。'],
   foe: ['条件：相手が溜め中', '相手が 攻撃技を 出す 直前の ため（溜め）を して いる とき。'],
-  see: ['条件：相手が見える', '壁や 障害物に さえぎられず、相手が 見えて いる とき。'],
+  see: ['条件：相手が見える', 'そのまま 当てられる 技が ある とき（障害物・技の かべに さえぎられて いない か、かべごしに とどく 技を もって いる）。'],
+  nosee: ['条件：相手が見えない', '障害物・技の かべに さえぎられて、そのままでは 当てられる 技が ない とき（回り込む・かべを こわす 技を 撃つ ときに）。'],
   mystg: ['条件：自分の能力', '自分の 能力の 段階（技などで 上下した ぶん）が「+n以上」または「-n以下」の とき。交代すると もとに もどる。'],
   opstg: ['条件：相手の能力', '相手の 能力の 段階が「+n以上」（つみ技を つまれたら など）または「-n以下」（下げたら など）の とき。'],
   cnt: ['条件：技を撃った回数', 'この 試合で、えらんだ 技を えらんだ 回数 いじょう 撃った とき（交代しても 数は のこる）。'],
