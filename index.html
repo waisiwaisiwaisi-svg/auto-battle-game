@@ -5521,7 +5521,7 @@ function placeFloor(f, o, m) {
 }
 const inZoneFloor = (z, x, y) => z.parts ? z.parts.some(q => ((x - q.x) / q.rad) ** 2 + ((y - q.y) / (q.rad * .62)) ** 2 < 1) : ((x - z.x) / z.rad) ** 2 + ((y - z.y) / (z.rad * .62)) ** 2 < 1;
 // あいての ゆかの 上に いるか（AI は さける）
-const onFoeFloor = (f, x, y) => !hovers(f) && B.zones.some(z => z.side !== f.side && inZoneFloor(z, x, y));
+const onFoeFloor = (f, x, y) => !hovers(f) && B.zones.some(z => z.side !== f.side && (MOVES[z.id] || {}).noDmg && inZoneFloor(z, x, y));   // さける のは ダメージの ない ゆか（みつだまり など）だけ。ほのお・どく・でんきの ゆかは さけずに とおる
 function updatePlaced(dt) {
   let ch = false;
   for (const w of B.walls) { w.life -= dt; if (w.life <= 0) { ch = true; for (const b of w.blocks) if (!b.gone) { burst(b.x, b.y, TYPES[w.t].c, 3, 50, .3); wallBreakFx(w, b); } }
@@ -6344,7 +6344,7 @@ function aiMove(f, o, dt, autoSpecial) {
   // 予兆の はんいの中なら まず 外へ にげる（命中100未満の わざは これで よけられる）
   // しじした じぶんに つかう わざ（まもる・カウンター・つみわざ・かいふく）：その場で すぐ だす（よちょうの はんいの 中でも）
   if (f.want && f.queued === f.want.id && ['protect', 'counter', 'self', 'heal', 'sub'].includes(MOVES[f.queued].k)) { const q = f.queued; f.queued = null; beginMove(f, q); return; }
-  { const z = !hovers(f) && B.zones.find(z => z.side !== f.side && inZoneFloor({ ...z, rad: z.rad * 1.15, parts: z.parts && z.parts.map(q => ({ ...q, rad: q.rad * 1.15 })) }, f.x, f.y));   // あいての ゆか（ありじごく など）に いる：まず そとへ でる
+  { const z = !hovers(f) && B.zones.find(z => z.side !== f.side && (MOVES[z.id] || {}).noDmg && inZoneFloor({ ...z, rad: z.rad * 1.15, parts: z.parts && z.parts.map(q => ({ ...q, rad: q.rad * 1.15 })) }, f.x, f.y));   // あいての ゆか（ありじごく など）に いる：まず そとへ でる
     if (z) { let ax = f.x - z.x, ay = (f.y - z.y) / .62; if (Math.hypot(ax, ay) < 4) { ax = Math.cos(ang + Math.PI / 2); ay = Math.sin(ang + Math.PI / 2); } const a = Math.atan2(ay * .62, ax); f.paceT = Math.max(f.paceT || 1, 1.8); f.aiMode = 'rest'; return moveDir(f, Math.cos(a), Math.sin(a), dt, true); } }
   const rushIn = !!(f.want && f.queued === f.want.id && rpsOf(MOVES[f.queued]) === 'rock' && charging(o));   // しじした とっしんで ために わりこむ：にげずに つっこむ
   if (!rushIn && threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o, f.x, f.y, f.r) && Math.random() < 1 + persona(f).dodge) {
