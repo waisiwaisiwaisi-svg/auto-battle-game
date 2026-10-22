@@ -1043,7 +1043,6 @@ html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
 
 /* くんれん */
 #scBattle.watch #mvCmds,#scBattle.watch #bAuto{display:none!important}
-#scBattle.watch .cmd.mv{pointer-events:none}
 #scBattle.watch .cmd.mv{filter:saturate(.85)}
 .trmode{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 6px}
 .trmode button.on{color:#1a1222;background:var(--acc)}
@@ -1253,6 +1252,8 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
 .kw{color:#ffd84a;text-decoration:underline;text-decoration-color:rgba(255,216,74,.55);text-underline-offset:2px;cursor:help;pointer-events:auto}
 #kwTip{position:fixed;z-index:10000;max-width:min(280px,calc(100vw - 16px));padding:8px 10px;background:#141030;color:#f3eefc;font-size:12px;line-height:1.55;border:2px solid #ffd84a;box-shadow:0 4px 0 rgba(0,0,0,.5);pointer-events:none;text-align:left}
 #kwTip b{display:block;color:#ffd84a;margin-bottom:2px;font-size:13px}
+#mvTip{position:fixed;z-index:9999;max-width:min(320px,calc(100vw - 16px));padding:8px 10px;background:#141030;color:#f3eefc;font-size:12px;line-height:1.55;border:2px solid var(--c,#ffd84a);box-shadow:0 4px 0 rgba(0,0,0,.5);text-align:left}
+#mvTip b{display:block;color:#ffd84a;font-size:13px}#mvTip .s{color:#b9b0d6;font-size:11px;margin-bottom:3px}#mvTip .cdl{color:#ff9f6b}
 .trflt{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px}.trflt select,.trflt input{font:inherit;font-size:11px;padding:3px 4px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);min-width:0}.trflt input{flex:1 1 90px}
 .trmvs[data-none="1"]::after{content:'あてはまる 技が ない';font-size:11px;color:var(--dim)}
 
@@ -4596,6 +4597,7 @@ function speedOf(f) {
 }
 
 function startBattle(cfg) {
+  mvTipHide();
   S.auto = false;   // AUTO は なくなった（バトルは いつも 訓練どおり）
   const st = cfg.kind === 'wild' ? makeWild() : makeStadium(cfg.field);
   const pf = (cfg.p0 || S.party.slice(0, 3)).map(m => mkFighter(m, 0));
@@ -10159,7 +10161,21 @@ $('btnTwBack').onclick = () => renderJourney();
 $('btnJrBack').onclick = () => renderHub();
 $('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade, twr = B && B.cfg && B.cfg.tower; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else if (twr) renderTower(); else renderHub(); };
 
-document.querySelectorAll('.cmd.mv').forEach(b => b.addEventListener('pointerdown', (e) => { e.preventDefault(); cmdMove(+b.dataset.mv); }));
+document.querySelectorAll('.cmd.mv').forEach(b => b.addEventListener('pointerdown', (e) => { e.preventDefault(); if (B && B.train && !(TUT && TUT.frozen)) { mvTipShow(b); return; } cmdMove(+b.dataset.mv); }));
+// 対戦中（見るだけ）：わざボタンを タップすると その わざの せつめい（もう いちど タップ・ほかを さわると とじる）
+function mvTipHide() { const t = $('mvTip'); if (t) { t.hidden = true; t._b = null; } }
+function mvTipShow(b) {
+  let t = $('mvTip'); if (t && !t.hidden && t._b === b) { mvTipHide(); return; }
+  const f = B && active(B.my || 0), id = f && f.moves[+b.dataset.mv], m = id && MOVES[id]; if (!m) return;
+  if (!t) { t = document.createElement('div'); t.id = 'mvTip'; document.body.appendChild(t);
+    document.addEventListener('pointerdown', (e) => { const T = $('mvTip'); if (T && !T.hidden && !T.contains(e.target) && !(e.target.closest && e.target.closest('.cmd.mv, #kwTip'))) mvTipHide(); }, true); }
+  const left = (f.cd[id] || 0) > 0 ? `<div class="cdl">いまは まち時間（あと ${Math.ceil(f.cd[id])}びょう）</div>` : '';
+  t.innerHTML = `<b>${m.n}${healMax(m) ? ' ' + mvUseTag(m, healLeft(f, id)) : ''}</b><div class="s">${moveSub(m)}・${CAT_NAMES[m.cat] || ''}</div><div>${kwDesc(m)}</div>${left}`;
+  t.style.setProperty('--c', TYPES[m.t].c); t.hidden = false; t._b = b; SND.se('click');
+  const r = b.getBoundingClientRect(), w = t.offsetWidth, h = t.offsetHeight;
+  t.style.left = clamp(r.left + r.width / 2 - w / 2, 8, innerWidth - w - 8) + 'px';
+  let y = r.top - h - 8; if (y < 8) y = Math.min(r.bottom + 8, innerHeight - h - 8); t.style.top = y + 'px';
+}
 
 $('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { NET.ended = true; B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rankResult(false)]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); netReset(); showResult(); } else { netReset(); endBattle('lose'); } }); return; } B.paused = true; $('pauseOv').hidden = false; };
 $('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
