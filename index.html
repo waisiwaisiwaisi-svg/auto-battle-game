@@ -2412,6 +2412,8 @@ Object.assign(NEW_MOVES, {   // だい2だん：ほろび・けっとう・ね�
   'snowscape': { n: 'ゆきげしき', t: 'ice', k: 'weather', cat: 'stat', power: 0, wk: 'snow', wind: .4, cd: 14 },
   'weather-ball': { n: 'ウェザーボール', t: 'normal', k: 'proj', power: 50, spd: 320, r: 10, homing: 1.2, wball: 1 },
   'rewind': { n: 'クロノバック', t: 'psychic', k: 'rewind', cat: 'stat', power: 0, wind: .2, cd: 14 },
+  'hako-punch': { n: 'ハコワレパンチ', t: 'fighting', k: 'melee', power: 90, loan: 1 },   // ハコワレ：ダメージの かわりに かしつけ（りそくが つく・HPを こえたら はさん）
+  'hako-rush': { n: 'ハコワレラッシュ', t: 'fighting', k: 'dash', power: 75, len: 200, loan: 1 },
 });
 const WEATHER = { rain: { n: '雨', ty: 'water', col: 'rgba(80,140,255,.10)' }, sun: { n: '晴れ', ty: 'fire', col: 'rgba(255,200,90,.12)' }, sand: { n: '砂あらし', ty: 'rock', col: 'rgba(200,160,90,.16)' }, snow: { n: '雪', ty: 'ice', col: 'rgba(230,240,255,.12)' } };
 const NEW_IDS = Object.keys(NEW_MOVES);
@@ -5026,6 +5028,7 @@ function moveBlocked(f, id) {
   if (AUTO_GUARD[m.k]) return 'じどうで でる';
   if (f.v && f.v.silence > 0) return 'ふういん中';
   if (f.v && f.v.overheat > 0) return 'オーバーヒート中';
+  if (f.bankT > 0) return 'はさん中';
   if (m.sp === 'roar' && B && B.kind === 'wild') return 'やせいでは つかわない';   // くさむら：とおぼえで にがしたり にげられたり しない（どちらも）
   if (healMax(m) && healLeft(f, id) <= 0) return 'つかいきった';
   if (f.v.taunt > 0 && m.cat === 'stat') return 'ちょうはつ中';
@@ -5775,6 +5778,11 @@ function rayEffect(f, o, m) {
       break;
   }
 }
+function checkBankrupt(f) {   // かりが のこりHPを こえた：はさん（トリタテン）
+  if (!(f.debt > 0) || f.bankT > 0 || f.hp <= 0 || f.debt < f.hp) return;
+  f.bankT = 20; f.cur = null; f.queued = null; if (['wind', 'chan'].includes(f.state)) f.state = 'free';
+  popText(f.x, f.y - 130, 'はさん！ トリタテン', '#ff5a5a', 'comic'); say(`${f.sp.n}は はさんした！ 20びょう 技が だせない！`); B.shake = Math.max(B.shake, 8); SND.se('crit');
+}
 function bombBoom(f, Bm, stun) {
   fxPush({ type: 'shock', x: f.x, y: f.y - BODY, rad: 60, col: '#ff8a3d', life: .4, max: .4 }); sheetFx('boom', f.x, f.y - BODY, 1.3); B.shake = Math.max(B.shake, 9); SND.se('boom');
   if (Bm.att && f.hp > 0) hit(Bm.att, f, Bm.m, Math.atan2(f.y - Bm.att.y, f.x - Bm.att.x), { sure: 1, mul: Bm.m.bomb.mul, bombEx: 1 });
@@ -5906,6 +5914,8 @@ function hit(att, def, m, ang, opt) {
   }
   if (def.v.web > 0 && !opt.tick) { const ex = Math.max(1, Math.round(def.maxHp * .04)); dmg += ex; popText(def.x + 14, def.y - 84, `+${ex}`, '#d8e0a0'); }   // ほういもう：あたるたびに ついかダメージ
   dmg = Math.min(dmg, Math.ceil(def.hp));
+  if (m.loan) { def.debt = (def.debt || 0) + dmg; def.creditor = att.side; def.debtT = def.debtT || 3; popText(def.x, def.y - 84, `かしつけ +${dmg}`, '#ffb347', true); dmg = 0; checkBankrupt(def); }   // ハコワレ：HPは へらさず かしつけ
+  else if (att.debt > 0 && def.side === att.creditor && dmg > 0) { const pay = Math.min(att.debt, dmg); att.debt -= pay; popText(att.x, att.y - 100, `へんさい -${pay}`, '#7be0a8'); }   // かりた がわが こうげき：その ぶん へんさい
   if (def.v.shield > 0) { const ab = Math.min(def.v.shield, dmg); def.v.shield -= ab; dmg -= ab; popText(def.x - 16, def.y - 84, `シールド -${ab}`, '#bfe8ff'); if (def.v.shield <= 0) { def.v.shield = 0; def.v.shieldT = 0; say(`${def.sp.n}の シールドが こわれた！`); burst(def.x, def.y - BODY, '#bfe8ff', 14, 120, .4); } }   // シールド：さきに けずれる
   def.hp = Math.max(0, def.hp - dmg); def.hurtAt = B.t;
   if (m.koReset && def.hp <= 0) { const k = MOVE_ID.get(m); if (k) att.cd[k] = 0; popText(att.x, att.y - 100, 'まちじかん リセット！', '#7be0a8'); }   // たおしたら すぐ もう いちど def.flash = .12; B.lastDmgT = B.t;
@@ -5935,7 +5945,7 @@ function hit(att, def, m, ang, opt) {
   B.shake = Math.max(B.shake, tier === 2 ? 11 : tier === 1 ? 6 : 1.5);
   if (tier === 2) { impactBeat(def.x, def.y - BODY, .55, .28); } /* ばつぐんでも がめんは ひからせない */ else if (tier === 1) impactBeat(def.x, def.y - BODY, .25, 0);
   B.cheer = Math.min(1, B.cheer + (heavy ? .7 : .3));
-  popText(def.x + rand(-6, 6), def.y - 66, String(dmg), eff > 1 ? '#ffd166' : eff < 1 ? '#a49ac0' : '#ffffff', eff > 1 || heavy);
+  if (!m.loan) popText(def.x + rand(-6, 6), def.y - 66, String(dmg), eff > 1 ? '#ffd166' : eff < 1 ? '#a49ac0' : '#ffffff', eff > 1 || heavy);
   burst(def.x, def.y - BODY, id2col(m), heavy ? 16 : 8, 110, .4);
   fxPush({ type: 'impact', x: def.x, y: def.y - BODY, rad: heavy ? 34 : 22, rot: Math.random(), life: .28, max: .28 });
   impactFx(def.x, def.y - BODY, m.t, clamp((heavy ? .6 : .25) + (eff > 1 ? .3 : 0) + (crit ? .2 : 0), 0, 1));
@@ -6252,6 +6262,7 @@ const CONDS = {
   opmark: { n: '相手に印' },
   weather: { n: '天候', ps: [['rain', '雨'], ['sun', '晴れ'], ['sand', '砂あらし'], ['snow', '雪']] },
   myheat: { n: '自分の熱', ps: [[50, '50以上'], [80, '80以上']] },
+  opdebt: { n: '相手の借金', ps: [[50, 'HPの50%以上'], [80, 'HPの80%以上']] },
   lost3: { n: '3秒で減ったHP', ps: [[20, '20%以上'], [35, '35%以上'], [50, '50%以上']] },   // 相手に しるしが ついて いる（しるしを はじく 技と くみあわせる）   // 相手が 交代して 出てきてから この技を まだ 撃っていない（10びょう まで）
 };
 const TR_GO = { auto: 'お任せ', near: '近づいて', far: '離れて', hide: '隠れて', flank: '回り込んで' };   // よける のは いつもの AI が じぶんで する
@@ -6267,6 +6278,7 @@ function condOk(f, o, c, id0) {
     case 'weather': return !!B.weather && B.weather.k === c.p;
     case 'myheat': return (f.heat || 0) >= (c.p || 50);
     case 'lost3': return lostRecent(f) >= (c.p || 20);
+    case 'opdebt': return (o.debt || 0) >= o.hp * (c.p || 50) / 100;
     case 'myhp': return hpk(f) < (c.p || 50);
     case 'ophp': return hpk(o) < (c.p || 50);
     case 'aff': return typeAff(f.sp, o.sp) === c.p;
@@ -6405,6 +6417,7 @@ function aiPick0(f, o) {
       if (m.det) w *= o.v.mark > 0 ? 2.5 : .5;   // しるしが ある ときに はじく
       if (m.mark && o.v.mark > 0) w *= .3;   // もう しるしが ある
       if (m.exec) w *= 1 + m.exec * (1 - o.hp / o.maxHp) * .6;
+      if (m.loan) w *= o.bankT > 0 ? .2 : 1.2;   // はさん中は もう かさない
       { const dd = dist(f, o), rc = moveReach(f, o, m); if (dd > rc) w *= clamp(1 - (dd - rc) / 500, .4, 1); if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !losClear(f, o)) w *= .5; else if (INDIRECT(m) && !losClear(f, o)) w *= 1.8; }
     } else switch (m.k) {
       case 'heal': w = f.hp < f.maxHp * .5 ? 4 : 0; break;
@@ -6863,6 +6876,8 @@ function updateEffects(f, dt) {
   for (const k of ['taunt', 'healBlock', 'confuse', 'protect', 'dbond', 'web', 'mark', 'root', 'silence', 'slowT']) if (v[k] > 0) v[k] = Math.max(0, v[k] - dt);
   if (v.shieldT > 0) { v.shieldT -= dt; if (v.shieldT <= 0) { v.shieldT = 0; v.shield = 0; } }
   if (v.overheat > 0) v.overheat = Math.max(0, v.overheat - dt);
+  if (f.bankT > 0) { f.bankT -= dt; if (f.bankT <= 0) { f.bankT = 0; f.debt = 0; popText(f.x, f.y - 110, 'しゃっきん ちょうけし', '#7be0a8'); } }   // はさん：20びょうで おわり、かりは なくなる
+  else if (f.debt > 0) { f.debtT = (f.debtT || 3) - dt; if (f.debtT <= 0) { f.debtT = 3; f.debt = Math.round(f.debt * 1.1); popText(f.x + 20, f.y - 96, 'りそく +10%', '#ffb347'); checkBankrupt(f); } }   // りそく：3びょうごとに 10%
   if (f.heat > 0 && !(v.overheat > 0)) f.heat = Math.max(0, f.heat - 8 * dt);   // ねつは すこしずつ さめる
   if (v.bomb) { v.bomb.t -= dt; if (v.bomb.t <= 0) { const Bm = v.bomb; v.bomb = null; bombBoom(f, Bm, false); } }
   if (v.perish > 0) { const c0 = Math.ceil(v.perish); v.perish -= dt;   // ほろびのうた：0で たおれる（こうたいすると とける）
@@ -8275,6 +8290,7 @@ function moveDesc(m) {
   if (m.root) add(`当たると${m.root}秒動けない（技は出せる）`); if (m.silence) add(`当たると${m.silence}秒技が出せない（動ける）`);
   if (m.tether) add(`当たると${m.tether.t}秒つながり、近くにいる間ダメージを与え続ける（離れると切れる）`);
   if (m.forceOut) add('当たると相手を控えと入れ替える');
+  if (m.loan) add('ダメージの代わりに借金を貸し付ける（3秒ごとに利息10%）。借金が相手の残りHPをこえると破産し、20秒技が出せない。相手がこちらに攻撃すると返済される');
   if (m.k === 'perish') add('自分と相手に10秒のカウント。0になると倒れる（交代すると消える）');
   if (m.k === 'duel') add('相手は7秒間交代できない');
   if (m.heat) add(`撃つと熱+${m.heat}。熱50以上で1.3倍。100でオーバーヒート（4秒技が出せない）`);
@@ -8321,6 +8337,7 @@ const KW_C = {   // 訓練の 条件
   dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
   weather: ['条件：天候', '場の 天候が えらんだ ものの とき（雨・晴れ・砂あらし・雪）。天候は 20秒 つづく。'],
   myheat: ['条件：自分の熱', '熱の たまる 技を 撃つと 熱が 上がる。50以上で 熱の技が 1.3倍、100に なると 4秒 技が 出せない。熱は すこしずつ さめる。'],
+  opdebt: ['条件：相手の借金', 'ハコワレの 技で かしつけた 借金が 相手の のこりHPの えらんだ 割合いじょうの とき。100%を こえると 相手は はさんして 20秒 技が 出せない。'],
   lost3: ['条件：3秒で減ったHP', 'さいきん 3秒の あいだに 自分の HPが えらんだ 割合いじょう 減った とき（クロノバックの つかいどき）。'],
   opmark: ['条件：相手に印', '相手に「しるし」が ついて いる とき。しるしは しるしを つける 技で つき、しるしを はじく 技で 大ダメージに なる。'],
   myhp: ['条件：自分のHP', '自分の HPが えらんだ 割合より 少ない とき。'],
@@ -9626,7 +9643,7 @@ function drawConditions(f, top, oy, img) {
   }
   if (f.v.protect > 0 && !plOk('g_hold')) { ctx.strokeStyle = `rgba(160,240,255,${.6 + Math.sin(B.t * 30) * .2})`; ctx.fillStyle = 'rgba(160,240,255,.18)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(cx, cy, img.width * 1.25, h * .7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
   if (f.v.shield > 0) { ctx.save(); ctx.strokeStyle = `rgba(191,232,255,${.55 + Math.sin(B.t * 6) * .2})`; ctx.fillStyle = 'rgba(191,232,255,.12)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy, img.width * 1.3, h * .74, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore(); }   // シールド
-  { const tags = []; if (f.v.mark > 0) tags.push(['しるし', '#ffd84a']); if (f.v.root > 0) tags.push(['うごけない', '#c8a8ff']); if (f.v.silence > 0) tags.push(['ふういん', '#c8a8ff']); if (f.v.stk > 0) tags.push(['●'.repeat(f.v.stk), '#9fe0ff']); if (f.v.perish > 0) tags.push([`ほろび ${Math.ceil(f.v.perish)}`, '#c8a8ff']); if (f.v.bomb) tags.push([`ばくだん ${Math.ceil(f.v.bomb.t)}`, '#ff8a3d']); if (f.v.overheat > 0) tags.push(['オーバーヒート', '#ff6a3d']); else if (f.heat > 0) tags.push([`ねつ ${Math.round(f.heat)}`, f.heat >= 50 ? '#ff8a3d' : '#ffd166']); if (B.sides[f.side].lockT > 0) tags.push(['こうたい ふか', '#ff8a6a']);   // あたまの うえの しるし
+  { const tags = []; if (f.v.mark > 0) tags.push(['しるし', '#ffd84a']); if (f.v.root > 0) tags.push(['うごけない', '#c8a8ff']); if (f.v.silence > 0) tags.push(['ふういん', '#c8a8ff']); if (f.v.stk > 0) tags.push(['●'.repeat(f.v.stk), '#9fe0ff']); if (f.v.perish > 0) tags.push([`ほろび ${Math.ceil(f.v.perish)}`, '#c8a8ff']); if (f.v.bomb) tags.push([`ばくだん ${Math.ceil(f.v.bomb.t)}`, '#ff8a3d']); if (f.v.overheat > 0) tags.push(['オーバーヒート', '#ff6a3d']); else if (f.heat > 0) tags.push([`ねつ ${Math.round(f.heat)}`, f.heat >= 50 ? '#ff8a3d' : '#ffd166']); if (B.sides[f.side].lockT > 0) tags.push(['こうたい ふか', '#ff8a6a']); if (f.bankT > 0) tags.push([`はさん ${Math.ceil(f.bankT)}`, '#ff5a5a']); else if (f.debt > 0) tags.push([`かり ${Math.round(f.debt)}（${Math.min(99, Math.round(f.debt / Math.max(1, f.hp) * 100))}%）`, '#ffb347']);   // あたまの うえの しるし
     if (tags.length) { ctx.save(); ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#120e1c'; tags.forEach(([t, c], i) => { const y = top - 20 - i * 12; ctx.strokeText(t, cx, y); ctx.fillStyle = c; ctx.fillText(t, cx, y); }); ctx.restore(); } }
   if (f.v.sub > 0) { ctx.globalAlpha = .55; drawSprite(SPR[f.mon.sid].w, f.x + f.face * -26, f.y + 4, f.face, 1); ctx.globalAlpha = 1; }
   if (f.v.counter && plOk('ctr_aura')) { const ck = f.v.counter.ctr === 'spec' && plOk('mirror') ? 'mirror' : 'ctr_aura', sc = (img.width * 1.4 + 20) / (PLFX[ck].w * PIX_D);   // かまえ：あしもとの ほのお／はんしゃの まく
