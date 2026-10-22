@@ -4944,11 +4944,12 @@ function beginMove(f, id) {
   f.lastMove = id; B.lastMoveT = B.t; (f.usedAt = f.usedAt || {})[id] = B.t; (f.useN = f.useN || {})[id] = (f.useN[id] || 0) + 1;   // useN：この 試合で 撃った 回数（交代しても のこる）
   if (simMine(f)) { const L = B.simLog; L.used[id] = (L.used[id] || 0) + 1; if (f.trTag === id) { L.cond[id] = (L.cond[id] || 0) + 1; L.lf = L.lf || {}; const k = `${f.trRow}:${f.trLine}`; L.lf[k] = (L.lf[k] || 0) + 1; } }   // 模擬戦の きろく
   if (B.log) B.log.push(id); if (B.logS) B.logS.push([f.side, id]);
+  if (!B.headless && m.n) popText(f.x, f.y - 112, m.n, TYPES[m.t] ? TYPES[m.t].c : '#ffffff', true);   // 撃った 技の なまえを あたまの うえに
   if (m.k !== 'melee' || id !== 'tackle') {
     say(`${prefix(f)}${f.sp.n}の ${m.n}！`);
     if (B.cfg.dummy) dummyLog(f, id);
     if (m.rapidSpin) { for (const sd of B.sides) { const hz = sd.hz; hz.rocks = hz.spikes = hz.tspikes = 0; const x = sd.fs[sd.act]; if (x) x.v.seed = 0; } B.obs = OB().filter(o => o.k !== 'mine' && o.k !== 'snare'); B.zones = []; say('しかけが すべて はらわれた！'); }   // ふりはらい：撃った ときに りょうほうの 場の しかけ（いわ・まきびし・どくびし・じらい・わな・ゆか）と たねを ぜんぶ はらう
-    if (f.trTag === id) { f.trTag = null; if (!B.headless) popText(f.x, f.y - 104, '条件', '#7be0a8'); }   // 訓練の 条件で えらんだ 技
+    if (f.trTag === id) { f.trTag = null; if (!B.headless) popText(f.x, f.y - 138, '条件', '#7be0a8'); }   // 訓練の 条件で えらんだ 技
     if (B.sides[f.side].trainer) cmdPose(f.side);
   }
 }
@@ -8106,7 +8107,7 @@ function dummyLog(f, id) {   // 技を 撃った：条件で えらんだ もの
   if (!DUM || f.side !== 0) return; const P = DUM.prog, ri = P.mv.findIndex(r => r.id === id), r = P.mv[ri];
   const by = f.trTag === id && r && f.trLine >= 0 ? trLines(r.c)[f.trLine] : null;
   DUM.log.unshift({ t: B.t, id, by: by ? by.map(c => trCondTx(c, P)).join('かつ') : '', auto: !!AUTO_GUARD[MOVES[id] && MOVES[id].k] }); DUM.log.length = Math.min(DUM.log.length, 5);
-  if (by) popText(f.x, f.y - 120, '条件：' + by.map(c => trCondTx(c, P)).join('かつ'), '#7be0a8');
+  if (by) popText(f.x, f.y - 140, '条件：' + by.map(c => trCondTx(c, P)).join('かつ'), '#7be0a8');
   DUM.flash = { id, t: B.t };
 }
 function dummyHud(on) {
