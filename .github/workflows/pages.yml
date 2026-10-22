@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main, claude/charming-curie-tre221]
-    paths: ['index.html', 'music/**', 'se8bit/**', 'stage/**', 'web/**', 'docs/privacy.html', '.github/workflows/pages.yml']
+    paths: ['index.html', 'music/**', 'se8bit/**', 'stage/**', 'web/**', 'docs/privacy.html', 'app/src/**', 'app/scripts/**', '.github/workflows/pages.yml']
 permissions:
   contents: write
 concurrency:
@@ -17,13 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      # オンライン（ランク対戦・ランキング・ギルド）：リポジトリの Secrets に FIREBASE_CONFIG（Firebase の ウェブアプリ設定の JSON）が あれば つなぐ。なければ 1人用だけ
+      - name: Firebase の せってい
+        env: { FIREBASE_CONFIG: '${{ secrets.FIREBASE_CONFIG }}' }
+        run: |
+          if [ -n "$FIREBASE_CONFIG" ]; then printf 'window.PMA_FIREBASE_CONFIG = %s;\n' "$FIREBASE_CONFIG" > app/firebase-config.js; echo "オンライン あり"; else echo "オンライン なし（1人用）"; fi
       - name: サイトを くみたてる
         run: |
-          mkdir -p _site/music _site/se8bit _site/stage
-          cp index.html _site/index.html
-          cp music/*.mp3 _site/music/
-          cp se8bit/*.wav _site/se8bit/
-          cp stage/* _site/stage/
+          (cd app && npm ci --no-audit --no-fund && node scripts/build-web.mjs)
+          mkdir -p _site
+          cp -r app/www/. _site/
           cp web/* _site/
           cp docs/privacy.html _site/privacy.html
           touch _site/.nojekyll
