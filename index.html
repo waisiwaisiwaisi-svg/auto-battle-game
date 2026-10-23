@@ -1135,7 +1135,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trnatn{margin-left:auto;font-size:11px;opacity:.75}
 .trnatsel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .trnatsel button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:8px;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--ink);font:inherit;min-width:0}
-.trnatsel button span{font-size:18px;line-height:1}.trnatsel button b{font-size:13px;white-space:nowrap}.trnatsel button small{font-size:10px;color:#ffd84a;opacity:1}
+.trnatsel button span{font-size:18px;line-height:1}.trnatsel button b{font-size:13px;white-space:nowrap}.trnatc{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-width:0}.trnatc button{padding:6px 4px!important}.trrec{font-size:10px;color:#ffd84a;text-align:center;line-height:1.3}.trnatsel button small{font-size:10px;color:#ffd84a;opacity:1}
 .trnatsel button.on{border-color:var(--g);background:color-mix(in srgb,var(--g) 22%,transparent);box-shadow:0 0 0 1px var(--g)}
 .trnat .nrel{display:flex;align-items:center;gap:6px;font-size:11px}
 .trr{border-left:5px solid var(--c,#888)!important;padding:7px 8px!important;background:rgba(255,255,255,.06)!important}
@@ -3940,7 +3940,7 @@ const planName = (m) => { const k = planOfMon(m), P = TR_PLAN.find(p => p[0] ===
 function trNatCard(k, W, m) {
   const N = NATURES[m.nat], rec = recPlan(m.sid), cur = trPlanOf(W && W.nat) || rec, P = TR_PLAN.find(p => p[0] === cur);
   return `<div class="trnat"><div class="trh"><span class="trstep">1</span><b>作戦</b><span class="dim">ふだんの 立ち回り</span></div>
-    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<button data-nat="${x}" class="${x === cur ? 'on' : ''}" style="--g:${GRP[NAT_GRP[x]].c}"><b>${n}</b>${x === rec ? '<small>★おすすめ</small>' : ''}</button>`).join('')}</div>
+    <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<div class="trnatc"><button data-nat="${x}" class="${x === cur ? 'on' : ''}" style="--g:${GRP[NAT_GRP[x]].c}"><b>${n}</b></button><small class="trrec"${x === rec ? '' : ' style="visibility:hidden"'}>★おすすめ</small></div>`).join('')}</div>
     <div class="ndsc">${P ? P[2] : ''}</div>
     <div class="dim nrel">${natRelText(cur)}<details class="trq"><summary>？</summary><div>3すくみ：🔥せめ → 🌀からめて → 🛡まもり → 🔥せめ。<br>よわい あいてから うけるときは ぼうぎょ 1.15ばい、にがてな あいてからは 0.87ばい。<br>性格は 能力の 上下だけ。撃ち方が「お任せ」の 技は この 作戦の 動きで 撃ちます。</div></details></div></div>`;
 }
@@ -4068,11 +4068,13 @@ function trtLoop() {
 }
 function trDockFix() {   // 訓練：3れつ ならび の ときは ひだりの れつ（モンスター いちらん＋木人戦・模擬戦・確定）を がめんに こてい（それ いがいは もとの ばしょへ）
   const B = $('trBody'), pg = B && B.querySelector('.trpage'), dk = pg && pg.querySelector('.trdock'), home = pg && pg.querySelector('.trhome'), mons = pg && pg.querySelector('.trmons'); if (!dk || !home || !mons) return;
+  const st = mons.scrollTop, sl = mons.scrollLeft;   // うごかすと スクロールが もどるので おぼえておく
   pg.classList.remove('dock'); if (mons.parentNode !== pg) pg.prepend(mons); dk.style.height = '';
   const three = getComputedStyle(pg).gridTemplateColumns.replace(/(minmax|repeat|fit-content)\([^)]*\)/g, 'X').trim().split(/\s+/).length >= 3;   // minmax( … ) は 1れつ と かぞえる
   const els = [...pg.querySelectorAll('.trbtns, .trbtns2, .trstat')];
   if (three) { pg.classList.add('dock'); dk.prepend(mons); dk.append(...els); trDockH(); }
   else { let at = home; for (const e of els) { at.after(e); at = e; } }
+  mons.scrollTop = st; mons.scrollLeft = sl;
 }
 function trDockH() {   // ひだりの れつの たかさ：みえて いる ぶん いっぱい（スクロール しても あかない）
   const sc = $('scTrain'), dk = sc && sc.querySelector('.trpage.dock .trdock'); if (!dk) return;
