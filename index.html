@@ -2372,7 +2372,7 @@ const NEW_MOVES = {"bonemerang": {"n": "ホネブーメラン", "t": "ground", "
   "venom-stack": {"n": "どくばりちくせき", "t": "bug", "k": "proj", "power": 40, "spd": 360, "r": 7, "homing": 1.5, "stack": {"n": 2, "st": "tox"}},
   "dragon-claw": {"n": "ドラゴンクロー", "t": "dragon", "k": "swipe", "power": 80, "rad": 64, "aim": "dir"},
   "dragon-tail": {"n": "ドラゴンテール", "t": "dragon", "k": "melee", "power": 60, "forceOut": 1, "cd": 5},
-  "scale-shot": {"n": "スケイルショット", "t": "dragon", "k": "proj", "power": 30, "spd": 400, "r": 7, "homing": 1.4, "burst": [4, 4], "cd": 4.5},
+  "scale-shot": {"n": "スケイルショット", "t": "dragon", "k": "proj", "power": 30, "spd": 400, "r": 7, "homing": 1.4, "burst": [4, 4], "cd": 4.5, "useSelf": {"def": -1, "spe": 1}},
   "dragon-armor": {"n": "りゅうせいとっしん", "t": "dragon", "k": "dash", "power": 100, "len": 220, "wind": 0.6, "armor": 1},
   "dragon-charge": {"n": "りゅうのためいき", "t": "dragon", "k": "cone", "power": 90, "rad": 1200, "half": 0.16, "pat": "breath", "wind": 0.4, "chargeUp": 1.2},
   "dragon-dive": {"n": "ドラゴンダイブ", "t": "dragon", "k": "vault", "power": 100, "rad": 40, "hide": "fly", "e": {"flinch": 20}},
@@ -2408,6 +2408,39 @@ Object.assign(NEW_MOVES, {   // だい2だん：ほろび・けっとう・ね�
   'snowscape': { n: 'ゆきげしき', t: 'ice', k: 'weather', cat: 'stat', power: 0, wk: 'snow', wind: .4, cd: 14 },
   'weather-ball': { n: 'ウェザーボール', t: 'normal', k: 'proj', power: 50, spd: 320, r: 10, homing: 1.2, wball: 1, uses: 10 },
   'rewind': { n: 'クロノバック', t: 'psychic', k: 'rewind', cat: 'stat', power: 0, wind: .2, cd: 14 },
+  // だい3だん：のこりの 候補 ぜんぶ
+  'third-fist': { n: 'みつめのこぶし', t: 'fighting', k: 'melee', power: 45, nth: 3 },
+  'wish': { n: 'ねがいごと', t: 'normal', k: 'wish', cat: 'stat', power: 0, wind: .3, cd: 12 },
+  'healing-wish': { n: 'いやしのねがい', t: 'psychic', k: 'hwish', cat: 'stat', power: 0, wind: .5, cd: 20 },
+  'memento': { n: 'おきみやげ', t: 'ghost', k: 'memento', cat: 'stat', power: 0, wind: .5, cd: 20 },
+  'echo-slash': { n: 'ざんきょう', t: 'ghost', k: 'swipe', power: 40, rad: 62, echo: { t: 3, k: .4 } },
+  'electric-terrain': { n: 'エレキフィールド', t: 'elec', k: 'terrain', cat: 'stat', power: 0, tk: 'elec', wind: .4, cd: 14 },
+  'grassy-terrain': { n: 'グラスフィールド', t: 'grass', k: 'terrain', cat: 'stat', power: 0, tk: 'grass', wind: .4, cd: 14 },
+  'psychic-terrain': { n: 'サイコフィールド', t: 'psychic', k: 'terrain', cat: 'stat', power: 0, tk: 'psy', wind: .4, cd: 14 },
+  'gravity': { n: 'じゅうりょく', t: 'psychic', k: 'gravity', cat: 'stat', power: 0, wind: .4, cd: 16 },
+  'smack-down': { n: 'うちおとす', t: 'rock', k: 'proj', power: 50, spd: 360, r: 9, homing: 1.2, ground: 8 },
+  'copycat': { n: 'オウムがえし', t: 'normal', k: 'copycat', cat: 'stat', power: 0, wind: .1, cd: 6 },
+  'mimic': { n: 'ものまね', t: 'normal', k: 'mimic', cat: 'stat', power: 0, wind: .3, cd: 10 },
+  'heart-swap': { n: 'ハートスワップ', t: 'psychic', k: 'ray', cat: 'stat', power: 0, sp: 'trick', wind: .3, cd: 8 },
+  'haze': { n: 'くろいきり', t: 'ice', k: 'haze', cat: 'stat', power: 0, wind: .4, cd: 10 },
+  'soak': { n: 'みずびたし', t: 'water', k: 'soak', cat: 'stat', power: 0, wind: .3, cd: 10 },
+  'trick-or-treat': { n: 'ハロウィン', t: 'ghost', k: 'halloween', cat: 'stat', power: 0, wind: .3, cd: 10 },
+  'power-barrier': { n: 'ちからのバリア', t: 'fighting', k: 'shield', cat: 'stat', power: 0, shield: .2, life: 6, zarya: 1, cd: 12 },
+  'rage-mode': { n: 'いかりモード', t: 'normal', k: 'enrage', cat: 'stat', power: 0, wind: .2, cd: 30, uses: 1 },
+  'mystic-shot': { n: 'まどうだん', t: 'psychic', k: 'proj', power: 50, spd: 520, r: 7, cdcut: 1.5 },
+  'side-change': { n: 'サイドチェンジ', t: 'psychic', k: 'sideswap', cat: 'stat', power: 0, wind: .25, cd: 10 },
+  'shadow-return': { n: 'かげがえし', t: 'ghost', k: 'dash', power: 70, len: 200, lbk: 3.5, cd: 6 },
+  'arcane-shift': { n: 'ひらりショット', t: 'wind', k: 'proj', power: 50, spd: 380, r: 8, homing: 2.2, blink: 130, cd: 5 },
+  'mini-turret': { n: 'ミニほうだい', t: 'elec', k: 'turret', cat: 'stat', power: 0, wind: .4, cd: 14 },
+  'summon-bear': { n: 'くまさんよび', t: 'normal', k: 'summon', cat: 'stat', power: 0, wind: .5, cd: 16 },
+  'burning-aura': { n: 'しゃくねつオーラ', t: 'fire', k: 'aura', cat: 'stat', power: 0, wind: .3, cd: 12 },
+  'magic-cage': { n: 'まほうのおり', t: 'ghost', k: 'cage', cat: 'stat', power: 0, wind: .4, cd: 12 },
+  'self-destruct': { n: 'じばく', t: 'normal', k: 'aoe', power: 200, rad: 120, boom: 1, wind: 1, cd: 10 },
+  'high-jump-kick': { n: 'とびひざげり', t: 'fighting', k: 'dash', power: 130, acc: 90, len: 230, missCrash: .5 },
+  'hyper-beam': { n: 'はかいこうせん', t: 'normal', k: 'beam', power: 150, len: 340, wid: 36, recharge: 2.5 },
+  'rollout': { n: 'ころがる', t: 'rock', k: 'dash', power: 30, len: 170, chain: 1, roll: 1 },
+  'pain-split': { n: 'いたみわけ', t: 'normal', k: 'painsplit', cat: 'stat', power: 0, wind: .3, cd: 12 },
+  'endeavor': { n: 'がむしゃら', t: 'normal', k: 'endeavor', cat: 'stat', power: 0, wind: .3, cd: 14 },
   'hako-punch': { n: 'ぶっとびてんし', t: 'fighting', k: 'melee', power: 0, hako: 1, cd: 4 },   // ハコワレ：いりょく0。あいての 攻撃+1、5びょうごとに うばう ステータスが ふえ、もう いちど あてるか たおれたら とりたて
 });
 const WEATHER = { rain: { n: '雨', ty: 'water', col: 'rgba(80,140,255,.10)' }, sun: { n: '晴れ', ty: 'fire', col: 'rgba(255,200,90,.12)' }, sand: { n: '砂あらし', ty: 'rock', col: 'rgba(200,160,90,.16)' }, snow: { n: '雪', ty: 'ice', col: 'rgba(230,240,255,.12)' } };
@@ -4760,6 +4793,8 @@ function sendOut(side, idx, pass, lag, at, ko) {
   f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.want = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
   f.enterT = 0; f.swIn = B.mode === 'fight'; f.inAt = B.t; f.v = {}; f.hist = []; f.rw = null; f.heat = 0; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.usedAt = {}; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
+  if (f.sp0) { f.sp = f.sp0; f.sp0 = null; }   // みずびたし・ハロウィン：こうたいで もとの タイプ
+  if (B.sides[side].hwish && f.hp > 0) { B.sides[side].hwish = 0; f.hp = f.maxHp; f.status = ''; f.toxN = 1; setTimeout(() => { if (B && f.hp > 0) { popText(f.x, f.y - 100, 'いやしのねがい！ ぜんかいふく', '#ff9ad0', 'comic'); healFx(f); } }, 0); }
   f.swapLag = lag ? SWAP_LAG : 0; if (lag) f.inv = 0;
   moveLock(f, ENTER_LOCK);   // でてきた ばかりは わざを だせない
   const tr = sd.trainer;
@@ -5022,6 +5057,8 @@ function moveBlocked(f, id) {
   const m = MOVES[id];
   if (AUTO_GUARD[m.k]) return 'じどうで でる';
   if (f.v && f.v.silence > 0) return 'ふういん中';
+  if (B && B.gravity > 0 && m.hide === 'fly') return 'じゅうりょく中';
+  if (m.k === 'enrage' && f.hp > f.maxHp * .3) return 'HPが 30%より おおい';
   if (f.v && f.v.overheat > 0) return 'オーバーヒート中';
   if (m.sp === 'roar' && B && B.kind === 'wild') return 'やせいでは つかわない';   // くさむら：とおぼえで にがしたり にげられたり しない（どちらも）
   if (healMax(m) && healLeft(f, id) <= 0) return 'つかいきった';
@@ -5037,6 +5074,15 @@ const isDamaging = (m) => m.cat !== 'stat';
 function beginMove(f, id) {
   const o = opp(f); if (!o || B.mode === 'intro') return;   // ファイト！ まえは うたない
   const m = MOVES[id];
+  if (m.k === 'copycat') {   // オウムがえし：あいてが さいごに つかった 技を つかう
+    f.cd[id] = m.cd * cdScale(f) * CD_SHARED_K; (f.cdMax = f.cdMax || {})[id] = f.cd[id]; const id2 = o.lastMove, m2 = MOVES[id2];
+    if (!m2 || ['copycat', 'mimic'].includes(m2.k) || AUTO_GUARD[m2.k]) { say('まねる 技が ない！'); popText(f.x, f.y - 66, 'しっぱい', '#a49ac0'); return; }
+    popText(f.x, f.y - 104, `オウムがえし！ ${m2.n}`, '#ffd166', true); return beginMove(f, id2);
+  }
+  if (m.lbk && f.lbk && f.lbk.id === id && B.t < f.lbk.end) {   // かげがえし：まどの あいだに もう いちど おすと もとの ばしょへ
+    const P = f.lbk; f.lbk = null; fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .5, max: .5, a: .6 }); f.x = P.x; f.y = P.y; clampF(f); if (B.st.solid && blockedAt(f.x, f.y, footR(f))) freeSpot(f);
+    fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 36, col: '#8a78c8', life: .5 }); popText(f.x, f.y - 100, 'もどった！', '#b8a8f0'); f.cd[id] = (f.cdMax = f.cdMax || {})[id] = m.cd * cdScale(f) * CD_SHARED_K; return;
+  }
   if (f.v.confuse > 0 && !f.cfuse && confusedAct(f, id)) return;   // こんらん：しじと ちがう ことを する
   if (healMax(m) && !TUT && !(m.charge2 && !f.v.charged)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }   // がりょうてんせいは ためる ときは かぞえない
   if (m.fakeout) f.v.fakeUsed = true;   // びっくりてうち：1かい でるごとに 1かい
@@ -5055,9 +5101,12 @@ function beginMove(f, id) {
   if (m.k === 'beam' && m.pat === 'erupt') { cur.pts = []; const L = rayLen(f, ang, m.len); for (let d = 40, i = 0; d <= L; d += 46, i++) cur.pts.push({ x: f.x + Math.cos(ang) * d, y: f.y + Math.sin(ang) * d, d: i * .06, r: 30, ring: 0 }); }   // じめんが じゅんに さけて ふきあがる
   if (m.charge2 && f.v.charged) cur.wind = .03;   // ためてあれば すぐ はなつ
   if (m.chargeUp) { const c = clamp((dist(f, o) - 140) / 260, 0, 1); cur.chg = c; cur.wind += c * m.chargeUp; if (m.k === 'cone') cur.half = m.half * (1 + 2.2 * c); }   // ためて はなつ：とおい ほど ながく ためて とおくまで とどく
+  if (m.nth) { f.nthC = f.nthC || {}; const c = f.nthC[id] = (f.nthC[id] || 0) + 1; cur.nthB = c % m.nth === 0; if (cur.nthB && !B.headless) popText(f.x, f.y - 104, 'つよい いちげき！', '#ffd166', true); }   // N かいめ だけ つよい
+  if (m.useSelf) changeStages(f, m.useSelf, true);   // スケイルショット：うつと ぼうぎょ↓ すばやさ↑
   cur.decoy = decoy; f.cur = cur; if (f.want && f.want.id === id) f.want = null;   // ボタンの しじ：だせた
   const cdv = m.cd * cdScale(f) * CD_SHARED_K; f.cdMax = f.cdMax || {}; f.cdMax[id] = cdv;
   if (id !== 'tackle') f.cd[id] = (f.v.rampage && id === 'outrage') ? 0 : cdv; else f.cd[id] = cdv;
+  if (m.lbk) { f.lbk = { id, x: f.x, y: f.y, end: B.t + m.lbk, hp: f.hp }; f.cd[id] = f.cdMax[id] = .5; }   // かげがえし：もどれる まど
   if (m.heat) { f.heat = (f.heat || 0) + m.heat; f.hot = f.heat >= 50 ? { id, t: B.t + 3 } : null;   // ねつ：50いじょうで つよい・100で オーバーヒート（4びょう 技が でない）
     if (f.heat >= 100) { f.heat = 0; f.v.overheat = 4; if (!B.headless) popText(f.x, f.y - 124, 'オーバーヒート！', '#ff6a3d', 'comic'); say(`${f.sp.n}は オーバーヒートした！ しばらく 技が だせない`); } }
   if (m.stock) {   // ストック：つづけて うてる かいすう。つかいきったら まちじかん（さいはつどう：まどの あいだに もう いちど）
@@ -5396,6 +5445,7 @@ function fireMove(f) {
       if (m.hits && cur.hits < m.hits && f.state === 'wind') { cur.t = cur.wind - .16; return; } // さんれんスピン：同じ向きで あと2回
       endAct(f, .25); break;
     case 'proj': {
+      if (m.blink && o) { const a = Math.atan2(f.y - o.y, f.x - o.x) + (Math.random() < .5 ? 1 : -1) * .9; fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .35, max: .35, a: .5 }); f.x += Math.cos(a) * m.blink; f.y += Math.sin(a) * m.blink; clampF(f); if (B.st.solid && blockedAt(f.x, f.y, footR(f))) freeSpot(f); cur.ang = Math.atan2(o.y - f.y, o.x - f.x); f.face = o.x >= f.x ? 1 : -1; burst(f.x, f.y - BODY, '#7fd8d0', 8, 70, .3); }   // ひらりショット
       if (m.burst) { // いしつぶてれんぱつ：同じ向きに 2〜5発
         const n = randi(m.burst[0], m.burst[1]);
         for (let i = 0; i < n; i++) f.shots.push({ t: i * .14, m, ang: cur.ang + rand(-.04, .04) });
@@ -5435,6 +5485,10 @@ function fireMove(f) {
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) { if (losClear(f, o)) hit(f, o, m, cur.ang); else blockedFx(f, o, m); }
       endAct(f, .35); break;
     case 'aoe':
+      if (m.boom) {   // じばく：おおきく ばくはつして じぶんは たおれる
+        fxPush({ type: 'shock', x: f.x, y: f.y, rad: m.rad, col: '#ffb347', life: .5, max: .5 }); sheetFx('boom', f.x, f.y - 30, 2.4); B.shake = Math.max(B.shake, 16); SND.se('boom'); addDecal(f.x, f.y, m.rad * .4, 'scorch'); wallsInArea(f.x, f.y, m.rad, m);
+        if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x));
+        endAct(f, .3); if (f.hp > 0) { f.hp = 0; faint(f, o); } break; }
       if (m.quake) {   // じならし：フィールド ぜんたいが ゆれる。モンスターが おいた かべ・いわを ぜんぶ くずす
         B.shake = Math.max(B.shake, 14); SND.se('boom'); const st = B.st;
         for (let i = 0; i < 7; i++) sheetFx('shockwave', rand(st.fx0 + 40, st.fx1 - 40), rand(st.fy0 + 20, st.fy1 - 10), 1.2);
@@ -5484,7 +5538,7 @@ function blockedFx(f, o, m) {
   impactFx(x, y - BODY * .5, m.t, .45); 
 }
 const id2col = (m) => m.t === 'normal' ? '#ffffff' : TYPES[m.t].c;
-function endAct(f, t) { if (['wind', 'chan', 'dash', 'rage', 'grab', 'stance'].includes(f.state)) { f.state = 'act'; f.stT = t; } afterMoveUsed(f); }
+function endAct(f, t) { if (['wind', 'chan', 'dash', 'rage', 'grab', 'stance'].includes(f.state)) { f.state = 'act'; f.stT = t; if (f.cur && f.cur.m.recharge) { f.stT = Math.max(t, f.cur.m.recharge); popText(f.x, f.y - 96, 'はんどうで うごけない', '#a49ac0'); } } afterMoveUsed(f); }
 // うちつづける わざの 1回ぶん
 function chanTick(f, o, oT) {
   const cur = f.cur, m = cur.m, c = Math.cos(cur.ang), s = Math.sin(cur.ang);
@@ -5711,10 +5765,34 @@ function useStatusMove(f, o, m) {
       const pts = [{ x: f.x, y: f.y }].concat(f.hist.slice(f.hist.indexOf(e)).reverse().map(h => ({ x: h.x, y: h.y })));   // いま → 3びょうまえ の みち
       f.rw = { pts, t: 0, T: .5, g: 0, heal: Math.max(0, e.hp - f.hp) * .5 }; popText(f.x, f.y - 110, 'まきもどし！', '#ff9ad0', 'comic'); break; }
     case 'magnet': B.magnet = { t: m.mt, pull: m.pull, side: f.side }; fxPush({ type: 'shock', x: f.x, y: f.y, rad: 90, col: '#ffe27a', life: .5, max: .5 }); say(`フィールドに じりょくが みちた！ おたがいが ひきよせられる！`); break;   // マグネットパワー：うちつづける あいだ あいてを ひきよせる
+    case 'wish': (B.wishes = B.wishes || []).push({ side: f.side, x: f.x, y: f.y, t: 3 }); say(`${f.sp.n}は ねがいごとを した！`); break;   // 3びょうご あしもとの みかたを かいふく
+    case 'hwish': case 'memento': {   // じぶんは たおれて つぎの みかたを たすける／あいてを よわらせる
+      if (m.k === 'hwish') { B.sides[f.side].hwish = 1; say(`${f.sp.n}は いやしのねがいを たくした！`); } else if (o && targetable(o)) { changeStages(o, { atk: -2, spa: -2 }); say(`${f.sp.n}は おきみやげを のこした！`); }
+      fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 50, col: m.k === 'hwish' ? '#ff9ad0' : '#8a78c8', life: .8 }); endAct(f, .2); if (f.hp > 0) { f.hp = 0; faint(f, o); } break; }
+    case 'terrain': B.terrain = { k: m.tk, t: 15 }; say({ elec: 'エレキフィールドに なった！（でんき↑・ねむらない）', grass: 'グラスフィールドに なった！（くさ↑・すこしずつ かいふく）', psy: 'サイコフィールドに なった！（エスパー↑・とっしんが きかない）' }[m.tk]); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 140, col: TYPES[m.t].c, life: .6, max: .6 }); break;
+    case 'gravity': B.gravity = 8; say('じゅうりょくが つよく なった！ とぶ ことが できない'); B.shake = Math.max(B.shake, 6); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#c8a8ff', life: .6, max: .6 }); break;
+    case 'mimic': {   // ものまね：あいてが さいごに つかった 技を この たたかいの あいだ おぼえる
+      const id2 = o && o.lastMove, m2 = MOVES[id2], me = MOVE_ID.get(m), ix = f.moves.indexOf(me);
+      if (!m2 || ['copycat', 'mimic'].includes(m2.k) || f.moves.includes(id2) || ix < 0) { failMove(f, 'まねる 技が ない！'); return; }
+      f.moves[ix] = id2; f.cd[id2] = 0; popText(f.x, f.y - 104, `${m2.n}を おぼえた！`, '#ffd166', true); say(`${f.sp.n}は ${m2.n}を ものまねした！`); break; }
+    case 'haze': for (const x of [f, o]) if (x) x.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#7f8aa8', life: .6, max: .6 }); say('くろいきりで のうりょくの へんかが もとに もどった！'); break;
+    case 'soak': case 'halloween': {   // あいての タイプを かえる・たす（こうたいで もどる）
+      if (!o || !targetable(o)) return; const nt = m.k === 'soak' ? 'water' : 'ghost';
+      if (m.k === 'soak' ? (o.sp.type === 'water' && !o.sp.type2) : hasType(o, 'ghost')) { failMove(f, 'こうかが ない！'); return; }
+      o.sp0 = o.sp0 || o.sp; o.sp = Object.assign({}, o.sp, m.k === 'soak' ? { type: 'water', type2: null } : { type2: 'ghost' });
+      fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: TYPES[nt].c, life: .45 }); popText(o.x, o.y - 104, m.k === 'soak' ? 'みずタイプに なった！' : 'ゴーストタイプが ついた！', TYPES[nt].c, true); break; }
+    case 'enrage': f.v.enrage = 8; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 46, col: '#ff5a3a', life: .8 }); popText(f.x, f.y - 104, 'いかりモード！', '#ff5a3a', 'comic'); say(`${f.sp.n}は いかりで ちからが みなぎった！`); break;
+    case 'sideswap': { if (!o || !targetable(o)) return; const ax = f.x, ay = f.y; for (const x of [f, o]) fxPush({ type: 'ghost', sid: x.mon.sid, x: x.x, y: x.y, face: x.face, life: .4, max: .4, a: .5 }); f.x = o.x; f.y = o.y; o.x = ax; o.y = ay; clampF(f); clampF(o); fxp({ type: 'swap', x: f.x, y: f.y - BODY, col: '#ff9ad0', life: .6 }); fxp({ type: 'swap', x: o.x, y: o.y - BODY, col: '#ff9ad0', life: .6 }); say(`${f.sp.n}と ${o.sp.n}の ばしょが いれかわった！`); break; }
+    case 'turret': (B.turrets = B.turrets || []).filter(q => q.side === f.side).forEach(q => q.t = 0); B.turrets.push({ f, side: f.side, x: f.x + f.face * 30, y: f.y + 4, t: 10, cd: .8, m: Object.assign({}, m, { k: 'proj', cat: 'spec', pow: 7, spd: 380, r: 6, homing: .6 }) }); say(`${f.sp.n}は ミニほうだいを おいた！`); break;
+    case 'summon': (B.minions = B.minions || []).filter(q => q.side === f.side).forEach(q => q.t = 0); B.minions.push({ f, side: f.side, x: f.x + f.face * 30, y: f.y, t: 8, cd: .5, face: f.face, walk: 0, m: Object.assign({}, m, { k: 'melee', cat: 'phys', pow: 5 }) }); sheetFx('teleport', f.x + f.face * 30, f.y - 20, 1); say(`${f.sp.n}は くまさんを よんだ！`); break;
+    case 'aura': if (f.v.aura > 0) { f.v.aura = 0; say(`${f.sp.n}は オーラを けした`); break; } f.v.aura = 8; f.v.auraN = .5; f.v.auraM = Object.assign({}, m, { cat: 'spec', pow: 6 }); say(`${f.sp.n}は しゃくねつの オーラを まとった！`); break;
+    case 'cage': if (!o) return; (B.cages = B.cages || []).push({ side: f.side, x: o.x, y: o.y, r: 110, t: 4, inside: true }); fxPush({ type: 'shock', x: o.x, y: o.y, rad: 110, col: '#b8a8f0', life: .5, max: .5 }); say('まほうの おりが あらわれた！ でたり はいったり すると うごけなくなる'); break;
+    case 'painsplit': { if (!o || !targetable(o)) return; const avg = (f.hp + o.hp) / 2; f.hp = Math.min(f.maxHp, Math.round(avg)); o.hp = Math.min(o.maxHp, Math.round(avg)); fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: '#ffb0c8', life: .45 }); say('おたがいの HPを わけあった！'); break; }
+    case 'endeavor': { if (!o || !targetable(o)) return; if (o.hp <= f.hp) { failMove(f, 'こうかが ない！'); return; } o.hp = Math.max(1, Math.round(f.hp)); o.flash = .15; fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: '#ffd166', life: .45 }); popText(o.x, o.y - 100, 'がむしゃら！', '#ffd166', 'comic'); break; }
     case 'cure': { const had = f.status || f.v.confuse > 0 || f.v.stk > 0;   // オーロラベール：じぶんの 状態異常・こんらん・つみかさねを なおす
       f.status = ''; f.statusT = 0; f.toxN = 1; f.v.confuse = 0; f.v.stk = 0; f.v.slowT = 0; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 44, col: '#bfe8ff', life: .7 }); typeFx(f.x, f.y - BODY, m.t, 14, 90, .6);
       popText(f.x, f.y - 104, had ? 'すっきり！' : 'かわりなし', had ? '#bfe8ff' : '#a49ac0'); say(had ? `${f.sp.n}の 状態異常が なおった！` : `${f.sp.n}は ${m.n}に つつまれた`); break; }
-    case 'shield': f.v.shield = Math.round(f.maxHp * (m.shield || .25)); f.v.shieldT = m.life || 8; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 44, col: '#bfe8ff', life: .7 }); typeFx(f.x, f.y - BODY, m.t, 14, 90, .6); say(`${f.sp.n}は ${m.n}に つつまれた！`); break;
+    case 'shield': f.v.shield = Math.round(f.maxHp * (m.shield || .25)); f.v.shieldT = m.life || 8; f.v.zsh = !!m.zarya; f.v.zab = 0; f.v.zup = 0; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 44, col: '#bfe8ff', life: .7 }); typeFx(f.x, f.y - BODY, m.t, 14, 90, .6); say(`${f.sp.n}は ${m.n}に つつまれた！`); break;
     case 'gshift': f.v.gshift = 1; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 40, col: '#8a78c8', life: .8 }); typeFx(f.x, f.y - BODY, 'ghost', 14, 90, .6); say(`${f.sp.n}の からだが すけた！ ノーマルと かくとうの わざが すりぬける！`); break;
     case 'scare': scareAway(f, o); break;
     case 'leaves': startLeaves(f, m); break;
@@ -5844,6 +5922,7 @@ function changeStages(f, ch, self) {
   if (parts.length) { const up = Object.values(ch)[0] > 0; popText(f.x, f.y - 80, parts.join(' '), up ? '#ffd166' : '#7fb2ff'); statFx(f, up, self && !up); }
 }
 function setStatus(f, s, by) {
+  if (s === 'slp' && B && B.terrain && B.terrain.k === 'elec' && !flies(f)) { popText(f.x, f.y - 80, 'エレキフィールドで ねむらない', '#ffe27a'); return; }
   if (f.status || f.hp <= 0) return false;
   if (by && f.v.sub > 0) return false;
   if ((s === 'brn' && hasType(f, 'fire')) || (s === 'par' && hasType(f, 'elec')) || ((s === 'psn' || s === 'tox') && (hasType(f, 'poison') || hasType(f, 'steel'))) || (s === 'frz' && hasType(f, 'ice'))) return false;
@@ -5891,6 +5970,7 @@ function hit(att, def, m, ang, opt) {
   }
   if (m.hako) return hakoHit(att, def, m);
   if (m.cat === 'stat') return statusHit(att, def, m);
+  if (B.terrain && B.terrain.k === 'psy' && m.k === 'dash' && !flies(def)) { popText(def.x, def.y - 66, 'サイコフィールドが まもった', '#ff9ad0'); return false; }   // サイコフィールド：じめんに いる こには とっしんが きかない
   let eff = m.t === 'normal' ? effOf('normal', def.sp.type) * (def.sp.type2 ? effOf('normal', def.sp.type2) : 1) : effVs(m.t, def.sp);
   if (!eff && m.ghostOk) eff = effMv(m, def.sp);
   if (m.superVsWater && hasType(def, 'water')) eff = eff / effOf('ice', 'water') * 2;
@@ -5915,6 +5995,9 @@ function hit(att, def, m, ang, opt) {
   if (m.far) xm *= 1 + m.far * clamp((Math.hypot(def.x - att.x, def.y - att.y) - 120) / 360, 0, 1);   // とおくから あてる ほど つよい
   if (m.revenge && att.hurtAt != null && B.t - att.hurtAt < 2.5) xm *= 2;   // ゆきなだれ：さっき うけて いたら 2ばい
   if (opt.chg) xm *= 1 + .6 * opt.chg;   // ためて はなつ
+  if (m.nth && att.cur && att.cur.nthB && att.cur.m === m) xm *= 2.5;   // みつめのこぶし
+  if (att.v && att.v.enrage > 0) xm *= 1.5;   // いかりモード
+  if (B.terrain && !flies(att) && m.t === { elec: 'elec', grass: 'grass', psy: 'psychic' }[B.terrain.k]) xm *= 1.3;   // フィールド：おなじ タイプの 技が つよい
   if (B.weather) { const wk = B.weather.k; if (wk === 'rain') xm *= m.t === 'water' ? 1.5 : m.t === 'fire' ? .5 : 1; if (wk === 'sun') xm *= m.t === 'fire' ? 1.5 : m.t === 'water' ? .5 : 1; }   // あめ・はれ
   if (m.heat && att.hot && att.hot.id === MOVE_ID.get(m) && B.t < att.hot.t) xm *= 1.3;   // ねつが 50いじょうで うった：つよい
   if (att.snatch && att.snatch.id === MOVE_ID.get(m) && B.t < att.snatch.t) xm *= 1.5;   // さきどりで うばった 技
@@ -5938,8 +6021,14 @@ function hit(att, def, m, ang, opt) {
   }
   if (def.v.web > 0 && !opt.tick) { const ex = Math.max(1, Math.round(def.maxHp * .04)); dmg += ex; popText(def.x + 14, def.y - 84, `+${ex}`, '#d8e0a0'); }   // ほういもう：あたるたびに ついかダメージ
   dmg = Math.min(dmg, Math.ceil(def.hp));
-  if (def.v.shield > 0) { const ab = Math.min(def.v.shield, dmg); def.v.shield -= ab; dmg -= ab; popText(def.x - 16, def.y - 84, `シールド -${ab}`, '#bfe8ff'); if (def.v.shield <= 0) { def.v.shield = 0; def.v.shieldT = 0; say(`${def.sp.n}の シールドが こわれた！`); burst(def.x, def.y - BODY, '#bfe8ff', 14, 120, .4); } }   // シールド：さきに けずれる
+  if (def.v.shield > 0) { const ab = Math.min(def.v.shield, dmg); def.v.shield -= ab; dmg -= ab;
+    if (def.v.zsh) { def.v.zab = (def.v.zab || 0) + ab; while (def.v.zab >= def.maxHp * .08 && (def.v.zup || 0) < 3) { def.v.zab -= def.maxHp * .08; def.v.zup = (def.v.zup || 0) + 1; changeStages(def, { atk: 1 }, true); popText(def.x, def.y - 120, 'バリアの ちから！', '#ffb070'); } }   /* ちからのバリア：うけた ぶん こうげき↑ */
+    popText(def.x - 16, def.y - 84, `シールド -${ab}`, '#bfe8ff'); if (def.v.shield <= 0) { def.v.shield = 0; def.v.shieldT = 0; say(`${def.sp.n}の シールドが こわれた！`); burst(def.x, def.y - BODY, '#bfe8ff', 14, 120, .4); } }   // シールド：さきに けずれる
   def.hp = Math.max(0, def.hp - dmg); def.hurtAt = B.t;
+  if (def.v.echo && def.v.echo.att === att) def.v.echo.sum += dmg;   // ざんきょう：あとで ついか
+  if (m.echo && !def.v.echo) { def.v.echo = { att, t: m.echo.t, sum: 0, k: m.echo.k }; popText(def.x, def.y - 112, 'ざんきょう', '#b8a8f0'); }
+  if (m.ground && !opt.tick) { if (flies(def)) popText(def.x, def.y - 112, 'うちおとした！', '#d8b060', true); def.v.grounded = m.ground; }   // うちおとす：しばらく とべない
+  if (m.cdcut && !opt.tick) { const me = MOVE_ID.get(m); let any = false; for (const k in att.cd) if (k !== me && att.cd[k] > 0) { att.cd[k] = Math.max(0, att.cd[k] - m.cdcut); any = true; } if (any) popText(att.x, att.y - 100, `まちじかん -${m.cdcut}びょう`, '#7be0a8'); }   // まどうだん
   if (m.koReset && def.hp <= 0) { const k = MOVE_ID.get(m); if (k) att.cd[k] = 0; popText(att.x, att.y - 100, 'まちじかん リセット！', '#7be0a8'); }   // たおしたら すぐ もう いちど def.flash = .12; B.lastDmgT = B.t;
   if (!opt.tick && !(def.hurtInv > 0)) { def.hurtInv = HURT_INV; def.hurtBy = { att, m }; }   // くらったら すこし むてき（おなじ わざの のこりの 弾・れんぞくは とおる）
   if (rampId) { const n = att.ramp[rampId] = Math.min(6, (att.ramp[rampId] || 0) + 1); popText(att.x, att.y - 96, `いりょく×${(1 + m.ramp * n).toFixed(1)}`, '#ffd166'); }
@@ -6285,6 +6374,7 @@ const CONDS = {
   enter: { n: '出場時' },   // 出てから この技を まだ 撃っていない
   swap:  { n: '交代時' },
   mysts: { n: '自分の状態異常', ps: [['any', 'どれか'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['frz', '凍結'], ['cf', '混乱']] },   // オーロラベールの つかいどき
+  terrain: { n: 'フィールド', ps: [['elec', 'エレキ'], ['grass', 'グラス'], ['psy', 'サイコ'], ['none', 'なし']] },
   weather: { n: '天候', ps: [['rain', '雨'], ['sun', '晴れ'], ['sand', '砂あらし'], ['snow', '雪']] },
   ophako: { n: 'ぶっとびてんしの取り立て', ps: [[2, '2つ以上'], [5, '5つ以上']] },
   lost3: { n: '3秒で減ったHP', ps: [[20, '20%以上'], [35, '35%以上'], [50, '50%以上']] },   // 相手に しるしが ついて いる（しるしを はじく 技と くみあわせる）   // 相手が 交代して 出てきてから この技を まだ 撃っていない（10びょう まで）
@@ -6299,6 +6389,7 @@ function condOk(f, o, c, id0) {
   switch (c.t) {
     case 'dist': return c.p === 'near' ? d < 150 : c.p === 'mid' ? d >= 150 && d < 290 : d >= 290;
     case 'mysts': return c.p === 'cf' ? f.v.confuse > 0 : c.p === 'any' ? (!!f.status || f.v.confuse > 0) : f.status === c.p || (c.p === 'psn' && f.status === 'tox');
+    case 'terrain': return c.p === 'none' ? !B.terrain : !!B.terrain && B.terrain.k === c.p;
     case 'weather': return !!B.weather && B.weather.k === c.p;
     case 'lost3': return lostRecent(f) >= (c.p || 20);
     case 'ophako': return !!o.hako && o.hako.side === f.side && hakoN(o) >= (c.p || 2);
@@ -6440,6 +6531,8 @@ function aiPick0(f, o) {
       if (m.det) w *= o.v.mark > 0 ? 2.5 : .5;   // しるしが ある ときに はじく
       if (m.mark && o.v.mark > 0) w *= .3;   // もう しるしが ある
       if (m.exec) w *= 1 + m.exec * (1 - o.hp / o.maxHp) * .6;
+      if (m.boom) w = f.hp < f.maxHp * .25 ? 3 : 0;   // じばく：さいごの てだけ
+      if (m.lbk && f.lbk && f.lbk.id === id) w = f.hp < f.lbk.hp * .85 ? 3 : .2;   // かげがえし：へったら もどる
       if (m.hako) w = !o.hako || o.hako.side !== f.side ? 1.4 : hakoN(o) >= 3 ? 3.2 : .05;   // ハコワレ：かして、たまったら とりたて
       { const dd = dist(f, o), rc = moveReach(f, o, m); if (dd > rc) w *= clamp(1 - (dd - rc) / 500, .4, 1); if (['proj', 'beam', 'cone', 'swipe', 'melee', 'dash', 'ray'].includes(m.k) && !losClear(f, o)) w *= .5; else if (INDIRECT(m) && !losClear(f, o)) w *= 1.8; }
     } else switch (m.k) {
@@ -6465,6 +6558,24 @@ function aiPick0(f, o) {
       case 'weather': { const mine = { rain: (x) => x.moves.some(id => MOVES[id] && MOVES[id].t === 'water' && isDamaging(MOVES[id])), sun: (x) => x.moves.some(id => MOVES[id] && MOVES[id].t === 'fire' && isDamaging(MOVES[id])), sand: (x) => hasType(x, 'rock') || hasType(x, 'ground'), snow: (x) => hasType(x, 'ice') }[m.wk]; w = B.weather && B.weather.k === m.wk ? 0 : mine && mine(f) ? 2.2 : .3; break; }
       case 'rewind': w = lostRecent(f) >= 25 ? 3 : 0; break;
       case 'magnet': w = B.magnet ? 0 : dist(f, o) > 200 ? (f.moves.some(x => MOVES[x] && ['melee', 'swipe', 'dash'].includes(MOVES[x].k)) ? 2.2 : 1) : 0; break;
+      case 'wish': w = f.hp < f.maxHp * .7 && !(B.wishes || []).some(x => x.side === f.side) ? 2 : 0; break;
+      case 'hwish': w = f.hp < f.maxHp * .25 && B.sides[f.side].fs.some(x => x !== f && !x.fainted && x.hp > 0 && x.hp < x.maxHp * .6) ? 3 : 0; break;
+      case 'memento': w = f.hp < f.maxHp * .2 && benchIdx(f.side) >= 0 ? 2.5 : 0; break;
+      case 'terrain': { const ty = { elec: 'elec', grass: 'grass', psy: 'psychic' }[m.tk]; w = B.terrain && B.terrain.k === m.tk ? 0 : f.moves.some(x => MOVES[x] && MOVES[x].t === ty && isDamaging(MOVES[x])) ? 2 : .3; break; }
+      case 'gravity': w = !(B.gravity > 0) && (flies(o) || o.moves.some(x => MOVES[x] && MOVES[x].hide === 'fly')) ? 2 : 0; break;
+      case 'copycat': w = o.lastMove && MOVES[o.lastMove] && isDamaging(MOVES[o.lastMove]) ? 1.8 : 0; break;
+      case 'mimic': w = o.lastMove && MOVES[o.lastMove] && isDamaging(MOVES[o.lastMove]) && !f.moves.includes(o.lastMove) ? 1.5 : 0; break;
+      case 'haze': w = STAGE_KEYS.reduce((a, k) => a + o.st[k] - f.st[k], 0) >= 3 ? 2.5 : 0; break;
+      case 'soak': w = !hasType(o, 'water') && f.moves.some(x => MOVES[x] && ['elec', 'grass'].includes(MOVES[x].t) && isDamaging(MOVES[x])) ? 2 : 0; break;
+      case 'halloween': w = !hasType(o, 'ghost') && f.moves.some(x => MOVES[x] && MOVES[x].t === 'ghost' && isDamaging(MOVES[x])) ? 2 : 0; break;
+      case 'enrage': w = 4; break;
+      case 'painsplit': w = o.hp - f.hp > f.maxHp * .3 ? 3 : 0; break;
+      case 'endeavor': w = o.hp > f.hp * 1.6 ? 3 : 0; break;
+      case 'sideswap': w = B.zones.some(z => z.side === f.side) ? 2 : .4; break;
+      case 'turret': w = !(B.turrets || []).some(q => q.side === f.side) ? 1.6 : 0; break;
+      case 'summon': w = !(B.minions || []).some(q => q.side === f.side) ? 1.6 : 0; break;
+      case 'aura': w = !(f.v.aura > 0) && f.hp > f.maxHp * .5 && dist(f, o) < 220 ? 1.8 : 0; break;
+      case 'cage': w = !(B.cages || []).some(c => c.side === f.side) && dist(f, o) < 320 ? 1.5 : 0; break;
       case 'cure': w = f.status || f.v.confuse > 0 || f.v.stk >= 1 ? 2.6 : 0; break;
       case 'shield': w = !(f.v.shield > 0) && f.hp < f.maxHp * .85 ? 1.8 : 0; break;
       case 'field': w = m.fld === 'trickroom' ? (B.trickRoom <= 0 && f.baseSpd < o.baseSpd ? 2.5 : 0) : (B.sides[f.side].tail <= 0 ? 1.8 : 0); break;
@@ -6843,6 +6954,7 @@ function moveDir(f, mx, my, dt, nav) {
     f.ghostT = (f.ghostT || 0) - dt; if (f.ghostT <= 0) { f.ghostT = .07; fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .16, max: .16 }); }
     if (Math.random() < dt * 25) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: -mx * 60 + rand(-15, 15), vy: -rand(10, 30), life: .3, max: .3, col: '#d8c8a8', size: 3, g: 60 });
   } else if (f.pace < 1.3) f.rushing = false;
+  if (f.v && f.v.enrage > 0) sp *= 1.3;   // いかりモード：はやい
   if (B.zones.length && !hovers(f)) { const zs = B.zones.find(z => z.side !== f.side && MOVES[z.id].slow && inZoneFloor(z, f.x, f.y)); if (zs) sp *= MOVES[zs.id].slow; }   // ありじごく：あしが とられる
   if (f.v.root > 0) sp = 0;   // かげぬい：うごけない
   if (f.v.slowT > 0) sp *= f.v.slowK || .7;   // こなゆき など：あしが おそく なる
@@ -6898,6 +7010,10 @@ function playerVec() { return { x: 0, y: 0, active: false }; } // 移動は自�
 function updateEffects(f, dt) {
   const v = f.v;
   for (const k of ['taunt', 'healBlock', 'confuse', 'protect', 'dbond', 'web', 'mark', 'root', 'silence', 'slowT']) if (v[k] > 0) v[k] = Math.max(0, v[k] - dt);
+  if (v.enrage > 0) v.enrage = Math.max(0, v.enrage - dt); if (v.grounded > 0) v.grounded = Math.max(0, v.grounded - dt);
+  if (f.lbk && B.t >= f.lbk.end) { const id = f.lbk.id; f.lbk = null; if (MOVES[id]) f.cd[id] = Math.max(f.cd[id] || 0, MOVES[id].cd * .6); }   // かげがえし：もどらなかった
+  if (v.echo) { v.echo.t -= dt; if (v.echo.t <= 0) { const E = v.echo; v.echo = null; const d = Math.round(E.sum * E.k); if (d > 0 && f.hp > 0) { f.hp = Math.max(0, f.hp - d); f.flash = .15; popText(f.x, f.y - 92, `ざんきょう -${d}`, '#b8a8f0', true); burst(f.x, f.y - BODY, '#8a78c8', 14, 120, .4); if (f.hp <= 0) { faint(f, E.att); return; } } } }
+  if (v.aura > 0) { v.aura -= dt; v.auraN -= dt; if (v.auraN <= 0) { v.auraN = .5; const o = opp(f); f.hp = Math.max(1, f.hp - Math.max(1, Math.round(f.maxHp * .01))); if (o && targetable(o) && dist(f, o) < 120 + o.r) hit(f, o, v.auraM, Math.atan2(o.y - f.y, o.x - f.x), { tick: true, first: false, sure: 1 }); } }   // しゃくねつオーラ
   if (v.shieldT > 0) { v.shieldT -= dt; if (v.shieldT <= 0) { v.shieldT = 0; v.shield = 0; } }
   if (v.overheat > 0) v.overheat = Math.max(0, v.overheat - dt);
   if (f.hako) { f.hako.t -= dt; if (f.hako.t <= 0) { f.hako.t = 5; const k = HAKO_ORDER[f.hako.n % 5]; f.hako.n++; f.hako.amt[k] = (f.hako.amt[k] || 0) + 1; popText(f.x + 20, f.y - 96, `りそく：${STAGE_NAMES[k]}`, '#ffb347'); } }   // ハコワレ：5びょうごとに うばう ステータスが ふえる
@@ -7084,7 +7200,7 @@ function updateFighter(f, dt) {
       if (PLFX.d_dust && pat !== 'leap' && (cur.dustT = (cur.dustT || 0) - dt) <= 0) { cur.dustT = .3; const a = Math.atan2(vy, vx); fxp({ type: 'pl', k: 'd_dust', x: f.x - Math.cos(a) * f.r, y: f.y - 4, s: .7, ang: a, fy: Math.cos(a) < 0, life: .45 }); }   // あしもとの すなけむり
       if (m.trail && Math.random() < .8) B.parts.push({ x: f.x + rand(-8, 8), y: f.y, vx: rand(-10, 10), vy: -rand(30, 70), life: .4, max: .4, col: choice(['#ffd166', '#ff8a3d']), size: 5, g: -20, shape: 'ember' });
       if (o && o.clones && !cur.back) hitClones(o, c => Math.hypot(c.x - f.x, c.y - f.y) < f.r + o.r + 4);
-      if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; if (PLFX.d_hit) plFx('d_hit', (f.x + o.x) / 2, (f.y + o.y) / 2 - BODY, 1.3); if (m.grab) { startGrab(f, o); break; } if (m.carry) { cur.carry = true; cur.d = L - (m.carryLen || 240); } if (hit(f, o, m, cur.ang) && m.chain) { cur.chainGo = !cur.chainN || Math.random() < .5; cur.chainN = (cur.chainN || 0) + 1; } }
+      if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; if (PLFX.d_hit) plFx('d_hit', (f.x + o.x) / 2, (f.y + o.y) / 2 - BODY, 1.3); if (m.grab) { startGrab(f, o); break; } if (m.carry) { cur.carry = true; cur.d = L - (m.carryLen || 240); } if (hit(f, o, m, cur.ang, m.roll ? { mul: Math.pow(1.45, cur.chainN || 0) } : undefined) && m.chain) { cur.chainGo = m.roll ? (cur.chainN || 0) < 4 : !cur.chainN || Math.random() < .5; cur.chainN = (cur.chainN || 0) + 1; } }
       if (f.state !== 'dash') break;
       if (m.shove && cur.hit) { endAct(f, .3); break; }   // つきとばし：あてたら とまる（あいては とんでいく）
       if (cur.carry && o && o.hp > 0) {   // ダッシュびんた：あいてを まえに かかえた まま つっこむ。かべ・しょうがいぶつ・はしに ぶつけたら ひるむ
@@ -7112,6 +7228,7 @@ function updateFighter(f, dt) {
       if (cur.d >= L || wall) {
         if (wall && !cur.back) { B.shake = Math.max(B.shake, 4); addDecal(f.x, f.y, 14, 'crater'); burst(f.x, f.y, '#c9b8ff', 8, 70, .35);
           if (m.crash && !cur.hit && f.hp > 0) { const r = Math.max(1, Math.round(estDmg(f, o || f, m) * m.crash)); f.hp = Math.max(0, f.hp - r); popText(f.x, f.y - 66, `-${r}`, '#ff9a8a'); say(`${f.sp.n}は かべに ぶつかって ダメージを うけた！`); if (f.hp <= 0) { faint(f, o); break; } } }   // すてみのはばたき：かべに ぶつかると はんどう
+        if (m.missCrash && !cur.hit && f.hp > 0) { const r = Math.round(f.maxHp * m.missCrash); f.hp = Math.max(0, f.hp - r); popText(f.x, f.y - 66, `-${r}`, '#ff9a8a'); say(`${f.sp.n}は いきおい あまって じめんに ぶつかった！`); B.shake = Math.max(B.shake, 6); if (f.hp <= 0) { faint(f, o); break; } }   // とびひざげり：はずすと じぶんが ダメージ
         if (m.chain && cur.chainGo && oT && cur.chainN < 8) {   // ドラゴンラッシュ：あたったら もういちど つっこむ（2かいめからは 50%）
           cur.chainGo = false; cur.ang = Math.atan2(o.y - f.y, o.x - f.x); cur.t = 0; cur.wind = .32; f.state = 'wind'; burst(f.x, f.y, '#8a6ae8', 8, 90, .3);   // いっかい ずつ はんいを みせてから つっこむ
           break; }
@@ -7958,6 +8075,20 @@ function bStep(dt) {
   B.cheer = Math.max(.15, B.cheer - dt * .4);
   B.shake = Math.max(0, B.shake - dt * 20);
   if (B.trickRoom > 0) { B.trickRoom -= dt; if (B.trickRoom <= 0) say('ねじれた じくうが もとに もどった！'); }
+  if (B.terrain) { const T = B.terrain; T.t -= dt; if (T.t <= 0) { B.terrain = null; say('フィールドが もとに もどった'); }
+    else if (T.k === 'grass') { T.ct = (T.ct || 0) + dt; if (T.ct >= 1) { T.ct -= 1; for (const x of [active(0), active(1)]) if (x && targetable(x) && x.hp > 0 && !flies(x) && x.hp < x.maxHp) healHp(x, x.maxHp * .01); } } }
+  if (B.gravity > 0) { B.gravity -= dt; if (B.gravity <= 0) { B.gravity = 0; say('じゅうりょくが もとに もどった'); } }
+  if (B.wishes && B.wishes.length) { for (const w of B.wishes) { w.t -= dt; if (w.t <= 0) { const x = active(w.side); if (x && targetable(x) && x.hp > 0 && Math.hypot(x.x - w.x, (x.y - w.y) / .62) < 70) { healHp(x, x.maxHp * .5); healFx(x); say('ねがいごとが かなった！'); } else burst(w.x, w.y, '#ffe9a0', 10, 60, .4); } } B.wishes = B.wishes.filter(w => w.t > 0); }
+  if (B.turrets && B.turrets.length) { for (const q of B.turrets) { q.t -= dt; const o = active(1 - q.side); if (o && targetable(o) && Math.hypot(o.x - q.x, o.y - q.y) < o.r + 18) { q.t = 0; burst(q.x, q.y - 12, '#ffe27a', 12, 110, .4); popText(q.x, q.y - 40, 'こわした！', '#ffffff'); continue; }
+      if ((q.cd -= dt) <= 0 && o && targetable(o) && q.f && Math.hypot(o.x - q.x, o.y - q.y) < 460) { q.cd = 1.1; const a = Math.atan2(o.y - q.y, o.x - q.x); spawnProj(q.f, q.m, a); const p = B.projs[B.projs.length - 1]; p.x = q.x + Math.cos(a) * 14; p.y = q.y - 18 + Math.sin(a) * 14; p.side = q.side; p.decoy = null; } }
+    B.turrets = B.turrets.filter(q => q.t > 0); }
+  if (B.minions && B.minions.length) { for (const q of B.minions) { q.t -= dt; const o = active(1 - q.side); if (!o || !targetable(o)) continue; const d = Math.hypot(o.x - q.x, o.y - q.y), a = Math.atan2(o.y - q.y, o.x - q.x); q.face = o.x >= q.x ? 1 : -1;
+      if (d > o.r + 24) { q.x += Math.cos(a) * 120 * dt; q.y += Math.sin(a) * 120 * dt; q.walk += dt; q.x = clamp(q.x, B.st.fx0, B.st.fx1); q.y = clamp(q.y, B.st.fy0, B.st.fy1); }
+      else if ((q.cd -= dt) <= 0) { q.cd = .9; q.punch = .2; if (q.f) hit(q.f, o, q.m, a, { decoy: null }); } if (q.punch > 0) q.punch -= dt; }
+    B.minions = B.minions.filter(q => q.t > 0); }
+  if (B.cages && B.cages.length) { for (const c of B.cages) { c.t -= dt; const o = active(1 - c.side); if (!o || !targetable(o)) continue; const ins = Math.hypot(o.x - c.x, (o.y - c.y) / .62) < c.r;
+      if (ins !== c.inside) { c.t = 0; o.cur = null; o.queued = null; o.state = 'stun'; o.stT = 1.5; o.flinchTo = B.t + 1.5; o.dizzy = 1.5; popText(o.x, o.y - 96, 'おりに ふれた！ うごけない', '#b8a8f0', 'comic'); burst(o.x, o.y - BODY, '#b8a8f0', 16, 120, .4); SND.se('hit', .8); } }
+    B.cages = B.cages.filter(c => c.t > 0); }
   if (B.magnet) { const M = B.magnet; M.t -= dt;   // マグネットパワー：おたがいを ひきよせる（とまって いても）
     const a = active(0), b = active(1);
     if (M.t <= 0) { B.magnet = null; say('じりょくが きえた'); }
@@ -8269,7 +8400,7 @@ $('tutNext').onclick = () => { if (!TUT) return; tutHide(); $('tutBox').hidden =
 $('tutSkip').onclick = async () => { if (!TUT || !B) return; B.paused = true; if (await ask('チュートリアルを スキップしますか？', 'スキップ', 'つづける')) { const lines = []; tutEnd('skip', lines); B = null; renderHub(); } else if (TUT) { const st = TUT_STEPS[TUT.i]; B.paused = !!(st && st.pause) || !!TUT.frozen; } };
 
 /* ---------- コマンド ---------- */
-const KIND_LABEL = { gshift: 'すり抜け', scare: '威嚇', mines: '地雷', trap: '罠', leaves: 'まとう', wave: '波', stance: '待ち伏せ', rage: '暴れる', warp: 'ワープ', flip: '反転', proj: '飛び道具', beam: '直線', aoe: '周囲', strike: '足元', dash: '突進', melee: '近接', swipe: '前方', cone: '扇', multi: '範囲', ray: '補助', self: '自分', heal: '回復', protect: 'まもる', sub: 'デコイ', clone: '分身', dbond: '補助', counter: 'カウンター', curse: '補助', field: '場', hazard: '設置', baton: '交代', cure: 'なおす', magnet: '引き寄せ', shield: 'シールド', duel: '交代封じ', future: '予告', snatch: '横取り', weather: '天候', rewind: '巻き戻し', floor: '床' };
+const KIND_LABEL = { gshift: 'すり抜け', scare: '威嚇', mines: '地雷', trap: '罠', leaves: 'まとう', wave: '波', stance: '待ち伏せ', rage: '暴れる', warp: 'ワープ', flip: '反転', proj: '飛び道具', beam: '直線', aoe: '周囲', strike: '足元', dash: '突進', melee: '近接', swipe: '前方', cone: '扇', multi: '範囲', ray: '補助', self: '自分', heal: '回復', protect: 'まもる', sub: 'デコイ', clone: '分身', dbond: '補助', counter: 'カウンター', curse: '補助', field: '場', hazard: '設置', baton: '交代', cure: 'なおす', wish: '回復', hwish: '自分が倒れる', memento: '自分が倒れる', terrain: '場', gravity: '場', copycat: 'まね', mimic: 'まね', haze: 'リセット', soak: 'タイプ', halloween: 'タイプ', enrage: '自分', sideswap: '入れ替え', turret: '設置', summon: '呼び出し', aura: 'まとう', cage: '設置', painsplit: 'HP', endeavor: 'HP', magnet: '引き寄せ', shield: 'シールド', duel: '交代封じ', future: '予告', snatch: '横取り', weather: '天候', rewind: '巻き戻し', floor: '床' };
 // わざの 効果の 説明
 // 技の説明文（データから自動で作る）：威力 → 動き → 効果 の順。使える回数は 技名の横に「のこり/最大」で出す（mvUses）
 function moveDesc(m) {
@@ -8357,6 +8488,26 @@ function moveDesc(m) {
   if (m.quake) add('フィールド全体をゆらす（予告なし・飛んでいる相手には当たらない）。モンスターが置いた壁・岩をすべて崩す'); if (m.wball) add('天候があると、その天候のタイプ（雨＝みず・晴れ＝ほのお・砂＝いわ・雪＝こおり）で威力2倍');
   if (m.k === 'rewind') add('3秒前にいた場所へ戻り、その間に減ったHPの半分を取り戻す');
   if (m.k === 'magnet') add(`${m.mt}秒間、フィールドにじりょくを満たし、自分と相手をおたがいに引き寄せ続ける（止まっていても引き寄せる・使った後は自由に動ける）`);
+  if (m.nth) add(`${m.nth}回に1回、2.5倍の強い一撃になる`);
+  if (m.useSelf) add(`撃つと自分の${stg(m.useSelf)}`);
+  if (m.echo) add(`当たると${m.echo.t}秒間の残響を付ける。その間に与えたダメージの${Math.round(m.echo.k * 100)}%を後から追加`);
+  if (m.ground) add(`当たると${m.ground}秒間、空を飛べなくなる（浮いている相手も地面に落ちる）`);
+  if (m.cdcut) add(`当たると他の技の待ち時間が${m.cdcut}秒縮む`);
+  if (m.lbk) add(`${m.lbk}秒以内にもう一度押すと元の場所へ戻る`);
+  if (m.blink) add('横へ瞬間移動してから撃つ');
+  if (m.boom) add('1秒ためて大爆発し、自分は倒れる（ため中にひるまされると不発）');
+  if (m.missCrash) add(`外すと最大HPの${Math.round(m.missCrash * 100)}%のダメージを自分が受ける`);
+  if (m.recharge) add(`撃った後${m.recharge}秒動けない`);
+  if (m.roll) add('当たるたびにもう一度転がり、だんだん強くなる（5回まで）。外すと止まる');
+  if (m.zarya) add('シールドで受けたダメージが最大HPの8%たまるごとに攻撃+1（3回まで）');
+  add({ wish: '足元に光を残し、3秒後にその上にいる味方のHPを50%回復（交代して出てきた味方にも効く）', hwish: '自分は倒れる。次に出てくる味方のHPと状態異常を全回復する', memento: '自分は倒れる。相手の攻撃-2・属性攻撃-2',
+    gravity: '8秒間、だれも空を飛べない（浮いている相手も地面に落ち、空へ飛ぶ技が出せない）', copycat: '相手が最後に使った技を使う', mimic: '相手が最後に使った技を、この戦いの間この技の代わりに覚える',
+    haze: '自分と相手の能力の変化をすべて元に戻す', soak: '相手をみずタイプだけにする（交代で戻る）', halloween: '相手にゴーストタイプを足す（交代で戻る）',
+    enrage: 'HPが30%以下のときだけ使える（1戦1回）。8秒間、与えるダメージ1.5倍・移動が速くなる', sideswap: '相手と場所を入れ替える',
+    turret: '10秒間、相手を自動で撃つミニほうだいを置く（相手がさわると壊れる）', summon: '8秒間、相手を追いかけて殴るくまさんを呼ぶ',
+    aura: '8秒間、自分のHPを毎秒2%使って、近くの相手にダメージを与え続ける（もう一度使うと消える）', cage: '相手の周りに4秒間おりを作る。おりの境目をまたぐと1.5秒動けない',
+    painsplit: '自分と相手のHPを足して半分ずつにする', endeavor: '相手のHPを自分のHPと同じまで減らす' }[m.k]);
+  if (m.k === 'terrain') add(`15秒間、場を${m.n}にする。${{ elec: 'でんき技1.3倍・地面にいる相手は眠らない', grass: 'くさ技1.3倍・地面にいるモンスターは毎秒1%回復', psy: 'エスパー技1.3倍・地面にいる相手に突進が効かない' }[m.tk]}`);
   if (m.k === 'cure') add('自分の状態異常（やけど・まひ・どく・凍結など）と混乱、積み重ねを治す');
   if (m.k === 'shield') add(`最大HPの${Math.round((m.shield || .25) * 100)}%のシールドを張る（${m.life || 8}秒）。ダメージを先に受け止める`);
   if (m.wallBreak) add('置かれた壁を壊す'); if (m.crash) add('壁にぶつかると自分がダメージ'); if (m.reflect) add('飛び道具・ビーム（照射も）を跳ね返す');
@@ -8393,6 +8544,7 @@ const KW_SV = {   // のうりょくが なにに きくか
 const KW_C = {   // 訓練の 条件
   dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
   mysts: ['条件：自分の状態異常', '自分が えらんだ 状態異常（火傷・麻痺・毒・凍結）か 混乱に なって いる とき。オーロラベールで なおす ときに つかう。「毒」は もうどくも ふくむ。'],
+  terrain: ['条件：フィールド', '場の フィールドが えらんだ ものの とき（エレキ・グラス・サイコ・なし）。フィールドは 15秒 つづく。'],
   weather: ['条件：天候', '場の 天候が えらんだ ものの とき（雨・晴れ・砂あらし・雪）。天候は 20秒 つづく。'],
   ophako: ['条件：ぶっとびてんしの取り立て', 'ぶっとびてんしで かしつけた 相手から 奪える ステータスが えらんだ 数いじょう たまった とき（5秒ごとに 攻撃→防御→属性攻撃→属性防御→素早さの 順に ふえる）。もう いちど ぶっとびてんしを 当てると 取り立てる。'],
   lost3: ['条件：3秒で減ったHP', 'さいきん 3秒の あいだに 自分の HPが えらんだ 割合いじょう 減った とき（クロノバックの つかいどき）。'],
@@ -9612,7 +9764,7 @@ function drawStar(x, y, r, col) {
 // 浮かんで 見え、障害物の 上を 飛びこえる（弾も 上から うつので 障害物に 止められない）。オリジナルは かいた え から きまる sp.fly
 const FLOAT_LOOK = new Set(['a_fire10', 'a_water4', 'a_water10', 'a_elec5', 'a_poison4', 'a_poison5', 'a_poison9', 'a_wind6', 'a_wind8', 'a_wind10', 'a_dragon4', 'b_fire4', 'b_fire8', 'b_water4', 'b_water6', 'b_ice8', 'b_poison7', 'b_wind4', 'b_wind6', 'b_wind8', 'sorabune', 'b_wind10', 'b_dragon5', 'g1', 'g2', 'kitsunemen', 'medamasho', 'g9', 'g10', 'c_fire5', 'c_water1', 'c_water5', 'c_elec1', 'c_elec4', 'c_elec5', 'c_elec8', 'c_ground9', 'c_wind6', 'c_dragon10', 'd_bug1', 'd_bug5', 'd_bug7', 'd_bug9', 'd_bug12', 'd_bug17', 'a_dragon10', 'b_fire7', 'f_jelly1']);
 const floats = (sid) => SPECIES[sid] && SPECIES[sid].custom ? !!SPECIES[sid].fly : FLOAT_LOOK.has(sid);
-const flies = (f) => !!(f && f.sp && f.mon && floats(f.mon.sid));
+const flies = (f) => !!(f && f.sp && f.mon && floats(f.mon.sid)) && !(typeof B !== 'undefined' && B && B.gravity > 0) && !(f.v && f.v.grounded > 0);   // じゅうりょく・うちおとす：とべない
 const hovers = (f) => !(f && f.state === 'wind' && f.cur && f.cur.id === 'roost') && flies(f);   // はねやすめ中は じめんに おりる
 // はばたく か ただよう か（羽の ある もの・鳥・竜は はばたき、ゴースト・くも・あわ などは ただよう）
 const WING_RX = /翼|羽|はね|つばさ|鳥|ドリ|バット|コウモリ|竜|リュウ|チョウ|ガーゴイ|グリフィ|ピクシー|ヒヨ|ガラス|ツル/;
@@ -10103,6 +10255,13 @@ function render() {
     for (const b of w.blocks) if (!b.gone) list.push({ y: b.y + WALL_B / 2, d: () => { drawWallBlock(w, b); drawWallDmg(w, b); } }); }
   list.sort((p, q) => p.y - q.y).forEach(o => o.d());
   if (B.weather) drawWeather(st);
+  if (B.terrain) { ctx.save(); ctx.fillStyle = { elec: 'rgba(255,226,90,.08)', grass: 'rgba(98,210,111,.09)', psy: 'rgba(255,122,176,.08)' }[B.terrain.k]; ctx.fillRect(st.fx0 - 40, st.fy0 - 40, st.fx1 - st.fx0 + 80, st.fy1 - st.fy0 + 80); ctx.restore(); }
+  if (B.gravity > 0) { ctx.save(); ctx.strokeStyle = 'rgba(200,168,255,.25)'; ctx.lineWidth = 2; for (let i = 0; i < 14; i++) { const x = st.fx0 + ((i * 97 + B.t * 30) % (st.fx1 - st.fx0)), y = st.fy0 + ((i * 53 + B.t * 260) % (st.fy1 - st.fy0)); ctx.beginPath(); ctx.moveTo(x, y - 16); ctx.lineTo(x, y); ctx.stroke(); } ctx.restore(); }
+  for (const w of B.wishes || []) { ctx.save(); ctx.globalAlpha = .5 + .3 * Math.sin(B.t * 8); ctx.fillStyle = '#ffe9a0'; ctx.beginPath(); ctx.ellipse(w.x, w.y, 70, 43, 0, 0, 7); ctx.fill(); ctx.globalAlpha = 1; ctx.font = 'bold 14px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#7a5a10'; ctx.fillText(String(Math.ceil(w.t)), w.x, w.y + 5); ctx.restore(); }
+  for (const c of B.cages || []) { ctx.save(); ctx.strokeStyle = '#b8a8f0'; ctx.lineWidth = 4; ctx.globalAlpha = .55 + .3 * Math.sin(B.t * 10); ctx.setLineDash([10, 6]); ctx.beginPath(); ctx.ellipse(c.x, c.y, c.r, c.r * .62, 0, 0, 7); ctx.stroke(); ctx.restore(); }
+  for (const q of B.turrets || []) { ctx.save(); const o = active(1 - q.side), a = o ? Math.atan2(o.y - q.y, o.x - q.x) : 0; ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(q.x, q.y, 14, 6, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#6a6f80'; ctx.fillRect(q.x - 9, q.y - 14, 18, 14); ctx.fillStyle = '#ffe27a'; ctx.beginPath(); ctx.arc(q.x, q.y - 18, 8, 0, 7); ctx.fill(); ctx.strokeStyle = '#3a3f50'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(q.x, q.y - 18); ctx.lineTo(q.x + Math.cos(a) * 16, q.y - 18 + Math.sin(a) * 16); ctx.stroke(); ctx.restore(); }
+  for (const q of B.minions || []) { ctx.save(); const bob = Math.abs(Math.sin(q.walk * 10)) * 3, px = q.punch > 0 ? q.face * 8 : 0; ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(q.x, q.y, 16, 6, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#8a5a3a'; ctx.beginPath(); ctx.ellipse(q.x, q.y - 16 - bob, 14, 16, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(q.x, q.y - 36 - bob, 11, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(q.x - 8, q.y - 45 - bob, 4, 0, 7); ctx.arc(q.x + 8, q.y - 45 - bob, 4, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(q.x + q.face * 13 + px, q.y - 20 - bob, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#120e1c'; ctx.fillRect(q.x + q.face * 4 - 1, q.y - 38 - bob, 2, 2); ctx.restore(); }
+  for (const x of [active(0), active(1)]) if (x && x.v && x.v.aura > 0) { ctx.save(); ctx.globalAlpha = .25 + .15 * Math.sin(B.t * 12); ctx.fillStyle = '#ff8a3d'; ctx.beginPath(); ctx.ellipse(x.x, x.y, 120, 74, 0, 0, 7); ctx.fill(); ctx.restore(); }
   if (B.magnet) { const a = active(0), b = active(1); if (a && b) { ctx.save(); ctx.globalAlpha = .35 + .2 * Math.sin(B.t * 10); ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 3; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -B.t * 60; ctx.beginPath(); ctx.moveTo(a.x, a.y - BODY); ctx.lineTo(b.x, b.y - BODY); ctx.stroke(); ctx.restore(); } }   // マグネットパワー：ひきあう せん
 
   // とぶ もの・エフェクト・つぶ（ドット絵に して かさねる）
