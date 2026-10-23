@@ -1122,7 +1122,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .hov{outline:3px solid #ffd166!important;outline-offset:1px;box-shadow:0 0 10px rgba(255,209,102,.45)!important}
 .trghost.snap{opacity:1;transform:scale(1.04);box-shadow:0 0 0 2px #ffd166,0 6px 16px rgba(0,0,0,.5)}
 .trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.trdock{display:none}.trpage.dock{grid-template-rows:auto 1fr}.trpage.dock .trmons{grid-column:1;grid-row:1;max-height:max(140px,calc(calc(100 * var(--vh)) - 430px))}.trpage.dock .trdock{display:flex;flex-direction:column;gap:10px;grid-column:1;grid-row:2;position:sticky;top:8px;align-self:start}.trpage.dock .trmain{grid-column:2;grid-row:1 / span 2}.trpage.dock .trside{grid-column:3;grid-row:1 / span 2}.trdock .trbtns{flex-direction:column;flex-wrap:nowrap;gap:10px}.trdock .trbtns .btn{width:100%;font-size:13px;padding:10px 4px;white-space:normal;line-height:1.3}.trdock .trbtns2{gap:4px 10px;font-size:12px}.trdock .trstat{line-height:1.5}   /* 3れつ：ひだりの れつに ボタン */.trbtns .btn{padding:6px 12px;font-size:13px}
+.trdock{display:none}.trpage.dock{grid-template-rows:auto 1fr}.trpage.dock .trmons{grid-column:1;grid-row:1;max-height:max(140px,calc(calc(100 * var(--vh)) - 430px))}.trpage.dock .trdock{display:flex;flex-direction:column;gap:10px;grid-column:1;grid-row:2;position:sticky;top:8px;align-self:start}.trpage.dock .trmain{grid-column:2;grid-row:1 / span 2}.trpage.dock .trside{grid-column:3;grid-row:1 / span 2}.trdock .trbtns{flex-direction:column;flex-wrap:nowrap;gap:10px}.trdock .trbtns .btn{width:100%;font-size:13px;padding:10px 4px;white-space:normal;line-height:1.3}.trdock .trbtns2{gap:4px 10px;font-size:12px}.trstat{display:none!important}   /* 3れつ：ひだりの れつに ボタン */.trbtns .btn{padding:6px 12px;font-size:13px}
 .trside h3{font-size:13px;margin:4px 0 0}.trside h3 .dim{font-size:10px;font-weight:400}.trside{background:rgba(20,16,36,.55);border:1px solid var(--edge);border-radius:10px;padding:8px}
 .trins{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--edge);font-size:12px;min-height:60px}
 .trmvinfo{display:flex;flex-direction:column;gap:3px;padding:4px 0 4px 8px;border-left:4px solid var(--c);line-height:1.45}.trmvinfo b{font-size:13px}
@@ -4070,7 +4070,12 @@ function trDockFix() {   // 訓練：3れつ ならび の ときは 木人戦�
   const B = $('trBody'), pg = B && B.querySelector('.trpage'), dk = pg && pg.querySelector('.trdock'), home = pg && pg.querySelector('.trhome'); if (!dk || !home) return;
   pg.classList.remove('dock'); const three = getComputedStyle(pg).gridTemplateColumns.replace(/(minmax|repeat|fit-content)\([^)]*\)/g, 'X').trim().split(/\s+/).length >= 3;   // minmax( … ) は 1れつ と かぞえる
   const els = [...pg.querySelectorAll('.trbtns, .trbtns2, .trstat')];
-  if (three) { pg.classList.add('dock'); dk.append(...els); } else { let at = home; for (const e of els) { at.after(e); at = e; } }
+  const mons = pg.querySelector('.trmons'); if (mons) mons.style.maxHeight = '';
+  if (three) { pg.classList.add('dock'); dk.append(...els);   // モンスター いちらんは ボタンの うえまで めいっぱい のばす
+    if (mons) { const sc = $('scTrain'), mr = mons.getBoundingClientRect(), k = mons.offsetHeight ? mr.height / mons.offsetHeight : 1, sr = sc.getBoundingClientRect();   // がめんは かくだい されて いるので 見た目の 大きさで はかる
+      const top = (mr.top - sr.top) / k + sc.scrollTop, room = sr.height / k - parseFloat(getComputedStyle(sc).paddingBottom || 0) - top - dk.offsetHeight - 14;
+      mons.style.maxHeight = Math.max(140, room) + 'px'; } }
+  else { let at = home; for (const e of els) { at.after(e); at = e; } }
 }
 addEventListener('resize', () => { if ($('trBody') && $('trBody').offsetParent) trDockFix(); });
 let TR_RO = null;   // 訓練の わくの はばが かわったら（がめんを ひらいた あと など）ならびを みなおす
