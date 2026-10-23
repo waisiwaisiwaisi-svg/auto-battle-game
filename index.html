@@ -2407,7 +2407,7 @@ Object.assign(NEW_MOVES, {   // だい2だん：ほろび・けっとう・ね�
   'heat-knuckle': { n: 'ヒートナックル', t: 'fire', k: 'melee', power: 70, heat: 25 },
   'heat-blaster': { n: 'ヒートブラスター', t: 'fire', k: 'beam', power: 85, len: 300, wid: 28, heat: 35 },
   'heat-missile': { n: 'ヒートミサイル', t: 'fire', k: 'proj', power: 50, spd: 380, r: 8, homing: 1.4, heat: 20 },
-  'future-sight': { n: 'みらいよち', t: 'psychic', k: 'future', power: 110, rad: 60, delay: 2.5, wind: .3, cd: 6 },
+  'future-sight': { n: 'みらいよち', t: 'psychic', k: 'future', power: 110, rad: 120, delay: 2.5, wind: .3, cd: 6 },
   'time-bomb': { n: 'じげんばくだん', t: 'fire', k: 'proj', power: 30, spd: 300, r: 9, homing: 1.4, bomb: { t: 3, mul: 3 }, cd: 5 },
   'snatch': { n: 'さきどり', t: 'normal', k: 'snatch', cat: 'stat', power: 0, wind: .06, prio: 1, cd: 7 },
   'rain-dance': { n: 'あまごい', t: 'water', k: 'weather', cat: 'stat', power: 0, wk: 'rain', wind: .4, cd: 14 },
@@ -4766,7 +4766,7 @@ function sendOut(side, idx, pass, lag, at, ko) {
   clampF(f); if (st.solid) freeSpot(f);
   f.hurtInv = ko ? KO_INV : 0; f.hurtBy = null;
   f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.want = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
-  f.enterT = 0; f.swIn = B.mode === 'fight'; f.inAt = B.t; f.v = {}; f.hist = []; f.heat = 0; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.usedAt = {}; f.shots = [];
+  f.enterT = 0; f.swIn = B.mode === 'fight'; f.inAt = B.t; f.v = {}; f.hist = []; f.rw = null; f.heat = 0; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.usedAt = {}; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
   f.swapLag = lag ? SWAP_LAG : 0; if (lag) f.inv = 0;
   moveLock(f, ENTER_LOCK);   // でてきた ばかりは わざを だせない
@@ -5701,8 +5701,8 @@ function useStatusMove(f, o, m) {
     case 'weather': B.weather = { k: m.wk, t: 20 }; say({ rain: 'あめが ふりだした！（みず↑ ほのお↓）', sun: 'ひざしが つよく なった！（ほのお↑ みず↓）', sand: 'すなあらしが ふきはじめた！（いわ・じめん いがいは けずられる）', snow: 'ゆきが ふりだした！（こおり いがいは けずられる）' }[m.wk]); break;
     case 'rewind': { const e = (f.hist || []).slice().reverse().find(h => B.t - h.t >= 2.9) || (f.hist || [])[0];   // クロノバック：3びょうまえの ばしょへ もどり、へった HPの はんぶんを とりもどす
       if (!e) { failMove(f, 'もどれる じかんが ない！'); break; }
-      fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .35, max: .35 }); f.x = e.x; f.y = e.y; clampF(f); if (B.st.solid && blockedAt(f.x, f.y, footR(f))) freeSpot(f);
-      const lost = e.hp - f.hp; if (lost > 0) healHp(f, lost * .5); fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 40, col: '#ff7ab0', life: .6 }); popText(f.x, f.y - 110, 'まきもどし！', '#ff9ad0', 'comic'); break; }
+      const pts = [{ x: f.x, y: f.y }].concat(f.hist.slice(f.hist.indexOf(e)).reverse().map(h => ({ x: h.x, y: h.y })));   // いま → 3びょうまえ の みち
+      f.rw = { pts, t: 0, T: .5, g: 0, heal: Math.max(0, e.hp - f.hp) * .5 }; popText(f.x, f.y - 110, 'まきもどし！', '#ff9ad0', 'comic'); break; }
     case 'magnet': { const cur = f.cur; if (!cur) break; cur.ch = 0; f.state = 'chan'; say(`${f.sp.n}の まわりに じりょくが うまれた！`); break; }   // マグネットパワー：うちつづける あいだ あいてを ひきよせる
     case 'shield': f.v.shield = Math.round(f.maxHp * (m.shield || .25)); f.v.shieldT = m.life || 8; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 44, col: '#bfe8ff', life: .7 }); typeFx(f.x, f.y - BODY, m.t, 14, 90, .6); say(`${f.sp.n}は ${m.n}に つつまれた！`); break;
     case 'gshift': f.v.gshift = 1; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 40, col: '#8a78c8', life: .8 }); typeFx(f.x, f.y - BODY, 'ghost', 14, 90, .6); say(`${f.sp.n}の からだが すけた！ ノーマルと かくとうの わざが すりぬける！`); break;
@@ -6940,6 +6940,14 @@ function updateFighter(f, dt) {
     const dl = o.clones && o.clones.find(c => c.doll), lx = dl ? dl.x : o.x;
     if (Math.abs(lx - f.x) > 2) f.face = lx >= f.x ? 1 : -1; }
   if (targetable(f)) { f.enterT += dt; updateEffects(f, dt); if (f.state === 'faint') return; }
+  if (f.rw) {   // クロノバック：きた みちを 残像を のこしながら まきもどる
+    const R = f.rw; R.t += dt; f.inv = Math.max(f.inv, .05);
+    const u = Math.min(1, R.t / R.T) * (R.pts.length - 1), i = Math.min(R.pts.length - 2, Math.floor(u)), a = R.pts[i], b = R.pts[i + 1] || a, w = u - i;
+    f.x = a.x + (b.x - a.x) * w; f.y = a.y + (b.y - a.y) * w;
+    if ((R.g -= dt) <= 0) { R.g = .03; fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .5, max: .5, a: .6 }); }
+    if (R.t >= R.T) { f.rw = null; clampF(f); if (B.st.solid && blockedAt(f.x, f.y, footR(f))) freeSpot(f); if (R.heal > 0) healHp(f, R.heal); }
+    return;
+  }
   // いしつぶてれんぱつ：つづけて うつ
   if (f.shots.length) { for (const s of f.shots) s.t -= dt; for (const s of f.shots.filter(s => s.t <= 0)) spawnProj(f, s.m, s.ang); f.shots = f.shots.filter(s => s.t > 0); }
   // とんぼがえり系：あてたら もどる
@@ -10032,7 +10040,7 @@ function render() {
   });
 
   if (B.cfg.dummy) drawDummyViz(a, e);
-  for (const fx of B.fx) if (fx.type === 'ghost' && fx.sid) drawSprite(SPR[fx.sid].fr.walk1.w, fx.x, fx.y + 3, fx.face, SPR[fx.sid].ms, .3 * fx.life / fx.max);
+  for (const fx of B.fx) if (fx.type === 'ghost' && fx.sid) drawSprite(SPR[fx.sid].fr.walk1.w, fx.x, fx.y + 3, fx.face, SPR[fx.sid].ms, (fx.a || .3) * fx.life / fx.max);
 
   // 奥→手前の順
   const list = [];
