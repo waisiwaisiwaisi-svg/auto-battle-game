@@ -5139,6 +5139,7 @@ function beginMove(f, id) {
   if (m.k === 'beam' && m.pat === 'erupt') { cur.pts = []; const L = rayLen(f, ang, m.len); for (let d = 40, i = 0; d <= L; d += 46, i++) cur.pts.push({ x: f.x + Math.cos(ang) * d, y: f.y + Math.sin(ang) * d, d: i * .06, r: 30, ring: 0 }); }   // じめんが じゅんに さけて ふきあがる
   if (m.charge2 && f.v.charged) cur.wind = .03;   // ためてあれば すぐ はなつ
   if (m.chargeUp) { const c = clamp((dist(f, o) - 140) / 260, 0, 1); if (m.k === 'cone') { cur.half = m.half * (1 + c); cur.wind += c * m.chargeUp; } else { cur.chg = c; cur.wind += c * m.chargeUp; } }   // ためて はなつ：とおい ほど ながく ためて とおくまで とどく
+  if (isDamaging(m) && !boost && cur.wind < .26) { cur.wind = Math.max(cur.wind, m.prio > 0 || (m.charge2 && f.v.charged) ? .14 : .24); cur.quick = 1; }   /* すぐ でる こうげき：みじかい よびどうさ（ひいて → うつ） */
   if (m.nth) { f.nthC = f.nthC || {}; const c = f.nthC[id] = (f.nthC[id] || 0) + 1; cur.nthB = c % m.nth === 0; if (cur.nthB && !B.headless) popText(f.x, f.y - 104, 'つよい いちげき！', '#ffd166', true); }   // N かいめ だけ つよい
   if (m.useSelf) changeStages(f, m.useSelf, true);
   if (m.charges) { const C = chgS(f, id); C.n = Math.max(0, C.n - 1); }   // スケイルショット：うつと ぼうぎょ↓ すばやさ↑
@@ -10119,8 +10120,13 @@ function drawFighter0(f) {
     ctx.save(); ctx.globalAlpha = .7; plDraw('d_lines', plLoop('d_lines', B.t), f.x - Math.cos(dA) * (dR + 22), dCy - Math.sin(dA) * (dR + 22), Math.max(.7, dR / 50), dA, null, null, dFy); ctx.restore();
     const ak = { fire: 'd_fire', elec: 'd_elec', water: 'd_water', dragon: 'd_dragon' }[f.cur.m.t];
     if (ak && plOk(ak)) plDraw(ak, plLoop(ak, B.t), f.x - Math.cos(dA) * 6, dCy - Math.sin(dA) * 6, (dR * 2 + 20) / (PLFX[ak].w * PIX_D) * 1.1, dA, null, null, dFy); }
-  if (bone) drawBoned(img, f, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy, fly);
-  else drawSprite(img, f.x, f.y + 3 + oy + warpU * 10, fface, ms, alpha, sx, sy);
+  let qx = 0, qy = 0; const qk = f.state === 'wind' && f.cur && f.cur.wind < .26 && f.cur.m.k !== 'self' && isDamaging(f.cur.m) ? clamp(f.cur.t / f.cur.wind, 0, 1) : 0;   // よびどうさ：うしろに ひいて ちぢむ
+  if (qk) { const e = Math.sin(qk * Math.PI / 2); qx = -Math.cos(f.cur.ang) * 8 * e; qy = -Math.sin(f.cur.ang) * 3 * e; sy *= 1 - .1 * e; sx *= 1 + .07 * e; }
+  if (bone) drawBoned(img, f, f.x + qx, f.y + 3 + oy + qy + warpU * 10, fface, ms, alpha, sx, sy, fly);
+  else drawSprite(img, f.x + qx, f.y + 3 + oy + qy + warpU * 10, fface, ms, alpha, sx, sy);
+  if (qk > .35) { const c = TYPES[f.cur.m.t] ? TYPES[f.cur.m.t].c : '#ffffff', g = (qk - .35) / .65, R = 7 + 12 * g, gx = f.x + qx + Math.cos(f.cur.ang) * img0.width * ms * .36, gy = f.y + oy + qy - img0.height * ms * .5;   // きらっ：うつ まえの あいず
+    ctx.save(); ctx.globalAlpha = .9 * Math.sin(g * Math.PI * .5 + .3); ctx.translate(gx, gy); ctx.rotate(B.t * 3); ctx.fillStyle = c; ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? R * .28 : R; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? R * .14 : R * .55; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill(); ctx.restore(); }
   // まえの しょうげき（弓なりの 絵）は つかわない
   if ((f.v.protect > 0 || (f.state === 'dash' && f.cur && f.cur.m.guardDash)) && !['faint', 'enter', 'return'].includes(f.state)) {   // まもりの かまえ：からだを つつむ バリア
     const R = img0.width * ms * .5 + 10, cy = f.y + oy - img0.height * ms * .45, k = .5 + .5 * Math.sin(B.t * 10);
