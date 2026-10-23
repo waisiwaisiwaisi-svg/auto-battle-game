@@ -172,6 +172,10 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .jrc::before{content:'';position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(10,8,20,.88))}
 .jrc>*{position:relative}.jrc .in{padding:8px 10px;display:flex;flex-direction:column;gap:3px}
 .jrc b{font-size:15px}.jrc small{font-size:11px;opacity:.85}.jrc .dots{display:flex;gap:4px}.jrc .dots i{width:10px;height:10px;border-radius:50%;background:#3a3350;border:1px solid #0d0b14}.jrc .dots i.on{background:var(--acc)}.jrc .dots i.ld{border-radius:2px;width:14px}
+.jrrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px}
+.jrteam{display:flex;align-items:center;gap:2px;padding:3px 8px;background:rgba(255,255,255,.06);border:2px solid var(--line,#4a4466);border-radius:8px;color:var(--ink);cursor:pointer;font:inherit}
+.jrteam canvas{image-rendering:pixelated;display:block}.jrteam .sep{width:1px;height:22px;background:#5a5480;margin:0 4px}.jrteam b{font-size:12px;margin-left:6px;white-space:nowrap}.jrteam:active{transform:translateY(1px)}
+@media (max-width:520px){.jrrow{flex-wrap:nowrap;gap:6px}.jrrow .btn{font-size:11px!important;padding:6px 8px!important;flex:0 1 auto}.jrteam{flex:0 0 auto;padding:3px 6px}.jrteam canvas{height:28px;width:auto}.jrteam canvas:nth-of-type(n+4),.jrteam .sep{display:none}.jrteam b{font-size:11px;margin-left:3px}}   /* たて画面：ひかえは はぶいて よこ ならび */
 .jrc>.jtype{position:absolute;top:8px;left:10px}.jrc .in{padding-top:30px}   /* タイプの ふだと ジムの なまえが かさならない ように */
 .jrc:not(.league){min-height:132px}
 .jrc b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -8318,11 +8322,13 @@ function bVisual(dt) {
     // よった ぶん だけ ふたりの まんなかへ
     const k = Math.max(.35, (tz - fit) / (up - fit || 1));
     tx += ((x0 + x1) / 2 - tx) * Math.min(1, k * 1.5); ty += ((y0 + y1) / 2 - ty) * Math.min(1, k * 1.5);
-    // ふたりが はいりきらない ときは じぶんの モンスターを かならず うつす（あいては ミニマップと はしの やじるしで）
-    const me = active(B.my || 0); if (me && me.state !== 'bench') { const hw = aw / 2 / tz - 70 - (me.r || 20), hh = ah / 2 / tz - 90 - (me.r || 20); if (hw > 0) tx = clamp(tx, me.x - hw, me.x + hw); if (hh > 0) ty = clamp(ty, me.y - BODY - hh, me.y - BODY + hh); }
+    // ふたりとも かならず がめんに いれる：はいりきらない ときは ひく（あたまの うえの なまえ・HPバーまで）
+    { const X0 = Math.min(...vis.map(f => f.x - (f.r || 20) - 40)), X1 = Math.max(...vis.map(f => f.x + (f.r || 20) + 40)), Y0 = Math.min(...vis.map(f => f.y - BODY * 2 - (f.r || 20) - 70)), Y1 = Math.max(...vis.map(f => f.y + 24));
+      const both = Math.min(aw / (X1 - X0), ah / (Y1 - Y0)); if (tz > both) tz = both;
+      const hw = aw / 2 / tz, hh = ah / 2 / tz; tx = clamp(tx, X1 - hw, X0 + hw); ty = clamp(ty, Y1 - hh, Y0 + hh); }
   }
   if (B.mode === 'intro') { const z0 = Math.max(aw / st.W, ah / st.H), z1 = Math.max(fit, tall ? aw / (fw * LO_W) : Math.min(ah / st.H, aw / (fw * LO_W))), t = B.modeT - (B.vsT || 0); tz = t < .6 ? z0 : z0 + Math.min(1, (t - .6) / 1.6) * (z1 - z0); if (t < 0) { tx = st.W / 2 + Math.sin(B.modeT * 1.1) * 40; ty = st.H * .42; } }
-  B.cam.z += (tz - B.cam.z) * Math.min(1, dt * 1.6);
+  B.cam.z += (tz - B.cam.z) * Math.min(1, dt * (tz < B.cam.z ? 5 : 1.6));   // ひく ときは はやく（ふたりが はみでない ように）
   B.cam.x += (tx - B.cam.x) * Math.min(1, dt * 4);
   B.cam.y += (ty - B.cam.y) * Math.min(1, dt * 4);
 }
@@ -10597,7 +10603,7 @@ const updSnd = () => { for (const id of ['titleSnd', 'hubSnd', 'bSnd']) { const 
 for (const id of ['titleSnd', 'hubSnd', 'bSnd']) { const b = $(id); if (b) b.onclick = (ev) => { ev.stopPropagation(); SND.init(); SND.toggle(); updSnd(); }; }
 updSnd();
 
-$('btnTeam').onclick = () => renderTeam();
+$('btnTeam').onclick = () => { teamFrom = null; renderTeam(); };
 $('btnChart').onclick = renderChart;
 $('hubChests').addEventListener('click', (e) => { const b = e.target.closest('.chest[data-i]'); if (b) tapChest(+b.dataset.i); });
 $('btnChartBack').onclick = () => renderHub();
@@ -10666,7 +10672,8 @@ document.querySelectorAll('#scHub .hres1').forEach(el => el.addEventListener('cl
 $('btnOnline').onclick = () => { onlineMenu(); const b = document.querySelector('.ntabs [data-t="friend"]'); if (b) b.click(); };
 $('btnRank').onclick = () => { onlineMenu(); const g = document.getElementById('mmGo'); if (g) g.click(); };   // メイン：すぐ マッチング
 $('btnDexBack').onclick = () => renderHub();
-$('btnTeamBack').onclick = renderHub;
+let teamFrom = null;   // へんせいを ひらいた ところ（ジムから きたら ジムへ もどる）
+$('btnTeamBack').onclick = () => { const f = teamFrom; teamFrom = null; if (f === 'journey') renderJourney(); else renderHub(); };
 // せってい：おとの 大きさ・セーブデータ
 function modal(html) { const bg = document.createElement('div'); bg.className = 'askbg'; bg.innerHTML = `<div class="askbox" style="max-width:440px;text-align:left">${html}</div>`; $('app').appendChild(bg); bg.addEventListener('pointerdown', (e) => { if (e.target === bg) bg.remove(); }); return bg; }
 $('btnOpt').onclick = () => {
@@ -11107,8 +11114,10 @@ function renderJourney() {
   show('scJourney'); const J = jr();
   $('jrBadges').textContent = J.badges.length;
   { const nt = J.champ ? null : J.badges.length >= GYMS.length ? LEAGUE[J.league][3] : GYMS[J.gym].f;
-    $('jrStory').innerHTML = '<span></span><button class="btn sub" id="jrSort" style="display:block;margin-top:6px;padding:6px 12px;font-size:12px">' + (nt ? (J.badges.length >= GYMS.length ? `${LEAGUE[J.league][1]}（${FIELD_NAMES[nt]}）に あわせて へんせい` : `${FIELD_NAMES[nt]}ジムに あわせて へんせい`) : 'つよい じゅんに へんせい') + '</button>';
-    $('jrSort').onclick = () => { SND.se('ok'); const top = sortPartyFor(nt); say0(`パーティを ならべかえたよ（せんとう：${top.map(m => SPECIES[m.sid].n).join('・')}）`); }; }
+    $('jrStory').innerHTML = '<span></span><span class="jrrow"><button class="btn sub" id="jrSort" style="padding:6px 12px;font-size:12px">' + (nt ? (J.badges.length >= GYMS.length ? `${LEAGUE[J.league][1]}（${FIELD_NAMES[nt]}）に あわせて へんせい` : `${FIELD_NAMES[nt]}ジムに あわせて へんせい`) : 'つよい じゅんに へんせい') + '</button><button class="jrteam" id="jrTeam" title="へんせいを かえる"></button></span>';
+    $('jrSort').onclick = () => { SND.se('ok'); const top = sortPartyFor(nt); renderJourney(); say0(`パーティを ならべかえたよ（せんとう：${top.map(m => SPECIES[m.sid].n).join('・')}）`); };
+    { const t = $('jrTeam'); S.party.slice(0, 6).forEach((m, i) => { if (i === 3) t.insertAdjacentHTML('beforeend', '<i class="sep"></i>'); const c = spriteCanvas(m.sid, i < 3 ? 34 : 24); t.appendChild(c); }); t.insertAdjacentHTML('beforeend', '<b>へんせい ›</b>');   // いまの へんせい：タップで へんせいがめんへ（もどると ジムに もどる）
+      t.onclick = () => { SND.se('ok'); teamFrom = 'journey'; renderTeam(); }; } }
   $('jrStory').firstChild.textContent = J.champ ? `でんどういり ${J.champ}かい！ ジムリーダーたちは つよく なって まっている。` : J.badges.length >= GYMS.length ? 'バッジが そろった！ チャンピオンリーグに いどもう。' : '10の とうぎじょうを めぐって ジムリーダーに かち、バッジを あつめよう。ぜんぶ そろうと チャンピオンリーグへ。';
   const g = $('jrGrid'); g.innerHTML = '';
   GYMS.forEach((G, i) => {
