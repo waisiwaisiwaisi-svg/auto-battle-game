@@ -2439,6 +2439,7 @@ Object.assign(NEW_MOVES, {   // だい2だん：ほろび・けっとう・ね�
   'hako-punch': { n: 'ぶっとびてんし', t: 'fighting', k: 'melee', power: 0, hako: 1, cd: 4 },   // ハコワレ：いりょく0。あいての 攻撃+1、5びょうごとに うばう ステータスが ふえ、もう いちど あてるか たおれたら とりたて
 });
 const WEATHER = { rain: { n: '雨', ty: 'water', col: 'rgba(80,140,255,.10)' }, sun: { n: '晴れ', ty: 'fire', col: 'rgba(255,200,90,.12)' }, sand: { n: '砂あらし', ty: 'rock', col: 'rgba(200,160,90,.16)' }, snow: { n: '雪', ty: 'ice', col: 'rgba(230,240,255,.12)' } };
+const NEW_TEXT = {"bonemerang": ["かえりぼね", "まっすぐ飛んで同じ道を戻ってくる。行きと帰りで1回ずつ当たる"], "bulldoze": ["だいちゆらし", "フィールド全体をゆらす（予告なし）。当たると素早さ-1。置かれた壁・岩をすべて崩す。飛んでいる相手には当たらない"], "drill-run": ["つらぬきドリル", "壁や障害物をつき抜けて突進する。突進中はひるまない。急所に当たりやすい"], "mud-slap": ["どろつぶて", "追いかける泥の弾。当たると回避-1"], "high-horsepower": ["マッドパンチ", "踏みこんで殴る重い一撃"], "x-scissor": ["クロスばさみ", "前方を十字にはさみ切る"], "megahorn": ["おおづのとっしん", "大きな角で突進する"], "needle-volley": ["れんしゃばり", "針を3発連射する"], "bug-buzz": ["はおとのなみ", "前方へ羽音の波。10%で属性防御-1"], "quiver-dance": ["はばたきのまい", "自分の属性攻撃・属性防御・素早さ+1"], "venom-stack": ["どくばりちくせき", "追いかける毒針。2回当てると猛毒"], "dragon-claw": ["りゅうのツメ", "前方を爪で切りさく"], "dragon-tail": ["しっぽばらい", "当たると相手を控えと入れ替える"], "scale-shot": ["うろこれんぱ", "うろこを4発連射する。撃つと自分の防御-1・素早さ+1"], "dragon-armor": ["りゅうせいとっしん", "ひるまずに突き進む突進"], "dragon-charge": ["りゅうのためいき", "射程無限のおうぎ形の息。ためる間に真ん中から広がり、相手が遠いほど長くためて広くなる"], "dragon-dive": ["てんくうおとし", "空へ飛び上がり、相手の所へ降りて攻撃（空中では攻撃を受けない）。20%でひるませる"], "aerial-ace": ["ひえんぎり", "必ず当たる切りつけ"], "air-slash2": ["かまいたち", "追いかける風の刃。30%でひるませる"], "drill-peck": ["きりもみづき", "きりもみ回転で突進する"], "hurricane": ["おおあらし", "前方へ大あらし。相手を混乱させる"], "gale-arrow": ["かぜのや", "場の端まで届く矢。遠くから当てるほど強い（最大2倍）"], "powder-snow": ["しもばしら", "相手の足元に霜の床を作る。乗ると足が遅くなり、0.5秒ごとに積み重なって4回で凍結"], "avalanche": ["ゆきのしかえし", "足元から雪がくずれ落ちる。直前に攻撃を受けていると威力2倍"], "aurora-veil": ["こおりのみそぎ", "自分の状態異常・混乱・積み重ねを治す"], "psycho-cut": ["ねんりきブレード", "念力の刃で前方を切る。急所に当たりやすい"], "zen-headbutt": ["ねんりきずつき", "念をこめた頭突きで突進する。20%でひるませる"], "shadow-claw": ["かげのツメ", "影の爪で前方を切る。急所に当たりやすい"], "cross-poison": ["どくのじゅうじぎり", "毒の十字切り。10%でどく。急所に当たりやすい"], "head-smash": ["がんせきずつき", "岩の頭で突進する。与えたダメージの50%を自分も受ける"], "wood-hammer": ["まるたうち", "丸太で突進する。与えたダメージの33%を自分も受ける"], "bullet-seed": ["タネれんぱつ", "種を5発連射する"], "finisher": ["とどめのいちげき", "相手のHPが減っているほど強い（最大3倍）。倒すと待ち時間がすぐ戻る"], "seal-tag": ["ふういんのおふだ", "追いかけるお札。当たると3秒間技が出せない（動ける）"], "shadow-pin": ["かげぬい", "追いかける影の針。当たると1.5秒動けない（技は出せる）"], "psy-link": ["ねんりきのいと", "相手と念力の糸でつながり、4秒間ダメージを与え続ける。近いほど強い（1秒で最大威力30）。離れすぎると切れる"], "magnet-power": ["マグネットパワー", "10秒間その場から動けない代わりに、まわりの相手と置かれた技・罠を引き寄せ続ける（技は使える）。一度とらえた相手は範囲の外でも引き寄せる"], "slap-dash": ["つきとばし", "当たった相手を突進の向きへつき飛ばす。壁・障害物・場の端にぶつけると2.5秒ひるむ"], "duel-arena": ["けっとうのば", "相手は10秒間交代できない"], "future-sight": ["よちのいちげき", "相手の足元に予告を置き、2.5秒後に攻撃する（どけばよけられる）"], "snatch": ["よこどり", "素早く出せる。相手が溜めている攻撃技を奪い、先に1.5倍で撃つ。溜めていない相手に使うと失敗して1.2秒動けない"], "rain-dance": ["あめよび", "20秒間、天候を雨にする。みず技1.5倍・ほのお技0.5倍"], "sunny-day": ["ひでりよび", "20秒間、天候を晴れにする。ほのお技1.5倍・みず技0.5倍"], "sandstorm": ["すなよび", "20秒間、天候を砂あらしにする。いわ・じめん以外は毎秒1%けずられる"], "snowscape": ["ゆきよび", "20秒間、天候を雪にする。こおり以外は毎秒1%けずられる"], "weather-ball": ["おてんきだま", "追いかける弾。天候があるとその天候のタイプ（雨＝みず・晴れ＝ほのお・砂＝いわ・雪＝こおり）になり威力2倍"], "rewind": ["クロノバック", "その場に残像を残す。5秒後に残像の場所へ戻り、その間に減ったHPの半分を取り戻す"], "third-fist": ["みつめのこぶし", "3回に1回、2.5倍の強い一撃になる"], "healing-wish": ["いのちのバトン", "自分は倒れる。次に出てくる味方のHPと状態異常を全回復する"], "memento": ["わすれがたみ", "自分は倒れる。相手の攻撃-2・属性攻撃-2"], "echo-slash": ["ざんきょう", "必ず当たる。影になって相手の後ろへ駆け抜け、しるしを刻む。6秒後、その間に与えたダメージの40%を追加で与える"], "electric-terrain": ["でんげきのば", "15秒間、場を電気で満たす。でんき技1.3倍・地面にいる相手は眠らない"], "grassy-terrain": ["くさはらのば", "15秒間、場を草原にする。くさ技1.3倍・地面にいるモンスターは毎秒1%回復"], "psychic-terrain": ["ねんりきのば", "15秒間、場を念力で満たす。エスパー技1.3倍・地面にいる相手に突進が効かない"], "gravity": ["じゅうりょくのば", "8秒間、だれも空を飛べない。浮いている相手も地面に落ち、空へ飛ぶ技が出せない"], "smack-down": ["つちおとし", "追いかける岩。当たると8秒間、空を飛べなくなる"], "copycat": ["まねっこ", "相手が最後に使った技をまねして使う"], "haze": ["くろもや", "自分と相手の能力の変化をすべて元に戻す"], "soak": ["ずぶぬれ", "相手をみずタイプだけにする（交代で戻る）"], "trick-or-treat": ["おばけづけ", "相手にゴーストタイプを足す（交代で戻る）"], "rage-mode": ["いかりモード", "HPが30%以下のときだけ使える（1戦1回）。8秒間、与えるダメージ1.5倍・移動が速くなる"], "mystic-shot": ["まどうだん", "速い魔法の弾。当たると他の技の待ち時間が1.5秒縮む"], "side-change": ["いれかわり", "相手と場所を入れ替える"], "shadow-return": ["かげがえし", "影に沈んでは浮かび上がり、相手のまわり2か所に現れてから攻撃。その後、影に沈んで元の場所へ戻る（距離200まで）"], "arcane-shift": ["ひらりショット", "ふわりと弧をえがいて横へ跳び、着地してから追いかける弾を撃つ"], "mini-turret": ["ミニほうだい", "10秒間、2秒ごとに相手を撃つミニほうだいを置く（さわると壊れる・3つまで）。5秒ごとに1回分たまり（最大3回）、待ち時間はない"], "burning-aura": ["しゃくねつオーラ", "8秒間、自分のHPを毎秒2%使って、近くの相手を焼き続ける"], "magic-cage": ["まほうのおり", "相手のまわりに4秒間おりを作る。おりの境目をまたぐと1.5秒動けない"], "self-destruct": ["すてみばくはつ", "1秒ためて大爆発し、自分は倒れる。ため中はひるまない"], "high-jump-kick": ["とびこみひざ", "飛びこんでひざげり。外すと最大HPの50%のダメージを自分が受ける"], "hyper-beam": ["はめつのひかり", "2秒間撃ち続けるビーム。撃った後2.5秒動けない"], "rollout": ["ごろごろアタック", "当たるたびにもう一度転がり、だんだん強くなる（5回まで）。外すと止まる"], "pain-split": ["わけあい", "自分と相手のHPを足して半分ずつにする"], "endeavor": ["ひきずりおろし", "相手のHPを自分のHPと同じまで減らす"], "hako-punch": ["ぶっとびてんし", "当てると相手の攻撃+1（かしつけ）。5秒ごとに奪うステータスが攻撃→防御→属性攻撃→属性防御→素早さの順に1つずつ増える。もう一度当てるか相手が倒れると、たまった分を奪って自分のものにする"]};   // 新しい 技の なまえ と せつめい（てがき）
 const NEW_IDS = Object.keys(NEW_MOVES);
 for (const id of NEW_IDS) {
   const m = Object.assign({ ref: id, acc: 100, prio: 0, aim: 'lock', wind: .35, e: {}, nw: 1 }, NEW_MOVES[id]);
@@ -2446,6 +2447,7 @@ for (const id of NEW_IDS) {
   if (m.k === 'proj') m.wind = NEW_MOVES[id].wind || .3;
   if (m.k === 'strike') m.wind = NEW_MOVES[id].wind || .7;
   if (m.k === 'aoe' || m.k === 'cone') m.wind = NEW_MOVES[id].wind || .6;
+  if (NEW_TEXT[id]) { m.n = NEW_TEXT[id][0]; m.ds = NEW_TEXT[id][1]; }
   m.pow = (m.power || 0) / 5;
   if (!(m.cd > 0)) m.cd = m.power ? Math.round((1.4 + .03127 * m.power) * 100) / 100 : 6;
   if (m.cat !== 'stat') m.cat = PHYS_KINDS.includes(m.k) || m.k === 'shadow' ? 'phys' : 'spec';
@@ -4790,7 +4792,7 @@ function sendOut(side, idx, pass, lag, at, ko) {
   f.enterT = 0; f.swIn = B.mode === 'fight'; f.inAt = B.t; f.v = {}; f.hist = []; f.rw = null; f.heat = 0; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.usedAt = {}; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
   if (f.sp0) { f.sp = f.sp0; f.sp0 = null; }   // みずびたし・ハロウィン：こうたいで もとの タイプ
-  if (B.sides[side].hwish && f.hp > 0) { B.sides[side].hwish = 0; f.hp = f.maxHp; f.status = ''; f.toxN = 1; setTimeout(() => { if (B && f.hp > 0) { popText(f.x, f.y - 100, 'いやしのねがい！ ぜんかいふく', '#ff9ad0', 'comic'); healFx(f); } }, 0); }
+  if (B.sides[side].hwish && f.hp > 0) { B.sides[side].hwish = 0; f.hp = f.maxHp; f.status = ''; f.toxN = 1; setTimeout(() => { if (B && f.hp > 0) { popText(f.x, f.y - 100, 'いのちのバトン！ ぜんかいふく', '#ff9ad0', 'comic'); healFx(f); } }, 0); }
   f.swapLag = lag ? SWAP_LAG : 0; if (lag) f.inv = 0;
   moveLock(f, ENTER_LOCK);   // でてきた ばかりは わざを だせない
   const tr = sd.trainer;
@@ -5075,7 +5077,7 @@ function beginMove(f, id) {
   if (m.k === 'copycat') {   // オウムがえし：あいてが さいごに つかった 技を つかう
     f.cd[id] = m.cd * cdScale(f) * CD_SHARED_K; (f.cdMax = f.cdMax || {})[id] = f.cd[id]; const id2 = o.lastMove, m2 = MOVES[id2];
     if (!m2 || ['copycat', 'mimic'].includes(m2.k) || AUTO_GUARD[m2.k]) { say('まねる 技が ない！'); popText(f.x, f.y - 66, 'しっぱい', '#a49ac0'); return; }
-    popText(f.x, f.y - 104, `オウムがえし！ ${m2.n}`, '#ffd166', true); return beginMove(f, id2);
+    popText(f.x, f.y - 104, `まねっこ！ ${m2.n}`, '#ffd166', true); return beginMove(f, id2);
   }
   if (f.v.confuse > 0 && !f.cfuse && confusedAct(f, id)) return;   // こんらん：しじと ちがう ことを する
   if (healMax(m) && !TUT && !(m.charge2 && !f.v.charged)) { f.uses = f.uses || {}; f.uses[id] = (f.uses[id] || 0) + 1; }   // がりょうてんせいは ためる ときは かぞえない
@@ -5788,7 +5790,7 @@ function useStatusMove(f, o, m) {
     case 'wish': (B.wishes = B.wishes || []).push({ side: f.side, x: f.x, y: f.y, t: 3 }); say(`${f.sp.n}は ねがいごとを した！`); break;   // 3びょうご あしもとの みかたを かいふく
     case 'link': {   // サイコリンク：すぐに つなぐ
       if (!o || !targetable(o) || dist(f, o) > m.tether.r - 20) { failMove(f, 'とどかない！'); return; }
-      o.v.teth = { att: f, m: Object.assign({}, m, { cat: 'spec', pow: 6 }), t: m.tether.t, r: m.tether.r, k: m.tether.k, next: .5 }; burst(o.x, o.y - BODY, TYPES[m.t].c, 10, 90, .35); popText(o.x, o.y - 104, 'つながった！', '#ff9ad0'); say(`${f.sp.n}は ${o.sp.n}と サイコリンクで つながった！`); break; }
+      o.v.teth = { att: f, m: Object.assign({}, m, { cat: 'spec', pow: 6 }), t: m.tether.t, r: m.tether.r, k: m.tether.k, next: .5 }; burst(o.x, o.y - BODY, TYPES[m.t].c, 10, 90, .35); popText(o.x, o.y - 104, 'つながった！', '#ff9ad0'); say(`${f.sp.n}は ${o.sp.n}と ねんりきのいとで つながった！`); break; }
     case 'shadow': if (!o || !targetable(o) || dist(f, o) > (m.reach || 200)) { failMove(f, 'とどかない！'); return; } shadowStrike(f, o, m); break;   // かげがえし
     case 'echo': {   // ざんきょう：かげに なって あいての うしろへ かけぬけ、しるしを きざむ
       if (!o || !targetable(o) || dist(f, o) > 380) { failMove(f, 'とどかない！'); return; }
@@ -5799,15 +5801,15 @@ function useStatusMove(f, o, m) {
         popText(o2.x, o2.y - 112, 'しるしを きざんだ！', '#b8a8f0', 'comic'); say(`${f.sp.n}は ${o2.sp.n}に ざんきょうの しるしを きざんだ！`); } };
       break; }
     case 'hwish': case 'memento': {   // じぶんは たおれて つぎの みかたを たすける／あいてを よわらせる
-      if (m.k === 'hwish') { B.sides[f.side].hwish = 1; say(`${f.sp.n}は いやしのねがいを たくした！`); } else if (o && targetable(o)) { changeStages(o, { atk: -2, spa: -2 }); say(`${f.sp.n}は おきみやげを のこした！`); }
+      if (m.k === 'hwish') { B.sides[f.side].hwish = 1; say(`${f.sp.n}は いのちのバトンを たくした！`); } else if (o && targetable(o)) { changeStages(o, { atk: -2, spa: -2 }); say(`${f.sp.n}は わすれがたみを のこした！`); }
       fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 50, col: m.k === 'hwish' ? '#ff9ad0' : '#8a78c8', life: .8 }); endAct(f, .2); if (f.hp > 0) { f.hp = 0; faint(f, o); } break; }
-    case 'terrain': B.terrain = { k: m.tk, t: 15 }; say({ elec: 'エレキフィールドに なった！（でんき↑・ねむらない）', grass: 'グラスフィールドに なった！（くさ↑・すこしずつ かいふく）', psy: 'サイコフィールドに なった！（エスパー↑・とっしんが きかない）' }[m.tk]); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 140, col: TYPES[m.t].c, life: .6, max: .6 }); break;
+    case 'terrain': B.terrain = { k: m.tk, t: 15 }; say({ elec: 'でんげきのばに なった！（でんき↑・ねむらない）', grass: 'くさはらのばに なった！（くさ↑・すこしずつ かいふく）', psy: 'ねんりきのばに なった！（エスパー↑・とっしんが きかない）' }[m.tk]); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 140, col: TYPES[m.t].c, life: .6, max: .6 }); break;
     case 'gravity': B.gravity = 8; say('じゅうりょくが つよく なった！ とぶ ことが できない'); B.shake = Math.max(B.shake, 6); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#c8a8ff', life: .6, max: .6 }); break;
     case 'mimic': {   // ものまね：あいてが さいごに つかった 技を この たたかいの あいだ おぼえる
       const id2 = o && o.lastMove, m2 = MOVES[id2], me = MOVE_ID.get(m), ix = f.moves.indexOf(me);
       if (!m2 || ['copycat', 'mimic'].includes(m2.k) || f.moves.includes(id2) || ix < 0) { failMove(f, 'まねる 技が ない！'); return; }
       f.moves[ix] = id2; f.cd[id2] = 0; popText(f.x, f.y - 104, `${m2.n}を おぼえた！`, '#ffd166', true); say(`${f.sp.n}は ${m2.n}を ものまねした！`); break; }
-    case 'haze': for (const x of [f, o]) if (x) x.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#7f8aa8', life: .6, max: .6 }); say('くろいきりで のうりょくの へんかが もとに もどった！'); break;
+    case 'haze': for (const x of [f, o]) if (x) x.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#7f8aa8', life: .6, max: .6 }); say('くろもやで のうりょくの へんかが もとに もどった！'); break;
     case 'soak': case 'halloween': {   // あいての タイプを かえる・たす（こうたいで もどる）
       if (!o || !targetable(o)) return; const nt = m.k === 'soak' ? 'water' : 'ghost';
       if (m.k === 'soak' ? (o.sp.type === 'water' && !o.sp.type2) : hasType(o, 'ghost')) { failMove(f, 'こうかが ない！'); return; }
@@ -5954,7 +5956,7 @@ function changeStages(f, ch, self) {
   if (parts.length) { const up = Object.values(ch)[0] > 0; popText(f.x, f.y - 80, parts.join(' '), up ? '#ffd166' : '#7fb2ff'); statFx(f, up, self && !up); }
 }
 function setStatus(f, s, by) {
-  if (s === 'slp' && B && B.terrain && B.terrain.k === 'elec' && !flies(f)) { popText(f.x, f.y - 80, 'エレキフィールドで ねむらない', '#ffe27a'); return; }
+  if (s === 'slp' && B && B.terrain && B.terrain.k === 'elec' && !flies(f)) { popText(f.x, f.y - 80, 'でんげきのばで ねむらない', '#ffe27a'); return; }
   if (f.status || f.hp <= 0) return false;
   if (by && f.v.sub > 0) return false;
   if ((s === 'brn' && hasType(f, 'fire')) || (s === 'par' && hasType(f, 'elec')) || ((s === 'psn' || s === 'tox') && (hasType(f, 'poison') || hasType(f, 'steel'))) || (s === 'frz' && hasType(f, 'ice'))) return false;
@@ -6002,7 +6004,7 @@ function hit(att, def, m, ang, opt) {
   }
   if (m.hako) return hakoHit(att, def, m);
   if (m.cat === 'stat') return statusHit(att, def, m);
-  if (B.terrain && B.terrain.k === 'psy' && m.k === 'dash' && !flies(def)) { popText(def.x, def.y - 66, 'サイコフィールドが まもった', '#ff9ad0'); return false; }   // サイコフィールド：じめんに いる こには とっしんが きかない
+  if (B.terrain && B.terrain.k === 'psy' && m.k === 'dash' && !flies(def)) { popText(def.x, def.y - 66, 'ねんりきのばが まもった', '#ff9ad0'); return false; }   // サイコフィールド：じめんに いる こには とっしんが きかない
   let eff = m.t === 'normal' ? effOf('normal', def.sp.type) * (def.sp.type2 ? effOf('normal', def.sp.type2) : 1) : effVs(m.t, def.sp);
   if (!eff && m.ghostOk) eff = effMv(m, def.sp);
   if (m.superVsWater && hasType(def, 'water')) eff = eff / effOf('ice', 'water') * 2;
@@ -8448,6 +8450,7 @@ function moveDesc(m) {
   const pw = m.power || (m.pow ? Math.round(m.pow * 5) : 0), add = (x) => { if (x) out.push(x); };
   const TN = (t) => TYPES[t].n;
   // 威力・命中
+  if (m.ds) { if (m.cat !== 'stat' && pw > 0) add(`威力${pw}`); if (m.cat !== 'stat' && m.acc && m.acc < 100) add(`命中${m.acc}`); add(m.ds + (isBigMove(m) ? '。大技' : '')); return out.join('・'); }   // てがきの せつめい
   if (m.cat !== 'stat' && m.k !== 'counter' && !m.ohko) add(`威力${pw}`);
   if (m.cat !== 'stat' && m.acc && m.acc < 100) add(`命中${m.acc}`);
   if (m.prio > 0) add('素早く出せる');
@@ -8580,7 +8583,7 @@ const KW_SV = {   // のうりょくが なにに きくか
 };
 const KW_C = {   // 訓練の 条件
   dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
-  mysts: ['条件：自分の状態異常', '自分が えらんだ 状態異常（火傷・麻痺・毒・凍結）か 混乱に なって いる とき。オーロラベールで なおす ときに つかう。「毒」は もうどくも ふくむ。'],
+  mysts: ['条件：自分の状態異常', '自分が えらんだ 状態異常（火傷・麻痺・毒・凍結）か 混乱に なって いる とき。こおりのみそぎで なおす ときに つかう。「毒」は もうどくも ふくむ。'],
   terrain: ['条件：フィールド', '場の フィールドが えらんだ ものの とき（エレキ・グラス・サイコ・なし）。フィールドは 15秒 つづく。'],
   weather: ['条件：天候', '場の 天候が えらんだ ものの とき（雨・晴れ・砂あらし・雪）。天候は 20秒 つづく。'],
   ophako: ['条件：ぶっとびてんしの取り立て', 'ぶっとびてんしで かしつけた 相手から 奪える ステータスが えらんだ 数いじょう たまった とき（5秒ごとに 攻撃→防御→属性攻撃→属性防御→素早さの 順に ふえる）。もう いちど ぶっとびてんしを 当てると 取り立てる。'],
