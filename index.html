@@ -489,9 +489,12 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 .bmon .bh{height:5px;background:#0d0b14;margin-top:3px;border-radius:1px}
 .bmon .bh i{display:block;height:100%;background:var(--good)}
 .bmon .bs{font-size:9.5px;color:var(--dim)}
+.bmon{position:relative}.bmon .bmu{position:absolute;top:2px;right:3px;font-style:normal;font-size:10px;font-weight:700;line-height:1.4;padding:0 4px;border-radius:3px;color:#fff;pointer-events:none}
+.mu{display:inline-block;padding:0 6px;border-radius:3px;color:#fff;font-size:11px;font-weight:700;margin-left:4px;vertical-align:middle}.mux{display:block;font-size:10.5px;color:var(--dim);margin-top:1px}
 #bench.many .bmon .bn{display:none} #bench.many .bmon{flex-direction:column!important;justify-content:center;gap:2px;padding:3px 4px!important} #bench.many .bmon > span{width:100%;flex:none!important}
 .bmon.out{opacity:.35;filter:grayscale(1)}
 .bmon .sw{color:var(--acc);font-size:10px}
+#wildBtns[hidden]{display:none!important}
 #wildBtns{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:8px;z-index:6;pointer-events:none}
 #wildBtns .cmd{pointer-events:auto;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;min-width:96px;min-height:44px;padding:4px 12px;text-align:left}
 #wildBtns .wt{display:flex;flex-direction:column;line-height:1.2}#wildBtns .a{font-size:15px;font-weight:700}#wildBtns .b{font-size:10.5px;opacity:.85;white-space:nowrap}
@@ -7408,7 +7411,7 @@ function netSendInput() { if (NET.nr) NET.nr.presence({ inp: { ...NET.inp, au: !
 function netGuestChoose() {
   const sd = B.sides[1], alive = sd.fs.map((x, i) => i).filter(i => !sd.fs[i].fainted && sd.fs[i].hp > 0), L = $('chooseList'); L.innerHTML = '';
   for (const i of alive) { const x = sd.fs[i], b = document.createElement('button'); b.appendChild(spriteCanvas(x.mon.sid, 48));
-    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}${x.sp.type2 ? typeChip(x.sp.type2) : ''}<small class="dim"> HP ${Math.ceil(x.hp)}/${x.maxHp}</small></span>`);
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}${x.sp.type2 ? typeChip(x.sp.type2) : ''}${muHtml(x, active(0))}<small class="dim"> HP ${Math.ceil(x.hp)}/${x.maxHp}</small></span>`);
     b.onclick = () => { $('chooseOv').hidden = true; NET.inp.ch = [NET.inp.ch[0] + 1, i]; netSendInput(); };
     L.appendChild(b); }
   $('chooseOv').hidden = false;
@@ -8580,7 +8583,7 @@ function renderBench() {
     if (i === sd.act) return;
     const b = document.createElement('button'); b.className = 'cmd bmon'; b.dataset.i = i; b.title = x.sp.n;
     b.appendChild(spriteCanvas(x.mon.sid, 44));
-    b.insertAdjacentHTML('beforeend', `<span style="flex:1;min-width:0"><div class="bn">${x.sp.n}</div><div class="bh"><i></i></div><div class="bs"></div></span><i class="cdv"></i>`);
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1;min-width:0"><div class="bn">${x.sp.n}</div><div class="bh"><i></i></div><div class="bs"></div></span><i class="cdv"></i><em class="bmu"></em>`);
     tap(b, () => swapTo(i));
     L.appendChild(b);
   });
@@ -8600,6 +8603,7 @@ function updBench() {
   $('bench').querySelectorAll('.bmon').forEach(b => {
     const x = sd.fs[+b.dataset.i]; if (!x) return;
     const out = x.fainted || x.hp <= 0, k = Math.max(0, x.hp / x.maxHp);
+    { const e = b.querySelector('.bmu'), r = !out && matchup(x, active(1 - (B.my || 0))); if (e) { e.hidden = !r; if (r) { setText(e, MU[r.k][0]); e.style.background = MU[r.k][1]; } } }   // あいてとの あいしょう
     b.classList.toggle('out', out);
     b.querySelector('.bh i').style.width = (k * 100) + '%'; b.querySelector('.bh i').style.background = k > .5 ? 'var(--good)' : k > .2 ? 'var(--mid)' : 'var(--bad)';
     setText(b.querySelector('.bs'), out ? 'ひんし' : sd.swapCd > 0 ? `こうたい あと${Math.ceil(sd.swapCd)}びょう` : (x.status ? STATUS_NAMES[x.status] + '・' : '') + 'タップで こうたい');
@@ -8610,6 +8614,14 @@ function updBench() {
 const AUTO_PICK_T = 10;   // 訓練・AUTO：この びょう えらばなければ じどうで だす
 function chooseNext(f) { chooseSwap(i => { B.pendingSend = { side: 0, idx: i, t: .2, ko: 1 }; }, 'つぎは だれを だす？', { t1: .5 }); }
 // こうたいさきを えらぶ（たおれた とき・交代技・ふきとばされた とき）。pick(i) で きまった あとの ことを する
+// こうたいの あいしょう：じぶんの 技が あいてに どれだけ きくか（こうげき）・あいての 技が じぶんに どれだけ きくか（うける）
+function matchup(x, o) {
+  if (!x || !o || !x.sp || !o.sp) return null;
+  const best = (a, b) => { const ds = (a.moves || []).map(id => MOVES[id]).filter(m => m && isDamaging(m)); return ds.length ? Math.max(...ds.map(m => effMv(m, b.sp))) : Math.max(effVs(a.sp.type, b.sp), a.sp.type2 ? effVs(a.sp.type2, b.sp) : 0); };
+  const atk = best(x, o), def = best(o, x); return { atk, def, k: atk > def ? 'adv' : atk < def ? 'dis' : 'even' };
+}
+const MU = { adv: ['有利', '#3fbf6a'], even: ['互角', '#7a7298'], dis: ['不利', '#e0504a'] };
+const muHtml = (x, o) => { const r = matchup(x, o); if (!r) return ''; const [n, c] = MU[r.k], fx = (v) => '×' + +v.toFixed(2); return `<span class="mu" style="background:${c}">${n}</span><small class="mux">こうげき${fx(r.atk)}・うける${fx(r.def)}</small>`; };
 function chooseSwap(pick, title, opt = {}) {
   const sd = B.sides[0], alive = sd.fs.map((x, i) => i).filter(i => i !== (opt.skip ?? -1) && !sd.fs[i].fainted && sd.fs[i].hp > 0);
   if (!alive.length) return;
@@ -8620,7 +8632,7 @@ function chooseSwap(pick, title, opt = {}) {
   for (const i of alive) {
     const x = sd.fs[i], b = document.createElement('button');
     b.appendChild(spriteCanvas(x.mon.sid, 48));
-    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}${x.sp.type2 ? typeChip(x.sp.type2) : ''}<div class="hpb" style="height:5px;background:#0d0b14;margin-top:4px"><i style="display:block;height:100%;width:${x.hp / x.maxHp * 100}%;background:var(--good)"></i></div></span>`);
+    b.insertAdjacentHTML('beforeend', `<span style="flex:1"><b>${x.sp.n}</b> ${typeChip(x.sp.type)}${x.sp.type2 ? typeChip(x.sp.type2) : ''}${muHtml(x, active(1))}<div class="hpb" style="height:5px;background:#0d0b14;margin-top:4px"><i style="display:block;height:100%;width:${x.hp / x.maxHp * 100}%;background:var(--good)"></i></div></span>`);
     b.onclick = () => { $('chooseOv').hidden = true; B.paused = false; B.choosing = false; pick(i); };
     L.appendChild(b);
   }
@@ -10869,7 +10881,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ NEW_IDS, moveBlocked, openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ chooseSwap, NEW_IDS, moveBlocked, openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 document.documentElement.classList.add('booted');
 { const fin = () => { if (window.__bootDone) window.__bootDone(); };   // ロード画面を とじる：タイトルの 絵と もじ（フォント）が そろってから
