@@ -1122,7 +1122,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .hov{outline:3px solid #ffd166!important;outline-offset:1px;box-shadow:0 0 10px rgba(255,209,102,.45)!important}
 .trghost.snap{opacity:1;transform:scale(1.04);box-shadow:0 0 0 2px #ffd166,0 6px 16px rgba(0,0,0,.5)}
 .trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.trdock{display:none}.trpage.dock{grid-template-rows:auto 1fr}.trpage.dock .trmons{grid-column:1;grid-row:1;max-height:max(140px,calc(calc(100 * var(--vh)) - 430px))}.trpage.dock .trdock{display:flex;flex-direction:column;gap:10px;grid-column:1;grid-row:2;position:sticky;top:8px;align-self:start}.trpage.dock .trmain{grid-column:2;grid-row:1 / span 2}.trpage.dock .trside{grid-column:3;grid-row:1 / span 2}.trdock .trbtns{flex-direction:column;flex-wrap:nowrap;gap:10px}.trdock .trbtns .btn{width:100%;font-size:13px;padding:10px 4px;white-space:normal;line-height:1.3}.trdock .trbtns2{gap:4px 10px;font-size:12px}.trstat{display:none!important}   /* 3れつ：ひだりの れつに ボタン */.trbtns .btn{padding:6px 12px;font-size:13px}
+.trdock{display:none}.trpage.dock .trdock{display:flex;flex-direction:column;gap:10px;grid-column:1;grid-row:1;position:sticky;top:8px;align-self:start;min-height:0}.trpage.dock .trdock .trmons{flex:1 1 auto;min-height:0;max-height:none}.trpage.dock .trdock > :not(.trmons){flex:none}.trdock .trbtns{flex-direction:column;flex-wrap:nowrap;gap:10px}.trdock .trbtns .btn{width:100%;font-size:13px;padding:10px 4px;white-space:normal;line-height:1.3}.trdock .trbtns2{gap:4px 10px;font-size:12px}.trstat{display:none!important}   /* 3れつ：ひだりの れつに ボタン */.trbtns .btn{padding:6px 12px;font-size:13px}
 .trside h3{font-size:13px;margin:4px 0 0}.trside h3 .dim{font-size:10px;font-weight:400}.trside{background:rgba(20,16,36,.55);border:1px solid var(--edge);border-radius:10px;padding:8px}
 .trins{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--edge);font-size:12px;min-height:60px}
 .trmvinfo{display:flex;flex-direction:column;gap:3px;padding:4px 0 4px 8px;border-left:4px solid var(--c);line-height:1.45}.trmvinfo b{font-size:13px}
@@ -4066,19 +4066,23 @@ function trtLoop() {
     else { y = clamp(r.top, 8, vh - bh - 8); x = r.right + 14 + bw < vw ? r.right + 14 : r.left - 14 - bw >= 0 ? r.left - 14 - bw : x; } }   // した → うえ → よこ の じゅんに おける ところへ
   bub.style.left = x + 'px'; bub.style.top = y + 'px';
 }
-function trDockFix() {   // 訓練：3れつ ならび の ときは 木人戦・模擬戦・確定 を ひだりの れつへ（それ いがいは 技の したへ もどす）
-  const B = $('trBody'), pg = B && B.querySelector('.trpage'), dk = pg && pg.querySelector('.trdock'), home = pg && pg.querySelector('.trhome'); if (!dk || !home) return;
-  pg.classList.remove('dock'); const three = getComputedStyle(pg).gridTemplateColumns.replace(/(minmax|repeat|fit-content)\([^)]*\)/g, 'X').trim().split(/\s+/).length >= 3;   // minmax( … ) は 1れつ と かぞえる
+function trDockFix() {   // 訓練：3れつ ならび の ときは ひだりの れつ（モンスター いちらん＋木人戦・模擬戦・確定）を がめんに こてい（それ いがいは もとの ばしょへ）
+  const B = $('trBody'), pg = B && B.querySelector('.trpage'), dk = pg && pg.querySelector('.trdock'), home = pg && pg.querySelector('.trhome'), mons = pg && pg.querySelector('.trmons'); if (!dk || !home || !mons) return;
+  pg.classList.remove('dock'); if (mons.parentNode !== pg) pg.prepend(mons); dk.style.height = '';
+  const three = getComputedStyle(pg).gridTemplateColumns.replace(/(minmax|repeat|fit-content)\([^)]*\)/g, 'X').trim().split(/\s+/).length >= 3;   // minmax( … ) は 1れつ と かぞえる
   const els = [...pg.querySelectorAll('.trbtns, .trbtns2, .trstat')];
-  const mons = pg.querySelector('.trmons'); if (mons) mons.style.maxHeight = '';
-  if (three) { pg.classList.add('dock'); dk.append(...els);   // モンスター いちらんは ボタンの うえまで めいっぱい のばす
-    if (mons) { const sc = $('scTrain'), mr = mons.getBoundingClientRect(), k = mons.offsetHeight ? mr.height / mons.offsetHeight : 1, sr = sc.getBoundingClientRect();   // がめんは かくだい されて いるので 見た目の 大きさで はかる
-      const top = (mr.top - sr.top) / k + sc.scrollTop, room = sr.height / k - parseFloat(getComputedStyle(sc).paddingBottom || 0) - top - dk.offsetHeight - 14;
-      mons.style.maxHeight = Math.max(140, room) + 'px'; } }
+  if (three) { pg.classList.add('dock'); dk.prepend(mons); dk.append(...els); trDockH(); }
   else { let at = home; for (const e of els) { at.after(e); at = e; } }
 }
+function trDockH() {   // ひだりの れつの たかさ：みえて いる ぶん いっぱい（スクロール しても あかない）
+  const sc = $('scTrain'), dk = sc && sc.querySelector('.trpage.dock .trdock'); if (!dk) return;
+  const pg = dk.parentNode, k = pg.offsetHeight ? pg.getBoundingClientRect().height / pg.offsetHeight : 1;
+  const top0 = (pg.getBoundingClientRect().top - sc.getBoundingClientRect().top) / k + sc.scrollTop;   // ひだりの れつの もとの たかさ
+  const vis = sc.clientHeight - parseFloat(getComputedStyle(sc).paddingBottom || 0) - Math.max(8, top0 - sc.scrollTop) - 8;
+  dk.style.height = Math.max(240, vis) + 'px';
+}
 addEventListener('resize', () => { if ($('trBody') && $('trBody').offsetParent) trDockFix(); });
-let TR_RO = null;   // 訓練の わくの はばが かわったら（がめんを ひらいた あと など）ならびを みなおす
+let TR_RO = null; $('scTrain').addEventListener('scroll', trDockH, { passive: true });   // 訓練の わくの はばが かわったら（がめんを ひらいた あと など）ならびを みなおす
 function renderTrain(uid) {
   if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { if (TR_ASKING && document.querySelector('.askbg')) return; TR_ASKING = true; ask('今の設定を仮保存しますか？', '仮保存', 'しない').then(y => { TR_ASKING = false; if (y) trDraft(); if (TRN) TRN.dirty = false; renderTrain(uid); }); return; }
   const all = [...S.party, ...S.box];
