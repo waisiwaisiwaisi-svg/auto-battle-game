@@ -6450,11 +6450,11 @@ const CONDS = {
   enter: { n: '出場時' },   // 出てから この技を まだ 撃っていない
   swap:  { n: '交代時' },
   mysts: { n: '自分の状態異常', ps: [['any', 'どれか'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['frz', '凍結'], ['cf', '混乱']] },   // オーロラベールの つかいどき
+  chg: { n: 'この技のチャージ', ps: [['done', 'チャージ済み'], ['not', 'まだ']] },   // がりょうてんせい など：1かいめで ためて 2かいめで はなつ
+  stk: { n: 'この技のたまった回数', ns: [1, 2, 3], nf: (v) => `：${v}回以上`, n0: 1 },   // ミニほうだい など：じかんで たまる
   hit: { n: '攻撃を受けた瞬間', ps: [['any', 'どれでも'], ['big', '大技'], ['stab', 'タイプ一致'], ['eff', 'ばつぐん']] },   // まもる・カウンターなどを その場で だす
   terrain: { n: 'フィールド', ps: [['elec', 'エレキ'], ['grass', 'グラス'], ['psy', 'サイコ'], ['none', 'なし']] },
   weather: { n: '天候', ps: [['rain', '雨'], ['sun', '晴れ'], ['sand', '砂あらし'], ['snow', '雪']] },
-  ophako: { n: 'ぶっとびてんしの取り立て', ps: [[2, '2つ以上'], [5, '5つ以上']] },
-  lost3: { n: '3秒で減ったHP', ps: [[20, '20%以上'], [35, '35%以上'], [50, '50%以上']] },   // 相手に しるしが ついて いる（しるしを はじく 技と くみあわせる）   // 相手が 交代して 出てきてから この技を まだ 撃っていない（10びょう まで）
 };
 const TR_GO = { auto: 'お任せ', near: '近づいて', far: '離れて', hide: '隠れて', flank: '回り込んで' };   // よける のは いつもの AI が じぶんで する
 const trProg = (f) => { const T = trOf(f); if (T && T.prog && T.prog.mv && !T.prog.hv) T.prog = trClone(T.prog, f.mon); return T && T.mode === 'chip' && T.prog && T.prog.mv ? T.prog : null; };   // むかしの データは ここでも うつしかえる
@@ -6466,11 +6466,11 @@ function condOk(f, o, c, id0) {
   switch (c.t) {
     case 'dist': return c.p === 'near' ? d < 150 : c.p === 'mid' ? d >= 150 && d < 290 : d >= 290;
     case 'mysts': return c.p === 'cf' ? f.v.confuse > 0 : c.p === 'any' ? (!!f.status || f.v.confuse > 0) : f.status === c.p || (c.p === 'psn' && f.status === 'tox');
+    case 'chg': { const ok = !!(f.v && f.v.charged) && !!MOVES[id0] && !!MOVES[id0].charge2; return c.p === 'not' ? !!MOVES[id0] && !!MOVES[id0].charge2 && !ok : ok; }
+    case 'stk': { const M = MOVES[id0]; return !!(M && M.charges) && chgS(f, id0).n >= (+c.n || 1); }
     case 'hit': { const H = f.hitCtx; if (!H) return false; return c.p === 'big' ? isBigMove(H.m) : c.p === 'stab' ? hasType(H.att, H.m.t) : c.p === 'eff' ? effVs(H.m.t, f.sp) > 1 : true; }
     case 'terrain': return c.p === 'none' ? !B.terrain : !!B.terrain && B.terrain.k === c.p;
     case 'weather': return !!B.weather && B.weather.k === c.p;
-    case 'lost3': return lostRecent(f) >= (c.p || 20);
-    case 'ophako': return !!o.hako && o.hako.side === f.side && hakoN(o) >= (c.p || 2);
     case 'myhp': return hpk(f) < (c.p || 50);
     case 'ophp': return hpk(o) < (c.p || 50);
     case 'aff': return typeAff(f.sp, o.sp) === c.p;
@@ -8629,11 +8629,11 @@ const KW_SV = {   // のうりょくが なにに きくか
 const KW_C = {   // 訓練の 条件
   dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
   mysts: ['条件：自分の状態異常', '自分が えらんだ 状態異常（火傷・麻痺・毒・凍結）か 混乱に なって いる とき。こおりのみそぎで なおす ときに つかう。「毒」は もうどくも ふくむ。'],
+  chg: ['条件：この技のチャージ', '1回目で 力を ためて 2回目で 放つ 技（がりょうてんせい など）に 置く。「チャージ済み」は ためおわって すぐ 放てる とき、「まだ」は これから ためる とき。ほかの 技に 置いても なりたたない。'],
+  stk: ['条件：この技のたまった回数', '時間で 使える 回数が たまる 技（ミニほうだい など）に 置く。たまった 回数が えらんだ 数いじょう ある とき。ほかの 技に 置いても なりたたない。'],
   hit: ['条件：攻撃を受けた瞬間', '相手の攻撃が 当たる その瞬間。ガードシェル・カウンター・だしぬきなどに 置くと、受けた瞬間に その場で 出る（どれでも／大技だけ／相手のタイプ一致の技だけ／自分に ばつぐんの技だけ）。ほかの 条件と「かつ」で くみあわせられる。この条件を 置かなければ、受けた瞬間には 出ない。'],
   terrain: ['条件：フィールド', '場の フィールドが えらんだ ものの とき（エレキ・グラス・サイコ・なし）。フィールドは 15秒 つづく。'],
   weather: ['条件：天候', '場の 天候が えらんだ ものの とき（雨・晴れ・砂あらし・雪）。天候は 20秒 つづく。'],
-  ophako: ['条件：ぶっとびてんしの取り立て', 'ぶっとびてんしで かしつけた 相手から 奪える ステータスが えらんだ 数いじょう たまった とき（5秒ごとに 攻撃→防御→属性攻撃→属性防御→素早さの 順に ふえる）。もう いちど ぶっとびてんしを 当てると 取り立てる。'],
-  lost3: ['条件：3秒で減ったHP', 'さいきん 3秒の あいだに 自分の HPが えらんだ 割合いじょう 減った とき（クロノバックの つかいどき）。'],
   myhp: ['条件：自分のHP', '自分の HPが えらんだ 割合より 少ない とき。'],
   ophp: ['条件：相手のHP', '相手の HPが えらんだ 割合より 少ない とき。'],
   aff: ['条件：タイプ相性', '自分の タイプと 相手の タイプを くらべて、有利・互角・不利 の どれか。'],
