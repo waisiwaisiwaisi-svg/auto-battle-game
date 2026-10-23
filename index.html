@@ -6027,6 +6027,7 @@ function hit(att, def, m, ang, opt) {
   if (def.inv > 0 && !opt.sure && !opt.throw) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
   if (gshiftOn(def) && isDamaging(m) && GSHIFT_T.includes(m.t)) { if (!opt.tick || opt.first) popText(def.x, def.y - 66, 'すりぬけた', '#b8a8f0'); burst(def.x, def.y - BODY, '#8a78c8', 6, 50, .3); return false; }   // ゴーストシフト：ノーマル・かくとうを すかす
   if (def.st.eva > 0 && !opt.tick && !opt.sure && !opt.throw && !m.ohko && !ZONE_KINDS.includes(m.k) && m.k !== 'proj' && Math.random() < 1 - 1 / (1 + def.st.eva * .12)) { SND.se('dodge'); popText(def.x, def.y - 66, 'ミス！', '#7fd8ff'); if (plOk('dodge')) fxp({ type: 'pl', k: 'dodge', x: def.x, y: def.y - BODY, s: 1, fy: att.x < def.x, ang: att.x < def.x ? Math.PI : 0, life: .4 }); fxPush({ type: 'ghost', sid: def.mon.sid, x: def.x + rand(-14, 14), y: def.y, face: def.face, life: .2, max: .2 }); return false; }   // かいひりつ
+  if (autoDodge(att, def, m, opt)) return false;
   autoGuard(att, def, m, opt);
   if (def.state === 'dash' && def.cur && def.cur.m.guardDash && !opt.throw && !def.cur.hit) {   // こうらおし：まもりながら すすむ
     SND.se('guard'); popText(def.x, def.y - 66, 'ガード！', '#9ff0ff'); if (plOk('g_hit')) fxp({ type: 'pl', k: 'parry', x: def.x + def.face * 18, y: def.y - BODY, s: .9, life: .4 }); else fxPush({ type: 'ring', x: def.x, y: def.y - BODY, rad: 30, col: '#9ff0ff', life: .3, max: .3 }); return false; }
@@ -6302,31 +6303,14 @@ function autoDodgeP(f) {
   if (trOf(f) && trOf(f).style) p *= [.3, 1, 1.9][trOf(f).style.dodge ?? 1];   // くんれん：よける かどうか
   return clamp(p, 0, .6);
 }
-function aiDodgeCheck(f, o) {
-  const skill = autoDodgeP(f);   // かわす かくりつは みかたも あいても かいひ しだい（あいての つよさ・かしこさ では かえない）
-  if (skill <= 0 || f.dodgeCd > 0 || !['free', 'act'].includes(f.state) || !canAct(f)) return;
-  if (o && threatState(o) && o.cur && (ZONE_KINDS.includes(o.cur.m.k) || o.cur.m.k === 'melee') && isDamaging(o.cur.m)) {   // 近接わざも おなじ かくりつで ステップで よける
-    if (f.planFor !== o.cur.uid) {
-      f.planFor = o.cur.uid;
-      // ガード系の わざを もっていれば たまに それで うける
-      const guard = null;   // ガード系の わざは うけた しゅんかんに じどうで でる（autoGuard）
-      f.plan = B.smartDodge && f.side === 1
-        ? { will: Math.random() < skill, at: Math.max(o.cur.wind * .62, o.cur.wind - .28), guard: guard && estDmg(o, f, o.cur.m) > f.hp * .3 ? guard : null }   // かしこい AI：ねらいが きまってから ぎりぎりで よける
-        : (() => { const g = guard && Math.random() < (natOf(f) === 'nonki' ? .9 : .4) ? guard : null; return { will: !!g && natOf(f) === 'nonki' || Math.random() < skill, at: rand(.12, .4) * o.cur.wind / .8, guard: g }; })();   // のんき：かまえて まつ
-    }
-    if (f.plan.will && o.cur.t >= f.plan.at && inZone(o.cur, o, f.x, f.y, f.r)) {
-      const g = f.plan.guard, gm = g && MOVES[g];
-      if (gm) { f.plan.guard = null; beginMove(f, g); return; }
-      startDodge(f); return;
-    }
-  }
-  for (const p of B.projs) {
-    if (p.side === f.side) continue;
-    const dx = f.x - p.x, dy = f.y - BODY - p.y, d = Math.hypot(dx, dy);
-    if (d > 110) continue;
-    if (!p.rolled) { p.rolled = true; p.will = Math.random() < skill * .8; }
-    if (p.will && (dx * p.vx + dy * p.vy) > 0) { startDodge(f); return; }
-  }
+function aiDodgeCheck(f, o) { }   // かわしは あたる しゅんかんに ちゅうせん（autoDodge）
+function autoDodge(att, def, m, opt) {   // こうげきが あたる しゅんかんに かいひを ちゅうせん → あたったら ステップで よける
+  if (opt.throw || opt.sure || (opt.tick && !opt.first) || att === def || def.hp <= 0 || !isDamaging(m)) return false;
+  if (def.dodgeCd > 0 || !['free', 'act'].includes(def.state) || !canAct(def) || def.v.protect > 0 || def.dummy) return false;
+  if (Math.random() >= autoDodgeP(def)) return false;
+  startDodge(def); if (B.stats) B.stats.dodged[MOVE_ID.get(m)] = (B.stats.dodged[MOVE_ID.get(m)] || 0) + 1;
+  popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3);
+  return true;
 }
 
 // AI の わざえらび：状況に あわせて 重みづけ
@@ -8266,11 +8250,11 @@ function bStep(dt) {
       if (tgt && tgt.clones && !(p.hitCd > 0)) { const c = tgt.clones.find(c => Math.hypot(c.x - p.x, c.y - BODY - p.y) < tgt.r + p.r); if (c) { popClone(tgt, c); if (p.m.multiHit) p.hitCd = .6; else if (p.pat !== 'boomerang' && p.pat !== 'boomline') p.life = 0; continue; } }
       { const rw = B.walls.find(w => w.reflect && w.side !== p.side && w.blocks.some(b => circRect(p.x, p.y + BODY, p.r + 2, b)));   // はんしゃのかべ：とびどうぐを はねかえす
         if (rw) { damageWall(rw.blocks.find(b => !b.gone && circRect(p.x, p.y + BODY, p.r + 2, b)), p.m, 1); p.vx = -p.vx; p.vy = -p.vy; p.bx = p.x; p.by = p.y; p.x += p.vx * dt * 2; p.y += p.vy * dt * 2; p.side = rw.side; p.f = active(rw.side) || p.f; p.decoy = null; p.hitDone = false; p.life = Math.max(p.life, 1.2); fxp({ type: 'glint', x: p.x, y: p.y, col: '#ff7ab0', life: .35 }); plFx('reflect', p.x, p.y, 1.3); popText(p.x, p.y - 30, 'はねかえした！', '#ff9ad0'); SND.se('guard'); continue; } }
-      if (!p.hitDone && !p.decoy && targetable(tgt) && Math.hypot(tgt.x - p.x, tgt.y - BODY - p.y) < tgt.r + p.r) {   // ぶんしんを ねらった たまは ほんものに あたらない
+      if (!p.hitDone && !p.decoy && targetable(tgt) && !(tgt.state === 'dodge' && tgt.inv > 0) && Math.hypot(tgt.x - p.x, tgt.y - BODY - p.y) < tgt.r + p.r) {   // ぶんしんを ねらった たまは ほんものに あたらない
         if (p.pat === 'boomerang' || p.pat === 'boomline') { p.hitDone = true; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx), { decoy: null }); }   // つきぬけて もどる
         else if (p.pat === 'blast') { p.life = 0; projBlast(p, 60); }
         else if (p.m.multiHit) { if (!(p.hitCd > 0)) { p.hitCd = p.m.multiHit.cd; p.hits = (p.hits || 0) + 1; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx), { mul: p.m.multiHit.mul, decoy: null }); if (p.hits >= p.m.multiHit.max) p.life = 0; } }   // たつまき：なんども あたる
-        else { p.life = 0; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx), { decoy: null }); }
+        else { const lf = p.life; p.life = 0; hit(p.f, tgt, p.m, Math.atan2(p.vy, p.vx), { decoy: null }); if (tgt.state === 'dodge' && tgt.inv > 0) p.life = lf; }   /* ステップで よけたら たまは とおりすぎる */
       }
       const st = B.st, out = p.x < st.fx0 - 10 || p.x > st.fx1 + 10 || p.y < st.fy0 - 40 || p.y > st.fy1 + 4, block = p.life > 0 && (flies(p.f) ? (p.fsol || (p.fsol = flySol(p.f, Math.atan2(p.vy, p.vx)))) : obstacles(false)).some(o => circRect(p.x, p.y + BODY, p.r, o));   // 飛んでいる こ の たまも わざの かべでは とまる
       if (block) { const wb = wallBlocksAt(p.x, p.y + BODY, p.r)[0]; if (wb) damageWall(wb, p.m); else damageProp(propsAt(p.x, p.y + BODY, p.r + 2)[0], p.m); }   // かべ・おきものを けずる
