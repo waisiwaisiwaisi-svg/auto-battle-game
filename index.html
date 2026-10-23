@@ -4610,7 +4610,7 @@ function buildNav(st) {
   st.nav = { nw, nh, walk, comfy };
 }
 const MATCH_T = 240;   // 1しあいの じかん（びょう）。すぎたら タイムアップで はんてい（3たい どうしの ふつうの しあいは 4ふん いないに おわる）
-const CAM_MAX = 1.6, CAM_PAD = 170, CAM_TALL_LO = .44, CAM_TALL_UP = .28;   // たて画面：みえる よこはばは フィールドの 44%〜28%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 1.6ばい まで）と ふたりの まわりの よゆう
+const CAM_MAX = 2.3, CAM_PAD = 130, CAM_TALL_LO = .4, CAM_TALL_UP = .24;   // たて画面：みえる よこはばは フィールドの 40%〜24%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 2.3ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
 const WALL_GAP = 8, WALL_ART = 10, WALL_UP = 30, WALL_COMFY = 52;   // WALL_COMFY：まわりこむ 道を かべから よこに どれだけ はなすか   // WALL_ART：かべの 絵が ブロックより よこに はみだす ぶん、WALL_UP：うえに のびる ぶん
 const _wg = 0;   // わざで つくった かべからは あるいて この きょり いじょう はなれる
@@ -8306,7 +8306,7 @@ function bVisual(dt) {
   const vis = [a, e].filter(f => f && f.state !== 'bench');
   // ふたりの きょりに あわせて ズーム：はなれると ひいて 全体、ちかいと よる（ただし CAM_MAX ばい まで）
   const aw = Math.max(80, VW - VPAD.l - VPAD.r), ah = Math.max(60, VH - VPAD.t - VPAD.b), fw = st.fx1 - st.fx0 + 60, fh = st.fy1 - st.fy0 + 60;
-  const tall = VH > VW * 1.2, LO_W = tall ? CAM_TALL_LO : .88, UP_W = tall ? CAM_TALL_UP : .6;   // たて画面：もっと よる（みえる はばを せまく）
+  const tall = VH > VW * 1.2, LO_W = tall ? CAM_TALL_LO : .66, UP_W = tall ? CAM_TALL_UP : .45;   // たて画面：もっと よる（みえる はばを せまく）
   const fit = Math.min(aw / fw, ah / fh), up = Math.max(fit * CAM_MAX, tall ? aw / (fw * UP_W) : Math.min(ah / st.H, aw / (fw * UP_W)));   // up：たてに ながい 画面では もっと よれる
   tx = (st.fx0 + st.fx1) / 2; ty = (st.fy0 + st.fy1) / 2 - 10; tz = Math.min(up, Math.max(fit, Math.min(ah / st.H, aw / st.W)));
   if (vis.length === 2 && B.mode !== 'intro') {
