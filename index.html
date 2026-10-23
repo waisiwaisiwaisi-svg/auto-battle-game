@@ -1102,6 +1102,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .gs{touch-action:none;user-select:none;-webkit-user-select:none;font-size:11px;padding:4px 8px;border-radius:6px;border:1px dashed #6adab0;color:#9ae8c8;white-space:nowrap;cursor:pointer}.gs.on{border-style:solid;border-width:2px;background:#24584a;color:var(--ink);cursor:grab}
 .pal.k-go{background:#24584a;border-color:#6adab0}
 .pal.k-c,.cnd{background:#2c4a7a;border-color:#6aa0ff}
+.pal.ng{opacity:.4}
 .rh.tmv::after{content:'★';position:absolute;top:-6px;right:-4px;font-size:11px;color:#ffd84a;text-shadow:0 0 2px #000}
 .rh.bad{background:#5a1a22;border-color:#ff4a4a}.rh.bad::after{content:'×';position:absolute;top:-7px;right:-4px;color:#ff6a6a;font-weight:700;text-shadow:0 0 2px #000}
 .rc{flex:1 1 100%;order:5;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:32px;padding:3px 5px;border-radius:6px;border:1px dashed rgba(255,255,255,.22)}
@@ -3947,7 +3948,7 @@ function trNatCard(k, W, m) {
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trDefC = (id) => MOVES[id] && AUTO_GUARD[MOVES[id].k] ? [[{ t: 'hit', p: 'any' }]] : [];   // まもる系の さいしょの 条件
 const trBlank = (m) => ({ hv: 1, mv: equipped(m).map(id => ({ id, go: 'auto', c: trDefC(id) })) });
-const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ hv: 1, nat: p.nat && NATURES[p.nat] ? p.nat : undefined, mv: p.mv.map(r => { const c = trLines(r.c).map(l => l.filter(c => CONDS[c.t]).map(c => Object.assign({ t: c.t, p: c.p }, c.n != null ? { n: c.n } : {}))).filter(l => l.length); return { id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: !p.hv && !c.length ? trDefC(r.id) : c }; }) })) : trBlank(m);   // hv：まもる系が じどう だった ころの データを うつしかえた しるし
+const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ hv: 1, nat: p.nat && NATURES[p.nat] ? p.nat : undefined, mv: p.mv.map(r => { const c = trLines(r.c).map(l => l.filter(c => CONDS[c.t] && condFits(c.t, r.id)).map(c => Object.assign({ t: c.t, p: c.p }, c.n != null ? { n: c.n } : {}))).filter(l => l.length); return { id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: !p.hv && !c.length ? trDefC(r.id) : c }; }) })) : trBlank(m);   // hv：まもる系が じどう だった ころの データを うつしかえた しるし
 // 使える技：覚えている4つ ＋ 持っているスクロールで覚えられる技
 let TR_MINI = false;
 const TR_FLT = { t: '', c: '', q: '' };   // 訓練の 技パレットの しぼりこみ（タイプ・分類・なまえ）   // くんれんの パレットを たたんで いるか
@@ -4118,7 +4119,7 @@ function renderTrain(uid) {
   const fattr = (id) => `data-ft="${MOVES[id].t}" data-fc="${MOVES[id].cat}" data-fn="${MOVES[id].n}"`;
   const side = `<h3>技 <span class="dim">→ 技の 枠へ（★＝スクロール）</span></h3><div class="trflt">${fsel('t', fts.map(t => [t, TYPES[t].n]))}${fsel('c', Object.entries(CAT_NAMES))}<input type="search" data-flt="q" placeholder="技名で さがす" value="${TR_FLT.q.replace(/"/g, '')}"></div><div class="trpal trmvs">${eq.map(id => `<div class="pal k-mv${on('mv', id)}" ${fattr(id)} data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}</div>`).join('')}${tm.map(id => `<div class="pal k-mv tmv${on('mv', id)}" ${fattr(id)} data-k="mv" data-v="${id}" style="--c:${tcol(id)}">${mvn(id)}<small>★×${(tmFree() ? '∞' : S.tms[id])}</small></div>`).join('')}</div>${infoId && MOVES[infoId] ? mvInfo(infoId) : ''}
     <h3>撃ち方 <span class="dim">→「〜撃つ」の 枠へ</span></h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-kwh="g:${a}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
-    <h3>条件 <span class="dim">→「使うとき」の 枠へ</span></h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}" data-kwh="c:${t}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
+    <h3>条件 <span class="dim">→「使うとき」の 枠へ</span></h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}${W.mv.some(r => condFits(t, r.id)) ? '' : ' ng'}" data-kwh="c:${t}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
     <div class="trins">${ins}</div>`;
   const scr = $('scTrain'), keep = !scr.hidden && [scr, ...['.trside', '.trmons'].map(q => $('trBody').querySelector(q))].map(e => e ? [e.scrollTop, e.scrollLeft] : [0, 0]);   // いまの スクロールを おぼえておく
   const trB0 = $('trBody'), trSame = !$('scTrain').hidden && MO.trUid === uid, trRows0 = trSame ? MO.rects(trB0, '.trr[data-key]') : new Map(), trC0 = trSame ? MO.rects(trB0, '.cnd[data-key]') : new Map();
@@ -4145,7 +4146,7 @@ function renderTrain(uid) {
     const L = z ? +z.dataset.l || 0 : 0, line = (r, l) => r.c[l] || (r.c[l] = []);
     if (pl.from) { const [fi, fl, fj] = pl.from, c = W.mv[fi].c[fl][fj];
       if (!z) { W.mv[fi].c[fl].splice(fj, 1); TRN.sel = null; SND.se('back'); touch(); return; }   // 枠の外へ：削除
-      if (d !== 'c' || (i === fi && L === fl)) return;
+      if (d !== 'c' || (i === fi && L === fl) || !condFits(c.t, W.mv[i].id)) return;
       line(W.mv[i], L).push(c); W.mv[fi].c[fl].splice(fj, 1); TRN.sel = null; SND.se('click'); touch(); return; }
     if (pl.rowEl) { const t = z && z.closest('.trr[data-row]'); if (!t) return; const to = +t.dataset.row; if (to === pl.i) return;
       const ids = W.mv.map(x => x.id), [r] = W.mv.splice(pl.i, 1); W.mv.splice(to, 0, r); trRemap(W, ids); TRN.sel = null; SND.se('click'); touch(); return; }
@@ -4155,10 +4156,10 @@ function renderTrain(uid) {
     if (!z) return;
     if (pl.k === 'mv') { const at = W.mv.findIndex(r => r.id === pl.v);
       if (d === 'mvnew') { if (at >= 0) return; W.mv.push({ id: pl.v, go: 'auto', c: trDefC(pl.v) }); }
-      else if (d === 'h') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; }
+      else if (d === 'h') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; for (const r of W.mv) r.c = trLines(r.c).map(l => l.filter(c => condFits(c.t, r.id))); }   // いれかえた 技に あわない 条件は はずす
       else return; }
     else if (pl.k === 'go') { if (d !== 'g') return; W.mv[i].go = pl.v; }
-    else if (pl.k === 'c') { if (d !== 'c') return; line(W.mv[i], L).push(trCondNew(pl.v)); TRN.sel = `${i}:${L}:${W.mv[i].c[L].length - 1}`; }
+    else if (pl.k === 'c') { if (d !== 'c' || !condFits(pl.v, W.mv[i].id)) return; line(W.mv[i], L).push(trCondNew(pl.v)); TRN.sel = `${i}:${L}:${W.mv[i].c[L].length - 1}`; }
     TRN.pick = null; SND.se('ok'); touch();
   };
   // おける ばしょ だけ：はこぶ ものごとに おける わくを きめる（おけない わくは ひからない）
@@ -4166,10 +4167,10 @@ function renderTrain(uid) {
     const q = (sel) => [...B.querySelectorAll(sel)];
     if (pl.rowEl) return q('.trr[data-row]').filter(z => +z.dataset.row !== pl.i);
     if (pl.gFrom != null) return q('.trmain [data-drop="g"]').filter(z => +z.dataset.i !== pl.gFrom);
-    if (pl.from) return q('.trmain [data-drop="c"]').filter(z => !(+z.dataset.i === pl.from[0] && +(z.dataset.l || 0) === pl.from[1]));
+    if (pl.from) { const ct = W.mv[pl.from[0]].c[pl.from[1]][pl.from[2]].t; return q('.trmain [data-drop="c"]').filter(z => !(+z.dataset.i === pl.from[0] && +(z.dataset.l || 0) === pl.from[1]) && condFits(ct, W.mv[+z.dataset.i].id)); }
     if (pl.k === 'mv') return q('.trmain [data-drop="mvnew"], .trmain [data-drop="h"]').filter(z => z.dataset.drop === 'mvnew' ? !W.mv.some(r => r.id === pl.v) : W.mv[+z.dataset.i].id !== pl.v);
     if (pl.k === 'go') return q('.trmain [data-drop="g"]');
-    if (pl.k === 'c') return q('.trmain [data-drop="c"]');
+    if (pl.k === 'c') return q('.trmain [data-drop="c"]').filter(z => condFits(pl.v, W.mv[+z.dataset.i].id));
     return [];
   };
   // いちばん ちかい おける わく（ゆびの したに あれば それ、なければ 56px いないの いちばん ちかい もの＝マグネット）
@@ -4192,6 +4193,7 @@ function renderTrain(uid) {
   B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.l}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.l, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); TRN.sel = TRN.sel === k ? null : k; SND.se('click'); redo(); }); });
   B.querySelectorAll('.gs.on').forEach(e => drag(e, { gFrom: +e.dataset.i }, () => { if (TRN.pick) drop(TRN.pick, e); }));
   B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (TRN.pick && !ev.target.closest('.cnd')) drop(TRN.pick, z); }); });
+  if (TRN.pick) zonesFor(TRN.pick).forEach(z => z.classList.add('can'));   // えらんだ ものを おける わく だけ ひからせる
   // 技の 優先度：番号 か 技名を ドラッグして ほかの 行へ（その位置に 入れる）
   B.querySelectorAll('.trr[data-row]').forEach(e => drag(e, { rowEl: 1, i: +e.dataset.row }, () => { }, (t) => !t.closest('.cnd, .gs.on, .rb, button')));
   B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', () => { if (TRN.pick) return; const id = W.mv[+e.dataset.i] && W.mv[+e.dataset.i].id; TRN.info = TRN.info === id ? null : id; TRN.sel = null; SND.se('click'); redo(); }));   // 置いた 技：タップで 内容
@@ -6495,6 +6497,14 @@ const typeAff = (a, b) => { const hit = (x, y) => Math.max(effVs(x.type, y), x.t
 // 条件の行：1行の中は「かつ」、行どうしは「または」（むかしの データは 1行）
 function trLines(c) { return Array.isArray(c) && c.length && !Array.isArray(c[0]) ? [c] : (c || []); }
 const TR_OR_MAX = 3, TR_EV = ['enter', 'swap'];
+// その技に おいて いみが ある 条件か（チャージ・たまった回数・攻撃を受けた瞬間 は つかえる 技が きまっている）
+function condFits(t, id) { const m = MOVES[id]; if (!m) return true;
+  if (t === 'chg') return !!m.charge2;
+  if (t === 'stk') return !!m.charges;
+  if (t === 'hit') return !!(m.psnGuard || AUTO_GUARD[m.k]);
+  return true; }
+// ためて はなつ 技：「チャージ」の 条件が いまの だんかい（ためる／はなつ）と ちがう 行は いまは ない もの として あつかう（その だんかいは お任せ）
+const chgOff = (f, id, l) => !!(MOVES[id] && MOVES[id].charge2) && l.some(c => c.t === 'chg' && (c.p === 'not') === !!(f.v && f.v.charged));
 const condsOk = (f, o, cs, id) => (cs || []).every(c => condOk(f, o, c, id));
 function runRules(f, o) {
   const P = trProg(f); f.trGo = null; f.trAt = '';
@@ -6507,8 +6517,8 @@ function runRules(f, o) {
   }
   const skip = (id) => f.trSkip && f.trSkip.id === id && B.t < f.trSkip.until;
   const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id) && !skip(r.id) && !moveUseless(f, o, r.id);
-  const lineHit = (r, ev) => trLines(r.c).some(l => l.length && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
-  const hasC = (r) => trLines(r.c).some(l => l.length);
+  const lineHit = (r, ev) => trLines(r.c).some(l => l.length && !chgOff(f, r.id, l) && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
+  const hasC = (r) => trLines(r.c).some(l => l.length && !chgOff(f, r.id, l));
   const hit = rows.filter(r => lineHit(r, 1)).concat(rows.filter(r => !lineHit(r, 1) && lineHit(r)));   // きっかけの 条件（出場時・交代時）が 合う 技が いちばん 先
   const pr = f.trPrep && rows.find(r => r.id === f.trPrep.id && ok(r) && (!hasC(r) || lineHit(r)));   // うごきはじめた 技は 撃つまで かえない（条件が はずれたら やめる）
   // 条件つきの 技は 条件が 合う ときだけ（上から 順）。合う技が ない ときは お任せAIが 条件なしの 技から えらぶ（えらばなければ 待つ）
@@ -8626,9 +8636,9 @@ const KW_SV = {   // のうりょくが なにに きくか
 const KW_C = {   // 訓練の 条件
   dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
   mysts: ['条件：自分の状態異常', '自分が えらんだ 状態異常（火傷・麻痺・毒・凍結）か 混乱に なって いる とき。こおりのみそぎで なおす ときに つかう。「毒」は もうどくも ふくむ。'],
-  chg: ['条件：この技のチャージ', '1回目で 力を ためて 2回目で 放つ 技（がりょうてんせい など）に 置く。「チャージ済み」は ためおわって すぐ 放てる とき、「まだ」は これから ためる とき。ほかの 技に 置いても なりたたない。'],
-  stk: ['条件：この技のたまった回数', '時間で 使える 回数が たまる 技（ミニほうだい など）に 置く。たまった 回数が えらんだ 数いじょう ある とき。ほかの 技に 置いても なりたたない。'],
-  hit: ['条件：攻撃を受けた瞬間', '相手の攻撃が 当たる その瞬間。ガードシェル・カウンター・だしぬきなどに 置くと、受けた瞬間に その場で 出る（どれでも／大技だけ／相手のタイプ一致の技だけ／自分に ばつぐんの技だけ）。ほかの 条件と「かつ」で くみあわせられる。この条件を 置かなければ、受けた瞬間には 出ない。'],
+  chg: ['条件：この技のチャージ', '1回目で 力を ためて 2回目で 放つ 技（がりょうてんせい など）に 置く。「チャージ済み」は ためおわって すぐ 放てる とき、「まだ」は これから ためる とき。「チャージ済み」だけ 置けば ためるのは お任せ、「まだ」だけ 置けば 放つのは お任せ。この技いがいには 置けない。'],
+  stk: ['条件：この技のたまった回数', '時間で 使える 回数が たまる 技（ミニほうだい など）に 置く。たまった 回数が えらんだ 数いじょう ある とき。この技いがいには 置けない。'],
+  hit: ['条件：攻撃を受けた瞬間', '相手の攻撃が 当たる その瞬間。ガードシェル・カウンター・だしぬきなどに 置くと、受けた瞬間に その場で 出る（どれでも／大技だけ／相手のタイプ一致の技だけ／自分に ばつぐんの技だけ）。ほかの 条件と「かつ」で くみあわせられる。この条件を 置かなければ、受けた瞬間には 出ない。ガード系の 技いがいには 置けない。'],
   terrain: ['条件：フィールド', '場の フィールドが えらんだ ものの とき（エレキ・グラス・サイコ・なし）。フィールドは 15秒 つづく。'],
   weather: ['条件：天候', '場の 天候が えらんだ ものの とき（雨・晴れ・砂あらし・雪）。天候は 20秒 つづく。'],
   myhp: ['条件：自分のHP', '自分の HPが えらんだ 割合より 少ない とき。'],
