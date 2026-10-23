@@ -1291,6 +1291,9 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
 #dumHud .dr{padding:3px 4px;margin:2px 0;border-left:3px solid #4a4466;background:rgba(255,255,255,.03)}#dumHud .dr.q{border-left-color:#6ab0ff}#dumHud .dr.fire{border-left-color:#ffd84a;background:rgba(255,216,74,.18)}
 #dumHud .dr i{font-style:normal;float:right;font-size:10px}#dumHud .dcd{color:#a9a3c8}#dumHud .dok{color:#5ee08a}
 #dumHud .dc{display:inline-block;margin:1px 2px 0 0;padding:0 4px;border:1px solid #6a4a5a;color:#d8b0b8}#dumHud .dc.on{border-color:#5ee08a;color:#9ff0c0;background:rgba(94,224,138,.15)}#dumHud .dc.any{border-color:#4a4466;color:#a9a3c8}#dumHud em{font-style:normal;color:#a9a3c8;margin:0 2px}
+#dumHud .dctl{margin:2px 0 5px;border-bottom:1px solid #3a3460;padding-bottom:5px;display:grid;grid-template-columns:1fr 1fr;gap:3px 6px}#dumHud.mini .dctl{display:none}#dumHud .dct{grid-column:1/-1;color:#ffd84a;cursor:pointer}#dumHud .dct u{text-decoration:none}#dumHud .dctl.shut>:not(.dct){display:none}#dumHud .dc.hit{border-color:#6aa0ff;color:#bcd4ff}
+#dumHud .dctl label{display:flex;flex-direction:column;gap:1px;color:#cfc8ea;min-width:0}#dumHud .dctl label>span{color:#9ff0c0}#dumHud .dctl select{font:inherit;font-size:11px;background:#221c44;color:#f3eefc;border:1px solid #4a4466;padding:1px 2px;min-width:0;max-width:100%}
+#dumHud .dctl .dbt{grid-column:1/-1;display:flex;gap:4px}#dumHud .dctl .dbt button{flex:1;font:inherit;font-size:11px;padding:3px 4px;color:#f3eefc;background:#2c4a7a;border:1px solid #6aa0ff}
 #dumHud .dlog{margin-top:4px;border-top:1px solid #3a3460;padding-top:3px;color:#cfc8ea}#dumHud .dlog .on{color:#5ee08a}
 </style>
 </head>
@@ -5082,12 +5085,13 @@ function autoGuard(att, def, m, opt) {
   if (def.v.protect > 0 || def.v.counter || def.state === 'stance') return;
   const can = (k) => (MOVES[k].psnGuard ? 'rock' : AUTO_GUARD[MOVES[k].k]) === r && !((def.cd[k] || 0) > 0) && !(healMax(MOVES[k]) && healLeft(def, k) <= 0) && !(def.v.taunt > 0 && MOVES[k].cat === 'stat');
   const P = trProg(def); let id;
-  if (P) { def.hitCtx = { att, m }; const row = P.mv.find(x => def.moves.includes(x.id) && MOVES[x.id] && can(x.id) && trLines(x.c).some(l => l.some(c => c.t === 'hit') && condsOk(def, att, l, x.id))); def.hitCtx = null; id = row && row.id; }   // 訓練：「攻撃を受けた瞬間」の 条件が 合う 技だけ
+  let li = -1; if (P) { def.hitCtx = { att, m }; const row = P.mv.find(x => def.moves.includes(x.id) && MOVES[x.id] && can(x.id) && (li = trLines(x.c).findIndex(l => l.some(c => c.t === 'hit') && condsOk(def, att, l, x.id))) >= 0); def.hitCtx = null; id = row && row.id; }   // 訓練：「攻撃を受けた瞬間」の 条件が 合う 技だけ
   else id = def.moves.find(can);   // 訓練が ない こ（やせい・あいての トレーナー）は いままでどおり じどう
   if (!id) return; const g = MOVES[id];
   if (healMax(g) && !TUT) { def.uses = def.uses || {}; def.uses[id] = (def.uses[id] || 0) + 1; }
   const cdv = g.cd * cdScale(def); def.cdMax = def.cdMax || {}; def.cdMax[id] = cdv; def.cd[id] = cdv;
   if (simMine(def)) { const L = B.simLog; L.used[id] = (L.used[id] || 0) + 1; }
+  if (B.cfg.dummy) { def.trTag = P ? id : null; def.trLine = li; dummyLog(def, id); }   // 木人戦：うけた しゅんかんの はつどうも きろく
   if (!B.headless) popText(def.x, def.y - 104, P ? g.n + '！' : `じどう ${g.n}`, '#9ff0ff');
   say(P ? `${prefix(def)}${def.sp.n}は とっさに ${g.n}！` : `${prefix(def)}${def.sp.n}の ${g.n}が じどうで はつどうした！`);
   if (g.k === 'protect') { def.v.protect = 2.5; def.v.pg = g.psnGuard ? 1 : 0; typeFx(def.x, def.y - BODY, g.psnGuard ? 'poison' : 'ice', 4, 110, .45); }   // ビームなど つづけて あたる わざも しばらく ふせぐ
@@ -8696,7 +8700,7 @@ function dummyStart(m, W) {
   dummyOvClear(); if (DUM) { dummyHud(false); DUM = null; }
   const sm = Object.assign({}, m, { moves: trMvIds(W).slice(0, 4), tr: Object.assign({}, m.tr, { mode: 'chip', prog: trClone(W, m) }) });
   const dm = Object.assign(foeMon(m.sid, .3, -777), { uid: -777 });
-  DUM = { uid: m.uid, keep: TRN, prog: sm.tr.prog, log: [], stop: false, hudT: 0 };
+  DUM = { uid: m.uid, keep: TRN, prog: sm.tr.prog, log: [], stop: false, hudT: 0, atkT: 2, set: { atk: 'none', ost: '', mst: '', wx: '', tr: '' } };
   startBattle({ kind: 'cup', field: choice(FIELDS), p0: [sm], enemies: [dm], title: '木人戦', dummy: true });
   const d = B.sides[1].fs[0]; d.dummy = true; d.moves = []; d.sp = Object.assign({}, d.sp, { n: '身代わり人形', type: 'normal', type2: null, dummy: true });
   dummyHud(true);
@@ -8710,6 +8714,32 @@ function dummyTick(dt) {
   if (!DUM || !B || !B.cfg.dummy) return;
   const d = active(1); if (d && DUM.stop) { if (DUM.px == null) { DUM.px = d.x; DUM.py = d.y; } d.x = DUM.px; d.y = DUM.py; d.vx = d.vy = 0; } else DUM.px = null;
   DUM.hudT -= dt; if (DUM.hudT <= 0) { DUM.hudT = .2; dummyHudUpd(); }
+  const f = active(0), S = DUM.set; if (!d || !f || B.mode !== 'fight') return;
+  // じょうきょうの せってい（つづける もの）：人形の 状態・自分の 状態・天候・フィールド・人形の こうげき
+  if (S.ost === 'flinch') { if (d.state === 'free') { d.state = 'stun'; d.stT = .8; d.flinchTo = B.t + .8; } }
+  else if (S.ost && d.status !== S.ost) { d.status = S.ost; d.statusT = 99; d.toxN = 1; d.tickT = TICK; }
+  if (S.mst === 'cf') f.v.confuse = Math.max(f.v.confuse || 0, 1);
+  else if (S.mst && S.mst !== 'frz' && !f.status) { f.status = S.mst; f.statusT = 99; f.toxN = 1; f.tickT = TICK; }
+  if (S.wx && !(B.weather && B.weather.k === S.wx)) B.weather = { k: S.wx, t: 99 }; if (S.wx && B.weather) B.weather.t = 99;
+  if (S.tr && !(B.terrain && B.terrain.k === S.tr)) B.terrain = { k: S.tr, t: 99 }; if (S.tr && B.terrain) B.terrain.t = 99;
+  DUM.atkT -= dt;
+  if (S.atk !== 'none' && DUM.atkT <= 0 && d.state === 'free' && !d.cur && canAct(d)) { const id = dollMove(S.atk, d, f); DUM.atkT = 3.5; if (id) { d.cd = {}; beginMove(d, id); if (d.cur) d.cur.doll = 1; } }
+  if (d.cur && d.cur.doll && d.state === 'wind' && d.cur.t + dt * 2 >= d.cur.wind) {   // 人形の こうげきは ためおわったら かならず とどく（にげられて「攻撃を受けた瞬間」が ためせない のを ふせぐ）
+    const m = d.cur.m; d.cur = null; d.state = 'act'; d.stT = .3; burst(f.x, f.y - BODY, TYPES[m.t] ? TYPES[m.t].c : '#ffffff', 14, 140, .4); hit(d, f, m, Math.atan2(f.y - d.y, f.x - d.x)); }
+}
+// 人形の こうげき：えらんだ しゅるい（ふつう／大技／タイプ一致／ばつぐん）に ぴったり あう 技を えらぶ（「攻撃を受けた瞬間」「相手が溜め中」を ためせる）
+function dollMove(k, d, f) {
+  const at = (m) => ({ big: movePower(m) >= 100, stab: m.t === d.sp.type, eff: effVs(m.t, f.sp) > 1 }), ks = ['big', 'stab', 'eff'];
+  const sc = (m) => { const a = at(m); if (k !== 'weak' && !a[k]) return -1; return 10 - ks.filter(x => x !== k && a[x]).length * 3 - (['proj', 'strike'].includes(m.k) && !m.pat && !m.nw ? 0 : 1); };   // えらんだ しゅるい だけに あてはまる 技を いちばんに
+  const c = Object.keys(MOVES).filter(id => { const m = MOVES[id]; return m && isDamaging(m) && !m.ohko && !m.charge2 && !m.hide && !m.sure && ['proj', 'strike', 'beam', 'multi'].includes(m.k) && sc(m) >= 0; });
+  const best = Math.max(...c.map(id => sc(MOVES[id]))); return choice(c.filter(id => sc(MOVES[id]) === best)) || null;
+}
+// 人形を かべの うしろへ（あいてが「見えない」を ためす）
+function dollHide() {
+  const f = active(0), d = active(1), st = B.st; if (!f || !d) return false;
+  for (let i = 0; i < 400; i++) { const x = rand(st.fx0 + 40, st.fx1 - 40), y = rand(st.fy0 + 40, st.fy1 - 40); if (!spotOk(d, x, y) || losClear(f, { x, y })) continue;
+    d.x = x; d.y = y; DUM.stop = true; DUM.px = x; DUM.py = y; const b = $('dumHud') && $('dumHud').querySelector('[data-d="stop"]'); if (b) b.textContent = '人形：とまる'; return true; }
+  return false;
 }
 function dummyLog(f, id) {   // 技を 撃った：条件で えらんだ ものは その 条件も
   if (!DUM || f.side !== 0) return; const P = DUM.prog, ri = P.mv.findIndex(r => r.id === id), r = P.mv[ri];
@@ -8721,7 +8751,8 @@ function dummyLog(f, id) {   // 技を 撃った：条件で えらんだ もの
 function dummyHud(on) {
   let h = $('dumHud'); if (!on) { if (h) h.remove(); return; }
   if (!h) { h = document.createElement('div'); h.id = 'dumHud'; $('scBattle').appendChild(h); }
-  h.innerHTML = `<div class="dh"><b>木人戦</b><button data-d="min">たたむ</button><button data-d="stop">人形：うごく</button><button data-d="quit">おわる</button></div><div class="dbody"></div>`;
+  h.innerHTML = `<div class="dh"><b>木人戦</b><button data-d="min">たたむ</button><button data-d="stop">人形：うごく</button><button data-d="quit">おわる</button></div><div class="dctl"></div><div class="dbody"></div>`;
+  dummyCtl(h.querySelector('.dctl'));
   h.classList.toggle('mini', innerWidth < 600);   // たて画面は たたんで はじめる（モンスターが かくれない）
   h.querySelector('[data-d="min"]').onclick = (e) => { h.classList.toggle('mini'); SND.se('click'); dummyHudUpd(); };
   h.querySelector('[data-d="stop"]').onclick = (e) => { DUM.stop = !DUM.stop; e.target.textContent = DUM.stop ? '人形：とまる' : '人形：うごく'; SND.se('click'); };
@@ -8731,11 +8762,42 @@ function dummyHudUpd() {
   const h = $('dumHud'), f = active(0), o = active(1); if (!h || !f || !o) return; const P = DUM.prog;
   const rows = P.mv.map((r, i) => { const M = MOVES[r.id]; if (!M) return ''; const blk = moveBlocked(f, r.id), use = moveUseless(f, o, r.id), cd = blk && !AUTO_GUARD[M.k] ? `<i class="dcd">${blk}</i>` : use ? '<i class="dcd">いまは 意味なし</i>' : f.cd[r.id] > 0 ? `<i class="dcd">${f.cd[r.id].toFixed(1)}s</i>` : '<i class="dok">OK</i>', ls = trLines(r.c).filter(l => l.length);
       const fl = DUM.flash && DUM.flash.id === r.id && B.t - DUM.flash.t < .8 ? ' fire' : '', q = f.queued === r.id ? ' q' : '';
-      const cs = AUTO_GUARD[M.k] ? '<span class="dc">自動</span>' : ls.length ? ls.map((l, li) => (li ? '<em>または</em>' : '') + l.map(c => { const ok = condOk(f, o, c, r.id); return `<span class="dc ${ok ? 'on' : ''}">${ok ? '○' : '×'} ${trCondTx(c, P)}</span>`; }).join('<em>かつ</em>')).join('') : '<span class="dc any">いつでも（お任せ）</span>';
+      const cs = ls.length ? ls.map((l, li) => (li ? '<em>または</em>' : '') + l.map(c => { if (c.t === 'hit') return `<span class="dc hit">◇ ${trCondTx(c, P)}</span>`; const ok = condOk(f, o, c, r.id); return `<span class="dc ${ok ? 'on' : ''}">${ok ? '○' : '×'} ${trCondTx(c, P)}</span>`; }).join('<em>かつ</em>')).join('') : '<span class="dc any">いつでも（お任せ）</span>';
       return `<div class="dr${fl}${q}"><b>${i + 1} ${M.n}</b>${cd}<div>${cs}</div></div>`; }).join('');
   const lg = DUM.log.map(x => `<div>${x.by ? `<span class="on">条件</span> ${x.by} → ` : x.auto ? '自動 → ' : 'お任せ → '}<b>${MOVES[x.id].n}</b></div>`).join('');
   h.querySelector('[data-d="min"]').textContent = h.classList.contains('mini') ? 'ひらく' : 'たたむ';
+  { const a = h.querySelector('.daff'); if (a) a.textContent = { adv: '有利', even: '互角', dis: '不利' }[typeAff(f.sp, o.sp)]; }
   h.querySelector('.dbody').innerHTML = h.classList.contains('mini') ? `<div class="dlog">${DUM.log.slice(0, 2).map(x => `<div>${x.by ? `<span class="on">条件</span> ${x.by} → ` : x.auto ? '自動 → ' : 'お任せ → '}<b>${MOVES[x.id].n}</b></div>`).join('') || '<span class="dim">まだ 撃って いない</span>'}</div>` : `<div class="dst">距離 <b>${Math.round(dist(f, o))}</b>（${dist(f, o) < 150 ? '近い' : dist(f, o) < 290 ? '普通' : '遠い'}）・相手が <b class="${canReach(f, o) ? 'ok' : 'ng'}">${canReach(f, o) ? '見える' : '見えない'}</b>・人形HP ${Math.round(o.hp / o.maxHp * 100)}%</div>${rows}<div class="dlog">${lg || '<span class="dim">まだ 撃って いない</span>'}</div>`;
+}
+// じょうきょうを つくる：すべての 条件を 木人戦で ためせるように
+function dummyCtl(el) {
+  const S = DUM.set, o = (a, cur) => a.map(([v, n]) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${n}</option>`).join('');
+  const pct = [['', '—'], [100, '100%'], [75, '75%'], [50, '50%'], [25, '25%'], [10, '10%']], stg = CONDS.mystg.ps, val = [['', '—']].concat([6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6].map(v => [v, v > 0 ? '+' + v : String(v)]));
+  const sel = (k, a, cur) => `<select data-c="${k}">${o(a, cur)}</select>`;
+  el.innerHTML = `<div class="dct">じょうきょうを つくる <u>▾</u></div>
+    <label>人形の攻撃${sel('atk', [['none', 'しない'], ['weak', 'ふつうの技'], ['big', '大技'], ['stab', 'タイプ一致'], ['eff', 'ばつぐん']], S.atk)}</label>
+    <label>人形のタイプ${sel('otype', Object.keys(TYPES).map(t => [t, TYPES[t].n]), active(1) ? active(1).sp.type : 'normal')}<span class="daff"></span></label>
+    <label>人形の状態${sel('ost', [['', 'なし']].concat(CONDS.opsts.ps.filter(([v]) => v !== 'any' && v !== 'none')), S.ost)}</label>
+    <label>自分の状態${sel('mst', [['', 'なし']].concat(CONDS.mysts.ps.filter(([v]) => v !== 'any')), S.mst)}</label>
+    <label>自分のHP${sel('mhp', pct, '')}</label><label>人形のHP${sel('ohp', pct, '')}</label>
+    <label>自分の能力${sel('mstk', stg, 'atk')}${sel('mstv', val, '')}</label><label>人形の能力${sel('ostk', stg, 'atk')}${sel('ostv', val, '')}</label>
+    <label>天候${sel('wx', [['', 'なし']].concat(Object.keys(WEATHER).map(k => [k, WEATHER[k].n])), S.wx)}</label>
+    <label>フィールド${sel('tr', [['', 'なし']].concat(CONDS.terrain.ps.filter(([v]) => v !== 'none')), S.tr)}</label>
+    <div class="dbt"><button data-c="swap">人形が 交代</button><button data-c="hide">かべの うしろへ</button></div>`;
+  const g = (k) => el.querySelector(`[data-c="${k}"]`);
+  el.querySelector('.dct').onclick = () => { el.classList.toggle('shut'); el.querySelector('.dct u').textContent = el.classList.contains('shut') ? '▸' : '▾'; SND.se('click'); };
+  el.querySelectorAll('select').forEach(x => x.onchange = () => { const f = active(0), d = active(1), k = x.dataset.c, v = x.value; if (!f || !d) return; SND.se('click');
+    if (k === 'atk') { S.atk = v; DUM.atkT = .6; }
+    else if (k === 'otype') d.sp = Object.assign({}, d.sp, { type: v, type2: null });
+    else if (k === 'ost') { S.ost = v; d.status = ''; if (d.state === 'stun') d.stT = 0; }
+    else if (k === 'mst') { S.mst = v; f.status = ''; f.v.confuse = 0; if (v === 'frz') { f.status = 'frz'; f.statusT = 3; f.cur = null; f.queued = null; } }
+    else if (k === 'mhp' || k === 'ohp') { if (v) { const t = k === 'mhp' ? f : d; t.hp = Math.max(1, Math.round(t.maxHp * v / 100)); } x.value = ''; }
+    else if (k === 'mstv' || k === 'ostv') { if (v !== '') (k === 'mstv' ? f : d).st[g(k === 'mstv' ? 'mstk' : 'ostk').value] = +v; x.value = ''; }
+    else if (k === 'wx') { S.wx = v; if (!v) B.weather = null; }
+    else if (k === 'tr') { S.tr = v; if (!v) B.terrain = null; }
+    dummyHudUpd(); });
+  g('swap').onclick = () => { const d = active(1); if (!d) return; d.swIn = true; d.inAt = B.t; SND.se('click'); burst(d.x, d.y - 20, '#e8d8a8', 14, 110, .45); popText(d.x, d.y - 100, '人形が 交代した（ふり）', '#ffd84a'); };
+  g('hide').onclick = () => { SND.se('click'); if (!dollHide()) { const d = active(1); if (d) popText(d.x, d.y - 100, 'かくれる ばしょが ない', '#ff8a9a'); } };
 }
 // フィールドに：距離の わ（150・290）と 相手への 見とおし線
 function drawDummyViz(f, o) {
