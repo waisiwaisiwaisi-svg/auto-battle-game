@@ -5704,7 +5704,7 @@ function magnetTick(f, o, m, M, dt) {   // マグネットパワー：まるい 
           for (const q of [...(B.turrets || []), ...(B.cages || [])]) { const v2 = pl(q.x, q.y); if (v2) { q.x += v2[0]; q.y += v2[1]; } }
           if ((M.wt = (M.wt || 0) - dt) <= 0 && B.walls.length) { M.wt = .1; let mv = false; for (const w of B.walls) { const b0 = w.blocks.find(b => !b.gone); if (!b0) continue; const d = Math.hypot(f.x - b0.x, (f.y - b0.y) / .62); if (d > R || d < 60) continue; const a = Math.atan2(f.y - b0.y, f.x - b0.x), st = Math.min(m.pull * .1, d - 60); for (const b of w.blocks) { b.x += Math.cos(a) * st; b.y += Math.sin(a) * st; } mv = true; } if (mv) wallsChanged(); } }
         if (o && targetable(o) && !o.dummy && Math.hypot(f.x - o.x, (f.y - o.y) / .62) <= (m.rad || 290) + o.r) M.caught = o;   // いちど とらえたら にがさない
-        if (o && targetable(o) && !o.dummy && M.caught === o) { const d = dist(f, o), a = Math.atan2(f.y - o.y, f.x - o.x), gap = d - (f.r + o.r + 12);
+        if (o && targetable(o) && !o.dummy && M.caught === o) { o.magPullT = B.t; const d = dist(f, o), a = Math.atan2(f.y - o.y, f.x - o.x), gap = d - (f.r + o.r + 12);
           if (gap > 0) { const st = Math.min(m.pull * dt, gap), px = o.x, py = o.y; o.x += Math.cos(a) * st; o.y += Math.sin(a) * st; clampF(o); if (!flies(o) && blockedAt(o.x, o.y, footR(o))) { o.x = px; o.y = py; } }
           if (Math.random() < dt * 25) { const u = Math.random(); B.parts.push({ x: f.x + (o.x - f.x) * u + rand(-6, 6), y: f.y - BODY + (o.y - f.y) * u + rand(-6, 6), vx: rand(-30, 30), vy: rand(-30, 30), life: .25, max: .25, col: choice(['#ffe27a', '#bfe8ff', '#ffffff']), size: 3, g: 0, glow: true }); } }
 }
@@ -7021,7 +7021,8 @@ function moveDir(f, mx, my, dt, nav) {
   f.moving = Math.hypot(mx, my) > .15; if (f.moving) f.walk += dt * clamp(f.pace, .7, 1.8);
   // すすもうと しているのに 3びょう ほとんど うごけて いない（かべや すみに はさまった など）→ ダッシュで ぬける
   const oo = opp(f), nearO = oo && oo.hp > 0 && dist(f, oo) < footR(f) + footR(oo) + 30;   // あいてに くっついて いる だけ：はさまって いない
-  if (Math.hypot(mx, my) > .5 && !nearO) { const k = f.stk || (f.stk = { x: f.x, y: f.y, t: 0 });   // .5：着いた あとの よこゆれ（.35）は すすもう として いない
+  const held = f.v.root > 0 || f.v.magnet || (f.magPullT && B.t - f.magPullT < .3);   // うごけない・ひきよせられて いる：はさまった わけでは ない
+  if (Math.hypot(mx, my) > .5 && !nearO && !held) { const k = f.stk || (f.stk = { x: f.x, y: f.y, t: 0 });   // .5：着いた あとの よこゆれ（.35）は すすもう として いない
     if (Math.hypot(f.x - k.x, f.y - k.y) > 24) { k.x = f.x; k.y = f.y; k.t = 0; } else if ((k.t += dt) >= 3 && f.state === 'free') { k.t = 0; escapeDash(f); } }
   else if (f.stk) f.stk.t = 0;
 }
@@ -7045,7 +7046,7 @@ function updateEffects(f, dt) {
   for (const k of ['taunt', 'healBlock', 'confuse', 'protect', 'dbond', 'web', 'mark', 'root', 'silence', 'slowT']) if (v[k] > 0) v[k] = Math.max(0, v[k] - dt);
   for (const id of f.moves) { const mm = MOVES[id]; if (mm && mm.charges) { const C = chgS(f, id); if (C.n < mm.charges.max) { C.t += dt; if (C.t >= mm.charges.every) { C.t = 0; C.n++; } } else C.t = 0; } }   // ミニほうだい：5びょうで 1かい たまる
   if (v.rwMark) { v.rwMark.t -= dt; if (v.rwMark.t <= 0) { const P = v.rwMark; v.rwMark = null; if (f.hp > 0) { popText(f.x, f.y - 110, 'まきもどし！', '#ff9ad0', 'comic'); SND.se('swing'); f.rw = { pts: [{ x: f.x, y: f.y }, { x: P.x, y: P.y }], t: 0, T: .35, g: 0, heal: Math.max(0, P.hp - f.hp) * .5 }; } } }   // クロノバック：残像へ もどる
-  if (v.magnet) { v.magnet.t -= dt; if (v.magnet.t <= 0) v.magnet = null; else magnetTick(f, opp(f), v.magnet.m, v.magnet, dt); }
+  if (v.magnet) { const M = v.magnet; M.t -= dt; if (M.t <= 0) v.magnet = null; else { if (f.state === 'dash' || f.rw || f.sink || !M.ax) { M.ax = f.x; M.ay = f.y; } else { f.x = M.ax; f.y = M.ay; f.kx = f.ky = 0; } magnetTick(f, opp(f), M.m, M, dt); } }   // マグネットパワー：じぶんの 技いがいでは その場から うごかない（ふきとび・ステップも なし）
   if (v.enrage > 0) v.enrage = Math.max(0, v.enrage - dt); if (v.grounded > 0) v.grounded = Math.max(0, v.grounded - dt);
   if (v.echo) { v.echo.t -= dt; if (v.echo.t <= 0) { const E = v.echo; v.echo = null; const d = Math.round(E.sum * E.k); if (d > 0 && f.hp > 0) { f.hp = Math.max(0, f.hp - d); f.flash = .15; popText(f.x, f.y - 92, `ざんきょう -${d}`, '#b8a8f0', true); burst(f.x, f.y - BODY, '#8a78c8', 14, 120, .4); if (f.hp <= 0) { faint(f, E.att); return; } } } }
   if (v.aura > 0) { v.aura -= dt; v.auraN -= dt; if (v.auraN <= 0) { v.auraN = .5; const o = opp(f); f.hp = Math.max(1, f.hp - Math.max(1, Math.round(f.maxHp * .01))); if (o && targetable(o) && dist(f, o) < 120 + o.r) hit(f, o, v.auraM, Math.atan2(o.y - f.y, o.x - f.x), { tick: true, first: false, sure: 1 }); } }   // しゃくねつオーラ
