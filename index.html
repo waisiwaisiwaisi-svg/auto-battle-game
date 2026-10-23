@@ -5137,9 +5137,9 @@ function beginMove(f, id) {
   if (m.k === 'multi') cur.pts = multiPoints(f, { x: tx, y: ty }, m, ang);
   if (m.k === 'strike' && m.pat) cur.pts = strikePoints(f, { x: tx, y: ty }, m, ang);
   if (m.k === 'beam' && m.pat === 'erupt') { cur.pts = []; const L = rayLen(f, ang, m.len); for (let d = 40, i = 0; d <= L; d += 46, i++) cur.pts.push({ x: f.x + Math.cos(ang) * d, y: f.y + Math.sin(ang) * d, d: i * .06, r: 30, ring: 0 }); }   // じめんが じゅんに さけて ふきあがる
-  if (m.charge2 && f.v.charged) cur.wind = .03;   // ためてあれば すぐ はなつ
+  if (m.charge2 && f.v.charged) cur.wind = .35;   // ためてあれば みじかい よびどうさで はなつ
   if (m.chargeUp) { const c = clamp((dist(f, o) - 140) / 260, 0, 1); if (m.k === 'cone') { cur.half = m.half * (1 + c); cur.wind += c * m.chargeUp; } else { cur.chg = c; cur.wind += c * m.chargeUp; } }   // ためて はなつ：とおい ほど ながく ためて とおくまで とどく
-  if (isDamaging(m) && !boost && cur.wind < .26) { cur.wind = Math.max(cur.wind, m.prio > 0 || (m.charge2 && f.v.charged) ? .14 : .24); cur.quick = 1; }   /* すぐ でる こうげき：みじかい よびどうさ（ひいて → うつ） */
+  if (isDamaging(m) && !boost && cur.wind < .26) { cur.wind = Math.max(cur.wind, m.prio > 0 ? .14 : .24); cur.quick = 1; }   /* すぐ でる こうげき：みじかい よびどうさ（ひいて → うつ） */
   if (m.nth) { f.nthC = f.nthC || {}; const c = f.nthC[id] = (f.nthC[id] || 0) + 1; cur.nthB = c % m.nth === 0; if (cur.nthB && !B.headless) popText(f.x, f.y - 104, 'つよい いちげき！', '#ffd166', true); }   // N かいめ だけ つよい
   if (m.useSelf) changeStages(f, m.useSelf, true);
   if (m.charges) { const C = chgS(f, id); C.n = Math.max(0, C.n - 1); }   // スケイルショット：うつと ぼうぎょ↓ すばやさ↑
@@ -7227,7 +7227,7 @@ function updateFighter(f, dt) {
       const m = cur.m;
       // 命中100（ロック）の わざだけ 予兆の とちゅうまで あいてを 追う
       if (oT && m.aim === 'lock') {
-        if ((m.k === 'beam' || m.k === 'dash' || m.k === 'cone' || m.k === 'swipe') && cur.t < cur.wind * (m.k === 'swipe' ? .75 : .6)) {
+        if ((m.k === 'beam' || m.k === 'dash' || m.k === 'cone' || m.k === 'swipe') && cur.t < cur.wind * (m.k === 'swipe' ? .75 : m.charge2 ? .9 : .6)) {
           const want = Math.atan2(o.y - f.y, o.x - f.x);
           cur.ang += clamp(wrapAng(want - cur.ang), -3 * dt, 3 * dt);
         }
