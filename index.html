@@ -2396,7 +2396,7 @@ const NEW_MOVES = {"bonemerang": {"n": "ホネブーメラン", "t": "ground", "
   "shadow-pin": {"n": "かげぬい", "t": "ghost", "k": "proj", "power": 50, "spd": 320, "r": 8, "homing": 1.5, "root": 1.5, "cd": 5},
   "psy-link": {"n": "サイコリンク", "t": "psychic", "k": "link", "cat": "stat", "power": 0, "wind": 0.3, "tether": {"t": 4, "r": 340, "k": 0.5},
   "cd": 6},
-  "magnet-power": {"n": "マグネットパワー", "t": "elec", "k": "magnet", "cat": "stat", "power": 0, "mt": 10, "pull": 90, "rad": 290, "armor": 1, "cd": 16},
+  "magnet-power": {"n": "マグネットパワー", "t": "elec", "k": "magnet", "cat": "stat", "power": 0, "mt": 10, "pull": 150, "rad": 290, "cd": 16},
   "slap-dash": {"n": "つきとばし", "t": "normal", "k": "dash", "power": 65, "len": 200, "shove": 2.5}};
 Object.assign(NEW_MOVES, {   // だい2だん：ほろび・けっとう・ねつ・よち・ばくだん・さきどり・てんき・まきもどし
   'duel-arena': { n: 'けっとうのば', t: 'fighting', k: 'duel', cat: 'stat', power: 0, wind: .3, cd: 16 },
@@ -5696,6 +5696,16 @@ function placeWall(f, o, m) {
   say(`${m.n}が あらわれた！`);
 }
 const FLOOR_LIFE = 99999;
+function magnetTick(f, o, m, M, dt) {   // マグネットパワー：まるい はんいの あいてと しかけ・わなを ひきよせる
+        { const R = m.rad || 290, pl = (px0, py0) => { const d = Math.hypot(f.x - px0, (f.y - py0) / .62); if (d > R || d < 24) return null; const st = Math.min(m.pull * dt, d - 24), a = Math.atan2(f.y - py0, f.x - px0); return [Math.cos(a) * st, Math.sin(a) * st]; };   // しかけ・わな・ゆか・ほうだいも ひきよせる
+          for (const x of OB()) { const v2 = pl(x.x, x.y); if (v2) { x.x += v2[0]; x.y += v2[1]; } }
+          for (const z of B.zones) { const v2 = pl(z.x, z.y); if (v2) { z.x += v2[0]; z.y += v2[1]; if (z.parts) for (const q of z.parts) { q.x += v2[0]; q.y += v2[1]; } } }
+          for (const q of [...(B.turrets || []), ...(B.cages || [])]) { const v2 = pl(q.x, q.y); if (v2) { q.x += v2[0]; q.y += v2[1]; } }
+          if ((M.wt = (M.wt || 0) - dt) <= 0 && B.walls.length) { M.wt = .1; let mv = false; for (const w of B.walls) { const b0 = w.blocks.find(b => !b.gone); if (!b0) continue; const d = Math.hypot(f.x - b0.x, (f.y - b0.y) / .62); if (d > R || d < 60) continue; const a = Math.atan2(f.y - b0.y, f.x - b0.x), st = Math.min(m.pull * .1, d - 60); for (const b of w.blocks) { b.x += Math.cos(a) * st; b.y += Math.sin(a) * st; } mv = true; } if (mv) wallsChanged(); } }
+        if (o && targetable(o) && !o.dummy && Math.hypot(f.x - o.x, (f.y - o.y) / .62) <= (m.rad || 290) + o.r) { const d = dist(f, o), a = Math.atan2(f.y - o.y, f.x - o.x), gap = d - (f.r + o.r + 12);
+          if (gap > 0) { const st = Math.min(m.pull * dt, gap), px = o.x, py = o.y; o.x += Math.cos(a) * st; o.y += Math.sin(a) * st; clampF(o); if (!flies(o) && blockedAt(o.x, o.y, footR(o))) { o.x = px; o.y = py; } }
+          if (Math.random() < dt * 25) { const u = Math.random(); B.parts.push({ x: f.x + (o.x - f.x) * u + rand(-6, 6), y: f.y - BODY + (o.y - f.y) * u + rand(-6, 6), vx: rand(-30, 30), vy: rand(-30, 30), life: .25, max: .25, col: choice(['#ffe27a', '#bfe8ff', '#ffffff']), size: 3, g: 0, glow: true }); } }
+}
 function addStack(def, m, att) {   // つみかさね：たまると 状態異常
   const SK = m.stack; def.v.stk = (def.v.stk || 0) + 1; def.v.stkT = 6; if (SK.slow) { def.v.slowT = 3; def.v.slowK = Math.max(.35, 1 - SK.slow * def.v.stk); }
   popText(def.x + 18, def.y - 100, '●'.repeat(def.v.stk) + '○'.repeat(Math.max(0, SK.n - def.v.stk)), TYPES[m.t].c);
@@ -5759,7 +5769,7 @@ function useStatusMove(f, o, m) {
       break; }
     case 'weather': B.weather = { k: m.wk, t: 20 }; say({ rain: 'あめが ふりだした！（みず↑ ほのお↓）', sun: 'ひざしが つよく なった！（ほのお↑ みず↓）', sand: 'すなあらしが ふきはじめた！（いわ・じめん いがいは けずられる）', snow: 'ゆきが ふりだした！（こおり いがいは けずられる）' }[m.wk]); break;
     case 'rewind': f.v.rwMark = { x: f.x, y: f.y, hp: f.hp, t: 3, face: f.face }; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 36, col: '#ff7ab0', life: .5 }); popText(f.x, f.y - 110, 'じかんを きざんだ', '#ff9ad0'); say(`${f.sp.n}は いまの じかんを きざんだ！ 3びょうごに もどる`); break;   // クロノバック
-    case 'magnet': { const cur = f.cur; if (!cur) break; cur.ch = 0; f.state = 'chan'; fxPush({ type: 'shock', x: f.x, y: f.y, rad: m.rad, col: '#ffe27a', life: .5, max: .5 }); say(`${f.sp.n}の まわりに じりょくが うまれた！`); break; }   // マグネットパワー：その場で ひきよせつづける   // マグネットパワー：うちつづける あいだ あいてを ひきよせる
+    case 'magnet': f.v.magnet = { t: m.mt, m }; fxPush({ type: 'shock', x: f.x, y: f.y, rad: m.rad, col: '#ffe27a', life: .5, max: .5 }); say(`${f.sp.n}の まわりに じりょくが うまれた！`); break;   // マグネットパワー：その場から うごけない かわりに ひきよせつづける（技は つかえる）   // マグネットパワー：うちつづける あいだ あいてを ひきよせる
     case 'wish': (B.wishes = B.wishes || []).push({ side: f.side, x: f.x, y: f.y, t: 3 }); say(`${f.sp.n}は ねがいごとを した！`); break;   // 3びょうご あしもとの みかたを かいふく
     case 'link': {   // サイコリンク：すぐに つなぐ
       if (!o || !targetable(o) || dist(f, o) > m.tether.r - 20) { failMove(f, 'とどかない！'); return; }
@@ -6562,7 +6572,7 @@ function aiPick0(f, o) {
       case 'snatch': w = charging(o) && o.cur && isDamaging(o.cur.m) ? 4 : 0; break;
       case 'weather': { const mine = { rain: (x) => x.moves.some(id => MOVES[id] && MOVES[id].t === 'water' && isDamaging(MOVES[id])), sun: (x) => x.moves.some(id => MOVES[id] && MOVES[id].t === 'fire' && isDamaging(MOVES[id])), sand: (x) => hasType(x, 'rock') || hasType(x, 'ground'), snow: (x) => hasType(x, 'ice') }[m.wk]; w = B.weather && B.weather.k === m.wk ? 0 : mine && mine(f) ? 2.2 : .3; break; }
       case 'rewind': w = f.v.rwMark ? 0 : (charging(o) && o.cur && isDamaging(o.cur.m)) || lostRecent(f) >= 15 ? 2.5 : .3; break;
-      case 'magnet': w = dist(f, o) > 290 || dist(f, o) < 130 ? 0 : dist(f, o) > 160 ? (f.moves.some(x => MOVES[x] && ['melee', 'swipe', 'dash'].includes(MOVES[x].k)) ? 2.2 : 1) : 0; break;
+      case 'magnet': w = f.v.magnet || dist(f, o) > 290 || dist(f, o) < 130 ? 0 : dist(f, o) > 160 ? (f.moves.some(x => MOVES[x] && ['melee', 'swipe', 'dash'].includes(MOVES[x].k)) ? 2.2 : 1) : 0; break;
       case 'echo': w = !o.v.echo && dist(f, o) < 360 && f.moves.some(x => MOVES[x] && isDamaging(MOVES[x])) ? 2.2 : 0; break;
       case 'hwish': w = f.hp < f.maxHp * .25 && B.sides[f.side].fs.some(x => x !== f && !x.fainted && x.hp > 0 && x.hp < x.maxHp * .6) ? 3 : 0; break;
       case 'memento': w = f.hp < f.maxHp * .2 && benchIdx(f.side) >= 0 ? 2.5 : 0; break;
@@ -6962,7 +6972,7 @@ function moveDir(f, mx, my, dt, nav) {
   } else if (f.pace < 1.3) f.rushing = false;
   if (f.v && f.v.enrage > 0) sp *= 1.3;   // いかりモード：はやい
   if (B.zones.length && !hovers(f)) { const zs = B.zones.find(z => z.side !== f.side && MOVES[z.id].slow && inZoneFloor(z, f.x, f.y)); if (zs) sp *= MOVES[zs.id].slow; }   // ありじごく：あしが とられる
-  if (f.v.root > 0) sp = 0;   // かげぬい：うごけない
+  if (f.v.root > 0 || f.v.magnet) sp = 0;   // かげぬい・マグネットパワー：うごけない
   if (f.v.slowT > 0) sp *= f.v.slowK || .7;   // こなゆき など：あしが おそく なる
   if (B.st.pools.length && inPool(f.x, f.y)) {
     sp *= f.sp.type === 'water' ? 1.2 : .6;
@@ -7018,6 +7028,7 @@ function updateEffects(f, dt) {
   for (const k of ['taunt', 'healBlock', 'confuse', 'protect', 'dbond', 'web', 'mark', 'root', 'silence', 'slowT']) if (v[k] > 0) v[k] = Math.max(0, v[k] - dt);
   for (const id of f.moves) { const mm = MOVES[id]; if (mm && mm.charges) { const C = chgS(f, id); if (C.n < mm.charges.max) { C.t += dt; if (C.t >= mm.charges.every) { C.t = 0; C.n++; } } else C.t = 0; } }   // ミニほうだい：5びょうで 1かい たまる
   if (v.rwMark) { v.rwMark.t -= dt; if (v.rwMark.t <= 0) { const P = v.rwMark; v.rwMark = null; if (f.hp > 0) { popText(f.x, f.y - 110, 'まきもどし！', '#ff9ad0', 'comic'); SND.se('swing'); f.rw = { pts: [{ x: f.x, y: f.y }, { x: P.x, y: P.y }], t: 0, T: .35, g: 0, heal: Math.max(0, P.hp - f.hp) * .5 }; } } }   // クロノバック：残像へ もどる
+  if (v.magnet) { v.magnet.t -= dt; if (v.magnet.t <= 0) v.magnet = null; else magnetTick(f, opp(f), v.magnet.m, v.magnet, dt); }
   if (v.enrage > 0) v.enrage = Math.max(0, v.enrage - dt); if (v.grounded > 0) v.grounded = Math.max(0, v.grounded - dt);
   if (v.echo) { v.echo.t -= dt; if (v.echo.t <= 0) { const E = v.echo; v.echo = null; const d = Math.round(E.sum * E.k); if (d > 0 && f.hp > 0) { f.hp = Math.max(0, f.hp - d); f.flash = .15; popText(f.x, f.y - 92, `ざんきょう -${d}`, '#b8a8f0', true); burst(f.x, f.y - BODY, '#8a78c8', 14, 120, .4); if (f.hp <= 0) { faint(f, E.att); return; } } } }
   if (v.aura > 0) { v.aura -= dt; v.auraN -= dt; if (v.auraN <= 0) { v.auraN = .5; const o = opp(f); f.hp = Math.max(1, f.hp - Math.max(1, Math.round(f.maxHp * .01))); if (o && targetable(o) && dist(f, o) < 120 + o.r) hit(f, o, v.auraM, Math.atan2(o.y - f.y, o.x - f.x), { tick: true, first: false, sure: 1 }); } }   // しゃくねつオーラ
@@ -7168,18 +7179,6 @@ function updateFighter(f, dt) {
     case 'chan': {   // うちつづける：ゆっくり あいてへ むきを あわせながら はなつ
       const cur = f.cur; if (!cur) { f.state = 'free'; break; }
       const m = cur.m; cur.ch += dt;
-      if (m.k === 'magnet') {   // ひきよせる（かならず：かわしても にげられない）
-        { const R = m.rad || 290, pl = (px0, py0) => { const d = Math.hypot(f.x - px0, (f.y - py0) / .62); if (d > R || d < 24) return null; const st = Math.min(m.pull * dt, d - 24), a = Math.atan2(f.y - py0, f.x - px0); return [Math.cos(a) * st, Math.sin(a) * st]; };   // しかけ・わな・ゆか・ほうだいも ひきよせる
-          for (const x of OB()) { const v2 = pl(x.x, x.y); if (v2) { x.x += v2[0]; x.y += v2[1]; } }
-          for (const z of B.zones) { const v2 = pl(z.x, z.y); if (v2) { z.x += v2[0]; z.y += v2[1]; if (z.parts) for (const q of z.parts) { q.x += v2[0]; q.y += v2[1]; } } }
-          for (const q of [...(B.turrets || []), ...(B.cages || [])]) { const v2 = pl(q.x, q.y); if (v2) { q.x += v2[0]; q.y += v2[1]; } }
-          if ((cur.wt = (cur.wt || 0) - dt) <= 0 && B.walls.length) { cur.wt = .1; let mv = false; for (const w of B.walls) { const b0 = w.blocks.find(b => !b.gone); if (!b0) continue; const d = Math.hypot(f.x - b0.x, (f.y - b0.y) / .62); if (d > R || d < 60) continue; const a = Math.atan2(f.y - b0.y, f.x - b0.x), st = Math.min(m.pull * .1, d - 60); for (const b of w.blocks) { b.x += Math.cos(a) * st; b.y += Math.sin(a) * st; } mv = true; } if (mv) wallsChanged(); } }
-        if (oT && !o.dummy && Math.hypot(f.x - o.x, (f.y - o.y) / .62) <= (m.rad || 290) + o.r) { const d = dist(f, o), a = Math.atan2(f.y - o.y, f.x - o.x), gap = d - (f.r + o.r + 12);
-          if (gap > 0) { const st = Math.min(m.pull * dt, gap), px = o.x, py = o.y; o.x += Math.cos(a) * st; o.y += Math.sin(a) * st; clampF(o); if (!flies(o) && blockedAt(o.x, o.y, footR(o))) { o.x = px; o.y = py; } }
-          if (Math.random() < dt * 25) { const u = Math.random(); B.parts.push({ x: f.x + (o.x - f.x) * u + rand(-6, 6), y: f.y - BODY + (o.y - f.y) * u + rand(-6, 6), vx: rand(-30, 30), vy: rand(-30, 30), life: .25, max: .25, col: choice(['#ffe27a', '#bfe8ff', '#ffffff']), size: 3, g: 0, glow: true }); } }
-        if (cur.ch >= m.mt) endAct(f, .3);
-        break;
-      }
       if (oT) { const tr = (m.aim === 'lock' ? .55 : .2) * dt; /* 照射中は ゆっくりしか むきを かえられない */ cur.ang += clamp(wrapAng(Math.atan2(o.y - f.y, o.x - f.x) - cur.ang), -tr, tr); }
       if (m.k === 'beam') cur.len = rayLen(f, cur.ang, m.len);
       if (m.chanMove && oT) { const a = Math.atan2(o.y - f.y, o.x - f.x), dd = dist(f, o), pr = dd > 150 ? 1 : dd < 90 ? -1 : 0, sd = f.side ? -1 : 1; f.paceT = .8; moveDir(f, Math.cos(a) * pr - Math.sin(a) * .7 * sd, Math.sin(a) * pr + Math.cos(a) * .7 * sd, dt); }   // ドラゴンブレス：はきながら うごく
@@ -8504,7 +8503,7 @@ function moveDesc(m) {
   if (m.k === 'weather') add(`20秒間、天候を${WEATHER[m.wk].n}にする。${{ rain: 'みず技1.5倍・ほのお技0.5倍', sun: 'ほのお技1.5倍・みず技0.5倍', sand: 'いわ・じめん以外は毎秒1%けずられる', snow: 'こおり以外は毎秒1%けずられる' }[m.wk]}`);
   if (m.quake) add('フィールド全体をゆらす（予告なし・飛んでいる相手には当たらない）。モンスターが置いた壁・岩をすべて崩す'); if (m.wball) add('天候があると、その天候のタイプ（雨＝みず・晴れ＝ほのお・砂＝いわ・雪＝こおり）で威力2倍');
   if (m.k === 'rewind') add('その場所に残像を残す。3秒後に残像の場所へ戻り、その間に減ったHPの半分を取り戻す');
-  if (m.k === 'magnet') add(`その場に止まって、最大${m.mt}秒間、まわり（ふつうの距離まで）の相手と、置いてある技・罠を自分へ引き寄せ続ける`);
+  if (m.k === 'magnet') add(`${m.mt}秒間、その場から動けなくなる代わりに、まわり（ふつうの距離まで）の相手と、置いてある技・罠を自分へ引き寄せ続ける（技は使える）`);
   if (m.nth) add(`${m.nth}回に1回、2.5倍の強い一撃になる`);
   if (m.useSelf) add(`撃つと自分の${stg(m.useSelf)}`);
   if (m.echo) add(`必ず当たる。影になって相手の後ろへ駆け抜け、しるしを刻む。${m.echo.t}秒後、その間に与えたダメージの${Math.round(m.echo.k * 100)}%を追加で与える`);
@@ -9880,7 +9879,7 @@ function drawConditions(f, top, oy, img) {
   }
   if (f.v.protect > 0 && !plOk('g_hold')) { ctx.strokeStyle = `rgba(160,240,255,${.6 + Math.sin(B.t * 30) * .2})`; ctx.fillStyle = 'rgba(160,240,255,.18)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(cx, cy, img.width * 1.25, h * .7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
   if (f.v.shield > 0) { ctx.save(); ctx.strokeStyle = `rgba(191,232,255,${.55 + Math.sin(B.t * 6) * .2})`; ctx.fillStyle = 'rgba(191,232,255,.12)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy, img.width * 1.3, h * .74, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore(); }   // シールド
-  { const tags = []; if (f.v.mark > 0) tags.push(['しるし', '#ffd84a']); if (f.v.root > 0) tags.push(['うごけない', '#c8a8ff']); if (f.v.silence > 0) tags.push(['ふういん', '#c8a8ff']); if (f.v.stk > 0) tags.push(['●'.repeat(f.v.stk), '#9fe0ff']); if (f.v.echo) tags.push([`ざんきょう ${Math.ceil(f.v.echo.t)}`, '#b8a8f0']); if (f.v.perish > 0) tags.push([`ほろび ${Math.ceil(f.v.perish)}`, '#c8a8ff']); if (f.v.bomb) tags.push([`ばくだん ${Math.ceil(f.v.bomb.t)}`, '#ff8a3d']); if (f.v.overheat > 0) tags.push(['オーバーヒート', '#ff6a3d']); else if (f.heat > 0) tags.push([`ねつ ${Math.round(f.heat)}`, f.heat >= 50 ? '#ff8a3d' : '#ffd166']); if (B.sides[f.side].lockT > 0) tags.push(['こうたい ふか', '#ff8a6a']); if (f.hako) tags.push([`とりたて ${hakoN(f)}（${HAKO_ORDER.filter(k => f.hako.amt[k] > 0).map(k => ({ atk: '攻', def: '防', spa: '特攻', spd: '特防', spe: '速' })[k] + f.hako.amt[k]).join('') || 'まだ'}）`, '#ffb347']);   // あたまの うえの しるし
+  { const tags = []; if (f.v.mark > 0) tags.push(['しるし', '#ffd84a']); if (f.v.root > 0) tags.push(['うごけない', '#c8a8ff']); if (f.v.magnet) tags.push([`じりょく ${Math.ceil(f.v.magnet.t)}`, '#ffe27a']); if (f.v.silence > 0) tags.push(['ふういん', '#c8a8ff']); if (f.v.stk > 0) tags.push(['●'.repeat(f.v.stk), '#9fe0ff']); if (f.v.echo) tags.push([`ざんきょう ${Math.ceil(f.v.echo.t)}`, '#b8a8f0']); if (f.v.perish > 0) tags.push([`ほろび ${Math.ceil(f.v.perish)}`, '#c8a8ff']); if (f.v.bomb) tags.push([`ばくだん ${Math.ceil(f.v.bomb.t)}`, '#ff8a3d']); if (f.v.overheat > 0) tags.push(['オーバーヒート', '#ff6a3d']); else if (f.heat > 0) tags.push([`ねつ ${Math.round(f.heat)}`, f.heat >= 50 ? '#ff8a3d' : '#ffd166']); if (B.sides[f.side].lockT > 0) tags.push(['こうたい ふか', '#ff8a6a']); if (f.hako) tags.push([`とりたて ${hakoN(f)}（${HAKO_ORDER.filter(k => f.hako.amt[k] > 0).map(k => ({ atk: '攻', def: '防', spa: '特攻', spd: '特防', spe: '速' })[k] + f.hako.amt[k]).join('') || 'まだ'}）`, '#ffb347']);   // あたまの うえの しるし
     if (tags.length) { ctx.save(); ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#120e1c'; tags.forEach(([t, c], i) => { const y = top - 20 - i * 12; ctx.strokeText(t, cx, y); ctx.fillStyle = c; ctx.fillText(t, cx, y); }); ctx.restore(); } }
   if (f.v.sub > 0) { ctx.globalAlpha = .55; drawSprite(SPR[f.mon.sid].w, f.x + f.face * -26, f.y + 4, f.face, 1); ctx.globalAlpha = 1; }
   if (f.v.counter && plOk('ctr_aura')) { const ck = f.v.counter.ctr === 'spec' && plOk('mirror') ? 'mirror' : 'ctr_aura', sc = (img.width * 1.4 + 20) / (PLFX[ck].w * PIX_D);   // かまえ：あしもとの ほのお／はんしゃの まく
@@ -10280,7 +10279,7 @@ function render() {
   for (const q of B.minions || []) { ctx.save(); const bob = Math.abs(Math.sin(q.walk * 10)) * 3, px = q.punch > 0 ? q.face * 8 : 0; ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(q.x, q.y, 16, 6, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#8a5a3a'; ctx.beginPath(); ctx.ellipse(q.x, q.y - 16 - bob, 14, 16, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(q.x, q.y - 36 - bob, 11, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(q.x - 8, q.y - 45 - bob, 4, 0, 7); ctx.arc(q.x + 8, q.y - 45 - bob, 4, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(q.x + q.face * 13 + px, q.y - 20 - bob, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#120e1c'; ctx.fillRect(q.x + q.face * 4 - 1, q.y - 38 - bob, 2, 2); ctx.restore(); }
   for (const x of [active(0), active(1)]) if (x && x.v && x.v.teth && x.v.teth.att) { const a = x.v.teth.att, near = clamp(1 - (dist(a, x) - 70) / 380, .1, 1); ctx.save(); ctx.strokeStyle = TYPES[x.v.teth.m.t].c; ctx.globalAlpha = .55 + .35 * Math.sin(B.t * 14); ctx.lineWidth = 2 + near * 4; ctx.beginPath(); ctx.moveTo(a.x, a.y - BODY); const mx = (a.x + x.x) / 2, my = (a.y + x.y) / 2 - BODY + Math.sin(B.t * 6) * 8; ctx.quadraticCurveTo(mx, my, x.x, x.y - BODY); ctx.stroke(); ctx.restore(); }   // サイコリンク：ひもを ずっと みせる
   for (const x of [active(0), active(1)]) if (x && x.v && x.v.rwMark && SPR[x.mon.sid]) { const P = x.v.rwMark; drawSprite(SPR[x.mon.sid].fr.walk1.w, P.x, P.y + 3, P.face, SPR[x.mon.sid].ms, .35 + .1 * Math.sin(B.t * 8)); ctx.save(); ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#120e1c'; ctx.strokeText(String(Math.ceil(P.t)), P.x, P.y - BODY * 2 - 6); ctx.fillStyle = '#ff9ad0'; ctx.fillText(String(Math.ceil(P.t)), P.x, P.y - BODY * 2 - 6); ctx.restore(); }   // クロノバック：のこした 残像
-  for (const x of [active(0), active(1)]) if (x && x.state === 'chan' && x.cur && x.cur.m.k === 'magnet') { const R = x.cur.m.rad || 290; ctx.save(); ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 3; ctx.globalAlpha = .35 + .2 * Math.sin(B.t * 10); ctx.setLineDash([10, 8]); ctx.lineDashOffset = B.t * 40; ctx.beginPath(); ctx.ellipse(x.x, x.y, R, R * .62, 0, 0, 7); ctx.stroke(); ctx.restore(); }   // マグネットパワー：はんい
+  for (const x of [active(0), active(1)]) if (x && x.v && x.v.magnet) { const R = x.v.magnet.m.rad || 290; ctx.save(); ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 3; ctx.globalAlpha = .35 + .2 * Math.sin(B.t * 10); ctx.setLineDash([10, 8]); ctx.lineDashOffset = B.t * 40; ctx.beginPath(); ctx.ellipse(x.x, x.y, R, R * .62, 0, 0, 7); ctx.stroke(); ctx.restore(); }   // マグネットパワー：はんい
   for (const x of [active(0), active(1)]) if (x && x.v && x.v.aura > 0) { ctx.save(); ctx.globalAlpha = .25 + .15 * Math.sin(B.t * 12); ctx.fillStyle = '#ff8a3d'; ctx.beginPath(); ctx.ellipse(x.x, x.y, 120, 74, 0, 0, 7); ctx.fill(); ctx.restore(); }
   if (B.magnet) { const a = active(0), b = active(1); if (a && b) { ctx.save(); ctx.globalAlpha = .35 + .2 * Math.sin(B.t * 10); ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 3; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -B.t * 60; ctx.beginPath(); ctx.moveTo(a.x, a.y - BODY); ctx.lineTo(b.x, b.y - BODY); ctx.stroke(); ctx.restore(); } }   // マグネットパワー：ひきあう せん
 
