@@ -11050,10 +11050,9 @@ function sortPartyFor(t) {
   const sc = (m) => { const b = SPECIES[m.sid].base, tot = b.hp + b.atk + b.def + b.spd + evUsed(m) * EV_K; if (!foes.length) return tot;
     let def = 0; for (const id of foes) { const sp = SPECIES[id]; def += Math.max(...[sp.type, sp.type2].filter(Boolean).map(x => ts(m).reduce((a, y) => a * effOf(x, y), 1))); }
     return tot / 100 + Math.max(...atkTs(m).map(x => effOf(x, t))) * 2 - def / foes.length * 2; };
-  const top = all.slice().sort((a, b) => sc(b) - sc(a)).slice(0, 3);
-  const rest = S.party.filter(m => !top.includes(m));
-  S.party = top.concat(rest).slice(0, 6); S.box = all.filter(m => !S.party.includes(m)); save();
-  return top;
+  const top = all.slice().sort((a, b) => sc(b) - sc(a)).slice(0, 6);   // しゅつじょう 3たい＋ひかえ 3たい ぜんぶ あわせる
+  S.party = top; S.box = all.filter(m => !S.party.includes(m)); save();
+  return top.slice(0, 3);
 }
 /* =====================================================================
    バトルタワー：でんどういり した 人の ための かちぬき。パーティの 上3体で なんれんしょう できるか
