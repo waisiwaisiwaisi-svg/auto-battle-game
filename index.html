@@ -2399,7 +2399,7 @@ const NEW_MOVES = {"bonemerang": {"n": "ホネブーメラン", "t": "ground", "
   "psy-link": {"n": "サイコリンク", "t": "psychic", "k": "proj", "power": 30, "spd": 360, "r": 8, "homing": 1.6, "tether": {"t": 4, "r": 260, "k": 0.35},
   "cd": 6},
   "magnet-power": {"n": "マグネットパワー", "t": "elec", "k": "magnet", "cat": "stat", "power": 0, "mt": 2.5, "pull": 150, "cd": 8},
-  "slap-dash": {"n": "ダッシュびんた", "t": "normal", "k": "dash", "power": 65, "len": 200, "slap": 1}};
+  "slap-dash": {"n": "ダッシュびんた", "t": "normal", "k": "dash", "power": 65, "len": 200, "carry": 1, "noKb": 1}};
 Object.assign(NEW_MOVES, {   // だい2だん：ほろび・けっとう・ねつ・よち・ばくだん・さきどり・てんき・まきもどし
   'perish-song': { n: 'ほろびのうた', t: 'normal', k: 'perish', cat: 'stat', power: 0, wind: .4, cd: 20 },
   'duel-arena': { n: 'けっとうのば', t: 'fighting', k: 'duel', cat: 'stat', power: 0, wind: .3, cd: 16 },
@@ -7056,8 +7056,19 @@ function updateFighter(f, dt) {
       if (PLFX.d_dust && pat !== 'leap' && (cur.dustT = (cur.dustT || 0) - dt) <= 0) { cur.dustT = .3; const a = Math.atan2(vy, vx); fxp({ type: 'pl', k: 'd_dust', x: f.x - Math.cos(a) * f.r, y: f.y - 4, s: .7, ang: a, fy: Math.cos(a) < 0, life: .45 }); }   // あしもとの すなけむり
       if (m.trail && Math.random() < .8) B.parts.push({ x: f.x + rand(-8, 8), y: f.y, vx: rand(-10, 10), vy: -rand(30, 70), life: .4, max: .4, col: choice(['#ffd166', '#ff8a3d']), size: 5, g: -20, shape: 'ember' });
       if (o && o.clones && !cur.back) hitClones(o, c => Math.hypot(c.x - f.x, c.y - f.y) < f.r + o.r + 4);
-      if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; if (PLFX.d_hit) plFx('d_hit', (f.x + o.x) / 2, (f.y + o.y) / 2 - BODY, 1.3); if (m.grab) { startGrab(f, o); break; } if (hit(f, o, m, cur.ang) && m.chain) { cur.chainGo = !cur.chainN || Math.random() < .5; cur.chainN = (cur.chainN || 0) + 1; } }
+      if (pat !== 'leap' && !cur.hit && oT && dist(f, o) < f.r + o.r + 4) { cur.hit = true; if (PLFX.d_hit) plFx('d_hit', (f.x + o.x) / 2, (f.y + o.y) / 2 - BODY, 1.3); if (m.grab) { startGrab(f, o); break; } if (m.carry) { cur.carry = true; cur.d = L - (m.carryLen || 240); } if (hit(f, o, m, cur.ang) && m.chain) { cur.chainGo = !cur.chainN || Math.random() < .5; cur.chainN = (cur.chainN || 0) + 1; } }
       if (f.state !== 'dash') break;
+      if (cur.carry && o && o.hp > 0) {   // ダッシュびんた：あいてを まえに かかえた まま つっこむ。かべ・しょうがいぶつ・はしに ぶつけたら ひるむ
+        const gap = f.r + o.r + 4; o.x = f.x + Math.cos(cur.ang) * gap; o.y = f.y + Math.sin(cur.ang) * gap; o.kx = o.ky = 0; o.cur = null; o.queued = null; o.state = 'stun'; o.stT = Math.max(o.stT || 0, .3);
+        const ex = o.x, ey = o.y; clampF(o);
+        const inSolid = !flies(o) && blockedAt(o.x, o.y, footR(o)), inWall = B.wallRects && B.wallRects.some(b => circRect(o.x, o.y, footR(o), b));
+        if (Math.hypot(o.x - ex, o.y - ey) > .5 || inSolid || inWall) {
+          if (inSolid || inWall) { o.x -= Math.cos(cur.ang) * 10; o.y -= Math.sin(cur.ang) * 10; f.x -= Math.cos(cur.ang) * 10; f.y -= Math.sin(cur.ang) * 10; }
+          o.stT = 1; o.flinchTo = Math.max(o.flinchTo || 0, B.t + 1); popText(o.x, o.y - 80, 'たたきつけた！ ひるんだ！', '#ffffff', true);
+          B.shake = Math.max(B.shake, 9); burst(o.x, o.y - BODY, '#ffffff', 14, 140, .4); sheetFx('slam', o.x, o.y - 14, 1); SND.se('boom'); B.hitstop = Math.max(B.hitstop, .1);
+          cur.carry = false; endAct(f, .3); break;
+        }
+      }
       if (m.wallBreak && B.walls.length) { const w = B.walls.find(w => w.blocks.some(b => circRect(f.x, f.y, footR(f) + 3, b))); if (w) {   // てつのずつき：せっちされた かべを こわす
         B.walls = B.walls.filter(x => x !== w); wallsChanged(); for (const b of w.blocks) { burst(b.x, b.y - 10, TYPES[w.t].c, 6, 120, .4); sheetFx('slam', b.x, b.y - 14, .7); } B.shake = Math.max(B.shake, 7); SND.se('boom'); } }
       clampF(f);
@@ -8284,6 +8295,7 @@ function moveDesc(m) {
   if (m.useDef) add('自分の防御の高さでダメージが決まる'); if (m.hitDef) add('相手の属性防御ではなく防御でダメージを受ける'); if (m.useFoeAtk) add('相手の攻撃の高さでダメージが決まる');
   if (m.superVsWater) add('みずタイプにも効果ばつぐん'); if (m.rapidSpin) add('自分の まわり ぜんぶを 攻撃。自分と 相手の 場の 仕掛け（岩・まきびし・どくびし・地雷・罠・床）と 種を すべて 払う');
   if (m.ghostOk) add('ゴーストタイプにも当たる');
+  if (m.carry) add('当たった相手を前に抱えたまま突き進む。壁・障害物・場の端にぶつけると1秒ひるむ');
   if (m.mark) add(`当たると相手に「しるし」を付ける（${m.mark}秒）`); if (m.det) add(`しるしの付いた相手には${m.det}倍（しるしは消える）`);
   if (m.exec) add(`相手のHPが減っているほど強い（最大${1 + m.exec}倍）`); if (m.koReset) add('倒すと待ち時間がすぐ戻る');
   if (m.far) add(`遠くから当てるほど強い（最大${1 + m.far}倍）`); if (m.revenge) add('直前に攻撃を受けていると威力2倍');
