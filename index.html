@@ -450,7 +450,7 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 .btn:hover:not(:disabled){filter:brightness(1.07)}
 .btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 0 0 3px var(--out),inset 0 2px 0 rgba(255,255,255,.5),0 2px 0 3px #6b4a10}
 .btn.sub{background:linear-gradient(180deg,#3d3466,#2a2348);color:var(--ink);text-shadow:1px 1px 0 #000;box-shadow:0 0 0 3px var(--out),inset 0 0 0 2px var(--rim2),inset 0 2px 0 2px rgba(255,255,255,.08),0 4px 0 3px #0b0914}
-.askbox.ask3{max-width:460px}.askbox.ask3 .row{flex-wrap:nowrap;gap:8px}.askbox.ask3 .btn{flex:1 1 0;min-width:0;padding-left:8px;padding-right:8px;white-space:nowrap}
+.askbox.ask3{max-width:460px}.askbox.ask3 .row{flex-wrap:nowrap;gap:8px}.askbox.ask3 .btn{flex:1 1 0;min-width:0;padding-left:4px;padding-right:4px;white-space:nowrap;display:flex;align-items:center;justify-content:center;text-align:center}
 .askbox .row{flex-wrap:wrap}
 #btnWild{background:linear-gradient(180deg,#b6f3c2,#7bd88f 45%,#4fb868)!important;box-shadow:0 0 0 3px var(--out),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18),0 5px 0 3px #22542e!important}
 .cmd{border-radius:4px;background:linear-gradient(180deg,#342b58,#221b3a);box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2),0 3px 0 2px rgba(0,0,0,.4)}
@@ -1121,7 +1121,8 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .can{outline:2px solid rgba(255,209,102,.35)!important;outline-offset:1px}
 .hov{outline:3px solid #ffd166!important;outline-offset:1px;box-shadow:0 0 10px rgba(255,209,102,.45)!important}
 .trghost.snap{opacity:1;transform:scale(1.04);box-shadow:0 0 0 2px #ffd166,0 6px 16px rgba(0,0,0,.5)}
-.trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.trbtns .btn{padding:6px 12px;font-size:13px}
+.trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.trdock{display:none}.trpage.dock{grid-template-rows:auto 1fr}.trpage.dock .trmons{grid-column:1;grid-row:1;max-height:max(140px,calc(calc(100 * var(--vh)) - 430px))}.trpage.dock .trdock{display:flex;flex-direction:column;gap:10px;grid-column:1;grid-row:2;position:sticky;top:8px;align-self:start}.trpage.dock .trmain{grid-column:2;grid-row:1 / span 2}.trpage.dock .trside{grid-column:3;grid-row:1 / span 2}.trdock .trbtns{flex-direction:column;flex-wrap:nowrap;gap:10px}.trdock .trbtns .btn{width:100%;font-size:13px;padding:10px 4px;white-space:normal;line-height:1.3}.trdock .trbtns2{gap:4px 10px;font-size:12px}.trdock .trstat{line-height:1.5}   /* 3れつ：ひだりの れつに ボタン */.trbtns .btn{padding:6px 12px;font-size:13px}
 .trside h3{font-size:13px;margin:4px 0 0}.trside h3 .dim{font-size:10px;font-weight:400}.trside{background:rgba(20,16,36,.55);border:1px solid var(--edge);border-radius:10px;padding:8px}
 .trins{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--edge);font-size:12px;min-height:60px}
 .trmvinfo{display:flex;flex-direction:column;gap:3px;padding:4px 0 4px 8px;border-left:4px solid var(--c);line-height:1.45}.trmvinfo b{font-size:13px}
@@ -4065,6 +4066,14 @@ function trtLoop() {
     else { y = clamp(r.top, 8, vh - bh - 8); x = r.right + 14 + bw < vw ? r.right + 14 : r.left - 14 - bw >= 0 ? r.left - 14 - bw : x; } }   // した → うえ → よこ の じゅんに おける ところへ
   bub.style.left = x + 'px'; bub.style.top = y + 'px';
 }
+function trDockFix() {   // 訓練：3れつ ならび の ときは 木人戦・模擬戦・確定 を ひだりの れつへ（それ いがいは 技の したへ もどす）
+  const B = $('trBody'), pg = B && B.querySelector('.trpage'), dk = pg && pg.querySelector('.trdock'), home = pg && pg.querySelector('.trhome'); if (!dk || !home) return;
+  pg.classList.remove('dock'); const three = getComputedStyle(pg).gridTemplateColumns.replace(/(minmax|repeat|fit-content)\([^)]*\)/g, 'X').trim().split(/\s+/).length >= 3;   // minmax( … ) は 1れつ と かぞえる
+  const els = [...pg.querySelectorAll('.trbtns, .trbtns2, .trstat')];
+  if (three) { pg.classList.add('dock'); dk.append(...els); } else { let at = home; for (const e of els) { at.after(e); at = e; } }
+}
+addEventListener('resize', () => { if ($('trBody') && $('trBody').offsetParent) trDockFix(); });
+let TR_RO = null;   // 訓練の わくの はばが かわったら（がめんを ひらいた あと など）ならびを みなおす
 function renderTrain(uid) {
   if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { if (TR_ASKING && document.querySelector('.askbg')) return; TR_ASKING = true; ask('今の設定を仮保存しますか？', '仮保存', 'しない').then(y => { TR_ASKING = false; if (y) trDraft(); if (TRN) TRN.dirty = false; renderTrain(uid); }); return; }
   const all = [...S.party, ...S.box];
@@ -4082,7 +4091,7 @@ function renderTrain(uid) {
   const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${false ? '' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${false ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
   const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
-    <div class="trbtns"><button class="btn sub trsim" data-a="dummy">🎯 木人戦</button><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
+    <div class="trhome"></div><div class="trbtns"><button class="btn sub trsim" data-a="dummy">🎯 木人戦</button><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
     <div class="trbtns2"><button data-a="draft">仮保存</button><button data-a="load">他からコピー</button><button data-a="revert">保存時に戻す</button><button data-a="clr">リセット</button></div>
     <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
@@ -4104,9 +4113,9 @@ function renderTrain(uid) {
   const trB0 = $('trBody'), trSame = !$('scTrain').hidden && MO.trUid === uid, trRows0 = trSame ? MO.rects(trB0, '.trr[data-key]') : new Map(), trC0 = trSame ? MO.rects(trB0, '.cnd[data-key]') : new Map();
   $('trBody').innerHTML = `<div class="trtop"><button class="btn sub trtutb" id="trTutB" style="padding:6px 12px;font-size:13px">？ やりかた</button><span class="dim">試合中は見るだけ。この設定どおりに戦う（交代だけは自分でできる）</span></div>
     <div class="trpage"><div class="trmons">${all.map(x => `<button data-u="${x.uid}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
-      <div class="trmain"><div class="trhead"><i data-big="${m.sid}"></i><div class="trhn"><b>${sp.n}</b><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><span class="dim">体格：${bodyTxt(sp)[0]}　性格：${NATURES[m.nat] ? `${NATURES[m.nat].n}（${NATURES[m.nat].d}）` : ''}</span></div></div>${trNatCard(nk, W, m)}${main}</div>
+      <div class="trdock"></div><div class="trmain"><div class="trhead"><i data-big="${m.sid}"></i><div class="trhn"><b>${sp.n}</b><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><span class="dim">体格：${bodyTxt(sp)[0]}　性格：${NATURES[m.nat] ? `${NATURES[m.nat].n}（${NATURES[m.nat].d}）` : ''}</span></div></div>${trNatCard(nk, W, m)}${main}</div>
       <div class="trside${TR_MINI ? ' mini' : ''}"><button class="trmini" type="button">${TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'}</button>${side}</div></div>`;
-  const B = $('trBody');
+  const B = $('trBody'); trDockFix(); requestAnimationFrame(trDockFix); if (!TR_RO && window.ResizeObserver) { TR_RO = new ResizeObserver(() => trDockFix()); TR_RO.observe(B); }
   { const run = () => { let n = 0; B.querySelectorAll('.trmvs .pal').forEach(p => { const ok = (!TR_FLT.t || p.dataset.ft === TR_FLT.t) && (!TR_FLT.c || p.dataset.fc === TR_FLT.c) && (!TR_FLT.q || p.dataset.fn.includes(TR_FLT.q)); p.hidden = !ok; if (ok) n++; });
       const pal = B.querySelector('.trmvs'); if (pal) pal.dataset.none = n ? '' : '1'; };
     B.querySelectorAll('[data-flt]').forEach(el => el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', () => { TR_FLT[el.dataset.flt] = el.value.trim(); run(); })); run(); }   // 技の しぼりこみ（えらび なおしても 入力中の 文字は きえない）
