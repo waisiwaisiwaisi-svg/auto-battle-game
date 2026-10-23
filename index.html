@@ -1006,6 +1006,7 @@ html.land #app #cvWrap .hudtop{right:calc(8px + var(--sar))!important}
 html.land #app #bpanel .bmon{min-height:0!important;padding:3px 6px!important;gap:6px;flex-direction:row!important;text-align:left} html.land #app #bpanel .bmon canvas{width:24px!important;height:24px!important}
 html.land #app #bpanel #bench .bmon .bn{display:none} html.land #app #bpanel #bench .bmon{flex:0 0 48px;flex-direction:column!important;justify-content:center;gap:2px;padding:3px 5px!important} html.land #app #bpanel #bench .bmon > span{width:100%;flex:none!important}   /* よこ画面の ひかえは せまいので なまえを けす（1もじだけ みえて ふしぜん） */
 html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
+html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:center;order:1;font-size:9.5px;line-height:1.3;padding:0 5px;border-radius:7px;white-space:nowrap} html.land #app #bpanel #bench .bmon .bmu[hidden]{display:none} html.land #app #bpanel #bench .bmon canvas{order:0} html.land #app #bpanel #bench .bmon > span{order:2} html.land #app #bpanel #bench .bmon .cdv{order:3}   /* よこむき：アイコンの したに ならべて かぶらない */
 
 /* ===== バトル画面：わくを なくして すけさせる（ステージに なじむ HUD） ===== */
 #scBattle .plate,#scBattle #banner,#scBattle .cmd,#scBattle .bmon,#scBattle #bTop button{
@@ -8868,10 +8869,10 @@ function updBench() {
 const AUTO_PICK_T = 10;   // 訓練・AUTO：この びょう えらばなければ じどうで だす
 function chooseNext(f) { chooseSwap(i => { B.pendingSend = { side: 0, idx: i, t: .2, ko: 1 }; }, 'つぎは だれを だす？', { t1: .5 }); }
 // こうたいさきを えらぶ（たおれた とき・交代技・ふきとばされた とき）。pick(i) で きまった あとの ことを する
-// こうたいの あいしょう：じぶんの 技が あいてに どれだけ きくか（こうげき）・あいての 技が じぶんに どれだけ きくか（うける）
+// こうたいの あいしょう：じぶんの タイプが あいてに どれだけ きくか（こうげき）・あいての タイプが じぶんに どれだけ きくか（うける）
 function matchup(x, o) {
   if (!x || !o || !x.sp || !o.sp) return null;
-  const best = (a, b) => { const ds = (a.moves || []).map(id => MOVES[id]).filter(m => m && isDamaging(m)); return ds.length ? Math.max(...ds.map(m => effMv(m, b.sp))) : Math.max(effVs(a.sp.type, b.sp), a.sp.type2 ? effVs(a.sp.type2, b.sp) : 0); };
+  const best = (a, b) => Math.max(effVs(a.sp.type, b.sp), a.sp.type2 ? effVs(a.sp.type2, b.sp) : 0);   // タイプ どうしの あいしょう だけ（技は みない）
   const atk = best(x, o), def = best(o, x); return { atk, def, k: atk > def ? 'adv' : atk < def ? 'dis' : 'even' };
 }
 const MU = { adv: ['有利', '#3fbf6a'], even: ['互角', '#7a7298'], dis: ['不利', '#e0504a'] };
