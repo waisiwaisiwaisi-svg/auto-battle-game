@@ -1832,6 +1832,7 @@ function fixMon(m, bias) {
   const L = learned(m);
   if (Array.isArray(m.moves) && m.moves.some(id => MOVES[id] && MOVES[id].cat === 'stat' && !canLearn(m.sid, id))) m.moves = m.moves.filter(id => !(MOVES[id] && MOVES[id].cat === 'stat' && !canLearn(m.sid, id))).concat(['tackle']);   // おぼえられない ほじょわざは おきかえ（下で うめる）
   if (Array.isArray(m.moves) && m.moves.includes('tackle')) { m.moves = m.moves.filter(id => id !== 'tackle'); for (const id of pickMoves(m)) if (m.moves.length < 4 && !m.moves.includes(id)) m.moves.push(id); }   // むかしの たいあたりは わざに おきかえ
+  if (m.tr) for (const k of ['prog', 'draft']) if (m.tr[k] && m.tr[k].mv && !m.tr[k].hv) m.tr[k] = trClone(m.tr[k], m);   // まもる系が じどう だった ころの 訓練：「攻撃を受けた瞬間」を つける
   if (Array.isArray(m.moves) && m.moves.some(id => !MOVES[id]) && m.moves.filter(id => MOVES[id]).length) { m.moves = m.moves.filter(id => MOVES[id]); for (const id of pickMoves(m)) if (m.moves.length < 4 && !m.moves.includes(id)) m.moves.push(id); }   // けした 技だけ はずして うめる
   if (!Array.isArray(m.moves) || m.moves.length < Math.min(4, L.length) || m.moves.some(id => !MOVES[id])) m.moves = pickMoves(m);   // スクロールの わざも そのまま
   return m;
@@ -3940,8 +3941,9 @@ function trNatCard(k, W, m) {
     <div class="dim nrel">${natRelText(cur)}<details class="trq"><summary>？</summary><div>3すくみ：🔥せめ → 🌀からめて → 🛡まもり → 🔥せめ。<br>よわい あいてから うけるときは ぼうぎょ 1.15ばい、にがてな あいてからは 0.87ばい。<br>性格は 能力の 上下だけ。撃ち方が「お任せ」の 技は この 作戦の 動きで 撃ちます。</div></details></div></div>`;
 }
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
-const trBlank = (m) => ({ mv: equipped(m).map(id => ({ id, go: 'auto', c: [] })) });
-const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ nat: p.nat && NATURES[p.nat] ? p.nat : undefined, mv: p.mv.map(r => ({ id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: trLines(r.c).map(l => l.filter(c => CONDS[c.t]).map(c => Object.assign({ t: c.t, p: c.p }, c.n != null ? { n: c.n } : {}))).filter(l => l.length) })) })) : trBlank(m);
+const trDefC = (id) => MOVES[id] && AUTO_GUARD[MOVES[id].k] ? [[{ t: 'hit', p: 'any' }]] : [];   // まもる系の さいしょの 条件
+const trBlank = (m) => ({ hv: 1, mv: equipped(m).map(id => ({ id, go: 'auto', c: trDefC(id) })) });
+const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ hv: 1, nat: p.nat && NATURES[p.nat] ? p.nat : undefined, mv: p.mv.map(r => { const c = trLines(r.c).map(l => l.filter(c => CONDS[c.t]).map(c => Object.assign({ t: c.t, p: c.p }, c.n != null ? { n: c.n } : {}))).filter(l => l.length); return { id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: !p.hv && !c.length ? trDefC(r.id) : c }; }) })) : trBlank(m);   // hv：まもる系が じどう だった ころの データを うつしかえた しるし
 // 使える技：覚えている4つ ＋ 持っているスクロールで覚えられる技
 let TR_MINI = false;
 const TR_FLT = { t: '', c: '', q: '' };   // 訓練の 技パレットの しぼりこみ（タイプ・分類・なまえ）   // くんれんの パレットを たたんで いるか
@@ -3986,7 +3988,7 @@ async function trSim(m, W, n) {
 }
 function trSimShow(m, W, log) {
   const pct = (v) => Math.round(v * 100) + '%', n = log.n || 1;
-  const rows = W.mv.map((r, i) => { const u = log.used[r.id] || 0, c = log.cond[r.id] || 0, auto = MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k], hasC = !auto && trLines(r.c).some(l => l.length);
+  const rows = W.mv.map((r, i) => { const u = log.used[r.id] || 0, c = log.cond[r.id] || 0, auto = false, hasC = trLines(r.c).some(l => l.length);
     const warn = auto ? (u ? '' : '<b style="color:#ffd166">あう こうげきを うけず、でなかった</b>') : !u ? '<b style="color:#ff8a6a">いちども 撃たなかった</b>' : hasC && !c ? '<b style="color:#ffd166">条件が いちども 合わなかった</b>' : '';
     return `<tr><td>${i + 1}</td><td><b>${MOVES[r.id] ? MOVES[r.id].n : '？'}</b></td><td class="n">${u}</td><td class="n">${auto ? 'じどう' : hasC ? c : '－'}</td><td>${warn}</td></tr>`; }).join('');
   modal(`<h3 style="margin-bottom:6px">模擬戦の けっか</h3>
@@ -3994,7 +3996,7 @@ function trSimShow(m, W, log) {
     <div class="row" style="gap:12px;flex-wrap:wrap;margin-bottom:8px"><span>かち <b style="font-size:18px;color:var(--acc)">${log.win}</b>/${log.n}</span><span>のこりHP <b>${pct(log.hp / n)}</b></span><span>あいてに あたえた <b>${pct(log.dmg / n)}</b></span><span>へいきん <b>${Math.round(log.t / n)}</b>びょう</span>${log.to ? `<span>タイムアップ ${log.to}</span>` : ''}</div>
     <div style="overflow-x:auto"><table class="simtbl" style="width:100%;font-size:12px;border-collapse:collapse"><tr class="dim"><td>#</td><td>技</td><td class="n">撃った</td><td class="n">うち条件</td><td></td></tr>${rows}</table></div>
     ${(() => { const T = log.ticks || 1, ct = log.ct || {}, lf = log.lf || {}, pc = (v) => Math.round((v || 0) / T * 100);
-      const out = W.mv.map((r, i) => { if (!MOVES[r.id] || AUTO_GUARD[MOVES[r.id].k]) return ''; const ls = trLines(r.c).filter(l => l.length); if (!ls.length) return '';
+      const out = W.mv.map((r, i) => { if (!MOVES[r.id]) return ''; const ls = trLines(r.c).filter(l => l.length); if (!ls.length) return '';
         return `<div class="simc"><b>${i + 1} ${MOVES[r.id].n}</b>${ls.map((l, li) => { const all = ct[`${i}:${li}`] || 0, n = lf[`${i}:${li}`] || 0;
           return `<div class="simln"><span class="lb">${li ? 'または' : '使うとき'}</span>${l.map((c, j) => { const v = ct[`${i}:${li}:${j}`] || 0; return `<span class="sc ${v ? 'on' : 'off'}">${v ? '○' : '×'} ${trCondTx(c, W)} <small>${pc(v)}%</small></span>`; }).join('<i>かつ</i>')}<span class="res ${n ? 'ok' : all ? 'mid' : 'ng'}">${n ? `→ ${n}かい 撃った` : all ? '→ 合ったが 撃てなかった' : '→ いちども 合わなかった'}</span></div>`; }).join('')}</div>`; }).join('');
       return out ? `<div class="simcs"><div class="dim" style="font-size:11px">条件の はつどう（○＝なりたった ことが ある・％＝なりたって いた じかん）</div>${out}</div>` : ''; })()}
@@ -4010,7 +4012,7 @@ document.addEventListener('click', (ev) => { const b = ev.target.closest && ev.t
 /* ---- 訓練の チュートリアル：じっさいに さわりながら 1つ くみたてる ---- */
 let TRT = null;
 const trtW = () => TRN && TRN.W;
-const trtRow = () => { const W = trtW(); if (!W) return 0; const i = W.mv.findIndex(r => MOVES[r.id] && !AUTO_GUARD[MOVES[r.id].k]); return i < 0 ? 0 : i; };
+const trtRow = () => { const W = trtW(); if (!W) return 0; const i = W.mv.findIndex(r => MOVES[r.id]); return i < 0 ? 0 : i; };
 const TRT_STEPS = [
   { tx: 'ここは <b>訓練</b>。バトルで モンスターが どう うごくかを くみたてる ばしょだよ。<br>いっしょに 1つ つくってみよう！', next: 1 },
   { sel: '.trnatsel', tx: '① まずは <b>作戦</b>。ふだんの 立ち回りを きめるよ。<br>どれか 1つ タップしてみよう（★が その子の おすすめ）', ok: () => TRT.f.nat },
@@ -4069,7 +4071,7 @@ function renderTrain(uid) {
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
   const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-kwh="c:${c.t}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '<small>＋ ほかの条件（ここへ）</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`).join('');
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? '<span class="gs autog">🛡 じどう</span>' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k] ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${false ? '' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${false ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
   const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
     <div class="trbtns"><button class="btn sub trsim" data-a="dummy">🎯 木人戦</button><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
@@ -4124,7 +4126,7 @@ function renderTrain(uid) {
       if (d !== 'g' || i === pl.gFrom) return; r.go = 'auto'; W.mv[i].go = g; SND.se('click'); touch(); return; }
     if (!z) return;
     if (pl.k === 'mv') { const at = W.mv.findIndex(r => r.id === pl.v);
-      if (d === 'mvnew') { if (at >= 0) return; W.mv.push({ id: pl.v, go: 'auto', c: [] }); }
+      if (d === 'mvnew') { if (at >= 0) return; W.mv.push({ id: pl.v, go: 'auto', c: trDefC(pl.v) }); }
       else if (d === 'h') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; }
       else return; }
     else if (pl.k === 'go') { if (d !== 'g') return; W.mv[i].go = pl.v; }
@@ -5039,13 +5041,16 @@ function autoGuard(att, def, m, opt) {
   if (opt.throw || (opt.tick && !opt.first) || att === def || def.hp <= 0 || !isDamaging(m)) return;
   const r = rpsOf(m); if (!r || ['slp', 'frz'].includes(def.status) || ['faint', 'enter', 'return'].includes(def.state)) return;
   if (def.v.protect > 0 || def.v.counter || def.state === 'stance') return;
-  const id = def.moves.find(k => (MOVES[k].psnGuard ? 'rock' : AUTO_GUARD[MOVES[k].k]) === r && !((def.cd[k] || 0) > 0) && !(healMax(MOVES[k]) && healLeft(def, k) <= 0) && !(def.v.taunt > 0 && MOVES[k].cat === 'stat'));
+  const can = (k) => (MOVES[k].psnGuard ? 'rock' : AUTO_GUARD[MOVES[k].k]) === r && !((def.cd[k] || 0) > 0) && !(healMax(MOVES[k]) && healLeft(def, k) <= 0) && !(def.v.taunt > 0 && MOVES[k].cat === 'stat');
+  const P = trProg(def); let id;
+  if (P) { def.hitCtx = { att, m }; const row = P.mv.find(x => def.moves.includes(x.id) && MOVES[x.id] && can(x.id) && trLines(x.c).some(l => l.some(c => c.t === 'hit') && condsOk(def, att, l, x.id))); def.hitCtx = null; id = row && row.id; }   // 訓練：「攻撃を受けた瞬間」の 条件が 合う 技だけ
+  else id = def.moves.find(can);   // 訓練が ない こ（やせい・あいての トレーナー）は いままでどおり じどう
   if (!id) return; const g = MOVES[id];
   if (healMax(g) && !TUT) { def.uses = def.uses || {}; def.uses[id] = (def.uses[id] || 0) + 1; }
   const cdv = g.cd * cdScale(def); def.cdMax = def.cdMax || {}; def.cdMax[id] = cdv; def.cd[id] = cdv;
   if (simMine(def)) { const L = B.simLog; L.used[id] = (L.used[id] || 0) + 1; }
-  if (!B.headless) popText(def.x, def.y - 104, `じどう ${g.n}`, '#9ff0ff');
-  say(`${prefix(def)}${def.sp.n}の ${g.n}が じどうで はつどうした！`);
+  if (!B.headless) popText(def.x, def.y - 104, P ? g.n + '！' : `じどう ${g.n}`, '#9ff0ff');
+  say(P ? `${prefix(def)}${def.sp.n}は とっさに ${g.n}！` : `${prefix(def)}${def.sp.n}の ${g.n}が じどうで はつどうした！`);
   if (g.k === 'protect') { def.v.protect = 2.5; def.v.pg = g.psnGuard ? 1 : 0; typeFx(def.x, def.y - BODY, g.psnGuard ? 'poison' : 'ice', 4, 110, .45); }   // ビームなど つづけて あたる わざも しばらく ふせぐ
   else if (g.k === 'counter') def.v.counter = { ctr: g.ctr, mult: g.mult, t: .5, t0: B.t };
   else { def.cur = { id, m: g, t: 0, wind: 0, ang: 0, uid: ++B.uidc, hits: 0 }; def.state = 'stance'; def.stT = .3; }   // だしぬき：うけたら すぐ つっこむ
@@ -5053,7 +5058,7 @@ function autoGuard(att, def, m, opt) {
 const healLeft = (f, id) => healMax(MOVES[id]) - ((f.uses && f.uses[id]) || 0);
 function moveBlocked(f, id) {
   const m = MOVES[id];
-  if (AUTO_GUARD[m.k]) return 'じどうで でる';
+  if (AUTO_GUARD[m.k] && !trProg(f)) return 'じどうで でる';
   if (f.v && f.v.silence > 0) return 'ふういん中';
   if (B && B.gravity > 0 && m.hide === 'fly') return 'じゅうりょく中';
   if (m.k === 'enrage' && f.hp > f.maxHp * .3) return 'HPが 30%より おおい';
@@ -6408,13 +6413,14 @@ const CONDS = {
   enter: { n: '出場時' },   // 出てから この技を まだ 撃っていない
   swap:  { n: '交代時' },
   mysts: { n: '自分の状態異常', ps: [['any', 'どれか'], ['brn', '火傷'], ['par', '麻痺'], ['psn', '毒'], ['frz', '凍結'], ['cf', '混乱']] },   // オーロラベールの つかいどき
+  hit: { n: '攻撃を受けた瞬間', ps: [['any', 'どれでも'], ['big', '大技'], ['stab', 'タイプ一致'], ['eff', 'ばつぐん']] },   // まもる・カウンターなどを その場で だす
   terrain: { n: 'フィールド', ps: [['elec', 'エレキ'], ['grass', 'グラス'], ['psy', 'サイコ'], ['none', 'なし']] },
   weather: { n: '天候', ps: [['rain', '雨'], ['sun', '晴れ'], ['sand', '砂あらし'], ['snow', '雪']] },
   ophako: { n: 'ぶっとびてんしの取り立て', ps: [[2, '2つ以上'], [5, '5つ以上']] },
   lost3: { n: '3秒で減ったHP', ps: [[20, '20%以上'], [35, '35%以上'], [50, '50%以上']] },   // 相手に しるしが ついて いる（しるしを はじく 技と くみあわせる）   // 相手が 交代して 出てきてから この技を まだ 撃っていない（10びょう まで）
 };
 const TR_GO = { auto: 'お任せ', near: '近づいて', far: '離れて', hide: '隠れて', flank: '回り込んで' };   // よける のは いつもの AI が じぶんで する
-const trProg = (f) => { const T = trOf(f); return T && T.mode === 'chip' && T.prog && T.prog.mv ? T.prog : null; };
+const trProg = (f) => { const T = trOf(f); if (T && T.prog && T.prog.mv && !T.prog.hv) T.prog = trClone(T.prog, f.mon); return T && T.mode === 'chip' && T.prog && T.prog.mv ? T.prog : null; };   // むかしの データは ここでも うつしかえる
 // 相手が「見える」：まっすぐ とおる（障害物・技の かべに さえぎられない）か、かべごしに とどく 攻撃技（上から 落とす・とびかかる・ワープ）を もっている
 const OVER_WALL = (m) => INDIRECT(m) || (isDamaging(m) && ['vault', 'warp'].includes(m.k));
 const canReach = (f, o) => losClear(f, o) || f.moves.some(id => MOVES[id] && OVER_WALL(MOVES[id]));
@@ -6423,6 +6429,7 @@ function condOk(f, o, c, id0) {
   switch (c.t) {
     case 'dist': return c.p === 'near' ? d < 150 : c.p === 'mid' ? d >= 150 && d < 290 : d >= 290;
     case 'mysts': return c.p === 'cf' ? f.v.confuse > 0 : c.p === 'any' ? (!!f.status || f.v.confuse > 0) : f.status === c.p || (c.p === 'psn' && f.status === 'tox');
+    case 'hit': { const H = f.hitCtx; if (!H) return false; return c.p === 'big' ? isBigMove(H.m) : c.p === 'stab' ? hasType(H.att, H.m.t) : c.p === 'eff' ? effVs(H.m.t, f.sp) > 1 : true; }
     case 'terrain': return c.p === 'none' ? !B.terrain : !!B.terrain && B.terrain.k === c.p;
     case 'weather': return !!B.weather && B.weather.k === c.p;
     case 'lost3': return lostRecent(f) >= (c.p || 20);
@@ -6470,7 +6477,7 @@ const condsOk = (f, o, cs, id) => (cs || []).every(c => condOk(f, o, c, id));
 function runRules(f, o) {
   const P = trProg(f); f.trGo = null; f.trAt = '';
   if (simMine(f)) { const L = B.simLog; L.ticks = (L.ticks || 0) + 1; L.ct = L.ct || {};   // 模擬戦：条件が なりたって いた じかんを かぞえる
-    P.mv.forEach((r, i) => { if (MOVES[r.id] && AUTO_GUARD[MOVES[r.id].k]) return; trLines(r.c).forEach((l, li) => { let all = l.length > 0; l.forEach((c, j) => { if (condOk(f, o, c, r.id)) L.ct[`${i}:${li}:${j}`] = (L.ct[`${i}:${li}:${j}`] || 0) + 1; else all = false; }); if (all) L.ct[`${i}:${li}`] = (L.ct[`${i}:${li}`] || 0) + 1; }); }); }
+    P.mv.forEach((r, i) => { trLines(r.c).forEach((l, li) => { let all = l.length > 0; l.forEach((c, j) => { if (condOk(f, o, c, r.id)) L.ct[`${i}:${li}:${j}`] = (L.ct[`${i}:${li}:${j}`] || 0) + 1; else all = false; }); if (all) L.ct[`${i}:${li}`] = (L.ct[`${i}:${li}`] || 0) + 1; }); }); }
   if (f.queued) {   // 撃つ 技が きまっている：ふつうの うごきで 間合いへ（2.5びょう 撃てなければ しばらく ほかの 技へ）
     if (!f.trQ || f.trQ.id !== f.queued) f.trQ = { id: f.queued, t: B.t };
     if (B.t - f.trQ.t < 2.5) { f.trAt = 'm:' + f.queued + ' q'; return; }
@@ -8455,18 +8462,18 @@ function moveDesc(m) {
   if (m.cat !== 'stat' && m.acc && m.acc < 100) add(`命中${m.acc}`);
   if (m.prio > 0) add('素早く出せる');
   // 動き
-  if (m.k === 'counter') add(`自動：突進・打撃を受けた瞬間に、受けたダメージを${m.mult}倍で返す`);
+  if (m.k === 'counter') add(`突進・打撃を受けた瞬間に、受けたダメージを${m.mult}倍で返す`);
   if (m.k === 'wall') add(`相手との間に壁を作る（${m.life}秒）。技も通さない${m.thorn ? '・触れるとダメージ' : ''}。空から降る技・地割れは防げない。壊せるのは${wallBreakers({ t: m.t, reflect: m.reflect }).map(TN).join('・')}の技だけ`);
   if (m.k === 'vault') add(m.hide === 'fly' ? '空へ飛び上がり、相手の所へ降りて攻撃（飛んでいる間は攻撃を受けない）' : '地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。出てくる所の攻撃範囲は体の大きさで決まる。掘った穴は残り、自分より大きくないモンスターは穴から穴へくぐれる');
   if (m.k === 'floor') add(`相手の足元に${m.n}を作る（消えない）。${[m.noDmg ? '' : '踏むと1ダメージ', m.slow ? '足が遅くなる' : '', m.pull ? '中心へ引き込まれる' : ''].filter(Boolean).join('・')}`);
   const K = {
-    protect: m.psnGuard ? '自動：近接・突進など体でぶつかる技を受けた瞬間に1回防ぎ、攻撃した相手をどくにする' : '自動：飛び道具・ビーム・範囲技を受けた瞬間に1回打ち消す',
+    protect: m.psnGuard ? '近接・突進など体でぶつかる技を1回防ぎ、攻撃した相手をどくにする' : '飛び道具・ビーム・範囲技を1回打ち消す',
     sub: 'HPを1/4使ってデコイ人形を置く（相手の攻撃を引きつけ、2回受けると壊れる）', dbond: 'この後倒されたら、相手も一緒に倒れる',
     curse: 'HPを1/4使って、相手のHPを20%削る（交代するまでその分は回復できない）', baton: '能力の変化を引き継いで控えと交代',
     flip: '自分の能力の変化を反対にする（下がったものが上がる）', leaves: '8秒間、自分の周りを木の葉が回って攻撃（交代しても残る）',
     mines: '胞子を5個ばらまく。踏むと爆発', trap: '相手の足元に見えない罠を仕掛ける（味方には見える）。踏むと2.4秒動けない',
     warp: '影に潜り、相手の後ろへワープして攻撃（距離は関係ない）', rage: '3秒間、相手を追いかけて周りを攻撃し続ける。終わると自分の攻撃-2',
-    stance: '自動：突進・打撃を受けた瞬間に相手へ突っ込む', gshift: '体が透けて、ノーマル・かくとうの技がすり抜ける（交代すると切れる）',
+    stance: '突進・打撃を受けた瞬間に相手へ突っ込む', gshift: '体が透けて、ノーマル・かくとうの技がすり抜ける（交代すると切れる）',
     scare: '相手を後ろへ後ずさりさせる', wave: '前へゆっくり進む波。波の通った後は味方が速く動ける',
     clone: '分身を2体出す（10秒）。相手の攻撃が分身に向かうことがあり、時々本物と入れ替わる' };
   add(K[m.k]);
@@ -8552,6 +8559,7 @@ function moveDesc(m) {
   if (m.k === 'shield') add(`最大HPの${Math.round((m.shield || .25) * 100)}%のシールドを張る（${m.life || 8}秒）。ダメージを先に受け止める`);
   if (m.wallBreak) add('置かれた壁を壊す'); if (m.crash) add('壁にぶつかると自分がダメージ'); if (m.reflect) add('飛び道具・ビーム（照射も）を跳ね返す');
   if (m.selfConfuse) add(`当てると自分が${m.selfConfuse}秒混乱`); if (m.bugHeal) add('味方のむしタイプは上にいると回復');
+  if (AUTO_GUARD[m.k]) add('訓練の条件「攻撃を受けた瞬間」で、受けた瞬間に出せる');
   if (isBigMove(m)) add('大技');
   return out.join('・');
 }
@@ -8584,6 +8592,7 @@ const KW_SV = {   // のうりょくが なにに きくか
 const KW_C = {   // 訓練の 条件
   dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
   mysts: ['条件：自分の状態異常', '自分が えらんだ 状態異常（火傷・麻痺・毒・凍結）か 混乱に なって いる とき。こおりのみそぎで なおす ときに つかう。「毒」は もうどくも ふくむ。'],
+  hit: ['条件：攻撃を受けた瞬間', '相手の攻撃が 当たる その瞬間。ガードシェル・カウンター・だしぬきなどに 置くと、受けた瞬間に その場で 出る（どれでも／大技だけ／相手のタイプ一致の技だけ／自分に ばつぐんの技だけ）。ほかの 条件と「かつ」で くみあわせられる。この条件を 置かなければ、受けた瞬間には 出ない。'],
   terrain: ['条件：フィールド', '場の フィールドが えらんだ ものの とき（エレキ・グラス・サイコ・なし）。フィールドは 15秒 つづく。'],
   weather: ['条件：天候', '場の 天候が えらんだ ものの とき（雨・晴れ・砂あらし・雪）。天候は 20秒 つづく。'],
   ophako: ['条件：ぶっとびてんしの取り立て', 'ぶっとびてんしで かしつけた 相手から 奪える ステータスが えらんだ 数いじょう たまった とき（5秒ごとに 攻撃→防御→属性攻撃→属性防御→素早さの 順に ふえる）。もう いちど ぶっとびてんしを 当てると 取り立てる。'],
