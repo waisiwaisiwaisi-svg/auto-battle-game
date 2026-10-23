@@ -5020,7 +5020,7 @@ function inPool(x, y) { for (const p of B.st.pools) { const dx = (x - p.x) / p.r
 /* ---------- わざが つかえるか ---------- */
 // 回復できる わざは 1戦で 使える 回数に 上限（どの わざも さいてい USE_MIN かい）
 const USE_MIN = 5;
-function healMax(m) { if (m.uses) return m.uses; const e = m.e || {}; if (m.k === 'counter' || m.k === 'heal' || e.seed || e.heal) return USE_MIN; return bigMax(m); }
+function healMax(m) { if (m.charges) return 0; if (m.uses) return m.uses; const e = m.e || {}; if (m.k === 'counter' || m.k === 'heal' || e.seed || e.heal) return USE_MIN; return bigMax(m); }
 // 1せんで つかえる 回数：いりょく50いかの シンプルな こうげきだけ むせいげん。
 //   いりょく100いじょう・いちげき＝5かい、それいがいの こうげき（60いじょう・ついか こうかつき）＝10かい、
 //   へんかわざ（ゆか・かべ・のうりょく・アンコール・こうたい など）＝5かい
