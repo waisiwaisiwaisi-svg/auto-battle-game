@@ -450,6 +450,8 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 .btn:hover:not(:disabled){filter:brightness(1.07)}
 .btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 0 0 3px var(--out),inset 0 2px 0 rgba(255,255,255,.5),0 2px 0 3px #6b4a10}
 .btn.sub{background:linear-gradient(180deg,#3d3466,#2a2348);color:var(--ink);text-shadow:1px 1px 0 #000;box-shadow:0 0 0 3px var(--out),inset 0 0 0 2px var(--rim2),inset 0 2px 0 2px rgba(255,255,255,.08),0 4px 0 3px #0b0914}
+.askbox.ask3{max-width:460px}.askbox.ask3 .row{flex-wrap:nowrap;gap:8px}.askbox.ask3 .btn{flex:1 1 0;min-width:0;padding-left:8px;padding-right:8px;white-space:nowrap}
+.askbox .row{flex-wrap:wrap}
 #btnWild{background:linear-gradient(180deg,#b6f3c2,#7bd88f 45%,#4fb868)!important;box-shadow:0 0 0 3px var(--out),inset 0 2px 0 rgba(255,255,255,.6),inset 0 -3px 0 rgba(0,0,0,.18),0 5px 0 3px #22542e!important}
 .cmd{border-radius:4px;background:linear-gradient(180deg,#342b58,#221b3a);box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2),0 3px 0 2px rgba(0,0,0,.4)}
 .cmd.mv{border-left:none;box-shadow:0 0 0 2px var(--out),inset 4px 0 0 var(--c),inset 0 0 0 2px var(--rim2),0 3px 0 2px rgba(0,0,0,.4)}
@@ -4006,7 +4008,12 @@ function trSimShow(m, W, log) {
 }
 function trDraft() { if (!TRN) return; const m = trMon(TRN.uid); if (!m) return; m.tr = m.tr || {}; m.tr.draft = trClone(TRN.W, m); TRN.dirty = false; save(); }
 let TR_ASKING = false;   // 「仮保存しますか？」を きいている あいだは かさねて きかない
-function trLeave(go) { if (!TRN || !TRN.dirty) return go(); if (TR_ASKING && document.querySelector('.askbg')) return; TR_ASKING = true; ask('変更が保存されていません。\n仮保存してから移動しますか？', '仮保存', '保存しない').then(y => { TR_ASKING = false; if (y) trDraft(); if (TRN) TRN.dirty = false; go(); }); }
+function trLeave(go) { if (!TRN || !TRN.dirty) return go(); if (TR_ASKING && document.querySelector('.askbg')) return; TR_ASKING = true;
+  ask3('変更が保存されていません。\n保存してから移動しますか？', ['保存しない', '仮保存', '保存']).then(async k => {
+    if (k === 2) { const m = trMon(TRN.uid); if (!m || !await trConfirm(m)) { TR_ASKING = false; return; }   // 保存：確定と おなじ（できなければ とどまる）
+      const T = m.tr = m.tr || {}; T.prog = trClone(TRN.W, m); T.mode = 'chip'; delete T.draft; save(); SND.se('ok'); }
+    else if (k === 1) trDraft();
+    TR_ASKING = false; if (TRN) TRN.dirty = false; go(); }); }
 // 訓練の とちゅうで 下の タブを おした：ほぞん して いなければ きいてから うつる
 document.addEventListener('click', (ev) => { const b = ev.target.closest && ev.target.closest('#tabbar button'); if (!b || b.dataset.tab === 'train' || !TRN || !TRN.dirty || $('scTrain').hidden) return;
   ev.stopPropagation(); ev.preventDefault(); trLeave(() => b.click()); }, true);
@@ -4370,6 +4377,15 @@ function ask(msg, ok = 'はい', ng = 'いいえ') {
   });
 }
 const say0 = (t) => ask(t, 'OK', null);
+function ask3(msg, labels) {   // ボタンが 3つの かくにん（左から 0・1・2）
+  return new Promise(res => {
+    const bg = document.createElement('div'); bg.className = 'askbg';
+    bg.innerHTML = `<div class="askbox ask3"><div></div><div class="row">${labels.map((l, i) => `<button class="btn${i === 0 ? ' sub' : i === 1 ? ' ok' : ''}" data-i="${i}">${l}</button>`).join('')}</div></div>`;
+    bg.querySelector('.askbox > div').textContent = msg; bg.querySelector('.askbox > div').style.whiteSpace = 'pre-line';
+    bg.querySelectorAll('button').forEach(b => b.onclick = () => { bg.remove(); res(+b.dataset.i); });
+    $('app').appendChild(bg); bg.querySelector('button[data-i="2"]').focus();
+  });
+}
 // 個体の できばえ（種族の 中での ステータスの よさ）
 function ivGrade(m) { fixMon(m); const t = ivTotal(m) / STAT6.length; return t >= 24 ? 'さいこうの こたい' : t >= 18.5 ? 'すぐれた こたい' : t >= 10 ? 'ふつうの こたい' : 'ひかえめな こたい'; }
 function monCard(m, where, i, openUid) {
