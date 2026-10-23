@@ -2396,7 +2396,7 @@ const NEW_MOVES = {"bonemerang": {"n": "ホネブーメラン", "t": "ground", "
   "shadow-pin": {"n": "かげぬい", "t": "ghost", "k": "proj", "power": 50, "spd": 320, "r": 8, "homing": 1.5, "root": 1.5, "cd": 5},
   "psy-link": {"n": "サイコリンク", "t": "psychic", "k": "link", "cat": "stat", "power": 0, "wind": 0.3, "tether": {"t": 4, "r": 340, "k": 0.5},
   "cd": 6},
-  "magnet-power": {"n": "マグネットパワー", "t": "elec", "k": "magnet", "cat": "stat", "power": 0, "mt": 10, "pull": 90, "rad": 290, "cd": 16},
+  "magnet-power": {"n": "マグネットパワー", "t": "elec", "k": "magnet", "cat": "stat", "power": 0, "mt": 10, "pull": 90, "rad": 290, "armor": 1, "cd": 16},
   "slap-dash": {"n": "つきとばし", "t": "normal", "k": "dash", "power": 65, "len": 200, "shove": 2.5}};
 Object.assign(NEW_MOVES, {   // だい2だん：ほろび・けっとう・ねつ・よち・ばくだん・さきどり・てんき・まきもどし
   'duel-arena': { n: 'けっとうのば', t: 'fighting', k: 'duel', cat: 'stat', power: 0, wind: .3, cd: 16 },
@@ -2433,7 +2433,7 @@ Object.assign(NEW_MOVES, {   // だい2だん：ほろび・けっとう・ね�
   'self-destruct': { n: 'じばく', t: 'normal', k: 'aoe', power: 200, rad: 180, boom: 1, armor: 1, wind: 1, cd: 10 },
   'high-jump-kick': { n: 'とびひざげり', t: 'fighting', k: 'dash', power: 130, acc: 90, len: 230, missCrash: .5 },
   'hyper-beam': { n: 'はかいこうせん', t: 'normal', k: 'beam', power: 150, len: 340, wid: 36, chan: 2, recharge: 2.5 },
-  'rollout': { n: 'ころがる', t: 'rock', k: 'dash', power: 30, len: 170, chain: 1, roll: 1 },
+  'rollout': { n: 'ころがる', t: 'rock', k: 'dash', power: 20, len: 170, chain: 1, roll: 1 },
   'pain-split': { n: 'いたみわけ', t: 'normal', k: 'painsplit', cat: 'stat', power: 0, wind: .3, cd: 12 },
   'endeavor': { n: 'がむしゃら', t: 'normal', k: 'endeavor', cat: 'stat', power: 0, wind: .3, cd: 14 },
   'hako-punch': { n: 'ぶっとびてんし', t: 'fighting', k: 'melee', power: 0, hako: 1, cd: 4 },   // ハコワレ：いりょく0。あいての 攻撃+1、5びょうごとに うばう ステータスが ふえ、もう いちど あてるか たおれたら とりたて
@@ -6040,7 +6040,7 @@ function hit(att, def, m, ang, opt) {
   if (rampId) { const n = att.ramp[rampId] = Math.min(6, (att.ramp[rampId] || 0) + 1); popText(att.x, att.y - 96, `いりょく×${(1 + m.ramp * n).toFixed(1)}`, '#ffd166'); }
   if (B.stats) { const k = MOVE_ID.get(m); B.stats.hit[k] = (B.stats.hit[k] || 0) + 1; B.stats.dmg[k] = (B.stats.dmg[k] || 0) + dmg; B.stats.dmgPct[k] = (B.stats.dmgPct[k] || 0) + dmg / def.maxHp; }
   const stance = def.state === 'stance' && def.cur && def.cur.m.k === 'stance';
-  const armored = def.cur && def.cur.m.armor && ['wind', 'dash', 'act'].includes(def.state);   // スーパーアーマー：わざの あいだは ひるまない・とめられない
+  const armored = def.cur && def.cur.m.armor && ['wind', 'dash', 'act', 'chan'].includes(def.state);   // スーパーアーマー：わざの あいだは ひるまない・とめられない
   if (armored && !opt.tick) popText(def.x, def.y - 100, 'アーマー！', '#ffb070');
   if (opt.tick) { def.kx += Math.cos(ang) * 45 * K; def.ky += Math.sin(ang) * 45 * K; }   // うちつづける わざ：ひるませず すこし おすだけ
   else if (stance || armored || def.state === 'rage' || def.state === 'grab') { def.kx += Math.cos(ang) * 50 * K; def.ky += Math.sin(ang) * 50 * K; B.hitstop = Math.max(B.hitstop, .04); }   // まちぶせ・あばれ・つかみ中は ひるまない
