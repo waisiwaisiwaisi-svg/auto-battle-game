@@ -6831,7 +6831,7 @@ function aiMove(f, o, dt, autoSpecial) {
   else if (f.trGo === 'far') { want = { R: Math.max(want.R + 160, 330), los: false, cover: false, flank: false, mode: 'rest' }; f.paceT = Math.max(f.paceT || 1, 1.6); }   // チップ：はなれる
   { // 作戦の 間合いに いる（技を 撃たない とき）：あいての まわりを 円を えがいて まわる
     const pl = natOf(f), pR = PLAN_R[pl], inBand = pl === 'yuukan' ? d < 150 : pl === 'nonki' ? d >= 150 && d < 290 : pl === 'reisei' ? d >= 290 && d < 470 : false;
-    if (pR && inBand && !f.queued && !f.trGo && !(f.order) && want.mode !== 'rest') {
+    if (pR && inBand && !f.queued && !f.trGo && !(f.order) && want.mode !== 'rest' && !f.whim) {   // きまぐれ中は まわらない
       f.orbDir = f.orbDir || (Math.random() < .5 ? 1 : -1);
       const Ro = { yuukan: 105, nonki: 220, reisei: 370 }[pl], ta = ang + f.orbDir * Math.PI / 2, rad = clamp((d - Ro) / 60, -1, 1),   /* まわる はんけい へ もどす ちから */ mx = Math.cos(ta) + Math.cos(ang) * rad, my = Math.sin(ta) + Math.sin(ang) * rad, L = Math.hypot(mx, my) || 1;
       const nx = f.x + mx / L * 40, ny = f.y + my / L * 40;
@@ -6989,6 +6989,10 @@ function idealRange(f, m, reach, per) {
 const losFrom = (x, y, o) => losClear({ x, y }, o);
 // 立ち位置えらび：相手の まわりに 候補を ならべて 点数を つけ、いちばん よい 場所へ（.45秒ごとに 見なおす）
 function pickSpot(f, o, w, dt) {
+  { // きまぐれ：ときどき 場の どこかを ぶらっと めざす（撃ちに いく ときは しない）
+    f.whimCd = (f.whimCd == null ? rand(3, 7) : f.whimCd) - dt; if (f.whim && (f.whim.t -= dt) <= 0) f.whim = null;
+    if (f.whimCd <= 0) { f.whimCd = rand(5, 9); const st = B.st; for (let i = 0; i < 10; i++) { const x = rand(st.fx0 + 30, st.fx1 - 30), y = rand(st.fy0 + 24, st.fy1 - 24); if (spotOk(f, x, y)) { f.whim = { x, y, t: rand(1.4, 2.6) }; f.spotT = 0; break; } } }
+  }
   f.spotT = (f.spotT || 0) - dt;
   if (f.spot && f.spotT > 0 && f.spotMode === w.mode) return f.spot;
   f.spotT = .45; f.spotMode = w.mode;
@@ -7000,16 +7004,19 @@ function pickSpot(f, o, w, dt) {
   };
   const baseA = Math.atan2(f.y - o.y, f.x - o.x), cands = [];
   for (let k = 0; k < 20; k++) { const a = baseA + (k / 20) * Math.PI * 2; for (const rr of [.75, 1, 1.25]) cands.push([o.x + Math.cos(a) * w.R * rr, o.y + Math.sin(a) * w.R * rr]); }
+  for (let k = 0; k < 12; k++) { const a = (k / 12) * Math.PI * 2; for (const rr of [80, 170]) cands.push([f.x + Math.cos(a) * rr, f.y + Math.sin(a) * rr]); }   // じぶんの まわりにも 候補（はしの ほうも えらばれる）
+  const wh = f.whim && w.mode !== 'attack' ? f.whim : null; if (wh) cands.push([wh.x, wh.y]);
   cands.push([f.x, f.y]);
   if (f.spot) cands.push([f.spot.x, f.spot.y]);
   let best = null, bs = 1e9;
   for (const [x, y] of cands) {
     if (!ok(x, y)) continue;
     const dO = Math.hypot(x - o.x, y - o.y);
-    let sc = Math.abs(dO - w.R) * .9 + Math.hypot(x - f.x, y - f.y) * .3;
+    let sc = Math.abs(dO - w.R) * (wh ? .35 : .9) + Math.hypot(x - f.x, y - f.y) * (wh ? .12 : .3);   // きまぐれ中は 間合いより 行きたい 場所
     if (w.los || w.cover) { const see = !hasObs || losFrom(x, y, o); if (w.los && !see) sc += 220; if (w.cover && see && hasObs) sc += 160 * per.cover; }
     if (w.flank) { const da = Math.abs(wrapAng(Math.atan2(y - o.y, x - o.x) - baseA)); sc += Math.abs(da - 1.1) * 45 * per.flank; }   // 正面より 斜め横から
-    const edge = Math.min(x - st.fx0, st.fx1 - x, y - st.fy0, st.fy1 - y); if (edge < 60) sc += (60 - edge) * 1.2;   // 壁ぎわは きらう
+    const edge = Math.min(x - st.fx0, st.fx1 - x, y - st.fy0, st.fy1 - y); if (edge < 30) sc += (30 - edge) * .8;   // 壁ぎわは すこし だけ きらう
+    if (wh) sc += Math.hypot(x - wh.x, y - wh.y) * .7;   // きまぐれ：めざす 場所に ちかいほど よい
     if (threatState(o) && o.cur && ZONE_KINDS.includes(o.cur.m.k) && inZone(o.cur, o.real || o, x, y, f.r)) sc += 400;   // 相手の わざの はんいは さける
     if (onFoeFloor(f, x, y)) sc += 260;   // あいての ゆかも さける
     if (f.spot && Math.hypot(x - f.spot.x, y - f.spot.y) < 8) sc -= 18;   // 少し 前の ねらいを つづける（ふらふら しない）
