@@ -4065,9 +4065,10 @@ const TRT_STEPS = [
   { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが <b>技の 行</b>。上ほど 先に 撃つよ。<br>左の 番号を ドラッグすると 順番を かえられる', next: 1 },
   { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を おいてみよう。<br>「<b>相手のHP</b>」を ○ばんの 技の「<b>使うとき</b>」へ ドラッグ！<br><small>（タップ → 置き場所を タップ でも OK）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
   { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手の HPが ${p}の とき</b>」に この技を 撃つ。<br>おいた 条件を タップすると ${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも かえられるよ`; }, next: 1 },
-  { sel: '.pal.k-go[data-v="near"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ つぎは <b>撃ち方</b>。<br>「<b>近づいてから</b>」を ○ばんの「その場で撃つ」の わくへ おいてみよう', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
+  { sel: '.pal.k-go[data-v="near"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ つぎは <b>撃ち方</b>。<br>「<b>近づいてから</b>」を ○ばんの「その場で撃つ」の わくへ おいてみよう<br><small>（そこまで うごいてから 撃つ。うまく うごけない ときは いまの 間合いで 撃てる 技に きりかえる）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
   { sel: '[data-a="sim"]', tx: '⑤ できたら <b>模擬戦で ためす</b>！<br>5かい たたかわせて けっかを みせてくれるよ', ok: () => !!document.querySelector('.simtbl') },
   { sel: '.simcs', allow: () => [], tx: '⑥「<b>条件の はつどう</b>」で、条件が なりたったか（○×）と 何かい 撃ったかが わかる。<br>うまく いかなければ 条件を かえて また ためそう', next: 1, onNext: () => { const a = document.querySelector('.simtbl'); if (a) { const bg = a.closest('.askbg'); if (bg) bg.remove(); } } },
+  { sel: '[data-a="dummy"]', allow: () => [], tx: '🎯 <b>木人戦</b>では 人形を あいてに、条件が いま ○か×かを みながら ためせる。<br>「じょうきょうを つくる」で HP・状態・天候・人形の こうげき なども かえられるよ', next: 1 },
   { sel: '[data-a="ok"]', tx: '⑦ よければ <b>確定</b>。この子の 訓練が ほぞん されるよ', ok: () => { const m = trMon(TRN && TRN.uid); return !!(m && m.tr && m.tr.prog && m.tr.prog.mv && !TRN.dirty); } },
   { tx: '⑧ これで 試合では この せっていどおりに たたかうよ。バトル中に きみが できるのは <b>こうたい</b>だけ。<br>まけたら ここに もどって なおそう！　これで おしまい！', next: 1, end: 1 },
 ];
@@ -8491,13 +8492,17 @@ function tutEnemy(id, hold) {   // あいてに わざを ださせる（hold �
   o.cd[id] = 0; beginMove(o, id); if (o.cur) { o.cur.wind = Math.max(o.cur.wind, hold); o.cur.tx = f.x; o.cur.ty = f.y; } return !!o.cur;
 }
 const TUT_STEPS = [
-  { tx: 'ようこそ！ この ゲームでは バトル中、モンスターは <b>じぶんで たたかう</b>。きみは みているだけ。<br>どう たたかうかは <b>訓練</b>で まえもって おしえて おくんだ。', pause: true },
-  { tx: 'まずは みてみよう。わざを うつと <b>あたまの うえに わざの なまえ</b>が でるよ。',
+  { tx: 'ようこそ！ この ゲームの バトルは <b>モンスターが じぶんで たたかう</b>。きみは みているだけ。<br>どう たたかうかは <b>訓練</b>で まえもって おしえて おくんだ。', pause: true },
+  { tx: '① まずは みてみよう。わざを うつと <b>あたまの うえに わざの なまえ</b>が でるよ。',
     run: (T) => { const f = tutF(); if (f && f.cur && f.cur.id !== T.f.last) { T.f.last = f.cur.id; T.f.n = (T.f.n || 0) + 1; } if (f && !f.cur) T.f.last = null; },
     wait: () => (TUT.f.n || 0) >= 2 || TUT.t > 9 },
-  { tx: 'いまは 訓練を して いないので <b>お任せ</b>で うっている。お任せは てきとうに えらぶから、つよい あいてには かてない。<br><b>訓練</b>で「どの わざを いつ・どう うつか」を きめると ぐんと つよく なる！', pause: true, delay: 1 },
-  { tx: '<b>ひかえ</b>の モンスターを タップすると こうたい できる。バトル中に きみが できるのは これ だけ！ やってみよう', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 },
-  { tx: 'ナイス！ では あいてを たおして しあげよう。<br>おわったら したの <b>訓練</b>タブで わざの つかいかたを きめてみよう！', pause: true, delay: 1.2 },
+  { tx: '② あいてが わざを <b>ためている</b>！ じめんに でた <b>わく</b>が こうげきの はんいだよ。<br>大きな わざほど ためが ながいから、見てから よけられる。',
+    run: (T) => { if (!T.f.sent && TUT.t > .4 && tutEnemy(TUT.em.strike, 1.6)) T.f.sent = 1; },
+    wait: () => !!TUT.f.sent && TUT.t > 2.8 && !(tutO() && tutO().cur) || TUT.t > 7, delay: .8 },
+  { tx: '③ こうげきが <b>あたる しゅんかん</b>に、モンスターは「かいひ」の のうりょくで <b>じどうで ステップ</b>して よけることが ある。<br>ガードシェル などの ガード技は、訓練で「<b>攻撃を受けた瞬間</b>」の 条件を おくと その場で でるよ。', pause: true },
+  { tx: '④ いまは 訓練を して いないので <b>お任せ</b>で うっている。お任せは てきとうに えらぶから、つよい あいてには かてない。<br><b>訓練</b>で「どの わざを・いつ・どう うつか」を きめると ぐんと つよく なる！', pause: true },
+  { tx: '⑤ <b>ひかえ</b>の モンスターを タップすると こうたい できる。バトル中に きみが できるのは これ だけ！<br>ひかえの「<b>有利・不利</b>」は タイプ相性の めやす。やってみよう', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 },
+  { tx: 'ナイス！ 出てきた ときの「<b>よゆう（さくせん◎）</b>」などは、作戦どうしの 相性（⚔近 → 🏹遠 → 🛡中 → ⚔近）だよ。<br>あいてを たおして しあげよう。おわったら したの <b>訓練</b>タブへ！', pause: true, delay: 1.2 },
   { tx: 'あいてを たおそう！', fin: true },
 ];
 function tutShow(step) {
@@ -10743,6 +10748,7 @@ $('btnOpt').onclick = () => {
     <label class="optrow">こうかおん <input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
     <label class="optrow">テスト：スクロール つかいほうだい <input type="checkbox" id="oTmFree"></label>
+    <div class="optrow">テスト：チュートリアル <span style="display:flex;gap:6px"><button class="btn sub" id="oTutB" style="font-size:12px;padding:6px 10px">バトル</button><button class="btn sub" id="oTutT" style="font-size:12px;padding:6px 10px">訓練</button></span></div>
     <div class="optrow"><span></span><button class="btn sub" id="oSeAdj" style="font-size:12px;padding:6px 12px">こうかおんを ひとつずつ ちょうせい</button></div>
     
     ${!window.PMA_NAME ? `<div class="optrow">なまえ <span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">かえる</button></span></div>` : ''}
@@ -10758,6 +10764,8 @@ $('btnOpt').onclick = () => {
   }
   m.value = SND.opt.music; x.value = SND.opt.sfx; u.checked = SND.opt.mute;
   { const t = bg.querySelector('#oTmFree'); t.checked = !!S.tmFree; t.onchange = () => { S.tmFree = t.checked; save(); renderHub(); }; }
+  bg.querySelector('#oTutB').onclick = () => { bg.remove(); startTutorial(); };   // テスト：いつでも チュートリアルを たしかめる
+  bg.querySelector('#oTutT').onclick = () => { bg.remove(); const m = S.party[0]; if (!m) return; renderTrain(m.uid); setTimeout(() => trtStart(), 200); };
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
   
   const LK = bg.querySelector('#oLooks');
