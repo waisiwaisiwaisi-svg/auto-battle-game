@@ -64,6 +64,7 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
 .inv b{color:var(--ink)}
 .reward{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:150px;justify-content:center}
 .reward .big{font-size:26px;font-weight:700}
+html.land.short .reward{min-height:0;gap:4px} html.land.short .reward .big{font-size:20px} html.land.short .reward img.pix{width:64px!important;height:64px!important;margin:2px auto!important} html.land.short .askbox{padding:12px 16px}   /* よこ画面で ひくい とき：ごほうびの まどを ちいさく（ボタンが きれない） */
 .reward .rar{font-size:11px;padding:1px 8px;border-radius:3px;color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914}
 .tmlist{display:flex;flex-direction:column;gap:6px;max-height:calc(52 * var(--vh));overflow:auto;text-align:left}
 .tmlist button{background:var(--bg);box-shadow:0 0 0 1px var(--edge);padding:6px 8px;text-align:left;border-left:5px solid var(--c)}
@@ -80,7 +81,7 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
 .lb{display:flex;flex-direction:column;gap:3px;margin-top:6px}.lb div{display:grid;grid-template-columns:26px 1fr auto 44px 48px;gap:6px;align-items:center;font-size:12px;padding:3px 6px;background:#15112a;border-radius:3px}.lb div.me{box-shadow:inset 0 0 0 2px var(--acc)}.lb .lbn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
 .nstat{margin-top:10px;font-size:13px;line-height:1.7;min-height:1.7em}.nstat.err{color:var(--bad)}.ncode{font-size:26px;letter-spacing:.3em;color:var(--acc);display:inline-block;padding:2px 10px;background:#120e1c;border-radius:4px;margin:4px 0;user-select:text;-webkit-user-select:text}.ncopy{padding:4px 12px!important;font-size:13px!important;vertical-align:middle;margin-left:6px}
 .optrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--edge)}
-.looks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;max-height:calc(38 * var(--vh));overflow:auto}.look{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border:2px solid var(--edge);border-radius:6px;background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.look canvas{height:64px;width:auto;max-width:100%;object-fit:contain}.look small{font-size:10px;white-space:nowrap}.look.on{border-color:var(--acc);background:rgba(255,209,102,.15)}
+.looks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;max-height:calc(38 * var(--vh));overflow:auto}.look{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border:2px solid var(--edge);border-radius:6px;background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.look canvas{height:64px;width:auto;max-width:100%;object-fit:contain}.look small{font-size:10px;white-space:nowrap;letter-spacing:-.08em;max-width:100%}.looks .look{padding:4px 1px}.look.on{border-color:var(--acc);background:rgba(255,209,102,.15)}
 .optrow input[type=range]{width:55%;accent-color:var(--acc)}
 .optrow input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
 .help p{font-size:13px;line-height:1.7;margin-bottom:8px}
@@ -158,8 +159,8 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .pm{background:var(--panel);box-shadow:0 0 0 2px var(--edge);padding:6px 4px;text-align:center;font-size:11px;position:relative}
 .pm canvas{width:48px;height:48px;display:block;margin:0 auto}
 .pm{cursor:pointer}.pm.empty{opacity:.45;cursor:default;box-shadow:0 0 0 2px var(--edge) inset;background:transparent}
-.pmt{margin-top:2px}.pmt .chip{font-size:9px}
-.pm .tag{position:absolute;left:3px;top:3px;font-size:9px;background:var(--acc);color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;padding:0 3px;font-weight:700}
+.pmt{margin-top:2px}.pmt .chip{font-size:10px}
+.pm .tag{position:absolute;left:3px;top:3px;font-size:10px;background:var(--acc);color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;padding:0 3px;font-weight:700}
 .bigbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .acbody{display:flex;flex-direction:column;gap:12px;max-width:640px;margin:0 auto;width:100%}
 .acbody .card{padding:12px}.acstages{display:flex;gap:6px;flex-wrap:wrap}.acstages i{width:44px;height:30px;border-radius:4px;background:#2a2440 center/cover;border:2px solid #0d0b14;position:relative;opacity:.45}
@@ -167,7 +168,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .acteam{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.acteam>div{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px}.acteam .bar{width:100%;height:6px;background:#2a2440;border-radius:3px;overflow:hidden}.acteam .bar i{display:block;height:100%;background:#7bd88f}
 .acscore{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}.acscore b{font-size:26px;color:var(--acc);font-variant-numeric:tabular-nums}
 .jrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
-.jrc .jrec{display:flex;flex-wrap:wrap;gap:2px;align-items:center;margin-top:2px}.jrc .jrec .chip{font-size:9px;padding:0 4px}
+.jrc .jrec{display:flex;flex-wrap:wrap;gap:2px;align-items:center;margin-top:2px}.jrc .jrec .chip{font-size:10px;padding:0 4px}
 .jrc{position:relative;border:2px solid var(--edge);border-radius:8px;overflow:hidden;background:#141022 center/cover;min-height:118px;color:#fff;font:inherit;text-align:left;padding:0;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end}
 .jrc::before{content:'';position:absolute;inset:0;background:linear-gradient(transparent 20%,rgba(10,8,20,.88))}
 .jrc>*{position:relative}.jrc .in{padding:8px 10px;display:flex;flex-direction:column;gap:3px}
@@ -189,7 +190,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .lgx-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
 .lgx-p{flex:1 0 64px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;border-radius:8px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);min-width:64px}
 .lgx-p .lgx-f{position:relative;width:44px;height:44px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:50%;background:radial-gradient(circle at 50% 70%,#4a3a7a,#1a1430)}
-.lgx-p img{height:52px;width:auto;image-rendering:pixelated;margin-bottom:-6px}.lgx-p i{font-style:normal;font-size:11px;font-weight:700;white-space:nowrap}.lgx-p .chip{font-size:9px;padding:0 4px}
+.lgx-p img{height:52px;width:auto;image-rendering:pixelated;margin-bottom:-6px}.lgx-p i{font-style:normal;font-size:11px;font-weight:700;white-space:nowrap}.lgx-p .chip{font-size:10px;padding:0 4px}
 .lgx-p.done{opacity:.55}.lgx-p.done img{filter:grayscale(.8)}.lgx-p em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;color:#5ee08a;text-shadow:0 0 3px #000,0 0 3px #000}
 .lgx-p.cur{border-color:#ffd84a;background:rgba(255,216,74,.14);box-shadow:0 0 10px rgba(255,216,74,.45)}.lgx-p.cur .lgx-f{background:radial-gradient(circle at 50% 70%,#8a6a1a,#2a1a08)}
 .lgx-p.champ .lgx-f{box-shadow:0 0 0 2px #ffd84a inset}.lgx-any{background:#5a4a7a}
@@ -266,7 +267,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .dexgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
 .dexc{background:var(--panel);box-shadow:0 0 0 2px var(--edge);padding:6px 4px 5px;text-align:center;font-size:11px;position:relative;cursor:pointer;min-width:0}
 .dexc canvas{width:64px;height:64px;display:block;margin:0 auto}
-.dexc .no{position:absolute;left:4px;top:3px;font-size:9px;color:var(--dim);font-variant-numeric:tabular-nums}
+.dexc .no{position:absolute;left:4px;top:3px;font-size:10px;color:var(--dim);font-variant-numeric:tabular-nums}
 .dexc .got{position:absolute;right:4px;top:2px;color:var(--acc);font-size:12px}
 .dexc .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dexc.unseen canvas{filter:brightness(0);opacity:.35}
@@ -281,7 +282,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .sbar i u{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff;opacity:.8;text-decoration:none}
 .sbar span:nth-child(2){font-variant-numeric:tabular-nums;white-space:nowrap}
 .sbar{grid-template-columns:64px 44px 1fr auto!important}
-.evb{color:var(--acc);font-weight:400;margin-left:2px;font-size:9.5px}
+.evb{color:var(--acc);font-weight:400;margin-left:2px;font-size:10px}
 .itlist{display:flex;flex-direction:column;gap:6px}.it{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;background:#15112a;border-radius:4px;padding:6px 8px;text-align:left}.it .iic{font-size:24px}.it small{display:block;color:var(--dim);font-size:10.5px;line-height:1.4}.it .btn{font-size:12px;padding:6px 10px}
 .bsum{display:flex;justify-content:space-between;margin:8px 0;font-size:13px}
 .ico.ico-s{width:1.25em;height:1.25em;margin-right:3px;vertical-align:-.25em}
@@ -301,7 +302,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .minfo{flex:1;min-width:0;font-size:11px;line-height:1.55}
 .mname{font-size:14px;font-weight:700}
 .mname .lv{font-size:11px;color:var(--dim);font-weight:400}
-.mname .tag{font-size:9px;background:var(--acc);color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;padding:0 4px;margin-left:4px;vertical-align:middle}
+.mname .tag{font-size:10px;background:var(--acc);color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;padding:0 4px;margin-left:4px;vertical-align:middle}
 .mstat{color:var(--dim)}
 .mmoves{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
 .mmoves span{font-size:10px;padding:0 4px;background:#0d0b14;border-left:3px solid var(--c)}
@@ -322,7 +323,7 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
 #chartWrap td.x0{background:#111;color:#888}
 .plate .types{display:flex;gap:3px;margin-top:2px}
 #plE .types{justify-content:flex-end}
-.plate .types .chip{font-size:9px;padding:0 4px}
+.plate .types .chip{font-size:10px;padding:0 4px}
 .cmd.mv[data-eff="2"]{box-shadow:0 0 0 2px #ff8a6a,0 3px 0 #0d0b14}
 .cmd.mv[data-eff="0.5"] .b,.cmd.mv[data-eff="0"] .b{color:#7fb2ff}
 .cmd.mv[data-eff="2"] .b{color:#ff8a6a}
@@ -403,8 +404,8 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
   display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;min-height:38px;touch-action:none;
 }
 .cmd .a{font-size:12.5px;font-weight:700;line-height:1.2;white-space:nowrap}
-.cmd .b{font-size:9px;color:var(--dim);white-space:nowrap}
-.mvu{font-style:normal;font-size:.72em;font-weight:400;color:var(--dim);margin-left:5px;font-variant-numeric:tabular-nums;white-space:nowrap}   /* 技名の よこの「のこり/最大」 */
+.cmd .b{font-size:10px;color:var(--dim);white-space:nowrap}
+.mvu{font-style:normal;font-size:max(10px,.72em);font-weight:400;color:var(--dim);margin-left:5px;font-variant-numeric:tabular-nums;white-space:nowrap}   /* 技名の よこの「のこり/最大」 */
 .cmd.mv{border-left:5px solid var(--c)}
 .cmd .cdv{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);height:0;pointer-events:none}
 .cmd.hot{box-shadow:0 0 0 2px var(--acc),0 3px 0 #0d0b14}
@@ -412,11 +413,11 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
 .cmd:active{transform:translateY(2px)}
 .cmd[hidden]{display:none}
 .cmd.blocked{opacity:.4}
-.plate .cond{font-size:9.5px;color:var(--acc);min-height:1.3em;line-height:1.3;display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
+.plate .cond{font-size:10px;color:var(--acc);min-height:1.3em;line-height:1.3;display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
 #plE .cond{justify-content:flex-end}
-.plate .db{position:relative;display:inline-flex;align-items:baseline;gap:3px;padding:1px 4px 2px;background:rgba(11,9,20,.72);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 55%,transparent);color:var(--c);font-size:9.5px;line-height:1.15;white-space:nowrap;overflow:hidden}
+.plate .db{position:relative;display:inline-flex;align-items:baseline;gap:3px;padding:1px 4px 2px;background:rgba(11,9,20,.72);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 55%,transparent);color:var(--c);font-size:10px;line-height:1.15;white-space:nowrap;overflow:hidden}
 .plate .db b{font-weight:700}
-.plate .db em{font-style:normal;font-variant-numeric:tabular-nums;color:#fff;opacity:.9;font-size:9px}
+.plate .db em{font-style:normal;font-variant-numeric:tabular-nums;color:#fff;opacity:.9;font-size:10px}
 .plate .db i{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--c);transform-origin:left;opacity:.9}
 .plate .db.bad.tm{box-shadow:inset 0 0 0 1px var(--c)}
 .plate .db.end{animation:dbBlink .25s steps(2) infinite}
@@ -449,8 +450,8 @@ html.land #banner{font-size:14px}
 /* スマホの 横画面（高さが ひくい）：つめて 表示 */
 html.land.short #scBattle:not([hidden]){grid-template-columns:minmax(0,1fr) 290px;column-gap:10px;row-gap:5px;padding:6px 10px calc(6px + var(--sab))}
 html.land.short #cvWrap{width:min(100%, calc((var(--appH, calc(100 * var(--vh))) - 36px) * 16 / 9))}
-html.land.short #btns{gap:5px} html.land.short #btns button.cmd{min-height:40px} html.land.short .cmd.info{min-height:44px;padding:2px 6px} html.land.short .cmd.info .d{font-size:9.5px;line-height:1.25}
-html.land.short .cmd .a{font-size:12px} html.land.short .cmd .b{font-size:9px} html.land.short #banner{font-size:11px;min-height:2em;padding:3px 6px}
+html.land.short #btns{gap:5px} html.land.short #btns button.cmd{min-height:40px} html.land.short .cmd.info{min-height:44px;padding:2px 6px} html.land.short .cmd.info .d{font-size:10px;line-height:1.25}
+html.land.short .cmd .a{font-size:12px} html.land.short .cmd .b{font-size:10px} html.land.short #banner{font-size:11px;min-height:2em;padding:3px 6px}
 html.land.short .plate{padding:3px 6px;font-size:10px} html.land.short .plate .top b{font-size:12px} html.land.short .plate .cond{min-height:0;margin-top:1px} html.land.short .plates{gap:4px;grid-template-columns:1fr 1fr}
 html.land.short #scHub, html.land.short #scDex{padding:8px 14px} html.land.short .bigbtns .btn{padding:10px 8px;font-size:16px} html.land.short .hubgrid{gap:12px}
 html.land.short .screen{padding-top:calc(6px + var(--sat));padding-bottom:calc(6px + var(--sab))}
@@ -502,7 +503,7 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 #cvWrap .hudtop .plate .top b{font-size:13px}
 #cvWrap .hudtop .plate .types{display:flex;gap:3px}
 #cvWrap .hudtop .plate .hp{margin:3px 0 2px}
-#cvWrap .hudtop .plate .cond{min-height:0;font-size:9.5px}
+#cvWrap .hudtop .plate .cond{min-height:0;font-size:10px}
 #bbar{display:flex;gap:8px;align-items:stretch}
 #bbar #cDodge{flex:0 0 26%;min-height:62px}
 #cDodge .a{font-size:17px}
@@ -512,7 +513,7 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 .bmon .bn{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bmon .bh{height:5px;background:#0d0b14;margin-top:3px;border-radius:1px}
 .bmon .bh i{display:block;height:100%;background:var(--good)}
-.bmon .bs{font-size:9.5px;color:var(--dim)}
+.bmon .bs{font-size:10px;color:var(--dim)}
 .bmon{position:relative}.bmon .bmu{position:absolute;top:2px;right:3px;font-style:normal;font-size:10px;font-weight:700;line-height:1.4;padding:0 4px;border-radius:3px;color:#fff;pointer-events:none}
 .mu{display:inline-block;padding:0 6px;border-radius:3px;color:#fff;font-size:11px;font-weight:700;margin-left:4px;vertical-align:middle}.mux{display:block;font-size:10.5px;color:var(--dim);margin-top:1px}
 #bench.many .bmon .bn{display:none} #bench.many .bmon{flex-direction:column!important;justify-content:center;gap:2px;padding:3px 4px!important} #bench.many .bmon > span{width:100%;flex:none!important}
@@ -540,7 +541,7 @@ html.land.short #bbar #cDodge,html.land.short .bmon{min-height:46px} html.land.s
 html.land.short #cvWrap .hudtop .plate{padding:2px 6px} html.land.short #cvWrap .hudtop .plate .top b{font-size:11px}
 
 /* ポップアップは 画面の 高さに おさめ、中身を スクロール */
-.askbox{max-height:calc(var(--appH, calc(100 * var(--vh))) - 24px);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.askbox{max-height:calc(var(--appH, calc(100 * var(--vh))) - 36px);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
 .tmlist{max-height:none;overflow:visible}
 .askbox .tmlist{max-height:calc(var(--appH, calc(100 * var(--vh))) - 200px);overflow-y:auto;touch-action:pan-y}
 /* たて画面：かわす と ひかえは いちばん 下 */
@@ -631,7 +632,7 @@ html #app #bpanel #ctrl{flex:none}
 html #app #bpanel #btns{grid-template-columns:1fr 1fr;grid-template-rows:none;height:auto;max-height:none;gap:5px}
 html #app #bpanel .cmd.info{grid-column:auto;min-height:40px;padding:2px 8px 2px 11px;justify-content:center;gap:0;opacity:.94}
 html #app #bpanel .cmd.info .a{font-size:12px}
-html #app #bpanel .cmd.info .b{font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+html #app #bpanel .cmd.info .b{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 html #app #bpanel .cmd.info .d{display:none}
 html #app #bpanel #bbar{flex-wrap:nowrap;gap:5px;margin:0}
 html #app #bpanel #bbar #cDodge{flex:0 0 26%;min-height:42px;opacity:.94}
@@ -660,10 +661,11 @@ html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #
 .hbar{display:flex;gap:8px;align-items:center}
 .hme{display:flex;align-items:center;gap:6px;padding:2px 8px 2px 2px;flex:none;min-height:44px}
 .hme canvas{height:40px;width:auto;image-rendering:pixelated;background:#1b1530}
-.hme #hRank{font-size:11px;line-height:1.2;text-align:left;display:grid;grid-template-columns:auto auto;column-gap:5px;align-items:center}
-.hme #hRank .ico{grid-row:2/4;width:26px;height:26px}
-#hRank .hnm{grid-column:1/3;font-size:12px;color:var(--ink);max-width:8.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hme #hRank .mb{grid-column:2;display:block;width:64px;height:5px;background:#0b0914;box-shadow:0 0 0 1px #3a3060;margin-top:2px}.hme #hRank .mb i{display:block;height:100%}
+.hme #hRank{font-size:12px;line-height:1.25;text-align:left;display:grid;grid-template-columns:auto minmax(0,auto);grid-template-rows:auto auto auto;column-gap:6px;row-gap:1px;align-items:center}
+.hme #hRank .ico{grid-column:1;grid-row:1/4;width:30px;height:30px;align-self:center}
+.hme #hRank .htier{grid-column:2;display:flex;align-items:baseline;gap:6px;white-space:nowrap}.hme #hRank .htier b{font-size:12px}.hme #hRank .hrate{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+#hRank .hnm{grid-column:2;grid-row:1;font-size:13px;color:var(--ink);max-width:10em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hme #hRank .mb{grid-column:2;display:block;width:100%;min-width:64px;height:5px;background:#0b0914;box-shadow:0 0 0 1px #3a3060;margin-top:2px}.hme #hRank .mb i{display:block;height:100%}
 .rkbody{display:flex;flex-direction:column;gap:10px}
 .rkme[hidden],.rkladder[hidden]{display:none!important}
 .rkme{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;padding:12px 14px}
@@ -716,7 +718,7 @@ html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #
 /* もちものの なまえを 数字の 下に・タップで せつめい */
 #scHub .hres1{cursor:pointer}
 #scHub .hrv{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05}
-#scHub .hrv small{font-size:9px;color:#cfc6ef;letter-spacing:0}
+#scHub .hrv small{font-size:10px;color:#cfc6ef;letter-spacing:0}
 #scHub .hres1:active{transform:translateY(1px)}
 .chesthead{display:flex;align-items:center;justify-content:space-between}
 .chlog{font-size:11px;padding:3px 10px;color:#fff;background:linear-gradient(180deg,#4a3f86,#2e2758);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -2px 0 rgba(0,0,0,.35),0 0 0 2px #0b0914;border-radius:3px}
@@ -726,7 +728,7 @@ html.land #app #bpanel .bmon{min-height:38px;justify-content:center} html.land #
 .clh{display:flex;align-items:center;gap:6px;font-size:13px}.clh small{margin-left:auto;color:#cfc6ef;font-size:10.5px}
 .clic{display:inline-flex;width:28px;height:24px;align-items:center;justify-content:center;overflow:hidden}.clic img{max-width:28px;max-height:24px;width:auto!important;height:auto!important}
 .clb{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:4px;font-size:11.5px}
-.clm{display:inline-flex;align-items:center;gap:3px}.clm img{width:28px;height:28px}.clm i{font-style:normal;font-size:9px;padding:0 4px;color:#fff;text-shadow:1px 1px 0 #0b0914}
+.clm{display:inline-flex;align-items:center;gap:3px}.clm img{width:28px;height:28px}.clm i{font-style:normal;font-size:10px;padding:0 4px;color:#fff;text-shadow:1px 1px 0 #0b0914}
 .clt{display:inline-flex;align-items:center;gap:2px;color:#e8e0fa}
 html:not(.land) #scHub .hbar{flex-wrap:wrap;row-gap:8px} html:not(.land) #scHub .hbar .hres{flex:1 1 100%;order:3} html:not(.land) #scHub .hbar .hres > span{flex:1 1 0}   /* たて画面：なまえを つけたら はみでたので 2だんに */
 #scHub .hicons{display:flex;gap:6px;justify-content:flex-end}
@@ -750,10 +752,10 @@ html:not(.land) #scHub .hbar{flex-wrap:wrap;row-gap:8px} html:not(.land) #scHub 
 .hcta .t,.hmode b{white-space:nowrap;min-width:0}
 html.vnarrow .hmode b{font-size:12.5px}html.vnarrow .hmode .ico{width:28px;height:28px}html.vnarrow .hmode{padding:8px 7px;column-gap:6px}
 .hmodes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.hmode{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;padding:8px 10px;min-height:60px}
+.hmode{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;align-content:center;text-align:left;padding:8px 10px;min-height:60px}
 .hmode .ico{grid-row:1/3;width:34px;height:34px}
 #scHub .hmode{padding-right:20px!important}   /* みぎはしの ▶ と もじが かさならない ように */
-.hmode b{font-size:14px} .hmode small{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmode b{font-size:14px} .hmode small{font-size:10px;color:var(--dim);white-space:normal;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}   /* せつめいは 2行まで おりかえす（…で きらない） */
 .hmode:active,.hstage:active,.hme:active,#tabbar button:active{transform:translateY(2px)}
 #scHub .chests .chest{min-height:88px}
 /* した の タブ */
@@ -787,7 +789,7 @@ html.vnarrow .hmode b{font-size:12.5px}html.vnarrow .hmode .ico{width:28px;heigh
 .shp{display:block;width:100%;padding:3px 0;background:#3a7a3a;box-shadow:0 2px 0 #0b0914,inset 0 1px 0 rgba(255,255,255,.3);font-size:13px;font-weight:700}
 .shcard.free .shp{background:#2a8a5a}.shcard.sold .shp,.shspecial.sold .shp{background:#4a4458}
 .shtag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);padding:0 8px;font-size:10px;font-weight:700;background:#ff5a5a;box-shadow:0 0 0 2px #0b0914;white-space:nowrap;z-index:1}
-.shcard .rar{position:absolute;top:4px;left:4px;font-size:9px!important;padding:0 5px!important;line-height:1.5;white-space:nowrap;z-index:1}
+.shcard .rar{position:absolute;top:4px;left:4px;font-size:10px!important;padding:0 5px!important;line-height:1.5;white-space:nowrap;z-index:1}
 .shspecial{flex-direction:row;gap:12px;padding:12px;border-image-source:var(--fr-gold)}.shspecial .shp{width:auto;padding:4px 12px;margin-left:auto;white-space:nowrap}.shspecial s{opacity:.6;font-size:11px}
 .shsd{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}.shsd b{font-size:15px;color:var(--acc)}.shsd span{font-size:11px;color:var(--dim)}
 .shgot{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}.shgot b{font-size:16px}
@@ -932,13 +934,14 @@ html.land #app #bpanel #mvCmds .cmd{min-height:30px}
 #tutBox[hidden],#tutHand[hidden]{display:none!important}
 /* うえの バー：ながい タイトルは 1ぎょうで けずる・ボタンは つぶさない */
 #bTop #bTitle{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:6px}
+html.vnarrow #bTop #bTitle{font-size:11px;letter-spacing:-.03em}
 #bTop > span:last-child{flex:none} #bTop button{white-space:nowrap}
 /* ボタンの ならび：うえから「わざ」→「うごきの しじ（かわす・かくれろ・まわりこめ）」→「こうたい」 */
 html #app #bpanel #bside{order:1} html #app #bpanel #mvCmds{order:2} html #app #bpanel #bbar{order:3}
 html #app #bpanel #mvCmds,html.land #app #bpanel #mvCmds{flex:none;flex-direction:row;gap:5px;width:100%}
 html #app #bpanel #mvCmds .cmd{flex:1 1 0;min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;opacity:.94}
 html #app #bpanel #mvCmds .cmd .a{font-size:13px}
-html #app #bpanel #mvCmds .cmd .b{font-size:9px;color:#9fb8cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+html #app #bpanel #mvCmds .cmd .b{font-size:10px;color:#9fb8cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 html #app #bpanel #mvCmds #cDodge{flex-grow:1.15;background:linear-gradient(180deg,#4a3f86,#2d2558)}
 html #app #bpanel #mvCmds #cDodge .a{font-size:14px;color:var(--acc)}
 html.land #app #bpanel #mvCmds .cmd{min-height:38px}
@@ -1046,7 +1049,7 @@ html.land #app #scBattle #bpanel{top:auto!important;left:calc(8px + var(--sal))!
 html.land #app #bpanel #bside{grid-area:moves;width:100%} html.land #app #bpanel #mvCmds{grid-area:cmds;width:100%} html.land #app #bpanel #bbar{grid-area:bench;width:100%}
 html.land #app #bpanel #btns{grid-template-columns:1fr 1fr!important;gap:5px}
 html.land #app #bpanel .cmd.info{min-height:34px!important;padding:2px 6px 2px 9px}
-html.land #app #bpanel .cmd.info .a{font-size:12px} html.land #app #bpanel .cmd.info .b{font-size:9px}
+html.land #app #bpanel .cmd.info .a{font-size:12px} html.land #app #bpanel .cmd.info .b{font-size:10px}
 html.land #app #bpanel #mvCmds .cmd{min-height:34px} html.land #app #bpanel .bmon{min-height:34px!important}
 html.land #app #bpanel .bmon canvas{width:24px;height:24px}
 html.land #app #bpanel #mvCmds .cmd .a{font-size:min(13px,calc(min(260px,calc(32 * var(--vw))) / 15))}
@@ -1056,7 +1059,7 @@ html.land #app #cvWrap .hudtop{right:calc(8px + var(--sar))!important}
 html.land #app #bpanel .bmon{min-height:0!important;padding:3px 6px!important;gap:6px;flex-direction:row!important;text-align:left} html.land #app #bpanel .bmon canvas{width:24px!important;height:24px!important}
 html.land #app #bpanel #bench .bmon .bn{display:none} html.land #app #bpanel #bench .bmon{flex:0 0 48px;flex-direction:column!important;justify-content:center;gap:2px;padding:3px 5px!important} html.land #app #bpanel #bench .bmon > span{width:100%;flex:none!important}   /* よこ画面の ひかえは せまいので なまえを けす（1もじだけ みえて ふしぜん） */
 html.land #app #bpanel .bmon .bn{font-size:10.5px;line-height:1.2}
-html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:center;order:1;font-size:9.5px;line-height:1.3;padding:0 5px;border-radius:7px;white-space:nowrap} html.land #app #bpanel #bench .bmon .bmu[hidden]{display:none} html.land #app #bpanel #bench .bmon canvas{order:0} html.land #app #bpanel #bench .bmon > span{order:2} html.land #app #bpanel #bench .bmon .cdv{order:3}   /* よこむき：アイコンの したに ならべて かぶらない */
+html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:center;order:1;font-size:10px;line-height:1.3;padding:0 5px;border-radius:7px;white-space:nowrap} html.land #app #bpanel #bench .bmon .bmu[hidden]{display:none} html.land #app #bpanel #bench .bmon canvas{order:0} html.land #app #bpanel #bench .bmon > span{order:2} html.land #app #bpanel #bench .bmon .cdv{order:3}   /* よこむき：アイコンの したに ならべて かぶらない */
 
 /* ===== バトル画面：わくを なくして すけさせる（ステージに なじむ HUD） ===== */
 #scBattle .plate,#scBattle #banner,#scBattle .cmd,#scBattle .bmon,#scBattle #bTop button{
@@ -1138,7 +1141,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trmons button{display:flex;align-items:center;gap:6px;font:inherit;font-size:12px;text-align:left;padding:3px 5px;border-radius:6px;border:2px solid transparent;background:rgba(255,255,255,.05);color:var(--ink);min-width:0}
 .trmons button.on{border-color:var(--acc);background:rgba(255,200,90,.12)}
 .trmons canvas{flex:none;image-rendering:pixelated}
-.trmons em{font-style:normal;font-size:9px;padding:0 4px;border-radius:3px;background:#3a3a4a;margin-right:2px}.trmons em.ok{background:#2f7a4a}.trmons em.dr{background:#7a5a2a}
+.trmons em{font-style:normal;font-size:10px;padding:0 4px;border-radius:3px;background:#3a3a4a;margin-right:2px}.trmons em.ok{background:#2f7a4a}.trmons em.dr{background:#7a5a2a}
 .trmain,.trside{min-width:0;display:flex;flex-direction:column;gap:6px}
 .trhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.trhead>b{font-size:16px}
 .trsec{display:flex;flex-direction:column;gap:5px}.trsec h3{font-size:14px;margin:4px 0 0}.trsec h3 .dim{font-size:11px;font-weight:400}
@@ -1162,7 +1165,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trnat .pp{font-style:normal;letter-spacing:1px;color:var(--acc);font-size:11px}.trnat .pp s{text-decoration:none;opacity:.2}.trnat small{opacity:.75}
 .trnat .nft{font-size:11px;opacity:.75}
 .trr[data-row]{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}.trr .no,.trr .rh{touch-action:none}.trr .no{white-space:nowrap}
-.rc i{font-style:normal;font-size:10px;opacity:.7}.rc .any{font-size:11px;opacity:.7}.rc .any small{font-size:9px}
+.rc i{font-style:normal;font-size:10px;opacity:.7}.rc .any{font-size:11px;opacity:.7}.rc .any small{font-size:10px}
 .cnd{white-space:nowrap;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:3px 7px;border-radius:5px;border:2px solid;color:var(--ink)}
 .cnd.not{background:#4a2c5a;border-color:#c07aff}.cnd b{color:#ffb0ff}
 .cnd.sel{outline:3px solid var(--acc);outline-offset:1px}
@@ -1198,7 +1201,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trbtns2{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center}.trbtns2 button{font:inherit;font-size:11px;color:var(--ink);opacity:.7;text-decoration:underline;text-underline-offset:3px;padding:2px}
 .trpal{display:flex;flex-wrap:wrap;gap:4px}
 .pal{position:relative;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;font-size:11px;padding:5px 9px;border-radius:5px;border:2px solid;color:var(--ink)}.pal.k-mv{border-left-width:6px}
-.pal small{font-size:9px;margin-left:3px;color:#ffd84a}
+.pal small{font-size:10px;margin-left:3px;color:#ffd84a}
 .pal[style*="--c"]{border-left:6px solid var(--c)!important}
 .pal.on{outline:3px solid var(--acc);outline-offset:1px}
 .trghost{position:fixed!important;pointer-events:none;z-index:9999;opacity:.85;transform:scale(1.08);box-shadow:0 6px 16px rgba(0,0,0,.5);margin:0}
@@ -1320,10 +1323,10 @@ html.land #scHub .hme,html.land #scHub .hres>span,html.land #scHub .hicon{backgr
 /* せまい よこ画面（iPhone の よこ・90度 かいてん など）：うえの 列が はみださない ように つめる。かいてんでも きく よう 画面の はばでは なく ホームの はばで みる */
 html.land #scHub{container-type:inline-size;container-name:hub}
 @container hub (max-width:900px){#scHub .hbar{gap:6px;flex-wrap:nowrap}#scHub .hres{gap:4px;min-width:0}#scHub .hres>span{padding:2px 6px 2px 3px}#scHub .hrv small{display:none}#scHub .hicons{gap:4px}#scHub .hicon{width:34px;height:34px}#scHub .hicon .ico{width:20px;height:20px}#scHub .hubgrid{grid-template-columns:minmax(0,1fr) clamp(250px,42%,460px);gap:8px 12px}}
-@container hub (max-width:760px){#scHub .hme #hRank .hnm{max-width:5em}#scHub .hres .ico{width:18px;height:18px}#scHub .hres>span{font-size:12px}#scHub .hicon{width:30px;height:30px}#scHub .hmode small{display:none}#scHub .hmode{min-height:46px}}
+@container hub (max-width:760px){#scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}#scHub .hres .ico{width:18px;height:18px}#scHub .hres>span{font-size:12px}#scHub .hicon{width:30px;height:30px}#scHub .hmode small{display:none}#scHub .hmode{min-height:46px}}
 /* おなじ ものを JS の クラスでも（container query が きかない ブラウザ むけ） */
 html.lnar #scHub .hbar{gap:6px;flex-wrap:nowrap}html.lnar #scHub .hres{gap:4px;min-width:0}html.lnar #scHub .hres>span{padding:2px 6px 2px 3px}html.lnar #scHub .hrv small{display:none}html.lnar #scHub .hicons{gap:4px}html.lnar #scHub .hicon{width:34px;height:34px}html.lnar #scHub .hicon .ico{width:20px;height:20px}html.lnar #scHub .hubgrid{grid-template-columns:minmax(0,1fr) clamp(250px,42%,460px);gap:8px 12px}
-html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{width:18px;height:18px}html.lnar2 #scHub .hres>span{font-size:12px}html.lnar2 #scHub .hicon{width:30px;height:30px}html.lnar2 #scHub .hmode small{display:none}html.lnar2 #scHub .hmode{min-height:46px}
+html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #scHub .hres .ico{width:18px;height:18px}html.lnar2 #scHub .hres>span{font-size:12px}html.lnar2 #scHub .hicon{width:30px;height:30px}html.lnar2 #scHub .hmode small{display:none}html.lnar2 #scHub .hmode{min-height:46px}
 
 /* ことばの リンク と せつめいの ふきだし */
 .kw{color:#ffd84a;text-decoration:underline;text-decoration-color:rgba(255,216,74,.55);text-underline-offset:2px;cursor:help;pointer-events:auto}
@@ -3719,7 +3722,7 @@ function renderChests() {
   { const b = $('tabShopBadge'); if (b) b.hidden = !shopFreeReady(); }   // ショップ：きょうの むりょう プレゼントが まだ
   $('hGems').textContent = S.gems || 0; $('hGuildBonus').hidden = !S.guildOn;
   $('hItems').textContent = Object.values(S.items || {}).reduce((a, b) => a + b, 0);
-  { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<b class="hnm"></b><i class="ico" style="background-image:url(${tierBadge(t.i)})"></i><b style="color:${t.c}">${t.n}</b><span style="grid-column:2">${k.r}</span><span class="mb"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></span>`; $('hRank').style.gridTemplateRows = 'auto auto auto auto'; $('hRank').querySelector('.hnm').textContent = myName(); }
+  { const k = myRank(), t = tierOf(k.r); $('hRank').innerHTML = `<i class="ico" style="background-image:url(${tierBadge(t.i)})"></i><b class="hnm"></b><span class="htier"><b style="color:${t.c}">${t.n}</b><span class="hrate">${k.r}</span></span><span class="mb"><i style="width:${Math.round(t.p * 100)}%;background:${t.c}"></i></span>`; $('hRank').style.gridTemplateRows = '';   /* バッジ｜なまえ・ランク レート・バー を ひだりで そろえる */ $('hRank').querySelector('.hnm').textContent = myName(); }
   if (!S.pname && !TUT && !renderHub.asked) { renderHub.asked = true;   // なまえが まだ：ほかの まど（コーチの おはなし など）が とじてから いちど だけ きく
     const tryAsk = () => { if (S.pname || TUT || B) { renderHub.asked = false; return; } if ($('scHub').hidden || document.querySelector('.askbg')) { setTimeout(tryAsk, 800); return; } askName(true); };
     setTimeout(tryAsk, 700); }
@@ -4162,6 +4165,9 @@ function trDockH() {   // ひだりの れつの たかさ：みえて いる �
 }
 addEventListener('resize', () => { if ($('trBody') && $('trBody').offsetParent) trDockFix(); });
 let TR_RO = null; $('scTrain').addEventListener('scroll', trDockH, { passive: true });   // 訓練の わくの はばが かわったら（がめんを ひらいた あと など）ならびを みなおす
+// 訓練の「？」の せつめい：ひらいた とき 画面の そとへ はみださない ように よこを ずらす
+document.addEventListener('toggle', (ev) => { const d = ev.target; if (!d.classList || !d.classList.contains('trq') || !d.open) return; const box = d.querySelector(':scope > div'); if (!box) return; box.style.left = '0px';
+  const r = box.getBoundingClientRect(), vw = document.documentElement.clientWidth, z = (r.width / box.offsetWidth) || 1, over = r.right - (vw - 8); if (over > 0) box.style.left = -Math.min(over, r.left - 8) / z + 'px'; }, true);
 function renderTrain(uid) {
   if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { if (TR_ASKING && document.querySelector('.askbg')) return; TR_ASKING = true; ask('今の設定を仮保存しますか？', '仮保存', 'しない').then(y => { TR_ASKING = false; if (y) trDraft(); if (TRN) TRN.dirty = false; renderTrain(uid); }); return; }
   const all = [...S.party, ...S.box];
@@ -10869,7 +10875,7 @@ $('btnOpt').onclick = () => {
     <label class="optrow">こうかおん <input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
     <label class="optrow">テスト：スクロール つかいほうだい <input type="checkbox" id="oTmFree"></label>
-    <div class="optrow">テスト：チュートリアル <span style="display:flex;gap:6px"><button class="btn sub" id="oTutB" style="font-size:12px;padding:6px 10px">バトル</button><button class="btn sub" id="oTutT" style="font-size:12px;padding:6px 10px">訓練</button><button class="btn sub" id="oTutA" style="font-size:12px;padding:6px 10px">はじめから</button></span></div>
+    <div class="optrow" style="flex-wrap:wrap;row-gap:6px"><span>テスト：チュートリアル</span><span style="display:flex;gap:6px;margin-left:auto"><button class="btn sub" id="oTutB" style="font-size:12px;padding:6px 10px">バトル</button><button class="btn sub" id="oTutT" style="font-size:12px;padding:6px 10px">訓練</button><button class="btn sub" id="oTutA" style="font-size:12px;padding:6px 10px">はじめから</button></span></div>
     <div class="optrow"><span></span><button class="btn sub" id="oSeAdj" style="font-size:12px;padding:6px 12px">こうかおんを ひとつずつ ちょうせい</button></div>
     
     ${!window.PMA_NAME ? `<div class="optrow">なまえ <span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">かえる</button></span></div>` : ''}
