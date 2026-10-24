@@ -1145,6 +1145,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .hov{outline:3px solid #ffd166!important;outline-offset:1px;box-shadow:0 0 10px rgba(255,209,102,.45)!important}
 .trghost.snap{opacity:1;transform:scale(1.04);box-shadow:0 0 0 2px #ffd166,0 6px 16px rgba(0,0,0,.5)}
 .trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+#scTrain.trt-on .trpage{padding-bottom:45vh}
 .trdock{display:none}.trpage.dock .trdock{display:flex;flex-direction:column;gap:10px;grid-column:1;grid-row:1;position:sticky;top:8px;align-self:start;min-height:0}.trpage.dock .trdock .trmons{flex:1 1 auto;min-height:0;max-height:none}.trpage.dock .trdock > :not(.trmons){flex:none}.trdock .trbtns{flex-direction:column;flex-wrap:nowrap;gap:10px}.trdock .trbtns .btn{width:100%;font-size:13px;padding:10px 4px;white-space:normal;line-height:1.3}.trdock .trbtns2{gap:4px 10px;font-size:12px}.trstat{display:none!important}   /* 3れつ：ひだりの れつに ボタン */.trbtns .btn{padding:6px 12px;font-size:13px}
 .trside h3{font-size:13px;margin:4px 0 0}.trside h3 .dim{font-size:10px;font-weight:400}.trside{background:rgba(20,16,36,.55);border:1px solid var(--edge);border-radius:10px;padding:8px}
 .trins{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--edge);font-size:12px;min-height:60px}
@@ -1352,8 +1353,8 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
 
   <!-- 最初の1匹 -->
   <section class="screen" id="scStarter">
-    <h2 style="font-size:18px;text-align:center;margin-top:8px">さいしょの あいぼうを えらぼう</h2>
-    <p class="dim" style="text-align:center">タイプには あいしょうが あります。ジムの タイプに つよい なかまを つれて いこう（えらんだ あいぼうの にがてを おぎなう なかまも 1たい もらえる）</p>
+    <h2 style="font-size:18px;text-align:center;margin-top:8px">最初の相棒を選びましょう</h2>
+    <p class="dim" style="text-align:center">タイプには相性があります。好きなモンスターを1体選んでください。</p>
     <div class="starters" id="starterList"></div>
   </section>
 
@@ -2829,6 +2830,7 @@ function spriteCanvas(sid, size) {
    セーブデータ
    ===================================================================== */
 const SAVE_KEY = 'pixel-monster-arena-v1';
+let ONB_TEST = null;   // せっていの「さいしょの ながれ」テスト中：もとの セーブを とっておく
 let S = null;
 const defaultSave = () => ({ party: [], box: [], capsules: 10, tier: 0, round: 0, trophies: 0, auto: false, uid: 1, caught: 0, wins: 0, gems: 20, tms: {}, chests: [], chestIdx: 0, dex: {}, items: { respec: 1, reroll4: 1, reroll1: 1, retype: 1 } });
 function loadSave() {
@@ -2839,7 +2841,7 @@ function loadSave() {
       const ok = m => m && SPECIES[m.sid];
       const all = [...s.party, ...(s.box || []), ...(s.stash || [])];
       s.stash = all.filter(m => !ok(m));
-      s.party = s.party.filter(ok); s.box = (s.box || []).filter(ok);
+      s.party = s.party.filter(m => ok(m) && !m.tutMon); s.box = (s.box || []).filter(ok);   // tutMon：訓練の チュートリアル用（のこさない）
       for (const m of all) if (ok(m) && !s.party.includes(m) && !s.box.includes(m)) s.box.push(m);
       while (s.party.length < 1 && s.box.length) s.party.push(s.box.shift());
       if (s.party.length) return Object.assign(defaultSave(), s);
@@ -2855,7 +2857,8 @@ window.addEventListener('storage', (e) => { if (e.key !== SAVE_KEY || SAVE_STALE
   const bg = document.createElement('div'); bg.className = 'askbg'; bg.style.zIndex = 300;
   bg.innerHTML = '<div class="askbox"><div style="margin-bottom:12px">べつの タブ（または まど）で この ゲームが うごいて データが かわりました。<br>この がめんは よみこみなおします。</div><div class="row"><button class="btn">よみこみなおす</button></div></div>';
   bg.querySelector('button').onclick = () => location.reload(); $('app').appendChild(bg); });
-function save() { if (SAVE_STALE) return; if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+function save() { if (SAVE_STALE || ONB_TEST) return;   // ONB_TEST：はじめからの ながれを ためしている あいだは かきこまない
+ if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
 /* ===== ステータス（ポケモンと おなじ しくみ） =====
    6つの のうりょく：HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ
@@ -3451,7 +3454,8 @@ function renderStarter() {
     const d = document.createElement('div');
     const pm = newMon(id); d.innerHTML = `<div class="nm">${sp.n} ${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><p>${sp.desc}</p>${sp.prof ? `<p>${profLine(sp)}</p>` : ''}<p>せいかく：${NATURES[pm.nat].n}（${ivGrade(pm)}）<br>わざ：${pm.moves.map(m => MOVES[m].n).join('・')}</p>`;
     b.appendChild(d);
-    b.onclick = () => { S = defaultSave(); pm.uid = S.uid++; S.party.push(pm);
+    b.onclick = () => { if (S && S.onb === 3) { pm.uid = S.uid++; S.party.push(pm); dexMark(id, 2); S.onb = 4; save(); SND.se('ok'); renderHub(); return; }   // さいしょの ながれ：つぎは くさむら
+      S = defaultSave(); pm.uid = S.uid++; S.party.push(pm);
       const bd = buddyFor(id); if (bd) { const bm = newMon(bd.sid); S.party.push(bm); dexMark(bd.sid, 2); }   // 2たいめ：あいぼうの にがてな ジムに つよい なかま
       save(); renderHub(); setTimeout(async () => { if (!S.pname) await askName(true); if (await ask((bd ? `コーチから ${SPECIES[bd.sid].n}を もらった！\n（${FIELD_NAMES[bd.gym]}ジムで たよりに なるよ）\n\n` : '') + 'まずは チュートリアルで バトルの きほんを やってみよう！', 'はじめる', 'あとで')) startTutorial(); }, 350); };   /* はじめての ときは チュートリアル */
     L.appendChild(b);
@@ -3497,6 +3501,7 @@ function canLearn(sid, id) {
 }
 const TM_POOL = () => [...new Set(Object.keys(MOVES100).filter(id => MOVES[id]).concat(NEW_IDS))];   // あたらしい 技も ふつうに でる
 const CHEST_WEIGHT = { wood: 30, silver: 38, gold: 18, giant: 6, magic: 6, legend: 2 };
+function giveChestKind(kind) { S.chests = S.chests || []; if (S.chests.length >= 4) return null; S.chests.unshift({ kind, at: Date.now() + CHESTS[kind].sec * 1000 }); return kind; }
 function giveChest() {
   S.chests = S.chests || [];
   if (S.chests.length >= 4) return null;
@@ -3697,6 +3702,7 @@ async function tapChest(i) {
   const c = S.chests[i]; if (!c) return;
   const C = CHESTS[c.kind], left = chestLeft(c);
   if (left === 0) return openChest(i);
+  if (S.onb === 5) { S.onbOpen = 1; return openChest(i); }   // さいしょの ながれ：こんかいの ジェムは むりょう
   const cost = gemCost(left);
   if (await ask(`のこり ${fmtTime(left)}。\n💎${cost} ジェムで いますぐ あけますか？（もっている：${S.gems || 0}）`, 'あける', 'やめる')) payOpen(i, cost);
 }
@@ -3789,6 +3795,7 @@ function useTM(m) {
 }
 
 function renderHub() {
+  if (S && S.onb) setTimeout(onbHub, 500);   // さいしょの ながれ：ホームの あんない
   if (S && S.goTrain && !B) { S.goTrain = 0; save(); setTimeout(() => { const b = $('btnTrainTab'); if (b && !B) b.click(); }, 400); }   // チュートリアルの つぎは 訓練へ
   if (!GUILD.checked) { GUILD.checked = true; setTimeout(() => guildMe().catch(() => { }), 0); }   // ギルドに いるか（たからばこ ボーナス）
   { const A = ac(), el = $('acSub'); if (el) el.textContent = A.run ? `ステージ ${A.run.stage + 1}/10 から つづける・スコア ${A.run.score}` : `10れんせん・ハイスコア ${A.best}`; }
@@ -4058,38 +4065,43 @@ document.addEventListener('click', (ev) => { const b = ev.target.closest && ev.t
 let TRT = null;
 const trtW = () => TRN && TRN.W;
 const trtRow = () => { const W = trtW(); if (!W) return 0; const i = W.mv.findIndex(r => MOVES[r.id]); return i < 0 ? 0 : i; };
+const TRS = () => (TRT && TRT.steps) || TRT_STEPS;   // いまの あんない（訓練・ホーム）
 const TRT_STEPS = [
-  { tx: 'ここは <b>訓練</b>。バトルで モンスターが どう うごくかを くみたてる ばしょだよ。<br>いっしょに 1つ つくってみよう！', next: 1 },
-  { sel: '.trnatsel', tx: '① まずは <b>作戦</b>。ふだんの 立ち回りを きめるよ。<br>どれか 1つ タップしてみよう（★が その子の おすすめ）', ok: () => TRT.f.nat },
-  { sel: '.trnatsel', allow: () => [], tx: '作戦には じゃんけんの ような かんけいが あるよ。<br>「<b>どんどん せめる</b>」は「<b>まあいを たもつ</b>」に、「まあいを たもつ」は「<b>どっしり かまえる</b>」に、「どっしり かまえる」は「どんどん せめる」に つよい。<br>あいてより つよい 作戦だと「<b>よゆう（さくせん◎）</b>」で こうげきを うけにくく（ぼうぎょ 1.15ばい）、よわいと「<b>けいかい（さくせん×）</b>」で うけやすく（0.87ばい）なる。おなじ グループ どうしは「ライバルだ！」', next: 1 },
-  { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが <b>技の 行</b>。上ほど 先に 撃つよ。<br>左の 番号を ドラッグすると 順番を かえられる', next: 1 },
-  { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を おいてみよう。<br>「<b>相手のHP</b>」を ○ばんの 技の「<b>使うとき</b>」へ ドラッグ！<br><small>（タップ → 置き場所を タップ でも OK）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
-  { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手の HPが ${p}の とき</b>」に この技を 撃つ。<br>おいた 条件を タップすると ${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも かえられるよ`; }, next: 1 },
-  { sel: '.pal.k-go[data-v="near"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ つぎは <b>撃ち方</b>。<br>「<b>近づいてから</b>」を ○ばんの「その場で撃つ」の わくへ おいてみよう<br><small>（そこまで うごいてから 撃つ。うまく うごけない ときは いまの 間合いで 撃てる 技に きりかえる）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
-  { sel: '[data-a="sim"]', tx: '⑤ できたら <b>模擬戦で ためす</b>！<br>5かい たたかわせて けっかを みせてくれるよ', ok: () => !!document.querySelector('.simtbl') },
-  { sel: '.simcs', allow: () => [], tx: '⑥「<b>条件の はつどう</b>」で、条件が なりたったか（○×）と 何かい 撃ったかが わかる。<br>うまく いかなければ 条件を かえて また ためそう', next: 1, onNext: () => { const a = document.querySelector('.simtbl'); if (a) { const bg = a.closest('.askbg'); if (bg) bg.remove(); } } },
-  { sel: '[data-a="dummy"]', allow: () => [], tx: '🎯 <b>木人戦</b>では 人形を あいてに、条件が いま ○か×かを みながら ためせる。<br>「じょうきょうを つくる」で HP・状態・天候・人形の こうげき なども かえられるよ', next: 1 },
-  { sel: '[data-a="ok"]', tx: '⑦ よければ <b>確定</b>。この子の 訓練が ほぞん されるよ', ok: () => { const m = trMon(TRN && TRN.uid); return !!(m && m.tr && m.tr.prog && m.tr.prog.mv && !TRN.dirty); } },
-  { tx: '⑧ これで 試合では この せっていどおりに たたかうよ。バトル中に きみが できるのは <b>こうたい</b>だけ。<br>まけたら ここに もどって なおそう！　これで おしまい！', next: 1, end: 1 },
+  { tx: 'ここは<b>訓練</b>です。バトルでモンスターがどう動くかを組み立てる場所です。<br>一緒にひとつ作ってみましょう！', next: 1 },
+  { sel: '.trnatsel', tx: '① まずは<b>作戦</b>です。普段の立ち回りを決めます。<br>どれかひとつタップしてみましょう（★がこのモンスターのおすすめです）。', ok: () => TRT.f.nat },
+  { sel: '.trnatsel', allow: () => [], tx: '作戦には、じゃんけんのような相性があります。<br>⚔「<b>どんどん せめる</b>」は 🏹「<b>まあいを たもつ</b>」に、🏹「まあいを たもつ」は 🛡「<b>どっしり かまえる</b>」に、🛡「どっしり かまえる」は ⚔「どんどん せめる」に強くなります。<br>相手より強い作戦だと「<b>よゆう（さくせん◎）</b>」になり、攻撃を受けにくく（防御1.15倍）なります。弱いと「<b>けいかい（さくせん×）</b>」になり、受けやすく（0.87倍）なります。同じグループ同士だと「ライバルだ！」になります。', next: 1 },
+  { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが<b>技の行</b>です。上にある技ほど先に撃ちます。<br>左の番号をドラッグすると、順番を入れ替えられます。', next: 1 },
+  { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を置いてみましょう。<br>「<b>相手のHP</b>」を ○番の技の「<b>使うとき</b>」へドラッグしてください。<br><small>（タップしてから置き場所をタップしても置けます）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
+  { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手のHPが${p}のとき</b>」に、この技を撃ちます。<br>置いた条件をタップすると、${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも変えられます。`; }, next: 1 },
+  { sel: '.pal.k-go[data-v="near"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ 次は<b>撃ち方</b>です。<br>「<b>近づいてから</b>」を ○番の「その場で撃つ」の枠へ置いてみましょう。<br><small>（その位置まで動いてから撃ちます。うまく動けないときは、今の間合いで撃てる技に切り替えます）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
+  { sel: '[data-a="sim"]', tx: '⑤ できたら<b>模擬戦</b>で試してみましょう！<br>5回戦わせて、結果を見せてくれます。', ok: () => !!document.querySelector('.simtbl') },
+  { sel: '.simcs', allow: () => [], tx: '⑥「<b>条件の発動</b>」を見ると、条件が成り立ったか（○×）と、何回撃ったかが分かります。<br>うまくいかなければ、条件を変えてもう一度試しましょう。', next: 1, onNext: () => { const a = document.querySelector('.simtbl'); if (a) { const bg = a.closest('.askbg'); if (bg) bg.remove(); } } },
+  { sel: '[data-a="dummy"]', allow: () => [], tx: '🎯 <b>木人戦</b>では人形を相手に、条件が今○か×かを見ながら試せます。<br>「じょうきょうを つくる」で、HP・状態・天候・人形の攻撃なども変えられます。', next: 1 },
+  { sel: '[data-a="ok"]', tx: '⑦ よければ<b>確定</b>します。このモンスターの訓練が保存されます。', ok: () => { const m = trMon(TRN && TRN.uid); return !!(m && m.tr && m.tr.prog && m.tr.prog.mv && !TRN.dirty); } },
+  { tx: '⑧ これで試合では、この設定どおりに戦います。バトル中にあなたができるのは<b>交代</b>だけです。<br>負けたら、ここに戻って直しましょう。訓練のチュートリアルはこれで終わりです！', next: 1, end: 1 },
 ];
 // チュートリアル中は いま あんない している ところ（と ふきだし）しか さわれない。スクロールは できる
-const trtAllowed = (el) => { if (!TRT || !el || !el.closest) return true; if (el.closest('#trtut .bub') || el.closest('.askbg')) return true; /* かくにんの まどは いつでも おせる（おせないと すすめなく なる） */ if ($('scTrain').hidden) return true;
-  const st = TRT_STEPS[TRT.i], q = st.allow ? st.allow() : st.sel ? [typeof st.sel === 'function' ? st.sel() : st.sel] : [];
+const trtAllowed = (el) => { if (!TRT || !el || !el.closest) return true; if (el.closest('#trtut .bub') || el.closest('.askbg')) return true; /* かくにんの まどは いつでも おせる（おせないと すすめなく なる） */ if ($(TRT.scr).hidden) return true;
+  const st = TRS()[TRT.i], q = st.allow ? st.allow() : st.sel ? [typeof st.sel === 'function' ? st.sel() : st.sel] : [];
   return q.some(x => { const t = el.closest(x); return !!t; }); };
 for (const ev of ['pointerdown', 'mousedown', 'click']) window.addEventListener(ev, (e) => { if (TRT && !trtAllowed(e.target)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } }, true);
-function trtStart() { trtStop(); document.querySelectorAll('.askbg').forEach(e => e.remove()); /* ほかの がめんの まどが のこって いたら とじる */ TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1 }; TRT.el.id = 'trtut'; TRT.el.innerHTML = '<svg class="dim"><path fill-rule="evenodd"></path></svg><div class="hls"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; document.body.appendChild(TRT.el);
+function trtStart(o) { o = o || {}; trtStop(); document.querySelectorAll('.askbg').forEach(e => e.remove()); /* ほかの がめんの まどが のこって いたら とじる */ TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1, steps: o.steps, scr: o.scr || 'scTrain', onEnd: o.onEnd }; /* steps・scr：ホーム などでも つかう（さいしょの ながれ） */ TRT.el.id = 'trtut'; TRT.el.innerHTML = '<svg class="dim"><path fill-rule="evenodd"></path></svg><div class="hls"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; document.body.appendChild(TRT.el);
   TRT.el.querySelector('.skip').onclick = () => { SND.se('back'); trtEnd(); };
-  TRT.el.querySelector('.nx').onclick = () => { const st = TRT_STEPS[TRT.i]; if (st.onNext) st.onNext(); if (st.end) { SND.se('ok'); trtEnd(); return; } SND.se('click'); trtGo(TRT.i + 1); };
+  TRT.el.querySelector('.nx').onclick = () => { const st = TRS()[TRT.i]; if (st.onNext) st.onNext(); if (st.end) { SND.se('ok'); trtEnd(); return; } SND.se('click'); trtGo(TRT.i + 1); };
   trtGo(0); trtLoop(); }
-function trtGo(i) { TRT.i = i; TRT.scrolled = -1; const st = TRT_STEPS[i]; TRT.el.querySelector('.tx').innerHTML = (typeof st.tx === 'function' ? st.tx() : st.tx).replace('○ばん', `${trtRow() + 1}ばん`); TRT.el.querySelector('.nx').hidden = !st.next; TRT.el.querySelector('.nx').textContent = st.end ? 'おわり ✔' : 'つぎへ ▶'; }
-function trtEnd() { if (S) { S.trTutDone = 1; save(); } trtStop(); }
-function trtStop() { if (TRT && TRT.el) TRT.el.remove(); TRT = null; }
+function trtGo(i) { TRT.i = i; TRT.scrolled = -1; const st = TRS()[i]; TRT.el.querySelector('.tx').innerHTML = (typeof st.tx === 'function' ? st.tx() : st.tx).replace('○番', `${trtRow() + 1}番`); TRT.el.querySelector('.nx').hidden = !st.next; TRT.el.querySelector('.nx').textContent = st.end ? 'おわり ✔' : 'つぎへ ▶'; }
+function trtEnd() { const T = TRT; if (S && T && !T.steps) { S.trTutDone = 1; save(); } trtStop(); if (T && T.onEnd) T.onEnd(); }
+function trtStop() { if (TRT && TRT.el) TRT.el.remove(); TRT = null; $('scTrain').classList.remove('trt-on'); }
 function trtLoop() {
   if (!TRT) return; requestAnimationFrame(trtLoop);
-  const on = !$('scTrain').hidden; TRT.el.hidden = !on; if (!on) return;
-  const st = TRT_STEPS[TRT.i]; if (st.ok && st.ok()) { SND.se('ok'); if (TRT.i + 1 < TRT_STEPS.length) trtGo(TRT.i + 1); return; }
+  const home = TRT.scr !== 'scTrain', on = !$(TRT.scr).hidden && !(home && document.querySelector('.askbg')); TRT.el.hidden = !on;   // ホームの あんない：まど（たからばこの なかみ など）が でている あいだは かくす
+  if (!on && !home) return;
+  if (!home) $('scTrain').classList.add('trt-on');   // したに よゆうを つくって、さいごの ボタンも まんなかまで スクロール できる
+  const st = TRS()[TRT.i]; if (st.ok && st.ok()) { SND.se('ok'); if (TRT.i + 1 < TRS().length) trtGo(TRT.i + 1); else trtEnd(); return; }
+  if (!on) return;
   const q = typeof st.sel === 'function' ? st.sel() : st.sel; let t = q ? document.querySelector(q) : null;
   if (t && t.closest('.trside.mini')) { TR_MINI = false; const sd = t.closest('.trside'); sd.classList.remove('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▼ たたむ'; }
+  if (t && !home && !t.closest('.trside')) { const sd = document.querySelector('#scTrain .trside'); if (sd && getComputedStyle(sd).position === 'sticky' && !sd.classList.contains('mini')) { const r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.top && r1.top < r2.bottom) { TR_MINI = true; sd.classList.add('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▲ パレットを ひらく'; TRT.scrolled = -1; } } }   // あんない している ボタンが したの パレットに かくれる：たたむ（もう いちど まんなかへ）
   const bub = TRT.el.querySelector('.bub'), vw = innerWidth, vh = innerHeight;
   if (TRT.scrolled !== TRT.i) { const sc = st.scr ? document.querySelector(st.scr()) : t; if (sc) { TRT.scrolled = TRT.i; const box = sc.closest('.screen'); if (box) { const r0 = sc.getBoundingClientRect(), b0 = box.getBoundingClientRect(), k = box.clientHeight / (b0.height || 1); box.scrollBy({ top: (r0.top - b0.top - (st.scr ? 12 : b0.height / 2 - r0.height / 2)) * k, behavior: 'smooth' }); } } }   // 訓練の 画面 だけ スクロール（まわりの わくは うごかさない）
   // ひからせる ところ（おく ものと おく ばしょ の 2つ ある ことも）：まわりを うすぐらく して あなを あける
@@ -4410,7 +4422,7 @@ function askName(first) {
     const go = () => { const raw = inp.value.trim(), v = safeName(raw, NAME_MAX);
       if (!v) { bg.querySelector('#nmErr').textContent = 'なまえを いれてね'; inp.focus(); return; }
       if (v !== raw.replace(/[<>&"'`\\]/g, '').slice(0, NAME_MAX)) { bg.querySelector('#nmErr').textContent = 'つかえない ことばが はいっています'; inp.focus(); return; }
-      S.pname = v; save(); SND.se('ok'); if (window.PMA_NAME) window.PMA_NAME.set(v).catch(() => { }); syncName(); done(v); };   // アプリ・サイト版：オンラインの なまえも おなじに
+      S.pname = v; save(); SND.se('ok'); if (!ONB_TEST) { if (window.PMA_NAME) window.PMA_NAME.set(v).catch(() => { }); syncName(); } done(v); };   // アプリ・サイト版：オンラインの なまえも おなじに
     okb.onclick = go; inp.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } };
     inp.onkeyup = (e) => { if (e.key === 'Enter') e.preventDefault(); };
     if (!first) bs[0].onclick = () => done(null);
@@ -7269,6 +7281,7 @@ function updateFighter(f, dt) {
       }
       aiDodgeCheck(f, o);
       if (f.state !== 'free') break;
+      if (tutHeld()) break;   // チュートリアル：うごきは こちらで きめる
       if (f.order) { if (orderStep(f, o, dt)) { if (f.order && f.order.tr && autoMoves(f) && trProg(f)) chipTick(f, o, dt); break; } }   // 訓練の 隠れて／回り込んで：うごきながら 撃つ タイミングを みる
       if (f.v.encore && f.queued !== f.v.encore.id && f.queued !== null) f.queued = null;
       // 移動は モンスター自身が おこなう。オートOFFなら わざは プレイヤーの 指示だけ
@@ -7442,6 +7455,7 @@ function updateFighter(f, dt) {
 const CATCH_HOT = .45;   // この かくりつ いじょうで オーブの ボタンを ひからせる
 function catchProb(e) { return clamp(e.sp.catch * (1.6 - 1.3 * e.hp / e.maxHp) * (e.state === 'stun' ? 1.15 : 1) * (e.status === 'slp' || e.status === 'frz' ? 2 : e.status ? 1.5 : 1), .04, .95); }
 function cmdCapsule() {
+  if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; B.paused = false; }   // チュートリアル：ここを おして と とめて いた
   if (!B || B.kind !== 'wild' || B.mode !== 'fight' || B.catchO || B.paused) return;
   if (S.capsules <= 0) { say('オーブが もう ない！'); return; }
   const e = active(1); if (!targetable(e)) return;
@@ -7463,7 +7477,7 @@ function updateCatch(dt) {
   } else if (c.phase === 'shake') {
     if (c.t >= .6) {
       c.t = 0;
-      if (Math.random() < Math.pow(c.p, 1 / 3)) {
+      if (B.cfg.onbCatch || Math.random() < Math.pow(c.p, 1 / 3)) {   // さいしょの くさむらは かならず つかまる
         c.shakes++; SND.se(c.shakes >= 3 ? 'caught' : 'shake'); if (c.shakes >= 3) sheetFx('confetti', c.x, c.y - 20, 1.5);
         if (c.shakes >= 3) {
           c.phase = 'done';
@@ -8292,6 +8306,7 @@ function bStep(dt) {
   else if (B.mode === 'fight' || B.mode === 'intro') {
     const a = active(0), e = active(1);
     updateFighter(a, dt); if (B.mode === 'fight' || B.mode === 'intro') updateFighter(e, dt);
+    if (TUT) tutPin(dt);
     if (targetable(a) && targetable(e)) {
       const d = dist(a, e), min = a.r + e.r - 2;
       if (d < min && d > .001) { const p = min - d, nx = (a.x - e.x) / d, ny = (a.y - e.y) / d; a.x += nx * p * .5; a.y += ny * p * .5; e.x -= nx * p * .5; e.y -= ny * p * .5; clampF(a); clampF(e); }
@@ -8410,6 +8425,8 @@ function endBattle(res) {
   const lines = [];
   const caps0 = S.capsules, gems0 = S.gems || 0;
   if (B.kind === 'wild') {
+    if (TUT) { TUT = null; tutHide(); $('tutBox').hidden = true; }
+    if (res === 'caught' && S.onb === 4) { S.onb = 5; giveChestKind('wood'); lines.push('草むらのごほうびに、<b>宝箱</b>をもらいました！'); }   // さいしょの ながれ：つぎは たからばこ
     if (res === 'caught') {
       const e = active(1); const nm = { uid: S.uid++, sid: e.mon.sid, nat: e.mon.nat, iv: e.mon.iv, moves: e.mon.moves.slice() };   // 戦った ときの 性格・ステータス・わざ の まま
       S.caught++;
@@ -8465,19 +8482,25 @@ function showResult() {
 // ステップ：{ tx: せつめい, hl: ひからせる ボタン, wait: できたら true, pause: とめて よむ, run: まいフレーム（あいての うごきを きめる）}
 let TUT = null;
 function startTutorial() {
-  if (!S || !S.party.length) return;
+  if (!S) return;
   // チュートリアル用の モンスター（パーティとは べつ）：ほのお → みずに こうたい。あいては みずに よわい よわい モンスター
   const me = newMon('a_fire2'), buddy = newMon('a_water2'), tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; };
   const weak = (id) => [SPECIES[id].type, SPECIES[id].type2].some(t => effOf('water', t) >= 2) && effOf(SPECIES[id].type, 'water') <= 1 && !(SPECIES[id].type2 && effOf(SPECIES[id].type2, 'water') > 1);
   const dummyId = poolIds().filter(id => !STARTERS.includes(id) && !SPECIES[id].rare && weak(id)).sort((a, b) => tot(a) - tot(b))[0] || poolIds()[0];
-  me.tutPlan = 'kimagure'; buddy.tutPlan = 'yuukan';   // 作戦：さいしょは ふつう、こうたいした こは「よゆう（さくせん◎）」に なる
-  const en = newMon(dummyId); en.tutPlan = 'kimagure';
+  me.tutPlan = 'kimagure'; buddy.tutPlan = 'yuukan'; me.nat = buddy.nat = 'reisei';   // せいかくも きめる（むらっけ などで ふきだしが ふえない）   // 作戦：さいしょは ふつう、こうたいした こは「よゆう（さくせん◎）」に なる
+  const en = newMon(dummyId); en.tutPlan = 'kimagure'; en.nat = 'reisei';
   const ids = Object.keys(MOVES).filter(id => !MOVES[id].nw), plain = (m) => !m.sucker && !m.fakeout && !m.ohko && !m.grab && !m.guardDash && !m.back && !m.trail && !m.wallBreak && !m.crash && !m.pat && !(m.e && (m.e.recoil || m.e.self)), pickK = (k) => ids.find(id => MOVES[id].k === k && plain(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 80 && MOVES[id].t === 'normal') || ids.find(id => MOVES[id].k === k && plain(MOVES[id]) && MOVES[id].power > 0);
-  TUT = { i: -1, t: 0, f: {}, auto0: S.auto, em: { strike: pickK('strike'), beam: pickK('beam'), dash: pickK('dash') } };
+  const pickP = () => ids.find(id => MOVES[id].k === 'proj' && MOVES[id].aim === 'dir' && plain(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 80 && MOVES[id].t === 'normal') || ids.find(id => MOVES[id].k === 'proj' && MOVES[id].aim === 'dir' && plain(MOVES[id]) && MOVES[id].power > 0) || pickK('proj');
+  TUT = { i: -1, t: 0, f: {}, auto0: S.auto, em: { shot: pickP(), strike: pickK('strike'), beam: pickK('beam') } };
+  { const fp = ids.find(id => MOVES[id].k === 'proj' && MOVES[id].t === 'fire' && plain(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 80); if (fp) me.moves = [fp, ...me.moves.filter(x => x !== fp)].slice(0, 4); }   // さいしょに みせる わざは とびどうぐ
   S.auto = false;
   startBattle({ kind: 'tutorial', tutorial: true, field: 'grass', p0: [me, buddy], enemies: [en], title: 'チュートリアル', intro: 'れんしゅう あいてが あらわれた！', trainer: { name: 'コーチ', spr: trArt('boy') }, skill: 0 });
+  { const st = B.st;   // まんなかの しょうがいぶつは なし（ひろい ばしょで みせる）
+    if (st.propSol) { st.props.forEach((p, i) => { if (!st.propSol[i].length) return; st.propGone[i] = true; const rs = new Set(st.propSol[i]); st.solid = st.solid.filter(r => !rs.has(r)); }); buildNav(st); }
+    const sp = st.spawn || [{ x: st.fx0 + 200, y: (st.fy0 + st.fy1) / 2 }, { x: st.fx1 - 200, y: (st.fy0 + st.fy1) / 2 }], cx = (sp[0].x + sp[1].x) / 2, cy = (sp[0].y + sp[1].y) / 2;
+    TUT.pin = [{ x: cx - 120, y: cy }, { x: cx + 120, y: cy }]; }   // チュートリアル中は この いちに いる（かってに うごかない）
   const o = B.sides[1].fs[0];
-  o.moves = [TUT.em.strike, TUT.em.beam, TUT.em.dash, Object.keys(MOVES).find(id => MOVES[id].k === 'protect')].filter(Boolean); TUT.em.guard = o.moves[3];
+  o.moves = [TUT.em.shot, TUT.em.strike, TUT.em.beam, Object.keys(MOVES).find(id => MOVES[id].k === 'protect')].filter(Boolean); TUT.em.guard = o.moves[3];
   o.atk *= .35; o.spa *= .35;
   setupCmds();
 }
@@ -8487,24 +8510,26 @@ function tutEnemy(id, hold) {   // あいてに わざを ださせる（hold �
   o.cd[id] = 0; beginMove(o, id); if (o.cur) { o.cur.wind = Math.max(o.cur.wind, hold); o.cur.tx = f.x; o.cur.ty = f.y; } return !!o.cur;
 }
 // stop：その ばめんに なった しゅんかんに とめて せつめいを だす（それまでは 文字を ださない）
+const TS = () => (TUT && TUT.steps) || TUT_STEPS;   // いまの チュートリアルの すすめかた（バトル・くさむら）
 const TUT_STEPS = [
-  { tx: 'ようこそ！ この ゲームの バトルは <b>モンスターが じぶんで たたかう</b>。きみは みているだけ。<br>どう たたかうかは <b>訓練</b>で まえもって おしえて おくんだ。', pause: true },
-  { tx: '① いま <b>あたまの うえに でた 文字</b>が、うった <b>わざの なまえ</b>。<br>モンスターは じぶんで わざを えらんで うつよ。',
+  { tx: 'ようこそ！ このゲームのバトルでは、<b>モンスターが自分で考えて戦います</b>。<br>どう戦うかは、前もって<b>訓練</b>で教えておきます。', pause: true },
+  { tx: '① モンスターの<b>頭の上に出た文字</b>が、使った<b>技の名前</b>です。<br>モンスターは自分で技を選んで撃ちます。',
     run: (T) => { const f = tutF(); if (!f) return; if (f.cur && !T.f.at) T.f.at = TUT.t;
-      if (!T.f.at && TUT.t > 2.5 && f.state === 'free' && !f.cur) { const id = f.moves.find(x => MOVES[x] && isDamaging(MOVES[x]) && !MOVES[x].nw); if (id) { f.cd[id] = 0; beginMove(f, id); } } },
+      if (!T.f.at && TUT.t > .8 && f.state === 'free') { const ok = (x) => MOVES[x] && isDamaging(MOVES[x]), id = f.moves.find(x => ok(x) && MOVES[x].k === 'proj') || f.moves.find(ok); if (id) { f.cur = null; f.cd[id] = 0; beginMove(f, id); } } },
     stop: (T) => T.f.at && TUT.t - T.f.at > .35 },
-  { tx: '② あいてが わざを <b>ためている</b>！ じめんに でた <b>わく</b>が こうげきの はんいだよ。<br>大きな わざほど ためが ながい。', hold: true,
-    run: (T) => { const f = tutF(); if (!T.f.sent && TUT.t > .3 && f && f.state === 'free' && !f.cur && !B.projs.some(q => q.side === 0) && tutEnemy(TUT.em.strike, 1.4)) { T.f.sent = TUT.t; TUT.dodge = 1; } },
+  { tx: '② 相手が技を<b>溜めています</b>！ <b>赤い点線</b>は、技が飛んでくる方向です。<br>強い技ほど、溜めが長くなります。',
+    run: (T) => { const f = tutF(); if (!T.f.sent && TUT.t > .3 && f && f.state === 'free' && !B.projs.some(q => q.side === 0) && tutEnemy(TUT.em.shot, 1.4)) { T.f.sent = TUT.t; TUT.dodge = 1; } },
     stop: (T) => T.f.sent && TUT.t - T.f.sent > .45 },
-  { tx: (T) => T.f.dodged ? '③ いま こうげきが <b>あたる しゅんかん</b>に <b>じどうで ステップ</b>して よけた！<br>よけるか どうかは「<b>かいひ</b>」の たかさで きまる。いつも よけられる わけでは ないよ。' : '③ こうげきが <b>あたる しゅんかん</b>に、「<b>かいひ</b>」が たかいと <b>じどうで ステップ</b>して よけることが あるよ。', hold: true,
+  { tx: (T) => T.f.dodged ? '③ 攻撃が<b>当たる瞬間</b>に、<b>自動でステップ</b>してかわしました！<br>かわせるかどうかは「<b>回避</b>」の高さで決まります。いつもかわせるわけではありません。' : '③ 攻撃が<b>当たる瞬間</b>に、「<b>回避</b>」が高いと<b>自動でステップ</b>してかわすことがあります。',
     run: (T) => { if (T.f.dodged && !T.f.at) T.f.at = TUT.t; if (!T.f.at && tutO() && tutO().state === 'free' && TUT.t > 2.5) T.f.at = TUT.t; },
     stop: (T) => T.f.at && TUT.t - T.f.at > .5, done: () => { TUT.dodge = 0; } },
-  { tx: '④ いまは 訓練を して いないので <b>お任せ</b>で うっている。お任せは てきとうに えらぶから、つよい あいてには かてない。<br><b>訓練</b>で「どの わざを・いつ・どう うつか」を きめると ぐんと つよく なる！<small>（ガード技も「<b>攻撃を受けた瞬間</b>」の 条件で うてる）</small>', pause: true },
-  { tx: '⑤ <b>ひかえ</b>の モンスターを タップすると こうたい できる。バトル中に きみが できるのは これ だけ！<br>ひかえに でている「<b>有利</b>」は タイプ相性の めやす。<b>ひかって いる こ</b>を タップしよう', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 },
-  { tx: (T) => TUT.mood ? `⑥ でてきた ときに「<b>${TUT.mood}</b>」と でたね。あいてとの <b>作戦の 相性</b>が いい しるし。<br>作戦の 相性は ⚔近 → 🏹遠 → 🛡中 → ⚔近（やじるしの さきに つよい）。訓練で えらべるよ` : '⑥ でてきた ときに「<b>よゆう（さくせん◎）</b>」などと でるのは、あいてとの <b>作戦の 相性</b>。<br>⚔近 → 🏹遠 → 🛡中 → ⚔近（やじるしの さきに つよい）。訓練で えらべるよ',
-    run: (T) => { if (TUT.mood && !T.f.at) T.f.at = TUT.t; if (!T.f.at && TUT.t > 4) T.f.at = TUT.t; }, stop: (T) => T.f.at && TUT.t - T.f.at > .5 },
-  { tx: 'あいてを たおして しあげよう！ おわったら したの <b>訓練</b>タブで わざの つかいかたを きめよう', pause: true },
-  { tx: 'あいてを たおそう！', fin: true },
+  { tx: '④ 今は訓練をしていないので、<b>お任せ</b>で戦っています。お任せでは技を適当に選ぶので、強い相手には勝てません。<br><b>訓練</b>で「どの技を・いつ・どう撃つか」を決めると、ぐっと強くなります！<small>（ガード技も「<b>攻撃を受けた瞬間</b>」の条件で使えます）</small>', pause: true },
+  { tx: '⑤ <b>控え</b>のモンスターをタップすると、交代できます。バトル中にあなたができるのは、これだけです！<br>控えの「<b>有利</b>」は、タイプ相性の目安です。<b>光っているモンスター</b>をタップしてみましょう。', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 },
+  { tx: (T) => TUT.mood ? `⑥ 出てきたときに「<b>${TUT.mood}</b>」と表示されました。相手との<b>作戦の相性</b>が良いしるしです。<br>作戦の相性は ⚔近 → 🏹遠 → 🛡中 → ⚔近（矢印の先に強い）。作戦は訓練で選べます。` : '⑥ 出てきたときに「<b>よゆう（さくせん◎）</b>」などと表示されるのは、相手との<b>作戦の相性</b>です。<br>⚔近 → 🏹遠 → 🛡中 → ⚔近（矢印の先に強い）。作戦は訓練で選べます。',
+    run: (T) => { const f = tutF(); if (!TUT.mood && f && f.state === 'free' && TUT.t > .4) { persona(f); if (f.moodPop) { const M = f.moodPop; f.moodPop = null; popText(f.x, f.y - 86, M.n, M.col, true); TUT.mood = M.n; } }   // でてきた ときの きもち
+      if (TUT.mood && !T.f.at) T.f.at = TUT.t; if (!T.f.at && TUT.t > 4) T.f.at = TUT.t; }, stop: (T) => T.f.at && TUT.t - T.f.at > .5 },
+  { tx: '最後に、相手を倒して仕上げましょう！', pause: true },
+  { tx: '', fin: true },
 ];
 function tutShow(step) {
   const box = $('tutBox'); box.hidden = false; $('tutTx').innerHTML = typeof step.tx === 'function' ? step.tx(TUT) : step.tx; if (B) B.padT = 0;   // カメラの あきを はかりなおす
@@ -8514,16 +8539,16 @@ function tutShow(step) {
   const el = step.hl && step.hl(); if (el) el.classList.add('tut-hl'); TUT.hlEl = el || null;
 }
 function tutGo(i) {
-  if (!TUT) return; const prev = TUT_STEPS[TUT.i]; if (prev && prev.done) prev.done(TUT);
+  if (!TUT) return; const prev = TS()[TUT.i]; if (prev && prev.done) prev.done(TUT);
   TUT.i = i; TUT.t = 0; TUT.f = {}; TUT.frozen = false;
-  const st = TUT_STEPS[i]; if (!st) return;
+  const st = TS()[i]; if (!st) return;
   if (st.fin) { $('tutBox').hidden = true; tutHide(); const o = tutO(); if (o) { o.hp = Math.min(o.hp, Math.ceil(o.maxHp * .3)); } B.paused = false; return; }
-  B.paused = !!st.pause; if (st.stop) { $('tutBox').hidden = true; return; } tutShow(st); if (st.pause) SND.se('ok');
+  B.paused = !!st.pause; if (st.stop || st.hideTill) { $('tutBox').hidden = true; return; } tutShow(st); if (st.pause) SND.se('ok');
 }
 function tutHide() { document.querySelectorAll('.tut-hl').forEach(e => e.classList.remove('tut-hl')); $('tutHand').hidden = true; }
 function tutTick(dt) {
   if (!TUT || !B || !B.cfg.tutorial) return;
-  const st = TUT_STEPS[TUT.i];
+  const st = TS()[TUT.i];
   // 指さし：ひからせて いる ボタンの うえ
   const hand = $('tutHand'), el = TUT.hlEl && document.body.contains(TUT.hlEl) ? TUT.hlEl : (st && st.hl && st.hl());
   if (el && st && !st.fin) { if (!el.classList.contains('tut-hl')) { el.classList.add('tut-hl'); TUT.hlEl = el; } const r = el.getBoundingClientRect(), up = r.top > 90;   // 指さし：ボタンの うえから（うえに よゆうが なければ したから）
@@ -8540,7 +8565,6 @@ function tutTick(dt) {
   if (f) f.hp = Math.max(f.hp, f.maxHp * .45);
   if (o) { o.hp = Math.max(o.hp, o.maxHp * .5); o.aiT = 9; if (!o.cur) o.queued = null; o.dodgeCd = 9; }
   if (st.pause || TUT.f.stopped) return;
-  if (st.hold && f) { f.aiT = 9; f.queued = null; if (f.state === 'free') f.cur = null; if (o && o.state === 'wind' && o.cur) { o.cur.tx = f.x; o.cur.ty = f.y; } }   // わくは じぶんの あしもとに（よける ところを みせる）   // せつめいの あいだは じぶんも かってに うたない
   if (st.near && !TUT.f.placed && f && o) {   // れんしゅうしやすい きょりに よせる
     TUT.f.placed = 1; const a = Math.atan2(o.y - f.y, o.x - f.x), d = Math.hypot(o.x - f.x, o.y - f.y);
     if (d > st.near) { o.x = f.x + Math.cos(a) * st.near; o.y = f.y + Math.sin(a) * st.near; clampF(o); if (B.st.solid) freeSpot(o); burst(o.x, o.y, '#ffffff', 10, 90, .3); }
@@ -8549,18 +8573,81 @@ function tutTick(dt) {
   if (st.stop && st.stop(TUT)) { TUT.f.stopped = 1; B.paused = true; tutShow(st); SND.se('ok'); return; }   // その ばめんで とめて せつめい
   if (st.freeze && !TUT.f.froze && st.freeze(TUT)) { TUT.f.froze = 1; TUT.frozen = true; B.paused = true; tutShow(st); }   // しじを まつ あいだ 時間を とめる
   if (st.wait && st.wait()) {
-    const nx = TUT_STEPS[TUT.i + 1]; SND.se('caught'); tutHide(); $('tutBox').hidden = true; B.slowT = 0;
+    const nx = TS()[TUT.i + 1]; SND.se('caught'); tutHide(); $('tutBox').hidden = true; B.slowT = 0;
     if (st.done) st.done(TUT);
     const d = nx && nx.delay || .6; TUT.busy = true; setTimeout(() => { if (TUT) { TUT.busy = false; tutGo(TUT.i + 1); } }, d * 1000);
   }
 }
+// チュートリアル中は モンスターを こちらで うごかす：きめた いちに もどり、かってに わざを うたない（さいごの「たおそう」から じゆう）
+const tutHeld = () => !!(TUT && TUT.pin && !(TS()[TUT.i] && TS()[TUT.i].fin));
+function tutPin(dt) {
+  if (!tutHeld()) return;
+  for (const s of [0, 1]) { const f = B.sides[s].fs[B.sides[s].act]; if (!f || f.hp <= 0) continue;
+    f.aiT = Math.max(f.aiT || 0, 9); f.queued = null; f.want = null; f.order = null; f.stk = null; f.moving = false;
+    if (f.state === 'free') { f.cur = null; const p = TUT.pin[s], k = Math.min(1, dt * 6); f.x += (p.x - f.x) * k; f.y += (p.y - f.y) * k; f.face = s ? -1 : 1; } }
+}
+/* ---------- さいしょの ながれ（S.onb）：1 バトル → 2 訓練 → 3 なまえ・さいしょの 1体 → 4 くさむら → 5 たからばこ → 0 おわり ---------- */
+function startOnboarding() { S = defaultSave(); S.onb = 1; startTutorial(); }
+function onbNext() {
+  if (!S || !S.onb) return renderHub();
+  if (S.onb === 1) return startTutorial();
+  if (S.onb === 2) return trainTutorial(() => { S.onb = 3; onbNext(); });
+  if (S.onb === 3) { (async () => { if (!S.pname) await askName(true); renderStarter(); })(); return; }
+  renderHub();
+}
+// 訓練の チュートリアル：訓練用の モンスターで やる（おわったら いなくなる）
+function trainTutorial(done) {
+  const m = newMon('a_water2'); m.tutMon = 1; m.nat = 'reisei'; S.party.push(m);
+  renderTrain(m.uid);
+  trtStart({ onEnd: () => { S.party = S.party.filter(x => !x.tutMon); if (TRN && TRN.uid === m.uid) TRN = null; S.trTutDone = 1; save(); if (done) done(); } });
+}
+// さいしょの くさむら：よわい モンスターが でて、かならず つかまえられる
+const WILD_STEPS = [
+  { tx: '野生のモンスターが現れました！ 草むらでは、モンスターを捕まえて仲間にできます。<br>まずは戦って、少し弱らせましょう。', pause: true },
+  { tx: '今です！ 下の「<b>オーブ</b>」をタップして、モンスターを捕まえましょう。<br><small>（弱っているほど捕まえやすくなります）</small>', hideTill: true, hl: () => $('cCap'),
+    freeze: () => { const o = tutO(); return TUT.t > 7 || (TUT.t > 2 && o && o.hp < o.maxHp * .75); }, wait: () => B.mode === 'catch' },
+  { tx: '', fin: true },
+];
+function onbWild() {
+  const tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; };
+  const pool = poolIds().filter(id => !STARTERS.includes(id) && !SPECIES[id].rare && !S.party.some(m => m.sid === id)).sort((a, b) => tot(a) - tot(b)).slice(0, 12), sid = choice(pool) || poolIds()[0];
+  S.capsules = Math.max(S.capsules || 0, 1);
+  TUT = { i: -1, t: 0, f: {}, auto0: S.auto, steps: WILD_STEPS };
+  startBattle({ kind: 'wild', tutorial: true, onbCatch: true, enemies: [fixMon({ uid: -1, sid })], title: 'くさむら', intro: 'くさむらが ガサガサ ゆれている…' });
+  const o = B.sides[1].fs[0]; o.atk *= .35; o.spa *= .35;
+}
+// ホームでの あんない
+const HUB_GRASS = [
+  { sel: '#btnWild', tx: () => `${SPECIES[S.party[0].sid].n}が仲間になりました！<br>一緒に<b>草むら</b>へ行って、モンスターを捕まえてみましょう。「<b>くさむら</b>」をタップしてください。`, ok: () => !!B },
+];
+const HUB_CHEST = [
+  { sel: '.chest[data-i="0"]', allow: () => [], tx: '草むらのごほうびに、<b>宝箱</b>をもらいました！<br>宝箱からは、モンスター・技のスクロール・オーブなどが出てきます。', next: 1 },
+  { sel: '.chest[data-i="0"]', tx: '宝箱は、時間が経つと開けられるようになります。<b>ジェム</b>を使えば、すぐに開けることもできます。<br>今回のジェムは<b>無料</b>です！ 宝箱をタップして開けてみましょう。', ok: () => S.onbOpen && !document.querySelector('.askbg') },
+  { sel: '#btnJourney', allow: () => [], tx: () => `これで仲間が<b>${S.party.length + S.box.length}体</b>になりました！<br>準備ができたら「<b>アーケード</b>」から<b>ジム戦</b>に挑戦してみましょう。がんばってください！`, next: 1, end: 1 },
+];
+function onbHub() {
+  if (!S || !S.onb || B || TRT || $('scHub').hidden || document.querySelector('.askbg')) return;
+  if (S.onb < 4) { if (S.party.length) S.onb = 4; else return; }
+  if (S.onb === 4) trtStart({ steps: HUB_GRASS, scr: 'scHub' });
+  else if (S.onb === 5) { if (!(S.chests || []).length) giveChestKind('wood'); renderChests(); trtStart({ steps: HUB_CHEST, scr: 'scHub', onEnd: onbFinish }); }
+}
+async function onbFinish() {
+  S.onb = 0; S.tutDone = true; S.trTutDone = 1; delete S.onbOpen; save();
+  if (ONB_TEST) { await ask('テストはここまでです。元のデータに戻します。', 'OK', ''); S = ONB_TEST; ONB_TEST = null; renderHub(); }
+}
+// せっていの テスト：いまの データは そのまま（ほぞん しない）で、さいしょの ながれを とおしで ためす
+async function onbTest() {
+  if (!(await ask('最初の流れ（バトル → 訓練 → 名前・最初のモンスター → 草むら → 宝箱）を通しで試します。\nテスト中のデータは保存されず、最後に元のデータに戻ります。', 'はじめる', 'やめる'))) return;
+  ONB_TEST = S; startOnboarding();
+}
 function tutEnd(res, lines) {
-  const first = !S.tutDone; S.tutDone = true; S.auto = TUT ? TUT.auto0 : S.auto; TUT = null; tutHide(); $('tutBox').hidden = true;
-  if (res === 'win') { lines.unshift('<b style="color:var(--acc)">チュートリアル クリア！</b>'); if (first) S.gems = (S.gems || 0) + 10; /* はじめての クリアは ジェム 10こ */ lines.push('つぎは したの「訓練」タブで わざの つかいかたを きめよう！'); if (first) S.goTrain = 1; }
-  else lines.unshift('チュートリアルを おえた。ヘルプ（？）から いつでも もういちど できるよ');
+  const first = !S.tutDone, onb = S.onb === 1; S.tutDone = true; S.auto = TUT ? TUT.auto0 : S.auto; TUT = null; tutHide(); $('tutBox').hidden = true;
+  if (onb) S.onb = 2;   // さいしょの ながれ：つぎは 訓練の チュートリアル
+  if (res === 'win') { lines.unshift('<b style="color:var(--acc)">チュートリアル クリア！</b>'); if (first && !onb) { S.gems = (S.gems || 0) + 10; S.goTrain = 1; } /* はじめての クリアは ジェム 10こ */ lines.push(onb ? '次は「訓練」で、技の使い方を決めてみましょう！' : '次は下の「訓練」タブで、技の使い方を決めてみましょう！'); }
+  else lines.unshift('チュートリアルを終えました。ヘルプ（？）から、いつでもやり直せます。');
 }
 $('tutNext').onclick = () => { if (!TUT) return; tutHide(); $('tutBox').hidden = true; if (B) B.padT = 0; tutGo(TUT.i + 1); };
-$('tutSkip').onclick = async () => { if (!TUT || !B) return; B.paused = true; if (await ask('チュートリアルを スキップしますか？', 'スキップ', 'つづける')) { const lines = []; tutEnd('skip', lines); B = null; renderHub(); } else if (TUT) { const st = TUT_STEPS[TUT.i]; B.paused = !!(st && st.pause) || !!TUT.frozen; } };
+$('tutSkip').onclick = async () => { if (!TUT || !B) return; B.paused = true; if (await ask('チュートリアルを スキップしますか？', 'スキップ', 'つづける')) { if (TUT.steps) { TUT = null; tutHide(); $('tutBox').hidden = true; B.paused = false; return; }   /* くさむら：あんないだけ やめる */ const lines = []; tutEnd('skip', lines); B = null; if (S.onb) onbNext(); else renderHub(); } else if (TUT) { const st = TS()[TUT.i]; B.paused = !!(st && st.pause) || !!TUT.frozen; } };
 
 /* ---------- コマンド ---------- */
 const KIND_LABEL = { gshift: 'すり抜け', scare: '威嚇', mines: '地雷', trap: '罠', leaves: 'まとう', wave: '波', stance: '待ち伏せ', rage: '暴れる', warp: 'ワープ', flip: '反転', proj: '飛び道具', beam: '直線', aoe: '周囲', strike: '足元', dash: '突進', melee: '近接', swipe: '前方', cone: '扇', multi: '範囲', ray: '補助', self: '自分', heal: '回復', protect: 'まもる', sub: 'デコイ', clone: '分身', dbond: '補助', counter: 'カウンター', curse: '補助', field: '場', hazard: '設置', baton: '交代', cure: 'なおす', shadow: 'かげ', echo: 'しるし', link: 'つなぐ', wish: '回復', hwish: '自分が倒れる', memento: '自分が倒れる', terrain: '場', gravity: '場', copycat: 'まね', mimic: 'まね', haze: 'リセット', soak: 'タイプ', halloween: 'タイプ', enrage: '自分', sideswap: '入れ替え', turret: '設置', summon: '呼び出し', aura: 'まとう', cage: '設置', painsplit: 'HP', endeavor: 'HP', magnet: '引き寄せ', shield: 'シールド', duel: '交代封じ', future: '予告', snatch: '横取り', weather: '天候', rewind: '巻き戻し', floor: '床' };
@@ -10627,7 +10714,7 @@ $('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') 
   const A = $('app'), t = $('tapStart'), pin = (el) => { let x = el.offsetWidth / 2, y = el.offsetHeight / 2; for (let q = el; q !== A; q = q.offsetParent) { if (!q) return null; x += q.offsetLeft; y += q.offsetTop; } return { x, y }; };
   const ar = A.getBoundingClientRect(), k = A.clientWidth / (ar.width || 1), pt = (t && pin(t)) || { x: (e.clientX - ar.left) * k, y: (e.clientY - ar.top) * k }, cx = pt.x, cy = pt.y;
   if (t) { t.classList.remove('hit'); void t.offsetWidth; t.classList.add('hit'); }
-  dotPulse(A, cx, cy, () => { titleGo = false; S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else renderStarter(); });   // パルスが きえてから ホームへ
+  dotPulse(A, cx, cy, () => { titleGo = false; S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else startOnboarding(); });   // パルスが きえてから ホームへ
 });
 /* ---------- 画面の 向き：横長なら 横レイアウト。スマホを たてに もった ままでも「横画面」で 90度 回して あそべる ---------- */
 let LAND_PREF = (() => { try { return localStorage.getItem('pma_land') === '1'; } catch (e) { return false; } })();
@@ -10751,7 +10838,7 @@ $('btnOpt').onclick = () => {
     <label class="optrow">こうかおん <input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
     <label class="optrow">テスト：スクロール つかいほうだい <input type="checkbox" id="oTmFree"></label>
-    <div class="optrow">テスト：チュートリアル <span style="display:flex;gap:6px"><button class="btn sub" id="oTutB" style="font-size:12px;padding:6px 10px">バトル</button><button class="btn sub" id="oTutT" style="font-size:12px;padding:6px 10px">訓練</button></span></div>
+    <div class="optrow">テスト：チュートリアル <span style="display:flex;gap:6px"><button class="btn sub" id="oTutB" style="font-size:12px;padding:6px 10px">バトル</button><button class="btn sub" id="oTutT" style="font-size:12px;padding:6px 10px">訓練</button><button class="btn sub" id="oTutA" style="font-size:12px;padding:6px 10px">はじめから</button></span></div>
     <div class="optrow"><span></span><button class="btn sub" id="oSeAdj" style="font-size:12px;padding:6px 12px">こうかおんを ひとつずつ ちょうせい</button></div>
     
     ${!window.PMA_NAME ? `<div class="optrow">なまえ <span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">かえる</button></span></div>` : ''}
@@ -10768,7 +10855,8 @@ $('btnOpt').onclick = () => {
   m.value = SND.opt.music; x.value = SND.opt.sfx; u.checked = SND.opt.mute;
   { const t = bg.querySelector('#oTmFree'); t.checked = !!S.tmFree; t.onchange = () => { S.tmFree = t.checked; save(); renderHub(); }; }
   bg.querySelector('#oTutB').onclick = () => { bg.remove(); startTutorial(); };   // テスト：いつでも チュートリアルを たしかめる
-  bg.querySelector('#oTutT').onclick = () => { bg.remove(); const m = S.party[0]; if (!m) return; renderTrain(m.uid); setTimeout(() => trtStart(), 200); };
+  bg.querySelector('#oTutT').onclick = () => { bg.remove(); trainTutorial(() => renderHub()); };
+  bg.querySelector('#oTutA').onclick = () => { bg.remove(); onbTest(); };
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
   
   const LK = bg.querySelector('#oLooks');
@@ -10965,7 +11053,7 @@ $('btnArcade').onclick = renderArcade;
 $('btnAcBack').onclick = () => renderHub();
 $('btnTwBack').onclick = () => renderJourney();
 $('btnJrBack').onclick = () => renderHub();
-$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade, twr = B && B.cfg && B.cfg.tower; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else if (twr) renderTower(); else renderHub(); };
+$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade, twr = B && B.cfg && B.cfg.tower; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else if (twr) renderTower(); else if (S && S.onb > 0 && S.onb < 4) onbNext(); else renderHub(); };
 
 document.querySelectorAll('.cmd.mv').forEach(b => b.addEventListener('pointerdown', (e) => { e.preventDefault(); if (B && B.train && !(TUT && TUT.frozen)) { mvTipShow(b); return; } cmdMove(+b.dataset.mv); }));
 // 対戦中（見るだけ）：わざボタンを タップすると その わざの せつめい（もう いちど タップ・ほかを さわると とじる）
@@ -11003,6 +11091,7 @@ function pickMoves(m) {
 }
 function avgLevel() { const t = S.party.slice(0, 3); return t.reduce((s, m) => s + m.lvl, 0) / t.length; }
 function startWild() {
+  if (S.onb === 4) return onbWild();
   let pool = poolIds().filter(id => !STARTERS.includes(id) || Math.random() < .35);
   { const J = jr(); if (!J.champ && J.gym < GYMS.length && Math.random() < .5) { const ok = strongVs(GYMS[J.gym].f), p2 = pool.filter(id => ok.includes(SPECIES[id].type) || ok.includes(SPECIES[id].type2)); if (p2.length) pool = p2; } }   // はんぶんは つぎの ジムに つよい モンスターが でる
   const weights = pool.map(id => SPECIES[id].rare ? .5 : 3);
