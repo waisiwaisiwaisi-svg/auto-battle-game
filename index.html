@@ -180,6 +180,24 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .jrc:not(.league){min-height:132px}
 .jrc b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jrc .badge{position:absolute;top:6px;right:8px;font-size:22px;filter:drop-shadow(0 0 4px #000)}
+.jrc.league.lock::after{content:'🔒';position:absolute;top:50%;right:16px;transform:translateY(-50%);font-size:26px;opacity:.75;filter:grayscale(1) drop-shadow(0 1px 2px #000)}
+.jrc.lgx,.jrc.twx{min-height:0;border-color:#ffd84a;box-shadow:0 0 0 1px #6a4a10,0 0 18px rgba(255,216,74,.25)}
+.jrc.lgx::before{background:linear-gradient(100deg,rgba(26,16,52,.94) 30%,rgba(26,16,52,.72) 70%,rgba(26,16,52,.55))}
+.jrc.twx{background:linear-gradient(120deg,#1c2a5a,#2a1a4a 60%,#4a2a1a)}.jrc.twx::before{background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 2px,transparent 2px 22px)}
+.lgx-in,.twx-in{display:flex;flex-direction:column;gap:8px;padding:10px 12px}
+.lgx-hd{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.lgx-hd b{font-size:17px;color:#ffd84a;text-shadow:0 2px 0 #3a2410}.lgx-hd small{white-space:normal}
+.lgx-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.lgx-p{flex:1 0 64px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;border-radius:8px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);min-width:64px}
+.lgx-p .lgx-f{position:relative;width:44px;height:44px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:50%;background:radial-gradient(circle at 50% 70%,#4a3a7a,#1a1430)}
+.lgx-p img{height:52px;width:auto;image-rendering:pixelated;margin-bottom:-6px}.lgx-p i{font-style:normal;font-size:11px;font-weight:700;white-space:nowrap}.lgx-p .chip{font-size:9px;padding:0 4px}
+.lgx-p.done{opacity:.55}.lgx-p.done img{filter:grayscale(.8)}.lgx-p em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;color:#5ee08a;text-shadow:0 0 3px #000,0 0 3px #000}
+.lgx-p.cur{border-color:#ffd84a;background:rgba(255,216,74,.14);box-shadow:0 0 10px rgba(255,216,74,.45)}.lgx-p.cur .lgx-f{background:radial-gradient(circle at 50% 70%,#8a6a1a,#2a1a08)}
+.lgx-p.champ .lgx-f{box-shadow:0 0 0 2px #ffd84a inset}.lgx-any{background:#5a4a7a}
+.lgx-next{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}.lgx-nt b{color:#ffd84a}
+.lgx-ace{display:flex;align-items:center;gap:6px;padding:2px 10px 2px 4px;border-radius:20px;background:rgba(255,216,74,.12);border:1px solid rgba(255,216,74,.5)}.lgx-ace i{font-style:normal;font-size:10px;color:#ffd84a;display:block}.lgx-ace b{font-size:13px}.lgx-ac canvas{display:block;image-rendering:pixelated}
+.lgx-go{margin-left:auto;padding:6px 14px;border-radius:6px;background:#ffd84a;color:#2a1a08;font-weight:800;font-size:13px;box-shadow:0 3px 0 #8a5a10;white-space:nowrap}
+.twx-st{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.twx-c{display:flex;flex-direction:column;align-items:center;min-width:76px;padding:4px 10px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15)}.twx-c i{font-style:normal;font-size:10px;opacity:.85}.twx-c b{font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}.twx-c.now{border-color:#ffd84a;background:rgba(255,216,74,.14)}.twx-c.now b{color:#ffd84a}
 .jrc.lock{filter:grayscale(1) brightness(.5);cursor:not-allowed}.jrc.next{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
 .jrc.league{grid-column:1/-1;min-height:90px;background:linear-gradient(135deg,#3a2a6a,#1a1430)}
 .jrc.league.tower{background:linear-gradient(135deg,#2a4a7a,#141a30)}
@@ -11213,12 +11231,24 @@ function renderJourney() {
     g.appendChild(b);
   });
   const L = document.createElement('button'), lo = J.badges.length >= GYMS.length;
-  L.className = 'jrc league' + (lo ? ' next' : ' lock');
-  L.innerHTML = `${J.champ ? '<span class="badge">👑</span>' : ''}<div class="in"><b>チャンピオンリーグ</b><small>${lo ? `してんのう ${LEAGUE.length - 1}人と チャンピオン（${J.league + 1}/${LEAGUE.length} せんめ：${LEAGUE[J.league][1].split(' ')[1]}${LEAGUE[J.league][3] ? '・' + TYPES[LEAGUE[J.league][3]].n + 'タイプ' : ''}・エース ${(SPECIES[leagueAce(LEAGUE[J.league][3])] || {}).n || ''}）` : 'バッジを 10こ あつめると ちょうせんできる'}</small></div>`;
+  if (!lo) { L.className = 'jrc league lock'; L.innerHTML = `<div class="in"><b>チャンピオンリーグ</b><small>バッジを 10こ あつめると ちょうせんできる</small></div>`; }
+  else {   // かいほう ずみ：してんのう 4人と チャンピオンの かお・すすみぐあい・つぎの あいての エース
+    const k = J.league, nt = LEAGUE[k][3], ace = leagueAce(nt), url = (lk) => lookCanvas(lk, 56).toDataURL();
+    L.className = 'jrc league next lgx'; L.style.backgroundImage = `url(${(ARENAS[nt] || ARENAS[FIELDS[(J.champ || 0) % FIELDS.length]] || ARENAS.grass).img})`;
+    L.innerHTML = `${J.champ ? '<span class="badge">👑</span>' : ''}<div class="lgx-in">
+      <div class="lgx-hd"><b>チャンピオンリーグ</b><small>${J.champ ? `でんどういり ${J.champ}かい` : 'してんのう 4人と チャンピオンに かちぬけ！'}</small></div>
+      <div class="lgx-row">${LEAGUE.map((x, i) => `<div class="lgx-p${i < k ? ' done' : i === k ? ' cur' : ''}${i === LEAGUE.length - 1 ? ' champ' : ''}"><span class="lgx-f"><img src="${url(x[0])}" alt="">${i < k ? '<em>✔</em>' : ''}</span><i>${x[1].split(' ')[1]}</i>${x[3] ? typeChip(x[3]) : '<span class="chip lgx-any">ぜんぶ</span>'}</div>`).join('')}</div>
+      <div class="lgx-next"><span class="lgx-nt">つぎ：<b>${LEAGUE[k][1]}</b></span>${ace ? `<span class="lgx-ace"><span class="lgx-ac"></span><span><i>エース</i><b>${SPECIES[ace].n}</b></span></span>` : ''}<span class="lgx-go">▶ ちょうせん</span></div></div>`;
+    if (ace) L.querySelector('.lgx-ac').appendChild(spriteCanvas(ace, 40)); }
   if (lo) L.onclick = () => { SND.se('ok'); startLeague(); };
   g.appendChild(L);
-  { const T = tw(), op = towerOpen(), b = document.createElement('button'); b.className = 'jrc league tower' + (op ? ' next' : ' lock');
-    b.innerHTML = `<div class="in"><b>バトルタワー</b><small>${op ? (T.run ? `ちょうせん中：${T.run.streak}れんしょう・` : '') + `さいこう ${T.best}れんしょう` : 'でんどういり すると ちょうせん できる'}</small></div>`;
+  { const T = tw(), op = towerOpen(), b = document.createElement('button');
+    if (!op) { b.className = 'jrc league tower lock'; b.innerHTML = `<div class="in"><b>バトルタワー</b><small>でんどういり すると ちょうせん できる</small></div>`; }
+    else {   // かいほう ずみ：いまの れんしょう・さいこう きろく・クリア
+      const now = T.run ? T.run.streak : 0, nx = now + 1, to = TW_SET - (now % TW_SET);
+      b.className = 'jrc league tower next twx';
+      b.innerHTML = `<div class="twx-in"><div class="lgx-hd"><b>バトルタワー</b><small>${nx % TW_TYCOON === 0 ? 'つぎは タワータイクーン！' : nx % TW_SET === 0 ? 'つぎは ボス！' : `ボスまで あと ${to}せん`}・${TW_SET}れんしょうごとに ボス、${TW_TYCOON}れんしょうで タイクーン</small></div>
+        <div class="twx-st"><div class="twx-c now"><i>いまの れんしょう</i><b>${now}</b></div><div class="twx-c"><i>さいこう きろく</i><b>${T.best}</b></div><div class="twx-c"><i>クリア</i><b>${T.sets}</b></div><span class="lgx-go">▶ ${T.run ? 'つづきから' : 'のぼる'}</span></div></div>`; }
     if (op) b.onclick = () => { SND.se('ok'); renderTower(); }; g.appendChild(b); }
 }
 /* =====================================================================
