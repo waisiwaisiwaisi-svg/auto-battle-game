@@ -201,6 +201,8 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .twx-c{display:flex;flex-direction:column;align-items:center;min-width:76px;padding:4px 10px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15)}.twx-c i{font-style:normal;font-size:10px;opacity:.85}.twx-c b{font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}.twx-c.now{border-color:#ffd84a;background:rgba(255,216,74,.14)}.twx-c.now b{color:#ffd84a}
 .jrc.lock{filter:grayscale(1) brightness(.5);cursor:not-allowed}.jrc.next{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
 .jrc.league{grid-column:1/-1;min-height:90px;background:linear-gradient(135deg,#3a2a6a,#1a1430)}
+.jrc.rival{min-height:70px;background-size:cover;background-position:center}.jrc .in.rvin{padding:8px 12px;flex-direction:row;align-items:center;gap:10px}.rvin .rvt{display:flex;flex-direction:column;gap:2px}.rvin .rvt b{font-size:15px}.rvin .rvt small{font-size:11px;color:#e6defa}.rvface canvas{display:block;image-rendering:pixelated}
+.rvtalk .askbox{text-align:left}.rvtalk .rvhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}.rvtalk .rvhead b{font-size:15px;color:var(--acc)}.rvtalk .rvtx{font-size:15px;line-height:1.7;min-height:3.4em}
 .jrc.league.tower{background:linear-gradient(135deg,#2a4a7a,#141a30)}
 .bigbtns .btn{padding:14px 8px;display:flex;flex-direction:column;gap:3px;align-items:center}
 .bigbtns .btn span{font-size:10.5px;font-weight:400;opacity:.85}
@@ -8396,7 +8398,7 @@ function bStep(dt) {
     }
     B.projs = B.projs.filter(p => p.life > 0);
   }
-  if (B.mode === 'end') { B.endT -= dt; if (B.endT <= 0 && $('resultOv').hidden && !B.headless) showResult(); }
+  if (B.mode === 'end') { B.endT -= dt; if (B.endT <= 0 && $('resultOv').hidden && !B.headless) { if (B.preTalk) { const f = B.preTalk, b0 = B; B.preTalk = null; B.endT = 1e9; f().then(() => { if (B === b0) showResult(); }); } else if (B.endT > -1e8) showResult(); } }   // preTalk：リザルトの まえに はなす（ライバル）
   if (B.net === 'host') netHostTick(dt);
   bVisual(dt);
 }
@@ -8660,7 +8662,7 @@ const HUB_GRASS = [
 const HUB_CHEST = [
   { sel: '.chest[data-i="0"]', allow: () => [], tx: '草むらのごほうびに、<b>宝箱</b>をもらいました！<br>宝箱からは、モンスター・技のスクロール・オーブなどが出てきます。', next: 1 },
   { sel: '.chest[data-i="0"]', tx: '宝箱は、時間が経つと開けられるようになります。<b>ジェム</b>を使えば、すぐに開けることもできます。<br>今回のジェムは<b>無料</b>です！ 宝箱をタップして開けてみましょう。', ok: () => S.onbOpen && !document.querySelector('.askbg') },
-  { sel: '#btnJourney', allow: () => [], tx: () => `これで仲間が<b>${S.party.length + S.box.length}体</b>になりました！<br>準備ができたら「<b>アーケード</b>」から<b>ジム戦</b>に挑戦してみましょう。がんばってください！`, next: 1, end: 1 },
+  { sel: '#btnJourney', allow: () => [], tx: () => `これで仲間が<b>${S.party.length + S.box.length}体</b>になりました！<br>準備ができたら「<b>アーケード</b>」へ行ってみましょう。まずはライバルとの「<b>はじめての戦い</b>」、そのあとは<b>ジム戦</b>です。がんばってください！`, next: 1, end: 1 },
 ];
 function onbHub() {
   if (!S || !S.onb || B || TRT || $('scHub').hidden || document.querySelector('.askbg')) return;
@@ -11159,7 +11161,7 @@ const GYMS = [
   { f: 'dragon', lead: 'vet', ln: 'ジムリーダー アカネ', say: 'ドラゴンの ほんきを みせてあげる。' },
 ];
 const LEAGUE = [['researcher', 'してんのう シオリ', 'データは もう そろっているの。', 'rock', 'a_fighting9'], ['vet', 'してんのう カゲミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', 'c_fighting7'], ['ranger', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'bug', 'd_bug6'], ['firefighter', 'してんのう アカリ', 'もえる こころで かかってこい！', 'psychic', 'c_fighting5'], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
-const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; const J = S.journey; if (!(J.league >= 0 && J.league < LEAGUE.length)) J.league = J.league >= LEAGUE.length ? LEAGUE.length - 1 : 0; return J; };   // リーグの 人数が かわっても こわれない
+const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; const J = S.journey; if (!J.rival && (J.gym > 0 || J.step > 0 || J.badges.length || J.champ)) J.rival = 1;   /* まえから すすんでいる 人は はじめての 戦いは すんだ ことに */ if (!(J.league >= 0 && J.league < LEAGUE.length)) J.league = J.league >= LEAGUE.length ? LEAGUE.length - 1 : 0; return J; };   // リーグの 人数が かわっても こわれない
 // 敵の モンスター：すすむ（p：0〜1）ほど 個体値・きょうか・わざの くみあわせが つよくなる（のうりょくの 倍率は かけない）
 function foeMon(sid, p, uid) {
   const em = fixMon({ uid, sid }, clamp(p * .9, 0, .95));
@@ -11255,6 +11257,7 @@ function noDefMoves(em) {
 function startJourney(gi) {
   const J = jr(), G = GYMS[gi];
   if (gi > J.gym && !J.champ) return;
+  if (!J.rival) return startRival();   // さいしょは ライバルとの はじめての 戦い
   const step = gi < J.gym ? 2 : J.step, leader = step >= 2, i = gi + (jr().champ ? 2 : 0);
   const others = TR_NPC.filter(t => t[0] !== G.lead && t[0] !== myLook());
   const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${FIELD_NAMES[G.f]}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
@@ -11270,8 +11273,35 @@ function startLeague() {
   const k = J.league, [lk, ln] = LEAGUE[k];
   const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), p0: S.party.slice(0, 6), enemies: leagueTeam(lt, 3, jProg(10 + k, 2)), trainer: { name: ln, spr: trArt(lk) }, boss: k === LEAGUE.length - 1, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === LEAGUE.length - 1 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
+// はじめての 戦い：ライバル（いまの チャンピオンと おなじ 人）。かならず かてる よわい あいて
+const rivalTr = () => { const L = LEAGUE[LEAGUE.length - 1]; return { look: L[0], name: 'ライバル ' + L[1].split(' ').pop() }; };
+function startRival() {
+  const R = rivalTr(), tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; };
+  const ids = poolIds().filter(id => !SPECIES[id].rare && !STARTERS.includes(id)).sort((a, b) => tot(a) - tot(b)).slice(0, 10), e = [];
+  while (e.length < 2 && ids.length) e.push(fixMon({ uid: -1 - e.length, sid: ids.splice(Math.floor(Math.random() * ids.length), 1)[0] }));
+  startBattle({ kind: 'cup', field: 'grass', p0: S.party.slice(0, 6), enemies: e.map(noDefMoves), trainer: { name: R.name, spr: trArt(R.look) }, journey: { rival: 1 },
+    title: 'はじめての戦い', intro: `${R.name}「あなたもトレーナーになったんだ。まずは腕試し！」` });
+  for (const f of B.sides[1].fs) { f.atk *= .3; f.spa *= .3; f.maxHp = Math.max(1, Math.round(f.maxHp * .4)); f.hp = f.maxHp; }   // かならず かてる（みじかく おわる）
+  if (!jr().rival) for (const f of B.sides[0].fs) { f.def *= 2; f.spd *= 2; }   // はじめては ぜったいに まけない
+}
+// ライバルの はなし（リザルトの まえ）
+function rivalTalk(lines) {
+  return new Promise(res => { const R = rivalTr(); let i = 0;
+    const bg = document.createElement('div'); bg.className = 'askbg rvtalk';
+    bg.innerHTML = `<div class="askbox"><div class="rvhead"><span class="rvface"></span><b>${R.name}</b></div><div class="rvtx"></div><button class="btn" style="margin-top:10px;width:100%">つぎへ</button></div>`;
+    bg.querySelector('.rvface').appendChild(lookCanvas(R.look, 64));
+    const show = () => { bg.querySelector('.rvtx').textContent = '「' + lines[i] + '」'; bg.querySelector('.btn').textContent = i === lines.length - 1 ? 'とじる' : 'つぎへ'; };
+    bg.querySelector('.btn').onclick = () => { SND.se('click'); i++; if (i >= lines.length) { bg.remove(); res(); } else show(); };
+    $('app').appendChild(bg); show(); });
+}
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
+  if (c.rival) {
+    if (res === 'win') { const first = !J.rival; J.rival = 1; S.wins++; lines.unshift(`${rivalTr().name}に かった！`); lines.push(`つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム！`);
+      if (first) { const g = FIELD_NAMES[GYMS[J.gym].f]; B.preTalk = () => rivalTalk(['……やるじゃない。初めてにしては、いい戦いだったよ。', 'わたしもこれから、ジムを巡ってバッジを集めるんだ。', 'ねえ、競争しない？ どっちが先にジムバッジを10個集められるか！', `チャンピオンリーグで待ってるからね。まずは${g}ジムから、がんばって！`]); } }
+    else if (res === 'lose') lines.unshift('まけてしまった… もういちど ちょうせんしよう');
+    return;
+  }
   if (c.league != null) {
     if (res === 'win') { S.wins++; S.gems = (S.gems || 0) + 2; J.league++;
       if (J.league >= LEAGUE.length) { J.league = 0; J.champ++; S.trophies++; S.gems += 15; lines.unshift('<b style="color:var(--acc)">👑 チャンピオンリーグ ゆうしょう！ でんどういり！</b>'); lines.push('ジムリーダーたちが さらに つよく なって まっている…'); }
@@ -11370,11 +11400,15 @@ function renderJourney() {
       t.onclick = () => { SND.se('ok'); teamFrom = 'journey'; renderTeam(); }; } }
   $('jrStory').firstChild.textContent = J.champ ? `でんどういり ${J.champ}かい！ ジムリーダーたちは つよく なって まっている。` : J.badges.length >= GYMS.length ? 'バッジが そろった！ チャンピオンリーグに いどもう。' : '10の とうぎじょうを めぐって ジムリーダーに かち、バッジを あつめよう。ぜんぶ そろうと チャンピオンリーグへ。';
   const g = $('jrGrid'); g.innerHTML = '';
+  { const R = rivalTr(), b = document.createElement('button'); b.className = 'jrc league rival' + (J.rival ? '' : ' next');   // はじめての 戦い（ライバル）
+    b.style.backgroundImage = `linear-gradient(90deg,rgba(20,16,40,.85),rgba(20,16,40,.35)),url(${ARENAS.grass.img})`;
+    b.innerHTML = `${J.rival ? '<span class="badge">✔</span>' : ''}<div class="in rvin"><span class="rvface"></span><span class="rvt"><b>はじめての戦い</b><small>${R.name}と しょうぶ${J.rival ? '（もういちど たたかえる）' : '！ まずは ここから'}</small></span></div>`;
+    b.querySelector('.rvface').appendChild(lookCanvas(R.look, 48)); b.onclick = () => { SND.se('ok'); startRival(); }; g.appendChild(b); }
   GYMS.forEach((G, i) => {
-    const open = i <= J.gym || J.champ, done = J.badges.includes(G.f), cur = i === J.gym && !J.champ, step = i < J.gym || J.champ ? 3 : J.step;
+    const open = (i <= J.gym || J.champ) && J.rival, done = J.badges.includes(G.f), cur = i === J.gym && !J.champ && J.rival, step = i < J.gym || J.champ ? 3 : J.step;
     const b = document.createElement('button'); b.className = 'jrc' + (open ? '' : ' lock') + (cur ? ' next' : '');
     b.style.backgroundImage = `url(${ARENAS[G.f].img})`;
-    b.innerHTML = `${done ? '<span class="badge">🏅</span>' : ''}<span class="jtype">${typeChip(G.f)}</span><div class="in"><b>${FIELD_NAMES[G.f]}ジム</b><small>${G.ln}</small><div class="dots"><i class="${step > 0 ? 'on' : ''}"></i><i class="${step > 1 ? 'on' : ''}"></i><i class="ld ${done ? 'on' : ''}"></i></div><small>${!open ? 'まえの ジムを クリアすると あく' : cur ? (J.step < 2 ? `トレーナー ${J.step + 1}人め` : 'ジムリーダーに ちょうせん') : 'リーダーに さいせん'}</small>${open ? `<small class="jrec">おすすめ ${strongVs(G.f).map(typeChip).join('')}</small>` : ''}</div>`;
+    b.innerHTML = `${done ? '<span class="badge">🏅</span>' : ''}<span class="jtype">${typeChip(G.f)}</span><div class="in"><b>${FIELD_NAMES[G.f]}ジム</b><small>${G.ln}</small><div class="dots"><i class="${step > 0 ? 'on' : ''}"></i><i class="${step > 1 ? 'on' : ''}"></i><i class="ld ${done ? 'on' : ''}"></i></div><small>${!open ? (!J.rival && i === 0 ? 'はじめての戦いの あとに あく' : 'まえの ジムを クリアすると あく') : cur ? (J.step < 2 ? `トレーナー ${J.step + 1}人め` : 'ジムリーダーに ちょうせん') : 'リーダーに さいせん'}</small>${open ? `<small class="jrec">おすすめ ${strongVs(G.f).map(typeChip).join('')}</small>` : ''}</div>`;
     if (open) b.onclick = () => { SND.se('ok'); startJourney(i); };
     g.appendChild(b);
   });
