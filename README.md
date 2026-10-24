@@ -87,7 +87,7 @@ python3 -m http.server 8000
 
 ## スマホアプリ版（iOS / Android）
 
-`app/` に Capacitor で つつんだ アプリ版が あります。ゲーム本体は この `index.html` を そのまま つかい、オンライン機能（ランク対戦・ランキング・ギルド）は Firebase に つなぎます。
+`app/` に Capacitor で つつんだ アプリ版が あります。ゲーム本体は この `index.html` を そのまま つかい、オンライン機能（オンライン対戦・ランキング・ギルド）は Firebase に つなぎます。
 
 ```sh
 cd app && npm install && npm run sync   # index.html → アプリに 反映

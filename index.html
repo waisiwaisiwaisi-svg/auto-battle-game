@@ -738,7 +738,7 @@ html:not(.land) #scHub .hbar{flex-wrap:wrap;row-gap:8px} html:not(.land) #scHub 
 .hsname{position:absolute;left:8px;top:6px;font-size:13px;font-weight:700;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914}
 .hcta{width:100%;display:grid!important;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;padding:12px 16px!important;min-height:76px;background:linear-gradient(180deg,#ffd27a,#ffb547 55%,#f2962d)!important}
 .hcta .ico{grid-row:1/3}
-/* ホーム：ランク対戦ボタンに ときどき ひかりが はしる（ドットらしく ふちの くっきりした ななめの おび） */
+/* ホーム：オンライン対戦ボタンに ときどき ひかりが はしる（ドットらしく ふちの くっきりした ななめの おび） */
 .hcta{position:relative;overflow:hidden}
 .hcta::after{content:'';position:absolute;top:-20%;bottom:-20%;left:0;width:26px;background:rgba(255,255,255,.38);box-shadow:10px 0 0 rgba(255,255,255,.18);transform:translateX(-80px) skewX(-20deg);pointer-events:none;animation:ctaShine 4.6s steps(24,end) 1.2s infinite}
 @keyframes ctaShine{0%{transform:translateX(-80px) skewX(-20deg)}22%,100%{transform:translateX(560px) skewX(-20deg)}}
@@ -1267,7 +1267,7 @@ html.tabs:not(.land) .trside{bottom:calc(70px + var(--sab))}   /* たて画面�
 /* ===== よこ画面の ホーム（ロビー）：Brawl Stars・ブルアカ などの 定番に あわせる =====
    ・背景は 画面いっぱいの ステージ（わくで かこまない）。まんなか〜左に あいぼうを 大きく
    ・うえ：じぶん（左）／しげん・せってい（右）
-   ・右下：いちばん 大事な「ランク対戦」を いちばん 大きく。その うえに ほかの あそびかた
+   ・右下：いちばん 大事な「オンライン対戦」を いちばん 大きく。その うえに ほかの あそびかた
    ・左下：たからばこ（ちいさく まとめる） */
 html.land #scHub:not([hidden])::before{content:'';position:absolute;inset:-3px;z-index:-1;pointer-events:none;filter:grayscale(.6) brightness(.62) blur(1px);background:linear-gradient(90deg,rgba(10,8,22,.25),rgba(10,8,22,0) 35%,rgba(10,8,22,0) 55%,rgba(10,8,22,.7)),linear-gradient(180deg,rgba(10,8,22,.55),rgba(10,8,22,0) 22%,rgba(10,8,22,0) 70%,rgba(10,8,22,.75)),var(--stg,none) center 65%/cover no-repeat;image-rendering:pixelated}
 html.land #scHub:not([hidden]){display:flex;flex-direction:column;isolation:isolate;overflow:hidden;background:#141022}
@@ -1375,7 +1375,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
         <div class="card cupinfo" id="cupInfo" hidden></div>
       </div>
       <div class="hcol">
-        <button class="btn hcta" id="btnRank"><i class="ico big" data-ico="swords"></i><span class="t">ランク対戦</span><span id="rkSub" class="s">ほかの トレーナーと たいせん</span></button>
+        <button class="btn hcta" id="btnRank"><i class="ico big" data-ico="swords"></i><span class="t">オンライン対戦</span><span id="rkSub" class="s">ほかの トレーナーと たいせん</span></button>
         <div class="hmodes">
           <button class="hmode" id="btnJourney"><i class="ico" data-ico="flag"></i><b>アーケード</b><small id="jrSub">ジムを めぐって バッジを あつめる</small></button>
           <button class="hmode" id="btnCup"><i class="ico" data-ico="trophy"></i><b>フリーたいかい</b><small id="cupSub">スタジアムで しあい</small></button>
@@ -7609,13 +7609,13 @@ function oppLook() { const p = NET.nr && NET.nr.peers().find(x => isOther(x) && 
 function netHostStart(gteam, mineSel) {
   NET.started = true;
   const field = choice(FIELDS), mine = mineSel || teamOf(S.party);
-  startBattle({ kind: 'online', field, enemies: gteam.map(monFrom), p0: mine.map(monFrom),   /* じぶんの チームも あいてに おくった データから つくる（あいての がめんと のうりょくを そろえる） */ trainer: { name: oppName(), spr: trArt(oppLook()) }, title: NET.ranked ? 'ランク対戦' : 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
+  startBattle({ kind: 'online', field, enemies: gteam.map(monFrom), p0: mine.map(monFrom),   /* じぶんの チームも あいてに おくった データから つくる（あいての がめんと のうりょくを そろえる） */ trainer: { name: oppName(), spr: trArt(oppLook()) }, title: NET.ranked ? 'オンライン対戦' : 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.net = 'host';
   // 見せあい用の 6たいは もう いらない（presence は ぜんぶで 4KB まで）
   const startP = { start: { field, h: mine, g: gteam, hr: myRank().r }, team: null, team6: null, pick: null, ca: null, la: null };   // え は もう おくった
   NET.nr.presence(startP).catch(() => { });
   NET.baseLen = JSON.stringify({ role: 'host', v: 1, r: myRank().r, rk: 1, lk: 'firefighter', start: startP.start }).length;
-  if (NET.ranked) B.cfg.title = 'ランク対戦';
+  if (NET.ranked) B.cfg.title = 'オンライン対戦';
   SND.onSe = (n, k) => { if (NET.host && B && B.net === 'host') netEv('se', [n, k]); };
 }
 function netHostInput(pr) {
@@ -7666,7 +7666,7 @@ function netGuestStart(st) {
   if (NET.nr) NET.nr.presence({ team6: null, pick: null, ca: null, la: null }).catch(() => { });
   const host = st.h.map(monFrom), me = st.g.map(monFrom);
   startBattle({ kind: 'online', field: st.field, enemies: me, p0: host, trainer: { name: myName(), spr: trArt(myLook()) }, title: 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
-  B.remote = true; B.my = 1; B.mode = 'intro'; B.snapT = 0; if (NET.ranked) $('bTitle').textContent = 'ランク対戦';
+  B.remote = true; B.my = 1; B.mode = 'intro'; B.snapT = 0; if (NET.ranked) $('bTitle').textContent = 'オンライン対戦';
   B.sides[0].trainer.name = oppName(); B.sides[0].trainer.spr = trArt(oppLook());
 }
 function netGuestSnap(sn) {
@@ -7742,7 +7742,7 @@ function netGuestChoose() {
     L.appendChild(b); }
   $('chooseOv').hidden = false;
 }
-/* ---------- ランク対戦：レート（イロレーティング）・ランク・マッチング・ランキング ---------- */
+/* ---------- オンライン対戦：レート（イロレーティング）・ランク・マッチング・ランキング ---------- */
 const TIERS = [[0, 'ブロンズ', '#d0905a'], [1100, 'シルバー', '#c8d0e0'], [1250, 'ゴールド', '#ffd166'], [1400, 'プラチナ', '#7af0e0'], [1550, 'ダイヤ', '#9ab8ff'], [1700, 'マスター', '#ff7ab0']];
 const tierOf = (r) => { let i = 0; TIERS.forEach((x, j) => { if (r >= x[0]) i = j; }); const t = TIERS[i], nx = TIERS[i + 1], lo = i ? t[0] : 850, hi = nx ? nx[0] : 0;
   return { i, n: t[1], c: t[2], lo, hi, next: nx ? nx[1] : '', p: nx ? Math.max(0, Math.min(1, (r - lo) / (hi - lo))) : 1 }; };
@@ -7788,7 +7788,7 @@ async function rankSave() {
   const k = myRank(), lead = S.party[0];
   R.db.doc('ranks/' + R.id).set({ r: k.r, w: k.w, l: k.l, t: Date.now(), m: lead ? lead.sid : '', nm: myName() }).catch(() => { });
 }
-// 1しあいの けっか：レートを うごかす（ランク対戦の ときだけ）
+// 1しあいの けっか：レートを うごかす（オンライン対戦の ときだけ）
 function rankResult(win) {
   if (!NET.ranked || NET.rated) return '';
   NET.rated = true;
@@ -7813,7 +7813,7 @@ async function renderLeaderboard(el) {
 /* ---------- ランキング画面：じぶんの ランク・ランクの かいだん・プレイヤー / ギルドの ひょうしょうだい ---------- */
 const badgeIco = (r, cls = '') => `<i class="ico ${cls}" style="background-image:url(${tierBadge(tierOf(r).i)})"></i>`;
 function rankSpark(h) {
-  if (!h || h.length < 2) return `<svg viewBox="0 0 300 56"><text x="150" y="33" text-anchor="middle" fill="#8a80b0" font-size="12">ランク対戦を すると レートの うごきが ここに でるよ</text></svg>`;
+  if (!h || h.length < 2) return `<svg viewBox="0 0 300 56"><text x="150" y="33" text-anchor="middle" fill="#8a80b0" font-size="12">オンライン対戦を すると レートの うごきが ここに でるよ</text></svg>`;
   const lo = Math.min(...h) - 10, hi = Math.max(...h) + 10, X = (i) => 8 + i * 284 / (h.length - 1), Y = (v) => 50 - (v - lo) / (hi - lo) * 44;
   let lines = ''; TIERS.forEach(t => { if (t[0] > lo && t[0] < hi) lines += `<line x1="0" x2="300" y1="${Y(t[0]).toFixed(1)}" y2="${Y(t[0]).toFixed(1)}" stroke="${t[2]}" stroke-dasharray="3 3" opacity=".6"/><text x="4" y="${(Y(t[0]) - 2).toFixed(1)}" fill="${t[2]}" font-size="9">${t[1]}</text>`; });
   const pts = h.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' '), L = h.length - 1, c = tierOf(h[L]).c;
@@ -7859,8 +7859,8 @@ async function rankPlayers(R, L) {
     row.innerHTML = `<span class="rk">${j + 4}</span>${badgeIco(r.r)}<span class="nm"><b></b><small style="color:${tierOf(r.r).c}">${tierOf(r.r).n}</small></span><span class="v">${r.r}<small>${r.w || 0}勝 ${r.l || 0}敗</small></span>`;
     row.querySelector('.nm b').textContent = nm(r.id); L.appendChild(row);
   });
-  if (mi < 0) { const k = myRank(), row = document.createElement('div'); row.className = 'gdrow card rkrow me'; row.innerHTML = `<span class="rk">-</span>${badgeIco(k.r)}<span class="nm"><b>あなた</b><small>ランク対戦を すると のるよ</small></span><span class="v">${k.r}<small>${k.w}勝 ${k.l}敗</small></span>`; L.appendChild(row); }
-  L.insertAdjacentHTML('beforeend', `<button class="btn hcta" id="rkGo" style="margin-top:6px">${icoHTML('swords')}<span class="t">ランク対戦</span><span class="s">マッチング かいし</span></button>`);
+  if (mi < 0) { const k = myRank(), row = document.createElement('div'); row.className = 'gdrow card rkrow me'; row.innerHTML = `<span class="rk">-</span>${badgeIco(k.r)}<span class="nm"><b>あなた</b><small>オンライン対戦を すると のるよ</small></span><span class="v">${k.r}<small>${k.w}勝 ${k.l}敗</small></span>`; L.appendChild(row); }
+  L.insertAdjacentHTML('beforeend', `<button class="btn hcta" id="rkGo" style="margin-top:6px">${icoHTML('swords')}<span class="t">オンライン対戦</span><span class="s">マッチング かいし</span></button>`);
   $('rkGo').onclick = () => $('btnRank').click();
 }
 async function rankGuilds(R, L) {
@@ -8170,7 +8170,7 @@ function rankPreview(oppTeam, oppR) {
   const draw = () => {
     const done = !!NET.myPick, t = tierOf(typeof oppR === 'number' ? oppR : 1000);
     ov.innerHTML = `<div class="askbox pvbox">
-      <div class="pvhead"><h3>${NET.ranked ? 'ランク対戦' : 'フレンド対戦'}　みせあい</h3><span class="pvt">${left}</span></div>
+      <div class="pvhead"><h3>${NET.ranked ? 'オンライン対戦' : 'フレンド対戦'}　みせあい</h3><span class="pvt">${left}</span></div>
       <div class="pvlab">あいて <span class="chip" style="background:${t.c}">${t.n}</span> ${typeof oppR === 'number' ? oppR : ''}　<span id="pvOpp" class="dim">${NET.oppPicked ? '✔ えらびおわった' : 'えらんでいます…'}</span></div>
       <div class="pvrow">${oppTeam.map((o, i) => card(o, i, false)).join('')}</div>
       <div class="pvlab">じぶん　<b style="color:var(--acc)">${done ? 'けってい ずみ' : `だす ${need}たいを じゅんばんに タップ（${sel.length}/${need}）`}</b></div>
@@ -8195,7 +8195,7 @@ function onlineMenu() {
   const k = myRank(), t = tierOf(k.r);
   const bg = modal(`<h3 style="margin-bottom:8px">オンライン対戦</h3>
     <p class="dim" style="margin-bottom:8px">パーティの 上から 3たいで たたかいます。${window.PMA_APP ? 'インターネットに つながって いる ひつようが あります。' : 'あいても この ゲームの ページを claude.ai で ひらいて いる ひつようが あります。'}</p>
-    <div class="ntabs"><button class="on" data-t="rank">ランク対戦</button><button data-t="friend">フレンド対戦</button></div>
+    <div class="ntabs"><button class="on" data-t="rank">オンライン対戦</button><button data-t="friend">フレンド対戦</button></div>
     <div data-p="rank">
       <div class="rankcard"><div class="rkup"><img src="${tierBadgeBig(t.i)}" alt=""><span class="chip" style="background:${t.c};font-size:13px;padding:2px 10px">${t.n}</span></div><div class="rr">${k.r}</div><div class="dim">${k.w}かち ${k.l}まけ</div></div>
       <button class="btn" id="mmGo" style="width:100%;margin-top:8px">マッチング かいし</button>

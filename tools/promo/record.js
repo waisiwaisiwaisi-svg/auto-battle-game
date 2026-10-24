@@ -66,7 +66,7 @@ const FPS = 30; let fno = 0;
   await cap('');
   await p.evaluate(() => { const G = window.__game; G.run(o => o).show('scTitle'); const e = document.getElementById('pe'); e.style.display = 'flex';
     const ids = ['hinokon', 'mizupuku', 'happamogu', 'birikurage', 'gouen'].filter(id => G.SPECIES[id]);
-    e.innerHTML = `<div class="l1">PIXEL MONSTER<br>ARENA</div><div class="l2">ピクセルモンスターアリーナ</div><div class="mons" id="pmons"></div><div class="l3">ランク対戦 ・ ギルド ・ ジムめぐり<br>オフラインでも あそべる！</div><div class="l4">近日 とうじょう！</div>`;
+    e.innerHTML = `<div class="l1">PIXEL MONSTER<br>ARENA</div><div class="l2">ピクセルモンスターアリーナ</div><div class="mons" id="pmons"></div><div class="l3">オンライン対戦 ・ ギルド ・ ジムめぐり<br>オフラインでも あそべる！</div><div class="l4">近日 とうじょう！</div>`;
     const sc = G.run(o => o); const M = document.getElementById('pmons'); for (const id of ids) { const cv = document.querySelector('.dexc canvas'); void cv; }
     document.querySelectorAll('#dexGrid .dexc canvas').forEach((cv, i) => { if (i < 5) { const c2 = document.createElement('canvas'); c2.width = cv.width; c2.height = cv.height; c2.getContext('2d').drawImage(cv, 0, 0); c2.style.width = '64px'; c2.style.height = '64px'; c2.style.imageRendering = 'pixelated'; M.appendChild(c2); } }); });
   for (let i = 0; i < FPS * 3.5; i++) { await p.evaluate((i) => { const e = document.getElementById('pe'); e.style.opacity = Math.min(1, i / 10); const m = document.getElementById('pmons'); if (m) [...m.children].forEach((c, j) => c.style.transform = `translateY(${Math.round(Math.sin(i / 5 + j) * 4)}px)`); }, i); await snap(); }

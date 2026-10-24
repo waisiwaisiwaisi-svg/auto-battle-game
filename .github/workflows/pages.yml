@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      # オンライン（ランク対戦・ランキング・ギルド）：リポジトリの Secrets に FIREBASE_CONFIG（Firebase の ウェブアプリ設定の JSON）が あれば つなぐ。なければ 1人用だけ
+      # オンライン（オンライン対戦・ランキング・ギルド）：リポジトリの Secrets に FIREBASE_CONFIG（Firebase の ウェブアプリ設定の JSON）が あれば つなぐ。なければ 1人用だけ
       - name: Firebase の せってい
         env: { FIREBASE_CONFIG: '${{ secrets.FIREBASE_CONFIG }}' }
         run: |
