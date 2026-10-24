@@ -1015,7 +1015,7 @@ html.land #tabbar{flex-direction:column}
 #tabbar button:not(.x),#tabbar button.home.on,html.land #tabbar button.home.on{background:none!important;box-shadow:none!important}
 #tabbar button.on:not(.x),#tabbar button.home.on{color:#ffd166!important}
 /* ひかり：まるい ぼかしが まんなかから ふくらむ ＋ ふちの 金の せんが まんなかから のびる（しかくい まどに しない） */
-#tabbar button::before,#tabbar button::after{content:'';position:absolute;pointer-events:none;z-index:-1;transition:transform .34s cubic-bezier(.34,1.4,.64,1),opacity .25s;opacity:0}
+#tabbar button::before,#tabbar button::after{content:'';position:absolute;pointer-events:none;z-index:-1;transition:transform .3s cubic-bezier(.2,.8,.25,1),opacity .25s;opacity:0}   /* はねかえらない うごき：ひかりが わくを こえない */
 #tabbar button::before{inset:0;border-radius:0;background:linear-gradient(180deg,rgba(255,209,102,.34),rgba(255,180,80,.12) 55%,rgba(255,180,80,.03));transform:scaleX(.15)}
 #tabbar button::after{left:0;right:0;top:0;height:3px;border-radius:3px;background:#ffd166;box-shadow:0 0 8px rgba(255,209,102,.8);transform:scaleX(0)}
 #tabbar button.on::before{opacity:1;transform:scaleX(1)}
