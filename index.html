@@ -6427,7 +6427,7 @@ const TR_STYLE = {
   flank: { n: 'まわりこむ', o: ['しょうめんから', 'ときどき', 'よく まわる'], v: [0, .4, 1] },
   flee:  { n: 'HPが へったら', o: ['にげない', 'すこし はなれる', 'にげる'], v: [0, .3, .7] },
 };
-const trOf = (f) => B && B.train && (f.side === 0 || B.kind === 'online' || (f.mon && f.mon.ace)) ? f.mon.tr || null : null;   // オンラインは あいての 訓練も つかう・リーグの エースも 訓練ずみ
+const trOf = (f) => B && B.train && (f.side === 0 || B.kind === 'online' || (f.mon && (f.mon.ace || f.mon.lead))) ? f.mon.tr || null : null;   // オンラインは あいての 訓練も つかう・リーグの エースも 訓練ずみ
 // わざの ねうちに かける かず（0＝つかわない・じょうけんに あわない）
 function trW(f, o, id) {
   const u = (trOf(f).use || {})[id] || {}, lv = u.w ?? 2, c = u.c || 'any';
@@ -6531,7 +6531,7 @@ function runRules(f, o) {
     P.mv.forEach((r, i) => { trLines(r.c).forEach((l, li) => { let all = l.length > 0; l.forEach((c, j) => { if (condOk(f, o, c, r.id)) L.ct[`${i}:${li}:${j}`] = (L.ct[`${i}:${li}:${j}`] || 0) + 1; else all = false; }); if (all) L.ct[`${i}:${li}`] = (L.ct[`${i}:${li}`] || 0) + 1; }); }); }
   if (f.queued) {   // 撃つ 技が きまっている：ふつうの うごきで 間合いへ（2.5びょう 撃てなければ しばらく ほかの 技へ）
     if (!f.trQ || f.trQ.id !== f.queued) f.trQ = { id: f.queued, t: B.t };
-    if (B.t - f.trQ.t < 2.5) { f.trAt = 'm:' + f.queued + ' q'; return; }
+    if (B.t - f.trQ.t < (f.trQ.ev ? 6 : 2.5)) { f.trAt = 'm:' + f.queued + ' q'; return; }   // 出場時・交代時の 技は ながめに まつ
     f.trSkip = { id: f.queued, until: B.t + 4 }; f.queued = null; f.trQ = null;
   }
   const skip = (id) => f.trSkip && f.trSkip.id === id && B.t < f.trSkip.until;
@@ -6561,14 +6561,14 @@ function runRules(f, o) {
   if (g !== 'auto') {   // 近づいて／離れて／隠れて／回り込んで から 撃つ（3びょう たったら 撃つ）
     if (!f.trPrep || f.trPrep.id !== r.id) { f.trPrep = { id: r.id, t: 0, ord: f.order && f.order.tr ? 1 : 0 }; }
     f.trPrep.t += .25; const d = dist(f, o), rd = g === 'near' ? d < 150 : g === 'far' ? d >= 260 : g === 'hide' ? (!losClear(f, o) || d >= 330) : f.trPrep.t >= 1.5;   // 隠れて：隠れきるか 330 いじょう はなれてから
-    if (!rd && f.trPrep.t >= .75) {   // うまく うごけない（おいかけられて 離れきれない など）：いまの 間合いで なりたつ 技が あれば そちらを 撃つ
+    if (!rd && f.trPrep.t >= .75 && !trLines(r.c).some(l => l.some(c => TR_EV.includes(c.t)))) {   // うまく うごけない（おいかけられて 離れきれない など）：いまの 間合いで なりたつ 技が あれば そちらを 撃つ
       const now = (x) => { const gx = x.go || 'auto'; return gx === 'auto' || (gx === 'near' && d < 150) || (gx === 'far' && d >= 260) || (gx === 'hide' && (!losClear(f, o) || d >= 330)); };
       const alt = hit.concat(rows.filter(x => !hit.includes(x))).find(x => x !== r && ok(x) && (!hasC(x) || lineHit(x)) && now(x) && d <= moveReach(f, o, MOVES[x.id]));
       if (alt) { r = alt; f.trAt += ' alt'; }
       else if (f.trPrep.t < (g === 'hide' ? 5 : 3)) return;
     } else if (!rd && f.trPrep.t < (g === 'hide' ? 5 : 3)) return;
   }
-  f.trPrep = null; f.trGo = null; f.trNext = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t }; f.trAt += ' q'; f.trTag = hit.includes(r) ? r.id : null; f.trRow = P.mv.indexOf(r); f.trLine = f.trTag ? trLines(r.c).findIndex(l => l.length && condsOk(f, o, l, r.id)) : -1;   // 条件で えらんだ 技：うつ ときに しるし
+  f.trPrep = null; f.trGo = null; f.trNext = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t, ev: trLines(r.c).some(l => l.some(c => TR_EV.includes(c.t)) && condsOk(f, o, l, r.id)) }; f.trAt += ' q'; f.trTag = hit.includes(r) ? r.id : null; f.trRow = P.mv.indexOf(r); f.trLine = f.trTag ? trLines(r.c).findIndex(l => l.length && condsOk(f, o, l, r.id)) : -1;   // 条件で えらんだ 技：うつ ときに しるし
 }
 // いま つかっても いみが ない 技（ゴーストシフト中の かけなおし・ゴーストシフト中の あいてに ノーマル／かくとう・まったく きかない タイプ）
 function moveUseless(f, o, id) { const m = MOVES[id]; if (!m || !o) return false;
@@ -6735,6 +6735,7 @@ function moveReach(f, o, m) {
 function aiSwitch(f, o, dt) {
   const sd = B.sides[f.side];
   if (B.kind !== 'cup' || sd.swapCd > 0 || sd.lockT > 0 || f.state !== 'free' || f.v.rampage) return false;
+  { const P = trProg(f); if (P && P.mv.some(r => f.moves.includes(r.id) && trLines(r.c).some(l => l.some(c => c.t === 'enter')) && !(f.usedAt && f.usedAt[r.id] != null))) return false; }   // 出場時の 技を 撃つ までは こうたい しない
   f.swapT = (f.swapT == null ? 3 : f.swapT) - dt;
   if (f.swapT > 0) return false;
   f.swapT = rand(2.5, 4.5);
@@ -11018,7 +11019,7 @@ const baseTot = (id) => Object.values(base6(id)).reduce((a, b) => a + b, 0);
 // エースの 訓練（コンボ）：上から じゅんに 条件を みる。after の p は この 一覧の なんばんめ か
 const TRC = (t, p, n) => n != null ? { t, p, n } : p != null ? { t, p } : { t };
 const ACE_TR = {
-  c_fighting5: [['close-combat', 'near', [[TRC('after', 2)]]], ['future-sight', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['bulk-up', 'auto', [[TRC('enter')]]], ['drain-punch', 'near', []]],   // ゴリング：みらいよちで しるし → ぜんりょくラッシュで つかんで にがさない
+  c_fighting5: [['close-combat', 'near', [[TRC('after', 2)]]], ['future-sight', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['drain-punch', 'near', [[TRC('myhp', 75)]]], ['zen-headbutt', 'auto', []]],   // ゴリング：みらいよち → ぜんりょくラッシュで にがさない・へったら すいとりナックル・あいまに ねんりきずつき
   c_fighting7: [['swords-dance', 'auto', [[TRC('enter')]]], ['close-combat', 'near', [[TRC('after', 1)], [TRC('mystg', 'atk', 2), TRC('dist', 'near')]]], ['sucker-punch', 'auto', [[TRC('hit', 'any')]]], ['poltergeist', 'auto', []]],   // オニゴ：やるきアップ → ぜんりょくラッシュ・うけたら だしぬき
   sorabune: [['tailwind', 'auto', [[TRC('enter')]]], ['protect', 'auto', [[TRC('hit', 'big')]]], ['hurricane', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['gale-arrow', 'far', [[TRC('dist', 'far')]]]],   // ソラフネ：おいかぜ → ちかければ おおあらし・とおければ かぜのや
   a_dragon4: [['toxic', 'auto', [[TRC('opsts', 'none')]]], ['gunk-shot', 'auto', [[TRC('opsts', 'psn')]]], ['roost', 'far', [[TRC('myhp', 50)]]], ['acid-rain', 'auto', []]],   // タツモドキ：もうどく → どくの あいてに どくのかたまり・HPが へったら はなれて つばさやすめ
@@ -11032,6 +11033,10 @@ function leagueTeam(type, n, p) {
   if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id) && id !== ace).sort((a, b) => baseTot(b) - baseTot(a)));
   const top = pool.slice(0, n + (type ? 2 : 6)), out = [];
   while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = choice(c.length ? c : top); top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }
+  if (type === 'fighting' && out.length) {   // アカリ：せんとうの 子は まず ぶっとびてんし（でた しゅんかんに かしつけ）
+    const i = Math.max(0, out.findIndex(e => canLearn(e.sid, 'hako-punch'))), e = out.splice(i, 1)[0]; out.unshift(e);
+    const rest = e.moves.filter(id => id !== 'hako-punch').slice(0, 3); e.moves = ['hako-punch', ...rest]; e.lead = 1;
+    e.tr = { mode: 'chip', prog: { hv: 1, nat: e.nat, mv: [{ id: 'hako-punch', go: 'auto', c: [[TRC('enter')]] }, ...rest.map(id => ({ id, go: 'auto', c: [] }))] } }; }
   if (ace) { const em = foeMon(ace, 1, -9), b = base6(ace), main = b.atk >= b.spa ? 'atk' : 'spa', sub = main === 'atk' ? 'spa' : 'atk';
     em.ace = 1; em.iv = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, eva: 31 }; em.ev = { [main]: EV_STAT_MAX, spe: EV_MAX - EV_STAT_MAX };
     em.nat = Object.keys(NATURES).find(k => NATURES[k].up === main && NATURES[k].down === sub) || Object.keys(NATURES).find(k => NATURES[k].up === main) || em.nat;
