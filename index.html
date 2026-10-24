@@ -10999,7 +10999,7 @@ const ACE_TR = {
   c_fighting5: [['close-combat', 'near', [[TRC('after', 2)]]], ['future-sight', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['bulk-up', 'auto', [[TRC('enter')]]], ['drain-punch', 'near', []]],   // ゴリング：みらいよちで しるし → ぜんりょくラッシュで つかんで にがさない
   c_fighting7: [['swords-dance', 'auto', [[TRC('enter')]]], ['close-combat', 'near', [[TRC('after', 1)], [TRC('mystg', 'atk', 2), TRC('dist', 'near')]]], ['sucker-punch', 'auto', [[TRC('hit', 'any')]]], ['poltergeist', 'auto', []]],   // オニゴ：やるきアップ → ぜんりょくラッシュ・うけたら だしぬき
   sorabune: [['tailwind', 'auto', [[TRC('enter')]]], ['protect', 'auto', [[TRC('hit', 'big')]]], ['hurricane', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['gale-arrow', 'far', [[TRC('dist', 'far')]]]],   // ソラフネ：おいかぜ → ちかければ おおあらし・とおければ かぜのや
-  a_dragon4: [['toxic', 'auto', [[TRC('opsts', 'none')]]], ['gunk-shot', 'auto', [[TRC('opsts', 'psn')]]], ['protect', 'auto', [[TRC('hit', 'big')]]], ['acid-rain', 'auto', []]],   // タツモドキ：もうどく → どくの あいてに どくのかたまり
+  a_dragon4: [['toxic', 'auto', [[TRC('opsts', 'none')]]], ['gunk-shot', 'auto', [[TRC('opsts', 'psn')]]], ['roost', 'far', [[TRC('myhp', 50)]]], ['acid-rain', 'auto', []]],   // タツモドキ：もうどく → どくの あいてに どくのかたまり・HPが へったら はなれて つばさやすめ
   c_dragon8: [['calm-mind', 'auto', [[TRC('enter')]]], ['draco-meteor', 'auto', [[TRC('after', 3)]]], ['future-sight', 'auto', [[TRC('dist', 'mid')], [TRC('dist', 'far')]]], ['dragon-pulse', 'auto', []]],   // ホーリュウ：せいしんとういつ → みらいよち → スターフォールで にげばを ふさぐ
 };
 function aceTrain(em) { const T = ACE_TR[em.sid]; if (!T) return; const ok = T.filter(([id]) => MOVES[id] && canLearn(em.sid, id)); if (ok.length < 2) return;
