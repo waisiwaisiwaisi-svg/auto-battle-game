@@ -10878,7 +10878,7 @@ $('btnOpt').onclick = () => {
     <label class="optrow">こうかおん <input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
     <label class="optrow">テスト：スクロール つかいほうだい <input type="checkbox" id="oTmFree"></label>
-    <div class="optrow" style="flex-wrap:wrap;row-gap:6px"><span>テスト：チュートリアル</span><span style="display:flex;gap:6px;margin-left:auto"><button class="btn sub" id="oTutB" style="font-size:12px;padding:6px 10px">バトル</button><button class="btn sub" id="oTutT" style="font-size:12px;padding:6px 10px">訓練</button><button class="btn sub" id="oTutA" style="font-size:12px;padding:6px 10px">はじめから</button></span></div>
+    <div class="optrow" style="flex-wrap:wrap;row-gap:6px"><span>テスト：チュートリアル</span><span style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-left:auto"><button class="btn sub" id="oTutB" style="font-size:12px;padding:6px 10px">バトル</button><button class="btn sub" id="oTutT" style="font-size:12px;padding:6px 10px">訓練</button><button class="btn sub" id="oTutA" style="font-size:12px;padding:6px 10px">はじめから</button><button class="btn sub" id="oTutR" style="font-size:12px;padding:6px 10px">はじめての戦い</button></span></div>
     <div class="optrow"><span></span><button class="btn sub" id="oSeAdj" style="font-size:12px;padding:6px 12px">こうかおんを ひとつずつ ちょうせい</button></div>
     
     ${!window.PMA_NAME ? `<div class="optrow">なまえ <span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">かえる</button></span></div>` : ''}
@@ -10897,6 +10897,7 @@ $('btnOpt').onclick = () => {
   bg.querySelector('#oTutB').onclick = () => { bg.remove(); startTutorial(); };   // テスト：いつでも チュートリアルを たしかめる
   bg.querySelector('#oTutT').onclick = () => { bg.remove(); trainTutorial(() => renderHub()); };
   bg.querySelector('#oTutA').onclick = () => { bg.remove(); onbTest(); };
+  bg.querySelector('#oTutR').onclick = () => { bg.remove(); startRival(true); };   // テスト：はじめての戦い（初回の 会話つき）
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
   
   const LK = bg.querySelector('#oLooks');
@@ -11276,14 +11277,14 @@ function startLeague() {
 }
 // はじめての 戦い：ライバル（いまの チャンピオンと おなじ 人）。かならず かてる よわい あいて
 const rivalTr = () => { const L = LEAGUE[LEAGUE.length - 1]; return { look: L[0], name: 'ライバル ' + L[1].split(' ').pop() }; };
-function startRival() {
+function startRival(test) {   // test：せっていの テスト（はじめての ときと おなじ うごき・すすみぐあいは かわらない）
   const R = rivalTr(), tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; };
   const ids = poolIds().filter(id => !SPECIES[id].rare && !STARTERS.includes(id)).sort((a, b) => tot(a) - tot(b)).slice(0, 10), e = [];
   while (e.length < 2 && ids.length) e.push(fixMon({ uid: -1 - e.length, sid: ids.splice(Math.floor(Math.random() * ids.length), 1)[0] }));
-  startBattle({ kind: 'cup', field: 'grass', p0: S.party.slice(0, 6), enemies: e.map(noDefMoves), trainer: { name: R.name, spr: trArt(R.look) }, journey: { rival: 1 },
+  startBattle({ kind: 'cup', field: 'grass', p0: S.party.slice(0, 6), enemies: e.map(noDefMoves), trainer: { name: R.name, spr: trArt(R.look) }, journey: { rival: 1, test: !!test },
     title: 'はじめての戦い', intro: `${R.name}「あなたもトレーナーになったんだ。まずは腕試し！」` });
   for (const f of B.sides[1].fs) { f.atk *= .3; f.spa *= .3; f.maxHp = Math.max(1, Math.round(f.maxHp * .4)); f.hp = f.maxHp; }   // かならず かてる（みじかく おわる）
-  if (!jr().rival) for (const f of B.sides[0].fs) { f.def *= 2; f.spd *= 2; }   // はじめては ぜったいに まけない
+  if (test || !jr().rival) for (const f of B.sides[0].fs) { f.def *= 2; f.spd *= 2; }   // はじめては ぜったいに まけない
 }
 // ライバルの はなし（リザルトの まえ）
 function rivalTalk(lines) {
@@ -11298,7 +11299,7 @@ function rivalTalk(lines) {
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
   if (c.rival) {
-    if (res === 'win') { const first = !J.rival; J.rival = 1; S.wins++; lines.unshift(`${rivalTr().name}に かった！`); lines.push(`つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム！`);
+    if (res === 'win') { const first = c.test || !J.rival; if (!c.test) { J.rival = 1; S.wins++; } lines.unshift(`${rivalTr().name}に かった！`); lines.push(`つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム！`);
       if (first) { const g = FIELD_NAMES[GYMS[J.gym].f]; B.preTalk = () => rivalTalk(['……やるじゃない。初めてにしては、いい戦いだったよ。', 'わたしもこれから、ジムを巡ってバッジを集めるんだ。', 'ねえ、競争しない？ どっちが先にジムバッジを10個集められるか！', `チャンピオンリーグで待ってるからね。まずは${g}ジムから、がんばって！`]); } }
     else if (res === 'lose') lines.unshift('まけてしまった… もういちど ちょうせんしよう');
     return;
