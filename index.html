@@ -1145,6 +1145,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .hov{outline:3px solid #ffd166!important;outline-offset:1px;box-shadow:0 0 10px rgba(255,209,102,.45)!important}
 .trghost.snap{opacity:1;transform:scale(1.04);box-shadow:0 0 0 2px #ffd166,0 6px 16px rgba(0,0,0,.5)}
 .trbtns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.trins .trseg.trstg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%;max-width:340px}.trins .trseg.trstg button{min-width:0;width:100%;padding:5px 0;font-size:13px}.trins .trseg[data-k="cq"] button{padding:4px 20px;font-size:13px}
 #scTrain.trt-on .trpage{padding-bottom:45vh}
 .trdock{display:none}.trpage.dock .trdock{display:flex;flex-direction:column;gap:10px;grid-column:1;grid-row:1;position:sticky;top:8px;align-self:start;min-height:0}.trpage.dock .trdock .trmons{flex:1 1 auto;min-height:0;max-height:none}.trpage.dock .trdock > :not(.trmons){flex:none}.trdock .trbtns{flex-direction:column;flex-wrap:nowrap;gap:10px}.trdock .trbtns .btn{width:100%;font-size:13px;padding:10px 4px;white-space:normal;line-height:1.3}.trdock .trbtns2{gap:4px 10px;font-size:12px}.trstat{display:none!important}   /* 3れつ：ひだりの れつに ボタン */.trbtns .btn{padding:6px 12px;font-size:13px}
 .trside h3{font-size:13px;margin:4px 0 0}.trside h3 .dim{font-size:10px;font-weight:400}.trside{background:rgba(20,16,36,.55);border:1px solid var(--edge);border-radius:10px;padding:8px}
@@ -4161,7 +4162,7 @@ function renderTrain(uid) {
   const mvInfo = (id) => { const M = MOVES[id]; if (!M) return ''; return `<div class="trmvinfo" style="--c:${tcol(id)}"><div><b>${M.n}</b>${mvUseTag(M)} <span class="dim">${moveSub(M)}・${CAT_NAMES[M.cat] || ''}・待ち${(+M.cd).toFixed(1).replace(/\.0$/, '')}秒</span></div><div>${kwDesc(M)}</div></div>`; };   // 技の 内容
   const infoId = pk && pk.k === 'mv' ? pk.v : !pk && !sc ? TRN.info : null;
   if (sc) { const K = CONDS[sc.t], seg = (opts, cur) => `<div class="trseg" data-k="cp">${opts.map(([v, n]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${n}</button>`).join('')}</div>`;
-    ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}${K.ns ? `<div class="trrow">${seg(K.ns.map(v => [v, K.nf(v)]), sc.n ?? K.n0).replace('data-k="cp"', 'data-k="cn"')}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
+    ins = `<div><b>${K.n}</b></div>${K.ps ? `<div class="trrow">${seg(trPs(sc.t, W), sc.p ?? K.ps[0][0])}</div>` : ''}${K.cmp ? (() => { const [v, q] = STG_DEC(sc.n ?? K.n0); return `<div class="trrow">${seg([['ge', '以上'], ['le', '以下']], q).replace('data-k="cp"', 'data-k="cq"')}</div><div class="trrow">${seg([-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6].map(x => [x, (x > 0 ? '+' : '') + x]), v).replace('data-k="cp"', 'data-k="cv"').replace('class="trseg"', 'class="trseg trstg"')}</div>`; })() : K.ns ? `<div class="trrow">${seg(K.ns.map(v => [v, K.nf(v)]), sc.n ?? K.n0).replace('data-k="cp"', 'data-k="cn"')}</div>` : ''}<button class="btn sub" data-a="cdel" style="padding:2px 12px;font-size:12px;align-self:flex-start">削除</button>`; }
   else if (pk) ins = '<div class="dim">置く場所をタップ（技は技の枠・立ち回りは「〜撃つ」の枠・条件は右の枠）</div>';
   else ins = '<div class="dim">ドラッグで 左へ 置く（タップ → 置き場所タップ でもOK）<br>置いた 条件：タップで 設定・外へ ドラッグで 削除</div>';
   const fts = [...new Set(eq.concat(tm).map(id => MOVES[id].t))], fsel = (k, opts) => `<select data-flt="${k}"><option value="">${k === 't' ? 'タイプ：ぜんぶ' : '分類：ぜんぶ'}</option>${opts.map(([v, n]) => `<option value="${v}"${TR_FLT[k] === v ? ' selected' : ''}>${n}</option>`).join('')}</select>`;
@@ -4248,7 +4249,8 @@ function renderTrain(uid) {
   B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', () => { if (TRN.pick) return; const id = W.mv[+e.dataset.i] && W.mv[+e.dataset.i].id; TRN.info = TRN.info === id ? null : id; TRN.sel = null; SND.se('click'); redo(); }));   // 置いた 技：タップで 内容
   B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { const ids = W.mv.map(x => x.id); W.mv.splice(+b.dataset.rm, 1); trRemap(W, ids); TRN.sel = null; SND.se('back'); touch(); });
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
-    if (g.dataset.k === 'cn') sc.n = +b.dataset.v; else sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
+    if (g.dataset.k === 'cq') sc.n = STG_ENC(STG_DEC(sc.n ?? K.n0)[0], b.dataset.v); else if (g.dataset.k === 'cv') sc.n = STG_ENC(+b.dataset.v, STG_DEC(sc.n ?? K.n0)[1]);   // 能力の 段階：以上・以下 と 段階を べつべつに
+    else if (g.dataset.k === 'cn') sc.n = +b.dataset.v; else sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
   act('cdel', () => { W.mv[+sel[0]].c[+sel[1]].splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
   act('sim', async () => { if (TR_SIM) return; if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok');
     const bg = modal('<h3>模擬戦ちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'); const log = await trSim(m, W, 5); bg.remove(); if (log) trSimShow(m, W, log); });
@@ -6481,6 +6483,9 @@ function trW(f, o, id) {
 // ===== くんれん：チップ（カルネージハート ふう）：マス目に チップを ならべて やじるしで つなぐ。0.25びょう ごとに「はじまり」から たどり、さいしょに ついた こうどうチップを する =====
 // 訓練の設定：技1〜4が そのまま優先度。条件つきの技は 条件が合うときだけ（1→4 の順）。合う技が ないときは お任せAIが 条件なしの技から えらぶ。技ごとに撃ち方（立ち回り）も決める
 const CHIP_PCT = [[25, '25%'], [50, '50%'], [75, '75%']];
+// 能力の 段階の 条件：n に「段階」と「以上・以下」を いれる（1〜6＝+n以上・-1〜-6＝-n以下 は むかしの まま。10〜16＝+0〜+6以下・-10〜-16＝-0〜-6以上）
+const STG_DEC = (n) => { n = +n || 1; if (n >= 10) return [n - 10, 'le']; if (n <= -10) return [n + 10, 'ge']; return [n, n > 0 ? 'ge' : 'le']; };
+const STG_ENC = (v, q) => q === 'ge' ? (v > 0 ? v : v - 10) : (v < 0 ? v : v + 10);
 const CONDS = {
   dist:  { n: '距離', ps: [['near', '近い'], ['mid', '普通'], ['far', '遠い']] },
   myhp:  { n: '自分のHP', ps: CHIP_PCT.map(([v, n]) => [v, n + '未満']) },
@@ -6492,8 +6497,8 @@ const CONDS = {
   nosee: { n: '相手が見えない' },   // 障害物・技の かべに さえぎられて、そのままでは 当てられる 技が ない
   after: { n: '技を撃った後', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']] },   // 直前に 撃った 技が その技
   cnt:   { n: '技を撃った回数', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']], ns: [1, 2, 3, 4, 5], nf: (v) => v + '回', n0: 2 },
-  mystg: { n: '自分の能力', ps: [['atk', '攻撃'], ['def', '防御'], ['spa', '属性攻撃'], ['spd', '属性防御'], ['spe', '素早さ'], ['eva', '回避']], ns: [1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6], nf: (v) => v > 0 ? `+${v}以上` : `${v}以下`, n0: 1 },   // 能力の 段階が +n いじょう／-n いか
-  opstg: { n: '相手の能力', ps: [['atk', '攻撃'], ['def', '防御'], ['spa', '属性攻撃'], ['spd', '属性防御'], ['spe', '素早さ'], ['eva', '回避']], ns: [1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6], nf: (v) => v > 0 ? `+${v}以上` : `${v}以下`, n0: 1 },   // この 試合で その技を n回 いじょう 撃った
+  mystg: { n: '自分の能力', ps: [['atk', '攻撃'], ['def', '防御'], ['spa', '属性攻撃'], ['spd', '属性防御'], ['spe', '素早さ'], ['eva', '回避']], ns: [1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6], cmp: 1, nf: (n) => { const [v, q] = STG_DEC(n); return `${v > 0 ? '+' : ''}${v}${q === 'ge' ? '以上' : '以下'}`; }, n0: 1 },   // 能力の 段階が +n いじょう／-n いか
+  opstg: { n: '相手の能力', ps: [['atk', '攻撃'], ['def', '防御'], ['spa', '属性攻撃'], ['spd', '属性防御'], ['spe', '素早さ'], ['eva', '回避']], ns: [1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6], cmp: 1, nf: (n) => { const [v, q] = STG_DEC(n); return `${v > 0 ? '+' : ''}${v}${q === 'ge' ? '以上' : '以下'}`; }, n0: 1 },   // この 試合で その技を n回 いじょう 撃った
   off:   { n: '技の効果が切れた', ps: [[1, '技1'], [2, '技2'], [3, '技3'], [4, '技4']] },   // その技を 撃ったことが あって、効果が もう ない
   enter: { n: '出場時' },   // 出てから この技を まだ 撃っていない
   swap:  { n: '交代時' },
@@ -6530,7 +6535,7 @@ function condOk(f, o, c, id0) {
     case 'enter': return !!id0 && !(f.usedAt && f.usedAt[id0] != null);
     case 'swap': return !!id0 && !!o.swIn && B.t - (o.inAt || 0) < 10 && !(f.usedAt && f.usedAt[id0] >= (o.inAt || 0));
     case 'after': { const id = trSlot(f, c.p); return !!id && f.lastMove === id; }
-    case 'mystg': case 'opstg': { const v = (((c.t === 'mystg' ? f : o).st || {})[c.p] || 0), n = +c.n || 1; return n > 0 ? v >= n : v <= n; }
+    case 'mystg': case 'opstg': { const v = (((c.t === 'mystg' ? f : o).st || {})[c.p] || 0), [n, q] = STG_DEC(c.n); return q === 'ge' ? v >= n : v <= n; }
     case 'cnt': { const id = trSlot(f, c.p); return !!id && ((f.useN || {})[id] || 0) >= (+c.n || 1); }
     case 'off': { const id = trSlot(f, c.p); return !!id && f.usedAt && f.usedAt[id] != null && !mvLasting(f, o, id); }
   }
@@ -8808,8 +8813,8 @@ const KW_C = {   // 訓練の 条件
   foe: ['条件：相手が溜め中', '相手が 攻撃技を 出す 直前の ため（溜め）を して いる とき。'],
   see: ['条件：相手が見える', 'そのまま 当てられる 技が ある とき（障害物・技の かべに さえぎられて いない か、かべごしに とどく 技を もって いる）。'],
   nosee: ['条件：相手が見えない', '障害物・技の かべに さえぎられて、そのままでは 当てられる 技が ない とき（回り込む・かべを こわす 技を 撃つ ときに）。'],
-  mystg: ['条件：自分の能力', '自分の 能力の 段階（技などで 上下した ぶん）が「+n以上」または「-n以下」の とき。交代すると もとに もどる。'],
-  opstg: ['条件：相手の能力', '相手の 能力の 段階が「+n以上」（つみ技を つまれたら など）または「-n以下」（下げたら など）の とき。'],
+  mystg: ['条件：自分の能力', '自分の 能力の 段階（技などで 上下した ぶん）が「+2以上」「+5以下」「-1以上」「-3以下」などの とき。以上・以下と 段階を べつべつに えらべる。交代すると もとに もどる。'],
+  opstg: ['条件：相手の能力', '相手の 能力の 段階が「+2以上」（つみ技を つまれたら など）や「-1以下」（下げたら など）、「0以下」（上がって いない）などの とき。以上・以下と 段階を べつべつに えらべる。'],
   cnt: ['条件：技を撃った回数', 'この 試合で、えらんだ 技を えらんだ 回数 いじょう 撃った とき（交代しても 数は のこる）。'],
   after: ['条件：技を撃った後', '直前に 撃った 技が えらんだ 技の とき（つなげ技に）。'],
   off: ['条件：技の効果が切れた', 'えらんだ 技を 撃った ことが あり、その 効果（能力の 変化・状態異常・まもり・壁 など）が もう ない とき。'],
