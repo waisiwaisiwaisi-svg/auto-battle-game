@@ -3943,7 +3943,7 @@ const TR_NAT = { yuukan: ['勇敢', '前へ前へ。ほとんど隠れない'], 
   zurugashikoi: ['ずる賢い', '横から回り込み、当てたらすぐ陰へ'], nonki: ['のんき', 'どっしり型。壁・回復・カウンターで待ち構える'], kimagure: ['むらっけ', '相手が出るたび能力が大きく上下する'], nebarizuyoi: ['粘り強い', '踏ん張り型。HPが減るほど速く激しくなる'] };
 const TR_STAT = { atk: '攻撃', def: '防御', spa: '属性攻撃', spd: '属性防御', spe: '素早さ' };
 // 作戦（ドラクエの「さくせん」の ような もの）：たちまわりの ほうしんを きめる。中身は 性格の うごき を つかう
-// 作戦は 3つ（性格の 3すくみ と おなじ：🔥せめ・🛡まもり・🌀からめて）。えらばなければ その子の 性格どおり
+// 作戦は 3つ（性格の 3すくみ と おなじ：🔥近・🛡中・🌀遠）。えらばなければ その子の 性格どおり
 const TR_PLAN = [['yuukan', 'どんどん せめる', '技を 撃たない ときは 近い 距離（〜150）を たもつ。ほとんど かくれない'], ['nonki', 'どっしり かまえる', '技を 撃たない ときは 普通の 距離（150〜290）を たもつ。かべ・かいふく・カウンターで まちかまえる'], ['reisei', 'まあいを たもつ', '技を 撃たない ときは 遠い 距離（290〜）を たもつ。ひまな ときは 陰で まつ']];
 const PLAN_R = { yuukan: 70, nonki: 220, reisei: 350 };   // 作戦ごとの 技を 撃たない ときの 間合い（近い 〜150・普通 150〜290・遠い 290〜 に おさまる ように）
 const trPlanOf = (n) => n && NATURES[n] ? (TR_PLAN.find(p => p[0] === n) || TR_PLAN.find(p => NAT_GRP[p[0]] === NAT_GRP[n]) || [])[0] : undefined;   // むかしの 作戦（いのちだいじに など）は おなじ グループの 作戦に
@@ -3953,7 +3953,7 @@ function trNatCard(k, W, m) {
   return `<div class="trnat"><div class="trh"><span class="trstep">1</span><b>作戦</b><span class="dim">ふだんの 立ち回り</span></div>
     <div class="trseg trnatsel">${TR_PLAN.map(([x, n]) => `<div class="trnatc"><button data-nat="${x}" class="${x === cur ? 'on' : ''}" style="--g:${GRP[NAT_GRP[x]].c}"><b>${n}</b></button><small class="trrec"${x === rec ? '' : ' style="visibility:hidden"'}>★おすすめ</small></div>`).join('')}</div>
     <div class="ndsc">${P ? P[2] : ''}</div>
-    <div class="dim nrel">${natRelText(cur)}<details class="trq"><summary>？</summary><div>3すくみ：🔥せめ → 🌀からめて → 🛡まもり → 🔥せめ。<br>よわい あいてから うけるときは ぼうぎょ 1.15ばい、にがてな あいてからは 0.87ばい。<br>性格は 能力の 上下だけ。撃ち方が「お任せ」の 技は この 作戦の 動きで 撃ちます。</div></details></div></div>`;
+    <div class="dim nrel">${natRelText(cur)}<details class="trq"><summary>？</summary><div>3すくみ：🔥近 → 🌀遠 → 🛡中 → 🔥近。<br>よわい あいてから うけるときは ぼうぎょ 1.15ばい、にがてな あいてからは 0.87ばい。<br>性格は 能力の 上下だけ。撃ち方が「お任せ」の 技は この 作戦の 動きで 撃ちます。</div></details></div></div>`;
 }
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trDefC = (id) => MOVES[id] && AUTO_GUARD[MOVES[id].k] ? [[{ t: 'hit', p: 'any' }]] : [];   // まもる系の さいしょの 条件
@@ -4036,7 +4036,7 @@ const trtRow = () => { const W = trtW(); if (!W) return 0; const i = W.mv.findIn
 const TRT_STEPS = [
   { tx: 'ここは <b>訓練</b>。バトルで モンスターが どう うごくかを くみたてる ばしょだよ。<br>いっしょに 1つ つくってみよう！', next: 1 },
   { sel: '.trnatsel', tx: '① まずは <b>作戦</b>。ふだんの 立ち回りを きめるよ。<br>どれか 1つ タップしてみよう（★が その子の おすすめ）', ok: () => TRT.f.nat },
-  { sel: '.trnatsel', allow: () => [], tx: '作戦には じゃんけんの ような かんけいが あるよ。<br>「<b>どんどん せめる</b>」は「<b>まあいを たもつ</b>」に、「まあいを たもつ」は「<b>どっしり かまえる</b>」に、「どっしり かまえる」は「どんどん せめる」に つよい。<br>あいてより つよい 作戦だと「<b>よゆう〜（さくせん◎）</b>」で こうげきを うけにくく（ぼうぎょ 1.15ばい）、よわいと「<b>けいかい（さくせん×）</b>」で うけやすく（0.87ばい）なる。おなじ グループ どうしは「ライバルだ！」', next: 1 },
+  { sel: '.trnatsel', allow: () => [], tx: '作戦には じゃんけんの ような かんけいが あるよ。<br>「<b>どんどん せめる</b>」は「<b>まあいを たもつ</b>」に、「まあいを たもつ」は「<b>どっしり かまえる</b>」に、「どっしり かまえる」は「どんどん せめる」に つよい。<br>あいてより つよい 作戦だと「<b>よゆう（さくせん◎）</b>」で こうげきを うけにくく（ぼうぎょ 1.15ばい）、よわいと「<b>けいかい（さくせん×）</b>」で うけやすく（0.87ばい）なる。おなじ グループ どうしは「ライバルだ！」', next: 1 },
   { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが <b>技の 行</b>。上ほど 先に 撃つよ。<br>左の 番号を ドラッグすると 順番を かえられる', next: 1 },
   { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を おいてみよう。<br>「<b>相手のHP</b>」を ○ばんの 技の「<b>使うとき</b>」へ ドラッグ！<br><small>（タップ → 置き場所を タップ でも OK）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
   { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手の HPが ${p}の とき</b>」に この技を 撃つ。<br>おいた 条件を タップすると ${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも かえられるよ`; }, next: 1 },
@@ -6942,11 +6942,11 @@ const MOODS = {
   scared: { n: 'びくびく…（さくせん×）',        col: '#8ab8ff', range: 1.4, cover: 1.8, flee: 1.6, react: 1.25, rush: .85, idle: 1.35, dodge: .15 },
   irri:   { n: 'イライラ…',        col: '#ff7a9a', range: .9,  cover: .6, flee: .8, react: .65, rush: 1.1,  idle: 1.3, dodge: -.1 },
   wary:   { n: 'けいかい（さくせん×）',         col: '#6ad8c8', range: 1.15, cover: 1.3, flee: 1.1, react: 1.1, rush: 1,   idle: .9, dodge: .15, flank: .2 },
-  mock:   { n: 'よゆう〜（さくせん◎）',         col: '#9ae07a', range: .9,  cover: .6, flee: .8, react: 1.3, rush: .95,  idle: .7, dodge: -.1 },
+  mock:   { n: 'よゆう（さくせん◎）',         col: '#9ae07a', range: .9,  cover: .6, flee: .8, react: 1.3, rush: .95,  idle: .7, dodge: -.1 },
 };
-// 性格の 3すくみ：せめ 🔥 → からめて 🌀 → まもり 🛡 → せめ 🔥（うける がわの ぼうぎょに 補正：つよい あいてから うけると 0.87ばい、よわい あいてからは 1.15ばい）
+// 性格の 3すくみ：近 🔥 → 遠 🌀 → 中 🛡 → 近 🔥（うける がわの ぼうぎょに 補正：つよい あいてから うけると 0.87ばい、よわい あいてからは 1.15ばい）
 const NAT_GRP = { yuukan: 'atk', sekkachi: 'atk', nebarizuyoi: 'atk', nonki: 'def', okubyou: 'def', reisei: 'tec', zurugashikoi: 'tec', kimagure: 'tec' };
-const GRP = { atk: { n: 'せめ', ic: '🔥', beats: 'tec', c: '#ff8a6a' }, tec: { n: 'からめて', ic: '🌀', beats: 'def', c: '#c08aff' }, def: { n: 'まもり', ic: '🛡', beats: 'atk', c: '#7ab8ff' } };
+const GRP = { atk: { n: '近', ic: '🔥', beats: 'tec', c: '#ff8a6a' }, tec: { n: '遠', ic: '🌀', beats: 'def', c: '#c08aff' }, def: { n: '中', ic: '🛡', beats: 'atk', c: '#7ab8ff' } };
 const natAdv = (a, b) => { const ga = NAT_GRP[a], gb = NAT_GRP[b]; if (!ga || !gb || ga === gb) return 0; return GRP[ga].beats === gb ? 1 : GRP[gb].beats === ga ? -1 : 0; };
 // うける がわの ぼうぎょ（ぼうぎょ・属性防御）に かける：にがてな あいてに つよい ときは 1.15ばい、よわい ときは 0.87ばい
 const NAT_DEF = { 1: 1.15, 0: 1, '-1': .87 };
@@ -10879,7 +10879,7 @@ $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
     <p><b>バトルは 見るだけ</b>：モンスターは <b>訓練</b>で きめた とおりに たたかう（作戦・わざの じゅんばん・条件・撃ち方）。訓練で きめて いない ところは お任せAIが うごかす。きみが できるのは <b>こうたい</b>（ひかえを タップ）だけ。オンライン対戦も おたがいの 訓練どうしで たたかう。</p>
-    <p><b>せいかくの 3すくみ</b>：🔥せめ（ゆうかん・せっかち・ねばりづよい）は 🌀からめて（れいせい・ずるがしこい・むらっけ）に つよく、🌀からめては 🛡まもり（のんき・おくびょう）に、🛡まもりは 🔥せめに つよい。うける がわの ぼうぎょ・属性防御が、じぶんが つよい あいてからなら 1.15ばい、にがてな あいてからなら 0.87ばい に なる。訓練の「作戦」でも かえられる。</p>
+    <p><b>せいかくの 3すくみ</b>：🔥近（ゆうかん・せっかち・ねばりづよい）は 🌀遠（れいせい・ずるがしこい・むらっけ）に つよく、🌀遠は 🛡中（のんき・おくびょう）に、🛡中は 🔥近に つよい。うける がわの ぼうぎょ・属性防御が、じぶんが つよい あいてからなら 1.15ばい、にがてな あいてからなら 0.87ばい に なる。訓練の「作戦」でも かえられる。</p>
     <p><b>よみあい</b>：<b>とっしん</b>（近接・突進）は、わざを <b>ためて ひかっている</b> あいてに あてると キャンセルできる（ためている あいだは ほかの わざでは とまらない）。<b>ガードシェル</b>は 弾・ビーム・はんいを 1かい うちけす（とっしんには わられる）。<b>はがねのしかえし</b>などの かまえは とっしんを はねかえす（弾・ビームには くずされる）。ダメージは かわらない、だす タイミングの よみあい。</p>
     <p><b>まち時間</b>：わざを 1つ つかうと、<b>ぜんぶの わざ</b>が その わざの まち時間に なる。つよい わざほど ながく まつので、どれを いつ だすかが かんじん。</p>
     <p><b>赤い はんい</b>は あいての わざの よちょう。モンスターは じぶんで かわそうと する。</p>
