@@ -2468,6 +2468,12 @@ for (const id of NEW_IDS) {
   MOVES[id] = m;
 }
 for (const m of Object.values(MOVES)) if (m.burst) m.homing = 0;   // れんしゃ技は おいかけない
+// 射程：あてにくい 直線ビームは とおくまで（520）、あてやすい 追尾弾は ふつうの 距離（360）まで。扇形・追尾しない 弾は そのまま
+for (const m of Object.values(MOVES)) {
+  if (m.cat === 'stat') continue;
+  if (m.k === 'beam' && !['wide', 'erupt'].includes(m.pat)) m.len = Math.max(m.len || 0, 520);
+  if (m.k === 'proj' && m.homing > 0 && m.spd && !['bounce', 'boomerang', 'boomline'].includes(m.pat)) m.life = Math.min(m.life || 2.2, 360 / m.spd);
+}
 
 for (const sid in SPECIES) { const sp = SPECIES[sid]; if (!LEARN[sid]) continue; if ((sp.fly || sp.type === 'wind' || sp.type2 === 'wind') && !LEARN[sid].some(([, x]) => x === 'fly')) LEARN[sid].push([28, 'fly']); if ((sp.type === 'ground' || sp.type2 === 'ground') && !sp.fly && !LEARN[sid].some(([, x]) => x === 'dig')) LEARN[sid].push([28, 'dig']); for (const id of PLACE_MOVES) if ([sp.type, sp.type2].includes(MOVES[id].t) && !LEARN[sid].some(([, x]) => x === id)) LEARN[sid].push([30, id]); }
 // おぼえる 技（タイプだけで なく 見た目・体格を みて えらんだ 一覧）：l＝しぜんに おぼえる、t＝スクロールで おぼえられる。うでが ない 子は パンチ・はねが ない 子は はばたき など を おぼえない
@@ -6555,7 +6561,12 @@ function runRules(f, o) {
   if (g !== 'auto') {   // 近づいて／離れて／隠れて／回り込んで から 撃つ（3びょう たったら 撃つ）
     if (!f.trPrep || f.trPrep.id !== r.id) { f.trPrep = { id: r.id, t: 0, ord: f.order && f.order.tr ? 1 : 0 }; }
     f.trPrep.t += .25; const d = dist(f, o), rd = g === 'near' ? d < 150 : g === 'far' ? d >= 260 : g === 'hide' ? (!losClear(f, o) || d >= 330) : f.trPrep.t >= 1.5;   // 隠れて：隠れきるか 330 いじょう はなれてから
-    if (!rd && f.trPrep.t < (g === 'hide' ? 5 : 3)) return;
+    if (!rd && f.trPrep.t >= .75) {   // うまく うごけない（おいかけられて 離れきれない など）：いまの 間合いで なりたつ 技が あれば そちらを 撃つ
+      const now = (x) => { const gx = x.go || 'auto'; return gx === 'auto' || (gx === 'near' && d < 150) || (gx === 'far' && d >= 260) || (gx === 'hide' && (!losClear(f, o) || d >= 330)); };
+      const alt = hit.concat(rows.filter(x => !hit.includes(x))).find(x => x !== r && ok(x) && (!hasC(x) || lineHit(x)) && now(x) && d <= moveReach(f, o, MOVES[x.id]));
+      if (alt) { r = alt; f.trAt += ' alt'; }
+      else if (f.trPrep.t < (g === 'hide' ? 5 : 3)) return;
+    } else if (!rd && f.trPrep.t < (g === 'hide' ? 5 : 3)) return;
   }
   f.trPrep = null; f.trGo = null; f.trNext = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t }; f.trAt += ' q'; f.trTag = hit.includes(r) ? r.id : null; f.trRow = P.mv.indexOf(r); f.trLine = f.trTag ? trLines(r.c).findIndex(l => l.length && condsOk(f, o, l, r.id)) : -1;   // 条件で えらんだ 技：うつ ときに しるし
 }
@@ -6707,6 +6718,7 @@ function moveReach(f, o, m) {
     case 'dash': return m.len * .8;
     case 'aoe': return m.rad * .75;
     case 'beam': return m.len * .8;
+    case 'proj': return m.spd ? Math.min(999, m.spd * (m.life || 2.2) * .8) : 999;   // 弾が きえる まえに とどく 距離
     case 'cone': return m.rad * .8;
     case 'multi': return 260;
     case 'vault': return 520;
