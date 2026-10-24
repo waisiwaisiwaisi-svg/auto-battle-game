@@ -4764,7 +4764,7 @@ const TICK = 3; // 状態異常ダメージの間隔（秒）＝ポケモンの�
 
 function mkFighter(mon, side) {
   const st = stats(mon), sp = SPECIES[mon.sid];
-  return {
+  return ((f, g) => g(f))({
     mon, sp, side, lvl: MON_LV, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, spa: st.spa, sdef: st.spd, speStat: st.spe, eva: st.eva, baseSpd: Math.round(st.spe * .85 - 10),
     moves: equipped(mon).slice(),
     x: 0, y: 0, r: Math.round(23 * bodySz(sp)), face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
@@ -4772,7 +4772,7 @@ function mkFighter(mon, side) {
     scale: 1, fainted: false, moving: false, walk: 0, ghostT: 0, splashT: 0,
     st: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }, status: '', statusT: 0, tickT: TICK, toxN: 1, parT: 2.5,
     v: {}, enterT: 0, lastMove: null, lastProtect: -9, shots: [],
-  };
+  }, mon.ace ? (f) => { for (const k in ACE_K) f[k] = Math.round(f[k] * ACE_K[k]); f.maxHp = f.hp; f.baseSpd = Math.round(f.speStat * .85 - 10); return f; } : (f) => f);
 }
 const active = (side) => { const sd = B.sides[side]; return sd.fs[sd.act]; };
 const opp = (f) => active(1 - f.side);
@@ -10167,6 +10167,12 @@ function drawFighter0(f) {
   const ms = SPR[f.mon.sid].ms;
   if (fly) { ctx.globalAlpha = .7 - bob * .08; shadow(f.x, f.y, img0.width * ms * (.22 - bob * .015)); ctx.globalAlpha = 1; }
   else shadow(f.x, f.y, img0.width * ms * .31);
+  if (f.mon && f.mon.ace && !['faint', 'enter', 'return', 'bench'].includes(f.state)) {   // エース：きんいろの オーラ
+    const R = img0.width * ms * .5 + 8, k = .5 + .5 * Math.sin(B.t * 5); ctx.save(); ctx.globalAlpha = .25 + .2 * k; ctx.fillStyle = '#ffd84a'; ctx.beginPath(); ctx.ellipse(f.x, f.y, R * 1.1, R * .38, 0, 0, 7); ctx.fill();
+    ctx.globalAlpha = .7; ctx.strokeStyle = '#fff3a0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(f.x, f.y, R * (1.2 + .15 * k), R * .42 * (1.2 + .15 * k), 0, 0, 7); ctx.stroke(); ctx.restore();
+    if (!B.headless && Math.random() < .35) B.parts.push({ x: f.x + rand(-R, R) * .8, y: f.y - rand(0, img0.height * ms * .9), vx: 0, vy: -rand(30, 60), life: .6, max: .6, col: Math.random() < .5 ? '#ffd84a' : '#ffffff', size: 3, g: 0 });
+    if (f.state !== 'enter' && !f.aceSaid) { f.aceSaid = 1; popText(f.x, f.y - 120, 'エース とうじょう！', '#ffd84a', 'comic'); say(`あいての エース ${f.sp.n}が あらわれた！ ものすごい はくりょくだ！`); }
+  }
   const img = (f.flash > 0 || f.state === 'enter' || f.state === 'return') ? fr.w : fr.n;
   // ため中：あしもとの わ・あつまる ひかり・からだが ひかる・ゲージ（とっしんで キャンセルできる あいず）
   const chg = f.cur && (f.state === 'chan' || (f.state === 'wind' && f.cur.wind >= .3)) ? f.cur : null;
@@ -10986,11 +10992,15 @@ function strongMoves(m, p) {
 const jProg = (g, step) => clamp((g * 3 + step) / 41, 0, 1) + (jr().champ ? .3 : 0);
 // チャンピオンリーグ：種族値の 高い モンスター。してんのうは とくいタイプの 上位から、チャンピオンは タイプに しばられず 全体の 上位から（タイプは かぶらない）
 const baseTot = (id) => Object.values(base6(id)).reduce((a, b) => a + b, 0);
+// エース（だいひょうの 1たい）：とくいタイプ（チャンピオンは 全体）で いちばん 種族値が 高い モンスター。ものすごく つよい 個体で さいごに でてくる
+const leagueAce = (type) => { const ids = poolIds(); return (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids).sort((a, b) => baseTot(b) - baseTot(a))[0]; };
+const ACE_K = { hp: 2, atk: 1.35, spa: 1.35, def: 1.25, sdef: 1.25, speStat: 1.15 };   // エースの のうりょく 倍率
 function leagueTeam(type, n, p) {
-  const ids = poolIds(); let pool = (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids.slice()).sort((a, b) => baseTot(b) - baseTot(a));
-  if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id)).sort((a, b) => baseTot(b) - baseTot(a)));
+  const ids = poolIds(), ace = leagueAce(type); let pool = (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids.slice()).filter(id => id !== ace).sort((a, b) => baseTot(b) - baseTot(a));
+  if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id) && id !== ace).sort((a, b) => baseTot(b) - baseTot(a)));
   const top = pool.slice(0, n + (type ? 2 : 6)), out = [];
   while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = choice(c.length ? c : top); top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }
+  if (ace) { const em = foeMon(ace, 1, -9); em.ace = 1; out.push(em); }   // エースは さいごに
   return out;
 }
 // 敵チーム：そのジムの タイプの モンスター（たりなければ ほかから）
@@ -11141,7 +11151,7 @@ function renderJourney() {
   });
   const L = document.createElement('button'), lo = J.badges.length >= GYMS.length;
   L.className = 'jrc league' + (lo ? ' next' : ' lock');
-  L.innerHTML = `${J.champ ? '<span class="badge">👑</span>' : ''}<div class="in"><b>チャンピオンリーグ</b><small>${lo ? `してんのう ${LEAGUE.length - 1}人と チャンピオン（${J.league + 1}/${LEAGUE.length} せんめ：${LEAGUE[J.league][1].split(' ')[1]}${LEAGUE[J.league][3] ? '・' + TYPES[LEAGUE[J.league][3]].n + 'タイプ' : ''}）` : 'バッジを 10こ あつめると ちょうせんできる'}</small></div>`;
+  L.innerHTML = `${J.champ ? '<span class="badge">👑</span>' : ''}<div class="in"><b>チャンピオンリーグ</b><small>${lo ? `してんのう ${LEAGUE.length - 1}人と チャンピオン（${J.league + 1}/${LEAGUE.length} せんめ：${LEAGUE[J.league][1].split(' ')[1]}${LEAGUE[J.league][3] ? '・' + TYPES[LEAGUE[J.league][3]].n + 'タイプ' : ''}・エース ${(SPECIES[leagueAce(LEAGUE[J.league][3])] || {}).n || ''}）` : 'バッジを 10こ あつめると ちょうせんできる'}</small></div>`;
   if (lo) L.onclick = () => { SND.se('ok'); startLeague(); };
   g.appendChild(L);
   { const T = tw(), op = towerOpen(), b = document.createElement('button'); b.className = 'jrc league tower' + (op ? ' next' : ' lock');
