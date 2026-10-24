@@ -5343,6 +5343,7 @@ function spawnWave(f, m, ang) {   // ビッグウェーブ：まえへ ゆっく
   OB().push({ k: 'wave', x0: f.x, y0: f.y, ang, d: 30, len: m.len || 460, w: m.wid || 120, sp: m.spd || 150, side: f.side, f, m, hit: false, life: 7, max: 7, uid: ++B.uidc });
   sheetFx('aoe_water', f.x + Math.cos(ang) * 40, f.y - 14 + Math.sin(ang) * 40, 1); B.shake = Math.max(B.shake, 3);
 }
+const WAVE_LN = 8;   // なみの はばを 8すじに わけて、かべに あたった すじだけ とめる
 const waveHead = (o) => ({ x: o.x0 + Math.cos(o.ang) * o.d, y: o.y0 + Math.sin(o.ang) * o.d });
 // なみの とおりみち の 上に いるか
 const onStream = (f) => !!(B && B.obs && B.obs.some(o => { if (o.k !== 'wave' || o.side !== f.side) return false; const c = Math.cos(o.ang), s = Math.sin(o.ang), dx = f.x - o.x0, dy = f.y - o.y0, al = dx * c + dy * s; return al >= 0 && al <= Math.min(o.d, o.len) && Math.abs(-dx * s + dy * c) <= o.w / 2; }));
@@ -5377,10 +5378,15 @@ function updObs(dt) {
         if (ob.d < ob.len) {
           const pd = ob.d; ob.d = Math.min(ob.len, ob.d + ob.sp * dt); const h = waveHead(ob);
           if (!inField(h.x, h.y, 0)) ob.d = ob.len;
+          { const c = Math.cos(ob.ang), s = Math.sin(ob.ang), sol = obstacles(false); ob.blk = ob.blk || new Array(WAVE_LN).fill(false);   // かべ・しょうがいぶつに あたった ところは そこで とまる
+            for (let i = 0; i < WAVE_LN; i++) { if (ob.blk[i]) continue; const t = ((i + .5) / WAVE_LN - .5) * ob.w, px = h.x - s * t, py = h.y + c * t;
+              if (sol.some(o => px > o.x0 && px < o.x1 && py > o.y0 && py < o.y1)) { ob.blk[i] = true; if (!ob.whit) { ob.whit = 1; wallsInArea(px, py, 8, ob.m); } }   /* かべへの ダメージは 1かいの なみで 1かい */ }
+            if (ob.blk.every(Boolean)) ob.d = ob.len; }
           if (Math.random() < dt * 30) { const t = rand(-.5, .5) * ob.w, c = Math.cos(ob.ang), s = Math.sin(ob.ang); B.parts.push({ x: h.x - s * t, y: h.y + c * t - 10, vx: c * 60 + rand(-20, 20), vy: -rand(40, 90), life: .4, max: .4, col: choice(['#ffffff', '#bfe4ff', '#4aa8ff']), size: 4, g: 200, shape: 'drop' }); }
           if (x && x.clones) hitClones(x, cl => { const c = Math.cos(ob.ang), s = Math.sin(ob.ang), dx = cl.x - ob.x0, dy = cl.y - ob.y0, al = dx * c + dy * s; return al >= pd - 20 && al <= ob.d + 20 && Math.abs(-dx * s + dy * c) <= ob.w / 2; });
           if (!ob.hit && xT) { const c = Math.cos(ob.ang), s = Math.sin(ob.ang), dx = x.x - ob.x0, dy = x.y - ob.y0, al = dx * c + dy * s;
-            if (al >= ob.d - 26 - x.r && al <= ob.d + 10 + x.r && Math.abs(-dx * s + dy * c) <= ob.w / 2 + x.r) { ob.hit = true; hit(ob.f, x, ob.m, ob.ang, { decoy: null }); } }
+            const ln = clamp(Math.floor(((-dx * s + dy * c) + ob.w / 2) / ob.w * WAVE_LN), 0, WAVE_LN - 1);
+            if (al >= ob.d - 26 - x.r && al <= ob.d + 10 + x.r && Math.abs(-dx * s + dy * c) <= ob.w / 2 + x.r && !(ob.blk && ob.blk[ln])) { ob.hit = true; hit(ob.f, x, ob.m, ob.ang, { decoy: null }); } }
         }
         break;
     }
@@ -9520,8 +9526,8 @@ function drawObsGround() {
 function drawObsTop() {
   if (B.obs) for (const o of B.obs) if (o.k === 'wave' && o.d < o.len) {   // なみの あたま（もりあがる なみ）
     const h = waveHead(o), c = Math.cos(o.ang), s = Math.sin(o.ang), hw = o.w / 2;
-    if (PLFX.wave && PLFX.wave.img.complete) { plDraw('wave', plLoop('wave', B.t), h.x, h.y - 10, o.w * 1.15 / (PLFX.wave.h * PIX_D), o.ang, null, null, c < 0); continue; }
-    for (let i = 0; i <= 10; i++) { const t = (i / 10 - .5) * 2 * hw, x = h.x - s * t, y = h.y + c * t, hh = 26 + Math.sin(i * 1.3 + B.t * 8) * 5;
+    if (PLFX.wave && PLFX.wave.img.complete && !(o.blk && o.blk.some(Boolean))) { plDraw('wave', plLoop('wave', B.t), h.x, h.y - 10, o.w * 1.15 / (PLFX.wave.h * PIX_D), o.ang, null, null, c < 0); continue; }
+    for (let i = 0; i <= 10; i++) { if (o.blk && o.blk[Math.min(WAVE_LN - 1, Math.floor(i / 10 * WAVE_LN))]) continue; const t = (i / 10 - .5) * 2 * hw, x = h.x - s * t, y = h.y + c * t, hh = 26 + Math.sin(i * 1.3 + B.t * 8) * 5;
       ctx.fillStyle = '#1d3d7a'; ctx.fillRect(x - 15, y - hh - 1, 30, hh + 2); ctx.fillStyle = '#4aa8ff'; ctx.fillRect(x - 14, y - hh, 28, hh); ctx.fillStyle = '#7ac8ff'; ctx.fillRect(x - 14 + c * 6, y - hh, 16, hh * .6); ctx.fillStyle = '#bfe4ff'; ctx.fillRect(x - 14, y - hh, 28, 6); ctx.fillStyle = '#ffffff'; ctx.fillRect(x - 10 + c * 8, y - hh - 4, 16, 4); }
   }
   B.sides.forEach((sd, si) => { const L = sd.leaves; if (!L) return; const me = active(si); if (!targetable(me)) return;   // まわる このは
