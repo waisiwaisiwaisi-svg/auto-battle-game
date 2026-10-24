@@ -1019,7 +1019,7 @@ html.land #tabbar{flex-direction:column}
 #tabbar button::before{inset:0;border-radius:0;background:linear-gradient(180deg,rgba(255,209,102,.34),rgba(255,180,80,.12) 55%,rgba(255,180,80,.03));transform:scaleX(.15)}
 #tabbar button::after{left:0;right:0;top:0;height:3px;border-radius:3px;background:#ffd166;box-shadow:0 0 8px rgba(255,209,102,.8);transform:scaleX(0)}
 #tabbar button.on::before{opacity:1;transform:scaleX(1)}
-#tabbar button.on::after{opacity:1;transform:scaleX(1)}
+#tabbar button.on::after{opacity:0}   /* 金の ふとい せんは ださない */
 html.land #tabbar button::after{left:auto;right:0;top:0;bottom:0;width:3px;height:auto;transform:scaleY(0)}
 html.land #tabbar button::before{background:linear-gradient(270deg,rgba(255,209,102,.34),rgba(255,180,80,.12) 55%,rgba(255,180,80,.03));transform:scaleY(.15)}
 html.land #tabbar button.on::before{transform:scaleY(1)}
@@ -1027,7 +1027,7 @@ html.land #tabbar button.on::before{transform:scaleY(1)}
 #tabbar button:not(.x) + button:not(.x){border-left:2px solid rgba(11,9,20,.85);box-shadow:inset 1px 0 0 rgba(154,140,224,.22)!important}
 html.land #tabbar button:not(.x) + button:not(.x){border-left:0;border-top:2px solid rgba(11,9,20,.85);box-shadow:inset 0 1px 0 rgba(154,140,224,.22)!important}
 #tabbar button{border-radius:0!important}
-html.land #tabbar button.on::after{transform:scaleY(1)}
+
 #tabbar button:not(.on) span:not(.medal){white-space:nowrap}
 
 /* よこ画面バトル：ひかえの ボタンが 細く つぶれて いたので パネルの はば いっぱいに、まわりこめ の 文字も おさめる */
@@ -3335,7 +3335,7 @@ function tabMotion(t) {
   const ico = btn.querySelector('.ico'); if (ico && ico.animate) ico.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-3px) scale(1.18)' }], { duration: D, easing: E });
   const po = pb && pb.querySelector('.ico'); if (po && po.animate) po.animate([{ transform: 'translateY(-3px) scale(1.18)' }, { transform: 'translateY(0) scale(1)' }], { duration: D * .7, easing: 'cubic-bezier(.3,.7,.2,1)' });
 }
-addEventListener('resize', () => { clearTimeout(tabMotion.rt); tabMotion.rt = setTimeout(() => { if (!TAB_CUR) return; const t = TAB_CUR; TAB_CUR = null; const tb = $('tabbar'), ind = tb && tb.querySelector('.tabind'); if (ind) ind.classList.remove('show'); tabMotion(t); }, 80); });   // 向き・大きさが かわったら いちから おきなおす
+// 向き・大きさが かわった ときは なにも しない（えらんだ タブの いたは もう つかわない。まえは ここで アイコンが なんども はねていた）
 // バトルへ いく／もどる ときの きりかえ：ピクセルディゾルブ アウト（まえの 画面が ドットの マスごとに 黒く なる）→ 黒 → ディゾルブ イン（マスが ぬけて バトル画面）
 //   きりかえの あいだは バトルの 時間を とめる（VS の えんしゅつを さいしょから みせる）
 const DSV = { cell: 18, out: 380, hold: 160, in: 380, steps: 10, col: '#000' };
