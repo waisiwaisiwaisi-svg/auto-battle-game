@@ -11030,6 +11030,21 @@ const ACE_TR = {
   a_dragon4: [['toxic', 'auto', [[TRC('opsts', 'none')]]], ['gunk-shot', 'auto', [[TRC('opsts', 'psn')]]], ['roost', 'far', [[TRC('myhp', 50)]]], ['acid-rain', 'auto', []]],   // タツモドキ：もうどく → どくの あいてに どくのかたまり・HPが へったら はなれて つばさやすめ
   c_dragon8: [['calm-mind', 'auto', [[TRC('enter')]]], ['draco-meteor', 'auto', [[TRC('after', 3)]]], ['future-sight', 'auto', [[TRC('dist', 'mid')], [TRC('dist', 'far')]]], ['dragon-pulse', 'auto', []]],   // ホーリュウ：せいしんとういつ → みらいよち → スターフォールで にげばを ふさぐ
 };
+// エース いがいの 子にも 訓練：もっている 技の かたちと しゅるいから 条件と 撃ち方を きめる
+function autoTrain(e) {
+  const rows = e.moves.filter(id => MOVES[id]).map(id => { const m = MOVES[id], st = m.cat === 'stat';
+    let go = 'auto', c = [];
+    if (!st) go = ['melee', 'dash', 'swipe'].includes(m.k) ? 'near' : (m.k === 'beam' && !['wide', 'erupt'].includes(m.pat)) || (m.k === 'proj' && !(m.homing > 0)) ? 'far' : 'auto';
+    else if (['self', 'weather', 'terrain', 'field', 'hazard', 'floor', 'aura', 'turret', 'gravity', 'duel', 'sub', 'clone', 'gshift', 'curse'].includes(m.k)) c = [[TRC('enter')]];   // じゅんび技は 出場時
+    else if (['heal', 'rewind', 'painsplit'].includes(m.k)) c = [[TRC('myhp', 50)]];   // かいふくは へってから
+    else if (m.k === 'protect') c = [[TRC('hit', 'big')]];
+    else if (['counter', 'stance'].includes(m.k)) c = [[TRC('hit', 'any')]];
+    else if (m.e && (m.e.st || m.e.seed)) c = [[TRC('opsts', 'none')]];   // じょうたいいじょうは まだ かかって いない あいてに
+    else if (m.k === 'enrage') c = [[TRC('myhp', 25)]];
+    return { id, go, c: c.filter(l => l.every(x => condFits(x.t, id))) }; });
+  const pri = (r) => r.c.length ? (r.c.some(l => l.some(x => x.t === 'enter')) ? 0 : 1) : 2; rows.sort((a, b) => pri(a) - pri(b));   // 出場時 → ほかの 条件 → 条件なし
+  e.moves = rows.map(r => r.id); e.lead = 1; e.tr = { mode: 'chip', prog: { hv: 1, nat: e.nat, mv: rows } };
+}
 function aceTrain(em) { const T = ACE_TR[em.sid]; if (!T) return; const ok = T.filter(([id]) => MOVES[id] && canLearn(em.sid, id)); if (ok.length < 2) return;
   em.moves = ok.map(([id]) => id).slice(0, 4); em.tr = { mode: 'chip', prog: { hv: 1, nat: em.nat, mv: ok.map(([id, go, c]) => ({ id, go, c })) } }; }
 const leagueAce = (type) => { const ids = poolIds(); return (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids).sort((a, b) => baseTot(b) - baseTot(a))[0]; };
@@ -11039,11 +11054,12 @@ function leagueTeam(type, n, p) {
   const top = pool.slice(0, n + (type ? 2 : 6)), out = [];
   while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = choice(c.length ? c : top); top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }
   if (type === 'fighting' && out.length >= 2) {   // アカリ：1ばんめは 出場時に けっとうのば、2ばんめは 出場時に ぶっとびてんし
-    const teach = (e, sp) => { const rest = e.moves.filter(id => id !== sp).slice(0, 3); e.moves = [sp, ...rest]; e.lead = 1;
-      e.tr = { mode: 'chip', prog: { hv: 1, nat: e.nat, mv: [{ id: sp, go: sp === 'hako-punch' ? 'near' : 'auto', c: [[TRC('enter')]] }, ...rest.map(id => ({ id, go: 'auto', c: [] }))] } }; };
+    const teach = (e, sp) => { e.moves = [sp, ...e.moves.filter(id => id !== sp).slice(0, 3)]; autoTrain(e); const mv = e.tr.prog.mv, i = mv.findIndex(r => r.id === sp), r = mv.splice(i, 1)[0];
+      r.c = [[TRC('enter')]]; r.go = sp === 'hako-punch' ? 'near' : 'auto'; mv.unshift(r); for (const x of mv) if (x !== r) x.c = x.c.filter(l => !l.some(c => c.t === 'enter')); e.moves = mv.map(x => x.id); };   // この 技だけ 出場時（ほかの 出場時は はずす）
     const pickBy = (id, from) => { const k = out.findIndex((e, n) => n >= from && canLearn(e.sid, id)); return k < 0 ? from : k; };
     let k = pickBy('duel-arena', 0); out.unshift(out.splice(k, 1)[0]); k = pickBy('hako-punch', 1); out.splice(1, 0, out.splice(k, 1)[0]);
     teach(out[0], 'duel-arena'); teach(out[1], 'hako-punch'); }
+  for (const e of out) if (!e.tr) autoTrain(e);   // エース いがいの 3たいにも 訓練
   if (ace) { const em = foeMon(ace, 1, -9), b = base6(ace), main = b.atk >= b.spa ? 'atk' : 'spa', sub = main === 'atk' ? 'spa' : 'atk';
     em.ace = 1; em.iv = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, eva: 31 }; em.ev = { [main]: EV_STAT_MAX, spe: EV_MAX - EV_STAT_MAX };
     em.nat = Object.keys(NATURES).find(k => NATURES[k].up === main && NATURES[k].down === sub) || Object.keys(NATURES).find(k => NATURES[k].up === main) || em.nat;
