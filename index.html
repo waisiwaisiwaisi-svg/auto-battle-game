@@ -2874,7 +2874,7 @@ function base6(sid) {
   const l1 = SPEC_LEAN[sp.type] || 1, lean = sp.type2 ? Math.sqrt(l1 * (SPEC_LEAN[sp.type2] || 1)) : l1;
   // 体長：大きいほど HP・こうげき・ぼうぎょが 高く、すばやさ・かいひが ひくい（小さいほど その ぎゃく）
   const z = sp.bz || 0, B = (v, k) => Math.round(v * (1 + k * z));
-  const hp = B(b.hp, BODY_K.hp), atk = B(b.atk, BODY_K.atk), def = B(b.def, BODY_K.def), spe = B(b.spd, BODY_K.spe);
+  const hp = B(b.hp, BODY_K.hp), atk = B(b.atk, BODY_K.atk), def = B(b.def, BODY_K.def), spe = B(b.spd, BODY_K.spe) + (sp.type === 'bug' || sp.type2 === 'bug' ? 15 : 0);   // むしは すばしっこい（+15）
   const r = { hp, atk, def, spa: Math.round(atk * lean * h('a')), spd: Math.round(def * (.6 + lean * .4) * h('d')), spe,
     eva: Math.round(clamp(spe * .55 + 25 - z * 30 + (sp.fly ? 12 : 0) + (sp.type === 'fighting' || sp.type2 === 'fighting' ? 20 : 0), 20, 130) * h('e')) };   // かいひ：すばやく 小さく 飛ぶ ものほど 高い・かくとうは みきりが うまい（+20）
   return (_base6[sid] = r);
