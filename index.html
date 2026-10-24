@@ -10995,7 +10995,7 @@ const GYMS = [
   { f: 'dragon', lead: 'vet', ln: 'ジムリーダー アカネ', say: 'ドラゴンの ほんきを みせてあげる。' },
 ];
 const LEAGUE = [['ranger', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'wind'], ['researcher', 'してんのう シオリ', 'データは もう そろっているの。', 'poison'], ['firefighter', 'してんのう アカリ', 'もえる こころで かかってこい！', 'fighting'], ['vet', 'してんのう カゲミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost'], ['girl', 'チャンピオン レイ', '', null]];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
-const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; return S.journey; };
+const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; const J = S.journey; if (!(J.league >= 0 && J.league < LEAGUE.length)) J.league = J.league >= LEAGUE.length ? LEAGUE.length - 1 : 0; return J; };   // リーグの 人数が かわっても こわれない
 // 敵の モンスター：すすむ（p：0〜1）ほど 個体値・きょうか・わざの くみあわせが つよくなる（のうりょくの 倍率は かけない）
 function foeMon(sid, p, uid) {
   const em = fixMon({ uid, sid }, clamp(p * .9, 0, .95));
