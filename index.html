@@ -11018,7 +11018,7 @@ const GYMS = [
   { f: 'fighting', lead: 'firefighter', ln: 'ジムリーダー アカリ', say: 'こころも からだも きたえてきた！' },
   { f: 'dragon', lead: 'vet', ln: 'ジムリーダー アカネ', say: 'ドラゴンの ほんきを みせてあげる。' },
 ];
-const LEAGUE = [['ranger', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'bug', 'd_bug6'], ['researcher', 'してんのう シオリ', 'データは もう そろっているの。', 'rock', 'b_ground3'], ['firefighter', 'してんのう アカリ', 'もえる こころで かかってこい！', 'psychic', 'c_fighting5'], ['vet', 'してんのう カゲミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', 'c_fighting7'], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
+const LEAGUE = [['researcher', 'してんのう シオリ', 'データは もう そろっているの。', 'rock', 'a_fighting9'], ['vet', 'してんのう カゲミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', 'c_fighting7'], ['ranger', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'bug', 'd_bug6'], ['firefighter', 'してんのう アカリ', 'もえる こころで かかってこい！', 'psychic', 'c_fighting5'], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
 const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; const J = S.journey; if (!(J.league >= 0 && J.league < LEAGUE.length)) J.league = J.league >= LEAGUE.length ? LEAGUE.length - 1 : 0; return J; };   // リーグの 人数が かわっても こわれない
 // 敵の モンスター：すすむ（p：0〜1）ほど 個体値・きょうか・わざの くみあわせが つよくなる（のうりょくの 倍率は かけない）
 function foeMon(sid, p, uid) {
@@ -11089,7 +11089,7 @@ function leagueTeam(type, n, p) {
   if (ace) { const em = foeMon(ace, 1, -9), b = base6(ace), main = b.atk >= b.spa ? 'atk' : 'spa', sub = main === 'atk' ? 'spa' : 'atk';
     em.ace = 1; em.iv = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, eva: 31 }; em.ev = { [main]: EV_STAT_MAX, spe: EV_MAX - EV_STAT_MAX };
     em.nat = Object.keys(NATURES).find(k => NATURES[k].up === main && NATURES[k].down === sub) || Object.keys(NATURES).find(k => NATURES[k].up === main) || em.nat;
-    em.moves = strongMoves(em, 1); aceTrain(em); out.push(em); }   // エースは さいごに
+    em.moves = strongMoves(em, 1); aceTrain(em); if (!em.tr) autoTrain(em); out.push(em); }   // エースは さいごに
   return out;
 }
 // 敵チーム：そのジムの タイプの モンスター（たりなければ ほかから）
