@@ -4036,6 +4036,7 @@ const trtRow = () => { const W = trtW(); if (!W) return 0; const i = W.mv.findIn
 const TRT_STEPS = [
   { tx: 'ここは <b>訓練</b>。バトルで モンスターが どう うごくかを くみたてる ばしょだよ。<br>いっしょに 1つ つくってみよう！', next: 1 },
   { sel: '.trnatsel', tx: '① まずは <b>作戦</b>。ふだんの 立ち回りを きめるよ。<br>どれか 1つ タップしてみよう（★が その子の おすすめ）', ok: () => TRT.f.nat },
+  { sel: '.trnatsel', allow: () => [], tx: '作戦には じゃんけんの ような かんけいが あるよ。<br>「<b>どんどん せめる</b>」は「<b>まあいを たもつ</b>」に、「まあいを たもつ」は「<b>どっしり かまえる</b>」に、「どっしり かまえる」は「どんどん せめる」に つよい。<br>あいてより つよい 作戦だと「<b>よゆう〜（さくせん◎）</b>」で こうげきを うけにくく（ぼうぎょ 1.15ばい）、よわいと「<b>けいかい（さくせん×）</b>」で うけやすく（0.87ばい）なる。おなじ グループ どうしは「ライバルだ！」', next: 1 },
   { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが <b>技の 行</b>。上ほど 先に 撃つよ。<br>左の 番号を ドラッグすると 順番を かえられる', next: 1 },
   { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を おいてみよう。<br>「<b>相手のHP</b>」を ○ばんの 技の「<b>使うとき</b>」へ ドラッグ！<br><small>（タップ → 置き場所を タップ でも OK）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
   { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手の HPが ${p}の とき</b>」に この技を 撃つ。<br>おいた 条件を タップすると ${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも かえられるよ`; }, next: 1 },
@@ -6938,10 +6939,10 @@ const MOODS = {
   fired:  { n: 'やる気まんまん！', col: '#ffa94a', range: .8,  cover: .5, flee: .6, react: .8,  rush: 1.15, idle: 1.2 },
   rival:  { n: 'ライバルだ！',     col: '#ff5a5a', range: .7,  cover: .2, flee: .3, react: .75, rush: 1.25, idle: 1.4, hold: 1 },
   chase:  { n: 'まてまてー！',     col: '#ffd84a', range: .75, cover: .6, flee: .8, react: .85, rush: 1.2,  idle: 1.2, flank: .4 },
-  scared: { n: 'びくびく…（あいしょう×）',        col: '#8ab8ff', range: 1.4, cover: 1.8, flee: 1.6, react: 1.25, rush: .85, idle: 1.35, dodge: .15 },
+  scared: { n: 'びくびく…（さくせん×）',        col: '#8ab8ff', range: 1.4, cover: 1.8, flee: 1.6, react: 1.25, rush: .85, idle: 1.35, dodge: .15 },
   irri:   { n: 'イライラ…',        col: '#ff7a9a', range: .9,  cover: .6, flee: .8, react: .65, rush: 1.1,  idle: 1.3, dodge: -.1 },
-  wary:   { n: 'けいかい（あいしょう×）',         col: '#6ad8c8', range: 1.15, cover: 1.3, flee: 1.1, react: 1.1, rush: 1,   idle: .9, dodge: .15, flank: .2 },
-  mock:   { n: 'よゆう〜（あいしょう◎）',         col: '#9ae07a', range: .9,  cover: .6, flee: .8, react: 1.3, rush: .95,  idle: .7, dodge: -.1 },
+  wary:   { n: 'けいかい（さくせん×）',         col: '#6ad8c8', range: 1.15, cover: 1.3, flee: 1.1, react: 1.1, rush: 1,   idle: .9, dodge: .15, flank: .2 },
+  mock:   { n: 'よゆう〜（さくせん◎）',         col: '#9ae07a', range: .9,  cover: .6, flee: .8, react: 1.3, rush: .95,  idle: .7, dodge: -.1 },
 };
 // 性格の 3すくみ：せめ 🔥 → からめて 🌀 → まもり 🛡 → せめ 🔥（うける がわの ぼうぎょに 補正：つよい あいてから うけると 0.87ばい、よわい あいてからは 1.15ばい）
 const NAT_GRP = { yuukan: 'atk', sekkachi: 'atk', nebarizuyoi: 'atk', nonki: 'def', okubyou: 'def', reisei: 'tec', zurugashikoi: 'tec', kimagure: 'tec' };
