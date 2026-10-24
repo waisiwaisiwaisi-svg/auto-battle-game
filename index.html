@@ -3989,7 +3989,7 @@ async function trSim(m, W, n) {
   const mates = S.party.filter(x => x.uid !== m.uid).slice(0, 2);   // なかま：パーティの ほかの 2たい（いまの 訓練の まま）
   try {
     for (let k = 0; k < n; k++) {
-      const en = gymTeam(type, 3, lg ? jProg(10 + J.league, 2) : jProg(gi, J.step || 0), lg || gi >= 5);
+      const en = lg ? leagueTeam(type, 3, jProg(10 + J.league, 2)) : gymTeam(type, 3, jProg(gi, J.step || 0), gi >= 5);
       startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [sm, ...mates], title: '模擬戦' });
       B.simLog = log; B.simUid = sm.uid; const es = B.sides[1].fs.slice();
       for (let s2 = 0; s2 < 30 * (MATCH_T + 20) && B.mode !== 'end'; s2++) { bStep(1 / 30); if (s2 % 900 === 899) await new Promise(r => setTimeout(r, 0)); }
@@ -10960,7 +10960,7 @@ const GYMS = [
   { f: 'fighting', lead: 'firefighter', ln: 'ジムリーダー アカリ', say: 'こころも からだも きたえてきた！' },
   { f: 'dragon', lead: 'vet', ln: 'ジムリーダー アカネ', say: 'ドラゴンの ほんきを みせてあげる。' },
 ];
-const LEAGUE = [['ranger', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'wind'], ['researcher', 'してんのう シオリ', 'データは もう そろっているの。', 'poison'], ['firefighter', 'してんのう アカリ', 'もえる こころで かかってこい！', 'fighting'], ['girl', 'チャンピオン レイ', '', null]];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
+const LEAGUE = [['ranger', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'wind'], ['researcher', 'してんのう シオリ', 'データは もう そろっているの。', 'poison'], ['firefighter', 'してんのう アカリ', 'もえる こころで かかってこい！', 'fighting'], ['vet', 'してんのう カゲミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost'], ['girl', 'チャンピオン レイ', '', null]];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
 const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; return S.journey; };
 // 敵の モンスター：すすむ（p：0〜1）ほど 個体値・きょうか・わざの くみあわせが つよくなる（のうりょくの 倍率は かけない）
 function foeMon(sid, p, uid) {
@@ -10982,8 +10982,17 @@ function strongMoves(m, p) {
   for (const x of base.concat(best)) if (out.length < 4 && x && !out.includes(x)) out.push(x);
   return out;
 }
-// ジムの すすみぐあい（ジム 0〜9 の トレーナー1・2・リーダー → リーグ 4にん）
+// ジムの すすみぐあい（ジム 0〜9 の トレーナー1・2・リーダー → リーグ 5にん：してんのう 4にん＋チャンピオン）
 const jProg = (g, step) => clamp((g * 3 + step) / 41, 0, 1) + (jr().champ ? .3 : 0);
+// チャンピオンリーグ：種族値の 高い モンスター。してんのうは とくいタイプの 上位から、チャンピオンは タイプに しばられず 全体の 上位から（タイプは かぶらない）
+const baseTot = (id) => Object.values(base6(id)).reduce((a, b) => a + b, 0);
+function leagueTeam(type, n, p) {
+  const ids = poolIds(); let pool = (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids.slice()).sort((a, b) => baseTot(b) - baseTot(a));
+  if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id)).sort((a, b) => baseTot(b) - baseTot(a)));
+  const top = pool.slice(0, n + (type ? 2 : 6)), out = [];
+  while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = choice(c.length ? c : top); top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }
+  return out;
+}
 // 敵チーム：そのジムの タイプの モンスター（たりなければ ほかから）
 function gymTeam(type, n, p, rare) {
   const ids = poolIds().filter(id => rare || !SPECIES[id].rare);
@@ -11020,7 +11029,7 @@ function startJourney(gi) {
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
-  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), p0: S.party.slice(0, 6), enemies: gymTeam(lt, 3, jProg(10 + k, 2), true), trainer: { name: ln, spr: trArt(lk) }, boss: k === 3, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === 3 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
+  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), p0: S.party.slice(0, 6), enemies: leagueTeam(lt, 3, jProg(10 + k, 2)), trainer: { name: ln, spr: trArt(lk) }, boss: k === LEAGUE.length - 1, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === LEAGUE.length - 1 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
@@ -11132,7 +11141,7 @@ function renderJourney() {
   });
   const L = document.createElement('button'), lo = J.badges.length >= GYMS.length;
   L.className = 'jrc league' + (lo ? ' next' : ' lock');
-  L.innerHTML = `${J.champ ? '<span class="badge">👑</span>' : ''}<div class="in"><b>チャンピオンリーグ</b><small>${lo ? `してんのう 3人と チャンピオン（${J.league + 1}/4 せんめ：${LEAGUE[J.league][1].split(' ')[1]}${LEAGUE[J.league][3] ? '・' + TYPES[LEAGUE[J.league][3]].n + 'タイプ' : ''}）` : 'バッジを 10こ あつめると ちょうせんできる'}</small></div>`;
+  L.innerHTML = `${J.champ ? '<span class="badge">👑</span>' : ''}<div class="in"><b>チャンピオンリーグ</b><small>${lo ? `してんのう ${LEAGUE.length - 1}人と チャンピオン（${J.league + 1}/${LEAGUE.length} せんめ：${LEAGUE[J.league][1].split(' ')[1]}${LEAGUE[J.league][3] ? '・' + TYPES[LEAGUE[J.league][3]].n + 'タイプ' : ''}）` : 'バッジを 10こ あつめると ちょうせんできる'}</small></div>`;
   if (lo) L.onclick = () => { SND.se('ok'); startLeague(); };
   g.appendChild(L);
   { const T = tw(), op = towerOpen(), b = document.createElement('button'); b.className = 'jrc league tower' + (op ? ' next' : ' lock');
