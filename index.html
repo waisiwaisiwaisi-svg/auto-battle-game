@@ -6538,18 +6538,26 @@ function runRules(f, o) {
   f.trBan = rows.filter(r => hasC(r) && !lineHit(r)).map(r => r.id);
   if (!rows.some(r => !moveBlocked(f, r.id) && !moveUseless(f, o, r.id))) { f.trPrep = null; if (f.state === 'free' && !f.queued) { const id = aiPickMove(f, o); if (id) { f.queued = id; f.trQ = { id, t: B.t }; } } return; }   // 撃てる 技が もう ない（つかいきった・いまは きかない）：通常の AI（たいあたり）で ねばる
   if (!pr && !hit.some(ok)) f.aiT = (f.aiT || 0) - .25;
-  const ai = !pr && !hit.some(ok) && f.state === 'free' && !f.queued && f.aiT <= 0 ? (() => { f.aiT = aiWait(f); const id = aiPickMove(f, o); return id && (rows.find(x => x.id === id && ok(x)) || (MOVES[id] && !rows.some(x => x.id === id) ? { id, go: 'auto', c: [] } : null)); })() : null;
-  const r = pr || hit.find(ok) || ai || hit[0]; if (!r) return;   // 条件が 合う 技が 待ち中なら その技の 立ち回りを する
+  const ai = !pr && !hit.some(ok) && f.state === 'free' && !f.queued && f.aiT <= 0 ? (() => { f.aiT = aiWait(f); const nx = f.trNext; f.trNext = null; const id = nx && rows.some(x => x.id === nx && ok(x)) ? nx : aiPickMove(f, o); return id && (rows.find(x => x.id === id && ok(x)) || (MOVES[id] && !rows.some(x => x.id === id) ? { id, go: 'auto', c: [] } : null)); })() : null;
+  // さきよみ：いま 撃てる 技が ない ときは、まもなく（3びょう いない）撃てる「〜してから」の 技を つぎの 技に きめて 先に うごきだす（撃ったあとの ロスを なくす）
+  const soon = (x) => !!x && (x.go || 'auto') !== 'auto' && (f.cd[x.id] || 0) <= 3 && !moveBlocked(f, x.id) && !skip(x.id) && !moveUseless(f, o, x.id) && (!hasC(x) || lineHit(x));
+  let r = pr || hit.find(ok) || ai || hit[0];
+  if (!r && !pr && !hit.some(ok) && rows.some(ok)) {   // お任せで えらぶ 技：まよい時間を またずに つぎの 技を きめておき、「〜してから」なら すぐ うごきだす
+    if (!f.trNext || !rows.some(x => x.id === f.trNext && ok(x))) f.trNext = aiPickMove(f, o);
+    const n = rows.find(x => x.id === f.trNext); if (n && (n.go || 'auto') !== 'auto' && ok(n)) r = n;
+  }
+  if ((!r || !ok(r)) && !soon(r)) { const n = rows.filter(soon).sort((a, b) => (f.cd[a.id] || 0) - (f.cd[b.id] || 0))[0]; if (n) r = n; }
+  if (!r) return;   // 条件が 合う 技が 待ち中なら その技の 立ち回りを する
   const g = r.go || 'auto'; f.trAt = 'm:' + r.id + (hit.includes(r) ? ' c' : '') + ' g:' + g;
-  if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g) && ok(r) && !(f.trPrep && f.trPrep.id === r.id && f.trPrep.ord) && !(B.t - (f.trOrdT || -9) < 2.5)) { f.trOrdT = B.t; giveOrder(f, g, f.side, true); if (f.order) { f.order.tr = 1; if (f.trPrep) f.trPrep.ord = 1; } }
-  if (!ok(r)) { f.trPrep = null; return; }
+  if (g === 'near' || g === 'far') f.trGo = g; else if ((g === 'hide' || g === 'flank') && !(f.order && f.order.k === g) && (ok(r) || soon(r)) && !(f.trPrep && f.trPrep.id === r.id && f.trPrep.ord) && !(B.t - (f.trOrdT || -9) < 2.5)) { f.trOrdT = B.t; giveOrder(f, g, f.side, true); if (f.order) { f.order.tr = 1; if (f.trPrep) f.trPrep.ord = 1; } }
+  if (!ok(r)) { if (soon(r)) { if (!f.trPrep || f.trPrep.id !== r.id) f.trPrep = { id: r.id, t: 0, ord: f.order && f.order.tr ? 1 : 0 }; if (f.state === 'free') f.trPrep.t += .25; } else f.trPrep = null; return; }   // まち時間ちゅうも うごいた じかんを かぞえる
   if (f.state !== 'free') return;
   if (g !== 'auto') {   // 近づいて／離れて／隠れて／回り込んで から 撃つ（3びょう たったら 撃つ）
     if (!f.trPrep || f.trPrep.id !== r.id) { f.trPrep = { id: r.id, t: 0, ord: f.order && f.order.tr ? 1 : 0 }; }
     f.trPrep.t += .25; const d = dist(f, o), rd = g === 'near' ? d < 150 : g === 'far' ? d >= 260 : g === 'hide' ? (!losClear(f, o) || d >= 330) : f.trPrep.t >= 1.5;   // 隠れて：隠れきるか 330 いじょう はなれてから
     if (!rd && f.trPrep.t < (g === 'hide' ? 5 : 3)) return;
   }
-  f.trPrep = null; f.trGo = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t }; f.trAt += ' q'; f.trTag = hit.includes(r) ? r.id : null; f.trRow = P.mv.indexOf(r); f.trLine = f.trTag ? trLines(r.c).findIndex(l => l.length && condsOk(f, o, l, r.id)) : -1;   // 条件で えらんだ 技：うつ ときに しるし
+  f.trPrep = null; f.trGo = null; f.trNext = null; if (f.order && f.order.tr) f.order = null; f.queued = r.id; f.trQ = { id: r.id, t: B.t }; f.trAt += ' q'; f.trTag = hit.includes(r) ? r.id : null; f.trRow = P.mv.indexOf(r); f.trLine = f.trTag ? trLines(r.c).findIndex(l => l.length && condsOk(f, o, l, r.id)) : -1;   // 条件で えらんだ 技：うつ ときに しるし
 }
 // いま つかっても いみが ない 技（ゴーストシフト中の かけなおし・ゴーストシフト中の あいてに ノーマル／かくとう・まったく きかない タイプ）
 function moveUseless(f, o, id) { const m = MOVES[id]; if (!m || !o) return false;
