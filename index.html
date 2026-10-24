@@ -11024,7 +11024,7 @@ const baseTot = (id) => Object.values(base6(id)).reduce((a, b) => a + b, 0);
 // エースの 訓練（コンボ）：上から じゅんに 条件を みる。after の p は この 一覧の なんばんめ か
 const TRC = (t, p, n) => n != null ? { t, p, n } : p != null ? { t, p } : { t };
 const ACE_TR = {
-  c_fighting5: [['duel-arena', 'auto', [[TRC('enter')]]], ['close-combat', 'near', [[TRC('after', 3)]]], ['future-sight', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['zen-headbutt', 'auto', []]],   // ゴリング：出場時に けっとうのば（にげられない・タイプ相性 なし）→ みらいよち → ぜんりょくラッシュ・あいまに ねんりきずつき
+  c_fighting5: [['close-combat', 'near', [[TRC('after', 2)]]], ['future-sight', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['drain-punch', 'near', [[TRC('myhp', 75)]]], ['zen-headbutt', 'auto', []]],   // ゴリング：みらいよち → ぜんりょくラッシュで にがさない・へったら すいとりナックル・あいまに ねんりきずつき
   c_fighting7: [['swords-dance', 'auto', [[TRC('enter')]]], ['close-combat', 'near', [[TRC('after', 1)], [TRC('mystg', 'atk', 2), TRC('dist', 'near')]]], ['sucker-punch', 'auto', [[TRC('hit', 'any')]]], ['poltergeist', 'auto', []]],   // オニゴ：やるきアップ → ぜんりょくラッシュ・うけたら だしぬき
   sorabune: [['tailwind', 'auto', [[TRC('enter')]]], ['protect', 'auto', [[TRC('hit', 'big')]]], ['hurricane', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['gale-arrow', 'far', [[TRC('dist', 'far')]]]],   // ソラフネ：おいかぜ → ちかければ おおあらし・とおければ かぜのや
   a_dragon4: [['toxic', 'auto', [[TRC('opsts', 'none')]]], ['gunk-shot', 'auto', [[TRC('opsts', 'psn')]]], ['roost', 'far', [[TRC('myhp', 50)]]], ['acid-rain', 'auto', []]],   // タツモドキ：もうどく → どくの あいてに どくのかたまり・HPが へったら はなれて つばさやすめ
@@ -11038,10 +11038,12 @@ function leagueTeam(type, n, p) {
   if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id) && id !== ace).sort((a, b) => baseTot(b) - baseTot(a)));
   const top = pool.slice(0, n + (type ? 2 : 6)), out = [];
   while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = choice(c.length ? c : top); top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }
-  if (type === 'fighting' && out.length) {   // アカリ：せんとうの 子は まず ぶっとびてんし（でた しゅんかんに かしつけ）
-    const i = Math.max(0, out.findIndex(e => canLearn(e.sid, 'hako-punch'))), e = out.splice(i, 1)[0]; out.unshift(e);
-    const rest = e.moves.filter(id => id !== 'hako-punch').slice(0, 3); e.moves = ['hako-punch', ...rest]; e.lead = 1;
-    e.tr = { mode: 'chip', prog: { hv: 1, nat: e.nat, mv: [{ id: 'hako-punch', go: 'auto', c: [[TRC('enter')]] }, ...rest.map(id => ({ id, go: 'auto', c: [] }))] } }; }
+  if (type === 'fighting' && out.length >= 2) {   // アカリ：1ばんめは 出場時に けっとうのば、2ばんめは 出場時に ぶっとびてんし
+    const teach = (e, sp) => { const rest = e.moves.filter(id => id !== sp).slice(0, 3); e.moves = [sp, ...rest]; e.lead = 1;
+      e.tr = { mode: 'chip', prog: { hv: 1, nat: e.nat, mv: [{ id: sp, go: sp === 'hako-punch' ? 'near' : 'auto', c: [[TRC('enter')]] }, ...rest.map(id => ({ id, go: 'auto', c: [] }))] } }; };
+    const pickBy = (id, from) => { const k = out.findIndex((e, n) => n >= from && canLearn(e.sid, id)); return k < 0 ? from : k; };
+    let k = pickBy('duel-arena', 0); out.unshift(out.splice(k, 1)[0]); k = pickBy('hako-punch', 1); out.splice(1, 0, out.splice(k, 1)[0]);
+    teach(out[0], 'duel-arena'); teach(out[1], 'hako-punch'); }
   if (ace) { const em = foeMon(ace, 1, -9), b = base6(ace), main = b.atk >= b.spa ? 'atk' : 'spa', sub = main === 'atk' ? 'spa' : 'atk';
     em.ace = 1; em.iv = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, eva: 31 }; em.ev = { [main]: EV_STAT_MAX, spe: EV_MAX - EV_STAT_MAX };
     em.nat = Object.keys(NATURES).find(k => NATURES[k].up === main && NATURES[k].down === sub) || Object.keys(NATURES).find(k => NATURES[k].up === main) || em.nat;
