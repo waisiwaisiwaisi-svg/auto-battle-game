@@ -1477,8 +1477,8 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:5em}html.lnar2 #scHub .hres .ico{wi
     <button data-tab="shop" id="btnShop"><i class="ico" data-ico="shop"></i><span>ショップ</span><em class="badge" id="tabShopBadge" hidden></em></button>
     <button data-tab="team" id="btnTeam"><i class="ico" data-ico="crystal"></i><span>へんせい</span></button>
     <button data-tab="home" id="tabHome"><i class="ico" data-ico="swords"></i><span>ホーム</span><em class="badge" id="tabHomeBadge" hidden></em></button>
-    <button data-tab="guild" id="btnGuild"><i class="ico" data-ico="shield"></i><span>ギルド</span></button>
     <button data-tab="train" id="btnTrainTab"><i class="ico" data-ico="chart"></i><span>訓練</span></button>
+    <button data-tab="guild" id="btnGuild"><i class="ico" data-ico="shield"></i><span>ギルド</span></button>
   </nav>
 
   <!-- バトル -->
@@ -10944,7 +10944,10 @@ function mkEdit(kind, key, opts) {
     P.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { MK.col = +b.dataset.c; if (MK.tool === 'erase' || MK.tool === 'pick') MK.tool = 'pen'; ui(); });
     $('mkColor').onchange = (e) => { const c = e.target.value; let i = MK.pal.indexOf(c); if (i < 0) { if (MK.pal.length >= 63) MK.pal[MK.pal.length - 1] = c, i = MK.pal.length - 1; else { MK.pal.push(c); i = MK.pal.length - 1; } } MK.col = i + 1; MK.tool = 'pen'; ui(); };
   };
-  const at = (e) => { const x = Math.floor(e.offsetX / cv.clientWidth * W), y = Math.floor(e.offsetY / cv.clientHeight * H); return x >= 0 && y >= 0 && x < W && y < H ? [x, y] : null; };
+  const at = (e) => { const r = cv.getBoundingClientRect(); let fx, fy;   // 画面の 座標 → ドット（よこ画面で まわした とき・PCで 拡大 した ときも ずれない）
+    if (document.documentElement.classList.contains('rot')) { fx = (e.clientY - r.top) / r.height; fy = (r.right - e.clientX) / r.width; }
+    else { const z = +$('app').style.zoom || 1, k = z !== 1 && Math.abs(r.width - cv.offsetWidth * z) > 2 ? 1 / z : 1; fx = (e.clientX * k - r.left) / r.width; fy = (e.clientY * k - r.top) / r.height; }
+    const x = Math.floor(fx * W), y = Math.floor(fy * H); return x >= 0 && y >= 0 && x < W && y < H ? [x, y] : null; };
   const put = (x, y, v) => { const f = MK.frames[MK.cur]; f[y * W + x] = v; if (MK.mirror) f[y * W + (W - 1 - x)] = v; };
   const flood = (x, y, v) => { const f = MK.frames[MK.cur], t = f[y * W + x]; if (t === v) return; const st = [[x, y]]; while (st.length) { const [a, b] = st.pop(); if (a < 0 || b < 0 || a >= W || b >= H || f[b * W + a] !== t) continue; f[b * W + a] = v; st.push([a + 1, b], [a - 1, b], [a, b + 1], [a, b - 1]); } };
   let down = false, last = null;
