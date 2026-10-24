@@ -6419,7 +6419,7 @@ const TR_STYLE = {
   flank: { n: 'まわりこむ', o: ['しょうめんから', 'ときどき', 'よく まわる'], v: [0, .4, 1] },
   flee:  { n: 'HPが へったら', o: ['にげない', 'すこし はなれる', 'にげる'], v: [0, .3, .7] },
 };
-const trOf = (f) => B && B.train && (f.side === 0 || B.kind === 'online') ? f.mon.tr || null : null;   // オンラインは あいての 訓練も つかう
+const trOf = (f) => B && B.train && (f.side === 0 || B.kind === 'online' || (f.mon && f.mon.ace)) ? f.mon.tr || null : null;   // オンラインは あいての 訓練も つかう・リーグの エースも 訓練ずみ
 // わざの ねうちに かける かず（0＝つかわない・じょうけんに あわない）
 function trW(f, o, id) {
   const u = (trOf(f).use || {})[id] || {}, lv = u.w ?? 2, c = u.c || 'any';
@@ -10993,6 +10993,17 @@ const jProg = (g, step) => clamp((g * 3 + step) / 41, 0, 1) + (jr().champ ? .3 :
 // チャンピオンリーグ：種族値の 高い モンスター。してんのうは とくいタイプの 上位から、チャンピオンは タイプに しばられず 全体の 上位から（タイプは かぶらない）
 const baseTot = (id) => Object.values(base6(id)).reduce((a, b) => a + b, 0);
 // エース（だいひょうの 1たい）：とくいタイプ（チャンピオンは 全体）で いちばん 種族値が 高い モンスター。そだてて とどく さいだい（個体値 ぜんぶ 31・強化 50・せいかく）で さいごに でてくる
+// エースの 訓練（コンボ）：上から じゅんに 条件を みる。after の p は この 一覧の なんばんめ か
+const TRC = (t, p, n) => n != null ? { t, p, n } : p != null ? { t, p } : { t };
+const ACE_TR = {
+  c_fighting5: [['close-combat', 'near', [[TRC('after', 2)]]], ['future-sight', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['bulk-up', 'auto', [[TRC('enter')]]], ['drain-punch', 'near', []]],   // ゴリング：みらいよちで しるし → ぜんりょくラッシュで つかんで にがさない
+  c_fighting7: [['swords-dance', 'auto', [[TRC('enter')]]], ['close-combat', 'near', [[TRC('after', 1)], [TRC('mystg', 'atk', 2), TRC('dist', 'near')]]], ['sucker-punch', 'auto', [[TRC('hit', 'any')]]], ['poltergeist', 'auto', []]],   // オニゴ：やるきアップ → ぜんりょくラッシュ・うけたら だしぬき
+  sorabune: [['tailwind', 'auto', [[TRC('enter')]]], ['protect', 'auto', [[TRC('hit', 'big')]]], ['hurricane', 'auto', [[TRC('dist', 'near')], [TRC('dist', 'mid')]]], ['gale-arrow', 'far', [[TRC('dist', 'far')]]]],   // ソラフネ：おいかぜ → ちかければ おおあらし・とおければ かぜのや
+  a_dragon4: [['toxic', 'auto', [[TRC('opsts', 'none')]]], ['gunk-shot', 'auto', [[TRC('opsts', 'psn')]]], ['protect', 'auto', [[TRC('hit', 'big')]]], ['acid-rain', 'auto', []]],   // タツモドキ：もうどく → どくの あいてに どくのかたまり
+  c_dragon8: [['calm-mind', 'auto', [[TRC('enter')]]], ['draco-meteor', 'auto', [[TRC('after', 3)]]], ['future-sight', 'auto', [[TRC('dist', 'mid')], [TRC('dist', 'far')]]], ['dragon-pulse', 'auto', []]],   // ホーリュウ：せいしんとういつ → みらいよち → スターフォールで にげばを ふさぐ
+};
+function aceTrain(em) { const T = ACE_TR[em.sid]; if (!T) return; const ok = T.filter(([id]) => MOVES[id] && canLearn(em.sid, id)); if (ok.length < 2) return;
+  em.moves = ok.map(([id]) => id).slice(0, 4); em.tr = { mode: 'chip', prog: { hv: 1, nat: em.nat, mv: ok.map(([id, go, c]) => ({ id, go, c })) } }; }
 const leagueAce = (type) => { const ids = poolIds(); return (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids).sort((a, b) => baseTot(b) - baseTot(a))[0]; };
 function leagueTeam(type, n, p) {
   const ids = poolIds(), ace = leagueAce(type); let pool = (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids.slice()).filter(id => id !== ace).sort((a, b) => baseTot(b) - baseTot(a));
@@ -11002,7 +11013,7 @@ function leagueTeam(type, n, p) {
   if (ace) { const em = foeMon(ace, 1, -9), b = base6(ace), main = b.atk >= b.spa ? 'atk' : 'spa', sub = main === 'atk' ? 'spa' : 'atk';
     em.ace = 1; em.iv = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, eva: 31 }; em.ev = { [main]: EV_STAT_MAX, spe: EV_MAX - EV_STAT_MAX };
     em.nat = Object.keys(NATURES).find(k => NATURES[k].up === main && NATURES[k].down === sub) || Object.keys(NATURES).find(k => NATURES[k].up === main) || em.nat;
-    em.moves = strongMoves(em, 1); out.push(em); }   // エースは さいごに
+    em.moves = strongMoves(em, 1); aceTrain(em); out.push(em); }   // エースは さいごに
   return out;
 }
 // 敵チーム：そのジムの タイプの モンスター（たりなければ ほかから）
