@@ -6357,7 +6357,8 @@ function aiDodgeCheck(f, o) { }   // かわしは あたる しゅんかんに �
 function autoDodge(att, def, m, opt) {   // こうげきが あたる しゅんかんに かいひを ちゅうせん → あたったら ステップで よける
   if (opt.throw || opt.sure || (opt.tick && !opt.first) || att === def || def.hp <= 0 || !isDamaging(m)) return false;
   if (def.dodgeCd > 0 || !['free', 'act'].includes(def.state) || !canAct(def) || def.v.protect > 0 || def.dummy) return false;
-  if (Math.random() >= autoDodgeP(def)) return false;
+  if (!(TUT && TUT.dodge && def.side === 0) && Math.random() >= autoDodgeP(def)) return false;   // チュートリアル：よける ところを みせる
+  if (TUT && def.side === 0) TUT.f.dodged = 1;
   startDodge(def); if (B.stats) B.stats.dodged[MOVE_ID.get(m)] = (B.stats.dodged[MOVE_ID.get(m)] || 0) + 1;
   popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3);
   return true;
@@ -6836,7 +6837,7 @@ function aiMove(f, o, dt, autoSpecial) {
   { const dl = o.clones && o.clones.find(c => c.doll);   // デコイにんぎょう：ここから さきの たちまわりは にんぎょうを あいてと して うごく（よちょうの はんいは 本物で よける）
     if (dl) { const p = Object.create(o); p.x = dl.x; p.y = dl.y; p.real = o; o = p; d = dist(f, o); ang = Math.atan2(o.y - f.y, o.x - f.x); } }
   const per = persona(f), hurt = f.hp < f.maxHp * per.flee;
-  if (f.moodPop) { const M = f.moodPop; f.moodPop = null; if (!B.headless) popText(f.x, f.y - 86, M.n, M.col, true); }
+  if (f.moodPop) { const M = f.moodPop; f.moodPop = null; if (!B.headless) popText(f.x, f.y - 86, M.n, M.col, true); if (TUT && f.side === 0) TUT.mood = M.n; }
   if (f.moodyNow) {   // むらっけ：ひとつ ぐーんと 上がり、べつの ひとつが 下がる
     f.moodyNow = false; const ks = ['atk', 'def', 'spa', 'spd', 'spe'], up = choice(ks.filter(k => f.st[k] < 4)), dn = choice(ks.filter(k => k !== up && f.st[k] > -4));
     if (up) f.st[up] += 2; if (dn) f.st[dn] -= 1;
@@ -7013,7 +7014,7 @@ function recPlan(sid) {
   return REC_PLAN[sid] || 'reisei';
 }
 const planOfMon = (m) => (m.tr && m.tr.prog && m.tr.prog.mv && trPlanOf(m.tr.prog.nat)) || recPlan(m.sid);
-function natOf(f) { if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp); return f.side === 0 || f.side == null ? planOfMon(f.mon) : recPlan(f.mon.sid); }
+function natOf(f) { if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp); if (f.mon.tutPlan) return f.mon.tutPlan; return f.side === 0 || f.side == null ? planOfMon(f.mon) : recPlan(f.mon.sid); }
 function moodVs(f, o) {
   const me = natOf(f);
   return NAT_REL[me][natOf(o)] || null;
@@ -8463,25 +8464,19 @@ function showResult() {
 /* ---------- チュートリアル：じっさいの バトルで 1つずつ やってみる ---------- */
 // ステップ：{ tx: せつめい, hl: ひからせる ボタン, wait: できたら true, pause: とめて よむ, run: まいフレーム（あいての うごきを きめる）}
 let TUT = null;
-function tutPickMoves(sid) {
-  const sp = SPECIES[sid], ok = (id, f) => MOVES[id] && f(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 90;
-  const ids = Object.keys(MOVES);
-  const odd = (m) => m.grab || m.guardDash || m.back || m.pat === 'orbit' || m.whip || m.hits || m.sure || m.slap || ['vault', 'warp', 'rage'].includes(m.k);
-  const rock = ids.find(id => ok(id, m => RPS_ROCK.includes(m.k) && !odd(m) && m.t === sp.type && !m.fakeout)) || ids.find(id => ok(id, m => ['melee', 'dash'].includes(m.k) && !odd(m) && !m.fakeout)) || 'tackle';
-  const sc = ids.find(id => ok(id, m => m.k === 'proj' && m.t === sp.type)) || ids.find(id => ok(id, m => m.k === 'proj')) ;
-  const prot = ids.find(id => MOVES[id].k === 'protect');
-  return [rock, sc, prot];
-}
 function startTutorial() {
   if (!S || !S.party.length) return;
-  const me = S.party[0], buddy = S.party[1] || newMon(me.sid === 'a_water2' ? 'a_grass2' : 'a_water2');
-  const ids = Object.keys(MOVES).filter(id => !MOVES[id].nw), plain = (m) => !m.sucker && !m.fakeout && !m.ohko && !m.grab && !m.guardDash && !m.back && !m.trail && !m.wallBreak && !m.crash && m.pat !== 'orbit' && !(m.e && (m.e.recoil || m.e.self)), pickK = (k) => ids.find(id => MOVES[id].k === k && plain(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 80 && MOVES[id].t === 'normal') || ids.find(id => MOVES[id].k === k && plain(MOVES[id]) && MOVES[id].power > 0);
-  const tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; }, myT = SPECIES[me.sid].type;
-  const dummyId = poolIds().filter(id => id !== me.sid && id !== buddy.sid && SPECIES[id].type !== myT).sort((a, b) => tot(a) - tot(b))[0] || poolIds()[0];   // れんしゅう あいて：いちばん よわい モンスター
-  TUT = { i: -1, t: 0, f: {}, auto0: S.auto, mv: tutPickMoves(me.sid), em: { strike: pickK('strike'), beam: pickK('beam'), dash: pickK('dash') } };
+  // チュートリアル用の モンスター（パーティとは べつ）：ほのお → みずに こうたい。あいては みずに よわい よわい モンスター
+  const me = newMon('a_fire2'), buddy = newMon('a_water2'), tot = (id) => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; };
+  const weak = (id) => [SPECIES[id].type, SPECIES[id].type2].some(t => effOf('water', t) >= 2) && effOf(SPECIES[id].type, 'water') <= 1 && !(SPECIES[id].type2 && effOf(SPECIES[id].type2, 'water') > 1);
+  const dummyId = poolIds().filter(id => !STARTERS.includes(id) && !SPECIES[id].rare && weak(id)).sort((a, b) => tot(a) - tot(b))[0] || poolIds()[0];
+  me.tutPlan = 'kimagure'; buddy.tutPlan = 'yuukan';   // 作戦：さいしょは ふつう、こうたいした こは「よゆう（さくせん◎）」に なる
+  const en = newMon(dummyId); en.tutPlan = 'kimagure';
+  const ids = Object.keys(MOVES).filter(id => !MOVES[id].nw), plain = (m) => !m.sucker && !m.fakeout && !m.ohko && !m.grab && !m.guardDash && !m.back && !m.trail && !m.wallBreak && !m.crash && !m.pat && !(m.e && (m.e.recoil || m.e.self)), pickK = (k) => ids.find(id => MOVES[id].k === k && plain(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 80 && MOVES[id].t === 'normal') || ids.find(id => MOVES[id].k === k && plain(MOVES[id]) && MOVES[id].power > 0);
+  TUT = { i: -1, t: 0, f: {}, auto0: S.auto, em: { strike: pickK('strike'), beam: pickK('beam'), dash: pickK('dash') } };
   S.auto = false;
-  startBattle({ kind: 'tutorial', tutorial: true, field: 'grass', p0: [me, buddy], enemies: [newMon(dummyId)], title: 'チュートリアル', intro: 'れんしゅう あいてが あらわれた！', trainer: { name: 'コーチ', spr: trArt('boy') }, skill: 0 });
-  const f = B.sides[0].fs[0], o = B.sides[1].fs[0];
+  startBattle({ kind: 'tutorial', tutorial: true, field: 'grass', p0: [me, buddy], enemies: [en], title: 'チュートリアル', intro: 'れんしゅう あいてが あらわれた！', trainer: { name: 'コーチ', spr: trArt('boy') }, skill: 0 });
+  const o = B.sides[1].fs[0];
   o.moves = [TUT.em.strike, TUT.em.beam, TUT.em.dash, Object.keys(MOVES).find(id => MOVES[id].k === 'protect')].filter(Boolean); TUT.em.guard = o.moves[3];
   o.atk *= .35; o.spa *= .35;
   setupCmds();
@@ -8491,24 +8486,30 @@ function tutEnemy(id, hold) {   // あいてに わざを ださせる（hold �
   const o = tutO(), f = tutF(); if (!o || !f || !id || o.state !== 'free') return false; o.cur = null;
   o.cd[id] = 0; beginMove(o, id); if (o.cur) { o.cur.wind = Math.max(o.cur.wind, hold); o.cur.tx = f.x; o.cur.ty = f.y; } return !!o.cur;
 }
+// stop：その ばめんに なった しゅんかんに とめて せつめいを だす（それまでは 文字を ださない）
 const TUT_STEPS = [
   { tx: 'ようこそ！ この ゲームの バトルは <b>モンスターが じぶんで たたかう</b>。きみは みているだけ。<br>どう たたかうかは <b>訓練</b>で まえもって おしえて おくんだ。', pause: true },
-  { tx: '① まずは みてみよう。わざを うつと <b>あたまの うえに わざの なまえ</b>が でるよ。',
-    run: (T) => { const f = tutF(); if (f && f.cur && f.cur.id !== T.f.last) { T.f.last = f.cur.id; T.f.n = (T.f.n || 0) + 1; } if (f && !f.cur) T.f.last = null; },
-    wait: () => (TUT.f.n || 0) >= 2 || TUT.t > 9 },
-  { tx: '② あいてが わざを <b>ためている</b>！ じめんに でた <b>わく</b>が こうげきの はんいだよ。<br>大きな わざほど ためが ながいから、見てから よけられる。',
-    run: (T) => { if (!T.f.sent && TUT.t > .4 && tutEnemy(TUT.em.strike, 1.6)) T.f.sent = 1; },
-    wait: () => !!TUT.f.sent && TUT.t > 2.8 && !(tutO() && tutO().cur) || TUT.t > 7, delay: .8 },
-  { tx: '③ こうげきが <b>あたる しゅんかん</b>に、モンスターは「かいひ」の のうりょくで <b>じどうで ステップ</b>して よけることが ある。<br>ガードシェル などの ガード技は、訓練で「<b>攻撃を受けた瞬間</b>」の 条件を おくと その場で でるよ。', pause: true },
-  { tx: '④ いまは 訓練を して いないので <b>お任せ</b>で うっている。お任せは てきとうに えらぶから、つよい あいてには かてない。<br><b>訓練</b>で「どの わざを・いつ・どう うつか」を きめると ぐんと つよく なる！', pause: true },
-  { tx: '⑤ <b>ひかえ</b>の モンスターを タップすると こうたい できる。バトル中に きみが できるのは これ だけ！<br>ひかえの「<b>有利・不利</b>」は タイプ相性の めやす。やってみよう', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 },
-  { tx: 'ナイス！ 出てきた ときの「<b>よゆう（さくせん◎）</b>」などは、作戦どうしの 相性（⚔近 → 🏹遠 → 🛡中 → ⚔近）だよ。<br>あいてを たおして しあげよう。おわったら したの <b>訓練</b>タブへ！', pause: true, delay: 1.2 },
+  { tx: '① いま <b>あたまの うえに でた 文字</b>が、うった <b>わざの なまえ</b>。<br>モンスターは じぶんで わざを えらんで うつよ。',
+    run: (T) => { const f = tutF(); if (!f) return; if (f.cur && !T.f.at) T.f.at = TUT.t;
+      if (!T.f.at && TUT.t > 2.5 && f.state === 'free' && !f.cur) { const id = f.moves.find(x => MOVES[x] && isDamaging(MOVES[x]) && !MOVES[x].nw); if (id) { f.cd[id] = 0; beginMove(f, id); } } },
+    stop: (T) => T.f.at && TUT.t - T.f.at > .35 },
+  { tx: '② あいてが わざを <b>ためている</b>！ じめんに でた <b>わく</b>が こうげきの はんいだよ。<br>大きな わざほど ためが ながい。', hold: true,
+    run: (T) => { const f = tutF(); if (!T.f.sent && TUT.t > .3 && f && f.state === 'free' && !f.cur && !B.projs.some(q => q.side === 0) && tutEnemy(TUT.em.strike, 1.4)) { T.f.sent = TUT.t; TUT.dodge = 1; } },
+    stop: (T) => T.f.sent && TUT.t - T.f.sent > .45 },
+  { tx: (T) => T.f.dodged ? '③ いま こうげきが <b>あたる しゅんかん</b>に <b>じどうで ステップ</b>して よけた！<br>よけるか どうかは「<b>かいひ</b>」の たかさで きまる。いつも よけられる わけでは ないよ。' : '③ こうげきが <b>あたる しゅんかん</b>に、「<b>かいひ</b>」が たかいと <b>じどうで ステップ</b>して よけることが あるよ。', hold: true,
+    run: (T) => { if (T.f.dodged && !T.f.at) T.f.at = TUT.t; if (!T.f.at && tutO() && tutO().state === 'free' && TUT.t > 2.5) T.f.at = TUT.t; },
+    stop: (T) => T.f.at && TUT.t - T.f.at > .5, done: () => { TUT.dodge = 0; } },
+  { tx: '④ いまは 訓練を して いないので <b>お任せ</b>で うっている。お任せは てきとうに えらぶから、つよい あいてには かてない。<br><b>訓練</b>で「どの わざを・いつ・どう うつか」を きめると ぐんと つよく なる！<small>（ガード技も「<b>攻撃を受けた瞬間</b>」の 条件で うてる）</small>', pause: true },
+  { tx: '⑤ <b>ひかえ</b>の モンスターを タップすると こうたい できる。バトル中に きみが できるのは これ だけ！<br>ひかえに でている「<b>有利</b>」は タイプ相性の めやす。<b>ひかって いる こ</b>を タップしよう', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 },
+  { tx: (T) => TUT.mood ? `⑥ でてきた ときに「<b>${TUT.mood}</b>」と でたね。あいてとの <b>作戦の 相性</b>が いい しるし。<br>作戦の 相性は ⚔近 → 🏹遠 → 🛡中 → ⚔近（やじるしの さきに つよい）。訓練で えらべるよ` : '⑥ でてきた ときに「<b>よゆう（さくせん◎）</b>」などと でるのは、あいてとの <b>作戦の 相性</b>。<br>⚔近 → 🏹遠 → 🛡中 → ⚔近（やじるしの さきに つよい）。訓練で えらべるよ',
+    run: (T) => { if (TUT.mood && !T.f.at) T.f.at = TUT.t; if (!T.f.at && TUT.t > 4) T.f.at = TUT.t; }, stop: (T) => T.f.at && TUT.t - T.f.at > .5 },
+  { tx: 'あいてを たおして しあげよう！ おわったら したの <b>訓練</b>タブで わざの つかいかたを きめよう', pause: true },
   { tx: 'あいてを たおそう！', fin: true },
 ];
 function tutShow(step) {
-  const box = $('tutBox'); box.hidden = false; $('tutTx').innerHTML = step.tx; if (B) B.padT = 0;   // カメラの あきを はかりなおす
+  const box = $('tutBox'); box.hidden = false; $('tutTx').innerHTML = typeof step.tx === 'function' ? step.tx(TUT) : step.tx; if (B) B.padT = 0;   // カメラの あきを はかりなおす
   { const pl = $('plP'), app = $('app'); box.style.top = ''; if (pl && app && !document.documentElement.classList.contains('land')) { const r = pl.getBoundingClientRect(), a = app.getBoundingClientRect(); if (r.height) box.style.top = (r.bottom - a.top + 6) + 'px'; } }   // HP の ひょうじの したに だす（かくさない）
-  $('tutNext').hidden = !step.pause;
+  $('tutNext').hidden = !(step.pause || step.stop);
   document.querySelectorAll('.tut-hl').forEach(e => e.classList.remove('tut-hl'));
   const el = step.hl && step.hl(); if (el) el.classList.add('tut-hl'); TUT.hlEl = el || null;
 }
@@ -8517,7 +8518,7 @@ function tutGo(i) {
   TUT.i = i; TUT.t = 0; TUT.f = {}; TUT.frozen = false;
   const st = TUT_STEPS[i]; if (!st) return;
   if (st.fin) { $('tutBox').hidden = true; tutHide(); const o = tutO(); if (o) { o.hp = Math.min(o.hp, Math.ceil(o.maxHp * .3)); } B.paused = false; return; }
-  B.paused = !!st.pause; tutShow(st); if (st.pause) SND.se('ok');
+  B.paused = !!st.pause; if (st.stop) { $('tutBox').hidden = true; return; } tutShow(st); if (st.pause) SND.se('ok');
 }
 function tutHide() { document.querySelectorAll('.tut-hl').forEach(e => e.classList.remove('tut-hl')); $('tutHand').hidden = true; }
 function tutTick(dt) {
@@ -8538,12 +8539,14 @@ function tutTick(dt) {
   const f = tutF(), o = tutO();
   if (f) f.hp = Math.max(f.hp, f.maxHp * .45);
   if (o) { o.hp = Math.max(o.hp, o.maxHp * .5); o.aiT = 9; if (!o.cur) o.queued = null; o.dodgeCd = 9; }
-  if (st.pause) return;
+  if (st.pause || TUT.f.stopped) return;
+  if (st.hold && f) { f.aiT = 9; f.queued = null; if (f.state === 'free') f.cur = null; if (o && o.state === 'wind' && o.cur) { o.cur.tx = f.x; o.cur.ty = f.y; } }   // わくは じぶんの あしもとに（よける ところを みせる）   // せつめいの あいだは じぶんも かってに うたない
   if (st.near && !TUT.f.placed && f && o) {   // れんしゅうしやすい きょりに よせる
     TUT.f.placed = 1; const a = Math.atan2(o.y - f.y, o.x - f.x), d = Math.hypot(o.x - f.x, o.y - f.y);
     if (d > st.near) { o.x = f.x + Math.cos(a) * st.near; o.y = f.y + Math.sin(a) * st.near; clampF(o); if (B.st.solid) freeSpot(o); burst(o.x, o.y, '#ffffff', 10, 90, .3); }
   }
   if (st.run) st.run(TUT);
+  if (st.stop && st.stop(TUT)) { TUT.f.stopped = 1; B.paused = true; tutShow(st); SND.se('ok'); return; }   // その ばめんで とめて せつめい
   if (st.freeze && !TUT.f.froze && st.freeze(TUT)) { TUT.f.froze = 1; TUT.frozen = true; B.paused = true; tutShow(st); }   // しじを まつ あいだ 時間を とめる
   if (st.wait && st.wait()) {
     const nx = TUT_STEPS[TUT.i + 1]; SND.se('caught'); tutHide(); $('tutBox').hidden = true; B.slowT = 0;
