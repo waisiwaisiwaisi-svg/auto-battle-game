@@ -4764,7 +4764,7 @@ const TICK = 3; // 状態異常ダメージの間隔（秒）＝ポケモンの�
 
 function mkFighter(mon, side) {
   const st = stats(mon), sp = SPECIES[mon.sid];
-  return ((f, g) => g(f))({
+  return ({
     mon, sp, side, lvl: MON_LV, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, spa: st.spa, sdef: st.spd, speStat: st.spe, eva: st.eva, baseSpd: Math.round(st.spe * .85 - 10),
     moves: equipped(mon).slice(),
     x: 0, y: 0, r: Math.round(23 * bodySz(sp)), face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
@@ -4772,7 +4772,7 @@ function mkFighter(mon, side) {
     scale: 1, fainted: false, moving: false, walk: 0, ghostT: 0, splashT: 0,
     st: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }, status: '', statusT: 0, tickT: TICK, toxN: 1, parT: 2.5,
     v: {}, enterT: 0, lastMove: null, lastProtect: -9, shots: [],
-  }, mon.ace ? (f) => { for (const k in ACE_K) f[k] = Math.round(f[k] * ACE_K[k]); f.maxHp = f.hp; f.baseSpd = Math.round(f.speStat * .85 - 10); return f; } : (f) => f);
+  });
 }
 const active = (side) => { const sd = B.sides[side]; return sd.fs[sd.act]; };
 const opp = (f) => active(1 - f.side);
@@ -10992,15 +10992,17 @@ function strongMoves(m, p) {
 const jProg = (g, step) => clamp((g * 3 + step) / 41, 0, 1) + (jr().champ ? .3 : 0);
 // チャンピオンリーグ：種族値の 高い モンスター。してんのうは とくいタイプの 上位から、チャンピオンは タイプに しばられず 全体の 上位から（タイプは かぶらない）
 const baseTot = (id) => Object.values(base6(id)).reduce((a, b) => a + b, 0);
-// エース（だいひょうの 1たい）：とくいタイプ（チャンピオンは 全体）で いちばん 種族値が 高い モンスター。ものすごく つよい 個体で さいごに でてくる
+// エース（だいひょうの 1たい）：とくいタイプ（チャンピオンは 全体）で いちばん 種族値が 高い モンスター。そだてて とどく さいだい（個体値 ぜんぶ 31・強化 50・せいかく）で さいごに でてくる
 const leagueAce = (type) => { const ids = poolIds(); return (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids).sort((a, b) => baseTot(b) - baseTot(a))[0]; };
-const ACE_K = { hp: 2, atk: 1.35, spa: 1.35, def: 1.25, sdef: 1.25, speStat: 1.15 };   // エースの のうりょく 倍率
 function leagueTeam(type, n, p) {
   const ids = poolIds(), ace = leagueAce(type); let pool = (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids.slice()).filter(id => id !== ace).sort((a, b) => baseTot(b) - baseTot(a));
   if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id) && id !== ace).sort((a, b) => baseTot(b) - baseTot(a)));
   const top = pool.slice(0, n + (type ? 2 : 6)), out = [];
   while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = choice(c.length ? c : top); top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }
-  if (ace) { const em = foeMon(ace, 1, -9); em.ace = 1; out.push(em); }   // エースは さいごに
+  if (ace) { const em = foeMon(ace, 1, -9), b = base6(ace), main = b.atk >= b.spa ? 'atk' : 'spa', sub = main === 'atk' ? 'spa' : 'atk';
+    em.ace = 1; em.iv = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, eva: 31 }; em.ev = { [main]: EV_STAT_MAX, spe: EV_MAX - EV_STAT_MAX };
+    em.nat = Object.keys(NATURES).find(k => NATURES[k].up === main && NATURES[k].down === sub) || Object.keys(NATURES).find(k => NATURES[k].up === main) || em.nat;
+    em.moves = strongMoves(em, 1); out.push(em); }   // エースは さいごに
   return out;
 }
 // 敵チーム：そのジムの タイプの モンスター（たりなければ ほかから）
