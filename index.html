@@ -1512,7 +1512,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
     <button data-tab="shop" id="btnShop"><i class="ico" data-ico="shop"></i><span>ショップ</span><em class="badge" id="tabShopBadge" hidden></em></button>
     <button data-tab="team" id="btnTeam"><i class="ico" data-ico="crystal"></i><span>へんせい</span></button>
     <button data-tab="home" id="tabHome"><i class="ico" data-ico="swords"></i><span>ホーム</span><em class="badge" id="tabHomeBadge" hidden></em></button>
-    <button data-tab="train" id="btnTrainTab"><i class="ico" data-ico="chart"></i><span>訓練</span></button>
+    <button data-tab="train" id="btnTrainTab"><i class="ico" data-ico="target"></i><span>訓練</span></button>
     <button data-tab="guild" id="btnGuild"><i class="ico" data-ico="shield"></i><span>ギルド</span></button>
   </nav>
 
@@ -2827,6 +2827,7 @@ function orbURL() { if (ORB_URL) return ORB_URL; const P = typeof PLFX !== 'unde
 const orbImg = (cls) => { const u = orbURL(); return u ? `<img class="pxe orbi${cls ? ' ' + cls : ''}" src="${u}" alt="" draggable="false">` : ''; };
 function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
+  if (name === 'target' && typeof UIA !== 'undefined' && UIA.target) return (ICON_URL[name] = UIA.target.src);   // 訓練の タブ：的
   if (name === 'shop' && typeof UIA !== 'undefined' && UIA.chest) return (ICON_URL[name] = UIA.chest.src);   // ショップ：たからばこの 絵
   if (name === 'capcr') { const u = orbURL(); if (u) return (ICON_URL[name] = u); if (typeof UIA !== 'undefined' && UIA.crystal) return UIA.crystal.src; }   // ふういんオーブ：くさむらで なげる 絵
   if (typeof UIA !== 'undefined' && UIA['ic_' + name]) return (ICON_URL[name] = UIA['ic_' + name].src);   // ChatGPT の アイコン（I1）
@@ -2857,6 +2858,19 @@ function sprBox(sid, img) {
     if (x1 >= 0) b = [x0, y0, x1 - x0 + 1, y1 - y0 + 1]; } catch (e) {}
   SBOX[sid] = { img, b }; return b;
 }
+// モンスターの 顔の アイコン（へんせいの タブ）：絵の 上の ほう（あたま）を 正方形に きりぬく
+const FACE_URL = {};
+function faceURL(sid) {
+  if (FACE_URL[sid]) return FACE_URL[sid]; const S = SPR[sid]; if (!S || !S.n) return '';
+  const img = S.n, [bx, by, bw, bh] = sprBox(sid, img), sd = Math.max(8, Math.round(Math.min(bw, bh) * .78));
+  let cx = bx + bw / 2;
+  try { const d = img.getContext('2d').getImageData(bx, by, bw, Math.max(1, Math.round(bh * .4))).data; let sx = 0, n = 0;   // あたま＝上の 4わりの まんなかへんに よせる
+    for (let i = 3; i < d.length; i += 4) if (d[i] > 40) { sx += (i >> 2) % bw; n++; } if (n) cx = bx + sx / n; } catch (e) {}
+  const x0 = Math.round(clamp(cx - sd / 2, bx, bx + bw - sd)), y0 = by - 1, R = sd + 2, c = document.createElement('canvas'); c.width = c.height = R;
+  const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(img, x0, y0, sd, R, 1, 0, sd, R);
+  return (FACE_URL[sid] = c.toDataURL());
+}
+function updTeamIco() { const el = document.querySelector('#btnTeam .ico'), m = S && S.party && S.party[0], u = m && faceURL(m.sid); if (!el || !u) return; el.dataset.ico = 'team'; el._ico = 'team'; el.style.backgroundImage = `url(${u})`; }
 function spriteCanvas(sid, size) {
   // 内部は 2〜3倍の 解像度で 描いて、CSS で size に する。絵の 中身を わくの 9わりに そろえる（どの こも おなじ 大きさに 見える）
   const img = SPR[sid].n, c = document.createElement('canvas'), R = size * Math.min(3, Math.max(2, Math.ceil(window.devicePixelRatio || 1)));
@@ -2899,7 +2913,7 @@ window.addEventListener('storage', (e) => { if (e.key !== SAVE_KEY || SAVE_STALE
   bg.innerHTML = '<div class="askbox"><div style="margin-bottom:12px">べつの タブ（または まど）で この ゲームが うごいて データが かわりました。<br>この がめんは よみこみなおします。</div><div class="row"><button class="btn">よみこみなおす</button></div></div>';
   bg.querySelector('button').onclick = () => location.reload(); $('app').appendChild(bg); });
 function save() { if (SAVE_STALE || ONB_TEST) return;   // ONB_TEST：はじめからの ながれを ためしている あいだは かきこまない
- if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+ if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} if (typeof updTeamIco === 'function') try { updTeamIco(); } catch (e) {} }   // へんせいの タブの 顔も かえる
 const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
 /* ===== ステータス（ポケモンと おなじ しくみ） =====
    6つの のうりょく：HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ
@@ -3836,6 +3850,7 @@ function useTM(m) {
 }
 
 function renderHub() {
+  updTeamIco();   // へんせいの タブ：せんとうの モンスターの 顔
   if (S && S.onb) setTimeout(onbHub, 500);   // さいしょの ながれ：ホームの あんない
   if (S && S.goTrain && !B) { S.goTrain = 0; save(); setTimeout(() => { const b = $('btnTrainTab'); if (b && !B) b.click(); }, 400); }   // チュートリアルの つぎは 訓練へ
   if (!GUILD.checked) { GUILD.checked = true; setTimeout(() => guildMe().catch(() => { }), 0); }   // ギルドに いるか（たからばこ ボーナス）
