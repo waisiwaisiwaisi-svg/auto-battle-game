@@ -29,11 +29,13 @@ out = {}
 def add(key, name, ms, **kw):
     p = f(name); out[key] = sheet(p, nf(p), ms, **kw)
 
-for t in TYPES:
-    add('p_' + t, 'A_shot_' + t, 100)            # とぶ たま（みぎむき）
-    add('hit_' + t, 'A_hit_' + t, 70)            # あたった しゅんかん
-    add('a_charge_' + t, 'A_charge_' + t, 100)   # ため（くりかえし）
-    p = f('A_burst_' + t); out['a_burst_' + t] = sheet(p, nf(p), 80, ay=47)   # あしもとの ばくはつ：下の まんなかが きじゅん
+ART = {'ground': 'earth'}   # 新タイプ：土は 土の 絵（earth）。機械・亜人・妖精・けもの も ふえた
+for t in TYPES + ['machine', 'demi', 'fairy', 'beast']:
+    a = ART.get(t, t)
+    add('p_' + t, 'A_shot_' + a, 100)            # とぶ たま（みぎむき）
+    add('hit_' + t, 'A_hit_' + a, 70)            # あたった しゅんかん
+    add('a_charge_' + t, 'A_charge_' + a, 100)   # ため（くりかえし）
+    p = f('A_burst_' + a); out['a_burst_' + t] = sheet(p, nf(p), 80, ay=47)   # あしもとの ばくはつ：下の まんなかが きじゅん
 add('fx_beam', 'B_beam_body', 70, ax=0)
 add('n_beam_start', 'B_beam_start', 70)
 add('n_beam_tip', 'B_beam_tip', 70)
