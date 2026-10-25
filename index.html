@@ -2448,7 +2448,7 @@ const NEW_MOVES = {"bonemerang": {"n": "ホネブーメラン", "t": "ground", "
   "drill-peck": {"n": "ドリルくちばし", "t": "wind", "k": "dash", "power": 80, "len": 200},
   "hurricane": {"n": "ぼうふう", "t": "wind", "k": "cone", "power": 110, "acc": 70, "rad": 220, "half": 0.45, "confuse": 2},
   "gale-arrow": {"n": "かぜのや", "t": "wind", "k": "proj", "power": 60, "spd": 520, "r": 7, "far": 1.0, "life": 9},
-  "powder-snow": {"n": "こなゆき", "t": "ice", "k": "floor", "cat": "stat", "power": 0, "rad": 72, "slow": 0.75, "wind": 0.5, "cd": 8, "stack": {"n": 4, "st": "frz"}},
+  "powder-snow": {"n": "こなゆき", "t": "ice", "k": "floor", "cat": "stat", "power": 0, "rad": 72, "slow": 0.75, "wind": 0.5, "cd": 8, "stack": {"n": 4, "st": "frz", "rate": 0.67}},
   "avalanche": {"n": "ゆきなだれ", "t": "ice", "k": "strike", "power": 60, "rad": 60, "revenge": 1},
   "aurora-veil": {"n": "オーロラベール", "t": "ice", "k": "cure", "cat": "stat", "power": 0, "cd": 10},
   "psycho-cut": {"n": "サイコカッター", "t": "psychic", "k": "swipe", "power": 70, "rad": 70, "crit": 1, "aim": "dir"},
@@ -5985,7 +5985,7 @@ function updatePlaced(dt) {
     z.life -= dt; z.tick -= dt;
     if (z.tick <= 0) { z.tick = .5;
       const zm = MOVES[z.id] || {}; if (zm.bugHeal) { const me = active(z.side); if (me && targetable(me) && !hovers(me) && hasType(me, 'bug') && me.hp < me.maxHp && inZoneFloor(z, me.x, me.y)) healHp(me, me.maxHp * .03); }   // みつだまり：みかたの むしは かいふく
-      const x = active(1 - z.side); if (x && targetable(x) && !hovers(x) && inZoneFloor(z, x.x, x.y) && !zm.noDmg) { floorDmg(x, z, 0); if (zm.stack && x.hp > 0 && !x.status) addStack(x, zm, z.f); const e = MOVES[z.id].e || {}; if (e.st && x.hp > 0 && Math.random() * 100 < e.stCh) setStatus(x, e.st, z.f); }
+      const x = active(1 - z.side); if (x && targetable(x) && !hovers(x) && inZoneFloor(z, x.x, x.y) && !zm.noDmg) { floorDmg(x, z, 0); if (zm.stack && x.hp > 0 && !x.status && (z.ska = (z.ska || 0) + (zm.stack.rate || 1)) >= 1) { z.ska -= 1; addStack(x, zm, z.f); } const e = MOVES[z.id].e || {}; if (e.st && x.hp > 0 && Math.random() * 100 < e.stCh) setStatus(x, e.st, z.f); }
     }
     if (Math.random() < dt * 10) { const q = z.parts ? choice(z.parts) : z; typeFx(q.x + rand(-q.rad, q.rad) * .8, q.y + rand(-q.rad, q.rad) * .45, z.t, 1, 30, .5); }
     if (z.pat === 'pull') for (const sd of B.sides) { const x = sd.fs[sd.act]; if (sd === B.sides[z.side] || !x || !targetable(x) || hovers(x) || !inZoneFloor(z, x.x, x.y) || x.state === 'dash') continue;   // ありじごく：まんなかへ ひきこむ
