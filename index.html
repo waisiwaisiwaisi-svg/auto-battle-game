@@ -3924,6 +3924,7 @@ const TYPE_SHORT = { fire: '火', water: '水', grass: '草', wind: '風', groun
 // すくみ図：そとの わは となりに かつ（とけいまわり）、うちがわの 線は 1つ とばしの 相性。むかいあう 2つは ふつう
 const SKM_MID = { '属性': 'normal', '種族': 'beast' };   // まんなか：どれとも ふつう
 const SKM_ORDER = { '属性': ['fire', 'grass', 'water', 'ground', 'elec', 'wind'], '種族': ['machine', 'fairy', 'dragon', 'ghost', 'demi', 'bug'] };
+const skDark = (c) => '#' + [1, 3, 5].map(i => Math.round(parseInt(c.substr(i, 2), 16) * .42).toString(16).padStart(2, '0')).join('');   // まるの なかは こい いろ（アイコンを 見やすく）、ふちは タイプの いろ
 function sukumi(o, cap) {
   const N = o.length, CX = 100, CY = 104, R = 68, r = 17, id = 'skA' + (cap === '属性' ? 'a' : 'r'), P = o.map((t, k) => { const a = -Math.PI / 2 + k * 2 * Math.PI / N; return [CX + R * Math.cos(a), CY + R * Math.sin(a)]; });
   let h = `<svg class="skm" viewBox="0 0 200 206" role="img" aria-label="${cap}の すくみ"><defs><marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffd166"/></marker></defs>`;
@@ -3931,7 +3932,7 @@ function sukumi(o, cap) {
     const [x0, y0] = P[i], [x1, y1] = P[j], L = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / L, uy = (y1 - y0) / L, ring = (j - i + N) % N === 1 || (i - j + N) % N === 1;
     h += `<line x1="${(x0 + ux * (r + 2)).toFixed(1)}" y1="${(y0 + uy * (r + 2)).toFixed(1)}" x2="${(x1 - ux * (r + 3)).toFixed(1)}" y2="${(y1 - uy * (r + 3)).toFixed(1)}" stroke="#ffd166" stroke-width="${ring ? 2.4 : 1.4}" opacity="${ring ? 1 : .55}" marker-end="url(#${id})"/>`; }
   [...o.map((t, k) => [t, ...P[k], P[k][1] > CY ? P[k][1] + r + 10 : P[k][1] - r - 4]), [SKM_MID[cap], CX, CY, CY + r + 10]].forEach(([t, x, y, ly]) => { const U = typeof UIA !== 'undefined' && UIA[TY_ICON[t] || 'ty_' + t];
-    h += `<circle cx="${x}" cy="${y}" r="${r}" fill="${TYPES[t].c}" stroke="#1a1626" stroke-width="2"/>${x === CX && y === CY ? `<circle cx="${x}" cy="${y}" r="${r + 4}" fill="none" stroke="#e8e4f4" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>` : ''}` + (U ? `<image href="${U.src}" x="${x - 10}" y="${y - 10}" width="20" height="20" style="image-rendering:pixelated"/>` : `<text x="${x}" y="${y + 4}" text-anchor="middle" font-size="12" fill="#1a1626">${TYPE_SHORT[t]}</text>`)
+    h += `<circle cx="${x}" cy="${y}" r="${r}" fill="${skDark(TYPES[t].c)}" stroke="${TYPES[t].c}" stroke-width="2.5"/>${x === CX && y === CY ? `<circle cx="${x}" cy="${y}" r="${r + 4}" fill="none" stroke="#e8e4f4" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>` : ''}` + (U ? `<image href="${U.src}" x="${x - 11}" y="${y - 11}" width="22" height="22" style="image-rendering:pixelated"/>` : `<text x="${x}" y="${y + 4}" text-anchor="middle" font-size="12" fill="#1a1626">${TYPE_SHORT[t]}</text>`)
       + `<text x="${x}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="9" fill="#e8e4f4">${TYPES[t].n}</text>`; });
   return h + '</svg>';
 }
