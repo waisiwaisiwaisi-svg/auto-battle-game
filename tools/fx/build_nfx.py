@@ -98,7 +98,18 @@ for p in sorted(FX.glob('G/G_*_*f.png')):
     out['g_' + nm] = sheet(p, n, 90 if nm.endswith(('_body', 'thread', 'idle', 'mark')) else 75, **kw)
 # ---- 優先度C（5回目の 納品）----
 add('n_conf', 'C_conf', 120); add('n_scared', 'E_scared', 140); add('n_anger', 'E_anger', 140); add('n_encore', 'E_encore', 140)
-add('n_seed', 'E_leech_seed', 160)
+def no_soil(p):   # やどりぎ：めばえの 下の 土を けす（くきの 下はしは ふちどりで とじる）
+    im = Image.open(p).convert('RGBA'); px = im.load(); H = im.height
+    brown = lambda c: c[3] and c[0] > c[1] and sum(c[:3]) >= 80
+    for x0 in range(0, im.width, H):
+        y0 = min((y for y in range(H) for x in range(x0, x0 + H) if brown(px[x, y])), default=None)
+        if y0 is None: continue
+        for y in range(y0 - 1, H):
+            for x in range(x0, x0 + H):
+                if y == y0 - 1 and px[x, y - 1][3]: continue
+                px[x, y] = (0, 0, 0, 0)
+    b = io.BytesIO(); im.save(b, 'PNG'); b.seek(0); return b
+p = f('E_leech_seed'); out['n_seed'] = sheet(no_soil(p), nf(p), 160)
 p = f('E_baton'); out['n_baton'] = sheet(p, nf(p), 70, ay=47)   # うけわたし：足もとから のぼる ひかり
 add('n_phase', 'E_phase', 80); add('n_reverse', 'E_reverse', 80)
 p = f('E_rubble'); out['rubble'] = sheet(p, 1, 100)   # こわれた 障害物の がれき（どの ステージでも）
