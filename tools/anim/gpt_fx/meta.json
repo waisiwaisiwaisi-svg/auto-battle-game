@@ -1830,5 +1830,25 @@
   "var": false,
   "ax": 32.0,
   "ay": 16.0
+ },
+ "fx_punch": {
+  "n": 6,
+  "w": 40,
+  "h": 40,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 20.0,
+  "ay": 20.0
+ },
+ "fx_bite": {
+  "n": 6,
+  "w": 40,
+  "h": 40,
+  "ms": 70,
+  "loop": false,
+  "var": false,
+  "ax": 20.0,
+  "ay": 20.0
  }
 }
