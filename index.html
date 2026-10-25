@@ -11372,7 +11372,7 @@ function startJourney(gi) {
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
-  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), p0: S.party.slice(0, 6), enemies: leagueTeam(lt, 3, jProg(10 + k, 2)), trainer: { name: ln, spr: trArt(lk) }, boss: k === LEAGUE.length - 1, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === LEAGUE.length - 1 ? `${ln}「ここまで きたんだね。さいごの しょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
+  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: lt && FIELDS.includes(lt) ? lt : choice(FIELDS), p0: S.party.slice(0, 6), enemies: leagueTeam(lt, 3, jProg(10 + k, 2)), trainer: { name: ln, spr: trArt(lk) }, boss: k === LEAGUE.length - 1, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === LEAGUE.length - 1 ? `${ln}「ここまで来たんだね。さいごのしょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 // はじめての 戦い：ライバル（いまの チャンピオンと おなじ 人）。かならず かてる よわい あいて
 const rivalTr = () => { const L = LEAGUE[LEAGUE.length - 1]; return { look: L[0], name: 'ライバル ' + L[1].split(' ').pop() }; };
@@ -11400,7 +11400,7 @@ function journeyResult(res, lines) {
   if (c.rival) {
     const nx = GYMS[J.gym] ? FIELD_NAMES[GYMS[J.gym].f] + 'ジム' : J.badges.length >= GYMS.length ? 'チャンピオンリーグ' : 'ジム';   // ジムを ぜんぶ おえている ときは リーグ（テストで ずっと あとから やっても とまらない）
     if (res === 'win') { const first = c.test || !J.rival; if (!c.test) { J.rival = 1; S.wins++; } lines.unshift(`${rivalTr().name}に かった！`); lines.push(`つぎは ${nx}！`);
-      if (first) { B.preTalk = () => rivalTalk(['……やるじゃない。初めてにしては、いい戦いだったよ。', 'わたしもこれから、ジムを巡ってバッジを集めるんだ。', 'ねえ、競争しない？ どっちが先にジムバッジを10個集められるか！', `チャンピオンリーグで待ってるからね。まずは${nx}から、がんばって！`]); } }
+      if (first) { B.preTalk = () => rivalTalk(['……やるじゃない。初めてにしては、いい戦いだったよ。', 'わたしもこれから、ジムを巡ってバッジを集めるんだ。', 'ねえ、競争しない？ どっちが先にジムバッジを10個集められるか！']); } }
     else if (res === 'lose') lines.unshift('まけてしまった… もういちど ちょうせんしよう');
     return;
   }
