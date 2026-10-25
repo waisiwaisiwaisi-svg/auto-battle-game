@@ -2625,10 +2625,10 @@ const TR_CACHE = {};
 const trArt = (k) => TR_CACHE[k] || (TR_CACHE[k] = trainerArt(TRAINER_ART[k] ? k : 'boy'));   // つかう ときに はじめて つくる
 // たいかいで でてくる トレーナー（チャンピオンは レイ）
 const TR_NPC = [['researcher', 'けんきゅういん シオリ'], ['ranger', 'レンジャー タクミ'], ['camera', 'カメラマン ハヤト'], ['vet', 'じゅうい アカネ'],
-  ['barista', 'バリスタ リク'], ['florist', 'はなや コハル'], ['mechanic', 'メカニック ジン'], ['firefighter', 'しょうぼうし アカリ'], ['chef', 'コック ショウ']];
+  ['barista', 'バリスタ リク'], ['florist', 'はなや コハル'], ['mechanic', 'メカニック ジン'], ['firefighter', 'しょうぼうし アカリ'], ['chef', 'コック ショウ'], ['gym_nene', 'ゲーマー ミナ']];
 // じぶんの みため として えらべる トレーナー
-const TR_LOOKS = [['boy', 'ヒーロー'], ['girl', 'ライバル'], ...TR_NPC.map(([k, n]) => [k, n.split(' ')[0]]), ['gamer', 'ゲーマー']];   // ゲーマーは 雷ジムの リーダー（みためは えらべる）
-const myLook = () => (S && TRAINER_ART[S.look]) ? S.look : 'boy';
+const TR_LOOKS = [['boy', 'ヒーロー'], ['girl', 'ライバル'], ...TR_NPC.map(([k, n]) => [k, n.split(' ')[0]])];
+const myLook = () => { if (S && S.look === 'gamer') S.look = 'gym_nene'; return (S && TRAINER_ART[S.look]) ? S.look : 'boy'; };   // ピンクの ゲーマーは 雷ジムの リーダーに なったので、えらんでいた 人は きいろの ゲーマーへ
 const TR_RIVAL = trArt('girl');
 const TR_MS = 1.3;
 // ====== メイキング：じぶんで かいた トレーナー・モンスター（べつの 場所に ほぞん。セーブを けしても のこる） ======
