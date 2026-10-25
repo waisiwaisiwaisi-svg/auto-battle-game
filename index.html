@@ -7804,10 +7804,32 @@ function netHostTick(dt) {
   const snap = netSnapshot();
   NET.nr.presence({ snap }).then(() => { NET.snapFail = 0; }, () => { NET.snapFail = (NET.snapFail || 0) + 1; });   // とどかなかった：つぎは もっと かるく
 }
+// 画面に だしっぱなしの 効果（ゲストの 画面にも だす）：ファイターごと と バトル全体
+const mvKey = (m) => m && (m.fxid || MOVE_ID.get(m)) || '';
+function fxExtra(f) { const v = f.v, o = {};
+  if (v.aura > 0) o.au = r1(v.aura); if (v.shield > 0) o.sh = 1; if (v.teth && v.teth.att) o.te = mvKey(v.teth.m) || 1; if (v.magnet) o.mg = [r1(v.magnet.t), mvKey(v.magnet.m)];
+  if (v.mark > 0) o.mk = 1; if (v.root > 0) o.rt = 1; if (v.silence > 0) o.si = 1; if (v.stk > 0) o.sk = v.stk; if (v.rwMark) o.rw = [r1(v.rwMark.x), r1(v.rwMark.y), v.rwMark.face];
+  if (f.fxScare > B.t) o.sc = r1(f.fxScare - B.t); return Object.keys(o).length ? o : 0; }
+function fxExtraSet(f, o, opp) { if (!o) { f.fxScare = 0; return; } const v = f.v;
+  if (o.au) v.aura = o.au; if (o.sh) v.shield = 1; if (o.te && opp) v.teth = { att: opp, m: MOVES[o.te] || {} }; if (o.mg) v.magnet = { t: o.mg[0], m: MOVES[o.mg[1]] || { rad: 290 } };
+  if (o.mk) v.mark = 1; if (o.rt) v.root = 1; if (o.si) v.silence = 1; if (o.sk) v.stk = o.sk; if (o.rw) v.rwMark = { x: o.rw[0], y: o.rw[1], face: o.rw[2] }; f.fxScare = o.sc ? B.t + o.sc : 0; }
+const fxWorld = () => { const o = {};
+  if (B.weather) o.w = [B.weather.k, r1(B.weather.t)]; if (B.terrain) o.tn = [B.terrain.k, r1(B.terrain.t)]; if (B.gravity > 0) o.g = r1(B.gravity);
+  if (B.turrets && B.turrets.length) o.tu = B.turrets.slice(0, 6).map(q => [r1(q.x), r1(q.y), q.side, mvKey(q.m), r1(B.t - (q.fireT || -9))]);
+  if (B.minions && B.minions.length) o.mi = B.minions.slice(0, 4).map(q => [r1(q.x), r1(q.y), q.side, q.face, r1(q.walk || 0), r1(q.punch || 0)]);
+  if (B.cages && B.cages.length) o.cg = B.cages.slice(0, 4).map(c => [r1(c.x), r1(c.y), c.r, c.side, r1(c.t)]);
+  if (B.wishes && B.wishes.length) o.ws = B.wishes.slice(0, 4).map(w => [r1(w.x), r1(w.y), w.side, r1(w.t)]);
+  return o; };
+function fxWorldSet(o) { o = o || {};
+  B.weather = o.w ? { k: o.w[0], t: o.w[1] } : null; B.terrain = o.tn ? { k: o.tn[0], t: o.tn[1] } : null; B.gravity = o.g || 0;
+  B.turrets = (o.tu || []).map(q => ({ x: q[0], y: q[1], side: q[2], m: MOVES[q[3]] || {}, fireT: B.t - q[4], t: 1 }));
+  B.minions = (o.mi || []).map(q => ({ x: q[0], y: q[1], side: q[2], face: q[3], walk: q[4], punch: q[5], t: 1 }));
+  B.cages = (o.cg || []).map(c => ({ x: c[0], y: c[1], r: c[2], side: c[3], t: c[4], inside: true }));
+  B.wishes = (o.ws || []).map(w => ({ x: w[0], y: w[1], side: w[2], t: w[3] })); }
 const VBITS = ['protect', 'sub', 'counter', 'dbond', 'confuse', 'seed', 'curse', 'yawn', 'taunt', 'encore', 'healBlock', 'web', 'charged', 'gshift'];
 function netSnapshot() {
   const F = (f) => { if (!f) return null; const c = f.cur; let vb = 0; VBITS.forEach((k, i) => { if (f.v[k]) vb |= 1 << i; });
-    return [f.side, B.sides[f.side].fs.indexOf(f), r1(f.x), r1(f.y), f.face, f.state, r1(f.hp), r1(f.stT), r1(f.scale == null ? 1 : f.scale), f.status || '', vb, c ? [c.id, r1(c.t), r1(c.wind), r1(c.ang), r1(c.tx), r1(c.ty), c.pts ? c.pts.map(p => [r1(p.x), r1(p.y), r1(p.r || 0), r1(p.ring || 0)]) : 0, c.len != null ? r1(c.len) : null] : 0, r1(f.inv), r1(f.flash), r1(B.t - (f.fireT || -9)), STAGE_KEYS.map(k => f.st[k]), r1(f.lagMax || 0), r1(f.swapLag || 0), r1(f.hurtInv || 0)]; };
+    return [f.side, B.sides[f.side].fs.indexOf(f), r1(f.x), r1(f.y), f.face, f.state, r1(f.hp), r1(f.stT), r1(f.scale == null ? 1 : f.scale), f.status || '', vb, c ? [c.id, r1(c.t), r1(c.wind), r1(c.ang), r1(c.tx), r1(c.ty), c.pts ? c.pts.map(p => [r1(p.x), r1(p.y), r1(p.r || 0), r1(p.ring || 0)]) : 0, c.len != null ? r1(c.len) : null] : 0, r1(f.inv), r1(f.flash), r1(B.t - (f.fireT || -9)), STAGE_KEYS.map(k => f.st[k]), r1(f.lagMax || 0), r1(f.swapLag || 0), r1(f.hurtInv || 0), fxExtra(f)]; };
   const sides = B.sides.map(sd => ({ a: sd.act, hp: sd.fs.map(x => r1(x.hp)), mh: sd.fs.map(x => x.maxHp), fa: sd.fs.map(x => x.fainted ? 1 : 0), st: sd.fs.map(x => x.status || ''), cd: r1(sd.swapCd), dc: r1(sd.dodgeCmd || 0), hz: sd.hz, tl: r1(sd.tail), tr: sd.trainer ? [r1(sd.trainer.shout), sd.trainer.pose || ''] : 0 }));
   const snap = { n: ++NET.snapN, t: Math.round(B.t * 1000) / 1000,   /* 時刻は こまかく（ゲストが あいだを なめらかに つなぐ） */ mt: r1(B.modeT), m: B.mode, sh: r1(B.shake), fl: r1(B.scrFlash || 0), ch: r1(B.cheer), tr: r1(B.trickRoom),
     f: [F(active(0)), F(active(1))], s: sides, p: B.projs.map(p => [r1(p.x), r1(p.y), r1(p.vx), r1(p.vy), MOVE_ID.get(p.m), r1(p.rot), p.side, p.pat || '']),
@@ -7816,7 +7838,7 @@ function netSnapshot() {
     cl: [active(0), active(1)].map(f => f && f.clones ? f.clones.map(c => [r1(c.x), r1(c.y), c.doll ? c.hp : 0]) : 0), bl: (B.blasts || []).filter(b => !b.done && b.t > 0).slice(0, 12).map(b => [r1(b.x), r1(b.y), r1(b.r), r1(b.ring), r1(b.t), r1(b.t0), b.side, b.look || '']),
     ob: (B.obs || []).slice(0, 16).map(o => o.k === 'trail' ? [o.k, o.side, r1(o.life), o.uid, o.pts.filter((p, i) => i % 2 === 0).slice(0, 14).map(p => [r1(p.x), r1(p.y)])] : o.k === 'wave' ? [o.k, o.side, r1(o.life), o.uid, r1(o.x0), r1(o.y0), r1(o.ang), r1(o.d), o.len, o.w] : [o.k, o.side, r1(o.life), o.uid, r1(o.x), r1(o.y), r1(o.R || o.r), o.arm > 0 ? 1 : 0]),
     lv: B.sides.map(sd => sd.leaves ? [r1(sd.leaves.t), r1(sd.leaves.a)] : 0), cap: [active(0), active(1)].map(f => f ? r1(f.capHp || 0) : 0), pg: [active(0), active(1)].map(f => f && f.v.pg ? 1 : 0),
-    rc: B.remoteChoose ? 1 : 0, wc: B.choosing && !B.remoteChoose ? 1 : 0, res: B.mode === 'end' ? B.result : 0, rl: B.mode === 'end' ? (B.resLines || []) : 0, ev: [] };
+    xw: fxWorld(), rc: B.remoteChoose ? 1 : 0, wc: B.choosing && !B.remoteChoose ? 1 : 0, res: B.mode === 'end' ? B.result : 0, rl: B.mode === 'end' ? (B.resLines || []) : 0, ev: [] };
   let json = JSON.stringify(snap), evs = NET.ev.slice(-30), cap = 4000 - (NET.baseLen || 1200) - 40 - (NET.snapFail ? 600 : 0);
   for (let n = evs.length; n >= 0; n--) { snap.ev = slim(evs.slice(evs.length - n)); json = JSON.stringify(snap); if (new Blob([json]).size < cap) break; }
   // それでも おおきい（かべ・しかけ・たまが たくさん）：みための ものから へらす（presence が とどかないと ゲストの がめんが とまる）
@@ -7867,9 +7889,10 @@ function netGuestApply(sn) {
     f.v = {}; VBITS.forEach((k, i) => { if (a[10] & (1 << i)) f.v[k] = k === 'counter' ? { t: 1 } : k === 'encore' ? { t: 1 } : 1; });
     const c = a[11]; if (c && MOVES[c[0]]) { f.cur = { id: c[0], m: MOVES[c[0]], t: c[1], wind: c[2], ang: c[3], tx: c[4], ty: c[5], pts: c[6] ? c[6].map(p => ({ x: p[0], y: p[1], r: p[2] || MOVES[c[0]].rad || 40, ring: p[3] || 0 })) : null }; if (c[7] != null) f.cur.len = c[7]; } else f.cur = null;
     { const si = a[0]; f.capHp = (sn.cap || [])[si] || 0; f.v.pg = (sn.pg || [])[si] || 0; }
-    f.inv = a[12]; f.flash = a[13]; f.fireT = B.t - a[14]; STAGE_KEYS.forEach((k, i) => f.st[k] = (a[15] || [])[i] || 0); f.lagMax = a[16]; f.swapLag = a[17]; f.hurtInv = a[18] || 0;
+    f.inv = a[12]; f.flash = a[13]; f.fireT = B.t - a[14]; STAGE_KEYS.forEach((k, i) => f.st[k] = (a[15] || [])[i] || 0); f.lagMax = a[16]; f.swapLag = a[17]; f.hurtInv = a[18] || 0; fxExtraSet(f, a[19], (B.sides[1 - a[0]] || { fs: [] }).fs[(sn.s && sn.s[1 - a[0]] || {}).a]);
   }
   for (const sd of B.sides) { const f = sd.fs[sd.act]; if (f && !f.fainted && f.hp > 0 && f.state === 'bench') { f.state = 'free'; if (f.x == null && f.tx != null) { f.x = f.tx; f.y = f.ty; } } }   // でている こが 控えの まま（とうめい）に ならないように
+  fxWorldSet(sn.xw);
   B.holes = (sn.ho || []).map(h => ({ x: h[0], y: h[1], sz: h[2] }));
   if (sn.pr && B.st.propSol) sn.pr.forEach((h, i) => { if (h === -1) { if (!B.st.propGone[i]) { B.st.propGone[i] = true; const rs = new Set(B.st.propSol[i]); B.st.solid = B.st.solid.filter(o => !rs.has(o)); const p = B.st.props[i]; if (PLFX.rubble) (B.st.rubble = B.st.rubble || []).push({ x: p.x, y: p.y, v: i % PLFX.rubble.n, sc: p.w * .7 / (PLFX.rubble.w * PIX_D), t0: B.t + .55 }); } } else if (h !== 99) { if (B.st.propHp[i] !== h) B.st.propHit[i] = B.t; B.st.propHp[i] = h; } });   // おきものの こわれぐあい
   B.walls = (sn.wl || []).map(w => ({ t: w[0], life: w[1], max: w[2], side: w[3], uid: w[4], reflect: !!w[6], ...(w[7] ? { one: true, hp: w[7][0], hpMax: w[7][1], ang: w[7][2], hitT: w[7][3] ? B.t : null } : {}), blocks: w[5].map(([x, y, h]) => ({ x, y, x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, gone: h === -1, hp: h == null || h === 9 || h === -1 ? null : h })) })); B.wallRects = []; for (const w of B.walls) for (const b of w.blocks) if (!b.gone) B.wallRects.push(b);
@@ -11776,7 +11799,7 @@ let last = performance.now();
 // あいてが モンスターを えらんで いる／つうしんを まって いる：画面の まんなかに だす
 function updWaitOv() {
   const el = $('waitOv'); if (!el) return;
-  const msg = !B || B.mode === 'end' || $('scBattle').hidden ? '' : B.remoteChoose || (B.remote && B.oppChoosing) ? 'あいてが つぎの モンスターを えらんでいます' : B.remote && B.netWait ? 'つうしんを まっています' : '';
+  const msg = !B || B.mode === 'end' || $('scBattle').hidden ? '' : B.remoteChoose ? 'あいてが つぎの モンスターを えらんでいます' : B.remote && B.oppChoosing ? 'あいてが モンスターを えらんでいます' : B.remote && B.netWait ? 'つうしんを まっています' : '';
   if (el.hidden !== !msg) el.hidden = !msg; if (!msg) return;
   if ($('waitMsg').textContent !== msg) $('waitMsg').textContent = msg;
   const t = B.remoteChoose ? Math.ceil(B.remoteChooseT) : 0, tx = t > 0 ? `のこり ${t}びょう（すぎたら じどうで えらばれます）` : '';
