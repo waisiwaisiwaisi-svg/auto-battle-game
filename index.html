@@ -7680,7 +7680,7 @@ async function netGetRoom() {
 // 訓練（確定した もの）を みじかく して おくる：{ n: 作戦, m: [[技, 撃ち方, [[条件, あたい, 回数]…]…]…] }
 const trPack = (m) => { const P = m.tr && m.tr.mode === 'chip' && m.tr.prog && m.tr.prog.mv ? trClone(m.tr.prog, m) : null; if (!P) return undefined;
   return { n: P.nat || 0, m: P.mv.map(r => [r.id, r.go === 'auto' ? 0 : r.go, r.c.map(l => l.map(c => c.n != null ? [c.t, c.p, c.n] : [c.t, c.p]))].concat(r.x && r.x.length ? [r.x.map(l => l.map(c => c.n != null ? [c.t, c.p, c.n] : [c.t, c.p]))] : [])) }; };
-const trUnpack = (o, m) => { try { if (!o || !Array.isArray(o.m)) return null; const P = trClone({ nat: o.n || undefined, mv: o.m.slice(0, 8).map(r => ({ id: String(r[0]), go: r[1] || 'auto', c: (Array.isArray(r[2]) ? r[2] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 6).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))), x: (Array.isArray(r[3]) ? r[3] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 6).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))) })).filter(r => MOVES[r.id] && m.moves.includes(r.id)) }, m); return P.mv.length ? { mode: 'chip', prog: P } : null; } catch (e) { return null; } };
+const trUnpack = (o, m) => { try { if (!o || !Array.isArray(o.m)) return null; const P = trClone({ nat: o.n || undefined, mv: o.m.slice(0, 8).map(r => ({ id: String(r[0]), go: r[1] || 'auto', c: (Array.isArray(r[2]) ? r[2] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 12).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))), x: (Array.isArray(r[3]) ? r[3] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 12).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))) })).filter(r => MOVES[r.id] && m.moves.includes(r.id)) }, m); return P.mv.length ? { mode: 'chip', prog: P } : null; } catch (e) { return null; } };
 const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0, tr: trPack(m) }; });
 const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   // しらない 種族（え が とどかなかった など）
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } const tr = trUnpack(o.tr, m); if (tr) m.tr = tr; return m; };
@@ -7694,16 +7694,18 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   netReset(); NET.code = code; NET.host = asHost; NET.guest = !asHost; NET.ranked = !!opts.ranked; NET.pick6 = !!opts.ranked || !!opts.pick6; NET.oppR = opts.oppR; NET.rated = false;
   try { NET.nr = await room.join('pma-' + code); } catch (e) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
   await guildMe().catch(() => { });   // あいてに ギルドめいを みせる
-  NET.team6 = teamOf(S.party, 6); NET.myPick = null; NET.preview = null;
+  NET.team6 = teamOf(S.party, 6); NET.team6Full = teamOf(S.party, 6); NET.myPick = null; NET.preview = null;   // team6 は presence に いれる ため 訓練を けずる ことが ある。試合には team6Full（訓練つき）を つかう
   const me = { role: asHost ? 'host' : 'guest', nm: myName(), team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, p6: NET.pick6 ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
   // じぶんで かいた もの の え（la：トレーナー、ca：モンスター）。あいては はじまる まえに うけとって おぼえる。presence は 4KB まで なので 入りきらない え は おくらない
   for (const o of NET.team6) if (CUSTOM.mon[o.sid] && !me.ca[o.sid]) me.ca[o.sid] = CUSTOM.mon[o.sid];
   const fits = () => presOk(me);
   if (me.la) me.la = chunkS(me.la); for (const k in me.ca) me.ca[k] = chunkS(me.ca[k]);
   if (!fits()) delete me.la;
-  for (const sid of Object.keys(me.ca).reverse()) { if (fits()) break; if (me.team.some(o => o.sid === sid)) continue; delete me.ca[sid]; NET.team6 = me.team6 = NET.team6.filter(o => o.sid !== sid); }
+  for (const sid of Object.keys(me.ca).reverse()) { if (fits()) break; if (me.team.some(o => o.sid === sid)) continue; delete me.ca[sid]; NET.team6 = me.team6 = NET.team6.filter(o => o.sid !== sid); NET.team6Full = NET.team6Full.filter(o => o.sid !== sid); }
   if (!fits()) me.ca = {};   // それでも はいらない：え は おくらない（あいてには かわりの すがたで みえる）
   if (!fits()) for (const o of [...NET.team6].reverse()) { if (fits()) break; if (!me.team.some(x => x.sid === o.sid)) delete o.tr; }   // まだ はいらない：見せあい だけの 子の 訓練は おくらない
+  if (!fits() && NET.pick6) { for (const o of NET.team6) delete o.tr; me.team = me.team.map(o => { const { tr, ...r } = o; return r; }); }   // えらぶ たいせん：訓練は えらんだ あと（pt）で おくる
+  NET.me = me;
   try { await NET.nr.presence(me); } catch (e) { onStatus('あいてに じぶんの チームを おくれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); return; }
   onStatus(NET.ranked ? 'たいせんの じゅんびを しています…' : asHost ? `あいことば <b class="ncode">${code}</b> <button class="btn sub ncopy" data-code="${code}">コピー</button><br>あいてに つたえてね。${NET.pick6 ? '<b>6たいから 3たい えらぶ</b> たいせん。' : ''}<br>あいてが はいるのを まっています…` : 'ホストを さがしています…');
   if (NET.ranked) setTimeout(() => { if (!NET.started && !NET.preview && NET.ranked && NET.code === code) { onStatus('あいてと つながりませんでした。もういちど さがしてね', true); netReset(); } }, 20000);
@@ -7719,7 +7721,7 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
         if (!NET.preview) { onStatus('', false, true); rankPreview(g.presence.team6, g.presence.r); }
         rankPreviewOpp(Array.isArray(g.presence.pick));
         const gp = rankPickOk(g.presence.pick, g.presence.team6.length);
-        if (NET.myPick && gp) { const gteam = gp.map(i => g.presence.team6[i]), mine = NET.myPick.map(i => NET.team6[i]); rankPreviewClose(); netHostStart(gteam, mine); }
+        if (NET.myPick && gp) { const gteam = netGuestPicked(g.presence, gp), mine = NET.myPick.map(i => (NET.team6Full || NET.team6)[i]); rankPreviewClose(); netHostStart(gteam, mine); }
         return;
       }
       if (g && !NET.started && !NET.pick6 && !!g.presence.rk === NET.ranked) { NET.peer = g.peer; if (typeof g.presence.r === 'number') NET.oppR = g.presence.r; netHostStart(g.presence.team); onStatus('', false, true); }
@@ -8337,6 +8339,8 @@ function mmStop(matched) {
 
 /* ---------- ランク：見せあい（おたがいの 6たいを 見て、3たいと じゅんばんを えらぶ） ---------- */
 const PICK_SEC = 60;
+// ゲストが えらんだ 3たい：pt（訓練つき）が とどいて いれば それを、なければ 見せあいの 6たいから
+function netGuestPicked(pr, gp) { const pt = pr.pt; return Array.isArray(pt) && validTeam(pt) && pt.length === gp.length && pt.every((o, k) => o.sid === (pr.team6[gp[k]] || {}).sid) ? pt : gp.map(i => pr.team6[i]); }
 function rankPickOk(pk, n) { const need = Math.min(3, n); if (!Array.isArray(pk) || pk.length !== need) return null; const u = [...new Set(pk.map(x => x | 0))]; return u.length === need && u.every(i => i >= 0 && i < n) ? u : null; }
 function rankPreview(oppTeam, oppR) {
   const mine = NET.team6, need = Math.min(3, mine.length); let sel = [], left = PICK_SEC;
@@ -8360,7 +8364,14 @@ function rankPreview(oppTeam, oppR) {
     }
   };
   const confirm = () => { if (NET.myPick) return; for (let i = 0; sel.length < need && i < mine.length; i++) if (!sel.includes(i)) sel.push(i); NET.myPick = sel.slice(); SND.se('ok');
-    if (NET.nr) NET.nr.presence({ pick: NET.myPick }).catch(() => { }); draw(); if (NET.host && NET.nr) { const g = NET.nr.peers().find(p => isOther(p) && p.presence && p.presence.role === 'guest'); if (g) { const gp = rankPickOk(g.presence.pick, (g.presence.team6 || []).length); if (gp) { rankPreviewClose(); netHostStart(gp.map(i => g.presence.team6[i]), NET.myPick.map(i => NET.team6[i])); } } } };
+    if (NET.nr) { const up = { pick: NET.myPick };
+      if (NET.guest && NET.team6Full) { up.pt = NET.myPick.map(i => NET.team6Full[i]).filter(Boolean);   // えらんだ 3たいの 訓練を ちゃんと とどける
+        const me = () => Object.assign({}, NET.me || {}, up);
+        if (!presOk(me())) { const nt = (l) => (l || []).map(o => { const { tr, ...r } = o; return r; }); up.team6 = nt(NET.me && NET.me.team6); up.team = nt(NET.me && NET.me.team); }
+        if (!presOk(me())) { up.ca = null; up.la = null; }
+        if (!presOk(me())) delete up.pt;   // それでも はいらない：いままでどおり
+        Object.assign(NET.me || {}, up); }
+      NET.nr.presence(up).catch(() => { }); } draw(); if (NET.host && NET.nr) { const g = NET.nr.peers().find(p => isOther(p) && p.presence && p.presence.role === 'guest'); if (g) { const gp = rankPickOk(g.presence.pick, (g.presence.team6 || []).length); if (gp) { rankPreviewClose(); netHostStart(netGuestPicked(g.presence, gp), NET.myPick.map(i => (NET.team6Full || NET.team6)[i])); } } } };
   NET.preview.iv = setInterval(() => { left--; const el = ov.querySelector('.pvt'); if (el) el.textContent = Math.max(0, left); if (left <= 0 && !NET.myPick) confirm(); }, 1000);
   NET.preview.draw = draw; draw();
 }
