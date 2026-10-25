@@ -219,6 +219,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .teamwrap{display:grid;grid-template-columns:1fr;gap:12px}
 .teamleft{display:flex;flex-direction:column;gap:8px;min-width:0}
 .slotlabel{font-size:13px} .slotlabel b{color:var(--acc)}
+.slotlabel.boxhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.boxsort{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px}.boxsort select{font:inherit;font-size:12px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);padding:3px 6px;max-width:60vw}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .slot{position:relative;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;font-size:12px;text-align:center;touch-action:none;cursor:grab;
   background:linear-gradient(180deg,var(--win1),var(--win2));box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2),0 4px 0 2px rgba(0,0,0,.35);border-radius:4px}
@@ -1491,7 +1492,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
         <div class="slots" id="tmMain"></div>
         <div class="slotlabel"><b>ひかえ</b> <span class="dim">— パーティには いるが しあいには でない</span></div>
         <div class="slots" id="tmSub"></div>
-        <div class="slotlabel"><b>ボックス</b> <span class="dim" id="boxCount"></span></div>
+        <div class="slotlabel boxhead"><span><b>ボックス</b> <span class="dim" id="boxCount"></span></span><label class="boxsort">ならびかえ <select id="boxSort"><option value="">じぶんで ならべる</option><option value="new">あたらしい じゅん</option><option value="old">ふるい じゅん</option><option value="dex">ずかん ばんごう</option><option value="type">タイプ</option><option value="power">つよい じゅん（のうりょく ごうけい）</option><option value="name">なまえ</option></select></label></div>
         <div class="boxgrid" id="tmBox"></div>
       </div>
       <div class="teamdetail card" id="tmDetail"></div>
@@ -3949,7 +3950,9 @@ function renderTeam(openUid) {
   const M = $('tmMain'), U = $('tmSub'), X = $('tmBox'), T = $('scTeam'), opened = !T.hidden, before = opened ? MO.rects(T, '.slot[data-key]') : new Map(); M.innerHTML = U.innerHTML = X.innerHTML = '';
   for (let i = 0; i < 6; i++) (i < 3 ? M : U).appendChild(slot(S.party[i], { w: 'p', i }, i < 3 ? 'main' : ''));
   const drop = document.createElement('div'); drop.className = 'slot drop'; drop.dataset.w = 'drop'; drop.dataset.i = 0; drop.innerHTML = '<div style="font-size:18px">⬇</div><div>ここに<br>あずける</div>'; X.appendChild(drop);
+  boxSortApply();
   S.box.forEach((m, i) => X.appendChild(slot(m, { w: 'b', i }, '')));
+  { const sel = $('boxSort'); sel.value = S.boxSort || ''; sel.onchange = () => { S.boxSort = sel.value; SND.se('click'); boxSortApply(); save(); renderTeam(); }; }
   $('boxCount').textContent = `${S.box.length}たい`;
   updTrainBtn(); renderTeamDetail();
   show('scTeam');
@@ -3957,6 +3960,15 @@ function renderTeam(openUid) {
   if (teamDrop != null) { MO.settle(T.querySelector(`.slot[data-key="${teamDrop}"]`)); teamDrop = null; }
 }
 let teamDrop = null, teamSheet = false;
+// ボックスの ならびかえ：えらんだ じゅんに S.box を ならべなおす（じぶんで ならべる ときは そのまま）
+const DEX_NO = (() => { const o = {}; Object.keys(SPECIES).forEach((id, i) => { o[id] = i; }); return o; })();
+function boxSortApply() {
+  const k = S.boxSort; if (!k || !S.box || S.box.length < 2) return;
+  const tot = (m) => { const o = stats(m); return STAT6.reduce((a, x) => a + o[x], 0); }, ti = (m) => Object.keys(TYPES).indexOf(SPECIES[m.sid].type), dex = (m) => DEX_NO[m.sid] ?? 9999;
+  const f = { new: (a, b) => b.uid - a.uid, old: (a, b) => a.uid - b.uid, dex: (a, b) => dex(a) - dex(b) || b.uid - a.uid, type: (a, b) => ti(a) - ti(b) || dex(a) - dex(b) || b.uid - a.uid,
+    power: (a, b) => tot(b) - tot(a) || dex(a) - dex(b), name: (a, b) => SPECIES[a.sid].n.localeCompare(SPECIES[b.sid].n, 'ja') || b.uid - a.uid }[k];
+  if (f) S.box.sort(f);
+}
 function renderTeamDetail() {
   const D = $('tmDetail'), all = [...S.party, ...S.box], m = all.find(x => x.uid === teamView) || S.party[0];
   if (!m) { D.innerHTML = ''; return; }
