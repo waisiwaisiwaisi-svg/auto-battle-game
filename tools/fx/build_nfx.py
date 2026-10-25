@@ -81,12 +81,33 @@ p = f('E_fly_up'); out['n_fly_up'] = sheet(p, nf(p), 70, ay=40)
 add('n_leaves', 'E_leaf_storm', 90)
 add('n_roar', 'E_roar', 70, ax=4)
 p = f('E_shadow_strike'); out['n_shadow'] = sheet(p, nf(p), 70, ay=44)
+# ---- 4回目の 納品 ----
+add('n_dive_wind', 'B_dive_wind', 80); add('n_dive_dragon', 'B_dive_dragon', 80)   # 落下攻撃：体を かくす
+add('n_roll', 'B_roll', 70)                      # ごろごろアタック：体を かくす 玉
+add('n_dbreath', 'E_dragon_breath', 70, ax=0)   # りゅうのためいき（口もとが きじゅん）
+p = f('E_stone_edge'); out['n_stone_edge'] = sheet(p, nf(p), 70, ay=46)   # いわのきっさき系：地面から つきでる 岩
 
+# ---- アイコン（UIA に 上書き・追加）----
+UI = {}
+def icons(name, keys):
+    p = next(FX.glob('F/' + name + '.png')); im = Image.open(p).convert('RGBA'); n = len(keys); w = im.width // n
+    for i, k in enumerate(keys):
+        if k: UI[k] = {'w': w, 'h': im.height, 'src': png(im.crop((i * w, 0, i * w + w, im.height)))}
+icons('F_tab_5', ['ic_tab_shop', 'ic_tab_team', 'ic_tab_home', 'ic_tab_train', 'ic_tab_guild'])
+icons('F_homebtn_7', ['ic_help', 'ic_book', 'ic_chart', 'rotate', 'spk_on', 'spk_off', 'ic_gear'])
+icons('F_mode_5', ['ic_mode_online', 'ic_flag', 'ic_mode_cup', 'ic_bush', 'ic_globe'])
+icons('F_resource_4', ['ic_trophy', 'ic_res_orb', 'ic_gem', 'ic_res_chest'])
+icons('F_emblem_3', ['emb_sword', 'emb_bow', 'emb_shield'])
+uijs = '// ====== NUI（effects/F の 納品アイコン：tools/fx/build_nfx.py が 自動生成。UIA の おなじ キーは 上書き）======\nObject.assign(UIA, ' + json.dumps(UI, separators=(',', ':')) + ');\n// ====== ここまで NUI ======\n'
 js = '// ====== NFX（effects/ の 納品エフェクト：tools/fx/build_nfx.py が 自動生成。PLFX の おなじ キーは 上書き）======\nconst NFX = ' + json.dumps(out, separators=(',', ':')) + ';\nObject.assign(PLFX, NFX);\n// ====== ここまで NFX ======\n'
 html = (ROOT / 'index.html').read_text(encoding='utf-8')
 html = re.sub(r'// ====== NFX.*?// ====== ここまで NFX ======\n', '', html, flags=re.S)
+html = re.sub(r'// ====== NUI.*?// ====== ここまで NUI ======\n', '', html, flags=re.S)
 anchor = '// ====== ここまで PLFX ======\n'
 assert html.count(anchor) == 1
 html = html.replace(anchor, anchor + js)
+ua = 'UIA.emb_bow = {'   # 古い 弓の 紋章の すぐ あと（UIA の 定義の あと）に 入れる
+i = html.index(ua); i = html.index('\n', i) + 1
+html = html[:i] + uijs + html[i:]
 (ROOT / 'index.html').write_text(html, encoding='utf-8')
 print(len(out), 'sheets,', len(js) // 1024, 'KB')
