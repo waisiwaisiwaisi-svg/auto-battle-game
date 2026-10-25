@@ -7801,7 +7801,7 @@ function netSnapshot() {
   const F = (f) => { if (!f) return null; const c = f.cur; let vb = 0; VBITS.forEach((k, i) => { if (f.v[k]) vb |= 1 << i; });
     return [f.side, B.sides[f.side].fs.indexOf(f), r1(f.x), r1(f.y), f.face, f.state, r1(f.hp), r1(f.stT), r1(f.scale == null ? 1 : f.scale), f.status || '', vb, c ? [c.id, r1(c.t), r1(c.wind), r1(c.ang), r1(c.tx), r1(c.ty), c.pts ? c.pts.map(p => [r1(p.x), r1(p.y), r1(p.r || 0), r1(p.ring || 0)]) : 0, c.len != null ? r1(c.len) : null] : 0, r1(f.inv), r1(f.flash), r1(B.t - (f.fireT || -9)), STAGE_KEYS.map(k => f.st[k]), r1(f.lagMax || 0), r1(f.swapLag || 0), r1(f.hurtInv || 0)]; };
   const sides = B.sides.map(sd => ({ a: sd.act, hp: sd.fs.map(x => r1(x.hp)), mh: sd.fs.map(x => x.maxHp), fa: sd.fs.map(x => x.fainted ? 1 : 0), st: sd.fs.map(x => x.status || ''), cd: r1(sd.swapCd), dc: r1(sd.dodgeCmd || 0), hz: sd.hz, tl: r1(sd.tail), tr: sd.trainer ? [r1(sd.trainer.shout), sd.trainer.pose || ''] : 0 }));
-  const snap = { n: ++NET.snapN, t: r1(B.t), mt: r1(B.modeT), m: B.mode, sh: r1(B.shake), fl: r1(B.scrFlash || 0), ch: r1(B.cheer), tr: r1(B.trickRoom),
+  const snap = { n: ++NET.snapN, t: Math.round(B.t * 1000) / 1000,   /* 時刻は こまかく（ゲストが あいだを なめらかに つなぐ） */ mt: r1(B.modeT), m: B.mode, sh: r1(B.shake), fl: r1(B.scrFlash || 0), ch: r1(B.cheer), tr: r1(B.trickRoom),
     f: [F(active(0)), F(active(1))], s: sides, p: B.projs.map(p => [r1(p.x), r1(p.y), r1(p.vx), r1(p.vy), MOVE_ID.get(p.m), r1(p.rot), p.side, p.pat || '']),
     ho: B.holes.map(h => [r1(h.x), r1(h.y), r1(h.sz)]), pr: B.st.propSol ? B.st.props.map((p, i) => B.st.propGone[i] ? -1 : (B.st.propHp[i] == null ? 99 : B.st.propHp[i])) : null,
     wl: B.walls.map(w => [w.t, r1(w.life), r1(w.max), w.side, w.uid, w.blocks.map(b => [r1(b.x), r1(b.y), b.gone ? -1 : (b.hp == null ? 9 : b.hp)]), w.reflect ? 1 : 0, w.one ? [w.hp, w.hpMax, +(w.ang || 0).toFixed(3), w.hitT != null && B.t - w.hitT < .1 ? 1 : 0] : 0]), zn: B.zones.map(z => [z.id, r1(z.x), r1(z.y), z.rad, r1(z.life), r1(z.max), z.side, z.uid]),
@@ -7825,9 +7825,19 @@ function netGuestStart(st) {
   B.remote = true; B.my = 1; B.mode = 'intro'; B.snapT = 0; if (NET.ranked) $('bTitle').textContent = 'オンライン対戦';
   B.sides[0].trainer.name = oppName(); B.sides[0].trainer.spr = trArt(oppLook());
 }
+// ゲスト：とどいた データは すこし ためて（NET_DELAY）、あいだを なめらかに つないで さいせい する（とどく かんかくが ばらついても カクつかない）
+const NET_DELAY = .12;
 function netGuestSnap(sn) {
   if (!B || !B.remote || !sn || typeof sn !== 'object') return;
   if (sn.n <= (B.lastSnap || 0)) return; B.lastSnap = sn.n;
+  const now = performance.now() / 1000; B.snapAt = now * 1000;
+  if (!B.sq) B.sq = [];
+  if (B.lastT != null && sn.t < B.lastT - .5) { B.sq.length = 0; B.rt = null; }   // ホストの 時計が もどった（あたらしい しあい など）
+  B.lastT = sn.t; B.lastArr = now; B.sq.push(sn);
+  if (B.sq.length > 30) netGuestApply(B.sq.shift());   // たまりすぎ：ふるい ものから つかう
+  if (B.rt == null) { B.rt = sn.t - NET_DELAY; netGuestApply(B.sq.shift()); }   // さいしょの 1まいは すぐ
+}
+function netGuestApply(sn) {
   B.t = sn.t; B.modeT = sn.mt; B.shake = Math.max(B.shake || 0, sn.sh || 0); B.scrFlash = Math.max(B.scrFlash || 0, sn.fl || 0); B.cheer = sn.ch || 0; B.trickRoom = sn.tr || 0;
   const prevMode = B.mode; B.mode = sn.m === 'end' ? 'fight' : sn.m;
   (sn.cl || []).forEach((cl, si) => { const sd = B.sides[si], f = sd && sd.fs[sd.act]; if (f) f.clones = cl ? cl.map((c, i) => ({ x: c[0], y: c[1], uid: i, life: 1, ox: 0, oy: 0, doll: !!c[2], hp: c[2] || 0 })) : null; });
@@ -7852,7 +7862,6 @@ function netGuestSnap(sn) {
     f.inv = a[12]; f.flash = a[13]; f.fireT = B.t - a[14]; STAGE_KEYS.forEach((k, i) => f.st[k] = (a[15] || [])[i] || 0); f.lagMax = a[16]; f.swapLag = a[17]; f.hurtInv = a[18] || 0;
   }
   for (const sd of B.sides) { const f = sd.fs[sd.act]; if (f && !f.fainted && f.hp > 0 && f.state === 'bench') { f.state = 'free'; if (f.x == null && f.tx != null) { f.x = f.tx; f.y = f.ty; } } }   // でている こが 控えの まま（とうめい）に ならないように
-  B.snapAt = performance.now();
   B.holes = (sn.ho || []).map(h => ({ x: h[0], y: h[1], sz: h[2] }));
   if (sn.pr && B.st.propSol) sn.pr.forEach((h, i) => { if (h === -1) { if (!B.st.propGone[i]) { B.st.propGone[i] = true; const rs = new Set(B.st.propSol[i]); B.st.solid = B.st.solid.filter(o => !rs.has(o)); const p = B.st.props[i]; if (PLFX.rubble) (B.st.rubble = B.st.rubble || []).push({ x: p.x, y: p.y, v: i % PLFX.rubble.n, sc: p.w * .7 / (PLFX.rubble.w * PIX_D), t0: B.t + .55 }); } } else if (h !== 99) { if (B.st.propHp[i] !== h) B.st.propHit[i] = B.t; B.st.propHp[i] = h; } });   // おきものの こわれぐあい
   B.walls = (sn.wl || []).map(w => ({ t: w[0], life: w[1], max: w[2], side: w[3], uid: w[4], reflect: !!w[6], ...(w[7] ? { one: true, hp: w[7][0], hpMax: w[7][1], ang: w[7][2], hitT: w[7][3] ? B.t : null } : {}), blocks: w[5].map(([x, y, h]) => ({ x, y, x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, gone: h === -1, hp: h == null || h === 9 || h === -1 ? null : h })) })); B.wallRects = []; for (const w of B.walls) for (const b of w.blocks) if (!b.gone) B.wallRects.push(b);
@@ -7880,11 +7889,19 @@ function netReplay(e) {
 }
 function netGuestStep(dt) {
   { const wait = B.snapAt && B.mode !== 'end' && performance.now() - B.snapAt > 2500; if (wait !== !!B.netWait) { B.netWait = wait; $('banner').classList.toggle('waiting', wait); if (wait) say('つうしんを まっています…'); } }   // ホストからの データが とまった
-  B.t += dt; B.modeT += dt; B.shake = Math.max(0, (B.shake || 0) - dt * 20);
+  if (B.rt != null && B.lastArr != null) {   // さいせい時刻：いつもの はやさで すすめ、さいごに とどいた データの すこし まえに ゆっくり あわせる
+    const now = performance.now() / 1000, tgt = B.lastT + Math.min(.25, now - B.lastArr) - NET_DELAY;
+    B.rt += dt; if (Math.abs(tgt - B.rt) > 1) B.rt = tgt; else B.rt += (tgt - B.rt) * Math.min(1, dt * 2.5);
+    while (B.sq.length && B.sq[0].t <= B.rt) netGuestApply(B.sq.shift());
+  }
+  B.t += dt; if (B.rt != null && Math.abs(B.rt - B.t) < 1) B.t += (B.rt - B.t) * Math.min(1, dt * 8); B.modeT += dt; B.shake = Math.max(0, (B.shake || 0) - dt * 20);
   for (const sd of B.sides) for (const f of sd.fs) {
     if (f.tx == null) continue;
-    if (f.tvx || f.tvy) { const k = (f.predT || 0) < .2 ? dt : 0; f.predT = (f.predT || 0) + dt; f.tx += f.tvx * k; f.ty += f.tvy * k; }   // つぎの データが くるまで うごきを のばす（0.2びょう まで）
-    const px = f.x, py = f.y; f.x += (f.tx - f.x) * Math.min(1, dt * 18); f.y += (f.ty - f.y) * Math.min(1, dt * 18);
+    let gx = f.tx, gy = f.ty;
+    const nx = B.sq && B.sq.find(q => (q.f || []).some(a => a && a[0] === f.side && a[1] === sd.fs.indexOf(f))), na = nx && nx.f.find(a => a && a[0] === f.side && a[1] === sd.fs.indexOf(f));
+    if (na && f.snT != null && nx.t > f.snT) { const u = clamp((B.rt - f.snT) / (nx.t - f.snT), 0, 1); gx = f.sx + (na[2] - f.sx) * u; gy = f.sy + (na[3] - f.sy) * u; }   // つぎの データとの あいだを おぎなう
+    else if (f.tvx || f.tvy) { const k = clamp(B.rt - f.snT, 0, .15); gx = f.sx + f.tvx * k; gy = f.sy + f.tvy * k; }   // つぎが まだ ない：すこしだけ のばす
+    const px = f.x, py = f.y; if (Math.hypot(gx - f.x, gy - f.y) > 160) { f.x = gx; f.y = gy; } else { f.x += (gx - f.x) * Math.min(1, dt * 30); f.y += (gy - f.y) * Math.min(1, dt * 30); }
     f.moving = Math.hypot(f.x - px, f.y - py) > dt * 20; if (f.moving) f.walk = (f.walk || 0) + dt;
     if (f.cur) f.cur.t += dt;
   }
