@@ -349,6 +349,7 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
 .balls{display:flex;gap:3px}
 .balls i{width:7px;height:7px;background:var(--acc);box-shadow:0 0 0 1px #0d0b14}
 .balls i.out{background:#3a3350}
+.balls .own{font-size:11px;line-height:1;padding:2px 6px;background:rgba(11,9,20,.7);color:#e6defa;box-shadow:inset 0 0 0 1px #3a3060;white-space:nowrap;font-variant-numeric:tabular-nums}.balls .own.new{color:#1a1222;background:#ffd166;box-shadow:inset 0 0 0 1px #0b0914;font-weight:700}
 #plE{text-align:right}
 #cvWrap{position:relative;width:min(100%, calc(calc(48 * var(--vh)) * 16 / 9));margin:0 auto;aspect-ratio:16/9;line-height:0;flex:none}
 #cv{width:100%;height:100%;display:block;box-shadow:0 0 0 2px #0d0b14,0 0 0 4px var(--edge)}
@@ -9278,6 +9279,10 @@ function updPlate(id, side) {
   bar.style.background = k > .5 ? 'var(--good)' : k > .2 ? 'var(--mid)' : 'var(--bad)';
   setText(root.querySelector('.hpn'), `${Math.ceil(f.hp)}/${f.maxHp}`);
   updCond(root.querySelector('.cond'), f);
+  if (B.kind === 'wild' && side === 1 && S) {   // くさむら：おなじ モンスターを なんたい もっているか
+    const n = [...S.party, ...S.box].filter(m => m.sid === f.mon.sid).length, sig = 'w' + f.mon.sid + n;
+    if (plCache[id] !== sig) { plCache[id] = sig; root.querySelector('.balls').innerHTML = n ? `<span class="own">もっている ×${n}</span>` : '<span class="own new">はじめて！</span>'; }
+    return; }
   const sig = B.sides[side].fs.map(x => x.fainted ? 0 : 1).join('');
   if (plCache[id] !== sig) { plCache[id] = sig; root.querySelector('.balls').innerHTML = B.sides[side].fs.map(x => `<i class="${x.fainted ? 'out' : ''}"></i>`).join(''); }
 }
