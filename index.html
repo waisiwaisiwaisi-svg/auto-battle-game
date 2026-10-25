@@ -7031,9 +7031,8 @@ function aiSwitch(f, o, dt) {
 
 // にらみあいで うごかない：5びょう だれも わざを つかって いない か、9びょう ダメージが ない
 const stalled = () => B.t - Math.max(B.lastMoveT || 0, B.sendT || 0) > 5 || B.t - Math.max(B.lastDmgT || 0, B.sendT || 0) > 9;
-// わざを だす 間隔：すばやさ（実数値・ランク変化・まひ）が 高いほど みじかい。平均の すばやさで 1ばい（0.6〜1.6ばい）
-function cdScale(f) {   // 技の 待ち時間：すばやさでは かわらない（まひ だけ ながく なる）
-  return f.status === 'par' ? 1.6 : 1;
+function cdScale(f) {   // 技の 待ち時間：すばやさ・まひ では かわらない
+  return 1;
 }
 const CLOSE_KINDS = ['melee', 'swipe', 'dash'];
 // はじまり・こうたい 直後は しばらく わざを だせない（ぜんぶの わざを クールダウンに）
