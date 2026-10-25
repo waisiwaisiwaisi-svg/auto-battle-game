@@ -13,7 +13,10 @@ shutil.rmtree(OUT, ignore_errors=True); os.makedirs(OUT)
 BEGIN, END = '// ====== STAGE（tools/arenas/build_stage.py が 自動生成）======', '// ====== ここまで STAGE ======'
 W, H = 1448, 1086
 KEYS = ['grass', 'fire', 'water', 'elec', 'ice', 'dragon', 'wind', 'ground', 'poison', 'fighting']
-IMG_K = .7   # 画像は 縮めて 保存（カメラで 縮めて うつすので じゅうぶん）
+IMG_K = .7
+# 納品された 追加の ステージ（effects/S/S_<キー>_floor.png・_banner_3f.png・_props_4.png）。置きものの 大きさは 右の ステージの 障害物に あわせる
+FXS = os.path.join(HERE, '..', '..', 'effects', 'S')
+EXTRA = {'machine': 'ice', 'bug': 'poison', 'normal': 'grass', 'ghost': 'dragon', 'beast': 'ground', 'fairy': 'wind', 'champion': 'fighting'}   # 画像は 縮めて 保存（カメラで 縮めて うつすので じゅうぶん）
 
 def enc(im, fmt='WEBP', q=88):
     b = io.BytesIO()
@@ -69,6 +72,9 @@ floors = {}
 for i, k in enumerate(KEYS):
     im = Image.open(f'{SRC}/S{i + 1:02d}.png').convert('RGB').resize((int((hw + 16) * IMG_K), int((hh + 16) * IMG_K)), Image.LANCZOS)
     floors[k] = enc(im, q=86)
+for k in EXTRA:
+    im = Image.open(f'{FXS}/S_{k}_floor.png').convert('RGB').resize((int((hw + 16) * IMG_K), int((hh + 16) * IMG_K)), Image.LANCZOS)
+    floors[k] = enc(im, q=86)
 
 # ---- 観客 ----
 cr = cells(np.array(Image.open(f'{SRC}/F2.png').convert('RGBA')), 6, 2)
@@ -91,6 +97,11 @@ for r_, (ka, kb) in enumerate(ORDER):
         fr3 = [crop_alpha(bn[r_][half * 3 + j]) for j in range(3)]
         fr3 = [im.resize((max(1, round(im.width * BH / im.height)), BH), Image.LANCZOS) for im in fr3]
         tmp[k] = fr3; bw = max(bw, *[im.width for im in fr3])
+for k in EXTRA:
+    a = np.array(Image.open(f'{FXS}/S_{k}_banner_3f.png').convert('RGBA')); fw = a.shape[1] // 3
+    fr3 = [crop_alpha(a[:, j * fw:(j + 1) * fw]) for j in range(3)]
+    fr3 = [im.resize((max(1, round(im.width * BH / im.height)), BH), Image.LANCZOS) for im in fr3]
+    tmp[k] = fr3; bw = max(bw, *[im.width for im in fr3])
 banners = {}
 for k, fr3 in tmp.items():
     st = Image.new('RGBA', (bw * 3, BH))
@@ -101,16 +112,21 @@ for k, fr3 in tmp.items():
 src = open(GAME, encoding='utf-8').read()
 AR = json.loads(re.search(r'ARENAS = (\{.*?\});\n', src, re.S).group(1))
 props = {}
+SHEETS = []   # （キー, 4この 絵［左上・右上・左下・右下］, 大きさを あわせる ステージ）
 for j in range(5):
     pc = cells(np.array(Image.open(f'{SRC}/P{j + 1}.png').convert('RGBA')), 4, 2)
-    for rr in range(2):
-        k = KEYS[j * 2 + rr]; solid = AR[k]['solid'][10:]   # さいしょの 10こは 台・管・はしらの 柱（枠の 一部）
+    for rr in range(2): SHEETS.append((KEYS[j * 2 + rr], pc[rr], KEYS[j * 2 + rr]))
+for k, base in EXTRA.items():
+    pc = cells(np.array(Image.open(f'{FXS}/S_{k}_props_4.png').convert('RGBA')), 2, 2)
+    SHEETS.append((k, pc[0] + pc[1], base))
+for k, cells4, base in SHEETS:
+        solid = AR[base]['solid'][10:]   # さいしょの 10こは 台・管・はしらの 柱（枠の 一部）
         out = []
         for q, (qx, qy) in enumerate(((0, 0), (1, 0), (0, 1), (1, 1))):   # 左上・右上・左下・右下
             rs = [s for s in solid if ((s[0] + s[2]) / 2 > W / 2) == bool(qx) and ((s[1] + s[3]) / 2 > H / 2) == bool(qy)]
             if not rs: continue
             x0, y0, x1, y1 = min(s[0] for s in rs), min(s[1] for s in rs), max(s[2] for s in rs), max(s[3] for s in rs)
-            im = crop_alpha(pc[rr][q]); dw = (x1 - x0) * 1.12; dh = dw * im.height / im.width
+            im = crop_alpha(cells4[q]); dw = (x1 - x0) * 1.12; dh = dw * im.height / im.width
             sv = im.resize((max(1, round(dw * .8)), max(1, round(dh * .8))), Image.LANCZOS)   # 表示の 0.8 倍で 保存
             # あたりはんてい：絵の 列ごとに、した 55% を 足もととして 通れなく する（CELL ごとの 四角に まとめる）
             A = np.array(im.resize((max(1, round(dw)), max(1, round(dh))), Image.LANCZOS))[:, :, 3] > 100
