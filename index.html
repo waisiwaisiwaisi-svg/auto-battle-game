@@ -100,7 +100,8 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 .dim{color:var(--dim);font-size:12px}
 .row{display:flex;gap:10px;align-items:center}
 .db .dbi{width:14px;height:14px;margin:-2px 2px -2px -2px;vertical-align:middle;image-rendering:pixelated;object-fit:contain}
-.chip .tyi{width:12px;height:12px;margin:-2px 2px 0 -3px;vertical-align:middle;image-rendering:pixelated}
+.jrc .badge img.medal{display:block;width:32px;height:32px;image-rendering:pixelated}
+.medal-i{width:20px;height:20px;vertical-align:-4px;image-rendering:pixelated}
 .chip{display:inline-block;font-size:10px;padding:1px 6px;color:#fff;text-shadow:1px 0 0 #0b0914,-1px 0 0 #0b0914,0 1px 0 #0b0914,0 -1px 0 #0b0914,1px 1px 0 #0b0914;font-weight:700;vertical-align:middle}
 .card{background:var(--panel);box-shadow:0 0 0 2px var(--edge);padding:10px}
 .sec-title{font-size:13px;color:var(--dim);letter-spacing:.1em;display:flex;justify-content:space-between;align-items:baseline}
@@ -2623,10 +2624,10 @@ const trainerSpr = (hat, coat) => bakeFrames(SpriteGen.frames(SpriteGen.TRAINER(
 const TR_CACHE = {};
 const trArt = (k) => TR_CACHE[k] || (TR_CACHE[k] = trainerArt(TRAINER_ART[k] ? k : 'boy'));   // つかう ときに はじめて つくる
 // たいかいで でてくる トレーナー（チャンピオンは レイ）
-const TR_NPC = [['researcher', 'けんきゅういん シオリ'], ['ranger', 'レンジャー タクミ'], ['gamer', 'ゲーマー ネネ'], ['camera', 'カメラマン ハヤト'], ['vet', 'じゅうい アカネ'],
-  ['barista', 'バリスタ リク'], ['florist', 'はなや コハル'], ['mechanic', 'メカニック ジン'], ['firefighter', 'しょうぼうし アカリ'], ['chef', 'コック ショウ'], ['occult', 'オカルトマニア ヨミ']];
+const TR_NPC = [['researcher', 'けんきゅういん シオリ'], ['ranger', 'レンジャー タクミ'], ['camera', 'カメラマン ハヤト'], ['vet', 'じゅうい アカネ'],
+  ['barista', 'バリスタ リク'], ['florist', 'はなや コハル'], ['mechanic', 'メカニック ジン'], ['firefighter', 'しょうぼうし アカリ'], ['chef', 'コック ショウ']];
 // じぶんの みため として えらべる トレーナー
-const TR_LOOKS = [['boy', 'ヒーロー'], ['girl', 'ライバル'], ...TR_NPC.map(([k, n]) => [k, n.split(' ')[0]])];
+const TR_LOOKS = [['boy', 'ヒーロー'], ['girl', 'ライバル'], ...TR_NPC.map(([k, n]) => [k, n.split(' ')[0]]), ['gamer', 'ゲーマー']];   // ゲーマーは 雷ジムの リーダー（みためは えらべる）
 const myLook = () => (S && TRAINER_ART[S.look]) ? S.look : 'boy';
 const TR_RIVAL = trArt('girl');
 const TR_MS = 1.3;
@@ -3452,7 +3453,8 @@ function profLine(sp) {
 }
 const TY_ICON = { ground: 'ty_earth', normal: 'ty_none', ghost: 'ty_spirit' };   // タイプの しるし（納品の 絵）
 const tyIcon = (t) => { const k = TY_ICON[t] || 'ty_' + t; return typeof UIA !== 'undefined' && UIA[k] ? `<img class="tyi" src="${UIA[k].src}" alt="">` : ''; };
-const typeChip = (t) => TYPES[t] ? `<span class="chip" style="background:${TYPES[t].c}">${tyIcon(t)}${TYPES[t].n}</span>` : '';
+const typeChip = (t) => TYPES[t] ? `<span class="chip" style="background:${TYPES[t].c}">${TYPES[t].n}</span>` : '';
+const gymMedal = (t, cls = 'medal') => tyIcon(t).replace('class="tyi"', `class="${cls}"`) || '🏅';   // ジムを クリアした しるし：タイプの しるしの 絵
 
 function renderTitle() {
   show('scTitle');
@@ -5077,7 +5079,9 @@ for (const k in MOVES) MOVES[k].fxid = k;
 const gfxOf = (m, part) => { const g = m && GFX[m.fxid], k = g && g[part]; return k && plOk(k) ? k : null; };
 // 地面から 出る／はじける 専用の 絵（はんい r に あわせる）。かいたら true
 function gBurst(m, x, y, r, part) { const k = gfxOf(m, part || 'burst') || (!part && gfxOf(m, 'aoe')); if (!k) return false; const S = PLFX[k], sc = clamp(r * 2.3 / (S.w * PIX_D), 1, 2.6);
-  plFx(k, x, S.ay > S.h * .7 ? y + 4 : y - S.h * PIX_D * sc * .3, sc); return true; }
+  const yy = S.ay > S.h * .7 ? y + 4 : y - S.h * PIX_D * sc * .3;
+  if (k === 'g_starfall_hit') fxp({ type: 'pl', k, x, y: yy, s: sc, ang: -Math.atan2(120, 360), life: S.n * S.ms / 1000 });   // スターフォール：おちてきた むきに ななめ
+  else plFx(k, x, yy, sc); return true; }
 // PLFX の 1コマを かく（ax, ay：絵の 中の きじゅん点、ang：むき、flipY：ひだりむきで さかさに しない）
 const plFx = (k, x, y, s, life) => { if (PLFX[k]) fxp({ type: 'pl', k, x, y, s: s || 1, life: life || PLFX[k].n * PLFX[k].ms / 1000 }); };
 const plOk = (k) => PLFX[k] && PLFX[k].img.complete;
@@ -9691,7 +9695,7 @@ function drawBlasts() {
     ctx.beginPath(); ctx.ellipse(b.x, b.y, b.r, b.r * .8, 0, 0, 7); if (b.ring) ctx.ellipse(b.x, b.y, b.ring, b.ring * .8, 0, 7, 0, true);
     ctx.fillStyle = `rgba(${base},${.12 + k * .25})`; ctx.fill(); ctx.strokeStyle = `rgba(${base},.85)`; ctx.stroke();
     if (gfxOf(b.m, 'mark')) { const mk = gfxOf(b.m, 'mark'); plDraw(mk, plLoop(mk, B.t), b.x, b.y, 1.4, 0); }   // みらいよち：予告の しるし
-    if (b.look === 'meteor' && gfxOf(b.m, 'fall')) { const q = 1 - k, fk = gfxOf(b.m, 'fall'); plDraw(fk, plLoop(fk, B.t), b.x - q * 120, b.y - 30 - q * 360, 1.4, 0); }   // スターフォール：おちてくる ながれぼし
+    if (b.look === 'meteor' && gfxOf(b.m, 'fall')) { const q = 1 - k, fk = gfxOf(b.m, 'fall'); plDraw(fk, plLoop(fk, B.t), b.x - q * 120, b.y - 30 - q * 360, 1.4, -Math.atan2(120, 360)); }   // おちる むきに あわせて ななめに   // スターフォール：おちてくる ながれぼし
     else if (b.look === 'meteor') { const q = 1 - k, mx = b.x - q * 230, my = b.y - 24 - q * 360;   // ななめ うえから おちてくる いんせき
       ctx.save(); ctx.lineCap = 'round'; for (const [w, c, a] of [[16, '#ff5a2a', .35], [9, '#ffb040', .6], [4, '#fff2a0', .9]]) { ctx.globalAlpha = a; ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(mx - 70, my - 110); ctx.lineTo(mx, my); ctx.stroke(); } ctx.restore();
       glowDot(mx, my, 26, '#ff8a3d', .7); drawRock(mx, my, 12, B.t * 8, '#8a6ab8'); } }
@@ -11450,7 +11454,7 @@ const GYMS = [
   { f: 'grass', t: 'grass', lead: 'gym_koharu', ln: 'ジムリーダー コハル', say: 'はなと みどりの ちから、うけとめてね！' },
   { f: 'water', t: 'water', lead: 'gym_riku', ln: 'ジムリーダー リク', say: 'ながれに さからえるかな？' },
   { f: 'fire', t: 'fire', lead: 'gym_sho', ln: 'ジムリーダー ショウ', say: 'あつあつの しあいを めしあがれ！' },
-  { f: 'elec', t: 'elec', lead: 'gym_nene', ln: 'ジムリーダー ネネ', say: 'はんのう そくど、ついてこられる？' },
+  { f: 'elec', t: 'elec', lead: 'gamer', ln: 'ジムリーダー ネネ', say: 'はんのう そくど、ついてこられる？' },
   { f: 'ice', t: 'machine', lead: 'gym_hayato', ln: 'ジムリーダー ハヤト', say: 'シャッターチャンスは のがさない！ きかいの せいど、みせてやる！' },
   { f: 'ground', t: 'ground', lead: 'gym_jin', ln: 'ジムリーダー ジン', say: 'どっしり かまえて うけてたつ！' },
   { f: 'poison', t: 'bug', lead: 'gym_shiori', ln: 'ジムリーダー シオリ', say: 'むしの けんきゅう せいか、みせてあげる。' },
@@ -11458,7 +11462,7 @@ const GYMS = [
   { f: 'fighting', t: 'demi', lead: 'gym_akari', ln: 'ジムリーダー アカリ', say: 'こころも からだも きたえてきた！' },
   { f: 'dragon', t: 'dragon', lead: 'gym_akane', ln: 'ジムリーダー アカネ', say: 'ドラゴンの ほんきを みせてあげる。' },
 ];
-const LEAGUE = [['league_shiori', 'してんのう シオリ', 'データは もう そろっているの。', 'normal', 'c_fighting7'], ['league_kagemi', 'してんのう カゲミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', null], ['league_takumi', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'beast', 'a_fighting9'], ['league_akari', 'してんのう アカリ', 'もえる こころで かかってこい！', 'fairy', null], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
+const LEAGUE = [['league_shiori', 'してんのう シオリ', 'データは もう そろっているの。', 'normal', 'c_fighting7'], ['occult', 'してんのう ヨミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', null], ['league_takumi', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'beast', 'a_fighting9'], ['league_akari', 'してんのう アカリ', 'もえる こころで かかってこい！', 'fairy', null], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
 const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; const J = S.journey; if (!J.rival && (J.gym > 0 || J.step > 0 || J.badges.length || J.champ)) J.rival = 1;   /* まえから すすんでいる 人は はじめての 戦いは すんだ ことに */ if (!(J.league >= 0 && J.league < LEAGUE.length)) J.league = J.league >= LEAGUE.length ? LEAGUE.length - 1 : 0; return J; };   // リーグの 人数が かわっても こわれない
 // 敵の モンスター：すすむ（p：0〜1）ほど 個体値・きょうか・わざの くみあわせが つよくなる（のうりょくの 倍率は かけない）
 function foeMon(sid, p, uid) {
@@ -11614,7 +11618,7 @@ function journeyResult(res, lines) {
   if (c.step < 2) { if (c.gi === J.gym) J.step = c.step + 1; lines.unshift(`トレーナーに かった！ ${c.step + 1 >= 2 ? 'つぎは ジムリーダー！' : 'つぎは 2人めの トレーナー'}`); return; }
   // ジムリーダーに かった
   S.gems = (S.gems || 0) + 5;
-  if (!J.badges.includes(G.f)) { J.badges.push(G.f); lines.unshift(`<b style="color:var(--acc)">🏅 ${TYPES[G.t].n}バッジを てにいれた！</b>`); }
+  if (!J.badges.includes(G.f)) { J.badges.push(G.f); lines.unshift(`<b style="color:var(--acc)">${gymMedal(G.t, 'medal-i')} ${TYPES[G.t].n}バッジを てにいれた！</b>`); }
   else lines.unshift(`${G.ln}に また かった！`);
   const tms = TM_POOL().filter(id => MOVES[id].t === G.f && isDamaging(MOVES[id])); if (tms.length) { const t = choice(tms); S.tms = S.tms || {}; S.tms[t] = (S.tms[t] || 0) + 1; lines.push(`スクロール「${MOVES[t].n}」を もらった`); }
   if (c.gi === J.gym && J.gym < GYMS.length) { J.gym++; J.step = 0; if (J.gym < GYMS.length) lines.push(`つぎは ${TYPES[GYMS[J.gym].t].n}ジム！`); else lines.push('<b>バッジが 10こ そろった！ チャンピオンリーグへ いこう！</b>'); }
@@ -11707,7 +11711,7 @@ function renderJourney() {
     const open = (i <= J.gym || J.champ) && J.rival, done = J.badges.includes(G.f), cur = i === J.gym && !J.champ && J.rival, step = i < J.gym || J.champ ? 3 : J.step;
     const b = document.createElement('button'); b.className = 'jrc' + (open ? '' : ' lock') + (cur ? ' next' : '');
     b.style.backgroundImage = `url(${ARENAS[G.f].img})`;
-    b.innerHTML = `${done ? '<span class="badge">🏅</span>' : ''}<span class="jtype">${typeChip(G.t)}</span><div class="in"><b>${TYPES[G.t].n}ジム</b><small>${G.ln}</small><div class="dots"><i class="${step > 0 ? 'on' : ''}"></i><i class="${step > 1 ? 'on' : ''}"></i><i class="ld ${done ? 'on' : ''}"></i></div><small>${!open ? (!J.rival && i === 0 ? 'はじめての戦いの あとに あく' : 'まえの ジムを クリアすると あく') : cur ? (J.step < 2 ? `トレーナー ${J.step + 1}人め` : 'ジムリーダーに ちょうせん') : 'リーダーに さいせん'}</small>${open ? `<small class="jrec">おすすめ ${strongVs(G.t).map(typeChip).join('')}</small>` : ''}</div>`;
+    b.innerHTML = `${done ? `<span class="badge">${gymMedal(G.t)}</span>` : ''}<span class="jtype">${typeChip(G.t)}</span><div class="in"><b>${TYPES[G.t].n}ジム</b><small>${G.ln}</small><div class="dots"><i class="${step > 0 ? 'on' : ''}"></i><i class="${step > 1 ? 'on' : ''}"></i><i class="ld ${done ? 'on' : ''}"></i></div><small>${!open ? (!J.rival && i === 0 ? 'はじめての戦いの あとに あく' : 'まえの ジムを クリアすると あく') : cur ? (J.step < 2 ? `トレーナー ${J.step + 1}人め` : 'ジムリーダーに ちょうせん') : 'リーダーに さいせん'}</small>${open ? `<small class="jrec">おすすめ ${strongVs(G.t).map(typeChip).join('')}</small>` : ''}</div>`;
     if (open) b.onclick = () => { SND.se('ok'); startJourney(i); };
     g.appendChild(b);
   });
