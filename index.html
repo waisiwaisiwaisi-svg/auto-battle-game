@@ -7686,7 +7686,7 @@ const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   //
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } const tr = trUnpack(o.tr, m); if (tr) m.tr = tr; return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
-function netReset() { SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false }); }
+function netReset() { SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0 }); }
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
 async function netOpen(asHost, code, onStatus, opts = {}) {
   const room = await netGetRoom();
@@ -7763,7 +7763,8 @@ function netHostStart(gteam, mineSel) {
   startBattle({ kind: 'online', field, enemies: gteam.map(monFrom), p0: mine.map(monFrom),   /* じぶんの チームも あいてに おくった データから つくる（あいての がめんと のうりょくを そろえる） */ trainer: { name: oppName(), spr: trArt(oppLook()) }, title: NET.ranked ? 'オンライン対戦' : 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.net = 'host';
   // 見せあい用の 6たいは もう いらない（presence は ぜんぶで 4KB まで）
-  const startP = { start: { field, h: mine, g: gteam, hr: myRank().r }, team: null, team6: null, pick: null, ca: null, la: null };   // え は もう おくった
+  const noTr = (t) => t.map(o => { const { tr, ...r } = o; return r; });   // 訓練は ホストだけが つかう（ゲストには おくらない：presence を かるく）
+  const startP = { start: { field, h: noTr(mine), g: noTr(gteam), hr: myRank().r }, team: null, team6: null, pick: null, ca: null, la: null };   // え は もう おくった
   NET.nr.presence(startP).catch(() => { });
   NET.baseLen = JSON.stringify({ role: 'host', v: 1, r: myRank().r, rk: 1, lk: 'firefighter', start: startP.start }).length;
   if (NET.ranked) B.cfg.title = 'オンライン対戦';
@@ -7771,6 +7772,7 @@ function netHostStart(gteam, mineSel) {
 }
 function netHostInput(pr) {
   const inp = pr && pr.inp; if (!inp || !B || B.net !== 'host') return;
+  if (!NET.startGone) { NET.startGone = true; NET.nr.presence({ start: null }).catch(() => { NET.startGone = false; }); NET.baseLen = 200; }   // ゲストが はじめた：start は もう いらない（4KB の わくを あける）
   NET.pending = inp;
 }
 function netApplyInput() {
@@ -7792,7 +7794,7 @@ function netHostTick(dt) {
   if (B.remoteChoose && (B.remoteChooseT -= dt) <= 0) { const sd = B.sides[1]; const i = sd.fs.findIndex((x, j) => !x.fainted && x.hp > 0); if (i >= 0) netResolveChoose(i); }
   NET.sendT -= dt; if (NET.sendT > 0) return; NET.sendT = SNAP_EVERY;
   const snap = netSnapshot();
-  NET.nr.presence({ snap }).catch(() => { });
+  NET.nr.presence({ snap }).then(() => { NET.snapFail = 0; }, () => { NET.snapFail = (NET.snapFail || 0) + 1; });   // とどかなかった：つぎは もっと かるく
 }
 const VBITS = ['protect', 'sub', 'counter', 'dbond', 'confuse', 'seed', 'curse', 'yawn', 'taunt', 'encore', 'healBlock', 'web', 'charged', 'gshift'];
 function netSnapshot() {
@@ -7807,8 +7809,11 @@ function netSnapshot() {
     ob: (B.obs || []).slice(0, 16).map(o => o.k === 'trail' ? [o.k, o.side, r1(o.life), o.uid, o.pts.filter((p, i) => i % 2 === 0).slice(0, 14).map(p => [r1(p.x), r1(p.y)])] : o.k === 'wave' ? [o.k, o.side, r1(o.life), o.uid, r1(o.x0), r1(o.y0), r1(o.ang), r1(o.d), o.len, o.w] : [o.k, o.side, r1(o.life), o.uid, r1(o.x), r1(o.y), r1(o.R || o.r), o.arm > 0 ? 1 : 0]),
     lv: B.sides.map(sd => sd.leaves ? [r1(sd.leaves.t), r1(sd.leaves.a)] : 0), cap: [active(0), active(1)].map(f => f ? r1(f.capHp || 0) : 0), pg: [active(0), active(1)].map(f => f && f.v.pg ? 1 : 0),
     rc: B.remoteChoose ? 1 : 0, wc: B.choosing && !B.remoteChoose ? 1 : 0, res: B.mode === 'end' ? B.result : 0, rl: B.mode === 'end' ? (B.resLines || []) : 0, ev: [] };
-  let json = JSON.stringify(snap), evs = NET.ev.slice(-30), cap = 4000 - (NET.baseLen || 1200) - 40;
+  let json = JSON.stringify(snap), evs = NET.ev.slice(-30), cap = 4000 - (NET.baseLen || 1200) - 40 - (NET.snapFail ? 600 : 0);
   for (let n = evs.length; n >= 0; n--) { snap.ev = slim(evs.slice(evs.length - n)); json = JSON.stringify(snap); if (new Blob([json]).size < cap) break; }
+  // それでも おおきい（かべ・しかけ・たまが たくさん）：みための ものから へらす（presence が とどかないと ゲストの がめんが とまる）
+  const cut = [() => { snap.ob = snap.ob.map(o => o[0] === 'trail' ? [...o.slice(0, 4), o[4].filter((p, i) => i % 2 === 0)] : o); }, () => { snap.p = snap.p.slice(0, 16); }, () => { snap.bl = snap.bl.slice(0, 6); }, () => { snap.ob = snap.ob.slice(0, 8); }, () => { snap.ho = snap.ho.slice(-6); }, () => { snap.cl = [0, 0]; }, () => { snap.ob = []; }, () => { snap.p = snap.p.slice(0, 6); }];
+  for (const c of cut) { if (new Blob([JSON.stringify(snap)]).size < cap) break; c(); }
   return snap;
 }
 /* ---------- ゲスト ---------- */
@@ -7846,6 +7851,8 @@ function netGuestSnap(sn) {
     { const si = a[0]; f.capHp = (sn.cap || [])[si] || 0; f.v.pg = (sn.pg || [])[si] || 0; }
     f.inv = a[12]; f.flash = a[13]; f.fireT = B.t - a[14]; STAGE_KEYS.forEach((k, i) => f.st[k] = (a[15] || [])[i] || 0); f.lagMax = a[16]; f.swapLag = a[17]; f.hurtInv = a[18] || 0;
   }
+  for (const sd of B.sides) { const f = sd.fs[sd.act]; if (f && !f.fainted && f.hp > 0 && f.state === 'bench') { f.state = 'free'; if (f.x == null && f.tx != null) { f.x = f.tx; f.y = f.ty; } } }   // でている こが 控えの まま（とうめい）に ならないように
+  B.snapAt = performance.now();
   B.holes = (sn.ho || []).map(h => ({ x: h[0], y: h[1], sz: h[2] }));
   if (sn.pr && B.st.propSol) sn.pr.forEach((h, i) => { if (h === -1) { if (!B.st.propGone[i]) { B.st.propGone[i] = true; const rs = new Set(B.st.propSol[i]); B.st.solid = B.st.solid.filter(o => !rs.has(o)); const p = B.st.props[i]; if (PLFX.rubble) (B.st.rubble = B.st.rubble || []).push({ x: p.x, y: p.y, v: i % PLFX.rubble.n, sc: p.w * .7 / (PLFX.rubble.w * PIX_D), t0: B.t + .55 }); } } else if (h !== 99) { if (B.st.propHp[i] !== h) B.st.propHit[i] = B.t; B.st.propHp[i] = h; } });   // おきものの こわれぐあい
   B.walls = (sn.wl || []).map(w => ({ t: w[0], life: w[1], max: w[2], side: w[3], uid: w[4], reflect: !!w[6], ...(w[7] ? { one: true, hp: w[7][0], hpMax: w[7][1], ang: w[7][2], hitT: w[7][3] ? B.t : null } : {}), blocks: w[5].map(([x, y, h]) => ({ x, y, x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, gone: h === -1, hp: h == null || h === 9 || h === -1 ? null : h })) })); B.wallRects = []; for (const w of B.walls) for (const b of w.blocks) if (!b.gone) B.wallRects.push(b);
@@ -7872,6 +7879,7 @@ function netReplay(e) {
   } catch (err) { }
 }
 function netGuestStep(dt) {
+  { const wait = B.snapAt && B.mode !== 'end' && performance.now() - B.snapAt > 2500; if (wait !== !!B.netWait) { B.netWait = wait; $('banner').classList.toggle('waiting', wait); if (wait) say('つうしんを まっています…'); } }   // ホストからの データが とまった
   B.t += dt; B.modeT += dt; B.shake = Math.max(0, (B.shake || 0) - dt * 20);
   for (const sd of B.sides) for (const f of sd.fs) {
     if (f.tx == null) continue;
@@ -11731,15 +11739,17 @@ function fitCanvas() {
    ループ
    ===================================================================== */
 let last = performance.now();
+let FRAME_ERR = 0;
 function frame(now) {
+  requestAnimationFrame(frame);   // さきに つぎを よやく：とちゅうで エラーが でても がめんが とまらない
   let dt = Math.min(.05, (now - last) / 1000) * TIME_SCALE; last = now;
   if (B && !$('scBattle').hidden) {
     // 速度倍率が大きいときは細かく刻む
     if (dsvNow) dt = 0;   // きりかえの あいだは とめる
-    while (dt > 0) { const s = Math.min(dt, 1 / 30); bStep(s); dt -= s; }
-    render(); updHUD();
+    try { while (dt > 0) { const s = Math.min(dt, 1 / 30); bStep(s); dt -= s; } } catch (e) { if (FRAME_ERR++ < 20) console.error('bStep', e); }
+    try { render(); } catch (e) { if (FRAME_ERR++ < 20) console.error('render', e); try { ctx = MAIN_CTX; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } catch (e2) { } }
+    try { updHUD(); } catch (e) { if (FRAME_ERR++ < 20) console.error('hud', e); }
   }
-  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 
