@@ -61,7 +61,7 @@ add('cap_caught', 'D_capture_ok', 80)
 add('cap_break', 'D_capture_ng', 70)
 add('n_capin', 'D_capture_in', 75)
 # ---- 優先度B（2回目の 納品）----
-add('wave', 'B_bigwave', 100)                    # 大波（白い 絵を 水の 色に）
+# add('wave', 'B_bigwave', 100)   # 大波：納品の 絵は つかわない（まえの 絵に もどした）
 add('n_claw', 'B_claw', 70)
 add('d_hit', 'B_dash_hit', 70)
 add('d_dust', 'B_dash_trail', 70)
