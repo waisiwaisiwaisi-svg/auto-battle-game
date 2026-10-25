@@ -87,6 +87,15 @@ add('n_roll', 'B_roll', 70)                      # ごろごろアタック：�
 add('n_dbreath', 'E_dragon_breath', 70, ax=0)   # りゅうのためいき（口もとが きじゅん）
 p = f('E_stone_edge'); out['n_stone_edge'] = sheet(p, nf(p), 70, ay=46)   # いわのきっさき系：地面から つきでる 岩
 
+# ---- Gグループ（大技の 専用）：キーは g_ ＋ なまえ ----
+BOTTOM = {'bolt', 'thunder', 'future_pillar', 'starfall_hit', 'shadow_hands', 'sludge_hit', 'earth_rift', 'rock_blade', 'flame_vortex'}
+for p in sorted(FX.glob('G/G_*_*f.png')):
+    nm = re.sub(r'^G_|_\d+f\.png$', '', p.name); n = nf(p)
+    kw = {}
+    if nm in BOTTOM: kw['ay'] = Image.open(p).height - 2
+    if nm.endswith('_body') or nm == 'psy_thread': kw['ax'] = 0
+    if nm == 'dragon_head': kw['ax'] = Image.open(p).width // n * .7
+    out['g_' + nm] = sheet(p, n, 90 if nm.endswith(('_body', 'thread', 'idle', 'mark')) else 75, **kw)
 # ---- アイコン（UIA に 上書き・追加）----
 UI = {}
 def icons(name, keys):
