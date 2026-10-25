@@ -9233,7 +9233,7 @@ function chooseSwap(pick, title, opt = {}) {
 }
 // じぶんの こうたいを プレイヤーが えらべる ときか（うらで うごく 試合・オンライン・チュートリアルでは えらばない）
 const canPickSwap = (side) => side === 0 && B && !B.headless && !B.autoChoose && B.kind !== 'online' && !TUT && !B.cfg.tutorial;
-function cmdRun() { if (!canCommand() || B.kind !== 'wild') return; say('うまく にげきれた！'); endBattle('run'); }
+function cmdRun() { if (!B || B.kind !== 'wild' || !['fight', 'intro'].includes(B.mode) || B.paused || B.catchO) return; if (TUT && TUT.steps) { say('いまは まず つかまえて みよう！'); SND.se('back'); return; } SND.se('back'); say('うまく にげきれた！'); endBattle('run'); }   // バトルは みるだけ（canCommand は いつも だめ）なので じぶんで たしかめる
 function cmdAuto() { S.auto = !S.auto; save(); updAutoBtn(); SND.se('click'); if (B && B.remote) netSendInput(); if (B && B.mode === 'fight') say(S.auto ? 'AUTO：わざを じどうで だすよ' : 'わざボタンで しじしよう！'); }
 function updAutoBtn() { const b = $('bAuto'); if (!b) return; const on = !!(S && S.auto); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'AUTO ON' : 'AUTO'; }
 
