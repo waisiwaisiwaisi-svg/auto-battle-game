@@ -97,6 +97,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 .logo small{display:block;font-size:13px;color:var(--ink);letter-spacing:.3em;margin-top:6px}
 .center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;flex:1;text-align:center}
 .lead{font-size:13px;line-height:1.7;color:var(--ink)}
+.chRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.skm{flex:none;max-width:100%}   /* 相性表の 横の すくみ図 */
 .dim{color:var(--dim);font-size:12px}
 .row{display:flex;gap:10px;align-items:center}
 .db .dbi{width:14px;height:14px;margin:-2px 2px -2px -2px;vertical-align:middle;image-rendering:pixelated;object-fit:contain}
@@ -3920,14 +3921,27 @@ function rollNum(el, to) {
   requestAnimationFrame(st);
 }
 const TYPE_SHORT = { fire: '火', water: '水', grass: '草', wind: '風', ground: '土', elec: '雷', normal: '無', machine: '機', bug: '虫', ghost: '霊', demi: '亜', fairy: '妖', dragon: '竜', beast: '獣' };
+// すくみ図：そとの わは となりに かつ（とけいまわり）、うちがわの 線は 1つ とばしの 相性。むかいあう 2つは ふつう
+const SKM_ORDER = { '属性': ['fire', 'grass', 'water', 'ground', 'elec', 'wind'], '種族': ['machine', 'fairy', 'dragon', 'ghost', 'demi', 'bug'] };
+function sukumi(o, cap) {
+  const N = o.length, CX = 100, CY = 104, R = 68, r = 17, id = 'skA' + (cap === '属性' ? 'a' : 'r'), P = o.map((t, k) => { const a = -Math.PI / 2 + k * 2 * Math.PI / N; return [CX + R * Math.cos(a), CY + R * Math.sin(a)]; });
+  let h = `<svg class="skm" viewBox="0 0 200 206" width="186" height="192" role="img" aria-label="${cap}の すくみ"><defs><marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffd166"/></marker></defs>`;
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) { if (effOf(o[i], o[j]) !== 2) continue;
+    const [x0, y0] = P[i], [x1, y1] = P[j], L = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / L, uy = (y1 - y0) / L, ring = (j - i + N) % N === 1 || (i - j + N) % N === 1;
+    h += `<line x1="${(x0 + ux * (r + 2)).toFixed(1)}" y1="${(y0 + uy * (r + 2)).toFixed(1)}" x2="${(x1 - ux * (r + 3)).toFixed(1)}" y2="${(y1 - uy * (r + 3)).toFixed(1)}" stroke="#ffd166" stroke-width="${ring ? 2.4 : 1.4}" opacity="${ring ? 1 : .55}" marker-end="url(#${id})"/>`; }
+  o.forEach((t, k) => { const [x, y] = P[k], U = typeof UIA !== 'undefined' && UIA[TY_ICON[t] || 'ty_' + t];
+    h += `<circle cx="${x}" cy="${y}" r="${r}" fill="${TYPES[t].c}" stroke="#1a1626" stroke-width="2"/>` + (U ? `<image href="${U.src}" x="${x - 10}" y="${y - 10}" width="20" height="20" style="image-rendering:pixelated"/>` : `<text x="${x}" y="${y + 4}" text-anchor="middle" font-size="12" fill="#1a1626">${TYPE_SHORT[t]}</text>`)
+      + `<text x="${x}" y="${(y > CY ? y + r + 10 : y - r - 4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#e8e4f4">${TYPES[t].n}</text>`; });
+  return h + '</svg>';
+}
 function renderChart() {   // 相性表：属性どうし・種族どうしの 2まい（属性の 技は 属性に、種族の 技は 種族に だけ きく）
   const th = (t) => `<th style="background:${TYPES[t].c}" title="${TYPES[t].n}">${TYPE_SHORT[t]}</th>`;
-  const table = (ts, cap) => { let h = `<h3 style="margin:10px 0 4px">${cap}</h3><table data-g="${cap}"><tr><th style="background:none;color:var(--dim)">技＼受</th>${ts.map(th).join('')}</tr>`;
+  const table = (ts, cap) => { let h = `<h3 style="margin:10px 0 4px">${cap}</h3><div class="chRow"><table data-g="${cap}"><tr><th style="background:none;color:var(--dim)">技＼受</th>${ts.map(th).join('')}</tr>`;
     for (const a of ts) { h += `<tr>${th(a)}`; for (const d of ts) { const v = effOf(a, d); h += v === 2 ? '<td class="x2">◎</td>' : v === .5 ? '<td class="x05">△</td>' : '<td></td>'; } h += '</tr>'; }
-    return h + '</table>'; };
+    return h + '</table>' + sukumi(SKM_ORDER[cap], cap) + '</div>'; };
   const all = [...TYPE_ATTR, ...TYPE_RACE];
   $('chartWrap').innerHTML = table(TYPE_ATTR, '属性') + table(TYPE_RACE, '種族') + '<div id="chartInfo" class="dim">マスを えらぶと ここに 出る</div><p class="dim" style="margin-top:4px">' + all.map(t => `${TYPE_SHORT[t]}=${TYPES[t].n}`).join('　')
-    + '</p><p class="dim" style="font-size:11px">モンスターは 属性1つ＋種族1つ。属性の 技は あいての 属性と、種族の 技は あいての 種族と だけ くらべる。◎＝有利（2ばい）・△＝不利（0.5ばい）。無属性と けものは どれとも ふつう</p>';
+    + '</p><p class="dim" style="font-size:11px">モンスターは 属性1つ＋種族1つ。属性の 技は あいての 属性と、種族の 技は あいての 種族と だけ くらべる。◎＝有利（2ばい）・△＝不利（0.5ばい）。無属性と けものは どれとも ふつう。<br>すくみ図：やじるしの 先の タイプに つよい（2ばい）。むかいあう 2つは ふつう</p>';
   for (const tb of $('chartWrap').querySelectorAll('table')) { const ts = tb.dataset.g === '属性' ? TYPE_ATTR : TYPE_RACE;
     const pick = (td) => { $('chartWrap').querySelectorAll('.hl,.on').forEach(e => e.classList.remove('hl', 'on')); if (!td || td.tagName !== 'TD') return;
       const tr = td.parentElement, ci = td.cellIndex, ri = tr.rowIndex; if (ri < 1 || ci < 1) return; const a = ts[ri - 1], d = ts[ci - 1], v = effOf(a, d);
