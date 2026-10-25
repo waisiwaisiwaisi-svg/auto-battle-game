@@ -352,6 +352,11 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
 .balls i.out{background:#3a3350}
 .balls .own{font-size:11px;line-height:1;padding:2px 6px;background:rgba(11,9,20,.7);color:#e6defa;box-shadow:inset 0 0 0 1px #3a3060;white-space:nowrap;font-variant-numeric:tabular-nums}.balls .own.new{color:#1a1222;background:#ffd166;box-shadow:inset 0 0 0 1px #0b0914;font-weight:700}
 #plE{text-align:right}
+#waitOv{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:rgba(10,8,20,.5);pointer-events:none;line-height:1.4}
+#waitOv .wcard{display:flex;flex-direction:column;align-items:center;gap:6px;max-width:86%;padding:14px 20px;background:#1d1830;border:3px solid #ffd166;border-radius:10px;box-shadow:0 6px 0 rgba(0,0,0,.4);color:#fff;text-align:center;animation:wpop .25s ease-out}
+#waitOv b{font-size:clamp(13px,3.6vw,18px);text-wrap:balance}#waitOv small{font-size:12px;color:#ffd166;min-height:1em;font-variant-numeric:tabular-nums}
+#waitOv .wspin{width:26px;height:26px;border:4px solid rgba(255,209,102,.25);border-top-color:#ffd166;border-radius:50%;animation:wspin .8s linear infinite}
+@keyframes wspin{to{transform:rotate(360deg)}}@keyframes wpop{from{transform:scale(.85);opacity:0}}
 #cvWrap{position:relative;width:min(100%, calc(calc(48 * var(--vh)) * 16 / 9));margin:0 auto;aspect-ratio:16/9;line-height:0;flex:none}
 #cv{width:100%;height:100%;display:block;box-shadow:0 0 0 2px #0d0b14,0 0 0 4px var(--edge)}
 #banner{
@@ -1522,6 +1527,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
     <div id="bTop"><span style="display:flex;gap:8px;align-items:center;min-width:0"><span id="bTitle"></span><b id="bTimer"></b></span><span style="display:flex;gap:6px"><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="1920" height="1080"></canvas>
+      <div id="waitOv" hidden><div class="wcard"><i class="wspin"></i><b id="waitMsg">あいてが つぎの モンスターを えらんでいます</b><small id="waitT"></small></div></div>
       <div class="plates hudtop">
         <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="types"></span></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div></div>
         <div class="plate" id="plE"><div class="top"><span class="types"></span><b class="nm"></b></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div></div>
@@ -7873,7 +7879,7 @@ function netGuestApply(sn) {
   if ((prevMode !== 'fight' && B.mode === 'fight') || B.sides[1].act !== myAct0) { setupCmds(); renderBench(); }
   if (sn.rc && $('chooseOv').hidden) netGuestChoose();
   if (!sn.rc && !$('chooseOv').hidden && B.my === 1 && !B.choosingLocal) $('chooseOv').hidden = true;
-  $('banner').classList.toggle('waiting', !!sn.wc); if (sn.wc) say('あいてが つぎの モンスターを えらんでいます…');
+  $('banner').classList.toggle('waiting', !!sn.wc); if (sn.wc && !B.oppChoosing) say('あいてが つぎの モンスターを えらんでいます…'); B.oppChoosing = !!sn.wc;
   if (sn.res && !NET.ended) { NET.ended = true; const r = sn.res === 'win' ? 'lose' : sn.res === 'lose' ? 'win' : sn.res; if (r === 'win') guildWin(3); B.result = r; B.remote = false; B.mode = 'end'; B.endT = 1.2;
     S.online = S.online || { w: 0, l: 0 }; S.online[r === 'win' ? 'w' : 'l']++; const rl = rankResult(r === 'win'); B.resLines = [r === 'win' ? '<b style="color:var(--acc)">オンライン対戦に かった！</b>' : 'オンライン対戦に まけた…', rl || `せんせき ${S.online.w}かち ${S.online.l}まけ`]; save(); SND.play(r === 'win' ? 'win' : 'lose'); }
 }
@@ -11767,6 +11773,15 @@ function fitCanvas() {
    ループ
    ===================================================================== */
 let last = performance.now();
+// あいてが モンスターを えらんで いる／つうしんを まって いる：画面の まんなかに だす
+function updWaitOv() {
+  const el = $('waitOv'); if (!el) return;
+  const msg = !B || B.mode === 'end' || $('scBattle').hidden ? '' : B.remoteChoose || (B.remote && B.oppChoosing) ? 'あいてが つぎの モンスターを えらんでいます' : B.remote && B.netWait ? 'つうしんを まっています' : '';
+  if (el.hidden !== !msg) el.hidden = !msg; if (!msg) return;
+  if ($('waitMsg').textContent !== msg) $('waitMsg').textContent = msg;
+  const t = B.remoteChoose ? Math.ceil(B.remoteChooseT) : 0, tx = t > 0 ? `のこり ${t}びょう（すぎたら じどうで えらばれます）` : '';
+  if ($('waitT').textContent !== tx) $('waitT').textContent = tx;
+}
 let FRAME_ERR = 0;
 function frame(now) {
   requestAnimationFrame(frame);   // さきに つぎを よやく：とちゅうで エラーが でても がめんが とまらない
@@ -11778,6 +11793,7 @@ function frame(now) {
     try { render(); } catch (e) { if (FRAME_ERR++ < 20) console.error('render', e); try { ctx = MAIN_CTX; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } catch (e2) { } }
     try { updHUD(); } catch (e) { if (FRAME_ERR++ < 20) console.error('hud', e); }
   }
+  try { updWaitOv(); } catch (e) { }
 }
 requestAnimationFrame(frame);
 
