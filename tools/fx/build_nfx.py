@@ -96,6 +96,12 @@ for p in sorted(FX.glob('G/G_*_*f.png')):
     if nm.endswith('_body') or nm == 'psy_thread': kw['ax'] = 0
     if nm == 'dragon_head': kw['ax'] = Image.open(p).width // n * .7
     out['g_' + nm] = sheet(p, n, 90 if nm.endswith(('_body', 'thread', 'idle', 'mark')) else 75, **kw)
+# ---- 優先度C（5回目の 納品）----
+add('n_conf', 'C_conf', 120); add('n_scared', 'E_scared', 140); add('n_anger', 'E_anger', 140); add('n_encore', 'E_encore', 140)
+add('n_seed', 'E_leech_seed', 160)
+p = f('E_baton'); out['n_baton'] = sheet(p, nf(p), 70, ay=47)   # うけわたし：足もとから のぼる ひかり
+add('n_phase', 'E_phase', 80); add('n_reverse', 'E_reverse', 80)
+p = f('E_rubble'); out['rubble'] = sheet(p, 1, 100)   # こわれた 障害物の がれき（どの ステージでも）
 # ---- アイコン（UIA に 上書き・追加）----
 UI = {}
 def icons(name, keys):
@@ -107,6 +113,14 @@ def icons(name, keys):
 # icons('F_mode_5', ['ic_mode_online', 'ic_flag', 'ic_mode_cup', 'ic_bush', 'ic_globe'])
 # icons('F_resource_4', ['ic_trophy', 'ic_res_orb', 'ic_gem', 'ic_res_chest'])
 icons('F_emblem_3', ['emb_sword', 'emb_bow', 'emb_shield'])
+icons('F_guild_1_5', ['emb_fire', 'emb_drop', 'emb_leaf', 'emb_bolt', 'emb_snow'])
+icons('F_guild_2_5', ['emb_dragon', 'emb_moon', 'emb_star', 'emb_crown', 'emb_skull'])
+icons('F_small_1_9', ['pill', 'bell', 'leaf', 'stone', 'crystal', 'trophy', 'medal', 'crown', None])   # ジェムは ホームと おなじ 絵の まま
+icons('F_small_2_9', ['star', 'hand_up', 'hand_down', 'warn', 'ban', 'arrow_down', 'pencil', 'lr', 'undo'])
+icons('F_small_3_9', [None, 'note', 'heart', 'key', 'check', 'target', 'rps_rock', 'rps_scissors', 'rps_paper'])   # 画面の 向き（ホーム）は もとの 絵の まま
+icons('F_digits_14', ['d0', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'plus', 'minus', 'times', 'pct'])
+icons('F_type_attr_7', ['ty_fire', 'ty_water', 'ty_grass', 'ty_wind', 'ty_earth', 'ty_elec', 'ty_none'])   # 新タイプ用：まだ ゲームで つかわない
+icons('F_type_race_7', ['ty_machine', 'ty_bug', 'ty_spirit', 'ty_dragon', 'ty_fairy', 'ty_demi', 'ty_beast'])
 uijs = '// ====== NUI（effects/F の 納品アイコン：tools/fx/build_nfx.py が 自動生成。UIA の おなじ キーは 上書き）======\nObject.assign(UIA, ' + json.dumps(UI, separators=(',', ':')) + ');\n// ====== ここまで NUI ======\n'
 js = '// ====== NFX（effects/ の 納品エフェクト：tools/fx/build_nfx.py が 自動生成。PLFX の おなじ キーは 上書き）======\nconst NFX = ' + json.dumps(out, separators=(',', ':')) + ';\nObject.assign(PLFX, NFX);\n// ====== ここまで NFX ======\n'
 html = (ROOT / 'index.html').read_text(encoding='utf-8')
