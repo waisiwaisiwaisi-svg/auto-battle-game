@@ -4218,7 +4218,7 @@ function renderTrain(uid) {
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
   const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${false ? '' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${false ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
-  const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
+  const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>「連続で撃ったら後回し」を つけた 技は、つづけて その回数 撃つと、ほかの 技を 1回 撃つまで いちばん 後回しに なります（ほかに 撃てる 技が なければ 撃ちます）。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
     <div class="trhome"></div><div class="trbtns"><button class="btn sub trsim" data-a="dummy">🎯 木人戦</button><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
     <div class="trbtns2"><button data-a="draft">仮保存</button><button data-a="load">他からコピー</button><button data-a="revert">保存時に戻す</button><button data-a="clr">リセット</button></div>
     <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
@@ -4947,7 +4947,7 @@ function sendOut(side, idx, pass, lag, at, ko) {
   clampF(f); if (st.solid) freeSpot(f);
   f.hurtInv = ko ? KO_INV : 0; f.hurtBy = null;
   f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.want = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
-  f.enterT = 0; f.swIn = B.mode === 'fight'; f.inAt = B.t; f.v = {}; f.hist = []; f.rw = null; f.heat = 0; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.usedAt = {}; f.shots = [];
+  f.enterT = 0; f.swIn = B.mode === 'fight'; f.inAt = B.t; f.v = {}; f.hist = []; f.rw = null; f.heat = 0; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.rotN = 0; f.usedAt = {}; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
   if (f.sp0) { f.sp = f.sp0; f.sp0 = null; }   // みずびたし・ハロウィン：こうたいで もとの タイプ
   if (B.sides[side].hwish && f.hp > 0) { B.sides[side].hwish = 0; f.hp = f.maxHp; f.status = ''; f.toxN = 1; setTimeout(() => { if (B && f.hp > 0) { popText(f.x, f.y - 100, 'いのちのバトン！ ぜんかいふく', '#ff9ad0', 'comic'); healFx(f); } }, 0); }
@@ -5285,6 +5285,7 @@ function beginMove(f, id) {
   }
   f.state = 'wind';
   if (isDamaging(m) && m.wind >= .5) sheetFx('charge', f.x, f.y - BODY, .9);   // ためる 光
+  f.rotN = f.lastMove === id ? (f.rotN || 0) + 1 : 1;   // おなじ 技を つづけて 撃った 回数（後回しに つかう）
   f.lastMove = id; B.lastMoveT = B.t; (f.usedAt = f.usedAt || {})[id] = B.t; (f.useN = f.useN || {})[id] = (f.useN[id] || 0) + 1;   // useN：この 試合で 撃った 回数（交代しても のこる）
   if (simMine(f)) { const L = B.simLog; L.used[id] = (L.used[id] || 0) + 1; if (f.trTag === id) { L.cond[id] = (L.cond[id] || 0) + 1; L.lf = L.lf || {}; const k = `${f.trRow}:${f.trLine}`; L.lf[k] = (L.lf[k] || 0) + 1; } }   // 模擬戦の きろく
   if (B.log) B.log.push(id); if (B.logS) B.logS.push([f.side, id]);
@@ -6583,6 +6584,7 @@ const CONDS = {
   hit: { n: '攻撃を受けた瞬間', ps: [['any', 'どれでも'], ['big', '大技'], ['stab', 'タイプ一致'], ['eff', 'ばつぐん']] },   // まもる・カウンターなどを その場で だす
   terrain: { n: 'フィールド', ps: [['elec', 'エレキ'], ['grass', 'グラス'], ['psy', 'サイコ'], ['none', 'なし']] },
   weather: { n: '天候', ps: [['rain', '雨'], ['sun', '晴れ'], ['sand', '砂あらし'], ['snow', '雪']] },
+  rot: { n: '連続で撃ったら後回し', ns: [1, 2, 3, 4, 5], nf: (v) => `（${v}回）`, n0: 2 },   // 条件では ない：この技を つづけて N回 撃ったら、ほかの技を 1回 撃つまで いちばん 下の 優先度に する
 };
 const TR_GO = { auto: 'その場で', near: '近づいてから', far: '離れてから', hide: '隠れてから', flank: '回り込んでから' };   // よける のは いつもの AI が じぶんで する
 const trProg = (f) => { const T = trOf(f); if (T && T.prog && T.prog.mv && !T.prog.hv) T.prog = trClone(T.prog, f.mon); return T && T.mode === 'chip' && T.prog && T.prog.mv ? T.prog : null; };   // むかしの データは ここでも うつしかえる
@@ -6599,6 +6601,7 @@ function condOk(f, o, c, id0) {
     case 'hit': { const H = f.hitCtx; if (!H) return false; return c.p === 'big' ? isBigMove(H.m) : c.p === 'stab' ? hasType(H.att, H.m.t) : c.p === 'eff' ? effVs(H.m.t, f.sp) > 1 : true; }
     case 'terrain': return c.p === 'none' ? !B.terrain : !!B.terrain && B.terrain.k === c.p;
     case 'weather': return !!B.weather && B.weather.k === c.p;
+    case 'rot': return true;
     case 'myhp': return hpk(f) < (c.p || 50);
     case 'ophp': return hpk(o) < (c.p || 50);
     case 'aff': return typeAff(f.sp, o.sp) === c.p;
@@ -6658,18 +6661,24 @@ function runRules(f, o) {
   }
   const skip = (id) => f.trSkip && f.trSkip.id === id && B.t < f.trSkip.until;
   const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id) && !skip(r.id) && !moveUseless(f, o, r.id);
-  const lineHit = (r, ev) => trLines(r.c).some(l => l.length && !chgOff(f, r.id, l) && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
-  const hasC = (r) => trLines(r.c).some(l => l.length && !chgOff(f, r.id, l));
-  const hit = rows.filter(r => lineHit(r, 1)).concat(rows.filter(r => !lineHit(r, 1) && lineHit(r)));   // きっかけの 条件（出場時・交代時）が 合う 技が いちばん 先
+  const LN = (l) => l.filter(c => c.t !== 'rot');   // 「後回し」は 条件に かぞえない
+  const lineHit = (r, ev) => trLines(r.c).some(l => LN(l).length && !chgOff(f, r.id, l) && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
+  const hasC = (r) => trLines(r.c).some(l => LN(l).length && !chgOff(f, r.id, l));
+  // 後回し：この技を つづけて N回 撃ったら、ほかの技を 撃つまで いちばん 下（ほかに 撃てる 技が ない ときは 撃つ）
+  const rotN = (r) => { for (const l of trLines(r.c)) for (const c of l) if (c.t === 'rot') return +c.n || CONDS.rot.n0; return 0; };
+  const pen = (r) => { const n = rotN(r); return n > 0 && f.lastMove === r.id && (f.rotN || 0) >= n; };
+  const hit0 = rows.filter(r => lineHit(r, 1)).concat(rows.filter(r => !lineHit(r, 1) && lineHit(r)));   // きっかけの 条件（出場時・交代時）が 合う 技が いちばん 先
+  const hit = hit0.filter(r => !pen(r)).concat(hit0.filter(pen)), hitNP = hit.filter(r => !pen(r));
+  const alt = rows.some(x => !pen(x) && ok(x) && (!hasC(x) || lineHit(x)));   // 後回しの 技の かわりに 撃てる 技が ある
   const pr = f.trPrep && rows.find(r => r.id === f.trPrep.id && ok(r) && (!hasC(r) || lineHit(r)));   // うごきはじめた 技は 撃つまで かえない（条件が はずれたら やめる）
   // 条件つきの 技は 条件が 合う ときだけ（上から 順）。合う技が ない ときは お任せAIが 条件なしの 技から えらぶ（えらばなければ 待つ）
-  f.trBan = rows.filter(r => hasC(r) && !lineHit(r)).map(r => r.id);
+  f.trBan = rows.filter(r => (hasC(r) && !lineHit(r)) || (alt && pen(r))).map(r => r.id);
   if (!rows.some(r => !moveBlocked(f, r.id) && !moveUseless(f, o, r.id))) { f.trPrep = null; if (f.state === 'free' && !f.queued) { const id = aiPickMove(f, o); if (id) { f.queued = id; f.trQ = { id, t: B.t }; } } return; }   // 撃てる 技が もう ない（つかいきった・いまは きかない）：通常の AI（たいあたり）で ねばる
-  if (!pr && !hit.some(ok)) f.aiT = (f.aiT || 0) - .25;
-  const ai = !pr && !hit.some(ok) && f.state === 'free' && !f.queued && f.aiT <= 0 ? (() => { f.aiT = aiWait(f); const nx = f.trNext; f.trNext = null; const id = nx && rows.some(x => x.id === nx && ok(x)) ? nx : aiPickMove(f, o); return id && (rows.find(x => x.id === id && ok(x)) || (MOVES[id] && !rows.some(x => x.id === id) ? { id, go: 'auto', c: [] } : null)); })() : null;
+  if (!pr && !hitNP.some(ok)) f.aiT = (f.aiT || 0) - .25;
+  const ai = !pr && !hitNP.some(ok) && f.state === 'free' && !f.queued && f.aiT <= 0 ? (() => { f.aiT = aiWait(f); const nx = f.trNext; f.trNext = null; const id = nx && rows.some(x => x.id === nx && ok(x) && !(alt && pen(x))) ? nx : aiPickMove(f, o); return id && (rows.find(x => x.id === id && ok(x)) || (MOVES[id] && !rows.some(x => x.id === id) ? { id, go: 'auto', c: [] } : null)); })() : null;
   // さきよみ：いま 撃てる 技が ない ときは、まもなく（3びょう いない）撃てる「〜してから」の 技を つぎの 技に きめて 先に うごきだす（撃ったあとの ロスを なくす）
   const soon = (x) => !!x && (x.go || 'auto') !== 'auto' && (f.cd[x.id] || 0) <= 3 && !moveBlocked(f, x.id) && !skip(x.id) && !moveUseless(f, o, x.id) && (!hasC(x) || lineHit(x));
-  let r = pr || hit.find(ok) || ai || hit[0];
+  let r = pr || hitNP.find(ok) || ai || (alt ? hitNP[0] : hit.find(ok) || hit[0]);   // 後回しの 技は ほかに 撃てる 技が ある あいだは えらばない
   if (!r && !pr && !hit.some(ok) && rows.some(ok)) {   // お任せで えらぶ 技：まよい時間を またずに つぎの 技を きめておき、「〜してから」なら すぐ うごきだす
     if (!f.trNext || !rows.some(x => x.id === f.trNext && ok(x))) f.trNext = aiPickMove(f, o);
     const n = rows.find(x => x.id === f.trNext); if (n && (n.go || 'auto') !== 'auto' && ok(n)) r = n;
