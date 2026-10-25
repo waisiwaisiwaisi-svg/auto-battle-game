@@ -97,7 +97,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 .logo small{display:block;font-size:13px;color:var(--ink);letter-spacing:.3em;margin-top:6px}
 .center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;flex:1;text-align:center}
 .lead{font-size:13px;line-height:1.7;color:var(--ink)}
-.chRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.skm{flex:none;max-width:100%}   /* 相性表の 横の すくみ図 */
+.chRow{display:flex;flex-wrap:wrap;justify-content:center;gap:calc(var(--cs,19px) * .6);align-items:center}#chartWrap .chRow table{margin:0}.skm{flex:1 1 150px;min-width:150px;max-width:calc(var(--cs,19px) * 8.4);height:auto}   /* 相性表の 横の すくみ図 */
 .dim{color:var(--dim);font-size:12px}
 .row{display:flex;gap:10px;align-items:center}
 .db .dbi{width:14px;height:14px;margin:-2px 2px -2px -2px;vertical-align:middle;image-rendering:pixelated;object-fit:contain}
@@ -321,7 +321,7 @@ html.land.short #scTeam{padding:8px 14px} html.land.short .slot{min-height:84px}
 .list{display:flex;flex-direction:column;gap:8px}
 #chartWrap table{border-collapse:collapse;font-size:10px;margin:0 auto}
 #chartWrap td,#chartWrap th{width:var(--cs,19px);height:var(--cs,19px);text-align:center;padding:0;border:1px solid #2a2340;font-size:calc(var(--cs,19px) * .52)}
-#chartWrap{--cs:clamp(19px,calc((min(100vw,var(--appW,100vw)) - 60px) / 17),34px)}
+#chartWrap{--cs:clamp(19px,calc((min(100vw,var(--appW,100vw)) - 60px) / 17),27px)}   /* 表と すくみ図が 横に ならぶ 大きさ */
 html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px)}
 #chartWrap td.hl,#chartWrap th.hl{box-shadow:inset 0 0 0 99px rgba(255,255,255,.12)}#chartWrap td.on{outline:2px solid #ffd84a;outline-offset:-2px}
 #chartInfo{text-align:center;min-height:1.6em;margin:6px 0 2px;font-size:13px}#chartInfo b{color:#ffd84a}
@@ -3922,16 +3922,17 @@ function rollNum(el, to) {
 }
 const TYPE_SHORT = { fire: '火', water: '水', grass: '草', wind: '風', ground: '土', elec: '雷', normal: '無', machine: '機', bug: '虫', ghost: '霊', demi: '亜', fairy: '妖', dragon: '竜', beast: '獣' };
 // すくみ図：そとの わは となりに かつ（とけいまわり）、うちがわの 線は 1つ とばしの 相性。むかいあう 2つは ふつう
+const SKM_MID = { '属性': 'normal', '種族': 'beast' };   // まんなか：どれとも ふつう
 const SKM_ORDER = { '属性': ['fire', 'grass', 'water', 'ground', 'elec', 'wind'], '種族': ['machine', 'fairy', 'dragon', 'ghost', 'demi', 'bug'] };
 function sukumi(o, cap) {
   const N = o.length, CX = 100, CY = 104, R = 68, r = 17, id = 'skA' + (cap === '属性' ? 'a' : 'r'), P = o.map((t, k) => { const a = -Math.PI / 2 + k * 2 * Math.PI / N; return [CX + R * Math.cos(a), CY + R * Math.sin(a)]; });
-  let h = `<svg class="skm" viewBox="0 0 200 206" width="186" height="192" role="img" aria-label="${cap}の すくみ"><defs><marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffd166"/></marker></defs>`;
+  let h = `<svg class="skm" viewBox="0 0 200 206" role="img" aria-label="${cap}の すくみ"><defs><marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffd166"/></marker></defs>`;
   for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) { if (effOf(o[i], o[j]) !== 2) continue;
     const [x0, y0] = P[i], [x1, y1] = P[j], L = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / L, uy = (y1 - y0) / L, ring = (j - i + N) % N === 1 || (i - j + N) % N === 1;
     h += `<line x1="${(x0 + ux * (r + 2)).toFixed(1)}" y1="${(y0 + uy * (r + 2)).toFixed(1)}" x2="${(x1 - ux * (r + 3)).toFixed(1)}" y2="${(y1 - uy * (r + 3)).toFixed(1)}" stroke="#ffd166" stroke-width="${ring ? 2.4 : 1.4}" opacity="${ring ? 1 : .55}" marker-end="url(#${id})"/>`; }
-  o.forEach((t, k) => { const [x, y] = P[k], U = typeof UIA !== 'undefined' && UIA[TY_ICON[t] || 'ty_' + t];
-    h += `<circle cx="${x}" cy="${y}" r="${r}" fill="${TYPES[t].c}" stroke="#1a1626" stroke-width="2"/>` + (U ? `<image href="${U.src}" x="${x - 10}" y="${y - 10}" width="20" height="20" style="image-rendering:pixelated"/>` : `<text x="${x}" y="${y + 4}" text-anchor="middle" font-size="12" fill="#1a1626">${TYPE_SHORT[t]}</text>`)
-      + `<text x="${x}" y="${(y > CY ? y + r + 10 : y - r - 4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#e8e4f4">${TYPES[t].n}</text>`; });
+  [...o.map((t, k) => [t, ...P[k], P[k][1] > CY ? P[k][1] + r + 10 : P[k][1] - r - 4]), [SKM_MID[cap], CX, CY, CY + r + 10]].forEach(([t, x, y, ly]) => { const U = typeof UIA !== 'undefined' && UIA[TY_ICON[t] || 'ty_' + t];
+    h += `<circle cx="${x}" cy="${y}" r="${r}" fill="${TYPES[t].c}" stroke="#1a1626" stroke-width="2"/>${x === CX && y === CY ? `<circle cx="${x}" cy="${y}" r="${r + 4}" fill="none" stroke="#e8e4f4" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>` : ''}` + (U ? `<image href="${U.src}" x="${x - 10}" y="${y - 10}" width="20" height="20" style="image-rendering:pixelated"/>` : `<text x="${x}" y="${y + 4}" text-anchor="middle" font-size="12" fill="#1a1626">${TYPE_SHORT[t]}</text>`)
+      + `<text x="${x}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="9" fill="#e8e4f4">${TYPES[t].n}</text>`; });
   return h + '</svg>';
 }
 function renderChart() {   // 相性表：属性どうし・種族どうしの 2まい（属性の 技は 属性に、種族の 技は 種族に だけ きく）
