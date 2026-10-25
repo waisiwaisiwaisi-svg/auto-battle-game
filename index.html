@@ -7849,7 +7849,7 @@ function netSnapshot() {
 /* ---------- ゲスト ---------- */
 function netGuestStart(st) {
   NET.started = true; setTimeout(netSendInput, 200);   // AUTO か どうかを ホストに つたえる
-  if (NET.nr) NET.nr.presence({ team6: null, pick: null, ca: null, la: null }).catch(() => { });
+  if (NET.nr) NET.nr.presence({ team6: null, pick: null, ca: null, la: null, pt: null, team: (NET.me && NET.me.team || st.g).map(o => { const { tr, ...r } = o; return r; }) }).catch(() => { });   // はじまったら 訓練は もう いらない：そうさ（inp）が かならず とどくように かるく
   const host = st.h.map(monFrom), me = st.g.map(monFrom);
   startBattle({ kind: 'online', field: st.field, enemies: me, p0: host, trainer: { name: myName(), spr: trArt(myLook()) }, title: 'オンライン対戦', intro: 'オンライン たいせん スタート！', skill: .5 });
   B.remote = true; B.my = 1; B.mode = 'intro'; B.snapT = 0; if (NET.ranked) $('bTitle').textContent = 'オンライン対戦';
@@ -9370,9 +9370,9 @@ function chooseSwap(pick, title, opt = {}) {
     L.appendChild(b);
   }
   $('chooseOv').hidden = false;
-  if (B.train || S.auto) {   // 訓練（見るだけ）・AUTO：えらばなければ じどうで だす
+  if (B.train || S.auto || B.kind === 'online') {   // 訓練（見るだけ）・AUTO・オンライン（あいてを またせない）：えらばなければ じどうで だす
     const myB = B, o = active(1), score = (i) => { const x = sd.fs[i]; return Math.max(...x.moves.map(id => MOVES[id] && isDamaging(MOVES[id]) && o ? effVs(MOVES[id].t, o.sp) : 0), .1) * (x.hp / x.maxHp + .2); };
-    const best = alive.slice().sort((a, b) => score(b) - score(a))[0]; let n = AUTO_PICK_T; const tip = document.createElement('div'); tip.className = 'dim'; tip.style.cssText = 'font-size:12px;margin-top:6px;text-align:center'; L.appendChild(tip);
+    const best = alive.slice().sort((a, b) => score(b) - score(a))[0]; let n = B.kind === 'online' && !S.auto ? 15 : AUTO_PICK_T; const tip = document.createElement('div'); tip.className = 'dim'; tip.style.cssText = 'font-size:12px;margin-top:6px;text-align:center'; L.appendChild(tip);
     const tick = () => { if (B !== myB || !B.choosing) return; if (n <= 0) { L.querySelectorAll('button')[alive.indexOf(best)].click(); return; } tip.textContent = `${n}びょうで ${sd.fs[best].sp.n}を じどうで だします`; n--; setTimeout(tick, 1000); }; tick();
   }
 }
