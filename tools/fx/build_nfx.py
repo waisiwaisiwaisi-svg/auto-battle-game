@@ -134,7 +134,32 @@ icons('F_small_3_9', [None, 'note', 'heart', 'key', 'check', 'target', 'rps_rock
 icons('F_digits_14', ['d0', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'plus', 'minus', 'times', 'pct'])
 icons('F_type_attr_7', ['ty_fire', 'ty_water', 'ty_grass', 'ty_wind', 'ty_earth', 'ty_elec', 'ty_none'])   # 新タイプ用：まだ ゲームで つかわない
 icons('F_type_race_7', ['ty_machine', 'ty_bug', 'ty_spirit', 'ty_dragon', 'ty_fairy', 'ty_demi', 'ty_beast'])
-uijs = '// ====== NUI（effects/F の 納品アイコン：tools/fx/build_nfx.py が 自動生成。UIA の おなじ キーは 上書き）======\nObject.assign(UIA, ' + json.dumps(UI, separators=(',', ':')) + ');\n// ====== ここまで NUI ======\n'
+# トレーナー（ジムリーダー・四天王・町の 人）：4コマ よこならび → TRAINER_ART と おなじ RLE（足もとを そろえて 4コマ 共通の わくに きりつめる）
+AL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-'
+B36 = '0123456789abcdefghijklmnopqrstuvwxyz'
+TRA = {}
+for p in sorted(FX.glob('T/T_*_4f.png')):
+    im = Image.open(p).convert('RGBA'); fw = im.width // 4
+    frs = [im.crop((i * fw, 0, (i + 1) * fw, im.height)) for i in range(4)]
+    bb = [f.getbbox() for f in frs]; box = (min(b[0] for b in bb), min(b[1] for b in bb), max(b[2] for b in bb), max(b[3] for b in bb))
+    frs = [f.crop(box) for f in frs]; w, h = frs[0].size; pal = []; f = []
+    for fr in frs:
+        idx = []
+        for c in fr.getdata():
+            if c[3] < 128: idx.append(0); continue
+            hx = '#%02x%02x%02x' % c[:3]
+            if hx not in pal: pal.append(hx)
+            idx.append(pal.index(hx) + 1)
+        o = ''; i = 0
+        while i < len(idx):
+            n = 1
+            while i + n < len(idx) and idx[i + n] == idx[i] and n < 1295: n += 1
+            o += AL[idx[i]] + B36[n // 36] + B36[n % 36]
+            i += n
+        f.append(o)
+    assert len(pal) <= 63, p
+    TRA[p.name[2:-7]] = {'w': w, 'h': h, 'pal': pal, 'f': f}
+uijs = '// ====== NUI（effects/F の 納品アイコン：tools/fx/build_nfx.py が 自動生成。UIA の おなじ キーは 上書き）======\nObject.assign(UIA, ' + json.dumps(UI, separators=(',', ':')) + ');\nObject.assign(TRAINER_ART, ' + json.dumps(TRA, separators=(',', ':')) + ');\n// ====== ここまで NUI ======\n'
 js = '// ====== NFX（effects/ の 納品エフェクト：tools/fx/build_nfx.py が 自動生成。PLFX の おなじ キーは 上書き）======\nconst NFX = ' + json.dumps(out, separators=(',', ':')) + ';\nObject.assign(PLFX, NFX);\n// ====== ここまで NFX ======\n'
 html = (ROOT / 'index.html').read_text(encoding='utf-8')
 html = re.sub(r'// ====== NFX.*?// ====== ここまで NFX ======\n', '', html, flags=re.S)
