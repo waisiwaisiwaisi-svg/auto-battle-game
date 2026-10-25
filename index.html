@@ -10459,7 +10459,9 @@ function drawFighter0(f) {
   { const g = f.state === 'grab' && f.cur && gfxOf(f.cur.m, 'brawl') ? f : null, o2 = typeof opp === 'function' ? opp(f) : null, by = !g && o2 && o2.state === 'grab' && o2.cur && gfxOf(o2.cur.m, 'brawl');   // ぜんりょくラッシュ：ケンカの 土煙で 2体を かくす
     if (by) return;
     if (g) { const o = opp(f), bk = gfxOf(f.cur.m, 'brawl'), img0 = SPR[f.mon.sid].n, ms = SPR[f.mon.sid].ms, mx = o ? (f.x + o.x) / 2 : f.x, my = o ? (f.y + o.y) / 2 : f.y;
-      shadow(mx, my, img0.width * ms * .9); plDraw(bk, plLoop(bk, B.t), mx + Math.sin(B.t * 31) * 2, my - img0.height * ms * .45 + Math.cos(B.t * 27) * 2, Math.max(1.4, img0.width * ms * 2.1 / (PLFX[bk].w * PIX_D)), 0); return; } }
+      const wa = img0.width * ms, ha = img0.height * ms, so = o && SPR[o.mon.sid], wb = so ? so.n.width * so.ms : wa, hb = so ? so.n.height * so.ms : ha,
+        span = (o ? Math.hypot(o.x - f.x, o.y - f.y) : 0) + (wa + wb) / 2, sc = Math.max(1.4, span * 1.35 / (PLFX[bk].w * PIX_D), Math.max(ha, hb) * 1.3 / (PLFX[bk].h * PIX_D));   // 2体とも まるごと つつむ 大きさ
+      shadow(mx, my, span * .6); plDraw(bk, plLoop(bk, B.t), mx + Math.sin(B.t * 31) * 2, my - Math.max(ha, hb) * .45 + Math.cos(B.t * 27) * 2, sc, 0); return; } }
   if (f.state === 'hide' && f.cur) {   // 空：上空に ちいさく 見えて かげだけ 地面に／地中：もりあがる つち
     const u = clamp(f.cur.t / f.cur.wind, 0, 1), img0 = SPR[f.mon.sid].n, ms = SPR[f.mon.sid].ms;
     if (f.cur.m.hide === 'fly') { const up = Math.sin(u * Math.PI) * 260 + 40, dk = f.cur.m.t === 'dragon' ? 'n_dive_dragon' : 'n_dive_wind'; shadow(f.x, f.y, img0.width * ms * (.15 + .2 * (1 - Math.sin(u * Math.PI))));
