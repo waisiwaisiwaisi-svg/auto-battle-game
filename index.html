@@ -1201,6 +1201,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trr .no{display:flex;flex-direction:column;align-items:center;line-height:1;width:1.6em!important;font-size:10px;opacity:.9}.trr .no b{font-size:17px}
 .trr .rh{font-size:14px;padding:6px 12px}
 .rc .ifl{font-size:10px;color:#9ec2ff;margin-right:2px;white-space:nowrap}
+.rc.not .ifl{color:#ff9a9a}.rc.not{background:rgba(120,20,30,.22)!important}
 .rc .any{font-size:12px;opacity:.85}.rc .any small{font-size:10px;opacity:.7}
 .trbtns .trok{font-size:15px;padding:8px 26px;background:var(--acc);color:#1a1222}.trbtns .trsim{font-size:14px;padding:8px 18px}
 .trbtns2{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center}.trbtns2 button{font:inherit;font-size:11px;color:var(--ink);opacity:.7;text-decoration:underline;text-underline-offset:3px;padding:2px}
@@ -4054,7 +4055,7 @@ function trNatCard(k, W, m) {
 const trMon = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
 const trDefC = (id) => MOVES[id] && AUTO_GUARD[MOVES[id].k] ? [[{ t: 'hit', p: 'any' }]] : [];   // まもる系の さいしょの 条件
 const trBlank = (m) => ({ hv: 1, mv: equipped(m).map(id => ({ id, go: 'auto', c: trDefC(id) })) });
-const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ hv: 1, nat: p.nat && NATURES[p.nat] ? p.nat : undefined, mv: p.mv.map(r => { const c = trLines(r.c).map(l => l.filter(c => CONDS[c.t] && condFits(c.t, r.id)).map(c => Object.assign({ t: c.t, p: c.p }, c.n != null ? { n: c.n } : {}))).filter(l => l.length); return { id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: !p.hv && !c.length ? trDefC(r.id) : c }; }) })) : trBlank(m);   // hv：まもる系が じどう だった ころの データを うつしかえた しるし
+const trClone = (p, m) => p && p.mv ? JSON.parse(JSON.stringify({ hv: 1, nat: p.nat && NATURES[p.nat] ? p.nat : undefined, mv: p.mv.map(r => { const c = trLines(r.c).map(l => l.filter(c => CONDS[c.t] && condFits(c.t, r.id)).map(c => Object.assign({ t: c.t, p: c.p }, c.n != null ? { n: c.n } : {}))).filter(l => l.length); const x = trLines(r.x).map(l => l.filter(c => CONDS[c.t] && c.t !== 'rot' && condFits(c.t, r.id)).map(c => Object.assign({ t: c.t, p: c.p }, c.n != null ? { n: c.n } : {}))).filter(l => l.length); return Object.assign({ id: r.id, go: TR_GO[r.go] ? r.go : 'auto', c: !p.hv && !c.length ? trDefC(r.id) : c }, x.length ? { x } : {}); }) })) : trBlank(m);   // hv：まもる系が じどう だった ころの データを うつしかえた しるし
 // 使える技：覚えている4つ ＋ 持っているスクロールで覚えられる技
 let TR_MINI = false;
 const TR_FLT = { t: '', c: '', q: '' };   // 訓練の 技パレットの しぼりこみ（タイプ・分類・なまえ）   // くんれんの パレットを たたんで いるか
@@ -4070,7 +4071,7 @@ const trCondTx = (c, W) => { const K = CONDS[c.t]; if (!K) return '？';
   const p = K.ps ? (K.ps.find(([v]) => String(v) === String(c.p)) || K.ps[0])[1] : ''; return K.n + (p ? '：' + p : '') + (K.ns ? K.nf(+c.n || K.n0) : ''); };
 // ならびかえ・さくじょ の あとも「技を撃った後／効果が切れた」が おなじ 技を さしつづける ように 番号を つけなおす（なくなった 技を さす じょうけんは けす）
 function trRemap(W, oldIds) {
-  for (const r of W.mv) for (const ls of (r.c || [])) for (let j = ls.length - 1; j >= 0; j--) { const c = ls[j]; if (!TR_SLOTC.includes(c.t)) continue;
+  for (const r of W.mv) for (const ls of (r.c || []).concat(r.x || [])) for (let j = ls.length - 1; j >= 0; j--) { const c = ls[j]; if (!TR_SLOTC.includes(c.t)) continue;
     const id = oldIds[(+c.p || 1) - 1], ni = W.mv.findIndex(x => x.id === id); if (ni < 0) ls.splice(j, 1); else c.p = ni + 1; }
 }
 // 模擬戦：いまの 設定（ほぞん まえでも）で つぎの あいて（アーケードの つぎの ジム）と 3たい たい 3たい を うらで なんかいか たたかわせて けっかを みせる（この子が せんとう・なかまは パーティの ほかの 2たい）
@@ -4214,16 +4215,18 @@ function renderTrain(uid) {
   const mvCls = (id) => eq.includes(id) ? '' : tm.includes(id) ? ' tmv' : ' bad';
   const where = (x) => (x.tr && x.tr.prog && x.tr.prog.mv && x.tr.mode === 'chip' ? '<em class="ok">設定済み</em>' : '') + (x.tr && x.tr.draft && x.tr.draft.mv ? '<em class="dr">仮</em>' : '');
   // 条件：1行の中は「かつ」、行どうしは「または」（2行目以降に入れる）
-  const conds = (i, ls) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l) => `<div class="rc${l ? ' or' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l ? '<b class="orl">または</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-kwh="c:${c.t}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l ? '<small>＋ ほかの条件（ここへ）</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`).join('');
+  // 使わないとき（l は 10〜）：どれかの 行が 合えば その技は 撃たない
+  const conds = (i, ls, X) => ls.concat(ls.length < TR_OR_MAX ? [[]] : []).map((cs, l0) => { const l = X ? l0 + 10 : l0; return `<div class="rc${l0 ? ' or' : ''}${X ? ' not' : ''}" data-drop="c" data-i="${i}" data-l="${l}">${l0 ? '<b class="orl">または</b>' : X ? '<b class="ifl">使わないとき</b>' : '<b class="ifl">使うとき</b>'}${cs.length ? cs.map((c, j) => `<span class="cnd${TRN.sel === `${i}:${l}:${j}` ? ' sel' : ''}" data-kwh="c:${c.t}" data-i="${i}" data-l="${l}" data-j="${j}" data-key="${W.mv[i].id}|${c.t}|${c.p}|${l}">${trCondTx(c, W)}</span>`).join('<i>かつ</i>') : `<span class="any">${l0 ? '<small>＋ ほかの条件（ここへ）</small>' : X ? 'なし <small>＋ 条件をここへ</small>' : 'いつでも <small>＋ 条件をここへ</small>'}</span>`}</div>`; }).join('');
+  const LN = (r, l) => +l >= 10 ? (r.x || (r.x = []))[+l - 10] : r.c[+l];   // 条件の 行（10〜 は 使わないとき）
   const btns = (i) => `<div class="rb"><button data-rm="${i}">×</button></div>`;
-  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${false ? '' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${false ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c)}${btns(i)}</div>`).join('')
+  const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${false ? '' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${false ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c) + conds(i, r.x || [], 1)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
-  const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>「連続で撃ったら後回し」を つけた 技は、つづけて その回数 撃つと、ほかの 技を 1回 撃つまで いちばん 後回しに なります（ほかに 撃てる 技が なければ 撃ちます）。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
+  const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>「使わないとき」の 条件が 合うと、その技は 撃ちません（「使うとき」より 先に 見ます）。<br>「連続で撃ったら後回し」を つけた 技は、つづけて その回数 撃つと、ほかの 技を 1回 撃つまで いちばん 後回しに なります（ほかに 撃てる 技が なければ 撃ちます）。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
     <div class="trhome"></div><div class="trbtns"><button class="btn sub trsim" data-a="dummy">🎯 木人戦</button><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
     <div class="trbtns2"><button data-a="draft">仮保存</button><button data-a="load">他からコピー</button><button data-a="revert">保存時に戻す</button><button data-a="clr">リセット</button></div>
     <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
-  const sel = TRN.sel && TRN.sel.split(':'), sc = sel && ((W.mv[+sel[0]] || { c: [] }).c[+sel[1]] || [])[+sel[2]];
+  const sel = TRN.sel && TRN.sel.split(':'), sc = sel && (LN(W.mv[+sel[0]] || { c: [] }, sel[1]) || [])[+sel[2]];
   let ins = '';
   const mvInfo = (id) => { const M = MOVES[id]; if (!M) return ''; return `<div class="trmvinfo" style="--c:${tcol(id)}"><div><b>${M.n}</b>${mvUseTag(M)} <span class="dim">${moveSub(M)}・${CAT_NAMES[M.cat] || ''}・待ち${(+M.cd).toFixed(1).replace(/\.0$/, '')}秒</span></div><div>${kwDesc(M)}</div></div>`; };   // 技の 内容
   const infoId = pk && pk.k === 'mv' ? pk.v : !pk && !sc ? TRN.info : null;
@@ -4255,15 +4258,15 @@ function renderTrain(uid) {
   if (!S.trTutDone && !TRT && !TRN.dirty) setTimeout(() => { if (!TRT && !$('scTrain').hidden) trtStart(); }, 300);   // はじめて ひらいたら やりかたを あんない
   B.querySelectorAll('.trnatsel button').forEach(b => b.onclick = () => { if (TRT) TRT.f.nat = 1; const v = b.dataset.nat; W.nat = v === recPlan(m.sid) ? undefined : v; TRN.dirty = true; SND.se('click'); renderTrain(uid); });   // 作戦：「確定」で 試合に つかう
   const act = (a, f) => { const e = B.querySelector(`[data-a="${a}"]`); if (e) e.onclick = f; };
-  const redo = () => renderTrain(uid), touch = () => { for (const r of W.mv) r.c = r.c.filter(l => l.length); TRN.dirty = true; redo(); };   // からの行は つめる
+  const redo = () => renderTrain(uid), touch = () => { for (const r of W.mv) { r.c = r.c.filter(l => l.length); if (r.x) { r.x = r.x.filter(l => l.length); if (!r.x.length) delete r.x; } } TRN.dirty = true; redo(); };   // からの行は つめる
   // 置く：pl = { k:'mv'|'go'|'c', v } 新しく ／ { from:[i,j] } 置いてある条件 ／ { gFrom:i } 置いてある立ち回り。z = 落とした枠
   const drop = (pl, z) => {
     const d = z && z.dataset.drop, i = z ? +z.dataset.i : -1;
-    const L = z ? +z.dataset.l || 0 : 0, line = (r, l) => r.c[l] || (r.c[l] = []);
-    if (pl.from) { const [fi, fl, fj] = pl.from, c = W.mv[fi].c[fl][fj];
-      if (!z) { W.mv[fi].c[fl].splice(fj, 1); TRN.sel = null; SND.se('back'); touch(); return; }   // 枠の外へ：削除
+    const L = z ? +z.dataset.l || 0 : 0, line = (r, l) => LN(r, l) || (l >= 10 ? (r.x[l - 10] = []) : (r.c[l] = []));
+    if (pl.from) { const [fi, fl, fj] = pl.from, c = LN(W.mv[fi], fl)[fj];
+      if (!z) { LN(W.mv[fi], fl).splice(fj, 1); TRN.sel = null; SND.se('back'); touch(); return; }   // 枠の外へ：削除
       if (d !== 'c' || (i === fi && L === fl) || !condFits(c.t, W.mv[i].id)) return;
-      line(W.mv[i], L).push(c); W.mv[fi].c[fl].splice(fj, 1); TRN.sel = null; SND.se('click'); touch(); return; }
+      if (c.t === 'rot' && L >= 10) return; line(W.mv[i], L).push(c); LN(W.mv[fi], fl).splice(fj, 1); TRN.sel = null; SND.se('click'); touch(); return; }
     if (pl.rowEl) { const t = z && z.closest('.trr[data-row]'); if (!t) return; const to = +t.dataset.row; if (to === pl.i) return;
       const ids = W.mv.map(x => x.id), [r] = W.mv.splice(pl.i, 1); W.mv.splice(to, 0, r); trRemap(W, ids); TRN.sel = null; SND.se('click'); touch(); return; }
     if (pl.gFrom != null) { const r = W.mv[pl.gFrom], g = r.go;
@@ -4272,10 +4275,10 @@ function renderTrain(uid) {
     if (!z) return;
     if (pl.k === 'mv') { const at = W.mv.findIndex(r => r.id === pl.v);
       if (d === 'mvnew') { if (at >= 0) return; W.mv.push({ id: pl.v, go: 'auto', c: trDefC(pl.v) }); }
-      else if (d === 'h') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; for (const r of W.mv) r.c = trLines(r.c).map(l => l.filter(c => condFits(c.t, r.id))); }   // いれかえた 技に あわない 条件は はずす
+      else if (d === 'h') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; for (const r of W.mv) { r.c = trLines(r.c).map(l => l.filter(c => condFits(c.t, r.id))); if (r.x) r.x = r.x.map(l => l.filter(c => condFits(c.t, r.id))); } }   // いれかえた 技に あわない 条件は はずす
       else return; }
     else if (pl.k === 'go') { if (d !== 'g') return; W.mv[i].go = pl.v; }
-    else if (pl.k === 'c') { if (d !== 'c' || !condFits(pl.v, W.mv[i].id)) return; line(W.mv[i], L).push(trCondNew(pl.v)); TRN.sel = `${i}:${L}:${W.mv[i].c[L].length - 1}`; }
+    else if (pl.k === 'c') { if (d !== 'c' || !condFits(pl.v, W.mv[i].id) || (pl.v === 'rot' && L >= 10)) return; line(W.mv[i], L).push(trCondNew(pl.v)); TRN.sel = `${i}:${L}:${LN(W.mv[i], L).length - 1}`; }
     TRN.pick = null; SND.se('ok'); touch();
   };
   // おける ばしょ だけ：はこぶ ものごとに おける わくを きめる（おけない わくは ひからない）
@@ -4283,10 +4286,10 @@ function renderTrain(uid) {
     const q = (sel) => [...B.querySelectorAll(sel)];
     if (pl.rowEl) return q('.trr[data-row]').filter(z => +z.dataset.row !== pl.i);
     if (pl.gFrom != null) return q('.trmain [data-drop="g"]').filter(z => +z.dataset.i !== pl.gFrom);
-    if (pl.from) { const ct = W.mv[pl.from[0]].c[pl.from[1]][pl.from[2]].t; return q('.trmain [data-drop="c"]').filter(z => !(+z.dataset.i === pl.from[0] && +(z.dataset.l || 0) === pl.from[1]) && condFits(ct, W.mv[+z.dataset.i].id)); }
+    if (pl.from) { const ct = LN(W.mv[pl.from[0]], pl.from[1])[pl.from[2]].t; return q('.trmain [data-drop="c"]').filter(z => !(+z.dataset.i === pl.from[0] && +(z.dataset.l || 0) === pl.from[1]) && condFits(ct, W.mv[+z.dataset.i].id) && !(ct === 'rot' && +z.dataset.l >= 10)); }
     if (pl.k === 'mv') return q('.trmain [data-drop="mvnew"], .trmain [data-drop="h"]').filter(z => z.dataset.drop === 'mvnew' ? !W.mv.some(r => r.id === pl.v) : W.mv[+z.dataset.i].id !== pl.v);
     if (pl.k === 'go') return q('.trmain [data-drop="g"]');
-    if (pl.k === 'c') return q('.trmain [data-drop="c"]').filter(z => condFits(pl.v, W.mv[+z.dataset.i].id));
+    if (pl.k === 'c') return q('.trmain [data-drop="c"]').filter(z => condFits(pl.v, W.mv[+z.dataset.i].id) && !(pl.v === 'rot' && +z.dataset.l >= 10));
     return [];
   };
   // いちばん ちかい おける わく（ゆびの したに あれば それ、なければ 56px いないの いちばん ちかい もの＝マグネット）
@@ -4317,7 +4320,7 @@ function renderTrain(uid) {
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     if (g.dataset.k === 'cq') sc.n = STG_ENC(STG_DEC(sc.n ?? K.n0)[0], b.dataset.v); else if (g.dataset.k === 'cv') sc.n = STG_ENC(+b.dataset.v, STG_DEC(sc.n ?? K.n0)[1]);   // 能力の 段階：以上・以下 と 段階を べつべつに
     else if (g.dataset.k === 'cn') sc.n = +b.dataset.v; else sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
-  act('cdel', () => { W.mv[+sel[0]].c[+sel[1]].splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
+  act('cdel', () => { LN(W.mv[+sel[0]], sel[1]).splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
   act('sim', async () => { if (TR_SIM) return; if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok');
     const bg = modal('<h3>模擬戦ちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'); const log = await trSim(m, W, 5); bg.remove(); if (log) trSimShow(m, W, log); });
   act('dummy', () => { if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok'); dummyStart(m, W); });
@@ -5207,7 +5210,7 @@ function autoGuard(att, def, m, opt) {
   if (def.v.protect > 0 || def.v.counter || def.state === 'stance') return;
   const can = (k) => (MOVES[k].psnGuard ? 'rock' : AUTO_GUARD[MOVES[k].k]) === r && !((def.cd[k] || 0) > 0) && !(healMax(MOVES[k]) && healLeft(def, k) <= 0) && !(def.v.taunt > 0 && MOVES[k].cat === 'stat');
   const P = trProg(def); let id;
-  let li = -1; if (P) { def.hitCtx = { att, m }; const row = P.mv.find(x => def.moves.includes(x.id) && MOVES[x.id] && can(x.id) && (li = trLines(x.c).findIndex(l => l.some(c => c.t === 'hit') && condsOk(def, att, l, x.id))) >= 0); def.hitCtx = null; id = row && row.id; }   // 訓練：「攻撃を受けた瞬間」の 条件が 合う 技だけ
+  let li = -1; if (P) { def.hitCtx = { att, m }; const row = P.mv.find(x => def.moves.includes(x.id) && MOVES[x.id] && can(x.id) && !trNot(def, att, x) && (li = trLines(x.c).findIndex(l => l.some(c => c.t === 'hit') && condsOk(def, att, l, x.id))) >= 0); def.hitCtx = null; id = row && row.id; }   // 訓練：「攻撃を受けた瞬間」の 条件が 合う 技だけ
   else id = def.moves.find(can);   // 訓練が ない こ（やせい・あいての トレーナー）は いままでどおり じどう
   if (!id) return; const g = MOVES[id];
   if (healMax(g) && !TUT) { def.uses = def.uses || {}; def.uses[id] = (def.uses[id] || 0) + 1; }
@@ -6650,6 +6653,7 @@ function condFits(t, id) { const m = MOVES[id]; if (!m) return true;
 // ためて はなつ 技：「チャージ」の 条件が いまの だんかい（ためる／はなつ）と ちがう 行は いまは ない もの として あつかう（その だんかいは お任せ）
 const chgOff = (f, id, l) => !!(MOVES[id] && MOVES[id].charge2) && l.some(c => c.t === 'chg' && (c.p === 'not') === !!(f.v && f.v.charged));
 const condsOk = (f, o, cs, id) => (cs || []).every(c => condOk(f, o, c, id));
+const trNot = (f, o, r) => !!(r && r.x) && r.x.some(l => l.length && condsOk(f, o, l, r.id));   // 使わないとき：どれかの 行が 合えば 撃たない
 function runRules(f, o) {
   const P = trProg(f); f.trGo = null; f.trAt = '';
   if (simMine(f)) { const L = B.simLog; L.ticks = (L.ticks || 0) + 1; L.ct = L.ct || {};   // 模擬戦：条件が なりたって いた じかんを かぞえる
@@ -6660,7 +6664,8 @@ function runRules(f, o) {
     f.trSkip = { id: f.queued, until: B.t + 4 }; f.queued = null; f.trQ = null;
   }
   const skip = (id) => f.trSkip && f.trSkip.id === id && B.t < f.trSkip.until;
-  const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id) && !skip(r.id) && !moveUseless(f, o, r.id);
+  const no = (r) => trNot(f, o, r);   // 使わないとき に 合う 技は 撃たない
+  const rows = P.mv.filter(r => f.moves.includes(r.id)), ok = (r) => !(f.cd[r.id] > 0) && !moveBlocked(f, r.id) && !skip(r.id) && !moveUseless(f, o, r.id) && !no(r);
   const LN = (l) => l.filter(c => c.t !== 'rot');   // 「後回し」は 条件に かぞえない
   const lineHit = (r, ev) => trLines(r.c).some(l => LN(l).length && !chgOff(f, r.id, l) && (!ev || l.some(c => TR_EV.includes(c.t))) && condsOk(f, o, l, r.id));
   const hasC = (r) => trLines(r.c).some(l => LN(l).length && !chgOff(f, r.id, l));
@@ -6672,7 +6677,7 @@ function runRules(f, o) {
   const alt = rows.some(x => !pen(x) && ok(x) && (!hasC(x) || lineHit(x)));   // 後回しの 技の かわりに 撃てる 技が ある
   const pr = f.trPrep && rows.find(r => r.id === f.trPrep.id && ok(r) && (!hasC(r) || lineHit(r)));   // うごきはじめた 技は 撃つまで かえない（条件が はずれたら やめる）
   // 条件つきの 技は 条件が 合う ときだけ（上から 順）。合う技が ない ときは お任せAIが 条件なしの 技から えらぶ（えらばなければ 待つ）
-  f.trBan = rows.filter(r => (hasC(r) && !lineHit(r)) || (alt && pen(r))).map(r => r.id);
+  f.trBan = rows.filter(r => (hasC(r) && !lineHit(r)) || (alt && pen(r)) || no(r)).map(r => r.id);
   if (!rows.some(r => !moveBlocked(f, r.id) && !moveUseless(f, o, r.id))) { f.trPrep = null; if (f.state === 'free' && !f.queued) { const id = aiPickMove(f, o); if (id) { f.queued = id; f.trQ = { id, t: B.t }; } } return; }   // 撃てる 技が もう ない（つかいきった・いまは きかない）：通常の AI（たいあたり）で ねばる
   if (!pr && !hitNP.some(ok)) f.aiT = (f.aiT || 0) - .25;
   const ai = !pr && !hitNP.some(ok) && f.state === 'free' && !f.queued && f.aiT <= 0 ? (() => { f.aiT = aiWait(f); const nx = f.trNext; f.trNext = null; const id = nx && rows.some(x => x.id === nx && ok(x) && !(alt && pen(x))) ? nx : aiPickMove(f, o); return id && (rows.find(x => x.id === id && ok(x)) || (MOVES[id] && !rows.some(x => x.id === id) ? { id, go: 'auto', c: [] } : null)); })() : null;
@@ -7618,8 +7623,8 @@ async function netGetRoom() {
 }
 // 訓練（確定した もの）を みじかく して おくる：{ n: 作戦, m: [[技, 撃ち方, [[条件, あたい, 回数]…]…]…] }
 const trPack = (m) => { const P = m.tr && m.tr.mode === 'chip' && m.tr.prog && m.tr.prog.mv ? trClone(m.tr.prog, m) : null; if (!P) return undefined;
-  return { n: P.nat || 0, m: P.mv.map(r => [r.id, r.go === 'auto' ? 0 : r.go, r.c.map(l => l.map(c => c.n != null ? [c.t, c.p, c.n] : [c.t, c.p]))]) }; };
-const trUnpack = (o, m) => { try { if (!o || !Array.isArray(o.m)) return null; const P = trClone({ nat: o.n || undefined, mv: o.m.slice(0, 8).map(r => ({ id: String(r[0]), go: r[1] || 'auto', c: (Array.isArray(r[2]) ? r[2] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 6).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))) })).filter(r => MOVES[r.id] && m.moves.includes(r.id)) }, m); return P.mv.length ? { mode: 'chip', prog: P } : null; } catch (e) { return null; } };
+  return { n: P.nat || 0, m: P.mv.map(r => [r.id, r.go === 'auto' ? 0 : r.go, r.c.map(l => l.map(c => c.n != null ? [c.t, c.p, c.n] : [c.t, c.p]))].concat(r.x && r.x.length ? [r.x.map(l => l.map(c => c.n != null ? [c.t, c.p, c.n] : [c.t, c.p]))] : [])) }; };
+const trUnpack = (o, m) => { try { if (!o || !Array.isArray(o.m)) return null; const P = trClone({ nat: o.n || undefined, mv: o.m.slice(0, 8).map(r => ({ id: String(r[0]), go: r[1] || 'auto', c: (Array.isArray(r[2]) ? r[2] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 6).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))), x: (Array.isArray(r[3]) ? r[3] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 6).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))) })).filter(r => MOVES[r.id] && m.moves.includes(r.id)) }, m); return P.mv.length ? { mode: 'chip', prog: P } : null; } catch (e) { return null; } };
 const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0, tr: trPack(m) }; });
 const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   // しらない 種族（え が とどかなかった など）
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } const tr = trUnpack(o.tr, m); if (tr) m.tr = tr; return m; };
