@@ -97,6 +97,7 @@ h1.logo{font-size:28px;line-height:1.15;letter-spacing:.06em;color:var(--acc);te
 .logo small{display:block;font-size:13px;color:var(--ink);letter-spacing:.3em;margin-top:6px}
 .center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;flex:1;text-align:center}
 .lead{font-size:13px;line-height:1.7;color:var(--ink)}
+#chartWrap th.chCorner{position:relative;background:linear-gradient(to top right,transparent calc(50% - .5px),#4a4060 50%,transparent calc(50% + .5px));color:var(--dim);text-shadow:none;font-weight:400}#chartWrap .chCorner i{position:absolute;font-style:normal;font-size:calc(var(--cs,19px) * .36);line-height:1}#chartWrap .chCorner i:first-child{top:2px;right:2px}#chartWrap .chCorner i:last-child{bottom:2px;left:2px}
 .chRow{display:flex;flex-wrap:wrap;justify-content:center;gap:calc(var(--cs,19px) * .6);align-items:center}#chartWrap .chRow table{margin:0}.skm{flex:1 1 150px;min-width:150px;max-width:calc(var(--cs,19px) * 8.4);height:auto}   /* 相性表の 横の すくみ図 */
 .dim{color:var(--dim);font-size:12px}
 .row{display:flex;gap:10px;align-items:center}
@@ -3938,7 +3939,7 @@ function sukumi(o, cap) {
 }
 function renderChart() {   // 相性表：属性どうし・種族どうしの 2まい（属性の 技は 属性に、種族の 技は 種族に だけ きく）
   const th = (t) => `<th style="background:${TYPES[t].c}" title="${TYPES[t].n}">${TYPE_SHORT[t]}</th>`;
-  const table = (ts, cap) => { let h = `<h3 style="margin:10px 0 4px">${cap}</h3><div class="chRow"><table data-g="${cap}"><tr><th style="background:none;color:var(--dim)">技＼受</th>${ts.map(th).join('')}</tr>`;
+  const table = (ts, cap) => { let h = `<h3 style="margin:10px 0 4px">${cap}</h3><div class="chRow"><table data-g="${cap}"><tr><th class="chCorner"><i>受</i><i>技</i></th>${ts.map(th).join('')}</tr>`;
     for (const a of ts) { h += `<tr>${th(a)}`; for (const d of ts) { const v = effOf(a, d); h += v === 2 ? '<td class="x2">◎</td>' : v === .5 ? '<td class="x05">△</td>' : '<td></td>'; } h += '</tr>'; }
     return h + '</table>' + sukumi(SKM_ORDER[cap], cap) + '</div>'; };
   $('chartWrap').innerHTML = table(TYPE_ATTR, '属性') + table(TYPE_RACE, '種族') + '<div id="chartInfo" class="dim" style="min-height:1.4em"></div>'
