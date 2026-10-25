@@ -8543,7 +8543,7 @@ function endBattle(res) {
     else if (res === 'lose') lines.unshift(B.fled ? `${B.fled}は とおぼえに おどろいて にげかえった…` : 'ちからつきて しまった… でも モンスターたちは すぐに げんきに なった');
     else if (res === 'run') lines.unshift(B.fled ? `${B.fled}は おどろいて にげていった（とおぼえで やせいは にげる）` : 'くさむらから ぶじに にげだした');
   } else if (B.cfg.tutorial) tutEnd(res, lines);
-  else if (B.cfg.journey) journeyResult(res, lines);
+  else if (B.cfg.journey) { try { journeyResult(res, lines); } catch (e) { console.error(e); } }   // ここで エラーが でても リザルトは だす（とまらない）
   else if (B.cfg.arcade) arcadeResult(res, lines);
   else if (B.cfg.tower) towerResult(res, lines);
   else {
@@ -11382,8 +11382,9 @@ function rivalTalk(lines) {
 function journeyResult(res, lines) {
   const J = jr(), c = B.cfg.journey;
   if (c.rival) {
-    if (res === 'win') { const first = c.test || !J.rival; if (!c.test) { J.rival = 1; S.wins++; } lines.unshift(`${rivalTr().name}に かった！`); lines.push(`つぎは ${FIELD_NAMES[GYMS[J.gym].f]}ジム！`);
-      if (first) { const g = FIELD_NAMES[GYMS[J.gym].f]; B.preTalk = () => rivalTalk(['……やるじゃない。初めてにしては、いい戦いだったよ。', 'わたしもこれから、ジムを巡ってバッジを集めるんだ。', 'ねえ、競争しない？ どっちが先にジムバッジを10個集められるか！', `チャンピオンリーグで待ってるからね。まずは${g}ジムから、がんばって！`]); } }
+    const nx = GYMS[J.gym] ? FIELD_NAMES[GYMS[J.gym].f] + 'ジム' : J.badges.length >= GYMS.length ? 'チャンピオンリーグ' : 'ジム';   // ジムを ぜんぶ おえている ときは リーグ（テストで ずっと あとから やっても とまらない）
+    if (res === 'win') { const first = c.test || !J.rival; if (!c.test) { J.rival = 1; S.wins++; } lines.unshift(`${rivalTr().name}に かった！`); lines.push(`つぎは ${nx}！`);
+      if (first) { B.preTalk = () => rivalTalk(['……やるじゃない。初めてにしては、いい戦いだったよ。', 'わたしもこれから、ジムを巡ってバッジを集めるんだ。', 'ねえ、競争しない？ どっちが先にジムバッジを10個集められるか！', `チャンピオンリーグで待ってるからね。まずは${nx}から、がんばって！`]); } }
     else if (res === 'lose') lines.unshift('まけてしまった… もういちど ちょうせんしよう');
     return;
   }
