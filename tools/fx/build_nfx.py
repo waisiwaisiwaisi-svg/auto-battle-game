@@ -102,10 +102,10 @@ def icons(name, keys):
     p = next(FX.glob('F/' + name + '.png')); im = Image.open(p).convert('RGBA'); n = len(keys); w = im.width // n
     for i, k in enumerate(keys):
         if k: UI[k] = {'w': w, 'h': im.height, 'src': png(im.crop((i * w, 0, i * w + w, im.height)))}
-icons('F_tab_5', ['ic_tab_shop', 'ic_tab_team', 'ic_tab_home', 'ic_tab_train', 'ic_tab_guild'])
-icons('F_homebtn_7', ['ic_help', 'ic_book', 'ic_chart', 'rotate', 'spk_on', 'spk_off', 'ic_gear'])
-icons('F_mode_5', ['ic_mode_online', 'ic_flag', 'ic_mode_cup', 'ic_bush', 'ic_globe'])
-icons('F_resource_4', ['ic_trophy', 'ic_res_orb', 'ic_gem', 'ic_res_chest'])
+# icons('F_tab_5', ['ic_tab_shop', 'ic_tab_team', 'ic_tab_home', 'ic_tab_train', 'ic_tab_guild'])
+# icons('F_homebtn_7', ['ic_help', 'ic_book', 'ic_chart', 'rotate', 'spk_on', 'spk_off', 'ic_gear'])
+# icons('F_mode_5', ['ic_mode_online', 'ic_flag', 'ic_mode_cup', 'ic_bush', 'ic_globe'])
+# icons('F_resource_4', ['ic_trophy', 'ic_res_orb', 'ic_gem', 'ic_res_chest'])
 icons('F_emblem_3', ['emb_sword', 'emb_bow', 'emb_shield'])
 uijs = '// ====== NUI（effects/F の 納品アイコン：tools/fx/build_nfx.py が 自動生成。UIA の おなじ キーは 上書き）======\nObject.assign(UIA, ' + json.dumps(UI, separators=(',', ':')) + ');\n// ====== ここまで NUI ======\n'
 js = '// ====== NFX（effects/ の 納品エフェクト：tools/fx/build_nfx.py が 自動生成。PLFX の おなじ キーは 上書き）======\nconst NFX = ' + json.dumps(out, separators=(',', ':')) + ';\nObject.assign(PLFX, NFX);\n// ====== ここまで NFX ======\n'
