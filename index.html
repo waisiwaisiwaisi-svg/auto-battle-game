@@ -5606,7 +5606,7 @@ function fireMove(f) {
   if (m.k === 'vault') {   // そらをとぶ・あなをほる：空／地中に かくれて あいての ところへ。おりてくる ばしょは 見えるので よけられる
     cur.t = 0; cur.wind = 1.4; cur.tx = o ? o.x : f.x; cur.ty = o ? o.y : f.y; f.state = 'hide'; f.inv = 0;
     if (m.hide === 'dig') { B.holes = B.holes.filter(h => h.side !== f.side); cur.hole = addHole(f.x, f.y, bodySz(f.sp), f.side); }   // もぐった 穴（あきっぱなし）。穴は 1プレイヤー 1セット：まえの 穴は けす
-    if (m.hide === 'dig' && plOk('dig_in')) plFx('dig_in', f.x, f.y + 4, digSc(f)); else if (m.hide === 'fly' && plOk('n_fly_up')) plFx('n_fly_up', f.x, f.y + 4, 1.6); else sheetFx(m.hide === 'fly' ? 'speed' : 'st_ground', f.x, f.y - 20, 1.1); B.shake = Math.max(B.shake, m.hide === 'dig' ? 4 : 2);
+    if (m.hide === 'dig' && plOk('dig_in')) plFx('dig_in', f.x, f.y + 4, digSc(f)); else if (m.hide === 'fly' && plOk('n_fly_up')) plFx('n_fly_up', f.x, f.y + 4, 1.6 * Math.max(.8, f.r / 23)); else sheetFx(m.hide === 'fly' ? 'speed' : 'st_ground', f.x, f.y - 20, 1.1); B.shake = Math.max(B.shake, m.hide === 'dig' ? 4 : 2);
     say(m.hide === 'fly' ? `${f.sp.n}は そらたかく とびあがった！` : `${f.sp.n}は じめんに もぐった！`); return;
   }
   if (o && o.clones && ['aoe', 'strike', 'beam', 'cone', 'swipe', 'multi'].includes(m.k) && !(cur.pts && m.k === 'strike')) hitClones(o, c => inZone(cur, f, c.x, c.y, 14));   // はんいの わざ：ぶんしんも けす
@@ -5791,7 +5791,7 @@ function addHole(x, y, sz, side) {
   return h;
 }
 const holeR = (h) => 14 + h.sz * 12;
-const vaultRad = (f, m) => m.hide === 'dig' && f && f.r ? Math.round(f.r * 1.4) : m.rad;   // あなをほる：でてくる ときの はんいは からだの 大きさ（ふつうの 大きさで 32）
+const vaultRad = (f, m) => !f || !f.r ? m.rad : m.hide === 'dig' ? Math.round(f.r * 1.4) : Math.round(m.rad * f.r / 23);   // そらをとぶ・ドラゴンダイブも ふつうの 大きさ（r=23）で もとの はんい、体が 大きいほど ひろく   // あなをほる：でてくる ときの はんいは からだの 大きさ（ふつうの 大きさで 32）
 const canTunnel = (f, h) => !hovers(f) && bodySz(f.sp) <= h.sz + 1e-6;
 // AI：近くの 穴に はいると のぞみの きょりに ちかづくなら くぐる
 function tryTunnel(f, o, R) {
@@ -7456,7 +7456,7 @@ function updateFighter(f, dt) {
       if (cur.m.hide === 'dig' && Math.random() < dt * 20) B.parts.push({ x: f.x + rand(-10, 10), y: f.y, vx: rand(-40, 40), vy: -rand(40, 90), life: .4, max: .4, col: choice(['#d8b060', '#8a6a3a', '#f0d8a0']), size: 3, g: 300, shape: 'chunk' });
       if (cur.t >= cur.wind) {
         const m = cur.m; f.x = cur.tx; f.y = cur.ty; if (blockedAt(f.x, f.y, footR(f))) freeSpot(f);
-        if (m.hide === 'dig' && plOk('dig_out')) plFx('dig_out', f.x, f.y + 4, digSc(f) * 1.2); else if (m.hide === 'fly' && plOk('n_fly_land')) plFx('n_fly_land', f.x, f.y + 4, 1.6); else sheetFx(m.hide === 'fly' ? 'slam' : 'st_ground', f.x, f.y - 20, 1.3); B.shake = Math.max(B.shake, 7); SND.se('boom');
+        if (m.hide === 'dig' && plOk('dig_out')) plFx('dig_out', f.x, f.y + 4, digSc(f) * 1.2); else if (m.hide === 'fly' && plOk('n_fly_land')) plFx('n_fly_land', f.x, f.y + 4, 1.6 * Math.max(.8, f.r / 23)); else sheetFx(m.hide === 'fly' ? 'slam' : 'st_ground', f.x, f.y - 20, 1.3); B.shake = Math.max(B.shake, 7); SND.se('boom');
         if (m.hide === 'dig') { const h = addHole(f.x, f.y, bodySz(f.sp), f.side); if (cur.hole) { h.to = cur.hole.uid; cur.hole.to = h.uid; } }   // でてきた 穴：もぐった 穴と つながる
         if (oT && Math.hypot(o.x - cur.tx, o.y - cur.ty) <= vaultRad(f, m) + o.r * .5) hit(f, o, m, Math.atan2(o.y - f.y, o.x - f.x));
         f.state = 'wind'; endAct(f, .4);
@@ -8802,7 +8802,7 @@ function moveDesc(m) {
   // 動き
   if (m.k === 'counter') add(`突進・打撃を受けた瞬間に、受けたダメージを${m.mult}倍で返す`);
   if (m.k === 'wall') add(`相手との間に壁を作る（${m.life}秒）。技も通さない${m.thorn ? '・触れるとダメージ' : ''}。空から降る技・地割れは防げない。壊せるのは${wallBreakers({ t: m.t, reflect: m.reflect }).map(TN).join('・')}の技だけ`);
-  if (m.k === 'vault') add(m.hide === 'fly' ? '空へ飛び上がり、相手の所へ降りて攻撃（飛んでいる間は攻撃を受けない）' : '地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。出てくる所の攻撃範囲は体の大きさで決まる。掘った穴は残り、自分より大きくないモンスターは穴から穴へくぐれる');
+  if (m.k === 'vault') add(m.hide === 'fly' ? '空へ飛び上がり、相手の所へ降りて攻撃（飛んでいる間は攻撃を受けない）。降りる所の攻撃範囲は体の大きさで決まる' : '地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。出てくる所の攻撃範囲は体の大きさで決まる。掘った穴は残り、自分より大きくないモンスターは穴から穴へくぐれる');
   if (m.k === 'floor') add(`相手の足元に${m.n}を作る（消えない）。${[m.noDmg ? '' : '踏むと1ダメージ', m.slow ? '足が遅くなる' : '', m.pull ? '中心へ引き込まれる' : ''].filter(Boolean).join('・')}`);
   const K = {
     protect: m.psnGuard ? '近接・突進など体でぶつかる技を1回防ぎ、攻撃した相手をどくにする' : '飛び道具・ビーム・範囲技を1回打ち消す',
