@@ -37,6 +37,15 @@ def cells(a, cols, rows):
     xs, ys = cuts(op.sum(0), cols, a.shape[1]), cuts(op.sum(1), rows, a.shape[0])
     return [[a[ys[r]:ys[r + 1], xs[c]:xs[c + 1]] for c in range(cols)] for r in range(rows)]
 
+def keep_main(c, R=8):
+    # マスわりで まじった となりの 絵の きれはしを けす：いちばん 大きい かたまりから R px いないに ある 絵だけ のこす
+    op = c[:, :, 3] > 40
+    lab, n = ndimage.label(ndimage.binary_dilation(op, iterations=R), structure=np.ones((3, 3)))
+    if n <= 1: return c
+    main = np.argmax(ndimage.sum(op, lab, range(1, n + 1))) + 1
+    c = c.copy(); c[lab != main, 3] = 0
+    return c
+
 def crop_alpha(c):
     ys, xs = np.where(c[:, :, 3] > 40)
     return Image.fromarray(c[ys.min():ys.max() + 1, xs.min():xs.max() + 1], 'RGBA')
@@ -126,7 +135,7 @@ for k, cells4, base in SHEETS:
             rs = [s for s in solid if ((s[0] + s[2]) / 2 > W / 2) == bool(qx) and ((s[1] + s[3]) / 2 > H / 2) == bool(qy)]
             if not rs: continue
             x0, y0, x1, y1 = min(s[0] for s in rs), min(s[1] for s in rs), max(s[2] for s in rs), max(s[3] for s in rs)
-            im = crop_alpha(cells4[q]); dw = (x1 - x0) * 1.12; dh = dw * im.height / im.width
+            im = crop_alpha(keep_main(cells4[q])); dw = (x1 - x0) * 1.12; dh = dw * im.height / im.width
             sv = im.resize((max(1, round(dw * .8)), max(1, round(dh * .8))), Image.LANCZOS)   # 表示の 0.8 倍で 保存
             # あたりはんてい：絵の 列ごとに、した 55% を 足もととして 通れなく する（CELL ごとの 四角に まとめる）
             A = np.array(im.resize((max(1, round(dw)), max(1, round(dh))), Image.LANCZOS))[:, :, 3] > 100
