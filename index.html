@@ -360,19 +360,19 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
 #mmPill[hidden]{display:none}
 /* バトルの スタンプ：HPの 下に ふきだし・えらぶ パネル */
 #cvWrap .hudtop .plate{position:relative}
-.stp{position:absolute;top:calc(100% + 7px);display:flex;align-items:center;gap:5px;padding:4px 10px 4px 6px;background:#fff8e6;color:#2a2040;border-radius:10px;box-shadow:0 0 0 2px #1a1626,2px 3px 0 rgba(0,0,0,.35);font-size:13px;font-weight:700;white-space:nowrap;z-index:6;pointer-events:none}
+.stp{position:absolute;top:calc(100% + 7px);display:flex;align-items:center;gap:5px;padding:5px;background:#fff8e6;color:#2a2040;border-radius:10px;box-shadow:0 0 0 2px #1a1626,2px 3px 0 rgba(0,0,0,.35);font-size:13px;font-weight:700;white-space:nowrap;z-index:6;pointer-events:none}
 .stp[hidden]{display:none}
 #stpP{left:6px} #stpE{right:6px}
 .stp::before{content:'';position:absolute;top:-7px;border:7px solid transparent;border-top:0;border-bottom-color:#1a1626}
 #stpP::before{left:14px} #stpE::before{right:14px}
-.stp img{width:20px;height:20px;image-rendering:pixelated}
+.stp img{width:40px;height:40px;image-rendering:pixelated;display:block}
 .stp.on{animation:stpPop .32s cubic-bezier(.3,1.6,.5,1)}
 @keyframes stpPop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
 #stampPal{pointer-events:auto;position:absolute;top:calc(34px + var(--sat,0px));right:8px;z-index:7;display:grid;grid-template-columns:repeat(4,auto);gap:5px;padding:6px;background:linear-gradient(180deg,#3d3466,#241d40);box-shadow:0 0 0 2px #1a1626,inset 0 0 0 1px #6a5aa8;border-radius:6px}
 #stampPal[hidden]{display:none}
-#stampPal button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 6px;min-width:60px;font-size:11px;color:#fff;background:#2a2248;border-radius:4px;box-shadow:inset 0 0 0 1px #5a4a90}
+#stampPal button{display:flex;align-items:center;justify-content:center;padding:6px;color:#fff;background:#2a2248;border-radius:4px;box-shadow:inset 0 0 0 1px #5a4a90}
 #stampPal button:active{transform:scale(.94)}
-#stampPal img{width:22px;height:22px;image-rendering:pixelated}
+#stampPal img{width:32px;height:32px;image-rendering:pixelated;display:block}
 #mmPill{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 6px);transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:6px;padding:5px 8px;background:#1d1830;border:2px solid #ffd166;border-radius:8px;box-shadow:0 4px 0 rgba(0,0,0,.4);color:#fff;font-size:12px;font-weight:700;line-height:1.3;max-width:calc(100% - 16px)}
 #mmPill .wspin{width:14px;height:14px;border:3px solid rgba(255,209,102,.25);border-top-color:#ffd166;border-radius:50%;animation:wspin .8s linear infinite;flex:none}#mmPill .btn{padding:3px 8px;font-size:11px;flex:none}#mmPill span{white-space:nowrap}
 #waitOv[hidden]{display:none}   /* hidden が display:flex に まけて ずっと でていた */
@@ -10788,12 +10788,14 @@ function drawFighter0(f) {
 }
 
 // 指示を だすと 指を さす（召喚・オーブは 手を ひろげる）
-// ===== スタンプ（バトル中に きもちを つたえる。オンラインでは あいてにも とどく）=====
-const STAMPS = [['hand', 'よろしく！'], ['star', 'ナイス！'], ['excl', 'すごい！'], ['heart', 'ありがとう'], ['emb_fire', 'まだまだ！'], ['ques', 'えっ？'], ['warn', 'あぶない！'], ['crown', 'GG']];
+// ===== スタンプ（バトル中に きもちを つたえる。ことばは なし・絵だけ。オンラインでは あいてにも とどく）=====
+// [キー, いみ（よみあげ用）]。納品の 絵（st_<キー>）が あれば それ、なければ いまの アイコン
+const STAMPS = [['hello', 'よろしく', 'hand'], ['nice', 'ナイス', 'star'], ['wow', 'すごい', 'excl'], ['thanks', 'ありがとう', 'heart'], ['fire', 'まだまだ', 'emb_fire'], ['what', 'えっ', 'ques'], ['yikes', 'あぶない', 'warn'], ['gg', 'GG', 'crown']];
+const stampSrc = (st) => (UIA['st_' + st[0]] || UIA[st[2]] || {}).src || '';
 const STAMP_REPLY = [0, 3, 3, 1, 4, 5, 4, 7];   // コンピューターの へんじ
 function showStamp(side, i) {
   const st = STAMPS[i], el = $(side === (B.my || 0) ? 'stpP' : 'stpE'); if (!st || !el) return;
-  el.innerHTML = `${UIA[st[0]] ? `<img src="${UIA[st[0]].src}" alt="">` : ''}<b>${st[1]}</b>`; el.hidden = false;
+  el.innerHTML = `<img src="${stampSrc(st)}" alt="${st[1]}">`; el.hidden = false;
   el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, 2600);
   if (B.sides[side] && B.sides[side].trainer) cmdPose(side); SND.se('click');
 }
@@ -10806,7 +10808,7 @@ function sendStamp(i) {
   if (!B.net && B.sides[1].trainer && Math.random() < .55) { const b0 = B; setTimeout(() => { if (B === b0 && B.mode !== 'end') showStamp(1, STAMP_REPLY[i]); }, rand(700, 1400)); }
 }
 function stampRecv(sm) { B.stampSeen = B.stampSeen || [0, 0]; sm.forEach((x, s) => { if (Array.isArray(x) && x[0] > B.stampSeen[s]) { B.stampSeen[s] = x[0]; showStamp(s, x[1] | 0); } }); }   // ゲスト：ホストから とどいた スタンプ
-$('stampPal').innerHTML = STAMPS.map(([k, t], i) => `<button type="button" data-i="${i}">${UIA[k] ? `<img src="${UIA[k].src}" alt="">` : ''}<span>${t}</span></button>`).join('');
+$('stampPal').innerHTML = STAMPS.map((st, i) => `<button type="button" data-i="${i}" aria-label="${st[1]}"><img src="${stampSrc(st)}" alt=""></button>`).join('');
 $('stampPal').onclick = (e) => { const b = e.target.closest('button'); if (b) { e.stopPropagation(); sendStamp(+b.dataset.i); } };
 document.addEventListener('pointerdown', (e) => { const p = $('stampPal'); if (!p.hidden && !(e.target.closest && e.target.closest('#stampPal,#bStamp'))) p.hidden = true; }, true);   // ほかを さわったら とじる
 $('bStamp').onclick = (e) => { e.stopPropagation(); $('stampPal').hidden = !$('stampPal').hidden; SND.se('click'); };
