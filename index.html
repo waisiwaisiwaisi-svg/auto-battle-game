@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Pixel Monster Arena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 <style>
 :root{--vw:1vw;--vh:1dvh;--sat:env(safe-area-inset-top);--sar:env(safe-area-inset-right);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left)}
 html.rot{--sat:env(safe-area-inset-right);--sar:env(safe-area-inset-bottom);--sab:env(safe-area-inset-left);--sal:env(safe-area-inset-top)}
@@ -1394,65 +1394,42 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
 #dumHud .dctl .dbt{grid-column:1/-1;display:flex;gap:4px}#dumHud .dctl .dbt button{flex:1;font:inherit;font-size:11px;padding:3px 4px;color:#f3eefc;background:#2c4a7a;border:1px solid #6aa0ff}
 #dumHud .dlog{margin-top:4px;border-top:1px solid #3a3460;padding-top:3px;color:#cfc8ea}#dumHud .dlog .on{color:#5ee08a}
 
-/* ==================== おもちゃ版：ホームを パステル×ステッカーの みためへ（BOX TOWN を さんこう）==================== */
-html.toy{--ty-ink:#2a1f55;--ty-pink:#ff7cc0;--ty-mint:#6fe3c9;--ty-yel:#ffe45c;--ty-lav:#b9a6ff;--ty-sky:#a8e2ff;--ty-paper:#fffdf8}
+/* ==================== おもちゃ版：ホーム（おもちゃ屋さんの なかの ジオラマ。ドットの わく × パステル）==================== */
+html.toy{--ty-ink:#1d1640;--ty-cream:#fff6dc;--ty-pink:#ffb4d8;--ty-yel:#ffe88a;--ty-mint:#a8f0c8;--ty-sky:#a8dcff;--ty-gold:#ffd23f}
 html.toy body:has(#scHub:not([hidden])){background:
-  radial-gradient(ellipse at 50% 40%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%),
-  repeating-conic-gradient(#bfe8ff 0 25%,#d3f0ff 0 50%) 0 0/48px 48px,#bfe8ff!important}
+  radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.35),rgba(255,255,255,0) 65%),
+  repeating-linear-gradient(180deg,transparent 0 118px,rgba(120,96,190,.28) 118px 126px,rgba(255,255,255,.18) 126px 128px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 2px,transparent 2px 180px),
+  linear-gradient(180deg,#c9bdf2,#a99be6 60%,#9a8bdc)!important}
 html.toy #scHub::before,html.toy.land #scHub:not([hidden])::before{content:none!important}
 html.toy #scHub{background:transparent!important}
-html.toy #scHub{color:var(--ty-ink);font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","DotGothic16",sans-serif;font-weight:800}
-html.toy #scHub :is(.hme,.hres1,.hicon,.hmode,.hcta,.hchest,.chlog){border:3px solid var(--ty-ink)!important;border-image:none!important;box-shadow:0 4px 0 var(--ty-ink)!important;text-shadow:none!important}
-html.toy #scHub .hme{background:var(--ty-paper)!important;border-radius:16px!important;color:var(--ty-ink)!important}
+html.toy #scHub :is(.hme,.hmode,.hcta,.hchest){border:3px solid var(--ty-ink)!important;border-image:none!important;border-radius:4px!important;box-shadow:inset 0 0 0 2px rgba(255,255,255,.75),0 4px 0 var(--ty-ink)!important;text-shadow:none!important}
+html.toy #scHub .hme{background:var(--ty-cream)!important}
 html.toy #scHub .hme *{color:var(--ty-ink)!important;text-shadow:none!important}
-html.toy body #scHub .hbar .hres .hres1{background:var(--ty-paper)!important;border-radius:999px!important;padding:2px 12px 2px 4px!important;color:var(--ty-ink)!important}
-html.toy #scHub .hres1 *{color:var(--ty-ink)!important;text-shadow:none!important}
-html.toy #scHub .hres1 small{opacity:.65}
-html.toy #scHub .hicon{background:var(--ty-paper)!important;border-radius:12px!important}
-html.toy #scHub .hmode{border-radius:18px!important;color:var(--ty-ink)!important;background:var(--c,#fff)!important}
-html.toy #scHub .hmode b{font-size:17px;color:var(--ty-ink)!important;letter-spacing:.02em}
-html.toy #scHub .hmode small{color:var(--ty-ink)!important;opacity:.75;font-weight:700}
-html.toy #scHub .hmode::after{filter:brightness(0) saturate(100%)!important;opacity:.5}
-html.toy #scHub #btnJourney{--c:var(--ty-pink);transform:rotate(-1.2deg)}
-html.toy #scHub #btnCup{--c:var(--ty-yel);transform:rotate(1deg)}
-html.toy #scHub #btnWild{--c:var(--ty-mint);transform:rotate(.8deg)}
-html.toy #scHub #btnOnline{--c:var(--ty-lav);transform:rotate(-.8deg)}
-html.toy #scHub .hmode:hover{transform:translateY(-3px) rotate(0)!important}
-html.toy #scHub .hcta{background:var(--ty-yel)!important;border-radius:999px!important;border-width:4px!important;box-shadow:0 6px 0 var(--ty-ink)!important}
-html.toy #scHub .hcta .t{color:var(--ty-ink)!important;text-shadow:none!important;font-size:26px;letter-spacing:.08em}
-html.toy #scHub .hcta .s{color:var(--ty-ink)!important;text-shadow:none!important;opacity:.75}
-html.toy #scHub .hchest{background:var(--ty-paper)!important;border-radius:18px!important;padding:0 10px 8px!important;overflow:hidden}
-html.toy #scHub .chesthead{margin:0 -10px 4px!important;padding:6px 10px!important;background:repeating-conic-gradient(var(--ty-pink) 0 25%,#ff9fd0 0 50%) 0 0/16px 16px!important;border:0!important;border-bottom:3px solid var(--ty-ink)!important;box-shadow:none!important}
-html.toy #scHub .chesthead>span{background:var(--ty-paper);color:var(--ty-ink)!important;border:3px solid var(--ty-ink);border-radius:10px;padding:0 10px;text-shadow:none!important;transform:rotate(-1.5deg);display:inline-block}
+html.toy body #scHub .hbar .hres .hres1{background:var(--ty-cream)!important;border:3px solid var(--ty-ink)!important;border-image:none!important;border-radius:4px!important;box-shadow:inset 0 0 0 2px #fff,0 3px 0 var(--ty-ink)!important;color:var(--ty-ink)!important}
+html.toy body #scHub .hbar .hres .hres1 *{color:var(--ty-ink)!important;text-shadow:none!important}
+html.toy #scHub .hmode{background:var(--c)!important;color:var(--ty-ink)!important}
+html.toy #scHub .hmode b{color:var(--ty-ink)!important;font-size:17px}
+html.toy #scHub .hmode small{color:var(--ty-ink)!important;opacity:.7}
+html.toy #scHub #btnJourney{--c:var(--ty-pink)} html.toy #scHub #btnCup{--c:var(--ty-yel)} html.toy #scHub #btnWild{--c:var(--ty-mint)} html.toy #scHub #btnOnline{--c:var(--ty-sky)}
+html.toy #scHub .hcta{background:linear-gradient(180deg,#ffe36a,var(--ty-gold))!important;box-shadow:inset 0 0 0 2px #fff6b0,0 5px 0 var(--ty-ink)!important}
+html.toy #scHub .hcta .t{color:var(--ty-ink)!important;text-shadow:0 2px 0 rgba(255,255,255,.6)!important;font-size:26px}
+html.toy body #scHub .hcta .s,html.toy body #scHub .hcta .s *{color:var(--ty-ink)!important;-webkit-text-fill-color:var(--ty-ink)!important;text-shadow:none!important;opacity:.8}
+html.toy #scHub .hchest{background:var(--ty-cream)!important;padding:0 8px 8px!important;overflow:hidden}
+html.toy #scHub .chesthead{margin:0 -8px 6px!important;padding:5px 8px!important;background:linear-gradient(90deg,#ff8cc6,#ffb4d8 55%,rgba(255,180,216,0)),radial-gradient(circle,#fff 1.2px,transparent 1.6px) 0 0/8px 8px,#ffe0ef!important;border:0!important;border-bottom:3px solid var(--ty-ink)!important;box-shadow:none!important}
+html.toy body #scHub .hchest .chesthead>span{background:none!important;border:0!important;border-image:none!important;box-shadow:none!important;clip-path:none!important;color:#fff!important;text-shadow:2px 0 0 var(--ty-ink),-2px 0 0 var(--ty-ink),0 2px 0 var(--ty-ink),0 -2px 0 var(--ty-ink)!important;font-size:16px;padding:0!important}
 html.toy #scHub .chesthead::before,html.toy #scHub .chesthead::after{display:none!important}
-html.toy #scHub .chesthead small{color:var(--ty-ink)!important;opacity:.6}
-html.toy #scHub .chlog{background:var(--ty-mint)!important;color:var(--ty-ink)!important;border-radius:999px!important;border-width:2px!important;box-shadow:0 3px 0 var(--ty-ink)!important}
-html.toy #scHub .chest{background:#efe9ff!important;border:2px dashed #9b8ad8!important;border-radius:14px!important;box-shadow:none!important;color:var(--ty-ink)!important}
-html.toy #scHub .chest:not(.empty){background:#fff3fa!important;border:3px solid var(--ty-ink)!important;box-shadow:0 3px 0 var(--ty-ink)!important}
+html.toy #scHub .chesthead small{display:none}
+html.toy #scHub .chlog{background:#4a3fa8!important;color:#fff!important;border:2px solid var(--ty-ink)!important;border-image:none!important;border-radius:4px!important;box-shadow:inset 0 0 0 1px #8f84e8!important}
+html.toy #scHub .chest{background:#2a2350!important;border:2px solid var(--ty-ink)!important;border-radius:4px!important;box-shadow:inset 0 0 0 2px #4a4080!important;color:#cfc6ef!important}
 html.toy #scHub .inv,html.toy #scHub .inv b{color:var(--ty-ink)!important}
-html.toy #scHub .hsname{background:var(--ty-paper);color:var(--ty-ink)!important;border:3px solid var(--ty-ink);border-radius:999px;padding:0 12px;text-shadow:none!important;box-shadow:0 3px 0 var(--ty-ink);transform:rotate(-2deg)}
-html.toy #tabbar{background:var(--ty-paper)!important;border-color:var(--ty-ink)!important;border-image:none!important}
-html.toy #tabbar button{color:var(--ty-ink)!important;font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",sans-serif;font-weight:800;text-shadow:none!important;border-radius:14px!important;margin:3px 0}
-html.toy #tabbar button.on,html.toy #tabbar button.home{background:var(--ty-pink)!important;border:3px solid var(--ty-ink)!important;box-shadow:0 3px 0 var(--ty-ink)!important;color:var(--ty-ink)!important;text-shadow:none!important}
-html.toy #tabbar button.home:not(.on){background:var(--ty-yel)!important}
-
-html.toy #tabbar::before,html.toy.land #tabbar::before{background:var(--ty-paper)!important;box-shadow:inset -3px 0 0 var(--ty-ink)!important}
-html.toy #tabbar button .ico{filter:none}
-html.toy body #scHub .hchest .chesthead>span{background:var(--ty-paper)!important;border:3px solid var(--ty-ink)!important;border-image:none!important;box-shadow:0 2px 0 var(--ty-ink)!important;color:var(--ty-ink)!important;padding:0 10px!important;clip-path:none!important}
-html.toy body #scHub .hcta .s,html.toy body #scHub .hcta .s *{color:var(--ty-ink)!important;-webkit-text-fill-color:var(--ty-ink)!important;opacity:.75}
-
-html.toy body #tabbar button{background:#fff!important;border:3px solid var(--ty-ink)!important;border-image:none!important;box-shadow:0 3px 0 var(--ty-ink)!important;border-radius:14px!important;margin:4px 0 6px!important}
-html.toy body #tabbar button::before,html.toy body #tabbar button::after{display:none!important}
-html.toy body #tabbar button.on{background:var(--ty-pink)!important}
-html.toy body #tabbar button.home:not(.on){background:var(--ty-yel)!important}
-@media (min-height:520px){
-html.toy.land #scHub .hubgrid>.hcol:nth-child(2)::before{content:'PIXEL MONSTER\A ARENA';white-space:pre;display:block;align-self:center;text-align:center;margin:0 0 auto;padding-top:clamp(8px,4vh,40px);
-  font:800 clamp(30px,6.2vh,54px)/1.02 "M PLUS Rounded 1c","Hiragino Maru Gothic ProN",sans-serif;letter-spacing:.04em;color:var(--ty-pink);
-  -webkit-text-stroke:3px var(--ty-ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ty-ink);transform:rotate(-3deg)}
-}
-
+html.toy #scHub .hsname{background:var(--ty-cream);color:var(--ty-ink)!important;border:3px solid var(--ty-ink);border-radius:4px;padding:0 12px;text-shadow:none!important;box-shadow:inset 0 0 0 2px #fff,0 3px 0 var(--ty-ink)}
 html.toy body #scHub .hstage{background:transparent!important;border:0!important;border-image:none!important;box-shadow:none!important}
+html.toy #tabbar button.on{background:linear-gradient(180deg,#ffe36a,var(--ty-gold))!important;color:var(--ty-ink)!important;text-shadow:none!important;box-shadow:inset 0 0 0 2px #fff6b0!important}
+html.toy #tabbar button.home.on{border:3px solid var(--ty-ink)!important}
 @media (max-height:480px){html.toy.land #scHub .hmode b{font-size:15px} html.toy.land #scHub .hmode{min-width:0;overflow:hidden}}
+html.toy body #scHub .hchest .sec-title.chesthead>span,html.toy body #scHub .hchest .sec-title.chesthead>span *{color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:2px 0 0 var(--ty-ink),-2px 0 0 var(--ty-ink),0 2px 0 var(--ty-ink),0 -2px 0 var(--ty-ink),2px 2px 0 var(--ty-ink)!important}
+html.toy body #scHub .hchest .chests .chest{background:#2a2350!important;opacity:1!important;filter:none!important}
 </style>
 </head>
 <body>
@@ -2853,6 +2830,33 @@ function acryCut(im, w, h, pad) {   // 絵を w×h で かいて、まわりに 
   q.fillStyle = g; q.fillRect(0, 0, W, H);
   sub.set(k2, c); if (sub.size > 12) sub.delete(sub.keys().next().value); return c;
 }
+// ポップな 台紙：属性の いろ ＋ なみ・ななめ じま・あみてん・ほし・いなずま・属性の しるし（1かい かいて とっておく）
+const POPB = {};
+function popBoard(t, w, h) {
+  const z = 3, key = t + w + 'x' + h; if (POPB[key] && POPB[key].ok) return POPB[key].c;
+  const c = document.createElement('canvas'); c.width = w * z; c.height = h * z; const q = c.getContext('2d'); q.scale(z, z);
+  const col = (TYPES[t] || { c: '#9fd8ff' }).c, mix = (a, k) => { const n = parseInt(a.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255; return `rgb(${Math.round(r + (255 - r) * k)},${Math.round(g + (255 - g) * k)},${Math.round(b + (255 - b) * k)})`; };
+  let gr = q.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, mix(col, .78)); gr.addColorStop(1, mix(col, .5)); q.fillStyle = gr; q.fillRect(0, 0, w, h);
+  // ななめ じま（右うえ）
+  q.save(); q.translate(w * .78, -8); q.rotate(.5); for (let i = 0; i < 6; i++) { q.fillStyle = i % 2 ? '#ffe36a' : '#ff9ccf'; q.fillRect(-60 + i * 9, -10, 9, 140); } q.restore();
+  // なみ（3ほん）
+  const wave = (y, a, c2, lw) => { q.strokeStyle = c2; q.lineWidth = lw; q.lineCap = 'round'; q.beginPath(); q.moveTo(-10, y); for (let x = -10; x <= w + 10; x += 6) q.lineTo(x, y + Math.sin(x / 22 + a) * 7); q.stroke(); };
+  wave(h * .62, 0, mix(col, .25), 14); wave(h * .62, 0, '#ffffff', 3); wave(h * .82, 1.7, mix(col, .1), 16); wave(h * .82, 1.7, 'rgba(255,255,255,.85)', 3); wave(h * .42, 3.1, mix(col, .55), 9);
+  // あみてん
+  const dots = (x0, y0, ww, hh, c2) => { q.fillStyle = c2; for (let y = y0; y < y0 + hh; y += 4) for (let x = x0 + (y / 4 % 2) * 2; x < x0 + ww; x += 4) { const k = 1 - Math.hypot((x - x0) / ww, (y - y0) / hh); if (k > .1) { q.beginPath(); q.arc(x, y, .9 * k + .2, 0, 7); q.fill(); } } };
+  dots(4, 4, 46, 26, 'rgba(255,255,255,.9)'); dots(w - 60, h - 30, 56, 26, 'rgba(255,255,255,.75)');
+  // いなずま
+  q.save(); q.translate(14, 10); q.fillStyle = '#ff7cc0'; q.strokeStyle = '#ffe36a'; q.lineWidth = 1.5; q.lineJoin = 'round';
+  q.beginPath(); [[14, 0], [26, 0], [17, 13], [27, 13], [6, 34], [12, 18], [3, 18]].forEach(([x, y], i) => i ? q.lineTo(x, y) : q.moveTo(x, y)); q.closePath(); q.fill(); q.stroke(); q.restore();
+  // ほし
+  const star = (x, y, r, c2) => { q.fillStyle = c2; q.strokeStyle = '#fff'; q.lineWidth = 1; q.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r; q.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } q.closePath(); q.fill(); q.stroke(); };
+  star(w * .36, h * .22, 4.5, '#ffe36a'); star(w * .62, h * .3, 3.5, '#ffe36a'); star(w * .12, h * .72, 6, '#ff8cc6'); star(w * .76, h * .55, 5, '#ffe36a'); star(w * .5, h * .12, 3, '#fff');
+  // 属性の しるし（右うえ）
+  const ex = w - 22, ey = 20; q.fillStyle = '#fff'; q.beginPath(); q.arc(ex, ey, 13, 0, 7); q.fill(); q.strokeStyle = col; q.lineWidth = 3; q.beginPath(); q.arc(ex, ey, 11.5, 0, 7); q.stroke();
+  const ik = (typeof TY_ICON !== 'undefined' && TY_ICON[t]) || 'ty_' + t, ui = typeof UIA !== 'undefined' && UIA[ik]; let ok = true;
+  if (ui) { const im = ui.__img || (ui.__img = Object.assign(new Image(), { src: ui.src })); if (im.complete && im.naturalWidth) { q.imageSmoothingEnabled = false; q.drawImage(im, ex - 9, ey - 9, 18, 18); } else ok = false; }
+  POPB[key] = { c, ok }; return c;
+}
 function hubField() { let f = 'grass'; if (S) try { const J = jr(); f = J.champ ? FIELDS[J.champ % FIELDS.length] : J.badges.length >= GYMS.length ? leagueStage(J.league) : GYMS[J.gym].st || GYMS[J.gym].f; } catch (e) { } return ARENAS[f] ? f : 'grass'; }
 function rrect(q, x, y, w, h, r) { q.beginPath(); q.moveTo(x + r, y); q.arcTo(x + w, y, x + w, y + h, r); q.arcTo(x + w, y + h, x, y + h, r); q.arcTo(x, y + h, x, y, r); q.arcTo(x, y, x + w, y, r); q.closePath(); }
 function hubStage() {
@@ -2873,23 +2877,23 @@ function hubStage() {
     const px = 16, py = 6, pw = W - 32, ph = BY - 4 - py;
     q.fillStyle = 'rgba(0,0,0,.35)'; rrect(q, px + 3, py + 3, pw, ph, 9); q.fill();
     q.save(); rrect(q, px, py, pw, ph, 9); q.clip();
-    const fl = STG && STG.floors[fk]; if (fl && imgOk(fl)) { const sw = fl.naturalWidth * .62, sh = sw * ph / pw; q.drawImage(fl, (fl.naturalWidth - sw) / 2, (fl.naturalHeight - sh) / 2, sw, sh, px, py, pw, ph); }
-    else { q.fillStyle = '#2a2440'; q.fillRect(px, py, pw, ph); }
-    { const g = q.createLinearGradient(0, py, 0, py + ph); g.addColorStop(0, 'rgba(255,255,255,.12)'); g.addColorStop(.55, 'rgba(10,8,24,0)'); g.addColorStop(1, 'rgba(10,8,24,.45)'); q.fillStyle = g; q.fillRect(px, py, pw, ph); }
+    q.drawImage(popBoard(lead ? SPECIES[lead.sid].type : 'normal', pw, ph), px, py, pw, ph);   // ポップな 台紙（せんとうの モンスターの 属性の いろ）
+    { const g = q.createLinearGradient(0, py, 0, py + ph); g.addColorStop(0, 'rgba(255,255,255,.12)'); g.addColorStop(.7, 'rgba(10,8,24,0)'); g.addColorStop(1, 'rgba(40,30,90,.18)'); q.fillStyle = g; q.fillRect(px, py, pw, ph); }
     { const g = q.createLinearGradient(px, py, px + pw * .6, py + ph); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.35, 'rgba(255,255,255,0)'); g.addColorStop(.42, 'rgba(255,255,255,.16)'); g.addColorStop(.5, 'rgba(255,255,255,0)'); q.fillStyle = g; q.fillRect(px, py, pw, ph); }
     q.restore();
     q.lineWidth = 1.6; q.strokeStyle = 'rgba(220,236,255,.85)'; rrect(q, px + .8, py + .8, pw - 1.6, ph - 1.6, 8.5); q.stroke();
     q.lineWidth = 1; q.strokeStyle = 'rgba(255,255,255,.35)'; rrect(q, px + 2.6, py + 2.6, pw - 5.2, ph - 5.2, 7); q.stroke();
+    q.fillStyle = 'rgba(190,175,240,.9)'; rrect(q, W / 2 - 16, py + 5, 32, 6, 3); q.fill(); q.strokeStyle = 'rgba(255,255,255,.9)'; q.lineWidth = 1; rrect(q, W / 2 - 16, py + 5, 32, 6, 3); q.stroke();   // つりさげの あな
     // 台座：2だんの アクリル（うえの めん・まえの あつみ）
-    const tier = (x, y, w, d, t) => {   // d：おくゆき、t：あつみ
+    const tier = (x, y, w, d, t, base) => {   // d：おくゆき、t：あつみ
       q.fillStyle = base; q.globalAlpha = .8; rrect(q, x, y, w, d, 4); q.fill(); q.globalAlpha = 1;
       q.fillStyle = 'rgba(255,255,255,.3)'; rrect(q, x, y, w, d, 4); q.fill();
       q.fillStyle = base; q.fillRect(x + 1, y + d - 1, w - 2, t); q.fillStyle = 'rgba(0,0,0,.22)'; q.fillRect(x + 1, y + d - 1, w - 2, t);
       q.fillStyle = 'rgba(255,255,255,.45)'; q.fillRect(x + 3, y + d, w - 6, 1);
       q.fillStyle = 'rgba(0,0,0,.35)'; q.fillRect(x + 2, y + d + t - 2, w - 4, 2);
       q.strokeStyle = 'rgba(255,255,255,.75)'; q.lineWidth = 1; rrect(q, x + .5, y + .5, w - 1, d - 1, 4); q.stroke(); };
-    tier(4, BY + 7, W - 8, 9, 6);
-    tier(12, BY - 3, W - 24, 10, 5);
+    tier(4, BY + 7, W - 8, 9, 6, '#5fd3e6');
+    tier(12, BY - 3, W - 24, 10, 5, '#c3b2ff');
     // スタンド
     const stand = (im, cx, w, h) => { const pad = 3, c = acryCut(im, Math.max(1, Math.round(w * z)), Math.max(1, Math.round(h * z)), pad * z);
       const x = cx - w / 2 - pad, y = BY + 2 - h - pad;
