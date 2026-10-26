@@ -1452,7 +1452,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
         <button class="btn hcta" id="btnRank"><i class="ico big" data-ico="swords"></i><span class="t">オンライン対戦</span><span id="rkSub" class="s">ほかの トレーナーと たいせん</span></button>
         <div class="hmodes">
           <button class="hmode" id="btnJourney"><i class="ico" data-ico="flag"></i><b>アーケード</b><small id="jrSub">ジムを めぐって バッジを あつめる</small></button>
-          <button class="hmode" id="btnCup"><i class="ico" data-ico="trophy"></i><b>フリーたいかい</b><small id="cupSub">スタジアムで しあい</small></button>
+          <button class="hmode" id="btnCup"><i class="ico" data-ico="trophy"></i><b>フリー対戦</b><small id="cupSub">だれかの チームと たいせん</small></button>
           <button class="hmode" id="btnWild"><i class="ico" data-ico="bush"></i><b>くさむら</b><small>モンスターを つかまえる</small></button>
           <button class="hmode" id="btnOnline"><i class="ico" data-ico="globe"></i><b>フレンド対戦</b><small>あいことばで たいせん</small></button>
         </div>
@@ -3933,7 +3933,6 @@ function renderHub() {
   const hubFirst = $('scHub').hidden;
   rollNum($('hTrophy'), S.trophies); rollNum($('hCaps'), S.capsules); rollNum($('hCaught'), S.caught);
   const r = ROUNDS[S.round];
-  { const el = $('cupSub'); if (el) el.textContent = `${r.n} vs ${roundTrainer(S.round).n.split(' ').pop()}`; }
   { const k = myRank(), t = tierOf(k.r), el = $('rkSub'); if (el) el.innerHTML = `<b style="color:#fff4c8">${t.n} ${k.r}</b>・${k.w}勝 ${k.l}敗`; }
   hubStage(); paintIcons($('scHub')); paintIcons($('tabbar'));
   { const k = myRank(); const a = $('hAvatar'), img = trArt(myLook()).idle0.n; a.width = img.width; a.height = img.height; const q = a.getContext('2d'); q.imageSmoothingEnabled = false; q.clearRect(0, 0, a.width, a.height); q.drawImage(img, 0, 0); }
@@ -8805,6 +8804,10 @@ function endBattle(res) {
   else if (B.cfg.journey) { try { journeyResult(res, lines); } catch (e) { console.error(e); } }   // ここで エラーが でても リザルトは だす（とまらない）
   else if (B.cfg.arcade) arcadeResult(res, lines);
   else if (B.cfg.tower) towerResult(res, lines);
+  else if (B.cfg.free) {   // フリー対戦：ごほうびは すこし。まけても なにも へらない
+    if (res === 'win') { S.wins++; S.capsules += 1; S.gems = (S.gems || 0) + 1; lines.unshift(`${B.cfg.free.nm}の チームに かった！`); }
+    else if (res === 'lose') lines.unshift(`${B.cfg.free.nm}の チームに まけてしまった…`);
+  }
   else {
     if (res === 'win') {
       S.wins++;
@@ -11520,7 +11523,7 @@ $('btnHelp').onclick = () => {
   bg.querySelector('#hTut').onclick = () => { bg.remove(); startTutorial(); };
 };
 $('btnWild').onclick = startWild;
-$('btnCup').onclick = startCup;
+$('btnCup').onclick = () => startFree();
 $('btnJourney').onclick = renderJourney;
 $('btnArcade').onclick = renderArcade;
 $('btnAcBack').onclick = () => renderHub();
@@ -11943,6 +11946,36 @@ function roundTrainer(i) {
   if (i >= ROUNDS.length - 1) return { k: 'girl', n: ROUNDS[i].tr };
   const pool = TR_NPC.filter(t => t[0] !== myLook()), t = pool[((S.tier || 0) * 3 + i) % pool.length];
   return { k: t[0], n: t[1] };
+}
+// ===== フリー対戦：だれかが ほぞんした チーム（しゅつじょう 3たい・訓練こみ）と たたかう。リアルタイムでは ない =====
+// teams/<じぶんの id> に じぶんの しゅつじょう 3たいを おく（フリー対戦を はじめる たびに 上書き）
+const freeOk = (t) => validTeam(t) && t.every(o => SPECIES[o.sid] && !/^c_mon_/.test(o.sid));   // じぶんで かいた モンスターは ほかの 人の がめんに 絵が ないので つかわない
+async function freeUpload(R) {
+  const tm = teamOf(S.party, 3); if (!freeOk(tm)) return;
+  const lk = myLook(); await R.db.doc('teams/' + R.id).set({ nm: myName(), lk: /^c_tr_/.test(lk) ? 'boy' : lk, r: myRank().r, t: Date.now(), tm }).catch(() => { });
+}
+async function startFree() {
+  if (!S.party.length) return;
+  const R = await rankDb().catch(() => false);
+  if (!R || !R.id) { await say0('いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます'); return startCup(); }
+  freeUpload(R);
+  let rows = [];
+  try { const q = await R.db.collection('teams').orderBy('t', 'desc').limit(40).get(); rows = q.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.id !== R.id && freeOk(r.tm)); } catch (e) { rows = []; }
+  if (!rows.length) { await say0('まだ ほかの 人の チームが ありません。コンピューターの チームと たたかいます'); return startCup(); }
+  let i = Math.floor(Math.random() * rows.length); if (rows.length > 1 && rows[i].id === S.freeLast) i = (i + 1) % rows.length;
+  const show_ = (k) => {
+    const o = rows[k], nm = safeName(o.nm, NAME_MAX) || 'トレーナー', bg = modal(`<h3 style="margin-bottom:6px">フリー対戦</h3><p class="dim" style="margin-bottom:8px">あいて：<b class="frNm" style="color:var(--ink)"></b>　${typeof o.r === 'number' ? tierChip(o.r) : ''}</p><div class="frTeam" style="display:flex;gap:8px;justify-content:center;margin-bottom:12px"></div><div class="row" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn sub" data-a="x">やめる</button>${rows.length > 1 ? '<button class="btn sub" data-a="n">ほかの あいて</button>' : ''}<button class="btn" data-a="go">たたかう</button></div>`);
+    bg.querySelector('.frNm').textContent = nm;
+    for (const t of o.tm) { const c = document.createElement('div'); c.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px'; c.appendChild(spriteCanvas(t.sid, 64)); const n = document.createElement('span'); n.textContent = SPECIES[t.sid].n; c.appendChild(n); bg.querySelector('.frTeam').appendChild(c); }
+    bg.onclick = (e) => { const b = e.target.closest('button[data-a]'); if (!b) return; bg.remove(); SND.se('click'); if (b.dataset.a === 'n') show_((k + 1) % rows.length); else if (b.dataset.a === 'go') freeBattle(o, nm); };
+  };
+  show_(i);
+}
+function freeBattle(o, nm) {
+  S.freeLast = o.id; save();
+  const enemies = o.tm.map(t => { const m = monFrom(t); m.lead = 1; return m; });   // あいての 訓練も つかう
+  const lk = typeof o.lk === 'string' && TRAINER_ART[o.lk] && !/^c_tr_/.test(o.lk) ? o.lk : 'girl', field = choice(FIELDS);
+  startBattle({ kind: 'cup', free: { id: o.id, nm }, boss: false, enemies, field, trainer: { name: nm, spr: trArt(lk) }, title: 'フリー対戦', intro: `${nm}の チームと フリー対戦！ ${FIELD_NAMES[field]}フィールドで しあい かいし！` });
 }
 function startCup(fieldArg) {
   const r = ROUNDS[S.round], lv = roundLv(r);

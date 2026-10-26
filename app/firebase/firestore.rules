@@ -13,6 +13,11 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if mine(uid) && (request.resource == null || request.resource.data.name is string && request.resource.data.name.size() <= 10);
     }
+    // フリー対戦：じぶんの しゅつじょう 3たい（だれでも よめる・かくのは じぶんだけ）
+    match /teams/{uid} {
+      allow read: if signedIn();
+      allow write: if mine(uid) && (request.resource == null || (request.resource.data.tm is list && request.resource.data.tm.size() <= 3));
+    }
     match /gmembers/{uid} {
       allow read: if signedIn();
       allow write: if mine(uid);

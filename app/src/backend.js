@@ -1,7 +1,7 @@
 /* =====================================================================
    アプリ版の オンライン：claude.ai の window.claude.use('db' | 'user' | 'room') と
    おなじ 形を Firebase で つくる。ゲーム本体（index.html）は そのまま うごく。
-   - db   … Cloud Firestore（ranks / guilds / gmembers / gchat / profiles）
+   - db   … Cloud Firestore（ranks / guilds / gmembers / gchat / profiles / teams）
    - user … 匿名ログイン（id）と profiles/{uid}.name（なまえ）
    - room … Realtime Database（rooms/{へや}/{peer} に presence を おく。きれたら きえる）
    設定は www/firebase-config.js の window.PMA_FIREBASE_CONFIG。なければ オフライン。
@@ -92,7 +92,7 @@ if (ok) {
     // オンラインの データを ぜんぶ けす（ストアの「アカウント削除」）
     wipe: async () => {
       const u = await ready; if (!u) return;
-      for (const c of ['ranks', 'gmembers', 'gchat', 'guilds', 'profiles']) { try { await deleteDoc(fsDoc(fs, `${c}/${u.uid}`)); } catch (e) { } }
+      for (const c of ['ranks', 'gmembers', 'gchat', 'guilds', 'profiles', 'teams']) { try { await deleteDoc(fsDoc(fs, `${c}/${u.uid}`)); } catch (e) { } }
       try { await deleteUser(u); } catch (e) { try { await auth.signOut(); } catch (x) { } }
       try { localStorage.removeItem(NAME_KEY); } catch (e) { }
       lobby = null; ready = login(); ready.then(nameDefault);
