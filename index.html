@@ -467,6 +467,8 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
 @keyframes dbBlink{50%{opacity:.45}}
 #bTop{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dim)}
 #bTop button.off{text-decoration:line-through}
+html #app #scBattle #bTop #bSpd.on{color:#ffd84a!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -3px 0 rgba(0,0,0,.4),0 0 0 2px #ffd84a!important}   /* ばいそく中 */
+#bTimer{white-space:nowrap}
 #bTimer{font-weight:400;color:var(--ink);font-variant-numeric:tabular-nums;background:rgba(11,9,20,.55);padding:0 6px;font-size:12px}
 #bTimer:empty{display:none}
 #bTimer.hurry{color:var(--bad);animation:pressblink .5s steps(1) infinite}
@@ -1558,7 +1560,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
   <!-- バトル -->
   <section class="screen" id="scBattle" hidden>
     <div id="tutBox" hidden><div class="tb-in"><b class="tb-who">コーチ</b><p id="tutTx"></p><div class="tb-btns"><button class="btn sub" id="tutSkip">スキップ</button><button class="btn" id="tutNext" hidden>つぎへ</button></div></div></div><div id="tutHand" hidden>👆</div>
-    <div id="bTop"><span style="display:flex;gap:8px;align-items:center;min-width:0"><span id="bTitle"></span><b id="bTimer"></b></span><span style="display:flex;gap:6px"><button id="bStamp" aria-label="スタンプ" hidden>スタンプ</button><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
+    <div id="bTop"><span style="display:flex;gap:8px;align-items:center;min-width:0"><span id="bTitle"></span><b id="bTimer"></b></span><span style="display:flex;gap:6px"><button id="bSpd" aria-label="ばいそく" hidden>×1</button><button id="bStamp" aria-label="スタンプ" hidden>スタンプ</button><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="1920" height="1080"></canvas>
       <div id="waitOv" hidden><div class="wcard"><i class="wspin"></i><b id="waitMsg">あいてが つぎの モンスターを えらんでいます</b><small id="waitT"></small></div></div>
@@ -5068,7 +5070,7 @@ function startBattle(cfg) {
   }
   $('resultOv').hidden = true; $('chooseOv').hidden = true; $('pauseOv').hidden = true;
   $('bTitle').textContent = cfg.title;
-  $('bStamp').hidden = !(cfg.trainer || cfg.kind === 'online'); $('stampPal').hidden = true; for (const id of ['stpP', 'stpE']) $(id).hidden = true;   // スタンプ：トレーナーが いる バトルだけ
+  $('bStamp').hidden = !(cfg.trainer || cfg.kind === 'online'); setTimeout(updSpdBtn, 0); $('stampPal').hidden = true; for (const id of ['stpP', 'stpE']) $(id).hidden = true;   // スタンプ：トレーナーが いる バトルだけ
   $('wildBtns').hidden = cfg.kind !== 'wild'; { const im = $('cCap').querySelector('.orbic'), u = orbURL(); if (u) im.src = u; im.hidden = !u; }   // くさむら：オーブ・にげるは せんじょうの うえに うかべる（ひかえの ならびは ふつうの バトルと おなじ）
 
   say(cfg.intro);
@@ -12028,9 +12030,15 @@ function updWaitOv() {
   if ($('waitT').textContent !== tx) $('waitT').textContent = tx;
 }
 let FRAME_ERR = 0;
+// ばいそく：オフラインの バトルだけ（オンラインは あいてと じかんを あわせるので つかわない）
+const BSPD = [1, 2, 3];
+const spdOk = () => !!(B && B.kind !== 'online' && !B.remote && !B.net && !TUT && !(B.cfg && B.cfg.tutorial));
+const battleSpd = () => spdOk() && S && S.bspd > 1 ? S.bspd : 1;
+function updSpdBtn() { const b = $('bSpd'); if (!b) return; b.hidden = !spdOk(); b.textContent = '×' + battleSpd(); b.classList.toggle('on', battleSpd() > 1); }
+$('bSpd').onclick = (e) => { e.stopPropagation(); if (!spdOk()) return; S.bspd = BSPD[(BSPD.indexOf(S.bspd || 1) + 1) % BSPD.length]; save(); SND.se('click'); updSpdBtn(); };
 function frame(now) {
   requestAnimationFrame(frame);   // さきに つぎを よやく：とちゅうで エラーが でても がめんが とまらない
-  let dt = Math.min(.05, (now - last) / 1000) * TIME_SCALE; last = now;
+  let dt = Math.min(.05, (now - last) / 1000) * TIME_SCALE * battleSpd(); last = now;
   if (B && !$('scBattle').hidden) {
     // 速度倍率が大きいときは細かく刻む
     if (dsvNow) dt = 0;   // きりかえの あいだは とめる
