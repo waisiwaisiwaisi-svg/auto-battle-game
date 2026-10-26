@@ -2773,26 +2773,78 @@ function loadCustom() {
 }
 loadCustom();   // 絵の サモナー（48ドット）の 倍率。ドット数が ちがう 絵は 同じ 背たけに なるよう ちょうせい
 
-// ホームの ぶたい：せんとうの モンスター（うごく）と サモナー
+// ホームの ぶたい：アクスタ（アクリルスタンド）の ジオラマ。うしろの 板（ステージの 床）＋ だんの ある 台座 ＋ サモナー・モンスター・おきものの スタンド
 let HUB_ANIM = null;
+const ACRY = new Map();   // アクスタの ふち（絵ごと・大きさごと に 1かい だけ つくる）
+function acryCut(im, w, h, pad) {   // 絵を w×h で かいて、まわりに pad の とうめいな ふちを つけた キャンバス
+  const key = im, sub = ACRY.get(key) || new Map(); ACRY.set(key, sub); const k2 = w + 'x' + h + 'x' + pad; if (sub.has(k2)) return sub.get(k2);
+  const W = w + pad * 2, H = h + pad * 2, sil = document.createElement('canvas'); sil.width = W; sil.height = H; const s = sil.getContext('2d'); s.imageSmoothingEnabled = false; s.drawImage(im, pad, pad, w, h);
+  s.globalCompositeOperation = 'source-in'; s.fillStyle = '#fff'; s.fillRect(0, 0, W, H);   // かげえ
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const q = c.getContext('2d'); q.imageSmoothingEnabled = false;
+  const ring = (r, col) => { const t = document.createElement('canvas'); t.width = W; t.height = H; const u = t.getContext('2d');
+    for (let a = 0; a < 24; a++) u.drawImage(sil, Math.round(Math.cos(a / 24 * 6.283) * r), Math.round(Math.sin(a / 24 * 6.283) * r));
+    for (let rr = 1; rr < r; rr++) for (let a = 0; a < 12; a++) u.drawImage(sil, Math.round(Math.cos(a / 12 * 6.283) * rr), Math.round(Math.sin(a / 12 * 6.283) * rr));
+    u.globalCompositeOperation = 'source-in'; u.fillStyle = col; u.fillRect(0, 0, W, H); return t; };
+  q.drawImage(ring(pad, 'rgba(210,230,255,.9)'), 0, 0);              // アクリルの ふち（いちばん そと）
+  q.drawImage(ring(pad - 1, 'rgba(255,255,255,.38)'), 0, 0);         // とうめいな いた
+  q.drawImage(im, pad, pad, w, h);
+  q.globalCompositeOperation = 'source-atop'; const g = q.createLinearGradient(0, 0, W, H);   // ななめの ひかり
+  g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.42, 'rgba(255,255,255,0)'); g.addColorStop(.47, 'rgba(255,255,255,.28)'); g.addColorStop(.53, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  q.fillStyle = g; q.fillRect(0, 0, W, H);
+  sub.set(k2, c); if (sub.size > 12) sub.delete(sub.keys().next().value); return c;
+}
+function hubField() { let f = 'grass'; if (S) try { const J = jr(); f = J.champ ? FIELDS[J.champ % FIELDS.length] : J.badges.length >= GYMS.length ? leagueStage(J.league) : GYMS[J.gym].st || GYMS[J.gym].f; } catch (e) { } return ARENAS[f] ? f : 'grass'; }
+function rrect(q, x, y, w, h, r) { q.beginPath(); q.moveTo(x + r, y); q.arcTo(x + w, y, x + w, y + h, r); q.arcTo(x + w, y + h, x, y + h, r); q.arcTo(x, y + h, x, y, r); q.arcTo(x, y, x + w, y, r); q.closePath(); }
 function hubStage() {
   const cv = $('hStageCv'); if (!cv) return; const lead = S.party[0];
   $('hStageName').innerHTML = lead ? `${SPECIES[lead.sid].n} ${typeChip(SPECIES[lead.sid].type)}${SPECIES[lead.sid].type2 ? typeChip(SPECIES[lead.sid].type2) : ''}` : '';
   if (HUB_ANIM) clearInterval(HUB_ANIM);
-  let fi = 0;
+  let fi = 0; const fk = hubField(), base = (TYPES[fk] || OLD_TYPES[fk] || { c: '#ffb347' }).c;
   const draw = () => {
     if ($('scHub').hidden) { clearInterval(HUB_ANIM); HUB_ANIM = null; return; }
-    const W = 240, H = 120, z = 2; if (cv.width !== W * z) { cv.width = W * z; cv.height = H * z; }
-    const q = cv.getContext('2d'); q.imageSmoothingEnabled = false; q.clearRect(0, 0, cv.width, cv.height);
-    q.fillStyle = 'rgba(10,8,20,.35)'; q.beginPath(); q.ellipse(W * z * .5, (H - 14) * z, 80 * z, 10 * z, 0, 0, 7); q.fill();
-    // バトル（だいかいの ステージ）と おなじ 大きさの ひりつで ならべる：サモナーの 1ドット＝TR_MS×1.3×48/h0、モンスターは SPR の ms。わくに はいらない ときは ふたり いっしょに ちぢめる
-    const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, trW = TR_MS * 1.3 * 48 / h0, f = 70 / (h0 * trW);   // f：ワールド → ホームの がめん
+    const W = 240, H = 120, z = 3; if (cv.width !== W * z) { cv.width = W * z; cv.height = H * z; }
+    const q = cv.getContext('2d'); q.imageSmoothingEnabled = false; q.setTransform(1, 0, 0, 1, 0, 0); q.clearRect(0, 0, cv.width, cv.height); q.scale(z, z);
+    const BY = 98;   // 台座の うえの めん（スタンドが たつ ところ）
+    // うしろの 板：ステージの 床を アクリルに はさんだ もの（あつみ・ふち・ひかり）
+    const px = 16, py = 6, pw = W - 32, ph = BY - 4 - py;
+    q.fillStyle = 'rgba(0,0,0,.35)'; rrect(q, px + 3, py + 3, pw, ph, 9); q.fill();
+    q.save(); rrect(q, px, py, pw, ph, 9); q.clip();
+    const fl = STG && STG.floors[fk]; if (fl && imgOk(fl)) { const sw = fl.naturalWidth * .62, sh = sw * ph / pw; q.drawImage(fl, (fl.naturalWidth - sw) / 2, (fl.naturalHeight - sh) / 2, sw, sh, px, py, pw, ph); }
+    else { q.fillStyle = '#2a2440'; q.fillRect(px, py, pw, ph); }
+    { const g = q.createLinearGradient(0, py, 0, py + ph); g.addColorStop(0, 'rgba(255,255,255,.12)'); g.addColorStop(.55, 'rgba(10,8,24,0)'); g.addColorStop(1, 'rgba(10,8,24,.45)'); q.fillStyle = g; q.fillRect(px, py, pw, ph); }
+    { const g = q.createLinearGradient(px, py, px + pw * .6, py + ph); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.35, 'rgba(255,255,255,0)'); g.addColorStop(.42, 'rgba(255,255,255,.16)'); g.addColorStop(.5, 'rgba(255,255,255,0)'); q.fillStyle = g; q.fillRect(px, py, pw, ph); }
+    q.restore();
+    q.lineWidth = 1.6; q.strokeStyle = 'rgba(220,236,255,.85)'; rrect(q, px + .8, py + .8, pw - 1.6, ph - 1.6, 8.5); q.stroke();
+    q.lineWidth = 1; q.strokeStyle = 'rgba(255,255,255,.35)'; rrect(q, px + 2.6, py + 2.6, pw - 5.2, ph - 5.2, 7); q.stroke();
+    // 台座：2だんの アクリル（うえの めん・まえの あつみ）
+    const tier = (x, y, w, d, t) => {   // d：おくゆき、t：あつみ
+      q.fillStyle = base; q.globalAlpha = .8; rrect(q, x, y, w, d, 4); q.fill(); q.globalAlpha = 1;
+      q.fillStyle = 'rgba(255,255,255,.3)'; rrect(q, x, y, w, d, 4); q.fill();
+      q.fillStyle = base; q.fillRect(x + 1, y + d - 1, w - 2, t); q.fillStyle = 'rgba(0,0,0,.22)'; q.fillRect(x + 1, y + d - 1, w - 2, t);
+      q.fillStyle = 'rgba(255,255,255,.45)'; q.fillRect(x + 3, y + d, w - 6, 1);
+      q.fillStyle = 'rgba(0,0,0,.35)'; q.fillRect(x + 2, y + d + t - 2, w - 4, 2);
+      q.strokeStyle = 'rgba(255,255,255,.75)'; q.lineWidth = 1; rrect(q, x + .5, y + .5, w - 1, d - 1, 4); q.stroke(); };
+    tier(4, BY + 7, W - 8, 9, 6);
+    tier(12, BY - 3, W - 24, 10, 5);
+    // スタンド
+    const stand = (im, cx, w, h) => { const pad = 3, c = acryCut(im, Math.max(1, Math.round(w * z)), Math.max(1, Math.round(h * z)), pad * z);
+      const x = cx - w / 2 - pad, y = BY + 2 - h - pad;
+      q.fillStyle = 'rgba(0,0,0,.25)'; q.beginPath(); q.ellipse(cx, BY + 3, w * .42 + 4, 2.4, 0, 0, 7); q.fill();
+      q.drawImage(c, x, y, w + pad * 2, h + pad * 2);
+      q.fillStyle = 'rgba(225,240,255,.55)'; rrect(q, cx - w * .32 - 3, BY - 1, w * .64 + 6, 4, 2); q.fill();   // あしもとの さしこみ
+      q.strokeStyle = 'rgba(255,255,255,.85)'; q.lineWidth = .8; rrect(q, cx - w * .32 - 3, BY - 1, w * .64 + 6, 4, 2); q.stroke(); };
+    // おきもの（ステージの 障害物）を うしろの すみに 1つ
+    const pr = STG && STG.props[fk] && STG.props[fk][0]; if (pr && imgOk(pr.img)) { const h = Math.min(30, 56 * pr.img.naturalHeight / pr.img.naturalWidth), w = h * pr.img.naturalWidth / pr.img.naturalHeight; stand(pr.img, W - 16 - w / 2, w, h); }
+    const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, trW = TR_MS * 1.3 * 48 / h0, f = 70 / (h0 * trW);
     let g = 1, mon = null;
-    if (lead && SPR[lead.sid]) { const [bx, by, bw, bh] = sprBox(lead.sid), ms = SPR[lead.sid].ms * f; mon = { bx, by, bw, bh, ms }; g = Math.min(1, (H - 22) / (bh * ms), W * .62 / (bw * ms)); }
-    g *= .8; const ts = 70 / h0 * g;   // ホームでは すこし 小さめ
-    q.drawImage(ti, Math.round((W * .3 - ti.width * ts / 2) * z), Math.round((H - 14 - ti.height * ts) * z), Math.round(ti.width * ts * z), Math.round(ti.height * ts * z));
-    if (mon) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, ms = mon.ms * g, cx = Math.max(W * .64, W * .3 + ti.width * ts / 2 + mon.bw * ms / 2 + 6);
-      q.drawImage(im, Math.round((cx - (mon.bx + mon.bw / 2) * ms) * z), Math.round((H - 14 - (mon.by + mon.bh) * ms) * z), Math.round(im.width * ms * z), Math.round(im.height * ms * z)); }
+    if (lead && SPR[lead.sid]) { const [bx, by, bw, bh] = sprBox(lead.sid), ms = SPR[lead.sid].ms * f; mon = { bx, by, bw, bh, ms }; g = Math.min(1, (H - 30) / (bh * ms), W * .5 / (bw * ms)); }
+    g *= .92; const ts = 70 / h0 * g;
+    if (mon) { const mh = mon.bh * mon.ms * g, want = clamp(mh, 38, 64); g *= 1; mon.k = want / mh; }
+    stand(ti, W * .32, ti.width * ts, ti.height * ts);
+    if (mon) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, ms = mon.ms * g * mon.k;
+      // モンスターは 絵の あまりを きりおとして スタンドに
+      if (!im.__cut) { const c = document.createElement('canvas'); c.width = mon.bw; c.height = mon.bh; c.getContext('2d').drawImage(im, -mon.bx, -mon.by); im.__cut = c; }
+      stand(im.__cut, Math.min(W * .62, Math.max(W * .56, W * .32 + ti.width * ts / 2 + mon.bw * ms / 2 + 10)), mon.bw * ms, mon.bh * ms); }
     fi++;
   };
   draw(); HUB_ANIM = setInterval(draw, 220);
@@ -3427,9 +3479,7 @@ const SND = (() => {
    ===================================================================== */
 function setArtBg() {
   // いま ちょうせん中の ジムの ステージ（バッジが そろったら リーグの あいて、でんどういり したら でんどういりの かいすうで まわす）
-  let f = 'grass';
-  if (S) try { const J = jr(); f = J.champ ? FIELDS[J.champ % FIELDS.length] : J.badges.length >= GYMS.length ? leagueStage(J.league) : GYMS[J.gym].st || GYMS[J.gym].f; } catch (e) { }   // よみこみ ちゅう（GYMS が まだ ない）は くさ
-  const im = ARENAS[f] || ARENAS.grass;
+  const im = ARENAS[hubField()] || ARENAS.grass;   // よみこみ ちゅう（GYMS が まだ ない）は くさ
   { const hs = $('scHub'); if (hs) hs.style.setProperty('--stg', `url(${im.img})`); }   // ホームの モンスターの うしろにも ステージの 絵
   document.body.classList.add('artbg');
   document.body.style.backgroundImage = `radial-gradient(ellipse at 50% 35%,rgba(22,18,44,.35),rgba(10,8,22,.88) 75%),linear-gradient(rgba(20,16,34,.5),rgba(12,10,24,.78)),url(${im.img})`;   // ステージの 絵を うすく みせる（紺の かげ）
