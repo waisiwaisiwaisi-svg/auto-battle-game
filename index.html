@@ -12034,7 +12034,7 @@ let FRAME_ERR = 0;
 const BSPD = [1, 2, 3];
 const spdOk = () => !!(B && B.kind !== 'online' && !B.remote && !B.net && !TUT && !(B.cfg && (B.cfg.tutorial || B.cfg.free)));   // オンライン・フリー対戦・チュートリアルは 倍速なし
 const battleSpd = () => spdOk() && S && S.bspd > 1 ? S.bspd : 1;
-function updSpdBtn() { const b = $('bSpd'); if (!b) return; b.hidden = !spdOk(); b.textContent = '×' + battleSpd(); b.classList.toggle('on', battleSpd() > 1); }
+function updSpdBtn() { const b = $('bSpd'); if (!b) return; const ok = spdOk(), x = battleSpd(); if (b.hidden !== !ok) b.hidden = !ok; const tx = '×' + x; if (b.textContent !== tx) b.textContent = tx; b.classList.toggle('on', x > 1); }
 $('bSpd').onclick = (e) => { e.stopPropagation(); if (!spdOk()) return; S.bspd = BSPD[(BSPD.indexOf(S.bspd || 1) + 1) % BSPD.length]; save(); SND.se('click'); updSpdBtn(); };
 function frame(now) {
   requestAnimationFrame(frame);   // さきに つぎを よやく：とちゅうで エラーが でても がめんが とまらない
@@ -12045,6 +12045,7 @@ function frame(now) {
     try { while (dt > 0) { const s = Math.min(dt, 1 / 30); bStep(s); dt -= s; } } catch (e) { if (FRAME_ERR++ < 20) console.error('bStep', e); }
     try { render(); } catch (e) { if (FRAME_ERR++ < 20) console.error('render', e); try { ctx = MAIN_CTX; ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; } catch (e2) { } }
     try { updHUD(); } catch (e) { if (FRAME_ERR++ < 20) console.error('hud', e); }
+    try { updSpdBtn(); } catch (e) { }   // 倍速が つかえない ばめんでは ボタンを かくす（オンラインの ゲストなど startBattle を とおらない ときも）
   }
   try { updWaitOv(); } catch (e) { }
 }
