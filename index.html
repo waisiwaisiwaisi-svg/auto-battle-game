@@ -2800,6 +2800,10 @@ function hubStage() {
   $('hStageName').innerHTML = lead ? `${SPECIES[lead.sid].n} ${typeChip(SPECIES[lead.sid].type)}${SPECIES[lead.sid].type2 ? typeChip(SPECIES[lead.sid].type2) : ''}` : '';
   if (HUB_ANIM) clearInterval(HUB_ANIM);
   let fi = 0; const fk = hubField(), base = (TYPES[fk] || OLD_TYPES[fk] || { c: '#ffb347' }).c;
+  // うごきの ある コマも きれない ように、idle の 4コマ ぜんぶが はいる 箱で きりとる
+  let UBOX = null; if (lead && SPR[lead.sid]) { const fr = SPR[lead.sid].fr; let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (let i = 0; i < 4; i++) { const im = (fr['idle' + i] || fr.idle0).n, [bx, by, bw, bh] = sprBox(lead.sid, im); x0 = Math.min(x0, bx); y0 = Math.min(y0, by); x1 = Math.max(x1, bx + bw); y1 = Math.max(y1, by + bh); }
+    UBOX = [x0, y0, x1 - x0, y1 - y0]; sprBox(lead.sid); }
   const draw = () => {
     if ($('scHub').hidden) { clearInterval(HUB_ANIM); HUB_ANIM = null; return; }
     const W = 240, H = 120, z = 3; if (cv.width !== W * z) { cv.width = W * z; cv.height = H * z; }
@@ -2837,13 +2841,13 @@ function hubStage() {
     const pr = STG && STG.props[fk] && STG.props[fk][0]; if (pr && imgOk(pr.img)) { const h = Math.min(30, 56 * pr.img.naturalHeight / pr.img.naturalWidth), w = h * pr.img.naturalWidth / pr.img.naturalHeight; stand(pr.img, W - 16 - w / 2, w, h); }
     const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, trW = TR_MS * 1.3 * 48 / h0, f = 70 / (h0 * trW);
     let g = 1, mon = null;
-    if (lead && SPR[lead.sid]) { const [bx, by, bw, bh] = sprBox(lead.sid), ms = SPR[lead.sid].ms * f; mon = { bx, by, bw, bh, ms }; g = Math.min(1, (H - 30) / (bh * ms), W * .5 / (bw * ms)); }
+    if (lead && SPR[lead.sid]) { const [bx, by, bw, bh] = UBOX || sprBox(lead.sid), ms = SPR[lead.sid].ms * f; mon = { bx, by, bw, bh, ms }; g = Math.min(1, (H - 30) / (bh * ms), W * .5 / (bw * ms)); }
     g *= .92; const ts = 70 / h0 * g;
     if (mon) { const mh = mon.bh * mon.ms * g, want = clamp(mh, 38, 64); g *= 1; mon.k = want / mh; }
     stand(ti, W * .32, ti.width * ts, ti.height * ts);
     if (mon) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, ms = mon.ms * g * mon.k;
       // モンスターは 絵の あまりを きりおとして スタンドに
-      if (!im.__cut) { const c = document.createElement('canvas'); c.width = mon.bw; c.height = mon.bh; c.getContext('2d').drawImage(im, -mon.bx, -mon.by); im.__cut = c; }
+      const ck = mon.bx + ',' + mon.by + ',' + mon.bw + ',' + mon.bh; if (!im.__cut || im.__cutK !== ck) { const c = document.createElement('canvas'); c.width = mon.bw; c.height = mon.bh; c.getContext('2d').drawImage(im, -mon.bx, -mon.by); im.__cut = c; im.__cutK = ck; }
       stand(im.__cut, Math.min(W * .62, Math.max(W * .56, W * .32 + ti.width * ts / 2 + mon.bw * ms / 2 + 10)), mon.bw * ms, mon.bh * ms); }
     fi++;
   };
