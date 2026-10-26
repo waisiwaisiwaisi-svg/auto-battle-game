@@ -358,6 +358,21 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
 .balls .own{font-size:11px;line-height:1;padding:2px 6px;background:rgba(11,9,20,.7);color:#e6defa;box-shadow:inset 0 0 0 1px #3a3060;white-space:nowrap;font-variant-numeric:tabular-nums}.balls .own.new{color:#1a1222;background:#ffd166;box-shadow:inset 0 0 0 1px #0b0914;font-weight:700}
 #plE{text-align:right}
 #mmPill[hidden]{display:none}
+/* バトルの スタンプ：HPの 下に ふきだし・えらぶ パネル */
+#cvWrap .hudtop .plate{position:relative}
+.stp{position:absolute;top:calc(100% + 7px);display:flex;align-items:center;gap:5px;padding:4px 10px 4px 6px;background:#fff8e6;color:#2a2040;border-radius:10px;box-shadow:0 0 0 2px #1a1626,2px 3px 0 rgba(0,0,0,.35);font-size:13px;font-weight:700;white-space:nowrap;z-index:6;pointer-events:none}
+.stp[hidden]{display:none}
+#stpP{left:6px} #stpE{right:6px}
+.stp::before{content:'';position:absolute;top:-7px;border:7px solid transparent;border-top:0;border-bottom-color:#1a1626}
+#stpP::before{left:14px} #stpE::before{right:14px}
+.stp img{width:20px;height:20px;image-rendering:pixelated}
+.stp.on{animation:stpPop .32s cubic-bezier(.3,1.6,.5,1)}
+@keyframes stpPop{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
+#stampPal{pointer-events:auto;position:absolute;top:calc(34px + var(--sat,0px));right:8px;z-index:7;display:grid;grid-template-columns:repeat(4,auto);gap:5px;padding:6px;background:linear-gradient(180deg,#3d3466,#241d40);box-shadow:0 0 0 2px #1a1626,inset 0 0 0 1px #6a5aa8;border-radius:6px}
+#stampPal[hidden]{display:none}
+#stampPal button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 6px;min-width:60px;font-size:11px;color:#fff;background:#2a2248;border-radius:4px;box-shadow:inset 0 0 0 1px #5a4a90}
+#stampPal button:active{transform:scale(.94)}
+#stampPal img{width:22px;height:22px;image-rendering:pixelated}
 #mmPill{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 6px);transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:6px;padding:5px 8px;background:#1d1830;border:2px solid #ffd166;border-radius:8px;box-shadow:0 4px 0 rgba(0,0,0,.4);color:#fff;font-size:12px;font-weight:700;line-height:1.3;max-width:calc(100% - 16px)}
 #mmPill .wspin{width:14px;height:14px;border:3px solid rgba(255,209,102,.25);border-top-color:#ffd166;border-radius:50%;animation:wspin .8s linear infinite;flex:none}#mmPill .btn{padding:3px 8px;font-size:11px;flex:none}#mmPill span{white-space:nowrap}
 #waitOv[hidden]{display:none}   /* hidden が display:flex に まけて ずっと でていた */
@@ -1533,14 +1548,15 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
   <!-- バトル -->
   <section class="screen" id="scBattle" hidden>
     <div id="tutBox" hidden><div class="tb-in"><b class="tb-who">コーチ</b><p id="tutTx"></p><div class="tb-btns"><button class="btn sub" id="tutSkip">スキップ</button><button class="btn" id="tutNext" hidden>つぎへ</button></div></div></div><div id="tutHand" hidden>👆</div>
-    <div id="bTop"><span style="display:flex;gap:8px;align-items:center;min-width:0"><span id="bTitle"></span><b id="bTimer"></b></span><span style="display:flex;gap:6px"><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
+    <div id="bTop"><span style="display:flex;gap:8px;align-items:center;min-width:0"><span id="bTitle"></span><b id="bTimer"></b></span><span style="display:flex;gap:6px"><button id="bStamp" aria-label="スタンプ" hidden>スタンプ</button><button id="bRot" class="rotbtn" aria-label="よこがめん">⟳ よこ</button><button id="bSnd" aria-label="おと">♪</button><button id="btnPause">ポーズ</button></span></div>
     <div id="cvWrap">
       <canvas id="cv" class="pix" width="1920" height="1080"></canvas>
       <div id="waitOv" hidden><div class="wcard"><i class="wspin"></i><b id="waitMsg">あいてが つぎの モンスターを えらんでいます</b><small id="waitT"></small></div></div>
       <div class="plates hudtop">
-        <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="types"></span></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div></div>
-        <div class="plate" id="plE"><div class="top"><span class="types"></span><b class="nm"></b></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div></div>
+        <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="types"></span></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div><div class="stp" id="stpP" hidden></div></div>
+        <div class="plate" id="plE"><div class="top"><span class="types"></span><b class="nm"></b></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div><div class="stp" id="stpE" hidden></div></div>
       </div>
+      <div id="stampPal" hidden></div>
       <div class="ov" id="pauseOv" hidden><h2>PAUSE</h2><button class="btn" id="btnResume">つづける</button><button class="btn sub" id="btnQuit" style="font-size:13px">しあいを やめる（まけ あつかい）</button></div>
       <div class="ov" id="chooseOv" hidden><h2 style="font-size:22px">つぎは だれを だす？</h2><div class="swaplist" id="chooseList"></div></div>
       <div id="wildBtns" hidden><button class="cmd" id="cCap"><img class="orbic pix" alt=""><span class="wt"><span class="a">オーブ</span><span class="b" id="capN"></span></span></button><button class="cmd" id="cRun"><span class="wt"><span class="a">にげる</span><span class="b">くさむらのみ</span></span></button></div>
@@ -5009,6 +5025,7 @@ function startBattle(cfg) {
   }
   $('resultOv').hidden = true; $('chooseOv').hidden = true; $('pauseOv').hidden = true;
   $('bTitle').textContent = cfg.title;
+  $('bStamp').hidden = !(cfg.trainer || cfg.kind === 'online'); $('stampPal').hidden = true; for (const id of ['stpP', 'stpE']) $(id).hidden = true;   // スタンプ：トレーナーが いる バトルだけ
   $('wildBtns').hidden = cfg.kind !== 'wild'; { const im = $('cCap').querySelector('.orbic'), u = orbURL(); if (u) im.src = u; im.hidden = !u; }   // くさむら：オーブ・にげるは せんじょうの うえに うかべる（ひかえの ならびは ふつうの バトルと おなじ）
 
   say(cfg.intro);
@@ -7865,6 +7882,7 @@ function netApplyInput() {
   if (Array.isArray(inp.mv) && (inp.mv[0] | 0) > (NET.done.mv || 0)) { NET.done.mv = inp.mv[0] | 0; const id = f && f.moves[inp.mv[1] | 0];   // ゲストの わざボタン
     if (id && B.mode === 'fight' && !moveBlocked(f, id)) { f.order = null; f.want = { id, t: B.t }; if (!((f.cd[id] || 0) > 0)) f.queued = id; f.aiT = Math.max(f.aiT || 0, .6); } }
   if (Array.isArray(inp.od) && (inp.od[0] | 0) > (NET.done.od || 0)) { NET.done.od = inp.od[0] | 0; if (f && B.mode === 'fight' && ['hide', 'flank'].includes(inp.od[1])) giveOrder(f, inp.od[1], 1); }   // ゲストの うごきの しじ
+  if (Array.isArray(inp.st) && (inp.st[0] | 0) > (NET.done.st || 0)) { NET.done.st = inp.st[0] | 0; const i = inp.st[1] | 0; if (STAMPS[i]) { showStamp(1, i); (B.stampSeq = B.stampSeq || [[0, 0], [0, 0]])[1] = [NET.done.st, i]; } }   // ゲストの スタンプ
   if (Array.isArray(inp.ch) && (inp.ch[0] | 0) > NET.done.ch) { NET.done.ch = inp.ch[0] | 0; if (B.remoteChoose) { const i = inp.ch[1] | 0, x = sd.fs[i]; if (x && !x.fainted && x.hp > 0) netResolveChoose(i); } }
 }
 function netResolveChoose(i) { B.remoteChoose = false; B.paused = false; B.choosing = false; B.pendingSend = { side: 1, idx: i, t: .2, ko: 1 }; }
@@ -7904,7 +7922,7 @@ function netSnapshot() {
   const F = (f) => { if (!f) return null; const c = f.cur; let vb = 0; VBITS.forEach((k, i) => { if (f.v[k]) vb |= 1 << i; });
     return [f.side, B.sides[f.side].fs.indexOf(f), r1(f.x), r1(f.y), f.face, f.state, r1(f.hp), r1(f.stT), r1(f.scale == null ? 1 : f.scale), f.status || '', vb, c ? [c.id, r1(c.t), r1(c.wind), r1(c.ang), r1(c.tx), r1(c.ty), c.pts ? c.pts.map(p => [r1(p.x), r1(p.y), r1(p.r || 0), r1(p.ring || 0)]) : 0, c.len != null ? r1(c.len) : null] : 0, r1(f.inv), r1(f.flash), r1(B.t - (f.fireT || -9)), STAGE_KEYS.map(k => f.st[k]), r1(f.lagMax || 0), r1(f.swapLag || 0), r1(f.hurtInv || 0), fxExtra(f)]; };
   const sides = B.sides.map(sd => ({ a: sd.act, hp: sd.fs.map(x => r1(x.hp)), mh: sd.fs.map(x => x.maxHp), fa: sd.fs.map(x => x.fainted ? 1 : 0), st: sd.fs.map(x => x.status || ''), cd: r1(sd.swapCd), dc: r1(sd.dodgeCmd || 0), hz: sd.hz, tl: r1(sd.tail), tr: sd.trainer ? [r1(sd.trainer.shout), sd.trainer.pose || ''] : 0 }));
-  const snap = { n: ++NET.snapN, t: Math.round(B.t * 1000) / 1000,   /* 時刻は こまかく（ゲストが あいだを なめらかに つなぐ） */ mt: r1(B.modeT), m: B.mode, sh: r1(B.shake), fl: r1(B.scrFlash || 0), ch: r1(B.cheer), tr: r1(B.trickRoom),
+  const snap = { n: ++NET.snapN, ...(B.stampSeq ? { sm: B.stampSeq } : {}), t: Math.round(B.t * 1000) / 1000,   /* 時刻は こまかく（ゲストが あいだを なめらかに つなぐ） */ mt: r1(B.modeT), m: B.mode, sh: r1(B.shake), fl: r1(B.scrFlash || 0), ch: r1(B.cheer), tr: r1(B.trickRoom),
     f: [F(active(0)), F(active(1))], s: sides, p: B.projs.map(p => [r1(p.x), r1(p.y), r1(p.vx), r1(p.vy), MOVE_ID.get(p.m), r1(p.rot), p.side, p.pat || '', p.el || 0]),
     ho: B.holes.map(h => [r1(h.x), r1(h.y), r1(h.sz)]), pr: B.st.propSol ? B.st.props.map((p, i) => B.st.propGone[i] ? -1 : (B.st.propHp[i] == null ? 99 : B.st.propHp[i])) : null,
     wl: B.walls.map(w => [w.mid === 'ice-wall' ? 'ice' : w.t, r1(w.life), r1(w.max), w.side, w.uid, w.blocks.map(b => [r1(b.x), r1(b.y), b.gone ? -1 : (b.hp == null ? 9 : b.hp)]), w.reflect ? 1 : w.dup ? 2 : 0, w.one ? [w.hp, w.hpMax, +(w.ang || 0).toFixed(3), w.hitT != null && B.t - w.hitT < .1 ? 1 : 0] : 0]), zn: B.zones.map(z => [z.id, r1(z.x), r1(z.y), z.rad, r1(z.life), r1(z.max), z.side, z.uid]),
@@ -7965,7 +7983,7 @@ function netGuestApply(sn) {
     f.inv = a[12]; f.flash = a[13]; f.fireT = B.t - a[14]; STAGE_KEYS.forEach((k, i) => f.st[k] = (a[15] || [])[i] || 0); f.lagMax = a[16]; f.swapLag = a[17]; f.hurtInv = a[18] || 0; fxExtraSet(f, a[19], (B.sides[1 - a[0]] || { fs: [] }).fs[(sn.s && sn.s[1 - a[0]] || {}).a]);
   }
   for (const sd of B.sides) { const f = sd.fs[sd.act]; if (f && !f.fainted && f.hp > 0 && f.state === 'bench') { f.state = 'free'; if (f.x == null && f.tx != null) { f.x = f.tx; f.y = f.ty; } } }   // でている こが 控えの まま（とうめい）に ならないように
-  fxWorldSet(sn.xw);
+  fxWorldSet(sn.xw); if (sn.sm) stampRecv(sn.sm);
   B.holes = (sn.ho || []).map(h => ({ x: h[0], y: h[1], sz: h[2] }));
   if (sn.pr && B.st.propSol) sn.pr.forEach((h, i) => { if (h === -1) { if (!B.st.propGone[i]) { B.st.propGone[i] = true; const rs = new Set(B.st.propSol[i]); B.st.solid = B.st.solid.filter(o => !rs.has(o)); const p = B.st.props[i]; if (PLFX.rubble) (B.st.rubble = B.st.rubble || []).push({ x: p.x, y: p.y, v: i % PLFX.rubble.n, sc: p.w * .7 / (PLFX.rubble.w * PIX_D), t0: B.t + .55 }); } } else if (h !== 99) { if (B.st.propHp[i] !== h) B.st.propHit[i] = B.t; B.st.propHp[i] = h; } });   // おきものの こわれぐあい
   B.walls = (sn.wl || []).map(w => ({ t: w[0], life: w[1], max: w[2], side: w[3], uid: w[4], reflect: w[6] === 1, dup: w[6] === 2, ...(w[7] ? { one: true, hp: w[7][0], hpMax: w[7][1], ang: w[7][2], hitT: w[7][3] ? B.t : null } : {}), blocks: w[5].map(([x, y, h]) => ({ x, y, x0: x - WALL_B / 2, y0: y - WALL_B / 2, x1: x + WALL_B / 2, y1: y + WALL_B / 2, gone: h === -1, hp: h == null || h === 9 || h === -1 ? null : h })) })); B.wallRects = []; for (const w of B.walls) for (const b of w.blocks) if (!b.gone) B.wallRects.push(b);
@@ -10770,6 +10788,28 @@ function drawFighter0(f) {
 }
 
 // 指示を だすと 指を さす（召喚・オーブは 手を ひろげる）
+// ===== スタンプ（バトル中に きもちを つたえる。オンラインでは あいてにも とどく）=====
+const STAMPS = [['hand', 'よろしく！'], ['star', 'ナイス！'], ['excl', 'すごい！'], ['heart', 'ありがとう'], ['emb_fire', 'まだまだ！'], ['ques', 'えっ？'], ['warn', 'あぶない！'], ['crown', 'GG']];
+const STAMP_REPLY = [0, 3, 3, 1, 4, 5, 4, 7];   // コンピューターの へんじ
+function showStamp(side, i) {
+  const st = STAMPS[i], el = $(side === (B.my || 0) ? 'stpP' : 'stpE'); if (!st || !el) return;
+  el.innerHTML = `${UIA[st[0]] ? `<img src="${UIA[st[0]].src}" alt="">` : ''}<b>${st[1]}</b>`; el.hidden = false;
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, 2600);
+  if (B.sides[side] && B.sides[side].trainer) cmdPose(side); SND.se('click');
+}
+function sendStamp(i) {
+  $('stampPal').hidden = true; if (!B || !STAMPS[i]) return;
+  const now = performance.now(); if (B.stampCd > now) return; B.stampCd = now + 1500;   // れんぱ しない
+  const me = B.my || 0; showStamp(me, i);
+  if (B.remote) { NET.inp.st = [((NET.inp.st && NET.inp.st[0]) || 0) + 1, i]; (B.stampSeen = B.stampSeen || [0, 0])[1] = NET.inp.st[0]; netSendInput(); return; }
+  B.stampSeq = B.stampSeq || [[0, 0], [0, 0]]; B.stampSeq[0] = [B.stampSeq[0][0] + 1, i];
+  if (!B.net && B.sides[1].trainer && Math.random() < .55) { const b0 = B; setTimeout(() => { if (B === b0 && B.mode !== 'end') showStamp(1, STAMP_REPLY[i]); }, rand(700, 1400)); }
+}
+function stampRecv(sm) { B.stampSeen = B.stampSeen || [0, 0]; sm.forEach((x, s) => { if (Array.isArray(x) && x[0] > B.stampSeen[s]) { B.stampSeen[s] = x[0]; showStamp(s, x[1] | 0); } }); }   // ゲスト：ホストから とどいた スタンプ
+$('stampPal').innerHTML = STAMPS.map(([k, t], i) => `<button type="button" data-i="${i}">${UIA[k] ? `<img src="${UIA[k].src}" alt="">` : ''}<span>${t}</span></button>`).join('');
+$('stampPal').onclick = (e) => { const b = e.target.closest('button'); if (b) { e.stopPropagation(); sendStamp(+b.dataset.i); } };
+document.addEventListener('pointerdown', (e) => { const p = $('stampPal'); if (!p.hidden && !(e.target.closest && e.target.closest('#stampPal,#bStamp'))) p.hidden = true; }, true);   // ほかを さわったら とじる
+$('bStamp').onclick = (e) => { e.stopPropagation(); $('stampPal').hidden = !$('stampPal').hidden; SND.se('click'); };
 function cmdPose(side) { const t = B.sides[side].trainer; if (t && !(t.shout > .3 && t.pose === 'open')) { t.shout = .6; t.pose = 'point'; } }
 function drawTrainer(sd) {
   const t = sd.trainer; if (!t) return;
