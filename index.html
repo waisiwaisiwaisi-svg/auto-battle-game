@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Pixel Monster Arena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
 <style>
 :root{--vw:1vw;--vh:1dvh;--sat:env(safe-area-inset-top);--sar:env(safe-area-inset-right);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left)}
 html.rot{--sat:env(safe-area-inset-right);--sar:env(safe-area-inset-bottom);--sab:env(safe-area-inset-left);--sal:env(safe-area-inset-top)}
@@ -1393,6 +1393,66 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
 #dumHud .dctl label{display:flex;flex-direction:column;gap:1px;color:#cfc8ea;min-width:0}#dumHud .dctl label>span{color:#9ff0c0}#dumHud .dctl select{font:inherit;font-size:11px;background:#221c44;color:#f3eefc;border:1px solid #4a4466;padding:1px 2px;min-width:0;max-width:100%}
 #dumHud .dctl .dbt{grid-column:1/-1;display:flex;gap:4px}#dumHud .dctl .dbt button{flex:1;font:inherit;font-size:11px;padding:3px 4px;color:#f3eefc;background:#2c4a7a;border:1px solid #6aa0ff}
 #dumHud .dlog{margin-top:4px;border-top:1px solid #3a3460;padding-top:3px;color:#cfc8ea}#dumHud .dlog .on{color:#5ee08a}
+
+/* ==================== おもちゃ版：ホームを パステル×ステッカーの みためへ（BOX TOWN を さんこう）==================== */
+html.toy{--ty-ink:#2a1f55;--ty-pink:#ff7cc0;--ty-mint:#6fe3c9;--ty-yel:#ffe45c;--ty-lav:#b9a6ff;--ty-sky:#a8e2ff;--ty-paper:#fffdf8}
+html.toy body:has(#scHub:not([hidden])){background:
+  radial-gradient(ellipse at 50% 40%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%),
+  repeating-conic-gradient(#bfe8ff 0 25%,#d3f0ff 0 50%) 0 0/48px 48px,#bfe8ff!important}
+html.toy #scHub::before,html.toy.land #scHub:not([hidden])::before{content:none!important}
+html.toy #scHub{background:transparent!important}
+html.toy #scHub{color:var(--ty-ink);font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","DotGothic16",sans-serif;font-weight:800}
+html.toy #scHub :is(.hme,.hres1,.hicon,.hmode,.hcta,.hchest,.chlog){border:3px solid var(--ty-ink)!important;border-image:none!important;box-shadow:0 4px 0 var(--ty-ink)!important;text-shadow:none!important}
+html.toy #scHub .hme{background:var(--ty-paper)!important;border-radius:16px!important;color:var(--ty-ink)!important}
+html.toy #scHub .hme *{color:var(--ty-ink)!important;text-shadow:none!important}
+html.toy body #scHub .hbar .hres .hres1{background:var(--ty-paper)!important;border-radius:999px!important;padding:2px 12px 2px 4px!important;color:var(--ty-ink)!important}
+html.toy #scHub .hres1 *{color:var(--ty-ink)!important;text-shadow:none!important}
+html.toy #scHub .hres1 small{opacity:.65}
+html.toy #scHub .hicon{background:var(--ty-paper)!important;border-radius:12px!important}
+html.toy #scHub .hmode{border-radius:18px!important;color:var(--ty-ink)!important;background:var(--c,#fff)!important}
+html.toy #scHub .hmode b{font-size:17px;color:var(--ty-ink)!important;letter-spacing:.02em}
+html.toy #scHub .hmode small{color:var(--ty-ink)!important;opacity:.75;font-weight:700}
+html.toy #scHub .hmode::after{filter:brightness(0) saturate(100%)!important;opacity:.5}
+html.toy #scHub #btnJourney{--c:var(--ty-pink);transform:rotate(-1.2deg)}
+html.toy #scHub #btnCup{--c:var(--ty-yel);transform:rotate(1deg)}
+html.toy #scHub #btnWild{--c:var(--ty-mint);transform:rotate(.8deg)}
+html.toy #scHub #btnOnline{--c:var(--ty-lav);transform:rotate(-.8deg)}
+html.toy #scHub .hmode:hover{transform:translateY(-3px) rotate(0)!important}
+html.toy #scHub .hcta{background:var(--ty-yel)!important;border-radius:999px!important;border-width:4px!important;box-shadow:0 6px 0 var(--ty-ink)!important}
+html.toy #scHub .hcta .t{color:var(--ty-ink)!important;text-shadow:none!important;font-size:26px;letter-spacing:.08em}
+html.toy #scHub .hcta .s{color:var(--ty-ink)!important;text-shadow:none!important;opacity:.75}
+html.toy #scHub .hchest{background:var(--ty-paper)!important;border-radius:18px!important;padding:0 10px 8px!important;overflow:hidden}
+html.toy #scHub .chesthead{margin:0 -10px 4px!important;padding:6px 10px!important;background:repeating-conic-gradient(var(--ty-pink) 0 25%,#ff9fd0 0 50%) 0 0/16px 16px!important;border:0!important;border-bottom:3px solid var(--ty-ink)!important;box-shadow:none!important}
+html.toy #scHub .chesthead>span{background:var(--ty-paper);color:var(--ty-ink)!important;border:3px solid var(--ty-ink);border-radius:10px;padding:0 10px;text-shadow:none!important;transform:rotate(-1.5deg);display:inline-block}
+html.toy #scHub .chesthead::before,html.toy #scHub .chesthead::after{display:none!important}
+html.toy #scHub .chesthead small{color:var(--ty-ink)!important;opacity:.6}
+html.toy #scHub .chlog{background:var(--ty-mint)!important;color:var(--ty-ink)!important;border-radius:999px!important;border-width:2px!important;box-shadow:0 3px 0 var(--ty-ink)!important}
+html.toy #scHub .chest{background:#efe9ff!important;border:2px dashed #9b8ad8!important;border-radius:14px!important;box-shadow:none!important;color:var(--ty-ink)!important}
+html.toy #scHub .chest:not(.empty){background:#fff3fa!important;border:3px solid var(--ty-ink)!important;box-shadow:0 3px 0 var(--ty-ink)!important}
+html.toy #scHub .inv,html.toy #scHub .inv b{color:var(--ty-ink)!important}
+html.toy #scHub .hsname{background:var(--ty-paper);color:var(--ty-ink)!important;border:3px solid var(--ty-ink);border-radius:999px;padding:0 12px;text-shadow:none!important;box-shadow:0 3px 0 var(--ty-ink);transform:rotate(-2deg)}
+html.toy #tabbar{background:var(--ty-paper)!important;border-color:var(--ty-ink)!important;border-image:none!important}
+html.toy #tabbar button{color:var(--ty-ink)!important;font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",sans-serif;font-weight:800;text-shadow:none!important;border-radius:14px!important;margin:3px 0}
+html.toy #tabbar button.on,html.toy #tabbar button.home{background:var(--ty-pink)!important;border:3px solid var(--ty-ink)!important;box-shadow:0 3px 0 var(--ty-ink)!important;color:var(--ty-ink)!important;text-shadow:none!important}
+html.toy #tabbar button.home:not(.on){background:var(--ty-yel)!important}
+
+html.toy #tabbar::before,html.toy.land #tabbar::before{background:var(--ty-paper)!important;box-shadow:inset -3px 0 0 var(--ty-ink)!important}
+html.toy #tabbar button .ico{filter:none}
+html.toy body #scHub .hchest .chesthead>span{background:var(--ty-paper)!important;border:3px solid var(--ty-ink)!important;border-image:none!important;box-shadow:0 2px 0 var(--ty-ink)!important;color:var(--ty-ink)!important;padding:0 10px!important;clip-path:none!important}
+html.toy body #scHub .hcta .s,html.toy body #scHub .hcta .s *{color:var(--ty-ink)!important;-webkit-text-fill-color:var(--ty-ink)!important;opacity:.75}
+
+html.toy body #tabbar button{background:#fff!important;border:3px solid var(--ty-ink)!important;border-image:none!important;box-shadow:0 3px 0 var(--ty-ink)!important;border-radius:14px!important;margin:4px 0 6px!important}
+html.toy body #tabbar button::before,html.toy body #tabbar button::after{display:none!important}
+html.toy body #tabbar button.on{background:var(--ty-pink)!important}
+html.toy body #tabbar button.home:not(.on){background:var(--ty-yel)!important}
+@media (min-height:520px){
+html.toy.land #scHub .hubgrid>.hcol:nth-child(2)::before{content:'PIXEL MONSTER\A ARENA';white-space:pre;display:block;align-self:center;text-align:center;margin:0 0 auto;padding-top:clamp(8px,4vh,40px);
+  font:800 clamp(30px,6.2vh,54px)/1.02 "M PLUS Rounded 1c","Hiragino Maru Gothic ProN",sans-serif;letter-spacing:.04em;color:var(--ty-pink);
+  -webkit-text-stroke:3px var(--ty-ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ty-ink);transform:rotate(-3deg)}
+}
+
+html.toy body #scHub .hstage{background:transparent!important;border:0!important;border-image:none!important;box-shadow:none!important}
+@media (max-height:480px){html.toy.land #scHub .hmode b{font-size:15px} html.toy.land #scHub .hmode{min-width:0;overflow:hidden}}
 </style>
 </head>
 <body>
@@ -12124,7 +12184,7 @@ window.__game = {
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
   run(fn) { return fn({ chooseSwap, NEW_IDS, moveBlocked, openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
-document.documentElement.classList.add('booted');
+document.documentElement.classList.add('booted', 'toy');   // おもちゃ版
 { const fin = () => { if (window.__bootDone) window.__bootDone(); };   // ロード画面を とじる：タイトルの 絵と もじ（フォント）が そろってから
   Promise.race([Promise.all([document.fonts ? document.fonts.ready : 0, new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))]), new Promise(r => setTimeout(r, 1500))]).then(fin, fin); }
 })();
