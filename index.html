@@ -12032,7 +12032,7 @@ function updWaitOv() {
 let FRAME_ERR = 0;
 // ばいそく：オフラインの バトルだけ（オンラインは あいてと じかんを あわせるので つかわない）
 const BSPD = [1, 2, 3];
-const spdOk = () => !!(B && B.kind !== 'online' && !B.remote && !B.net && !TUT && !(B.cfg && B.cfg.tutorial));
+const spdOk = () => !!(B && B.kind !== 'online' && !B.remote && !B.net && !TUT && !(B.cfg && (B.cfg.tutorial || B.cfg.free)));   // オンライン・フリー対戦・チュートリアルは 倍速なし
 const battleSpd = () => spdOk() && S && S.bspd > 1 ? S.bspd : 1;
 function updSpdBtn() { const b = $('bSpd'); if (!b) return; b.hidden = !spdOk(); b.textContent = '×' + battleSpd(); b.classList.toggle('on', battleSpd() > 1); }
 $('bSpd').onclick = (e) => { e.stopPropagation(); if (!spdOk()) return; S.bspd = BSPD[(BSPD.indexOf(S.bspd || 1) + 1) % BSPD.length]; save(); SND.se('click'); updSpdBtn(); };
