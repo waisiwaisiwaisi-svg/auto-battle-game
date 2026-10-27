@@ -1425,7 +1425,10 @@ html.town #scHub .chests .chest{width:64px;min-height:56px!important}
 #townPop{position:absolute;z-index:5;left:50%;top:22%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;padding:12px 16px;background:#fffaf0;border:3px solid #2a1f45;box-shadow:0 5px 0 #2a1f45;color:#2a1f45;text-align:center;min-width:200px}
 #townPop[hidden]{display:none}
 html:not(.land).town #scHub .hubgrid{flex-direction:column;align-items:stretch}
-html:not(.land).town #scHub .hchest{order:1;overflow-x:auto}
+html:not(.land).town #scHub .hchest{order:1;overflow:hidden}
+html:not(.land).town #scHub .hchest .chesthead>span{font-size:12px}
+html:not(.land).town #scHub .chests{flex:1 1 0;min-width:0}
+html:not(.land).town #scHub .chests .chest{flex:1 1 0;width:auto;min-width:0}
 html:not(.land).town #scHub .hubgrid>.hcol:nth-child(2){max-width:none}
 html:not(.land).town #scHub .hcta{min-width:0;width:100%}
 html.town #scHub .hchest .chesthead>span{white-space:nowrap}
@@ -1455,9 +1458,10 @@ html.town body:has(#scHub:not([hidden])) #tabbar{display:grid!important}
 html.town #tabbar>button:is(#btnShop,#btnTrainTab){display:none!important}
 #tabbar>button.tnew{display:none}
 html.town #tabbar>button.tnew{display:flex}
-html.town #tabbar{grid-template-columns:repeat(5,1fr)!important}
+html.town #tabbar{grid-template-columns:repeat(4,1fr)!important}
+html.town #tabbar>#tabMenu,html.town #scHub #btnHelp{display:none!important}
 html.town #tabbar>#tabHome{order:0} html.town #tabbar>#btnTeam{order:1} html.town #tabbar>#tabBattle{order:2} html.town #tabbar>#btnGuild{order:3} html.town #tabbar>#tabMenu{order:4}
-html.town.land body:has(#scHub:not([hidden])) #tabbar{top:auto!important;bottom:0!important;left:50%!important;right:auto!important;transform:translateX(-50%);width:min(620px,76vw)!important;height:60px;grid-template-columns:repeat(5,1fr)!important;grid-auto-rows:auto!important;padding:4px 8px calc(4px + var(--sab))!important;border-right:0!important;border-top:3px solid #0b0914!important}
+html.town.land body:has(#scHub:not([hidden])) #tabbar{top:auto!important;bottom:0!important;left:50%!important;right:auto!important;transform:translateX(-50%);width:min(620px,76vw)!important;height:60px;grid-template-columns:repeat(4,1fr)!important;grid-auto-rows:auto!important;padding:4px 8px calc(4px + var(--sab))!important;border-right:0!important;border-top:3px solid #0b0914!important}
 html.town.land body:has(#scHub:not([hidden])) #tabbar::before{box-shadow:inset 0 3px 0 #0b0914!important}
 html.town.land body:has(#scHub:not([hidden])) #tabbar button.home{margin:0!important}
 html.town body:has(#scHub:not([hidden])) #tabbar .tabind{display:none}
@@ -1478,7 +1482,9 @@ html.town #scHub #isles .isle canvas{width:100%!important}
 @supports (width:1cqw){html.town #scHub #isles .isle{container-type:size} html.town #scHub #isles .isle canvas{width:min(100cqw,calc(100cqh * 200 / 170))!important;height:auto!important}}
 html.town #scHub .islabel{left:50%;bottom:8px;transform:translateX(-62%) rotate(-12deg)}
 html.town:not(.land) #scHub .islabel{font-size:13px;padding:1px 8px}
-html.town:not(.land) #scHub #isles{display:block!important;top:162px!important}
+html.town.land #scHub #isles{top:52px!important;padding:0 4px!important;gap:0!important}
+html.town.land #scHub #isles .isle canvas{transform:scale(1.16);transform-origin:50% 92%}
+html.town:not(.land) #scHub #isles{display:block!important;top:150px!important}
 html.town:not(.land) #scHub #isles .isle canvas{width:100%!important;height:100%!important;max-width:none;max-height:none}
 html.town:not(.land) #scHub #isles .isle .islabel{left:auto;right:auto;bottom:14%;transform:rotate(-12deg)}
 html.town:not(.land) #scHub #isles .isle:nth-child(odd) .islabel{left:4%} html.town:not(.land) #scHub #isles .isle:nth-child(even) .islabel{right:4%}
@@ -3062,7 +3068,7 @@ function townLayer(Wc, Hc, dpr, u, cx0, cy0, land) {
 const ISLES = [   // 4つ：1がめんに おさまる
   { k: 'arena', n: 'アーケード', act: () => { ISLE.jt = isleJt(); $('btnJourney').click(); } },
   { k: 'shop', n: 'ショップ', act: () => $('btnShop').click() },
-  { k: 'room', n: 'マイルーム', act: () => $('btnTrainTab').click() },
+  { k: 'room', n: 'マイルーム', act: () => isleMenu('マイルーム', [['へんせい', 'btnTeam'], ['くんれん', 'btnTrainTab']]) },
   { k: 'wild', n: 'くさむら', act: () => S.onb === 4 ? $('btnWild').click() : renderWild() },
 ];
 function isleMenu(title, items) {
@@ -3130,7 +3136,7 @@ function isleLayout() {
   const box = $('isles'); if (!box) return; const land = document.documentElement.classList.contains('land'), els = [...box.querySelectorAll('.isle')];
   if (land) { els.forEach(e => { e.style.cssText = ''; }); return; }
   const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
-  const step = .62, n = els.length, h = Math.min(W * .74 * 170 / 200, H / (1 + (n - 1) * step)), w = h * 200 / 170, pad = 4;
+  const step = .47, n = els.length, h = Math.min(W * .66 * 170 / 200, H / (1 + (n - 1) * step)), w = h * 200 / 170, pad = 0;
   const top0 = (H - (h + (n - 1) * h * step)) / 2;
   els.forEach((e, i) => { Object.assign(e.style, { position: 'absolute', width: w + 'px', height: h + 'px', left: (i % 2 ? W - w - pad : pad) + 'px', top: top0 + i * h * step + 'px', zIndex: i + 1, padding: '0' }); });
 }
@@ -3158,8 +3164,8 @@ function islesStage() {
 }
 // しまの なか：うえ（よこ画面は ひだり）に しまの なかの ようす、した に もどる・タブ。中身は いままでの 画面を そのまま つかう
 const ISLE = { k: null, jt: 'gym', st: 'deal', bg: {} };
-const ISLE_SCR = { scJourney: 'arena', scTower: 'arena', scShop: 'shop', scTrain: 'room', scWild: 'wild' };
-const ISLE_TABS = { arena: [['ジム', 'gym'], ['リーグ', 'league'], ['タワー', 'tower']], shop: [['おすすめ', 'deal'], ['ボックス', 'box'], ['ステッカー', 'tm'], ['モンスター', 'mon']], room: [['くんれん', 'train'], ['へんせい', 'team']], wild: [] };
+const ISLE_SCR = { scJourney: 'arena', scTower: 'arena', scShop: 'shop', scWild: 'wild' };
+const ISLE_TABS = { arena: [['ジム', 'gym'], ['リーグ', 'league'], ['タワー', 'tower']], shop: [['おすすめ', 'deal'], ['ボックス', 'box'], ['ステッカー', 'tm'], ['モンスター', 'mon']], wild: [] };
 const ISLE_NAME = { arena: 'アーケード', shop: 'ショップ', room: 'マイルーム', wild: 'くさむら' };
 function isleJt() { const J = jr(); return !J.champ && J.badges.length >= GYMS.length ? 'league' : 'gym'; }
 // 仮の 絵（アイソメの へや。ゆかと かべは 画面の そとまで つづける）
@@ -3239,24 +3245,23 @@ function isleScene(k) {
   $('isleSay').textContent = say;
 }
 function isleNav(k, id) {
-  const cur = k === 'arena' ? ISLE.jt : k === 'shop' ? ISLE.st : k === 'room' ? (id === 'scTeam' ? 'team' : 'train') : '';
+  const cur = k === 'arena' ? ISLE.jt : k === 'shop' ? ISLE.st : '';
   $('isleTabs').innerHTML = ISLE_TABS[k].map(([n, v]) => `<button data-v="${v}" class="${v === cur ? 'on' : ''}">${n}</button>`).join('');
 }
 function isleSync(id) {
-  const H = document.documentElement; let tf = null; try { tf = teamFrom; } catch (e) { }
-  let k = ISLE_SCR[id] || (id === 'scTeam' && ISLE.k === 'room' && !tf ? 'room' : null); if (!H.classList.contains('town')) k = null;
+  const H = document.documentElement;
+  let k = ISLE_SCR[id] || null; if (!H.classList.contains('town')) k = null;
   document.querySelectorAll('.screen.isl').forEach(s => s.classList.remove('isl'));
   if (!k) { if (ISLE.k) { ISLE.k = null; H.classList.remove('isle'); } if (id === 'scHub') ISLE.wild = 0; return; }
   if (id === 'scTower') ISLE.jt = 'tower';
   const fresh = ISLE.k !== k; ISLE.k = k; H.classList.add('isle'); H.dataset.isle = k; H.dataset.jt = ISLE.jt; H.dataset.st = ISLE.st;
   const el = $(id); if (el) el.classList.add('isl');
-  if (fresh || id === 'scTrain' || id === 'scTeam') isleScene(k); isleNav(k, id);
+  if (fresh) isleScene(k); isleNav(k, id);
 }
 $('isleBack').onclick = () => { SND.se('click'); $('tabHome').click(); };
 $('isleTabs').onclick = (e) => { const b = e.target.closest('button'); if (!b || b.classList.contains('on')) return; SND.se('click'); const v = b.dataset.v, k = ISLE.k;
   if (k === 'arena') { ISLE.jt = v; if (v === 'tower' && towerOpen()) renderTower(); else renderJourney(); $('scJourney').scrollTop = 0; }
-  else if (k === 'shop') { ISLE.st = v; isleSync('scShop'); $('scShop').scrollTop = 0; }
-  else if (k === 'room') { if (v === 'team') { teamFrom = null; renderTeam(); } else { guildStop(); renderTrain(); } } };
+  else if (k === 'shop') { ISLE.st = v; isleSync('scShop'); $('scShop').scrollTop = 0; } };
 // くさむら：しまの なかで「さがす」と バトル。おわったら ここへ もどる
 function renderWild() {
   show('scWild'); const J = jr(), gt = J.rival && !J.champ && J.gym < GYMS.length && J.badges.length < GYMS.length ? GYMS[J.gym].t : null, ok = gt ? strongVs(gt) : [];
@@ -11894,6 +11899,7 @@ $('btnTeamBack').onclick = () => { const f = teamFrom; teamFrom = null; if (f ==
 function modal(html) { const bg = document.createElement('div'); bg.className = 'askbg'; bg.innerHTML = `<div class="askbox" style="max-width:440px;text-align:left">${html}</div>`; $('app').appendChild(bg); bg.addEventListener('pointerdown', (e) => { if (e.target === bg) bg.remove(); }); return bg; }
 $('btnOpt').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:12px">せってい</h3>
+    <div class="optrow"><span>あそびかた</span><button class="btn sub" id="oHelp" style="font-size:12px;padding:6px 12px">みる</button></div>
     <label class="optrow">BGM <input type="range" min="0" max="1" step="0.05" id="oMusic"></label>
     <label class="optrow">こうかおん <input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">おとを けす <input type="checkbox" id="oMute"></label>
@@ -11935,6 +11941,7 @@ $('btnOpt').onclick = () => {
     LK.appendChild(b); } };
   if (S) drawLooks(); else LK.previousElementSibling.hidden = true;
   bg.querySelector('#oSeAdj').onclick = () => seAdjust();
+  bg.querySelector('#oHelp').onclick = () => { bg.remove(); $('btnHelp').click(); };
   bg.querySelector('#oClose').onclick = () => bg.remove();
   bg.querySelector('#oReset').onclick = async () => { bg.remove(); if (!(await ask('データを しょきか して はじめから あそびますか？\nいまの セーブデータは きえて もとに もどせません。', 'しょきか', 'やめる'))) return; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; renderTitle(); };
 };
