@@ -1400,7 +1400,7 @@ html.land #scHub:not([hidden])::before{content:none!important}
 html.land #scHub{background:transparent!important}
 #scHub .hstage::before{background:linear-gradient(180deg,rgba(12,10,26,.1),rgba(12,10,26,.45)),var(--toyshop) center 60%/cover no-repeat!important;filter:none!important}
 #scHub .inv,#scHub .inv b{color:#fff6e0!important;text-shadow:1px 0 0 #1a1024,-1px 0 0 #1a1024,0 1px 0 #1a1024,0 -1px 0 #1a1024!important}   /* あかるい はいけいでも よめる ように */
-html #app #scHub .hstage canvas,html.land #app #scHub .hstage canvas{aspect-ratio:240/148!important}   /* クオータービューは すこし たかい */
+html #app #scHub .hstage canvas,html.land #app #scHub .hstage canvas{aspect-ratio:320/212!important}   /* クオータービューは すこし たかい */
 </style>
 </head>
 <body>
@@ -2801,6 +2801,72 @@ function acryCut(im, w, h, pad) {   // 絵を w×h で かいて、まわりに 
   q.fillStyle = g; q.fillRect(0, 0, W, H);
   sub.set(k2, c); if (sub.size > 12) sub.delete(sub.keys().next().value); return c;
 }
+// ホームの 小さな 街（うごかない ぶぶんを 1まいに かいて とっておく）
+const HUBTOWN = {};
+function hubTown(fk, base) {
+  const W = 320, H = 212, z = 3, key = fk; if (HUBTOWN[key] && HUBTOWN[key].ok) return HUBTOWN[key];
+  const c = document.createElement('canvas'); c.width = W * z; c.height = H * z; const q = c.getContext('2d'); q.scale(z, z);
+  const K = .5, Lu = 170, Lv = 130, ox = W / 2 - (Lu - Lv) / 2, oy = 50;
+  const P = (u, v, h = 0) => [ox + (u - v), oy + (u + v) * K - h];
+  const poly = (pts, fill, stroke, lw = 1) => { q.beginPath(); pts.forEach(([x, y], i) => i ? q.lineTo(x, y) : q.moveTo(x, y)); q.closePath(); if (fill) { q.fillStyle = fill; q.fill(); } if (stroke) { q.strokeStyle = stroke; q.lineWidth = lw; q.stroke(); } };
+  const quad = (u0, v0, u1, v1, h, fill, stroke) => poly([P(u0, v0, h), P(u1, v0, h), P(u1, v1, h), P(u0, v1, h)], fill, stroke);
+  const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16); const f = (x) => Math.max(0, Math.min(255, Math.round(x * k))); return `rgb(${f(n >> 16)},${f(n >> 8 & 255)},${f(n & 255)})`; };
+  // 台座（あつみ ＋ ゆかの かげ）
+  poly([P(-6, -6, -16), P(Lu + 16, -6, -16), P(Lu + 16, Lv + 16, -16), P(-6, Lv + 16, -16)], 'rgba(20,10,30,.2)');
+  const slab = (u0, v0, u1, v1, h0, t, col) => {
+    poly([P(u0, v1, h0), P(u1, v1, h0), P(u1, v1, h0 - t), P(u0, v1, h0 - t)], shade(col, .72));
+    poly([P(u1, v0, h0), P(u1, v1, h0), P(u1, v1, h0 - t), P(u1, v0, h0 - t)], shade(col, .86));
+    quad(u0, v0, u1, v1, h0, col, 'rgba(255,255,255,.7)'); };
+  slab(-6, -6, Lu + 6, Lv + 6, -4, 7, '#a07c5c');
+  slab(0, 0, Lu, Lv, 0, 4, base);
+  // しばふ（ますめ）
+  for (let i = 0; i < Lu / 10; i++) for (let j = 0; j < Lv / 10; j++) quad(i * 10, j * 10, i * 10 + 10, j * 10 + 10, 0, (i + j) % 2 ? '#7fd28a' : '#74c880');
+  // みち（よこ・たて）
+  const road = (u0, v0, u1, v1) => { quad(u0, v0, u1, v1, 0, '#d9cbb0'); for (let x = u0; x < u1; x += 6) for (let y = v0; y < v1; y += 6) if ((x + y) / 6 % 2 < 1) quad(x, y, Math.min(u1, x + 6), Math.min(v1, y + 6), 0, '#cdbd9f'); };
+  road(0, 60, Lu, 72); road(84, 0, 96, Lv);
+  // 広場：いまの ステージの 床を ちめんに はる
+  const pu0 = 60, pv0 = 50, pu1 = 120, pv1 = 94; let ok = true;
+  { const [x0, y0] = P(pu0, pv0, 0); q.save(); q.setTransform(z, z * K, -z, z * K, z * x0, z * y0); const fl = STG && STG.floors[fk];
+    q.fillStyle = '#c9b8f0'; q.fillRect(-2, -2, pu1 - pu0 + 4, pv1 - pv0 + 4);
+    if (fl && imgOk(fl)) { const sw = fl.naturalWidth * .7, sh = sw * (pv1 - pv0) / (pu1 - pu0); q.drawImage(fl, (fl.naturalWidth - sw) / 2, (fl.naturalHeight - sh) / 2, sw, sh, 0, 0, pu1 - pu0, pv1 - pv0); } else ok = false;
+    q.strokeStyle = '#fff'; q.lineWidth = 1.5; q.strokeRect(0, 0, pu1 - pu0, pv1 - pv0); q.restore(); }
+  // たてもの
+  const objs = [];
+  const bld = (u0, v0, du, dv, h, wall, roof, kind) => objs.push({ d: u0 + du + v0 + dv, f: () => {
+    const u1 = u0 + du, v1 = v0 + dv;
+    poly([P(u0, v1, 0), P(u1, v1, 0), P(u1, v1, h), P(u0, v1, h)], wall, '#3a2a4a', .6);   // まえ左の かべ
+    poly([P(u1, v0, 0), P(u1, v1, 0), P(u1, v1, h), P(u1, v0, h)], shade(wall, .82), '#3a2a4a', .6);   // まえ右の かべ
+    const vm = (v0 + v1) / 2, hr = Math.min(16, dv * .45);
+    poly([P(u1, v0 - 1, h), P(u1, v1 + 1, h), P(u1, vm, h + hr)], shade(wall, .9), '#3a2a4a', .6);   // つまの さんかく
+    poly([P(u0 - 1, vm, h + hr), P(u1 + 1, vm, h + hr), P(u1 + 1, v1 + 2, h - 1), P(u0 - 1, v1 + 2, h - 1)], roof, '#3a2a4a', .6);   // まえの やね
+    poly([P(u0 - 1, v0 - 2, h - 1), P(u1 + 1, v0 - 2, h - 1), P(u1 + 1, vm, h + hr), P(u0 - 1, vm, h + hr)], shade(roof, .75), '#3a2a4a', .6);   // おくの やね（すこし みえる）
+    poly([P(u0 - 1, vm, h + hr), P(u1 + 1, vm, h + hr), P(u1 + 1, v1 + 2, h - 1), P(u0 - 1, v1 + 2, h - 1)], roof, '#3a2a4a', .6);
+    // まど・ドア（まえ左の かべ）
+    const win = (u, hh, w2, h2, col) => poly([P(u, v1 + .1, hh), P(u + w2, v1 + .1, hh), P(u + w2, v1 + .1, hh + h2), P(u, v1 + .1, hh + h2)], col, '#3a2a4a', .5);
+    win(u0 + du / 2 - 3, 0, 6, 10, '#7a4a3a');
+    for (let x = u0 + 4; x < u1 - 4; x += 10) if (Math.abs(x + 3 - (u0 + du / 2)) > 6) win(x, h * .45, 6, 6, '#bfe8ff');
+    const winR = (v, hh, w2, h2, col) => poly([P(u1 + .1, v, hh), P(u1 + .1, v + w2, hh), P(u1 + .1, v + w2, hh + h2), P(u1 + .1, v, hh + h2)], col, '#3a2a4a', .5);
+    for (let y = v0 + 4; y < v1 - 4; y += 10) winR(y, h * .45, 6, 6, '#a8d8f0');
+    if (kind === 'shop') for (let x = u0; x < u1; x += 4) poly([P(x, v1 + .2, h * .82), P(Math.min(u1, x + 4), v1 + .2, h * .82), P(Math.min(u1, x + 4), v1 + 5, h * .66), P(x, v1 + 5, h * .66)], (x - u0) / 4 % 2 < 1 ? '#ff7cc0' : '#fff');   // ひさし
+    if (kind === 'gym') { const [fx, fy] = P(u1 - 4, vm, h + hr); q.strokeStyle = '#3a2a4a'; q.lineWidth = 1; q.beginPath(); q.moveTo(fx, fy); q.lineTo(fx, fy - 14); q.stroke(); poly([[fx, fy - 14], [fx + 9, fy - 11], [fx, fy - 8]], '#ff4d6d'); }
+  } });
+  const vend = (u0, v0) => objs.push({ d: u0 + 6 + v0 + 4, f: () => { const u1 = u0 + 6, v1 = v0 + 4, h = 14;
+    poly([P(u0, v1, 0), P(u1, v1, 0), P(u1, v1, h), P(u0, v1, h)], '#ffe36a', '#3a2a4a', .6); poly([P(u1, v0, 0), P(u1, v1, 0), P(u1, v1, h), P(u1, v0, h)], '#e8c440', '#3a2a4a', .6); quad(u0, v0, u1, v1, h, '#fff2a8', '#3a2a4a');
+    const cols = ['#ff7cc0', '#7fd8ff', '#b9a6ff', '#7fd28a']; for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) poly([P(u0 + .8 + i * 2.6, v1 + .1, 4 + j * 4.5), P(u0 + 3 + i * 2.6, v1 + .1, 4 + j * 4.5), P(u0 + 3 + i * 2.6, v1 + .1, 7.5 + j * 4.5), P(u0 + .8 + i * 2.6, v1 + .1, 7.5 + j * 4.5)], cols[i * 2 + j]); } });
+  const tree = (u, v, s = 1) => objs.push({ d: u + v, f: () => { const [x, y] = P(u, v, 0);
+    q.fillStyle = 'rgba(0,0,0,.2)'; q.beginPath(); q.ellipse(x, y, 7 * s, 3 * s, 0, 0, 7); q.fill();
+    q.fillStyle = '#7a5038'; q.fillRect(x - 1.2 * s, y - 9 * s, 2.4 * s, 9 * s);
+    for (const [dx, dy, r, col] of [[0, -16, 8, '#3f9e57'], [-4, -12, 6, '#4fb468'], [4, -12, 6, '#4fb468'], [-1, -18, 4.5, '#68cc7e']]) { q.fillStyle = col; q.beginPath(); q.arc(x + dx * s, y + dy * s, r * s, 0, 7); q.fill(); }
+    q.strokeStyle = 'rgba(30,60,40,.5)'; q.lineWidth = .6; q.beginPath(); q.arc(x, y - 16 * s, 8 * s, Math.PI, 2 * Math.PI); q.stroke(); } });
+  bld(8, 8, 40, 30, 26, '#ffe1ee', '#ff6fae', 'shop');
+  bld(114, 6, 46, 40, 34, '#ece6ff', '#7a5cff', 'gym');
+  bld(8, 92, 32, 28, 20, '#fff2d6', '#58a8f0', 'house');
+  bld(128, 96, 32, 26, 24, '#dff7e8', '#3fb87a', 'house');
+  vend(66, 34); vend(74, 34);
+  tree(56, 16); tree(104, 46, .8); tree(46, 84, .9); tree(112, 116); tree(150, 76, .85); tree(20, 50, .8); tree(66, 116, .9);
+  objs.sort((a, b) => a.d - b.d).forEach(o => o.f());
+  HUBTOWN[key] = { c, ok, P }; return HUBTOWN[key];
+}
 function hubField() { let f = 'grass'; if (S) try { const J = jr(); f = J.champ ? FIELDS[J.champ % FIELDS.length] : J.badges.length >= GYMS.length ? leagueStage(J.league) : GYMS[J.gym].st || GYMS[J.gym].f; } catch (e) { } return ARENAS[f] ? f : 'grass'; }
 function rrect(q, x, y, w, h, r) { q.beginPath(); q.moveTo(x + r, y); q.arcTo(x + w, y, x + w, y + h, r); q.arcTo(x + w, y + h, x, y + h, r); q.arcTo(x, y + h, x, y, r); q.arcTo(x, y, x + w, y, r); q.closePath(); }
 function hubStage() {
@@ -2812,52 +2878,23 @@ function hubStage() {
   let UBOX = null; if (lead && SPR[lead.sid]) { const fr = SPR[lead.sid].fr; let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     for (let i = 0; i < 4; i++) { const im = (fr['idle' + i] || fr.idle0).n, [bx, by, bw, bh] = sprBox(lead.sid, im); x0 = Math.min(x0, bx); y0 = Math.min(y0, by); x1 = Math.max(x1, bx + bw); y1 = Math.max(y1, by + bh); }
     UBOX = [x0, y0, x1 - x0, y1 - y0]; sprBox(lead.sid); }
-  const draw = () => {   // クオータービュー：ひしがたの 台座（天面＋まえの 2めん）、おくの へりに 斜めに たつ 板、まえむきの スタンド
+  const draw = () => {   // クオータービューの 小さな 街：大きな 台座の うえに 道・広場（ステージの 床）・たてもの・木。サモナーと モンスターは 広場に たつ
     if ($('scHub').hidden) { clearInterval(HUB_ANIM); HUB_ANIM = null; return; }
-    const W = 240, H = 148, z = 3; if (cv.width !== W * z || cv.height !== H * z) { cv.width = W * z; cv.height = H * z; }
+    const W = 320, H = 212, z = 3; if (cv.width !== W * z || cv.height !== H * z) { cv.width = W * z; cv.height = H * z; }
     const q = cv.getContext('2d'); q.imageSmoothingEnabled = false; q.setTransform(1, 0, 0, 1, 0, 0); q.clearRect(0, 0, cv.width, cv.height); q.scale(z, z);
-    const K = .36, Lu = 140, Lv = 74, ox = W / 2 - (Lu - Lv) / 2, oy = 58;   // u：右したへ、v：左したへ
-    const P = (u, v, h = 0) => [ox + (u - v), oy + (u + v) * K - h];
-    const poly = (pts, fill, stroke, lw = 1) => { q.beginPath(); pts.forEach(([x, y], i) => i ? q.lineTo(x, y) : q.moveTo(x, y)); q.closePath(); if (fill) { q.fillStyle = fill; q.fill(); } if (stroke) { q.strokeStyle = stroke; q.lineWidth = lw; q.stroke(); } };
-    // 台座：2だん（したの だんは ひとまわり 大きい）
-    const slab = (u0, v0, u1, v1, h0, t, col) => {
-      const top = [P(u0, v0, h0), P(u1, v0, h0), P(u1, v1, h0), P(u0, v1, h0)];
-      poly([P(u0, v1, h0), P(u1, v1, h0), P(u1, v1, h0 - t), P(u0, v1, h0 - t)], col); poly([P(u0, v1, h0), P(u1, v1, h0), P(u1, v1, h0 - t), P(u0, v1, h0 - t)], 'rgba(0,0,0,.28)');   // まえ左の めん
-      poly([P(u1, v0, h0), P(u1, v1, h0), P(u1, v1, h0 - t), P(u1, v0, h0 - t)], col); poly([P(u1, v0, h0), P(u1, v1, h0), P(u1, v1, h0 - t), P(u1, v0, h0 - t)], 'rgba(0,0,0,.12)');   // まえ右の めん
-      q.globalAlpha = .85; poly(top, col); q.globalAlpha = 1; poly(top, 'rgba(255,255,255,.3)', 'rgba(255,255,255,.8)');
-      q.strokeStyle = 'rgba(255,255,255,.55)'; q.lineWidth = 1; q.beginPath(); q.moveTo(...P(u0, v1, h0 - 1)); q.lineTo(...P(u1, v1, h0 - 1)); q.lineTo(...P(u1, v0, h0 - 1)); q.stroke(); };
-    poly([P(-4, -4, -14), P(Lu + 14, -4, -14), P(Lu + 14, Lv + 14, -14), P(-4, Lv + 14, -14)], 'rgba(20,10,30,.18)');   // ゆかの かげ
-    slab(-8, -8, Lu + 8, Lv + 8, -5, 6, '#9a7a5a');
-    slab(0, 0, Lu, Lv, 0, 5, base);
-    // おくの 板：ステージの 床を アクリルに はさんだ もの。u の むきに 斜めに たつ
-    const bu0 = 6, bLen = Lu - 12, bh = 54, [bx, by] = P(bu0, 3, 0);
-    q.save(); q.setTransform(z, z * K, 0, z, z * bx, z * by);
-    q.fillStyle = 'rgba(0,0,0,.3)'; rrect(q, 3, -bh + 3, bLen, bh, 7); q.fill();
-    q.save(); rrect(q, 0, -bh, bLen, bh, 7); q.clip();
-    const fl = STG && STG.floors[fk]; if (fl && imgOk(fl)) { const sw = fl.naturalWidth * .62, sh = sw * bh / bLen; q.drawImage(fl, (fl.naturalWidth - sw) / 2, (fl.naturalHeight - sh) / 2, sw, sh, 0, -bh, bLen, bh); } else { q.fillStyle = '#2a2440'; q.fillRect(0, -bh, bLen, bh); }
-    { const g = q.createLinearGradient(0, -bh, 0, 0); g.addColorStop(0, 'rgba(255,255,255,.12)'); g.addColorStop(.6, 'rgba(10,8,24,0)'); g.addColorStop(1, 'rgba(10,8,24,.4)'); q.fillStyle = g; q.fillRect(0, -bh, bLen, bh); }
-    { const g = q.createLinearGradient(0, -bh, bLen * .6, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.36, 'rgba(255,255,255,0)'); g.addColorStop(.43, 'rgba(255,255,255,.18)'); g.addColorStop(.5, 'rgba(255,255,255,0)'); q.fillStyle = g; q.fillRect(0, -bh, bLen, bh); }
-    q.restore();
-    q.lineWidth = 1.4; q.strokeStyle = 'rgba(220,236,255,.9)'; rrect(q, .7, -bh + .7, bLen - 1.4, bh - 1.4, 6.5); q.stroke();
-    q.fillStyle = 'rgba(200,225,255,.55)'; q.fillRect(bLen, -bh + 3, 2, bh - 3);   // 板の あつみ
-    q.restore();
-    // スタンド：あしもとの 点（u, v）に まえむきで たつ
-    const stand = (im, u, v, w, h) => { const pad = 3, c = acryCut(im, Math.max(1, Math.round(w * z)), Math.max(1, Math.round(h * z)), pad * z), [cx, cy] = P(u, v, 0);
-      q.fillStyle = 'rgba(0,0,0,.25)'; q.beginPath(); q.ellipse(cx, cy + 1, w * .4 + 4, 3, 0, 0, 7); q.fill();
-      const s0 = w * .3 + 3; poly([P(u - s0 * .5, v - 4), P(u + s0 * .5, v - 4), P(u + s0 * .5, v + 2), P(u - s0 * .5, v + 2)].map(([x, y]) => [x, y + 0]), 'rgba(225,240,255,.6)', 'rgba(255,255,255,.9)', .8);   // あしもとの さしこみ
+    const T = hubTown(fk, base); if (T) q.drawImage(T.c, 0, 0, W, H);
+    const P = T.P;
+    const stand = (im, u, v, w, h) => { const pad = 2, c = acryCut(im, Math.max(1, Math.round(w * z)), Math.max(1, Math.round(h * z)), pad * z), [cx, cy] = P(u, v, 0);
+      q.fillStyle = 'rgba(0,0,0,.28)'; q.beginPath(); q.ellipse(cx, cy + 1, w * .38 + 3, 2.6, 0, 0, 7); q.fill();
       q.drawImage(c, cx - w / 2 - pad, cy + 1 - h - pad, w + pad * 2, h + pad * 2); };
     const items = [];
-    const pr = STG && STG.props[fk] && STG.props[fk][0]; if (pr && imgOk(pr.img)) { const h = Math.min(28, 52 * pr.img.naturalHeight / pr.img.naturalWidth), w = h * pr.img.naturalWidth / pr.img.naturalHeight; items.push([pr.img, Lu - 20, 16, w, h]); }
-    const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, trW = TR_MS * 1.3 * 48 / h0, f = 70 / (h0 * trW);
-    let g = 1, mon = null;
-    if (lead && SPR[lead.sid]) { const [bx2, by2, bw, bh2] = UBOX || sprBox(lead.sid), ms = SPR[lead.sid].ms * f; mon = { bx: bx2, by: by2, bw, bh: bh2, ms }; g = Math.min(1, (H - 50) / (bh2 * ms), W * .45 / (bw * ms)); }
-    g *= .86; const ts = 70 / h0 * g;
-    if (mon) { const mh = mon.bh * mon.ms * g, want = clamp(mh, 36, 58); mon.k = want / mh; }
-    items.push([ti, 40, 46, ti.width * ts, ti.height * ts]);
-    if (mon) { const fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, ms = mon.ms * g * mon.k;
-      const ck = mon.bx + ',' + mon.by + ',' + mon.bw + ',' + mon.bh; if (!im.__cut || im.__cutK !== ck) { const c = document.createElement('canvas'); c.width = mon.bw; c.height = mon.bh; c.getContext('2d').drawImage(im, -mon.bx, -mon.by); im.__cut = c; im.__cutK = ck; }
-      items.push([im.__cut, 92, 40, mon.bw * ms, mon.bh * ms]); }
-    items.sort((a, b2) => (a[1] + a[2]) - (b2[1] + b2[2])).forEach(it => stand(...it));   // おくから じゅんに
+    const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, th = 46, ts = th / h0;
+    items.push([ti, 76, 70, ti.width * ts, ti.height * ts]);
+    if (lead && SPR[lead.sid]) { const [bx2, by2, bw, bh2] = UBOX || sprBox(lead.sid), fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n;
+      const k = clamp(bh2 * SPR[lead.sid].ms * .55, 26, 44) / bh2, ck = bx2 + ',' + by2 + ',' + bw + ',' + bh2;
+      if (!im.__cut || im.__cutK !== ck) { const c = document.createElement('canvas'); c.width = bw; c.height = bh2; c.getContext('2d').drawImage(im, -bx2, -by2); im.__cut = c; im.__cutK = ck; }
+      items.push([im.__cut, 100, 74, bw * k, bh2 * k]); }
+    items.sort((a, b2) => (a[1] + a[2]) - (b2[1] + b2[2])).forEach(it => stand(...it));
     fi++;
   };
   draw(); HUB_ANIM = setInterval(draw, 220);
