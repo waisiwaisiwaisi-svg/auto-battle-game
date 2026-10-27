@@ -1486,7 +1486,7 @@ html.town #scHub .hres1[data-res=trophy]{display:none!important}
 html.town:not(.land) #scHub .hbar{flex-wrap:nowrap!important} html.town:not(.land) #scHub .hbar .hres{flex:1 1 auto!important;order:0!important;min-width:0}
 html.town:not(.land) #scHub .hbar .hres>span{flex:1 1 0;min-width:0}
 html.town.land #scHub #isles{top:52px!important;padding:0 4px!important;gap:0!important}
-html.town.land #scHub #isles .isle canvas{transform:scale(1.16);transform-origin:50% 92%}
+html.town.land #scHub #isles{display:block!important}
 html.town:not(.land) #scHub #isles{display:block!important;top:108px!important}
 html.town:not(.land) #scHub #isles .isle canvas{width:100%!important;height:100%!important;max-width:none;max-height:none}
 html.town:not(.land) #scHub #isles .isle .islabel{left:auto;right:auto;bottom:14%;transform:rotate(-12deg)}
@@ -3137,8 +3137,13 @@ function citySky() {   // うしろの ビルの まち（1かい かく）
 // たて画面：しまを ジグザグに かさねて ならべる（スクロール しない）
 function isleLayout() {
   const box = $('isles'); if (!box) return; const land = document.documentElement.classList.contains('land'), els = [...box.querySelectorAll('.isle')];
-  if (land) { els.forEach(e => { e.style.cssText = ''; }); return; }
   const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
+  if (land) {   // よこ画面：うえ・した・うえ・した の ジグザグ
+    const sx = .74, n = els.length, hW = W / (1 + (n - 1) * sx) * 170 / 200, h = Math.min(hW, Math.max(H / 1.42, H * (H < 320 ? .9 : .8))), w = h * 200 / 170, off = Math.min(h * .42, H - h);   // ひくい 画面は ジグザグを あさく して しまを おおきく
+    const x0 = (W - w * (1 + (n - 1) * sx)) / 2, y0 = (H - h - off) / 2;
+    els.forEach((e, i) => { Object.assign(e.style, { position: 'absolute', width: w + 'px', height: h + 'px', left: x0 + i * w * sx + 'px', top: y0 + (i % 2 ? off : 0) + 'px', zIndex: i % 2 ? 2 : 1 }); });
+    return;
+  }
   const step = .6, n = els.length, h = Math.min(W * .66 * 170 / 200, H / (1 + (n - 1) * step)), w = h * 200 / 170, pad = 0;
   const top0 = (H - (h + (n - 1) * h * step)) / 2;
   els.forEach((e, i) => { Object.assign(e.style, { position: 'absolute', width: w + 'px', height: h + 'px', left: (i % 2 ? W - w - pad : pad) + 'px', top: top0 + i * h * step + 'px', zIndex: i + 1, padding: '0' }); });
