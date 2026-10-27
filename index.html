@@ -2841,7 +2841,7 @@ const HUBTOWN = {};
 // ====== ホーム：クオータービューの まち（仮の 絵。たてものを おすと その きのうへ）======
 let TOWN = { hits: [], hover: -1, layer: null, key: '' };
 const TOWN_B = [   // sx, sy：広場の まんなかから みた がめんの いち（まちの 単位）。du・dv：たてものの おおきさ、h：たかさ
-  { k: 'arena', n: 'とうぎじょう', sx: 0, sy: -78, px: 0, py: -142, du: 46, dv: 40, h: 22, act: () => townPop('arena') },
+  { k: 'arena', n: 'とうぎじょう', sx: 0, sy: -96, px: 0, py: -160, du: 46, dv: 40, h: 22, act: () => townPop('arena') },
   { k: 'shop', n: 'ショップ', sx: -118, sy: -46, px: -82, py: -96, du: 40, dv: 30, h: 26, act: () => $('btnShop').click() },
   { k: 'gym', n: 'ジム', sx: 118, sy: -46, px: 82, py: -96, du: 42, dv: 34, h: 30, act: () => $('btnJourney').click() },
   { k: 'dojo', n: 'くんれん', sx: -178, sy: 6, px: -98, py: -22, du: 34, dv: 28, h: 22, act: () => $('btnTrainTab').click() },
@@ -2872,13 +2872,13 @@ function townStage() {
     q.setTransform(dpr, 0, 0, dpr, 0, 0); q.imageSmoothingEnabled = false;
     // ひろばの サモナーと モンスター
     const P = TOWN.layer.P, [px, py] = P(0, 0), u = Sc;
-    const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, th = 30 * u, ts = th / h0;
-    q.fillStyle = 'rgba(0,0,0,.22)'; q.beginPath(); q.ellipse(px - 9 * u, py + 1, 9 * u, 3 * u, 0, 0, 7); q.fill();
-    q.drawImage(ti, Math.round(px - 9 * u - ti.width * ts / 2), Math.round(py - ti.height * ts), Math.round(ti.width * ts), Math.round(ti.height * ts));
-    if (lead && UBOX) { const [bx, by, bw, bh] = UBOX, fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, k = clamp(bh * SPR[lead.sid].ms * .36, 16, 28) * u / bh;
-      q.fillStyle = 'rgba(0,0,0,.22)'; q.beginPath(); q.ellipse(px + 12 * u, py + 2, bw * k * .4 + 3, 3 * u, 0, 0, 7); q.fill();
-      q.drawImage(im, bx, by, bw, bh, Math.round(px + 12 * u - bw * k / 2), Math.round(py + 2 - bh * k), Math.round(bw * k), Math.round(bh * k));
-      const nm = SPECIES[lead.sid].n; townSign(q, px + 2 * u, py + 9 * u, nm, u, false); }
+    const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, th = 62 * u, ts = th / h0;   // キャラは 大きめ（アクスタの ときと おなじ くらい）
+    q.fillStyle = 'rgba(0,0,0,.22)'; q.beginPath(); q.ellipse(px - 18 * u, py + 1, 16 * u, 5 * u, 0, 0, 7); q.fill();
+    q.drawImage(ti, Math.round(px - 18 * u - ti.width * ts / 2), Math.round(py - ti.height * ts), Math.round(ti.width * ts), Math.round(ti.height * ts));
+    if (lead && UBOX) { const [bx, by, bw, bh] = UBOX, fr = SPR[lead.sid].fr, im = (fr['idle' + (fi % 4)] || fr.idle0).n, k = clamp(bh * SPR[lead.sid].ms * .75, 34, 46) * u / bh;
+      q.fillStyle = 'rgba(0,0,0,.22)'; q.beginPath(); q.ellipse(px + 20 * u, py + 3 * u, bw * k * .4 + 3, 5 * u, 0, 0, 7); q.fill();
+      q.drawImage(im, bx, by, bw, bh, Math.round(px + 20 * u - bw * k / 2), Math.round(py + 3 * u - bh * k), Math.round(bw * k), Math.round(bh * k));
+      const nm = SPECIES[lead.sid].n; townSign(q, px + 2 * u, py + 12 * u, nm, u, false); }
     // かんばん（おすと はいれる）
     TOWN.hits = TOWN.layer.hits; TOWN.layer.signs.forEach((sg, i) => townSign(q, sg.x, sg.y, sg.n, u, TOWN.hover === i));
     fi++;
