@@ -1454,12 +1454,12 @@ html:not(.land).town .isle canvas{width:min(78vw,300px);height:auto}
 .islabel{position:absolute;left:8%;bottom:10%;transform:rotate(-14deg);background:#1d1640;color:#fff;border:2px solid #7fb4ff;padding:2px 12px;font-size:15px;letter-spacing:.04em;box-shadow:0 3px 0 #0b0820;white-space:nowrap}
 html.town #scHub .hubgrid{bottom:calc(66px + var(--sab))!important;justify-content:center!important}
 html.town body:has(#scHub:not([hidden])) #tabbar{display:grid!important}
-html.town #tabbar>button:is(#btnShop,#btnTrainTab,#btnGuild){display:none!important}
+html.town #tabbar>button:is(#btnShop,#btnTrainTab){display:none!important}
 #tabbar>button.tnew{display:none}
 html.town #tabbar>button.tnew{display:flex}
-html.town #tabbar{grid-template-columns:repeat(4,1fr)!important}
-html.town #tabbar>#tabHome{order:0} html.town #tabbar>#btnTeam{order:1} html.town #tabbar>#tabBattle{order:2} html.town #tabbar>#tabMenu{order:3}
-html.town.land body:has(#scHub:not([hidden])) #tabbar{top:auto!important;bottom:0!important;left:50%!important;right:auto!important;transform:translateX(-50%);width:min(520px,70vw)!important;height:60px;grid-template-columns:repeat(4,1fr)!important;grid-auto-rows:auto!important;padding:4px 8px calc(4px + var(--sab))!important;border-right:0!important;border-top:3px solid #0b0914!important}
+html.town #tabbar{grid-template-columns:repeat(5,1fr)!important}
+html.town #tabbar>#tabHome{order:0} html.town #tabbar>#btnTeam{order:1} html.town #tabbar>#tabBattle{order:2} html.town #tabbar>#btnGuild{order:3} html.town #tabbar>#tabMenu{order:4}
+html.town.land body:has(#scHub:not([hidden])) #tabbar{top:auto!important;bottom:0!important;left:50%!important;right:auto!important;transform:translateX(-50%);width:min(620px,76vw)!important;height:60px;grid-template-columns:repeat(5,1fr)!important;grid-auto-rows:auto!important;padding:4px 8px calc(4px + var(--sab))!important;border-right:0!important;border-top:3px solid #0b0914!important}
 html.town.land body:has(#scHub:not([hidden])) #tabbar::before{box-shadow:inset 0 3px 0 #0b0914!important}
 html.town.land body:has(#scHub:not([hidden])) #tabbar button.home{margin:0!important}
 html.town body:has(#scHub:not([hidden])) #tabbar .tabind{display:none}
@@ -1470,6 +1470,16 @@ html.town #tabbar #tabHome .ico{background:none!important}
 html.town #tabbar #tabHome .ico>*{display:none!important}
 html.town #tabbar #tabHome .ico::after{content:'';display:block;width:100%;height:100%;image-rendering:pixelated;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' shape-rendering='crispEdges'%3E%3Cpath fill='%230b0914' d='M6 1h2v1h1v1h1v1h1v1h1v1h1v2h-1v5H2V8H1V6h1V5h1V4h1V3h1V2h1z'/%3E%3Cpath fill='%23ffb02e' d='M6 2h2v1h1v1h1v1h1v1h1v1H2V6h1V5h1V4h1V3h1z'/%3E%3Cpath fill='%23fff3d0' d='M3 8h8v4H3z'/%3E%3Cpath fill='%23c0392b' d='M6 9h2v3H6z'/%3E%3C/svg%3E") center/contain no-repeat}
 html.town #scHub .hubgrid>.hcol:nth-child(2):has(.tut-hl){display:block!important} html.town #scHub .hcol:has(.tut-hl) .hcta{display:none!important}   /* チュートリアルで さす ボタンだけ だす */
+/* しまは 4つ：スクロール しないで 1がめんに ならべる（よこ：4れつ、たて：2×2）*/
+html.town #scHub #isles{display:grid!important;overflow:hidden!important;scroll-snap-type:none!important;gap:6px!important;place-items:center}
+html.town.land #scHub #isles{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:minmax(0,1fr);padding:0 12px!important}
+html.town:not(.land) #scHub #isles{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));padding:4px 8px!important;flex-direction:unset}
+html.town #scHub #isles .isle{width:100%;height:100%;min-height:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:22px!important}
+html.town #scHub #isles .isle canvas{width:auto!important;height:auto!important;max-width:100%;max-height:100%;aspect-ratio:200/170}
+html.town #scHub #isles .isle canvas{width:100%!important}
+@supports (width:1cqw){html.town #scHub #isles .isle{container-type:size} html.town #scHub #isles .isle canvas{width:min(100cqw,calc(100cqh * 200 / 170))!important;height:auto!important}}
+html.town #scHub .islabel{left:50%;bottom:8px;transform:translateX(-62%) rotate(-12deg)}
+html.town:not(.land) #scHub .islabel{font-size:13px;padding:1px 8px}
 </style>
 </head>
 <body>
@@ -3010,13 +3020,10 @@ function townLayer(Wc, Hc, dpr, u, cx0, cy0, land) {
 }
 
 // ====== ホーム：うかぶ へやの ジオラマ（しま）を ならべる（仮の 絵）======
-const ISLES = [
-  { k: 'gym', n: 'ジム', act: () => $('btnJourney').click() },
+const ISLES = [   // 4つ：1がめんに おさまる
+  { k: 'arena', n: 'アーケード', act: () => $('btnJourney').click() },
   { k: 'shop', n: 'ショップ', act: () => $('btnShop').click() },
-  { k: 'room', n: 'マイルーム', act: () => isleMenu('マイルーム', [['へんせい', 'btnTeam'], ['コレクション', 'btnDex']]) },
-  { k: 'lab', n: 'ラボ', act: () => $('btnTrainTab').click() },
-  { k: 'arena', n: 'とうぎじょう', act: () => isleMenu('とうぎじょう', [['フリー対戦', 'btnCup'], ['フレンド対戦', 'btnOnline']]) },
-  { k: 'guild', n: 'ギルド', act: () => $('btnGuild').click() },
+  { k: 'room', n: 'マイルーム', act: () => $('btnTrainTab').click() },
   { k: 'wild', n: 'くさむら', act: () => $('btnWild').click() },
 ];
 function isleMenu(title, items) {
@@ -3101,7 +3108,7 @@ function islesStage() {
 }
 // したの メニュー：バトル・メニュー
 $('tabBattle').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('バトル', [['オンライン対戦', 'btnRank'], ['アーケード', 'btnJourney'], ['フリー対戦', 'btnCup'], ['フレンド対戦', 'btnOnline'], ['くさむら', 'btnWild']]), 0); };
-$('tabMenu').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('メニュー', [['ショップ', 'btnShop'], ['訓練', 'btnTrainTab'], ['ギルド', 'btnGuild'], ['コレクション（図鑑）', 'btnDex'], ['ランキング', 'hMe'], ['あそびかた', 'btnHelp'], ['タイプあいしょう', 'btnChart'], ['おと オン／オフ', 'hubSnd'], ['がめんの むき', 'hubRot'], ['せってい', 'btnOpt']]), 0); };
+$('tabMenu').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('メニュー', [['ショップ', 'btnShop'], ['訓練', 'btnTrainTab'], ['コレクション（図鑑）', 'btnDex'], ['ランキング', 'hMe'], ['あそびかた', 'btnHelp'], ['タイプあいしょう', 'btnChart'], ['おと オン／オフ', 'hubSnd'], ['がめんの むき', 'hubRot'], ['せってい', 'btnOpt']]), 0); };
 function hubTown(fk, base) {
   const W = 320, H = 212, z = 3, key = fk; if (HUBTOWN[key] && HUBTOWN[key].ok) return HUBTOWN[key];
   const c = document.createElement('canvas'); c.width = W * z; c.height = H * z; const q = c.getContext('2d'); q.scale(z, z);
