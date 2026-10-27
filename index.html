@@ -1434,6 +1434,7 @@ html.town #scHub .hchest .chesthead>span{white-space:nowrap}
 /* まち：チュートリアルで さす ボタン（くさむら・アーケード）だけ まんなかに だす */
 html.town #scHub .hmodes:has(.tut-hl){display:flex!important;position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:6;min-width:220px}
 html.town #scHub .hmodes:has(.tut-hl) .hmode:not(.tut-hl){display:none!important}
+html.town #scHub .hbar,html.town #scHub .hicons,html.town #scHub .hres{pointer-events:none} html.town #scHub .hbar>*:not(.hres),html.town #scHub .hres>*,html.town #scHub .hicons>*{pointer-events:auto}   /* うえの だんの すきまは まちを おせる */
 </style>
 </head>
 <body>
@@ -2841,14 +2842,14 @@ const HUBTOWN = {};
 // ====== ホーム：クオータービューの まち（仮の 絵。たてものを おすと その きのうへ）======
 let TOWN = { hits: [], hover: -1, layer: null, key: '' };
 const TOWN_B = [   // sx, sy：広場の まんなかから みた がめんの いち（まちの 単位）。du・dv：たてものの おおきさ、h：たかさ
-  { k: 'arena', n: 'とうぎじょう', sx: 0, sy: -96, px: 0, py: -160, du: 46, dv: 40, h: 22, act: () => townPop('arena') },
-  { k: 'shop', n: 'ショップ', sx: -118, sy: -46, px: -82, py: -96, du: 40, dv: 30, h: 26, act: () => $('btnShop').click() },
-  { k: 'gym', n: 'ジム', sx: 118, sy: -46, px: 82, py: -96, du: 42, dv: 34, h: 30, act: () => $('btnJourney').click() },
-  { k: 'dojo', n: 'くんれん', sx: -178, sy: 6, px: -98, py: -22, du: 34, dv: 28, h: 22, act: () => $('btnTrainTab').click() },
-  { k: 'guild', n: 'ギルド', sx: 178, sy: 6, px: 98, py: -22, du: 34, dv: 30, h: 34, act: () => $('btnGuild').click() },
-  { k: 'book', n: 'コレクション', sx: -116, sy: 46, px: -80, py: 58, du: 30, dv: 22, h: 24, act: () => $('btnDex').click() },
-  { k: 'team', n: 'へんせい', sx: 0, sy: 58, px: 0, py: 84, du: 36, dv: 10, h: 18, act: () => $('btnTeam').click() },
-  { k: 'wild', n: 'くさむら', sx: 116, sy: 46, px: 82, py: 58, du: 44, dv: 34, h: 0, act: () => $('btnWild').click() },
+  { k: 'arena', n: 'とうぎじょう', sx: 0, sy: -96, px: 0, py: -160, fw: 58, fh: 40, du: 46, dv: 40, h: 22, act: () => townPop('arena') },
+  { k: 'shop', n: 'ショップ', sx: -118, sy: -46, px: -82, py: -96, fw: 54, fh: 46, du: 40, dv: 30, h: 26, act: () => $('btnShop').click() },
+  { k: 'gym', n: 'ジム', sx: 118, sy: -46, px: 82, py: -96, fw: 56, fh: 50, du: 42, dv: 34, h: 30, act: () => $('btnJourney').click() },
+  { k: 'dojo', n: 'くんれん', sx: -178, sy: 6, px: -98, py: -22, fw: 48, fh: 40, du: 34, dv: 28, h: 22, act: () => $('btnTrainTab').click() },
+  { k: 'guild', n: 'ギルド', sx: 178, sy: 6, px: 98, py: -22, fw: 46, fh: 48, du: 34, dv: 30, h: 34, act: () => $('btnGuild').click() },
+  { k: 'book', n: 'コレクション', sx: -116, sy: 46, px: -80, py: 58, fw: 46, fh: 36, du: 30, dv: 22, h: 24, act: () => $('btnDex').click() },
+  { k: 'team', n: 'へんせい', sx: 0, sy: 58, px: 0, py: 84, fw: 46, fh: 34, du: 36, dv: 10, h: 18, act: () => $('btnTeam').click() },
+  { k: 'wild', n: 'くさむら', sx: 116, sy: 46, px: 82, py: 58, fw: 56, fh: 36, du: 44, dv: 34, h: 0, act: () => $('btnWild').click() },
 ];
 function townPop(k) {
   const p = $('townPop'); p.innerHTML = `<b>とうぎじょう</b><button class="btn" data-a="cup">フリー対戦</button><button class="btn" data-a="online">フレンド対戦</button><button class="btn sub" data-a="x">とじる</button>`;
@@ -2897,6 +2898,34 @@ function townSign(q, x, y, t, u, hot) {
   q.fillStyle = hot ? '#ffe36a' : '#fffaf0'; rrect(q, x - w / 2, y - h / 2, w, h, 3 * u); q.fill(); q.strokeStyle = '#3a2a4a'; q.lineWidth = Math.max(1, .8 * u); q.stroke();
   q.fillStyle = '#2a1f45'; q.textAlign = 'center'; q.textBaseline = 'middle'; q.fillText(t, x, y + .5 * u); q.restore();
 }
+// まちの たてもの：まえから みた 絵（アクスタに する）。1ドット＝1たんい で かく
+const TFRONT = {};
+function townFront(k, w, h) {
+  const key = k + w + 'x' + h; if (TFRONT[key]) return TFRONT[key];
+  const z = 4, c = document.createElement('canvas'); c.width = w * z; c.height = h * z; const q = c.getContext('2d'); q.scale(z, z); q.lineJoin = 'round';
+  const O = '#2a1f45', R = (x, y, ww, hh, col, lw = .8) => { q.fillStyle = col; q.fillRect(x, y, ww, hh); q.strokeStyle = O; q.lineWidth = lw; q.strokeRect(x, y, ww, hh); };
+  const tri = (pts, col) => { q.beginPath(); pts.forEach(([x, y], i) => i ? q.lineTo(x, y) : q.moveTo(x, y)); q.closePath(); q.fillStyle = col; q.fill(); q.strokeStyle = O; q.lineWidth = .8; q.stroke(); };
+  const house = (wall, roof, rh = 14) => { R(4, rh, w - 8, h - rh - 1, wall); tri([[1, rh + 1], [w / 2, 2], [w - 1, rh + 1]], roof); };
+  const win = (x, y, ww = 7, hh = 7, col = '#bfe8ff') => { R(x, y, ww, hh, col, .6); q.fillStyle = 'rgba(255,255,255,.7)'; q.fillRect(x + 1, y + 1, 2, 2); };
+  const door = (x, y, ww, col = '#8a5a3a') => R(x, y, ww, h - 1 - y, col, .7);
+  if (k === 'shop') { house('#ffe1ee', '#ff6fae', 13); for (let x = 4; x < w - 4; x += 4) { q.fillStyle = (x / 4) % 2 < 1 ? '#ff7cc0' : '#fff'; q.fillRect(x, 14, 4, 6); } q.strokeStyle = O; q.strokeRect(4, 14, w - 8, 6);
+    win(7, 23, 12, 10); win(w - 19, 23, 12, 10); door(w / 2 - 4, 26, 8, '#ff9ccf'); ['#7fd8ff', '#ff9ccf', '#b9a6ff', '#ffe36a'].forEach((col, j) => R(5 + j * 6, h - 7, 5, 6, col, .5));
+    R(w / 2 - 6, 4, 12, 7, '#fff', .6); q.fillStyle = '#ff6fae'; q.fillRect(w / 2 - 3, 6, 6, 3); }
+  else if (k === 'gym') { house('#f0e2d0', '#2c2f6e', 15); door(w / 2 - 5, 26, 10, '#c0392b'); win(7, 21, 8, 8); win(w - 15, 21, 8, 8);
+    q.strokeStyle = '#fff'; q.lineWidth = 2.2; q.beginPath(); q.moveTo(w / 2 - 5, 4); q.lineTo(w / 2 + 5, 13); q.moveTo(w / 2 + 5, 4); q.lineTo(w / 2 - 5, 13); q.stroke();
+    for (const x of [1, w - 4]) { R(x, h - 12, 3, 11, '#3a3a4a', .5); q.fillStyle = '#ff8a3d'; q.beginPath(); q.arc(x + 1.5, h - 14, 2.2, 0, 7); q.fill(); } }
+  else if (k === 'arena') { R(3, 14, w - 6, h - 15, '#c9b8f0'); for (let x = 5; x < w - 5; x += 6) R(x, 10, 4, 5, '#b5a2e8', .5); R(6, 22, w - 12, 5, '#a08ade', .5); R(6, 30, w - 12, 5, '#a08ade', .5);
+    q.fillStyle = '#ffe36a'; q.beginPath(); q.ellipse(w / 2, h - 7, 9, 4, 0, 0, 7); q.fill(); q.strokeStyle = O; q.lineWidth = .7; q.stroke(); for (const x of [6, w - 8]) { q.strokeStyle = O; q.beginPath(); q.moveTo(x, 10); q.lineTo(x, 2); q.stroke(); tri([[x, 2], [x + 6, 4], [x, 6]], '#ff4d6d'); } }
+  else if (k === 'dojo') { house('#e8cf9e', '#5a3a2a', 13); door(w / 2 - 6, 24, 12, '#7a4a3a'); R(w / 2 - 8, 15, 16, 5, '#fff3d0', .5); q.fillStyle = O; q.fillRect(w / 2 - 5, 17, 10, 1); win(6, 24, 6, 8, '#fff3d0'); win(w - 12, 24, 6, 8, '#fff3d0'); }
+  else if (k === 'guild') { R(4, 12, w - 8, h - 13, '#d8dcef'); for (let x = 4; x < w - 4; x += 5) R(x, 8, 3, 5, '#c4c9e4', .5); for (let x = 7; x < w - 7; x += 8) R(x, 16, 3, h - 22, '#eef0fa', .5); door(w / 2 - 5, h - 14, 10, '#4a3a8a');
+    q.strokeStyle = O; q.beginPath(); q.moveTo(w / 2, 8); q.lineTo(w / 2, 0.5); q.stroke(); R(w / 2, 1, 8, 5, '#ff4d6d', .5); }
+  else if (k === 'book') { R(2, 8, w / 2 - 2, h - 12, '#fff8e6'); R(w / 2, 8, w / 2 - 2, h - 12, '#fff1d6'); q.strokeStyle = '#3a6fd0'; q.lineWidth = 2; q.strokeRect(1, 7, w - 2, h - 10);
+    ['#7fd8ff', '#b9a6ff', '#ff9ccf', '#a8f0c8'].forEach((col, j) => R(6 + (j % 2) * 11 + (j > 1 ? w / 2 - 2 : 0), 13 + (j % 2) * 0 + Math.floor(j / 2) * 0 + (j % 2 ? 12 : 0) * 0 + (j % 2) * 11, 8, 8, col, .5)); R(w / 2 - 3, h - 8, 6, 7, '#ffd23f', .6); }
+  else if (k === 'team') { ['#7fd8ff', '#ff9ccf', '#b9a6ff'].forEach((col, j) => { R(3 + j * (w - 6) / 3 + 1, 4, (w - 6) / 3 - 2, h - 12, col); R(3 + j * (w - 6) / 3 + 3, 7, (w - 6) / 3 - 6, h - 20, 'rgba(255,255,255,.55)', .4); }); R(1, h - 8, w - 2, 7, '#a07850'); }
+  else if (k === 'wild') { R(1, h - 10, w - 2, 9, '#5fb85a'); for (let x = 2; x < w - 2; x += 4) tri([[x, h - 9], [x + 2, h - 19 - (x * 7) % 6], [x + 4, h - 9]], (x / 4) % 2 < 1 ? '#3f9e57' : '#2f8a4a'); q.fillStyle = '#7a5038'; q.fillRect(w - 12, 10, 3, h - 18);
+    for (const [dx, dy, r, col] of [[0, -6, 9, '#3f9e57'], [-5, -1, 6, '#4fb468'], [5, -1, 6, '#4fb468']]) { q.fillStyle = col; q.beginPath(); q.arc(w - 10.5 + dx, 12 + dy, r, 0, 7); q.fill(); } for (let x = 1; x < w; x += 5) R(x, h - 6, 1.2, 5, '#c99a5e', .3); }
+  TFRONT[key] = c; return c;
+}
 function townLayer(Wc, Hc, dpr, u, cx0, cy0, land) {
   const c = document.createElement('canvas'); c.width = Math.round(Wc * dpr); c.height = Math.round(Hc * dpr); const q = c.getContext('2d'); q.scale(dpr, dpr);
   const K = .5, P = (a, b, h = 0) => [cx0 + (a - b) * u, cy0 + (a + b) * K * u - h * u];   // a・b：まちの じく（ひろばが 0,0）
@@ -2925,28 +2954,20 @@ function townLayer(Wc, Hc, dpr, u, cx0, cy0, land) {
   const tree = (a, b, s = 1) => objs.push({ d: a + b, f: () => { const [x, y] = P(a, b); q.fillStyle = 'rgba(0,0,0,.18)'; q.beginPath(); q.ellipse(x, y, 7 * s * u, 3 * s * u, 0, 0, 7); q.fill(); q.fillStyle = '#7a5038'; q.fillRect(x - 1.2 * s * u, y - 9 * s * u, 2.4 * s * u, 9 * s * u);
     for (const [dx, dy, r, col] of [[0, -16, 8, '#3f9e57'], [-4, -12, 6, '#4fb468'], [4, -12, 6, '#4fb468'], [-1, -18, 4.5, '#68cc7e']]) { q.fillStyle = col; q.beginPath(); q.arc(x + dx * s * u, y + dy * s * u, r * s * u, 0, 7); q.fill(); } } });
   const lamp = (a, b) => objs.push({ d: a + b, f: () => { const [x, y] = P(a, b); q.fillStyle = '#2a2440'; q.fillRect(x - .7 * u, y - 22 * u, 1.4 * u, 22 * u); q.fillStyle = '#ffe9a0'; q.beginPath(); q.arc(x, y - 23 * u, 2.4 * u, 0, 7); q.fill(); q.strokeStyle = '#2a2440'; q.lineWidth = u * .6; q.stroke(); } });
-  TOWN_B.forEach((B, i) => { const [ac, bc] = land ? fromS(B.sx, B.sy) : fromS(B.px, B.py), a0 = ac - B.du / 2, b0 = bc - B.dv / 2, a1 = a0 + B.du, b1 = b0 + B.dv;
-    quad(a0 - 6, b0 - 6, a1 + 6, b1 + 6, 0, B.k === 'wild' ? '#7fcf7a' : '#e9dcc6', 'rgba(120,100,90,.4)');   // しきち
-    objs.push({ d: a1 + b1, f: () => {
-      if (B.k === 'shop') { box(a0, b0, a1, b1, B.h, '#ffe1ee'); roof(a0, b0, a1, b1, B.h, 10, '#ff6fae', '#ffe1ee'); for (let x = a0; x < a1; x += 4) poly([P(x, b1 + .2, B.h * .8), P(Math.min(a1, x + 4), b1 + .2, B.h * .8), P(Math.min(a1, x + 4), b1 + 6, B.h * .62), P(x, b1 + 6, B.h * .62)], (x - a0) / 4 % 2 < 1 ? '#ff7cc0' : '#fff');
-        win(a0 + 4, b1, 0, 8, 12, '#bfe8ff'); win(a1 - 12, b1, 0, 8, 12, '#bfe8ff'); const cols = ['#7fd8ff', '#ff9ccf', '#b9a6ff', '#ffe36a']; cols.forEach((col, j) => box(a0 + 2 + j * 9, b1 + 8, a0 + 9 + j * 9, b1 + 14, 7, col)); }
-      else if (B.k === 'gym') { box(a0, b0, a1, b1, B.h, '#f0e2d0'); roof(a0, b0, a1, b1, B.h, 12, '#2c2f6e', '#f0e2d0'); win(a0 + B.du / 2 - 5, b1, 0, 10, 14, '#c0392b'); const [x, y] = P(a0 + B.du / 2, b1, B.h + 6); q.strokeStyle = '#fff'; q.lineWidth = 2.4 * u; q.beginPath(); q.moveTo(x - 7 * u, y - 7 * u); q.lineTo(x + 7 * u, y + 7 * u); q.moveTo(x + 7 * u, y - 7 * u); q.lineTo(x - 7 * u, y + 7 * u); q.stroke(); for (const aa of [a0 - 3, a1 + 3]) { const [fx, fy] = P(aa, b1 + 4); q.fillStyle = '#ff8a3d'; q.beginPath(); q.arc(fx, fy - 12 * u, 2.6 * u, 0, 7); q.fill(); q.fillStyle = '#3a3a4a'; q.fillRect(fx - 2 * u, fy - 10 * u, 4 * u, 10 * u); } }
-      else if (B.k === 'arena') { const steps = 3; for (let i = 0; i < steps; i++) box(a0 + i * 4, b0 + i * 4, a1 - i * 4, b1 - i * 4, B.h - i * 6, ['#c9b8f0', '#b5a2e8', '#a08ade'][i]); const [x, y] = P((a0 + a1) / 2, (b0 + b1) / 2, B.h - 12); q.fillStyle = '#ffe36a'; q.beginPath(); q.ellipse(x, y, 10 * u, 5 * u, 0, 0, 7); q.fill(); q.strokeStyle = '#3a2a4a'; q.lineWidth = u * .7; q.stroke(); }
-      else if (B.k === 'dojo') { box(a0, b0, a1, b1, B.h, '#e8cf9e'); roof(a0, b0, a1, b1, B.h, 9, '#5a3a2a', '#e8cf9e'); win(a0 + B.du / 2 - 5, b1, 0, 10, 12, '#7a4a3a'); }
-      else if (B.k === 'guild') { box(a0, b0, a1, b1, B.h, '#d8dcef'); for (let x = a0; x < a1; x += 6) box(x, b1 - 3, x + 3, b1, B.h + 4, '#c4c9e4'); win(a0 + B.du / 2 - 5, b1, 0, 10, 14, '#4a3a8a'); const [x, y] = P(a0 + 6, b1, B.h + 4); q.fillStyle = '#ff4d6d'; q.fillRect(x, y - 16 * u, 6 * u, 12 * u); q.fillStyle = '#ffe36a'; q.beginPath(); q.arc(x + 3 * u, y - 10 * u, 1.6 * u, 0, 7); q.fill(); }
-      else if (B.k === 'book') { const [x, y] = P(a0, b1, 0), [x2, y2] = P(a1, b1, 0); poly([[x, y], [x2, y2], [x2, y2 - B.h * u], [x, y - B.h * u]], '#3a6fd0', '#2a1f45', .8); const m = [(x + x2) / 2, (y + y2) / 2]; poly([[x + 2 * u, y - 2 * u], [m[0], m[1] - 1 * u], [m[0], m[1] - (B.h - 3) * u], [x + 2 * u, y - (B.h - 2) * u]], '#fff8e6', '#2a1f45', .6); poly([[m[0], m[1] - 1 * u], [x2 - 2 * u, y2 - 2 * u], [x2 - 2 * u, y2 - (B.h - 2) * u], [m[0], m[1] - (B.h - 3) * u]], '#fff1d6', '#2a1f45', .6);
-        for (let j = 0; j < 4; j++) { const t = (j % 2 ? .62 : .2), hh = j < 2 ? .62 : .3; q.fillStyle = ['#7fd8ff', '#b9a6ff', '#ff9ccf', '#a8f0c8'][j]; const xx = x + (x2 - x) * (t + .05), yy = y + (y2 - y) * (t + .05) - B.h * u * hh; q.fillRect(xx, yy, 7 * u, 6 * u); } }
-      else if (B.k === 'team') { ['#7fd8ff', '#ff9ccf', '#b9a6ff'].forEach((col, j) => { const aa = a0 + j * 12; poly([P(aa, b1, 2), P(aa + 10, b1, 2), P(aa + 10, b1, B.h), P(aa, b1, B.h)], col, '#2a1f45', .8); poly([P(aa + 2, b1 + .1, 6), P(aa + 8, b1 + .1, 6), P(aa + 8, b1 + .1, B.h - 3), P(aa + 2, b1 + .1, B.h - 3)], 'rgba(255,255,255,.55)'); }); box(a0 - 2, b1 - 3, a1 + 2, b1 + 2, 2, '#a07850'); }
-      else if (B.k === 'wild') { quad(a0, b0, a1, b1, 0, '#5fb85a', '#2e6b3a'); for (let x = a0 + 3; x < a1; x += 6) for (let y = b0 + 3; y < b1; y += 6) { const [gx, gy] = P(x + ((y * 7) % 3), y); q.fillStyle = (x + y) % 12 < 6 ? '#3f9e57' : '#2f8a4a'; q.beginPath(); q.moveTo(gx - 3 * u, gy); q.lineTo(gx - 1 * u, gy - 6 * u); q.lineTo(gx, gy - 2 * u); q.lineTo(gx + 1.5 * u, gy - 7 * u); q.lineTo(gx + 3 * u, gy); q.fill(); }
-        for (let x = a0; x <= a1; x += 6) { const [fx, fy] = P(x, b1 + 1); q.fillStyle = '#c99a5e'; q.fillRect(fx - .7 * u, fy - 5 * u, 1.4 * u, 5 * u); } }
+  TOWN_B.forEach((B, i) => { const [ac, bc] = land ? fromS(B.sx, B.sy) : fromS(B.px, B.py);   // たてものは まえむきの アクスタ（はばを とらない）
+    const fw = (B.fw || 52) * 1.25, fh = (B.fh || 46) * 1.25, [cx, cy] = P(ac, bc), W2 = fw * u, H2 = fh * u, pad = 2.5 * u;
+    objs.push({ d: ac + bc, f: () => {
+      // あしもとの 台（ひしがた）
+      const r = fw * .42; poly([P(ac - r * .5, bc - 6), P(ac + r * .5, bc - 6), P(ac + r * .5, bc + 6), P(ac - r * .5, bc + 6)].map(([x, y]) => [x, y]), 'rgba(225,240,255,.75)', '#ffffff', .8);
+      q.fillStyle = 'rgba(0,0,0,.18)'; q.beginPath(); q.ellipse(cx, cy + 2 * u, W2 * .5, 5 * u, 0, 0, 7); q.fill();
+      const art = townFront(B.k, fw, fh), c = acryCut(art, Math.round(W2 * 2), Math.round(H2 * 2), Math.round(pad * 2));
+      q.drawImage(c, cx - W2 / 2 - pad, cy - H2 - pad, W2 + pad * 2, H2 + pad * 2);
     } });
-    const [sx, sy] = P(a1 - 2, b1 + 4, -2); signs.push({ x: sx - 8 * u, y: sy + 6 * u, n: B.n });
-    // あたり：たてものの まわり（がめんの 四角）
-    const pts = [P(a0, b0, B.h + 14), P(a1, b0, B.h + 14), P(a1, b1, 0), P(a0, b1, 0), P(a1, b1, B.h + 10), P(a0 - 6, b1 + 6, 0), P(a1 + 6, b1 + 6, 0)];
-    hits[i] = { x0: Math.min(...pts.map(p => p[0])), x1: Math.max(...pts.map(p => p[0])), y0: Math.min(...pts.map(p => p[1])), y1: Math.max(...pts.map(p => p[1])) + 14 * u };
+    signs.push({ x: cx, y: cy + 10 * u, n: B.n });
+    hits[i] = { x0: cx - W2 / 2 - pad, x1: cx + W2 / 2 + pad, y0: cy - H2 - pad, y1: cy + 16 * u };
   });
-  for (const [a, b] of [[40, -40], [-40, 40], [-100, -20], [100, -20], [-20, 100], [20, -100], [-70, 10], [10, -70]]) lamp(a, b);
-  for (const [sx, sy, s] of [[-60, -95, 1], [60, -95, .9], [-200, -60, 1.1], [200, -60, 1], [-60, 95, .9], [60, 92, 1], [-210, 70, 1], [210, 70, 1.1], [-160, -100, .8], [160, -100, .8]]) { const [a, b] = fromS(sx, sy); tree(a, b, s); }
+  for (const [a, b] of [[40, -40], [-40, 40]]) lamp(a, b);
+  for (const [sx, sy, s] of [[-60, -95, 1], [60, -95, .9], [-200, -60, 1.1], [200, -60, 1], [-60, 95, .9], [60, 92, 1], [-210, 70, 1], [210, 70, 1.1], [-160, -100, .8], [160, -100, .8]]) { const [a, b] = fromS(sx, sy), [tx, ty] = P(a, b); if (hits.some(h => tx > h.x0 - 10 * u && tx < h.x1 + 10 * u && ty > h.y0 && ty < h.y1 + 20 * u)) continue; tree(a, b, s); }   // たてものに かさなる 木は うえない
   objs.sort((x, y) => x.d - y.d).forEach(o => o.f());
   return { c, P: (a, b, h = 0) => P(a, b, h), hits, signs };
 }
