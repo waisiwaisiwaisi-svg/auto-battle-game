@@ -1484,6 +1484,35 @@ html.town:not(.land) #scHub #isles .isle .islabel{left:auto;right:auto;bottom:14
 html.town:not(.land) #scHub #isles .isle:nth-child(odd) .islabel{left:4%} html.town:not(.land) #scHub #isles .isle:nth-child(even) .islabel{right:4%}
 html.town #scHub .hicons{position:relative;z-index:2}
 html.town.land #scHub .hbar .hres{margin-left:0!important}
+/* しまの なか：うえ（よこ画面は ひだり）に しまの ようす、した に もどる・タブ */
+#isleScene,#isleNav{display:none}
+html.isle #isleScene{display:block;position:absolute;left:0;right:0;top:0;height:40%;overflow:hidden;z-index:0;background:#2a3fa8}
+html.isle #isleScene canvas{width:100%;height:100%;object-fit:cover;object-position:50% 62%;image-rendering:pixelated;display:block}
+#isleTtl{position:absolute;left:10px;top:calc(8px + var(--sat));background:rgba(13,18,48,.86);color:#ffd166;border:2px solid #e9c46a;border-radius:8px;padding:2px 12px;font-size:18px;letter-spacing:.06em}
+#isleSay{position:absolute;left:10px;top:calc(48px + var(--sat));max-width:calc(100% - 20px);background:#fff;color:#222;border:2px solid #222;border-radius:10px;padding:4px 10px;font-size:12px;line-height:1.5}
+html.isle .screen.isl{top:calc(40% - 14px);bottom:calc(60px + var(--sab));z-index:1;background:linear-gradient(var(--win1),var(--win2));border-top:3px solid var(--rim);border-radius:14px 14px 0 0;padding:12px 10px 12px!important;box-shadow:0 -4px 14px rgba(0,0,0,.35)}
+html.isle .screen.isl .sec-title>button.btn.sub{display:none}
+html.isle #tabbar{display:none!important}
+html.isle #isleNav{display:flex;position:absolute;left:0;right:0;bottom:0;z-index:2;gap:4px;padding:6px 6px calc(6px + var(--sab));height:calc(60px + var(--sab));background:var(--win2);border-top:2px solid var(--rim)}
+#isleBack{flex:none;width:52px;border-radius:9px;border:2px solid #e9c46a;background:var(--win1);color:#ffd166;font:700 26px/1 system-ui,sans-serif;cursor:pointer}
+#isleTabs{flex:1;display:flex;gap:4px;min-width:0}
+#isleTabs button{flex:1;min-width:0;border:0;border-radius:9px;background:transparent;color:#b9b2dc;font-family:inherit;font-size:14px;white-space:nowrap;cursor:pointer}
+#isleTabs button.on{background:var(--win1);color:#ffd166;box-shadow:inset 0 -3px #e9c46a}
+html.isle.land #isleScene{right:auto;width:36%;height:auto;bottom:0}
+html.isle.land .screen.isl{top:0;left:36%!important;right:0!important;width:auto!important;max-width:none!important;border-top:0;border-left:3px solid var(--rim);border-radius:0;padding-top:calc(10px + var(--sat))!important;box-shadow:-4px 0 14px rgba(0,0,0,.35)}
+html.isle.land #isleNav{left:36%}
+/* アーケード：タブで ジム・リーグ・タワーを わける */
+html.isle[data-jt=gym] #jrGrid .jrc.league:not(.rival){display:none}
+html.isle[data-jt=league] #jrGrid .jrc:not(.league),html.isle[data-jt=league] #jrGrid .jrc.rival,html.isle[data-jt=league] #jrGrid .jrc.tower{display:none}
+html.isle[data-jt=tower] #jrGrid .jrc:not(.tower){display:none}
+/* ショップ：タブで うりばを わける */
+html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.isle[data-st=box] #scShop .shsec:not([data-k=box]),html.isle[data-st=tm] #scShop .shsec:not([data-k=tm]),html.isle[data-st=mon] #scShop .shsec:not([data-k=mon]){display:none}
+/* くさむら */
+.wdcard{display:flex;flex-direction:column;gap:8px}
+.wdcard p{margin:0;font-size:12px}
+.wdrow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.wdchips{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+#scWild #wdGo{font-size:20px;padding:14px;width:100%}
 </style>
 </head>
 <body>
@@ -1501,6 +1530,8 @@ html.town.land #scHub .hbar .hres{margin-left:0!important}
 })();
 </script>
 <div id="app">
+  <div id="isleScene"><canvas id="isleCv"></canvas><b id="isleTtl"></b><div id="isleSay"></div></div>
+  <nav id="isleNav"><button id="isleBack" aria-label="もどる">‹</button><div id="isleTabs"></div></nav>
 
   <!-- タイトル -->
   <section class="screen" id="scTitle">
@@ -1637,6 +1668,10 @@ html.town.land #scHub .hbar .hres{margin-left:0!important}
   <section class="screen" id="scTrain" hidden>
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">訓練</span><button class="btn sub" id="btnTrBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
     <div id="trBody"></div>
+  </section>
+  <section class="screen" id="scWild" hidden>
+    <div class="sec-title"><span style="font-size:18px;color:var(--ink)">くさむら</span><button class="btn sub" id="btnWdBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
+    <div id="wdBody"></div>
   </section>
 
   <!-- した の タブ：いつでも おもな ばしょへ -->
@@ -3025,10 +3060,10 @@ function townLayer(Wc, Hc, dpr, u, cx0, cy0, land) {
 
 // ====== ホーム：うかぶ へやの ジオラマ（しま）を ならべる（仮の 絵）======
 const ISLES = [   // 4つ：1がめんに おさまる
-  { k: 'arena', n: 'アーケード', act: () => $('btnJourney').click() },
+  { k: 'arena', n: 'アーケード', act: () => { ISLE.jt = isleJt(); $('btnJourney').click(); } },
   { k: 'shop', n: 'ショップ', act: () => $('btnShop').click() },
   { k: 'room', n: 'マイルーム', act: () => $('btnTrainTab').click() },
-  { k: 'wild', n: 'くさむら', act: () => $('btnWild').click() },
+  { k: 'wild', n: 'くさむら', act: () => S.onb === 4 ? $('btnWild').click() : renderWild() },
 ];
 function isleMenu(title, items) {
   const p = $('townPop'); p.innerHTML = `<b>${title}</b>` + items.map(([t, id]) => `<button class="btn" data-a="${id}">${t}</button>`).join('') + `<button class="btn sub" data-a="x">とじる</button>`;
@@ -3121,6 +3156,117 @@ function islesStage() {
   draw(); HUB_ANIM = setInterval(draw, 220);
   if (!window.__isleRz) { window.__isleRz = 1; window.addEventListener('resize', () => { const c = $('townCv'); if (c) c.__k = ''; }); }
 }
+// しまの なか：うえ（よこ画面は ひだり）に しまの なかの ようす、した に もどる・タブ。中身は いままでの 画面を そのまま つかう
+const ISLE = { k: null, jt: 'gym', st: 'deal', bg: {} };
+const ISLE_SCR = { scJourney: 'arena', scTower: 'arena', scShop: 'shop', scTrain: 'room', scWild: 'wild' };
+const ISLE_TABS = { arena: [['ジム', 'gym'], ['リーグ', 'league'], ['タワー', 'tower']], shop: [['おすすめ', 'deal'], ['ボックス', 'box'], ['ステッカー', 'tm'], ['モンスター', 'mon']], room: [['くんれん', 'train'], ['へんせい', 'team']], wild: [] };
+const ISLE_NAME = { arena: 'アーケード', shop: 'ショップ', room: 'マイルーム', wild: 'くさむら' };
+function isleJt() { const J = jr(); return !J.champ && J.badges.length >= GYMS.length ? 'league' : 'gym'; }
+// 仮の 絵（アイソメの へや。ゆかと かべは 画面の そとまで つづける）
+const ISLE_IN = (() => {
+  const iso = (cx, cy) => (a, b, h = 0) => [cx + (a - b), cy + (a + b) * .5 - h];
+  const poly = (g, pts, f, st) => { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fillStyle = f; g.fill(); if (st) { g.strokeStyle = st; g.lineWidth = 1; g.stroke(); } };
+  const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16), f = v => Math.max(0, Math.min(255, Math.round(v * k))); return '#' + [f(n >> 16), f(n >> 8 & 255), f(n & 255)].map(v => v.toString(16).padStart(2, '0')).join(''); };
+  const box = (g, P, a, b, w, d, h, col, z = 0) => {
+    poly(g, [P(a, b + d, z), P(a + w, b + d, z), P(a + w, b + d, z + h), P(a, b + d, z + h)], shade(col, .78), '#0003');
+    poly(g, [P(a + w, b, z), P(a + w, b + d, z), P(a + w, b + d, z + h), P(a + w, b, z + h)], shade(col, .62), '#0003');
+    poly(g, [P(a, b, z + h), P(a + w, b, z + h), P(a + w, b + d, z + h), P(a, b + d, z + h)], col, '#0003');
+  };
+  const room = (g, P, floor, wallL, wallR, tile) => { const n = 220;
+    for (let i = 0; i < n; i += 10) for (let j = 0; j < n; j += 10) poly(g, [P(i, j), P(i + 10, j), P(i + 10, j + 10), P(i, j + 10)], ((i + j) / 10) % 2 && tile ? shade(floor, .92) : floor);
+    if (wallL) { poly(g, [P(0, 0, 0), P(0, n, 0), P(0, n, 200), P(0, 0, 200)], wallL); poly(g, [P(0, 0, 0), P(0, n, 0), P(0, n, 3), P(0, 0, 3)], shade(wallL, .8)); }
+    if (wallR) { poly(g, [P(0, 0, 0), P(n, 0, 0), P(n, 0, 200), P(0, 0, 200)], wallR); poly(g, [P(0, 0, 0), P(n, 0, 0), P(n, 0, 3), P(0, 0, 3)], shade(wallR, .8)); }
+  };
+  const dude = (g, x, y, body, hair) => { g.fillStyle = '#0004'; g.beginPath(); g.ellipse(x, y, 6, 2.5, 0, 0, 7); g.fill(); g.fillStyle = '#2b2b3b'; g.fillRect(x - 3, y - 8, 2, 8); g.fillRect(x + 1, y - 8, 2, 8); g.fillStyle = body; g.fillRect(x - 4, y - 17, 8, 10); g.fillStyle = '#f2c9a5'; g.fillRect(x - 3, y - 23, 6, 6); g.fillStyle = hair; g.fillRect(x - 4, y - 26, 8, 4); g.fillRect(x - 4, y - 23, 2, 3); };
+  const plant = (g, P, a, b) => { box(g, P, a, b, 5, 5, 5, '#b46a3c'); const [x, y] = P(a + 2.5, b + 2.5, 5); g.fillStyle = '#3f9b4f'; g.beginPath(); g.arc(x, y - 5, 6, 0, 7); g.fill(); g.fillStyle = '#5fc46d'; g.beginPath(); g.arc(x - 2, y - 7, 3, 0, 7); g.fill(); };
+  const tree = (g, P, a, b) => { box(g, P, a, b, 4, 4, 14, '#7a4a26'); const [x, y] = P(a + 2, b + 2, 14); g.fillStyle = '#2f8a3c'; g.beginPath(); g.arc(x, y - 6, 10, 0, 7); g.fill(); g.fillStyle = '#4cc05a'; g.beginPath(); g.arc(x - 3, y - 9, 5, 0, 7); g.fill(); };
+  const ART = {
+    arena(g, P) {
+      room(g, P, '#efe5c9', '#b9a6e8', '#cfc0f2', true);
+      poly(g, [P(30, 0, 44), P(72, 0, 44), P(72, 0, 34), P(30, 0, 34)], '#2a1d4f'); g.fillStyle = '#ff6fa8'; g.font = '8px monospace'; { const [tx, ty] = P(36, 0, 36); g.save(); g.translate(tx, ty); g.transform(1, .5, 0, 1, 0, 0); g.fillText('ARCADE', 0, 0); g.restore(); }
+      box(g, P, 32, 34, 40, 34, 4, '#8a7ad8'); poly(g, [P(42, 44, 4), P(62, 44, 4), P(62, 58, 4), P(42, 58, 4)], '#ffd25a');
+      [[4, 10], [4, 30], [4, 50]].forEach(([a, b], i) => { box(g, P, a, b, 10, 12, 26, ['#e2507f', '#4fb3e8', '#5fd38d'][i]); const [x, y] = P(a + 10, b + 3, 18); g.fillStyle = '#152045'; g.fillRect(x - 1, y - 2, 6, 8); });
+      box(g, P, 80, 10, 14, 10, 18, '#f4a640');
+      const [x, y] = P(84, 74); dude(g, x, y, '#5a5fd6', '#e6a33c');
+      return { tr: P(42, 54, 4), mon: P(66, 44, 4) };
+    },
+    shop(g, P) {
+      room(g, P, '#f3ead6', '#f2c2d6', '#f7d9e4', true);
+      [[2, 8], [2, 32], [2, 56]].forEach(([a, b]) => { box(g, P, a, b, 10, 20, 40, '#a8743f'); for (let k = 0; k < 3; k++) for (let m = 0; m < 3; m++) { const [x, y] = P(a + 10, b + 3 + m * 6, 8 + k * 11); g.fillStyle = ['#ff8dbb', '#7ad0ff', '#ffd25a', '#9be37a'][(k + m + b) % 4]; g.fillRect(x - 1, y - 6, 4, 6); } });
+      for (let i = 0; i < 10; i++) poly(g, [P(20 + i * 7, 0, 50), P(27 + i * 7, 0, 50), P(27 + i * 7, 8, 44), P(20 + i * 7, 8, 44)], i % 2 ? '#fff' : '#3f63d6');
+      const [x, y] = P(62, 22); dude(g, x, y, '#5fd38d', '#8a4a2a');
+      box(g, P, 40, 30, 46, 12, 14, '#c58a4a');
+      [46, 56, 66, 76].forEach((a, i) => box(g, P, a, 33, 6, 6, 6, ['#ff8dbb', '#7ad0ff', '#ffd25a', '#9be37a'][i], 14));
+      box(g, P, 84, 62, 12, 12, 16, '#d33b4c'); plant(g, P, 88, 6);
+      return { tr: P(54, 68), mon: P(78, 62) };
+    },
+    room(g, P) {
+      room(g, P, '#e9d6b6', '#efe3cf', '#f6eddc', false);
+      poly(g, [P(0, 20, 40), P(0, 38, 40), P(0, 38, 28), P(0, 20, 28)], '#3a3f6e');
+      poly(g, [P(60, 0, 42), P(72, 0, 42), P(72, 0, 30), P(60, 0, 30)], '#e2507f');
+      box(g, P, 4, 6, 26, 40, 9, '#7aa0e8'); box(g, P, 4, 6, 26, 10, 13, '#f2f4ff');
+      poly(g, [P(30, 40), P(70, 40), P(70, 76), P(30, 76)], '#f59bc2');
+      box(g, P, 78, 22, 16, 30, 10, '#9a6a3a'); box(g, P, 82, 30, 4, 14, 12, '#222844', 10);
+      box(g, P, 70, 76, 8, 8, 20, '#e9c46a'); plant(g, P, 88, 72);
+      return { tr: P(42, 60), mon: P(66, 50) };
+    },
+    wild(g, P) {
+      g.fillStyle = '#4cab51'; g.fillRect(0, 0, 999, 999);
+      for (let i = -100; i < 220; i += 10) for (let j = -100; j < 220; j += 10) poly(g, [P(i, j), P(i + 10, j), P(i + 10, j + 10), P(i, j + 10)], (i + j) / 10 % 2 ? '#56b85a' : '#4cab51');
+      for (let i = 0; i < 80; i++) { const a = 10 + (i * 37 % 80), b = 8 + (i * 53 % 84); if (a > 36 && a < 70 && b > 40 && b < 70) continue; const [x, y] = P(a, b); g.fillStyle = i % 3 ? '#2f8a3c' : '#3fa54b'; g.fillRect(x - 2, y - 6, 2, 6); g.fillRect(x + 1, y - 8, 2, 8); }
+      [[-30, -40], [-10, -46], [10, -40], [30, -46], [50, -40], [70, -46], [90, -40], [110, -46], [-40, -20], [-46, 0], [-40, 20], [-46, 40], [-40, 60], [-46, 80], [-40, 100], [8, 10], [86, 14], [12, 80], [130, 40], [40, 140]].forEach(([a, b]) => tree(g, P, a, b));
+      for (let b = 0; b <= 100; b += 8) box(g, P, 98, b, 2, 2, 8, '#a8743f');
+      box(g, P, 72, 70, 14, 5, 4, '#a8743f');
+      const [x, y] = P(72, 34); g.fillStyle = '#ffd25a'; g.fillRect(x - 1, y - 26, 3, 9); g.fillRect(x - 1, y - 15, 3, 3);
+      g.fillStyle = '#2a6a32'; for (let k = -6; k <= 6; k += 3) g.fillRect(x + k, y - 9 - Math.abs(k) * .4, 2, 9);
+      return { tr: P(44, 62), mon: P(66, 52) };
+    },
+  };
+  return (k) => { const z = 3, c = document.createElement('canvas'); c.width = 220 * z; c.height = 190 * z; const g = c.getContext('2d'); g.scale(z, z); const at = ART[k](g, iso(110, 60)); return { c, at }; };
+})();
+function isleScene(k) {
+  const cv = $('isleCv'); if (!cv) return; const B0 = ISLE.bg[k] || (ISLE.bg[k] = ISLE_IN(k)), z = 3;
+  cv.width = B0.c.width; cv.height = B0.c.height; const q = cv.getContext('2d'); q.imageSmoothingEnabled = false; q.drawImage(B0.c, 0, 0);
+  const shadow = (x, y, w) => { q.fillStyle = 'rgba(0,0,0,.22)'; q.beginPath(); q.ellipse(x * z, y * z, w * z, 3 * z, 0, 0, 7); q.fill(); };
+  try { const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, ts = 32 * z / h0, [px, py] = B0.at.tr;
+    shadow(px, py, 8); q.drawImage(ti, Math.round(px * z - ti.width * ts / 2), Math.round(py * z - ti.height * ts), Math.round(ti.width * ts), Math.round(ti.height * ts)); } catch (e) { }
+  const lead = S && S.party && S.party[0];
+  if (lead && SPR[lead.sid]) try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * z / bh, [mx, my] = B0.at.mon;
+    shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { }
+  $('isleTtl').textContent = ISLE_NAME[k];
+  const J = jr(), say = k === 'arena' ? (J.champ ? 'でんどういり おめでとう！ タワーにも のぼろう' : J.badges.length >= GYMS.length ? `つぎは ${LEAGUE[J.league][1]}！` : !J.rival ? 'まずは はじめての 戦いから！' : `つぎの あいては ${GYMS[J.gym].ln}！`)
+    : k === 'shop' ? 'いらっしゃい！ きょうの とくばいも みていってね' : k === 'room' ? (lead ? `${SPECIES[lead.sid].n}「きょうも いっしょに がんばろう！」` : 'おかえり！') : 'しげみが ガサガサ ゆれている……！';
+  $('isleSay').textContent = say;
+}
+function isleNav(k, id) {
+  const cur = k === 'arena' ? ISLE.jt : k === 'shop' ? ISLE.st : k === 'room' ? (id === 'scTeam' ? 'team' : 'train') : '';
+  $('isleTabs').innerHTML = ISLE_TABS[k].map(([n, v]) => `<button data-v="${v}" class="${v === cur ? 'on' : ''}">${n}</button>`).join('');
+}
+function isleSync(id) {
+  const H = document.documentElement; let tf = null; try { tf = teamFrom; } catch (e) { }
+  let k = ISLE_SCR[id] || (id === 'scTeam' && ISLE.k === 'room' && !tf ? 'room' : null); if (!H.classList.contains('town')) k = null;
+  document.querySelectorAll('.screen.isl').forEach(s => s.classList.remove('isl'));
+  if (!k) { if (ISLE.k) { ISLE.k = null; H.classList.remove('isle'); } if (id === 'scHub') ISLE.wild = 0; return; }
+  if (id === 'scTower') ISLE.jt = 'tower';
+  const fresh = ISLE.k !== k; ISLE.k = k; H.classList.add('isle'); H.dataset.isle = k; H.dataset.jt = ISLE.jt; H.dataset.st = ISLE.st;
+  const el = $(id); if (el) el.classList.add('isl');
+  if (fresh || id === 'scTrain' || id === 'scTeam') isleScene(k); isleNav(k, id);
+}
+$('isleBack').onclick = () => { SND.se('click'); $('tabHome').click(); };
+$('isleTabs').onclick = (e) => { const b = e.target.closest('button'); if (!b || b.classList.contains('on')) return; SND.se('click'); const v = b.dataset.v, k = ISLE.k;
+  if (k === 'arena') { ISLE.jt = v; if (v === 'tower' && towerOpen()) renderTower(); else renderJourney(); $('scJourney').scrollTop = 0; }
+  else if (k === 'shop') { ISLE.st = v; isleSync('scShop'); $('scShop').scrollTop = 0; }
+  else if (k === 'room') { if (v === 'team') { teamFrom = null; renderTeam(); } else { guildStop(); renderTrain(); } } };
+// くさむら：しまの なかで「さがす」と バトル。おわったら ここへ もどる
+function renderWild() {
+  show('scWild'); const J = jr(), gt = J.rival && !J.champ && J.gym < GYMS.length && J.badges.length < GYMS.length ? GYMS[J.gym].t : null, ok = gt ? strongVs(gt) : [];
+  $('wdBody').innerHTML = `<div class="card wdcard"><b>しげみを さがすと やせいの モンスターが でてくる</b>
+    ${ok.length ? `<div class="wdrow"><span>でやすい タイプ</span><span class="wdchips">${ok.map(typeChip).join('')}</span></div><p class="dim">${TYPES[gt].n}ジムに つよい タイプが よく でる</p>` : ''}
+    <div class="wdrow"><span>マテリアル</span><b>${S.capsules || 0}こ</b></div></div>
+    <button class="btn" id="wdGo">さがす</button>`;
+  $('wdGo').onclick = () => { SND.se('ok'); ISLE.wild = 1; startWild(); };
+}
+$('btnWdBack').onclick = () => $('tabHome').click();
 // したの メニュー：バトル・メニュー
 $('tabBattle').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('バトル', [['オンライン対戦', 'btnRank'], ['アーケード', 'btnJourney'], ['フリー対戦', 'btnCup'], ['フレンド対戦', 'btnOnline'], ['くさむら', 'btnWild']]), 0); };
 $('tabMenu').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('メニュー', [['ショップ', 'btnShop'], ['訓練', 'btnTrainTab'], ['コレクション（図鑑）', 'btnDex'], ['ランキング', 'hMe'], ['あそびかた', 'btnHelp'], ['タイプあいしょう', 'btnChart'], ['おと オン／オフ', 'hubSnd'], ['がめんの むき', 'hubRot'], ['せってい', 'btnOpt']]), 0); };
@@ -3924,6 +4070,7 @@ function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN &&
   if (!same && !bat) dsvKill();
   const dsv = bat && pixDissolve(prev);
   for (const s of document.querySelectorAll('.screen')) if (!s.dataset.dsv) s.hidden = s.id !== id;
+  isleSync(id);
   { const tb = $('tabbar'); if (tb) { const t = TAB_OF[id]; tb.hidden = !t || !S; if (!tb.hidden) paintIcons(tb); document.documentElement.classList.toggle('tabs', !tb.hidden); tb.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); if (!tb.hidden) tabMotion(t); } }
   if (same) return;
   { const el = document.getElementById(id); if (el) { el.classList.remove('scr-in'); if (!dsv) { void el.offsetWidth; el.classList.add('scr-in'); } } } if (['scHub', 'scTeam', 'scChart', 'scStarter', 'scDex', 'scJourney', 'scArcade', 'scMaker', 'scGuild', 'scRank', 'scTrain'].includes(id)) setArtBg(); else { document.body.classList.remove('artbg'); document.body.style.backgroundImage = ''; } if (id !== 'scBattle') SND.play('hub'); /* タイトルも ホームと おなじ きょく（つながって ながれる） */ }
@@ -4198,12 +4345,12 @@ function renderShop() {
   const deal = (o, i) => { const sold = (st.bought || []).includes(i);
     return `<button class="shcard${sold ? ' sold' : ''}${o.p === 0 ? ' free' : ''}" data-deal="${i}">${o.p === 0 ? '<span class="shtag">むりょう</span>' : rar(o)}<div class="shgi">${shopIcon(o)}</div><b>${shopName(o)}</b>${o.k === 'mon' && o.nat && NATURES[o.nat] ? `<small class="shnat">${NATURES[o.nat].n}</small>` : ''}<span class="shp">${sold ? 'うりきれ' : o.p === 0 ? 'うけとる' : `💎 ${o.p}`}</span></button>`; };
   $('shBody').innerHTML = `
-    <div class="shsec"><div class="shh"><b>きょうの とくばい</b><span class="dim">あと ${hm} で いれかえ</span></div><div class="shgrid">${deals.map(deal).join('')}</div></div>
-    <div class="shsec"><div class="shh"><b>ワザステッカー</b><span class="dim">まいにち いれかえ</span></div><div class="shgrid">${shopLine('tm').map((o, j) => deal(o, 't' + j)).join('')}</div></div>
-    <div class="shsec"><div class="shh"><b>モンスター</b><span class="dim">まいにち いれかえ</span></div><div class="shgrid">${shopLine('mon').map((o, j) => deal(o, 'm' + j)).join('')}</div></div>
-    <div class="shsec"><div class="shh"><b>しゅうがわり スペシャル</b><span class="dim">げつようび に いれかえ</span></div>
+    <div class="shsec" data-k="deal"><div class="shh"><b>きょうの とくばい</b><span class="dim">あと ${hm} で いれかえ</span></div><div class="shgrid">${deals.map(deal).join('')}</div></div>
+    <div class="shsec" data-k="tm"><div class="shh"><b>ワザステッカー</b><span class="dim">まいにち いれかえ</span></div><div class="shgrid">${shopLine('tm').map((o, j) => deal(o, 't' + j)).join('')}</div></div>
+    <div class="shsec" data-k="mon"><div class="shh"><b>モンスター</b><span class="dim">まいにち いれかえ</span></div><div class="shgrid">${shopLine('mon').map((o, j) => deal(o, 'm' + j)).join('')}</div></div>
+    <div class="shsec" data-k="sp"><div class="shh"><b>しゅうがわり スペシャル</b><span class="dim">げつようび に いれかえ</span></div>
       <button class="shspecial${st.wb ? ' sold' : ''}" id="shSp" ${st.wb ? 'disabled' : ''}><span class="shtag">${Math.round((1 - sp.p / sp.was) * 100)}% おとく</span><div class="shgi">${chestIcon(sp.ch, false, 2)}</div><div class="shsd"><b>${sp.n}</b><span>${CHESTS[sp.ch].n}${sp.orb ? `・マテリアル ×${sp.orb}` : ''}${sp.item ? `・どうぐ ×${sp.item}` : ''}</span></div><span class="shp">${st.wb ? 'こうにゅうずみ' : `<s>💎${sp.was}</s> 💎 ${sp.p}`}</span></button></div>
-    <div class="shsec"><div class="shh"><b>ブラインドボックス</b><span class="dim">かうと すぐ あく</span></div><div class="shgrid shch">${SHOP_CHESTS.map(([k, p]) => `<button class="shcard" data-ch="${k}" data-p="${p}"><div class="shgi">${chestIcon(k, false, 2)}</div><b>${CHESTS[k].n}</b><span class="shp">💎 ${p}</span></button>`).join('')}</div></div>
+    <div class="shsec" data-k="box"><div class="shh"><b>ブラインドボックス</b><span class="dim">かうと すぐ あく</span></div><div class="shgrid shch">${SHOP_CHESTS.map(([k, p]) => `<button class="shcard" data-ch="${k}" data-p="${p}"><div class="shgi">${chestIcon(k, false, 2)}</div><b>${CHESTS[k].n}</b><span class="shp">💎 ${p}</span></button>`).join('')}</div></div>
     <div class="dim" style="font-size:11px;text-align:center">ジェムは しあいや ジム・リーグの ごほうびで たまります</div>`;
   const B = $('shBody'); shopPaint(B);
   B.querySelectorAll('[data-deal]').forEach(b => b.onclick = () => shopDetail(/^\d+$/.test(b.dataset.deal) ? +b.dataset.deal : b.dataset.deal));
@@ -11970,7 +12117,7 @@ $('btnArcade').onclick = renderArcade;
 $('btnAcBack').onclick = () => renderHub();
 $('btnTwBack').onclick = () => renderJourney();
 $('btnJrBack').onclick = () => renderHub();
-$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade, twr = B && B.cfg && B.cfg.tower; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else if (twr) renderTower(); else if (S && S.onb > 0 && S.onb < 4) onbNext(); else renderHub(); };
+$('resNext').onclick = () => { $('resultOv').hidden = true; if (B && B.kind === 'online') netReset(); const wd = B && B.kind === 'wild' && ISLE.wild, jr = B && B.cfg && B.cfg.journey, ac = B && B.cfg && B.cfg.arcade, twr = B && B.cfg && B.cfg.tower; B = null; if (jr) renderJourney(); else if (ac) renderArcade(); else if (twr) renderTower(); else if (S && S.onb > 0 && S.onb < 4) onbNext(); else if (wd) renderWild(); else renderHub(); };
 
 document.querySelectorAll('.cmd.mv').forEach(b => b.addEventListener('pointerdown', (e) => { e.preventDefault(); if (B && B.train && !(TUT && TUT.frozen)) { mvTipShow(b); return; } cmdMove(+b.dataset.mv); }));
 // 対戦中（見るだけ）：わざボタンを タップすると その わざの せつめい（もう いちど タップ・ほかを さわると とじる）
