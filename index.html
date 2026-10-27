@@ -1482,9 +1482,12 @@ html.town #scHub #isles .isle canvas{width:100%!important}
 @supports (width:1cqw){html.town #scHub #isles .isle{container-type:size} html.town #scHub #isles .isle canvas{width:min(100cqw,calc(100cqh * 200 / 170))!important;height:auto!important}}
 html.town #scHub .islabel{left:50%;bottom:8px;transform:translateX(-62%) rotate(-12deg)}
 html.town:not(.land) #scHub .islabel{font-size:13px;padding:1px 8px}
+html.town #scHub .hres1[data-res=trophy]{display:none!important}
+html.town:not(.land) #scHub .hbar{flex-wrap:nowrap!important} html.town:not(.land) #scHub .hbar .hres{flex:1 1 auto!important;order:0!important;min-width:0}
+html.town:not(.land) #scHub .hbar .hres>span{flex:1 1 0;min-width:0}
 html.town.land #scHub #isles{top:52px!important;padding:0 4px!important;gap:0!important}
 html.town.land #scHub #isles .isle canvas{transform:scale(1.16);transform-origin:50% 92%}
-html.town:not(.land) #scHub #isles{display:block!important;top:150px!important}
+html.town:not(.land) #scHub #isles{display:block!important;top:108px!important}
 html.town:not(.land) #scHub #isles .isle canvas{width:100%!important;height:100%!important;max-width:none;max-height:none}
 html.town:not(.land) #scHub #isles .isle .islabel{left:auto;right:auto;bottom:14%;transform:rotate(-12deg)}
 html.town:not(.land) #scHub #isles .isle:nth-child(odd) .islabel{left:4%} html.town:not(.land) #scHub #isles .isle:nth-child(even) .islabel{right:4%}
@@ -3136,7 +3139,7 @@ function isleLayout() {
   const box = $('isles'); if (!box) return; const land = document.documentElement.classList.contains('land'), els = [...box.querySelectorAll('.isle')];
   if (land) { els.forEach(e => { e.style.cssText = ''; }); return; }
   const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
-  const step = .47, n = els.length, h = Math.min(W * .66 * 170 / 200, H / (1 + (n - 1) * step)), w = h * 200 / 170, pad = 0;
+  const step = .6, n = els.length, h = Math.min(W * .66 * 170 / 200, H / (1 + (n - 1) * step)), w = h * 200 / 170, pad = 0;
   const top0 = (H - (h + (n - 1) * h * step)) / 2;
   els.forEach((e, i) => { Object.assign(e.style, { position: 'absolute', width: w + 'px', height: h + 'px', left: (i % 2 ? W - w - pad : pad) + 'px', top: top0 + i * h * step + 'px', zIndex: i + 1, padding: '0' }); });
 }
