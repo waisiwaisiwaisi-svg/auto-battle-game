@@ -1409,7 +1409,7 @@ html.town #scHub:not([hidden]){background:#d8cbb6!important}
 html.town body:has(#scHub:not([hidden])){background:#d8cbb6!important}
 html.town #scHub::before,html.town.land #scHub:not([hidden])::before{content:none!important}
 html.town.land.tabs #scHub.screen{padding-left:18px!important;left:0!important;max-width:none!important;padding-bottom:0!important}
-html.town #scHub .hstage,html.town #scHub .hmodes,html.town #scHub .cupinfo,html.town #scHub #btnDex,html.town #scHub .inv,html.town #scHub .chesthead small,html.town #scHub #hGuildBonus{display:none!important}
+html.town #scHub .hstage,html.town #scHub .hmodes,html.town #scHub .cupinfo,html.town #scHub .inv,html.town #scHub .chesthead small,html.town #scHub #hGuildBonus{display:none!important}
 html.town #scHub .hbar,html.town #scHub .hicons{position:relative;z-index:2}
 html.town #scHub .hubgrid{position:absolute;left:12px;right:max(16px,var(--sar));width:auto!important;max-width:none!important;margin:0!important;box-sizing:border-box;bottom:calc(10px + var(--sab));z-index:2;display:flex!important;align-items:flex-end;justify-content:space-between;gap:12px;pointer-events:none}
 html.town #scHub .hubgrid>*{pointer-events:auto}
@@ -1426,7 +1426,6 @@ html.town #scHub .chests .chest{width:64px;min-height:56px!important}
 #townPop[hidden]{display:none}
 html:not(.land).town #scHub .hubgrid{flex-direction:column;align-items:stretch}
 html:not(.land).town #scHub .hchest{order:1;overflow-x:auto}
-html.town #scHub .hicons>.hicon:not(#btnOpt){display:none!important}
 html:not(.land).town #scHub .hubgrid>.hcol:nth-child(2){max-width:none}
 html:not(.land).town #scHub .hcta{min-width:0;width:100%}
 html.town #scHub .hchest .chesthead>span{white-space:nowrap}
@@ -1437,7 +1436,6 @@ html.town #scHub .hbar,html.town #scHub .hicons,html.town #scHub .hres{pointer-e
 
 /* ===== ホーム：うかぶ しま（たてに・よこに ならべて スクロール）===== */
 html.town #scHub .hubgrid>.hcol:nth-child(2){display:none!important}
-html.town #scHub .hicons{display:none!important}
 html.town #scHub #townCv{pointer-events:none}
 #isles{display:none}
 html.town #scHub #isles{display:flex;position:absolute;z-index:1;gap:4px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -1480,6 +1478,12 @@ html.town #scHub #isles .isle canvas{width:100%!important}
 @supports (width:1cqw){html.town #scHub #isles .isle{container-type:size} html.town #scHub #isles .isle canvas{width:min(100cqw,calc(100cqh * 200 / 170))!important;height:auto!important}}
 html.town #scHub .islabel{left:50%;bottom:8px;transform:translateX(-62%) rotate(-12deg)}
 html.town:not(.land) #scHub .islabel{font-size:13px;padding:1px 8px}
+html.town:not(.land) #scHub #isles{display:block!important;top:162px!important}
+html.town:not(.land) #scHub #isles .isle canvas{width:100%!important;height:100%!important;max-width:none;max-height:none}
+html.town:not(.land) #scHub #isles .isle .islabel{left:auto;right:auto;bottom:14%;transform:rotate(-12deg)}
+html.town:not(.land) #scHub #isles .isle:nth-child(odd) .islabel{left:4%} html.town:not(.land) #scHub #isles .isle:nth-child(even) .islabel{right:4%}
+html.town #scHub .hicons{position:relative;z-index:2}
+html.town.land #scHub .hbar .hres{margin-left:0!important}
 </style>
 </head>
 <body>
@@ -3085,8 +3089,19 @@ function citySky() {   // うしろの ビルの まち（1かい かく）
   for (const [lay, col, wcol, hk] of [[0, '#3a5fc8', 'rgba(170,210,255,.45)', .75], [1, '#2c46a8', 'rgba(255,230,140,.5)', .55]]) { let x = -10; while (x < W) { const w = 26 + rnd() * 40, h = H * (hk - .25 + rnd() * .35); q.fillStyle = col; q.fillRect(x, H - h, w, h); q.fillStyle = wcol; for (let yy = H - h + 6; yy < H - 6; yy += 9) for (let xx = x + 4; xx < x + w - 4; xx += 8) if (rnd() < .55) q.fillRect(xx, yy, 4, 4); x += w + 2; } }
   for (let i = 0; i < 6; i++) { const x = rnd() * W, y = H - rnd() * H * .15; q.fillStyle = '#2f8a6a'; q.fillRect(x - 1.5, y - 30, 3, 30); q.fillStyle = '#3fb87a'; for (const a of [-1.2, -.6, 0, .6, 1.2]) { q.beginPath(); q.ellipse(x + Math.sin(a) * 9, y - 32 + Math.abs(a) * 3, 10, 3.5, a, 0, 7); q.fill(); } }
 }
+
+// たて画面：しまを ジグザグに かさねて ならべる（スクロール しない）
+function isleLayout() {
+  const box = $('isles'); if (!box) return; const land = document.documentElement.classList.contains('land'), els = [...box.querySelectorAll('.isle')];
+  if (land) { els.forEach(e => { e.style.cssText = ''; }); return; }
+  const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
+  const step = .62, n = els.length, h = Math.min(W * .74 * 170 / 200, H / (1 + (n - 1) * step)), w = h * 200 / 170, pad = 4;
+  const top0 = (H - (h + (n - 1) * h * step)) / 2;
+  els.forEach((e, i) => { Object.assign(e.style, { position: 'absolute', width: w + 'px', height: h + 'px', left: (i % 2 ? W - w - pad : pad) + 'px', top: top0 + i * h * step + 'px', zIndex: i + 1, padding: '0' }); });
+}
+window.addEventListener('resize', () => setTimeout(isleLayout, 50));
 function islesStage() {
-  islesBuild(); citySky(); $('townPop').hidden = true;
+  islesBuild(); citySky(); requestAnimationFrame(isleLayout); $('townPop').hidden = true;
   if (HUB_ANIM) clearInterval(HUB_ANIM);
   const i = ISLES.findIndex(I => I.k === 'room'), cv = $('isles').querySelectorAll('.isle canvas')[i]; if (!cv) return;
   const q = cv.getContext('2d'), lead = S.party[0]; let fi = 0, UBOX = null;
@@ -12478,12 +12493,7 @@ window.__game = {
   run(fn) { return fn({ chooseSwap, NEW_IDS, moveBlocked, openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 
-// まち：右うえの はぐるまで「あそびかた・あいしょう・おと・むき・せってい」を まとめて だす
-{ const opt = $('btnOpt'); if (opt) opt.addEventListener('click', (e) => { if (!document.documentElement.classList.contains('town') || $('scHub').hidden || opt.__pass) return; e.stopImmediatePropagation(); e.preventDefault();
-  const p = $('townPop'), snd = $('hubSnd');
-  p.innerHTML = `<b>メニュー</b><button class="btn" data-a="btnHelp">あそびかた</button><button class="btn" data-a="btnChart">タイプあいしょう</button><button class="btn" data-a="hubSnd">おと ${snd && snd.classList.contains('off') ? 'オフ' : 'オン'}</button><button class="btn" data-a="hubRot">がめんの むき</button><button class="btn" data-a="btnOpt">せってい</button><button class="btn sub" data-a="x">とじる</button>`;
-  p.hidden = false; p.onclick = (ev) => { const b = ev.target.closest('button'); if (!b) return; p.hidden = true; const id = b.dataset.a; if (id === 'x') return; if (id === 'btnOpt') { opt.__pass = 1; opt.click(); opt.__pass = 0; } else { const t = $(id); if (t) t.click(); } };
-}, true); }
+
 document.documentElement.classList.add('booted', 'town');   // ホームは まちの 絵
 { const fin = () => { if (window.__bootDone) window.__bootDone(); };   // ロード画面を とじる：タイトルの 絵と もじ（フォント）が そろってから
   Promise.race([Promise.all([document.fonts ? document.fonts.ready : 0, new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))]), new Promise(r => setTimeout(r, 1500))]).then(fin, fin); }
