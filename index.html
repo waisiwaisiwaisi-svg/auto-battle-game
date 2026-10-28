@@ -1286,7 +1286,9 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 .trr{background:linear-gradient(180deg,#2a2346,#1f1a36)!important;border-left-width:4px!important;box-shadow:inset 5px 0 0 var(--c,#888),0 3px 0 rgba(0,0,0,.4)!important;padding-left:12px!important}
 .trside{background:#1b1630!important}
 html:not(.land) #scTrain .trside{position:fixed!important;top:auto!important;left:max(12px,calc(50% - 248px));right:max(12px,calc(50% - 248px));bottom:var(--trTabH,0px);z-index:20;margin:0}   /* たて画面：パレットは たたんでも ひらいても いちばん した（タブの すぐ うえ） */
-html:not(.land) #scTrain #trBody{padding-bottom:calc(var(--trSideH,0px) + 8px)}   /* した の パレットに かくれない ぶん あける */
+html:not(.land) #scTrain #trBody{padding-bottom:calc(var(--trSideH,0px) + var(--trBtnH,0px) + 8px)}
+html:not(.land) #scTrain>.trbtns{position:fixed;left:max(12px,calc(50% - 248px));right:max(12px,calc(50% - 248px));bottom:calc(var(--trTabH,0px) + var(--trSideH,0px));z-index:21;margin:0;padding:6px 6px 4px;flex-wrap:nowrap;background:linear-gradient(180deg,rgba(27,22,48,0),#1b1630 30%)}   /* たて画面：模擬戦・シミュレーション・確定 は パレットの すぐ うえ */
+html:not(.land) #scTrain>.trbtns .btn{flex:1 1 0;min-width:0;padding:8px 4px!important;font-size:13px!important;white-space:nowrap}html:not(.land) #scTrain>.trbtns [data-a=sim]{flex-grow:1.6}html:not(.land) #scTrain>.trbtns .btn{font-size:12px!important;letter-spacing:0}   /* した の パレットに かくれない ぶん あける */
 .trmons button.on,.trnatsel button.on{border-image-source:var(--fr-gold)!important}
 .trnatsel button,.trnatsel button.on{background:linear-gradient(180deg,#33295a,#221c3c)!important;color:var(--ink)!important}
 .trnatsel button.on{background:linear-gradient(180deg,color-mix(in srgb,var(--g) 45%,#2a2148),#221c3c)!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
@@ -1404,7 +1406,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
 .trflt{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px}.trflt select,.trflt input{font:inherit;font-size:11px;padding:3px 4px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);min-width:0}.trflt input{flex:1 1 90px}
 .trmvs[data-none="1"]::after{content:'あてはまる 技が ない';font-size:11px;color:var(--dim)}
 
-/* 木人戦の まど */
+/* 模擬戦の まど */
 #dumHud{position:absolute;left:8px;top:calc(96px + var(--sat, 0px));z-index:30;width:min(300px,46%);max-height:70%;overflow:auto;background:rgba(14,11,34,.86);border:2px solid #ffd84a;font-size:11px;line-height:1.45;padding:6px 8px;color:#f3eefc;pointer-events:auto}
 #dumHud .dh{display:flex;gap:4px;align-items:center;margin-bottom:4px}#dumHud .dh b{color:#ffd84a;flex:1;white-space:nowrap}#dumHud.mini{width:auto;max-width:min(300px,70%)}#dumHud.mini .dlog{margin-top:0;border-top:0;padding-top:0}#dumHud .dh button{font:inherit;font-size:11px;padding:2px 8px;color:#f3eefc;background:#2a2450;border:1px solid #6a6488}
 #dumHud .dst{margin-bottom:4px;color:#cfc8ea}#dumHud .dst .ok{color:#5ee08a}#dumHud .dst .ng{color:#ff8a9a}
@@ -1583,7 +1585,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
 /* ロード画面：本体（おおきい スクリプト）を よみこむ あいだ だす。すすみは じかんで よそく（おわったら 100%） */
 (function () {
   var t0 = Date.now(), bar = document.getElementById('bootBar'),  tip = document.getElementById('bootTip'), done = false, p = 0;
-  var TIPS = ['ヒント：訓練で 技の 条件を きめると ぐんと つよく なる', 'ヒント：くさむらで よわらせて マテリアルを なげよう', 'ヒント：ひかえを タップすると こうたい できる', 'ヒント：タイプの あいしょうを ジムに あわせよう', 'ヒント：模擬戦で 訓練の ききめを ためせる'];
+  var TIPS = ['ヒント：訓練で 技の 条件を きめると ぐんと つよく なる', 'ヒント：くさむらで よわらせて マテリアルを なげよう', 'ヒント：ひかえを タップすると こうたい できる', 'ヒント：タイプの あいしょうを ジムに あわせよう', 'ヒント：シミュレーションで 訓練の ききめを ためせる'];
   var k = Math.floor(Math.random() * TIPS.length); tip.textContent = TIPS[k];
   var tipIv = setInterval(function () { k = (k + 1) % TIPS.length; tip.textContent = TIPS[k]; }, 3200);
   var iv = setInterval(function () { if (done) return; var t = (Date.now() - t0) / 1000; p = Math.min(95, Math.round(95 * (1 - Math.exp(-t / 3.2)))); bar.style.width = p + '%'; }, 120);
@@ -4967,20 +4969,20 @@ function trRemap(W, oldIds) {
   for (const r of W.mv) for (const ls of (r.c || []).concat(r.x || [])) for (let j = ls.length - 1; j >= 0; j--) { const c = ls[j]; if (!TR_SLOTC.includes(c.t)) continue;
     const id = oldIds[(+c.p || 1) - 1], ni = W.mv.findIndex(x => x.id === id); if (ni < 0) ls.splice(j, 1); else c.p = ni + 1; }
 }
-// 模擬戦：いまの 設定（ほぞん まえでも）で つぎの あいて（アーケードの つぎの ジム）と 3たい たい 3たい を うらで なんかいか たたかわせて けっかを みせる（この子が せんとう・なかまは パーティの ほかの 2たい）
+// シミュレーション：いまの 設定（ほぞん まえでも）で つぎの あいて（アーケードの つぎの ジム）と 3たい たい 3たい を うらで なんかいか たたかわせて けっかを みせる（この子が せんとう・なかまは パーティの ほかの 2たい）
 let TR_SIM = false;
-const simMine = (f) => !!(B && B.simLog && f.side === 0 && (!B.simUid || (f.mon && f.mon.uid === B.simUid)));   // 模擬戦で きろくするのは 設定中の 子だけ
+const simMine = (f) => !!(B && B.simLog && f.side === 0 && (!B.simUid || (f.mon && f.mon.uid === B.simUid)));   // シミュレーションで きろくするのは 設定中の 子だけ
 async function trSim(m, W, n) {
   if (TR_SIM || (B && !B.cfg.sim)) return null; TR_SIM = true;
   const J = jr(), gi = Math.min(J.gym, GYMS.length - 1), lg = J.badges.length >= GYMS.length && !J.champ, type = lg ? LEAGUE[J.league][3] : GYMS[gi].t, lv = lg ? 10 + J.league : gi;
   const tr0 = m.tr, train0 = S.train, mute0 = SND.opt.mute, log = { n: 0, win: 0, t: 0, hp: 0, dmg: 0, used: {}, cond: {}, foes: [], to: 0 };
   m.tr = Object.assign({}, tr0, { mode: 'chip', prog: trClone(W, m) }); S.train = true; SND.opt.mute = true;
-  const sm = Object.assign({}, m, { moves: trMvIds(W).slice(0, 4) });   // 模擬戦は 設定の 技で（★ワザステッカーの 技も おぼえた つもりで）
+  const sm = Object.assign({}, m, { moves: trMvIds(W).slice(0, 4) });   // シミュレーションは 設定の 技で（★ワザステッカーの 技も おぼえた つもりで）
   const mates = S.party.filter(x => x.uid !== m.uid).slice(0, 2);   // なかま：パーティの ほかの 2たい（いまの 訓練の まま）
   try {
     for (let k = 0; k < n; k++) {
       const en = lg ? leagueTeam(type, 3, jProg(10 + J.league, 2)) : gymTeam(type, 3, jProg(gi, J.step || 0), gi >= 5);
-      startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [sm, ...mates], title: '模擬戦' });
+      startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [sm, ...mates], title: 'シミュレーション' });
       B.simLog = log; B.simUid = sm.uid; const es = B.sides[1].fs.slice();
       for (let s2 = 0; s2 < 30 * (MATCH_T + 20) && B.mode !== 'end'; s2++) { bStep(1 / 30); if (s2 % 900 === 899) await new Promise(r => setTimeout(r, 0)); }
       const f = B.sides[0].fs.find(x => x.mon && x.mon.uid === sm.uid) || B.sides[0].fs[0];
@@ -4996,7 +4998,7 @@ function trSimShow(m, W, log) {
   const rows = W.mv.map((r, i) => { const u = log.used[r.id] || 0, c = log.cond[r.id] || 0, auto = false, hasC = trLines(r.c).some(l => l.length);
     const warn = auto ? (u ? '' : '<b style="color:#ffd166">あう こうげきを うけず、でなかった</b>') : !u ? '<b style="color:#ff8a6a">いちども 撃たなかった</b>' : hasC && !c ? '<b style="color:#ffd166">条件が いちども 合わなかった</b>' : '';
     return `<tr><td>${i + 1}</td><td><b>${MOVES[r.id] ? MOVES[r.id].n : '？'}</b></td><td class="n">${u}</td><td class="n">${auto ? 'じどう' : hasC ? c : '－'}</td><td>${warn}</td></tr>`; }).join('');
-  modal(`<h3 style="margin-bottom:6px">模擬戦の けっか</h3>
+  modal(`<h3 style="margin-bottom:6px">シミュレーションの けっか</h3>
     <div class="dim" style="font-size:12px;margin-bottom:6px">${SPECIES[m.sid].n}（せんとう）${log.mates ? `＋ なかま${log.mates}たい` : ''} で ${log.vs}の 3たいと ${log.n}かい（いまの 設定。ほぞん まえでも OK）。きろくは この子の ぶん</div>
     <div class="row" style="gap:12px;flex-wrap:wrap;margin-bottom:8px"><span>かち <b style="font-size:18px;color:var(--acc)">${log.win}</b>/${log.n}</span><span>のこりHP <b>${pct(log.hp / n)}</b></span><span>あいてに あたえた <b>${pct(log.dmg / n)}</b></span><span>へいきん <b>${Math.round(log.t / n)}</b>びょう</span>${log.to ? `<span>タイムアップ ${log.to}</span>` : ''}</div>
     <div style="overflow-x:auto"><table class="simtbl" style="width:100%;font-size:12px;border-collapse:collapse"><tr class="dim"><td>#</td><td>技</td><td class="n">撃った</td><td class="n">うち条件</td><td></td></tr>${rows}</table></div>
@@ -5032,9 +5034,9 @@ const TRT_STEPS = [
   { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を置いてみましょう。<br>○番の技の「<b>使うとき</b>」の枠を<b>タップ</b>して、一覧から「<b>相手のHP</b>」を選んでください（右の「相手のHP」をドラッグしても置けます）。<br><small>（タップしてから置き場所をタップしても置けます）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
   { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手のHPが${p}のとき</b>」に、この技を撃ちます。<br>置いた条件をタップすると、${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも変えられます。`; }, next: 1 },
   { sel: '.pal.k-go[data-v="near"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ 次は<b>撃ち方</b>です。<br>「<b>近づいてから</b>」を ○番の「その場で撃つ」の枠へ置いてみましょう。<br><small>（その位置まで動いてから撃ちます。うまく動けないときは、今の間合いで撃てる技に切り替えます）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
-  { sel: '[data-a="sim"]', tx: '⑤ できたら<b>模擬戦</b>で試してみましょう！<br>5回戦わせて、結果を見せてくれます。', ok: () => !!document.querySelector('.simtbl') },
+  { sel: '[data-a="sim"]', tx: '⑤ できたら<b>シミュレーション</b>で試してみましょう！<br>5回戦わせて、結果を見せてくれます。', ok: () => !!document.querySelector('.simtbl') },
   { sel: '.simcs', allow: () => [], tx: '⑥「<b>条件の発動</b>」を見ると、条件が成り立ったか（○×）と、何回撃ったかが分かります。<br>うまくいかなければ、条件を変えてもう一度試しましょう。', next: 1, onNext: () => { const a = document.querySelector('.simtbl'); if (a) { const bg = a.closest('.askbg'); if (bg) bg.remove(); } } },
-  { sel: '[data-a="dummy"]', allow: () => [], tx: '🎯 <b>木人戦</b>では人形を相手に、条件が今○か×かを見ながら試せます。<br>「じょうきょうを つくる」で、HP・状態・天候・人形の攻撃なども変えられます。', next: 1 },
+  { sel: '[data-a="dummy"]', allow: () => [], tx: '🎯 <b>模擬戦</b>では人形を相手に、条件が今○か×かを見ながら試せます。<br>「じょうきょうを つくる」で、HP・状態・天候・人形の攻撃なども変えられます。', next: 1 },
   { sel: '[data-a="ok"]', tx: '⑦ よければ<b>確定</b>します。このモンスターの訓練が保存されます。', ok: () => { const m = trMon(TRN && TRN.uid); return !!(m && m.tr && m.tr.prog && m.tr.prog.mv && !TRN.dirty); } },
   { tx: '⑧ これで試合では、この設定どおりに戦います。バトル中にあなたができるのは<b>交代</b>だけです。<br>負けたら、ここに戻って直しましょう。訓練のチュートリアルはこれで終わりです！', next: 1, end: 1 },
 ];
@@ -5074,7 +5076,7 @@ function trtLoop() {
     else { y = clamp(r.top, 8, vh - bh - 8); x = r.right + 14 + bw < vw ? r.right + 14 : r.left - 14 - bw >= 0 ? r.left - 14 - bw : x; } }   // した → うえ → よこ の じゅんに おける ところへ
   bub.style.left = x + 'px'; bub.style.top = y + 'px';
 }
-function trDockFix() {   // 訓練：3れつ ならび の ときは ひだりの れつ（モンスター いちらん＋木人戦・模擬戦・確定）を がめんに こてい（それ いがいは もとの ばしょへ）
+function trDockFix() {   // 訓練：3れつ ならび の ときは ひだりの れつ（モンスター いちらん＋模擬戦・シミュレーション・確定）を がめんに こてい（それ いがいは もとの ばしょへ）
   const B = $('trBody'), pg = B && B.querySelector('.trpage'), dk = pg && pg.querySelector('.trdock'), home = pg && pg.querySelector('.trhome'), mons = pg && pg.querySelector('.trmons'); if (!dk || !home || !mons) return;
   const st = mons.scrollTop, sl = mons.scrollLeft;   // うごかすと スクロールが もどるので おぼえておく
   pg.classList.remove('dock'); if (mons.parentNode !== pg) pg.prepend(mons); dk.style.height = '';
@@ -5115,7 +5117,7 @@ function renderTrain(uid) {
   const rows = W.mv.map((r, i) => `<div class="trr" data-row="${i}" data-key="${r.id}" style="--c:${tcol(r.id)}"><span class="no" data-row="${i}" title="ドラッグで優先度を入れ替え"><b>${i + 1}</b>≡</span><span class="rh mv${mvCls(r.id)}" data-drop="h" data-i="${i}" style="--c:${tcol(r.id)}">${mvn(r.id)}${MOVES[r.id] ? mvUseTag(MOVES[r.id]) : ''}</span>${false ? '' : `<span class="gs${r.go && r.go !== 'auto' ? ' on' : ''}" data-kwh="g:${r.go || 'auto'}" data-drop="g" data-i="${i}">${TR_GO[r.go || 'auto']}撃つ</span>`}<span class="rdesc">${MOVES[r.id] ? `<b>${TYPES[MOVES[r.id].t].n}・${CAT_NAMES[MOVES[r.id].cat] || ''}・待ち${(+MOVES[r.id].cd).toFixed(1).replace(/\.0$/, '')}秒</b><br>${kwDesc(MOVES[r.id])}` : ''}</span>${false ? `<div class="rc autoc"><b class="ifl">使うとき</b><span class="any">${AUTO_GUARD[MOVES[r.id].k] === 'scissors' ? '弾・ビーム・はんい' : 'とっしん・だげき'}を うけた しゅんかんに じどうで でる（条件は いらない）</span></div>` : conds(i, r.c) + conds(i, r.x || [], 1)}${btns(i)}</div>`).join('')
     + (W.mv.length < 4 ? '<div class="trr add" data-drop="mvnew">＋ 技をここへ（右の 技から）</div>' : '');
   const main = `<div class="trsec"><div class="trh"><span class="trstep">2</span><b>技の使い方</b><span class="dim">上ほど 先に 撃つ</span><details class="trq"><summary>？</summary><div>「使うとき」の 条件が 合った 技を、1→4 の 順に 撃ちます（「出場時・交代時」が いちばん先）。<br>条件を つけた 技は、条件が 合う ときしか 撃ちません。<br>「使わないとき」の 条件が 合うと、その技は 撃ちません（「使うとき」より 先に 見ます）。<br>「連続で撃ったら後回し」を つけた 技は、つづけて その回数 撃つと、ほかの 技を 1回 撃つまで いちばん 後回しに なります（ほかに 撃てる 技が なければ 撃ちます）。<br>条件は よこに ならべると「かつ」、下の 行に 入れると「または」。<br>条件が 合う 技が ないときは、お任せAIが 条件なしの 技から えらびます。よけるのは いつも 自動です。</div></details></div>${rows}</div>
-    <div class="trhome"></div><div class="trbtns"><button class="btn sub trsim" data-a="dummy">🎯 木人戦</button><button class="btn sub trsim" data-a="sim">▶ 模擬戦で ためす</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
+    <div class="trhome"></div><div class="trbtns"><button class="btn sub trsim" data-a="dummy">🎯 模擬戦</button><button class="btn sub trsim" data-a="sim">▶ シミュレーション</button><button class="btn trok" data-a="ok">✔ 確定</button></div>
     <div class="trbtns2"><button data-a="draft">仮保存</button><button data-a="load">他からコピー</button><button data-a="revert">保存時に戻す</button><button data-a="clr">リセット</button></div>
     <div class="dim trstat" style="font-size:11px;text-align:center">${TRN.dirty ? '<b style="color:var(--acc)">未保存</b>' : T.draft && T.draft.mv ? '仮保存済み（試合ではまだ使わない）' : T.prog && T.prog.mv ? '確定済み' : '未設定'}　/　試合で使う：${T.mode === 'chip' && T.prog && T.prog.mv ? (TRN.dirty || (T.draft && T.draft.mv) ? '前に確定した設定（いま編集中の内容ではない）' : 'この設定') : '通常のAI'}</div>`;
   const pk = TRN.pick, on = (k, v) => pk && pk.k === k && pk.v === v ? ' on' : '';
@@ -5257,7 +5259,7 @@ function renderTrain(uid) {
     else if (g.dataset.k === 'cn') sc.n = +b.dataset.v; else sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
   act('cdel', () => { LN(W.mv[+sel[0]], sel[1]).splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
   act('sim', async () => { if (TR_SIM) return; if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok');
-    const bg = modal('<h3>模擬戦ちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'); const log = await trSim(m, W, 5); bg.remove(); if (log) trSimShow(m, W, log); });
+    const bg = modal('<h3>シミュレーションちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'); const log = await trSim(m, W, 5); bg.remove(); if (log) trSimShow(m, W, log); });
   act('dummy', () => { if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok'); dummyStart(m, W); });
   act('draft', () => { trDraft(); SND.se('ok'); say0('仮保存しました（試合ではまだ使いません）').then(() => { redo(); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.dr`)); }); });
   act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; if (TRN) TRN.dirty = false; save(); SND.se('ok'); redo(); MO.stamp($('trBody').querySelector('.trstat')); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.ok`)); }));
@@ -5267,7 +5269,7 @@ function renderTrain(uid) {
   if (trSame) { MO.flip(B, '.trr[data-key]', trRows0, true); MO.flip(B, '.cnd[data-key]', trC0, true); }   // ならびかえは すべる・あたらしい じょうけんは ぽんと でる
   else { MO.stagger(B.querySelectorAll('.trnat, .trr'), 34, 8); if (!keep) MO.stagger(B.querySelectorAll('.trpal .pal'), 10, 4); }   // ひらいた／モンスターを かえた：じゅんばんに
   MO.trUid = uid;
-  scr.querySelectorAll(':scope > .trside').forEach(e => e.remove());   // まえに そとへ だした パレット
+  scr.querySelectorAll(':scope > .trside, :scope > .trbtns').forEach(e => e.remove());   // まえに そとへ だした パレット・ボタン
   if (keep) [scr, B.querySelector('.trside'), B.querySelector('.trmons')].forEach((e, i) => { if (e) [e.scrollTop, e.scrollLeft] = keep[i]; });   // そうさ しても 画面は そのまま（出しなおさない）
   else show('scTrain');
   trSideFix(); requestAnimationFrame(trSideFix);
@@ -5276,6 +5278,9 @@ function renderTrain(uid) {
 function trSideFix() { const sd = document.querySelector('#scTrain .trside'), tb = $('tabbar'), R = document.documentElement, sc = $('scTrain'); if (!sd) return;
   const port = !R.classList.contains('land');   // たて画面：パレットを #scTrain の すぐ したへ（コンテナの なかだと position:fixed が きかない）
   if (port && sd.parentNode !== sc) { const st = sd.scrollTop; sc.appendChild(sd); sd.scrollTop = st; } else if (!port && sd.parentNode === sc) { const pg = sc.querySelector('.trpage'); if (pg) pg.appendChild(sd); }
+  const bt = sc.querySelector('.trbtns');   // 模擬戦・シミュレーション・確定：たて画面は パレットの うえに こてい
+  if (bt && port && bt.parentNode !== sc) sc.appendChild(bt); else if (bt && !port && bt.parentNode === sc) { const pg = sc.querySelector('.trpage'), home = pg && pg.querySelector('.trhome'); if (home) home.after(bt); trDockFix(); }
+  R.style.setProperty('--trBtnH', (bt && port ? bt.offsetHeight : 0) + 'px');
   R.style.setProperty('--trTabH', (tb && !tb.hidden && tb.offsetHeight ? tb.offsetHeight : 0) + 'px'); R.style.setProperty('--trSideH', sd.offsetHeight + 'px'); }
 window.addEventListener('resize', () => { if (!$('scTrain').hidden) trSideFix(); });
 // 確定：今覚えていない技は ワザステッカーを使う（必ず確認）
@@ -5865,7 +5870,7 @@ function startBattle(cfg) {
   B.smart = [false, false]; B.smartDodge = false;
   // くんれんモード：みかたは くんれん どおりに うごく（しあい中の しじは なし）。オンライン・チュートリアルでは つかわない
   B.train = !cfg.headless;   // バトルは いつも 訓練どおり（見るだけ）。じぶんで できるのは こうたい だけ
-  if (cfg.sim) { B.train = true; B.headless = true; B.autoChoose = true; B.vsT = 0; return; }   // 模擬戦：がめんは そのまま、うらで うごかす
+  if (cfg.sim) { B.train = true; B.headless = true; B.autoChoose = true; B.vsT = 0; return; }   // シミュレーション：がめんは そのまま、うらで うごかす
   $('scBattle').classList.toggle('watch', B.train);
   if (cfg.hpCarry) {   // アーケード：まえの たたかいの HP を ひきつぐ
     pf.forEach((f, i) => { const k = cfg.hpCarry[i]; if (k == null) return; f.hp = Math.round(f.maxHp * k); if (f.hp <= 0) { f.hp = 0; f.fainted = true; } });
@@ -6187,7 +6192,7 @@ function autoGuard(att, def, m, opt) {
   if (healMax(g) && !TUT) { def.uses = def.uses || {}; def.uses[id] = (def.uses[id] || 0) + 1; }
   const cdv = g.cd * cdScale(def); def.cdMax = def.cdMax || {}; def.cdMax[id] = cdv; def.cd[id] = cdv;
   if (simMine(def)) { const L = B.simLog; L.used[id] = (L.used[id] || 0) + 1; }
-  if (B.cfg.dummy) { def.trTag = P ? id : null; def.trLine = li; dummyLog(def, id); }   // 木人戦：うけた しゅんかんの はつどうも きろく
+  if (B.cfg.dummy) { def.trTag = P ? id : null; def.trLine = li; dummyLog(def, id); }   // 模擬戦：うけた しゅんかんの はつどうも きろく
   if (!B.headless) popText(def.x, def.y - 104, P ? g.n + '！' : `じどう ${g.n}`, '#9ff0ff');
   say(P ? `${prefix(def)}${def.sp.n}は とっさに ${g.n}！` : `${prefix(def)}${def.sp.n}の ${g.n}が じどうで はつどうした！`);
   if (g.k === 'protect') { def.v.protect = 2.5; def.v.pg = g.psnGuard ? 1 : 0; typeFx(def.x, def.y - BODY, g.psnGuard ? 'poison' : 'ice', 4, 110, .45); }   // ビームなど つづけて あたる わざも しばらく ふせぐ
@@ -6263,7 +6268,7 @@ function beginMove(f, id) {
   f.state = 'wind';
   f.rotN = f.lastMove === id ? (f.rotN || 0) + 1 : 1;   // おなじ 技を つづけて 撃った 回数（後回しに つかう）
   f.lastMove = id; B.lastMoveT = B.t; (f.usedAt = f.usedAt || {})[id] = B.t; (f.useN = f.useN || {})[id] = (f.useN[id] || 0) + 1;   // useN：この 試合で 撃った 回数（交代しても のこる）
-  if (simMine(f)) { const L = B.simLog; L.used[id] = (L.used[id] || 0) + 1; if (f.trTag === id) { L.cond[id] = (L.cond[id] || 0) + 1; L.lf = L.lf || {}; const k = `${f.trRow}:${f.trLine}`; L.lf[k] = (L.lf[k] || 0) + 1; } }   // 模擬戦の きろく
+  if (simMine(f)) { const L = B.simLog; L.used[id] = (L.used[id] || 0) + 1; if (f.trTag === id) { L.cond[id] = (L.cond[id] || 0) + 1; L.lf = L.lf || {}; const k = `${f.trRow}:${f.trLine}`; L.lf[k] = (L.lf[k] || 0) + 1; } }   // シミュレーションの きろく
   if (B.log) B.log.push(id); if (B.logS) B.logS.push([f.side, id]);
   if (!B.headless && m.n) popText(f.x, f.y - 112, m.n, TYPES[m.t] ? TYPES[m.t].c : '#ffffff', true);   // 撃った 技の なまえを あたまの うえに
   if (m.k !== 'melee' || id !== 'tackle') {
@@ -7361,7 +7366,7 @@ function impactBeat(x, y, k, slowT) {
 }
 function faint(f, by) {
   if (f.hako) hakoCollect(f, false);   // ハコワレ：たおれたら たまった ぶんを とりたて
-  if (B.cfg.dummy) { f.hp = f.maxHp; f.status = ''; f.v.curse = 0; burst(f.x, f.y - 20, '#e8d8a8', 16, 120, .5); popText(f.x, f.y - 100, f.dummy ? '人形が もとに もどった' : 'HPが もどった', '#ffd84a'); return; }   // 木人戦：たおれない
+  if (B.cfg.dummy) { f.hp = f.maxHp; f.status = ''; f.v.curse = 0; burst(f.x, f.y - 20, '#e8d8a8', 16, 120, .5); popText(f.x, f.y - 100, f.dummy ? '人形が もとに もどった' : 'HPが もどった', '#ffd84a'); return; }   // 模擬戦：たおれない
   B.cheerT = 3;
   if (f.state === 'faint' || f.fainted) return;
   f.state = 'faint'; f.stT = 1.2; f.cur = null; f.queued = null; SND.se('ko');
@@ -7657,7 +7662,7 @@ const condsOk = (f, o, cs, id) => (cs || []).every(c => condOk(f, o, c, id));
 const trNot = (f, o, r) => !!(r && r.x) && r.x.some(l => l.length && condsOk(f, o, l, r.id));   // 使わないとき：どれかの 行が 合えば 撃たない
 function runRules(f, o) {
   const P = trProg(f); f.trGo = null; f.trAt = '';
-  if (simMine(f)) { const L = B.simLog; L.ticks = (L.ticks || 0) + 1; L.ct = L.ct || {};   // 模擬戦：条件が なりたって いた じかんを かぞえる
+  if (simMine(f)) { const L = B.simLog; L.ticks = (L.ticks || 0) + 1; L.ct = L.ct || {};   // シミュレーション：条件が なりたって いた じかんを かぞえる
     P.mv.forEach((r, i) => { trLines(r.c).forEach((l, li) => { let all = l.length > 0; l.forEach((c, j) => { if (condOk(f, o, c, r.id)) L.ct[`${i}:${li}:${j}`] = (L.ct[`${i}:${li}:${j}`] || 0) + 1; else all = false; }); if (all) L.ct[`${i}:${li}`] = (L.ct[`${i}:${li}`] || 0) + 1; }); }); }
   if (f.queued) {   // 撃つ 技が きまっている：ふつうの うごきで 間合いへ（2.5びょう 撃てなければ しばらく ほかの 技へ）
     if (!f.trQ || f.trQ.id !== f.queued) f.trQ = { id: f.queued, t: B.t };
@@ -7907,7 +7912,7 @@ function moveLock(f, t) { f.cdMax = f.cdMax || {}; for (const k of f.moves || []
 let CD_SHARED_K = 1;   // クールダウンの ばいりつ（わざごと）
 function aiMove(f, o, dt, autoSpecial) {
   let d = dist(f, o), ang = Math.atan2(o.y - f.y, o.x - f.x);
-  if (f.dummy) {   // 木人戦の 身代わり人形：ゆっくり うろうろ（にげたり ちかづいたり しない）
+  if (f.dummy) {   // 模擬戦の 身代わり人形：ゆっくり うろうろ（にげたり ちかづいたり しない）
     f.wT = (f.wT || 0) - dt; const st = B.st;
     if (f.wT <= 0 || !f.wTo || Math.hypot(f.wTo.x - f.x, f.wTo.y - f.y) < 12) { f.wT = rand(2.5, 4.5); for (let i = 0; i < 12; i++) { const x = rand(st.fx0 + 80, st.fx1 - 80), y = rand(st.fy0 + 60, st.fy1 - 60); if (spotOk(f, x, y)) { f.wTo = { x, y }; break; } } }
     if (!f.wTo) return; f.paceT = .55; const a = useNav(f) ? navDir(f, f.wTo.x, f.wTo.y) : Math.atan2(f.wTo.y - f.y, f.wTo.x - f.x); return moveDir(f, Math.cos(a), Math.sin(a), dt, true);
@@ -9464,7 +9469,7 @@ function bStep(dt) {
   }
   // ラストスパート：どちらかが のこり 1たいに なったら 曲が ボス版に。じぶんが ピンチなら こどう
   if (B.mode === 'fight' && !B.lastStand && B.kind !== 'wild' && B.sides.some(sd => sd.fs.length > 1 && sd.fs.filter(x => !x.fainted && x.hp > 0).length === 1)) {   // 1たいだけの チームは さいしょから のこり1たい：だれかが たおれて へった ときだけ
-    B.lastStand = true; if (!B.cfg.boss && !B.headless) SND.play('st_' + B.st.field + '_boss');   // 模擬戦（うらで うごく）では BGMを かえない say('ラストスパート！'); B.cheer = 1;
+    B.lastStand = true; if (!B.cfg.boss && !B.headless) SND.play('st_' + B.st.field + '_boss');   // シミュレーション（うらで うごく）では BGMを かえない say('ラストスパート！'); B.cheer = 1;
   }
   { const me = active(B.my || 0), pin = me && B.mode === 'fight' && me.hp > 0 && me.hp < me.maxHp * .3 && !B.sides[B.my || 0].fs.some(x => x !== me && !x.fainted && x.hp > 0);
     B.pinch = pin ? Math.min(1, (B.pinch || 0) + dt * 2) : Math.max(0, (B.pinch || 0) - dt * 2);
@@ -9592,8 +9597,8 @@ function learnLines(m, before) {
 }
 function endBattle(res) {
   if (B.mode === 'end') return;
-  if (B.cfg.sim) { B.mode = 'end'; B.result = res; return; }   // 模擬戦：ごほうび・きろくは なし
-  if (B.cfg.dummy) { setTimeout(dummyQuit, 0); B.mode = 'end'; B.result = res; B.endT = 99; B.resLines = []; return; }   // 木人戦：そのまま 訓練へ
+  if (B.cfg.sim) { B.mode = 'end'; B.result = res; return; }   // シミュレーション：ごほうび・きろくは なし
+  if (B.cfg.dummy) { setTimeout(dummyQuit, 0); B.mode = 'end'; B.result = res; B.endT = 99; B.resLines = []; return; }   // 模擬戦：そのまま 訓練へ
   SND.play(res === 'win' || res === 'caught' ? 'win' : res === 'lose' ? 'lose' : '');
   B.mode = 'end'; B.result = res; B.endT = res === 'caught' ? 1.6 : 1.4;
   if (res === 'win' && B.kind !== 'wild' && !B.cfg.tutorial) guildWin(B.kind === 'online' ? 3 : 1);   // ギルドに ポイント
@@ -10030,7 +10035,7 @@ function kwInfo(k) {
   ['pointerdown', 'click'].forEach(t => document.addEventListener(t, tap, true));
   addEventListener('scroll', hide, true); }
 
-/* ---------- 木人戦：いまの 訓練（ほぞん まえでも）で 身代わり人形と たたかい、条件の はんいと はつどうを 見る ---------- */
+/* ---------- 模擬戦：いまの 訓練（ほぞん まえでも）で 身代わり人形と たたかい、条件の はんいと はつどうを 見る ---------- */
 let DUM = null;   // { uid, keep: TRN, rows: 訓練の 行, log: [], stop, hudT }
 const dummyOvClear = () => ['pauseOv', 'chooseOv', 'resultOv'].forEach(id => { const e = $(id); if (e) e.hidden = true; });   // まえの 試合の まどを のこさない
 function dummyStart(m, W) {
@@ -10038,7 +10043,7 @@ function dummyStart(m, W) {
   const sm = Object.assign({}, m, { moves: trMvIds(W).slice(0, 4), tr: Object.assign({}, m.tr, { mode: 'chip', prog: trClone(W, m) }) });
   const dm = Object.assign(foeMon(m.sid, .3, -777), { uid: -777 });
   DUM = { uid: m.uid, keep: TRN, prog: sm.tr.prog, log: [], stop: false, hudT: 0, atkT: 2, set: { atk: 'none', ost: '', mst: '', wx: '', tr: '' } };
-  startBattle({ kind: 'cup', field: choice(FIELDS), p0: [sm], enemies: [dm], title: '木人戦', dummy: true });
+  startBattle({ kind: 'cup', field: choice(FIELDS), p0: [sm], enemies: [dm], title: '模擬戦', dummy: true });
   const d = B.sides[1].fs[0]; d.dummy = true; d.moves = []; d.sp = Object.assign({}, d.sp, { n: '身代わり人形', type: 'normal', type2: 'beast', dummy: true });
   dummyHud(true);
 }
@@ -10088,7 +10093,7 @@ function dummyLog(f, id) {   // 技を 撃った：条件で えらんだ もの
 function dummyHud(on) {
   let h = $('dumHud'); if (!on) { if (h) h.remove(); return; }
   if (!h) { h = document.createElement('div'); h.id = 'dumHud'; $('scBattle').appendChild(h); }
-  h.innerHTML = `<div class="dh"><b>木人戦</b><button data-d="min">たたむ</button><button data-d="stop">人形：うごく</button><button data-d="quit">おわる</button></div><div class="dctl"></div><div class="dbody"></div>`;
+  h.innerHTML = `<div class="dh"><b>模擬戦</b><button data-d="min">たたむ</button><button data-d="stop">人形：うごく</button><button data-d="quit">おわる</button></div><div class="dctl"></div><div class="dbody"></div>`;
   dummyCtl(h.querySelector('.dctl'));
   h.classList.toggle('mini', innerWidth < 600);   // たて画面は たたんで はじめる（モンスターが かくれない）
   h.querySelector('[data-d="min"]').onclick = (e) => { h.classList.toggle('mini'); SND.se('click'); dummyHudUpd(); };
@@ -10106,7 +10111,7 @@ function dummyHudUpd() {
   { const a = h.querySelector('.daff'); if (a) a.textContent = { adv: '有利', even: '互角', dis: '不利' }[typeAff(f.sp, o.sp)]; }
   h.querySelector('.dbody').innerHTML = h.classList.contains('mini') ? `<div class="dlog">${DUM.log.slice(0, 2).map(x => `<div>${x.by ? `<span class="on">条件</span> ${x.by} → ` : x.auto ? '自動 → ' : 'お任せ → '}<b>${MOVES[x.id].n}</b></div>`).join('') || '<span class="dim">まだ 撃って いない</span>'}</div>` : `<div class="dst">距離 <b>${Math.round(dist(f, o))}</b>（${dist(f, o) < 150 ? '近い' : dist(f, o) < 290 ? '普通' : '遠い'}）・相手が <b class="${canReach(f, o) ? 'ok' : 'ng'}">${canReach(f, o) ? '見える' : '見えない'}</b>・人形HP ${Math.round(o.hp / o.maxHp * 100)}%</div>${rows}<div class="dlog">${lg || '<span class="dim">まだ 撃って いない</span>'}</div>`;
 }
-// じょうきょうを つくる：すべての 条件を 木人戦で ためせるように
+// じょうきょうを つくる：すべての 条件を 模擬戦で ためせるように
 function dummyCtl(el) {
   const S = DUM.set, o = (a, cur) => a.map(([v, n]) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${n}</option>`).join('');
   const pct = [['', '—'], [100, '100%'], [75, '75%'], [50, '50%'], [25, '25%'], [10, '10%']], stg = CONDS.mystg.ps, val = [['', '—']].concat([6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6].map(v => [v, v > 0 ? '+' + v : String(v)]));
@@ -11512,7 +11517,7 @@ function drawFighter(f) {   // かげがえし：じめんに しずむ とき�
   drawFighter0(f);
 }
 function drawFighter0(f) {
-  if (f && f.dummy) { if (f.state !== 'bench') drawDoll(f.x, f.y, f.hp / f.maxHp < .35 ? 1 : 2); return; }   // 木人戦の 身代わり人形
+  if (f && f.dummy) { if (f.state !== 'bench') drawDoll(f.x, f.y, f.hp / f.maxHp < .35 ? 1 : 2); return; }   // 模擬戦の 身代わり人形
   if (f && f.clones && !f.isClone) for (const c of f.clones) { if (c.doll) { drawDoll(c.x, c.y, c.hp); continue; } const g = Object.create(f); g.isClone = true; g.x = c.x; g.y = c.y; g.clones = null; drawFighter(g); }   // ぶんしん（ほんものと おなじ みため）
   if (!f || f.state === 'bench' || f.state === 'capt') return;
   if (f.state === 'tunnel') { burrowPt(f); drawMound(f.x, f.y, bodySz(f.sp), f.uid || 0); return; }   // 穴の 中：もりあがった つちが すすむ
