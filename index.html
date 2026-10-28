@@ -1493,6 +1493,7 @@ html.town #scHub #isles.plaza .isle{pointer-events:auto;padding:0!important;disp
 html.town #scHub #isles.plaza .isle:hover,html.town #scHub #isles.plaza .isle:focus-visible{transform:none}
 html.town #scHub #isles.plaza .isle:hover canvas{filter:drop-shadow(0 0 0 #c8ff5a) drop-shadow(0 0 3px #c8ff5a)}
 html.town #scHub #isles.plaza .isle canvas{position:relative;filter:drop-shadow(0 6px 4px rgba(10,20,60,.3));width:100%!important;height:100%!important;aspect-ratio:auto!important;max-width:none!important;max-height:none!important;image-rendering:pixelated}
+html.short.town #scHub #isles.plaza .isle .islabel{font-size:11px;padding:1px 7px}
 html.town #scHub #isles.plaza .isle .islabel{z-index:10;left:50%!important;right:auto!important;bottom:-4px!important;transform:translateX(-50%) rotate(-6deg)!important}
 #plazaChar{position:absolute;pointer-events:none;image-rendering:pixelated}
 html.town:not(.land) #scHub #isles{display:block!important;top:108px!important}
@@ -3167,11 +3168,12 @@ function citySky() {   // うしろの ビルの まち（1かい かく）
 // ひろば：しせつを HOME_layout の ばしょに おく。うえの ボタンと したの ブラインドボックスに かからないよう、はみでる ときは ちぢめて まんなかへ
 function plazaLayout(box, els) {
   const W = box.clientWidth, H = box.clientHeight, L = HOME_LAYOUT[W > H ? 'w' : 't'], [bw, bh] = L.size, sc = Math.max(W / bw, H / bh), ox = (W - bw * sc) / 2;
-  const br0 = box.getBoundingClientRect(), hub = $('scHub'), kz = br0.width / W || 1;   // がめんの ズーム（rect は みための px、W は CSS の px）
-  const cvt = (r) => r && { top: (r.top - br0.top) / kz, bottom: (r.bottom - br0.top) / kz, left: (r.left - br0.left) / kz, right: (r.right - br0.left) / kz, width: r.width / kz, height: r.height / kz }, br = { top: 0, left: 0 };
-  const rect = (e) => e && cvt(e.getBoundingClientRect());
-  let top = 0; hub.querySelectorAll('.hbar,.hicons').forEach(e => { const r = rect(e); if (r.height && r.top - br.top < H * .3) top = Math.max(top, r.bottom - br.top); });   // うえの だんだけ
-  let bot = H; { const g = hub.querySelector('.hubgrid'); if (g) { const r = rect(g); if (r.height) bot = r.top - br.top; } }
+  const hub = $('scHub'), app = $('app'), br = { top: 0, left: 0 };
+  // ばしょは offset で はかる（よこむき ボタンの 回転や ズームが あっても CSS の px の まま）
+  const off = (e) => { let x = 0, y = 0, n = e; while (n && n !== app) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return [x, y]; }, [bx0, by0] = off(box);
+  const rect = (e) => { if (!e || !e.offsetWidth) return null; const [x, y] = off(e); return { top: y - by0, left: x - bx0, bottom: y - by0 + e.offsetHeight, right: x - bx0 + e.offsetWidth, width: e.offsetWidth, height: e.offsetHeight }; };
+  let top = 0; hub.querySelectorAll('.hbar,.hicons').forEach(e => { const r = rect(e); if (r && r.height && r.top - br.top < H * .3) top = Math.max(top, r.bottom - br.top); });   // うえの だんだけ
+  let bot = H; { const g = hub.querySelector('.hubgrid'); if (g) { const r = rect(g); if (r && r.height) bot = r.top - br.top; } }
   const keys = ['shop', 'arena', 'house', 'wild'], R = keys.map(k => L[k]), x0 = Math.min(...R.map(r => r[0])), y0 = Math.min(...R.map(r => r[1])), x1 = Math.max(...R.map(r => r[0] + r[2])), y1 = Math.max(...R.map(r => r[1] + r[3]));
   let T = (x, y) => [ox + x * sc, y * sc], s2 = sc;
   if (W > H) {   // よこ画面：ひだりの れつ（ショップ・マイルーム）と みぎの れつ（アーケード・くさむら）を はしに よせ、まんなかの ブラインドボックスを よける
@@ -3181,6 +3183,16 @@ function plazaLayout(box, els) {
     s2 = Math.min(sc, (cl - 14) / lw, (W - crr - 14) / rw, (b2 - top - 10) / (y1 - y0));
     const cy = top + 4 + Math.max(0, (b2 - top - 10) - (y1 - y0) * s2) * .35;
     T = (x, y) => [x < bw / 2 ? 8 + (x - lx) * s2 : (x > bw / 2 ? W - 8 - (rx - x) * s2 : W / 2), cy + (y - y0) * s2];
+    // ひくい よこ画面：2れつだと ちいさすぎる ときは ブラインドボックスの うえに 1れつ（ショップ・マイルーム・サモナー・アーケード・くさむら）
+    const order = ['shop', 'house', null, 'arena', 'wild'], uw = order.reduce((t, k) => t + (k ? L[k][2] : 64), 0), mh = Math.max(...keys.map(k => L[k][3])), rh = bot - top - 8;
+    const s3 = Math.min(sc, (W - 16) / uw, rh / mh);
+    if (s3 > s2 * 1.15) {
+      s2 = s3; const yb = bot - 6, gap = (W - uw * s3) / 2; let x = gap; const P = {};
+      for (const k of order) { const w = (k ? L[k][2] : 64) * s3; P[k || 'char'] = [x, k ? yb - L[k][3] * s3 : yb - 8 * s3, w]; x += w; }
+      els.forEach((e, i) => { const k = ISLES[i].k === 'room' ? 'house' : ISLES[i].k, [x, y] = P[k]; Object.assign(e.style, { position: 'absolute', left: x + 'px', top: y + 'px', width: L[k][2] * s3 + 'px', height: L[k][3] * s3 + 'px', zIndex: 'auto', padding: '0' }); e.querySelector('canvas').style.zIndex = 1; });
+      const c = $('plazaChar'); if (c) { const [cx, cy, cw] = P.char; Object.assign(c.style, { left: cx + cw / 2 - 30 * s3 + 'px', top: cy - 44 * s3 + 'px', width: 60 * s3 + 'px', height: 44 * s3 + 'px', zIndex: 3 }); }
+      return;
+    }
   } else if (y0 * sc < top + 4 || y1 * sc > bot - 6) { s2 = Math.min(sc, (bot - top - 16) / (y1 - y0), W * .98 / (x1 - x0)); const cy = top + 6 + ((bot - top - 16) - (y1 - y0) * s2) / 2; T = (x, y) => [W / 2 + (x - (x0 + x1) / 2) * s2, cy + (y - y0) * s2]; }
   els.forEach((e, i) => { const k = ISLES[i].k === 'room' ? 'house' : ISLES[i].k, r = L[k], [x, y] = T(r[0], r[1]); Object.assign(e.style, { position: 'absolute', left: x + 'px', top: y + 'px', width: r[2] * s2 + 'px', height: r[3] * s2 + 'px', zIndex: 'auto', padding: '0' }); e.querySelector('canvas').style.zIndex = keys.indexOf(k) + 1; });   // なふだは いつも てまえ（canvas だけ おくゆきの じゅん）
   const c = $('plazaChar'); if (c) { let [cx, cy] = T(L.char[0], L.char[1]); if (W > H) cx = W / 2; Object.assign(c.style, { left: cx - 30 * s2 + 'px', top: cy - 44 * s2 + 'px', width: 60 * s2 + 'px', height: 44 * s2 + 'px', zIndex: 3 }); }
