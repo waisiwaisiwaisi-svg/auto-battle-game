@@ -31,6 +31,15 @@ service cloud.firestore {
       allow read: if false;
       allow create: if signedIn() && rid.matches(request.auth.uid + '_[0-9]+') && request.resource.data.by == request.auth.uid && request.resource.data.x.size() <= 80;
     }
+    // データの ひきつぎ：セーブを 暗号化した もの（かぎは ふっかつコード）。さがす ために だれでも よめる・かくのは じぶんだけ
+    match /backups/{uid} {
+      allow read: if signedIn();
+      allow write: if mine(uid) && (request.resource == null || (request.resource.data.k is string && request.resource.data.d is string && request.resource.data.d.size() <= 900000));
+    }
+    // じぶんだけの ばしょ（ふっかつコードの ひかえ）
+    match /data/users/{uid}/{doc} {
+      allow read, write: if mine(uid);
+    }
     match /profiles/{uid} {
       allow read: if signedIn();
       allow write: if mine(uid) && (request.resource == null || (request.resource.data.name is string && request.resource.data.name.size() <= 12));
