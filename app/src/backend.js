@@ -92,7 +92,8 @@ if (ok) {
     // オンラインの データを ぜんぶ けす（ストアの「アカウント削除」）
     wipe: async () => {
       const u = await ready; if (!u) return;
-      for (const c of ['ranks', 'gmembers', 'gchat', 'guilds', 'profiles', 'teams']) { try { await deleteDoc(fsDoc(fs, `${c}/${u.uid}`)); } catch (e) { } }
+      for (const c of ['ranks', 'gmembers', 'gchat', 'guilds', 'profiles', 'teams', 'backups']) { try { await deleteDoc(fsDoc(fs, `${c}/${u.uid}`)); } catch (e) { } }
+      try { await deleteDoc(fsDoc(fs, `data/users/${u.uid}/bkcode`)); } catch (e) { }
       try { await deleteUser(u); } catch (e) { try { await auth.signOut(); } catch (x) { } }
       try { localStorage.removeItem(NAME_KEY); } catch (e) { }
       lobby = null; ready = login(); ready.then(nameDefault);

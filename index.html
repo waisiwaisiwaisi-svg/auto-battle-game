@@ -131,6 +131,9 @@ h1.tlogo{font-size:clamp(30px,calc(6 * var(--vw)),60px);line-height:1;display:fl
 @keyframes tapblink{0%,55%{opacity:1}56%,100%{opacity:0}}
 #scTitle{cursor:pointer}
 @keyframes tglow{50%{box-shadow:0 4px 0 #b8892a,0 0 0 3px #0d0b14,0 0 22px 4px rgba(255,209,102,.55)}}
+.trestore{position:absolute;right:calc(10px + var(--sar, 0px));bottom:calc(6px + var(--sab));z-index:2;font:inherit;font-size:11px;color:rgba(255,255,255,.7);background:rgba(11,9,20,.55);border:1px solid rgba(255,255,255,.25);padding:4px 10px;cursor:pointer;text-shadow:1px 1px 0 #000}
+.bkcode{font-size:20px;letter-spacing:.12em;text-align:center;padding:10px 6px;background:#120e1c;box-shadow:inset 0 0 0 2px var(--rim2);color:#ffd166;user-select:all;-webkit-user-select:all;word-break:break-all}
+.bksum{font-size:13px;line-height:1.7;padding:8px 10px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 2px var(--rim2)}
 .tfoot{position:absolute;left:0;right:0;bottom:calc(8px + var(--sab));text-align:center;font-size:10px;color:rgba(255,255,255,.55);z-index:1;text-shadow:1px 1px 0 #000}
 .sndbtn{position:absolute;right:calc(12px + var(--sar));top:calc(12px + var(--sat));z-index:2;width:40px;height:40px;background:rgba(20,16,34,.75);box-shadow:0 0 0 2px var(--edge);font-size:18px;color:var(--acc)}
 .sndbtn.rotbtn{right:calc(60px + var(--sar))}
@@ -1574,6 +1577,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
       </div>
       <div id="titleMons" hidden></div>
     </div>
+    <button class="trestore" id="titleRestore">データを もどす</button>
     <div class="tfoot">© Pixel Monster Arena　<span id="titleVer">ver 1.0</span></div>
   </section>
 
@@ -3637,7 +3641,7 @@ window.addEventListener('storage', (e) => { if (e.key !== SAVE_KEY || SAVE_STALE
   bg.innerHTML = '<div class="askbox"><div style="margin-bottom:12px">べつの タブ（または まど）で この ゲームが うごいて データが かわりました。<br>この がめんは よみこみなおします。</div><div class="row"><button class="btn">よみこみなおす</button></div></div>';
   bg.querySelector('button').onclick = () => location.reload(); $('app').appendChild(bg); });
 function save() { if (SAVE_STALE || ONB_TEST) return;   // ONB_TEST：はじめからの ながれを ためしている あいだは かきこまない
- if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} if (typeof updTeamIco === 'function') try { updTeamIco(); } catch (e) {} }   // へんせいの タブの 顔も かえる
+ if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} bkKick(); if (typeof updTeamIco === 'function') try { updTeamIco(); } catch (e) {} }   // へんせいの タブの 顔も かえる
 const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
 /* ===== ステータス（ポケモンと おなじ しくみ） =====
    6つの のうりょく：HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ
@@ -11889,7 +11893,8 @@ function dotPulse(A, cx, cy, done) {
     if (u < 1) requestAnimationFrame(step); else { c.remove(); if (done) done(); } };
   requestAnimationFrame(step);
 }
-$('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn') || $('scTitle').hidden) return;
+$('titleRestore').onclick = () => { SND.se('ok'); bkRestoreWin(); };
+$('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn, .trestore') || $('scTitle').hidden) return;
   if (!titleArmed && !SND.opt.mute) { titleArmed = true; SND.init(); SND.play('hub'); const t = $('tapStart'); if (t) t.classList.add('armed'); }   // 1かいの タップで おとも ならして そのまま すすむ
   if (titleGo) return; titleGo = true; titleArmed = true; SND.se('ok');
   // 金色の パルス：TAP TO START から わっと ひろがってから ホームへ
@@ -12017,6 +12022,138 @@ let teamFrom = null;   // へんせいを ひらいた ところ（ジムから 
 $('btnTeamBack').onclick = () => { const f = teamFrom; teamFrom = null; if (f === 'journey') renderJourney(); else renderHub(); };
 // せってい：おとの 大きさ・セーブデータ
 function modal(html) { const bg = document.createElement('div'); bg.className = 'askbg'; bg.innerHTML = `<div class="askbox" style="max-width:440px;text-align:left">${html}</div>`; $('app').appendChild(bg); bg.addEventListener('pointerdown', (e) => { if (e.target === bg) bg.remove(); }); return bg; }
+/* ---------- データの ひきつぎ：ふっかつコードで ほかの 端末へ・けしても もどせる ----------
+   backups/{じぶんの id} に セーブを 暗号化して おく（かぎは ふっかつコードから つくる。サーバーに コードは おかない）
+   さがす ときは k（コードの ハッシュ）で。コードは data/users/{id}/bkcode にも おく（おなじ アカウントなら コードなしで もどせる） */
+const BK_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const bkNewCode = () => [...crypto.getRandomValues(new Uint8Array(16))].map(b => BK_ABC[b & 31]).join('');
+const bkFmt = (c) => String(c || '').replace(/(.{4})(?=.)/g, '$1-');
+const bkNorm = (s) => { const c = String(s || '').toUpperCase().replace(/[\s\-ー－]/g, ''); return c.length === 16 && [...c].every(ch => BK_ABC.includes(ch)) ? c : null; };
+const bkHash = async (s) => new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)));
+const bkB64 = (u) => { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+const bkUnb64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const bkKey = async (code) => crypto.subtle.importKey('raw', await bkHash('pma-key:' + code), 'AES-GCM', false, ['encrypt', 'decrypt']);
+const bkId = async (code) => [...(await bkHash('pma-id:' + code))].slice(0, 16).map(b => b.toString(16).padStart(2, '0')).join('');
+async function bkZip(u, on) {   // gzip（つかえない ブラウザでは そのまま）
+  if (typeof CompressionStream === 'undefined') return null;
+  const st = new Blob([u]).stream().pipeThrough(on ? new CompressionStream('gzip') : new DecompressionStream('gzip'));
+  return new Uint8Array(await new Response(st).arrayBuffer());
+}
+let BKDB = null;   // { db, id }（つながらなければ つぎに また ためす）
+async function bkDb() {
+  if (BKDB) return BKDB;
+  try {
+    const db = window.claude && window.claude.use ? await window.claude.use('db') : null, user = db ? await window.claude.use('user') : null, id = user ? await user.id() : null;
+    if (db && id) BKDB = { db, id };
+  } catch (e) { }
+  return BKDB;
+}
+let BK_T = 0, BK_BUSY = null, BK_LAST = 0;
+// セーブの たびに よぶ：3ぷんに 1かい まとめて バックアップ（アプリを とじる ときは すぐ）
+function bkKick() { if (BK_T || !S || ONB_TEST || SAVE_STALE) return; BK_T = setTimeout(() => { BK_T = 0; bkUp().catch(() => { }); }, Math.max(20000, 180000 - (Date.now() - BK_LAST))); }
+document.addEventListener('visibilitychange', () => { if (document.hidden && BK_T) { clearTimeout(BK_T); BK_T = 0; bkUp().catch(() => { }); } });
+function bkUp() { return BK_BUSY || (BK_BUSY = bkUp0().finally(() => { BK_BUSY = null; })); }
+async function bkUp0() {
+  if (!S || SAVE_STALE || ONB_TEST || !S.party || !S.party.length) return false;
+  const R = await bkDb(); if (!R) return false;
+  const fresh = !S.bk || !bkNorm(S.bk.code);
+  if (fresh) S.bk = { code: bkNewCode() };
+  const code = S.bk.code, raw = new TextEncoder().encode(JSON.stringify(S));
+  const zz = await bkZip(raw, true).catch(() => null), iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await bkKey(code), zz || raw));
+  const t = Date.now();
+  await R.db.doc('backups/' + R.id).set({ k: await bkId(code), iv: bkB64(iv), d: bkB64(ct), z: zz ? 1 : 0, t, v: 1 });
+  if (fresh || !S.bk.acct) { await R.db.doc(`data/users/${R.id}/bkcode`).set({ c: code, t }).catch(() => { }); S.bk.acct = 1; }
+  BK_LAST = t; S.bk.t = t;
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { }   // save() だと また バックアップを よぶので ちょくせつ
+  return true;
+}
+async function bkOpen(d, code) {   // 1つの バックアップを ひらく（コードが ちがえば null）
+  try {
+    const pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bkUnb64(d.iv) }, await bkKey(code), bkUnb64(d.d)));
+    const s = JSON.parse(new TextDecoder().decode(d.z ? await bkZip(pt, false) : pt));
+    return s && Array.isArray(s.party) && s.party.length ? s : null;
+  } catch (e) { return null; }
+}
+async function bkFind(code) {   // コードの バックアップの うち いちばん あたらしい もの
+  const R = await bkDb(); if (!R) throw 'offline';
+  const q = await R.db.collection('backups').where('k', '==', await bkId(code)).limit(20).get();
+  const docs = q.docs.map(x => x.data()).filter(d => d && d.d && d.iv).sort((a, b) => (b.t || 0) - (a.t || 0));
+  for (const d of docs) { const s = await bkOpen(d, code); if (s) return { s, t: d.t || 0 }; }
+  return null;
+}
+async function bkMine() {   // この アカウントに のこっている コード（claude.ai 版：おなじ アカウントなら ほかの 端末でも）
+  const R = await bkDb(); if (!R) return null;
+  const sn = await R.db.doc(`data/users/${R.id}/bkcode`).get().catch(() => null), d = sn && sn.exists ? sn.data() : null;
+  return d && bkNorm(d.c);
+}
+const bkWhen = (t) => { if (!t) return '—'; const d = new Date(t), z = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}/${z(d.getMonth() + 1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`; };
+const bkSum = (s) => { const L = s.party[0], nm = L && SPECIES[L.sid] ? SPECIES[L.sid].n : '？';
+  return `なまえ：${safeName(s.pname || "", NAME_MAX) || "サモナー"}<br>せんとう：${safeName(nm, 12)} ほか ${s.party.length + (s.box || []).length - 1}たい<br>かったかず：${s.wins || 0}　ジェム：${s.gems || 0}`; };
+const BK_INP = 'width:100%;font:inherit;font-size:16px;letter-spacing:.08em;padding:6px 8px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2);text-transform:uppercase';
+// せっていの「データの ひきつぎ」
+async function bkWin() {
+  const bg = modal(`<h3 style="margin-bottom:10px">データの ひきつぎ</h3><div id="bkBody"><p class="dim">よみこみちゅう…</p></div>
+    <div class="row" style="margin-top:14px;justify-content:space-between"><button class="btn sub" id="bkRes">コードで もどす</button><button class="btn" id="bkX">とじる</button></div>`);
+  const B = bg.querySelector('#bkBody');
+  bg.querySelector('#bkX').onclick = () => bg.remove();
+  bg.querySelector('#bkRes').onclick = () => { bg.remove(); bkRestoreWin(); };
+  const ok = await bkUp().catch(() => false);
+  if (!bg.isConnected) return;
+  if (!ok || !S.bk) { B.innerHTML = `<p class="dim">${onlineHint('データの ひきつぎ')}</p>`; return; }
+  B.innerHTML = `<p style="margin-bottom:8px">ふっかつコード</p>
+    <div class="bkcode" id="bkCode"></div>
+    <div class="row" style="margin:8px 0 10px;justify-content:flex-end"><button class="btn sub" id="bkCp" style="font-size:12px;padding:6px 12px">コピー</button></div>
+    <p class="dim" style="font-size:12px;line-height:1.6">この コードを ほかの スマホや PCで いれると、いまの データが そのまま つかえます。データを けして しまった ときも もどせます。<br><b style="color:#ffd166">コードは スクショか メモで かならず ひかえて おいてね。</b>なくすと もどせません。ひとには おしえないでね。</p>
+    <div class="optrow" style="border:0;flex-wrap:wrap;row-gap:6px"><span class="dim" style="font-size:12px;min-width:0">さいごの バックアップ<br><span id="bkT"></span></span><button class="btn sub" id="bkNow" style="font-size:12px;padding:6px 12px;margin-left:auto;white-space:nowrap">いま バックアップ</button></div>`;
+  const C = B.querySelector('#bkCode'); C.textContent = bkFmt(S.bk.code);
+  B.querySelector('#bkT').textContent = bkWhen(S.bk.t);
+  B.querySelector('#bkCp').onclick = () => { const sel = () => { const r = document.createRange(); r.selectNodeContents(C); const w = getSelection(); w.removeAllRanges(); w.addRange(r); };
+    try { navigator.clipboard.writeText(bkFmt(S.bk.code)).then(() => { SND.se('ok'); B.querySelector('#bkCp').textContent = 'コピーしました'; }, sel); } catch (e) { sel(); } };
+  B.querySelector('#bkNow').onclick = async (e) => { e.target.disabled = true; const r = await bkUp().catch(() => false); e.target.disabled = false; if (r) SND.se('ok'); B.querySelector('#bkT').textContent = r ? bkWhen(S.bk.t) : 'しっぱい（つうしんを たしかめてね）'; };
+}
+// コードを いれて もどす（タイトルからも）
+async function bkRestoreWin() {
+  const bg = modal(`<h3 style="margin-bottom:10px">データを もどす</h3>
+    <p class="dim" style="font-size:12px;margin-bottom:8px">ふっかつコード（16もじ）を いれてね。</p>
+    <input type="text" id="bkIn" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX" style="${BK_INP}">
+    <p id="bkMsg" class="dim" style="font-size:12px;min-height:1.4em;margin-top:6px"></p>
+    <div id="bkAcct"></div>
+    <div class="row" style="margin-top:12px;justify-content:space-between"><button class="btn sub" id="bkX">やめる</button><button class="btn" id="bkGo">さがす</button></div>`);
+  const I = bg.querySelector('#bkIn'), M = bg.querySelector('#bkMsg'), go = bg.querySelector('#bkGo');
+  bg.querySelector('#bkX').onclick = () => bg.remove();
+  const use = async (code) => {
+    go.disabled = true; M.textContent = 'さがしています…';
+    let f = null; try { f = await bkFind(code); } catch (e) { M.innerHTML = onlineHint('データの ひきつぎ'); go.disabled = false; return; }
+    go.disabled = false;
+    if (!f) { M.textContent = 'その コードの データは みつかりませんでした。'; return; }
+    bg.remove(); bkConfirm(f);
+  };
+  go.onclick = () => { const c = bkNorm(I.value); if (!c) { M.textContent = 'コードは 16もじ です（Ｏ・Ｉ・０・１ は つかって いません）。'; return; } use(c); };
+  I.addEventListener('keydown', (e) => { if (e.key === 'Enter') go.click(); });
+  setTimeout(() => I.focus(), 50);
+  const mine = await bkMine().catch(() => null);   // claude.ai 版：この アカウントの バックアップ
+  if (mine && bg.isConnected && !(S && S.bk && S.bk.code === mine)) {
+    const A = bg.querySelector('#bkAcct'); A.innerHTML = `<div class="optrow" style="border:0"><span style="font-size:12px">この アカウントの バックアップが あります</span><button class="btn sub" id="bkMine" style="font-size:12px;padding:6px 12px">これで もどす</button></div>`;
+    A.querySelector('#bkMine').onclick = () => use(mine);
+  }
+}
+async function bkConfirm(f) {
+  const cur = S || loadSave();
+  const msg = `${bkWhen(f.t)} の データ`;
+  const bg = modal(`<h3 style="margin-bottom:10px">この データに もどしますか？</h3>
+    <p style="margin-bottom:6px"></p><div class="bksum">${bkSum(f.s)}</div>
+    ${cur ? `<p style="font-size:12px;margin-top:10px;color:#ff8a8a">いま この 端末に ある データは きえて、もとに もどせません。</p>` : ''}
+    <div class="row" style="margin-top:14px;justify-content:space-between"><button class="btn sub" id="bkNo">やめる</button><button class="btn" id="bkYes">もどす</button></div>`);
+  bg.querySelector('p').textContent = msg;
+  bg.querySelector('#bkNo').onclick = () => bg.remove();
+  bg.querySelector('#bkYes').onclick = () => {
+    if (BK_T) { clearTimeout(BK_T); BK_T = 0; }
+    const s = f.s; if (s.bk) s.bk.acct = 0;   // この アカウントにも コードを のこす
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { }
+    SND.se('ok'); SAVE_STALE = true; location.reload();
+  };
+}
 $('btnOpt').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:12px">せってい</h3>
     <div class="optrow"><span>あそびかた</span><button class="btn sub" id="oHelp" style="font-size:12px;padding:6px 12px">みる</button></div>
@@ -12029,14 +12166,16 @@ $('btnOpt').onclick = () => {
     
     ${!window.PMA_NAME ? `<div class="optrow">なまえ <span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">かえる</button></span></div>` : ''}
     ${window.PMA_NAME ? `<label class="optrow">なまえ（オンライン） <span style="display:flex;gap:6px"><input type="text" id="oName" maxlength="12" style="width:9em;font:inherit;font-size:14px;padding:4px 6px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"><button class="btn sub" id="oNameSave" style="padding:4px 10px;font-size:12px">きめる</button></span></label>` : ''}
+    <div class="optrow"><span>データの ひきつぎ<br><span class="dim" style="font-size:11px">ほかの 端末へ・けしても もどせる</span></span><button class="btn sub" id="oBk" style="font-size:12px;padding:6px 12px">ひらく</button></div>
     <div style="margin-top:12px">サモナーの みため</div><div class="looks" id="oLooks"></div>
     <div class="row" style="margin-top:16px;justify-content:space-between"><span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><button class="dim" id="oReset" style="text-decoration:underline">データを しょきか（はじめから あそぶ）</button>${window.PMA_NAME ? '<button class="dim" id="oWipe" style="text-decoration:underline">オンラインの データを けす</button>' : ''}<a class="dim" href="https://waisiwaisiwaisi-svg.github.io/auto-battle-game/privacy.html" target="_blank" rel="noopener" style="font-size:12px">プライバシーポリシー</a></span><button class="btn" id="oClose">とじる</button></div>`);
+  bg.querySelector('#oBk').onclick = () => { bg.remove(); bkWin(); };
   const m = bg.querySelector('#oMusic'), x = bg.querySelector('#oSfx'), u = bg.querySelector('#oMute');
   if (!window.PMA_NAME) { const P = bg.querySelector('#oPname'); P.textContent = myName(); bg.querySelector('#oPnameEd').onclick = async () => { const v = await askName(false); if (v) P.textContent = myName(); }; }
   if (window.PMA_NAME) {   // アプリ版：なまえ と オンラインの データ けし
     const N = bg.querySelector('#oName'); N.value = window.PMA_NAME.get();
     bg.querySelector('#oNameSave').onclick = async () => { const ok = await window.PMA_NAME.set(N.value).catch(() => false); if (ok) SND.se('ok'); if (ok) { N.value = window.PMA_NAME.get(); S.pname = safeName(N.value, NAME_MAX) || S.pname; save(); } };
-    bg.querySelector('#oWipe').onclick = async () => { if (!(await ask('ランキング・ギルド・なまえ など、サーバーに ある あなたの データを ぜんぶ けしますか？（この スマホの セーブデータは のこります）', 'けす', 'やめる'))) return; await window.PMA_NAME.wipe().catch(() => { }); RANKDB = null; NET.room = null; GUILD.me = null; await ask('けしました。つぎに オンラインを つかうと あたらしく はじまります。', 'OK', null); };
+    bg.querySelector('#oWipe').onclick = async () => { if (!(await ask('ランキング・ギルド・なまえ・データの バックアップ など、サーバーに ある あなたの データを ぜんぶ けしますか？（この スマホの セーブデータは のこります。ふっかつコードは つかえなく なります）', 'けす', 'やめる'))) return; if (BK_T) { clearTimeout(BK_T); BK_T = 0; } await window.PMA_NAME.wipe().catch(() => { }); BKDB = null; if (S) { delete S.bk; save(); } RANKDB = null; NET.room = null; GUILD.me = null; await ask('けしました。つぎに オンラインを つかうと あたらしく はじまります。', 'OK', null); };
   }
   m.value = SND.opt.music; x.value = SND.opt.sfx; u.checked = SND.opt.mute;
   { const t = bg.querySelector('#oTmFree'); t.checked = !!S.tmFree; t.onchange = () => { S.tmFree = t.checked; save(); renderHub(); }; }
@@ -12759,7 +12898,7 @@ renderTitle();
 window.__game = {
   tut() { return TUT; }, get town() { return { TOWN, TOWN_B }; },
   get B() { return B; }, get S() { return S; }, set S(v) { S = v; },
-  startWild, startCup, renderHub, SPECIES, MOVES, LEARN, save, equipped, learned, canLearn, get TRN() { return TRN; },
+  startWild, startCup, renderHub, bkUp, SPECIES, MOVES, LEARN, save, equipped, learned, canLearn, get TRN() { return TRN; },
   step(sec) { for (let t = 0; t < sec; t += 1 / 60) bStep(1 / 60); },
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
