@@ -1,0 +1,77 @@
+{
+ "note": "1倍の座標（左上）。4倍の画像では すべて4倍。描く順は shop→arena→house→wild（奥から手前）",
+ "w": {
+  "bg": "HOME_base_w.png",
+  "size": [
+   480,
+   270
+  ],
+  "objects": {
+   "shop": {
+    "file": "OBJ_shop.png",
+    "x": 10,
+    "y": 52,
+    "w": 171,
+    "h": 109
+   },
+   "arena": {
+    "file": "OBJ_arena.png",
+    "x": 298,
+    "y": 52,
+    "w": 172,
+    "h": 111
+   },
+   "house": {
+    "file": "OBJ_house.png",
+    "x": 10,
+    "y": 150,
+    "w": 170,
+    "h": 104
+   },
+   "wild": {
+    "file": "OBJ_wild.png",
+    "x": 298,
+    "y": 152,
+    "w": 170,
+    "h": 110
+   }
+  }
+ },
+ "t": {
+  "bg": "HOME_base_t.png",
+  "size": [
+   270,
+   480
+  ],
+  "objects": {
+   "shop": {
+    "file": "OBJ_shop.png",
+    "x": 0,
+    "y": 72,
+    "w": 171,
+    "h": 109
+   },
+   "arena": {
+    "file": "OBJ_arena.png",
+    "x": 99,
+    "y": 162,
+    "w": 172,
+    "h": 111
+   },
+   "house": {
+    "file": "OBJ_house.png",
+    "x": 0,
+    "y": 252,
+    "w": 170,
+    "h": 104
+   },
+   "wild": {
+    "file": "OBJ_wild.png",
+    "x": 99,
+    "y": 342,
+    "w": 170,
+    "h": 110
+   }
+  }
+ }
+}
