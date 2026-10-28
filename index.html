@@ -1276,6 +1276,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trmini{display:none;align-self:flex-end;font-size:11px;color:var(--dim);padding:2px 6px;margin:-2px -4px 0 0}
 .trside{position:sticky;top:0;align-self:start;max-height:calc(calc(100 * var(--vh)) - 16px);overflow:auto}
 @media (max-width:860px){.trmini{display:block}.trside.mini{padding:2px 8px}.trside.mini > :not(.trmini){display:none}.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;top:auto;bottom:0;z-index:5;max-height:calc(32 * var(--vh));overflow:auto;padding:4px 8px;border-radius:10px;background:#161228;border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}
+html.town.land #scTrain .trside{max-height:calc(calc(100 * var(--vh)) - 24px - var(--trTabH,0px))!important}   /* よこ画面：したの メニューに かくれない */
 html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage{grid-template-columns:minmax(0,1fr) 200px}html.land .trmons{grid-column:1/-1}html.land .trside{position:sticky;top:0;bottom:auto;align-self:start;max-height:calc(calc(100 * var(--vh)) - 16px);box-shadow:none}html.land .trmini{display:none}html.land .trside.mini > :not(.trmini){display:revert}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
 /* 訓練：がめんの はばでは なく 訓練の わくの はばで ならびを かえる（中くらいの まどでも くずれない） */
 #trBody{container-type:inline-size}
@@ -1402,6 +1403,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
 .kw{color:#ffd84a;text-decoration:underline;text-decoration-color:rgba(255,216,74,.55);text-underline-offset:2px;cursor:help;pointer-events:auto}
 #kwTip{position:fixed;z-index:10000;max-width:min(280px,calc(100vw - 16px));padding:8px 10px;background:#141030;color:#f3eefc;font-size:12px;line-height:1.55;border:2px solid #ffd84a;box-shadow:0 4px 0 rgba(0,0,0,.5);pointer-events:none;text-align:left}
 #kwTip b{display:block;color:#ffd84a;margin-bottom:2px;font-size:13px}
+body:has(.trpickbg) #kwTip{display:none!important}   /* 訓練の えらぶ ウィンドウが でて いる あいだは せつめいを ださない */
 #mvTip{position:fixed;z-index:9999;max-width:min(320px,calc(100vw - 16px));padding:8px 10px;background:#141030;color:#f3eefc;font-size:12px;line-height:1.55;border:2px solid var(--c,#ffd84a);box-shadow:0 4px 0 rgba(0,0,0,.5);text-align:left}
 #mvTip b{display:block;color:#ffd84a;font-size:13px}#mvTip .s{color:#b9b0d6;font-size:11px;margin-bottom:3px}#mvTip .cdl{color:#ff9f6b}
 .trflt{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px}.trflt select,.trflt input{font:inherit;font-size:11px;padding:3px 4px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);min-width:0}.trflt input{flex:1 1 90px}
@@ -5048,7 +5050,7 @@ const TRT_STEPS = [
   { sel: '.trnatsel', tx: '① まずは<b>作戦</b>です。普段の立ち回りを決めます。<br>どれかひとつタップしてみましょう（★がこのモンスターのおすすめです）。', ok: () => TRT.f.nat },
   { sel: '.trnatsel', allow: () => [], tx: '作戦には、じゃんけんのような相性があります。<br>⚔「<b>どんどん せめる</b>」は 🏹「<b>まあいを たもつ</b>」に、🏹「まあいを たもつ」は 🛡「<b>どっしり かまえる</b>」に、🛡「どっしり かまえる」は ⚔「どんどん せめる」に強くなります。<br>相手より強い作戦だと「<b>よゆう（さくせん◎）</b>」になり、攻撃を受けにくく（防御1.15倍）なります。弱いと「<b>けいかい（さくせん×）</b>」になり、受けやすく（0.87倍）なります。同じグループ同士だと「ライバルだ！」になります。', next: 1 },
   { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが<b>技の行</b>です。上にある技ほど先に撃ちます。<br>左の番号をドラッグすると、順番を入れ替えられます。', next: 1 },
-  { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を置いてみましょう。<br>○番の技の「<b>使うとき</b>」の枠を<b>タップ</b>して、一覧から「<b>相手のHP</b>」を選んでください（右の「相手のHP」をドラッグしても置けます）。<br><small>（タップしてから置き場所をタップしても置けます）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
+  { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を置いてみましょう。<br>○番の技の「<b>使うとき</b>」の枠を<b>タップ</b>して、一覧から「<b>相手のHP</b>」を選んでください（パレットの「相手のHP」をタップしてから 枠を タップしても 置けます）。', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
   { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手のHPが${p}のとき</b>」に、この技を撃ちます。<br>置いた条件をタップすると、${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも変えられます。`; }, next: 1 },
   { sel: '.pal.k-go[data-v="near"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ 次は<b>撃ち方</b>です。<br>「<b>近づいてから</b>」を ○番の「その場で撃つ」の枠へ置いてみましょう。<br><small>（その位置まで動いてから撃ちます。うまく動けないときは、今の間合いで撃てる技に切り替えます）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
   { sel: '[data-a="sim"]', tx: '⑤ できたら<b>シミュレーション</b>で試してみましょう！<br>5回戦わせて、結果を見せてくれます。', ok: () => !!document.querySelector('.simtbl') },
@@ -5077,6 +5079,7 @@ function trtLoop() {
   const st = TRS()[TRT.i]; if (st.ok && st.ok()) { SND.se('ok'); if (TRT.i + 1 < TRS().length) trtGo(TRT.i + 1); else trtEnd(); return; }
   if (!on) return;
   const q = typeof st.sel === 'function' ? st.sel() : st.sel; let t = q ? document.querySelector(q) : null;
+  if (t && t.closest('.trside') && !t.closest('.trside.mini')) { const sd = t.closest('.trside'), r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.bottom - 4 || r1.top < r2.top + 4) sd.scrollTop += (r1.top - r2.top) - (r2.height - r1.height) / 2; }   // パレットの なかの ものを さす：パレットの なかを スクロール して みせる
   if (t && t.closest('.trside.mini')) { TR_MINI = false; const sd = t.closest('.trside'); sd.classList.remove('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▼ たたむ'; }
   if (t && !home && !t.closest('.trside')) { const sd = document.querySelector('#scTrain .trside'); if (sd && getComputedStyle(sd).position !== 'static' && !sd.classList.contains('mini')) { const r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.top && r1.top < r2.bottom) { TR_MINI = true; sd.classList.add('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▲ パレットを ひらく'; TRT.scrolled = -1; } } }   // あんない している ボタンが したの パレットに かくれる：たたむ（もう いちど まんなかへ）
   const bub = TRT.el.querySelector('.bub'), vw = innerWidth, vh = innerHeight;
@@ -5173,6 +5176,11 @@ function renderTrain(uid) {
   const act = (a, f) => { const e = B.querySelector(`[data-a="${a}"]`); if (e) e.onclick = f; };
   const redo = () => renderTrain(uid), touch = () => { for (const r of W.mv) { r.c = r.c.filter(l => l.length); if (r.x) { r.x = r.x.filter(l => l.length); if (!r.x.length) delete r.x; } } TRN.dirty = true; redo(); };   // からの行は つめる
   // 置く：pl = { k:'mv'|'go'|'c', v } 新しく ／ { from:[i,j] } 置いてある条件 ／ { gFrom:i } 置いてある立ち回り。z = 落とした枠
+  // i ばんめの 技を id に する：ほかの 段に ある 技なら 段ごと いれかえ（条件も いっしょに うごく）。あたらしい 技なら おきかえて あわない 条件は はずす
+  const setMv = (i, id) => { const r = W.mv[i]; if (!r || r.id === id) return false; const ids = W.mv.map(x => x.id), at = ids.indexOf(id);
+    if (at >= 0) [W.mv[i], W.mv[at]] = [W.mv[at], W.mv[i]];
+    else { r.id = id; r.c = trLines(r.c).map(l => l.filter(c => condFits(c.t, id))); if (r.x) r.x = r.x.map(l => l.filter(c => condFits(c.t, id))); }
+    trRemap(W, ids); return true; };
   const drop = (pl, z) => {
     const d = z && z.dataset.drop, i = z ? +z.dataset.i : -1;
     const L = z ? +z.dataset.l || 0 : 0, line = (r, l) => LN(r, l) || (l >= 10 ? (r.x[l - 10] = []) : (r.c[l] = []));
@@ -5188,7 +5196,7 @@ function renderTrain(uid) {
     if (!z) return;
     if (pl.k === 'mv') { const at = W.mv.findIndex(r => r.id === pl.v);
       if (d === 'mvnew') { if (at >= 0) return; W.mv.push({ id: pl.v, go: 'auto', c: trDefC(pl.v) }); }
-      else if (d === 'h') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; for (const r of W.mv) { r.c = trLines(r.c).map(l => l.filter(c => condFits(c.t, r.id))); if (r.x) r.x = r.x.map(l => l.filter(c => condFits(c.t, r.id))); } }   // いれかえた 技に あわない 条件は はずす
+      else if (d === 'h') { if (!setMv(i, pl.v)) return; }   // ほかの 段の 技なら 段ごと いれかえ
       else return; }
     else if (pl.k === 'go') { if (d !== 'g') return; W.mv[i].go = pl.v; }
     else if (pl.k === 'c') { if (d !== 'c' || !condFits(pl.v, W.mv[i].id) || (pl.v === 'rot' && L >= 10)) return; line(W.mv[i], L).push(trCondNew(pl.v)); TRN.sel = `${i}:${L}:${LN(W.mv[i], L).length - 1}`; }
@@ -5252,13 +5260,12 @@ function renderTrain(uid) {
   const goPick = (i) => pickWin('撃ち方', Object.entries(TR_GO).map(([a, n]) => [a, n + '撃つ', '', false, a === (W.mv[i].go || 'auto')]), (a) => { W.mv[i].go = a; SND.se('ok'); touch(); });
   const mvSwap = (i) => { const r = W.mv[i]; if (!r) return;   // おいた 技の なまえを タップ：ほかの 技に かえる（あわない 条件は はずす）
     pickWin(`${i + 1}ばんめの 技`, [...new Set(eq.concat(tm))].map(id => { const at = W.mv.findIndex(x => x.id === id); return [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}${at >= 0 && at !== i ? `・${at + 1}ばんめと いれかえ` : ''}`, false, id === r.id]; }), (id) => {
-      if (id === r.id) return; const at = W.mv.findIndex(x => x.id === id); if (at >= 0) W.mv[at].id = r.id; r.id = id;   // ほかの 行に ある 技なら いれかえ
-      for (const x of W.mv) { x.c = trLines(x.c).map(l => l.filter(c => condFits(c.t, x.id))); if (x.x) x.x = x.x.map(l => l.filter(c => condFits(c.t, x.id))); } TRN.info = null; SND.se('ok'); touch(); }); };
+      if (!setMv(i, id)) return; TRN.info = null; TRN.sel = null; SND.se('ok'); touch(); }); };
   const mvPick = () => pickWin('技を ついか', eq.concat(tm).filter(id => !W.mv.some(r => r.id === id)).map(id => [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}`]), (id) => { W.mv.push({ id, go: 'auto', c: trDefC(id) }); SND.se('ok'); touch(); });
   B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
   B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.l}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.l, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); SND.se('click'); condEdit(+e.dataset.i, +e.dataset.l, +e.dataset.j); }); });
   B.querySelectorAll('.gs.on').forEach(e => drag(e, { gFrom: +e.dataset.i }, () => { if (TRN.pick) drop(TRN.pick, e); else { SND.se('click'); goPick(+e.dataset.i); } }));
-  B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (ev.target.closest('.cnd')) return; if (TRN.pick) return drop(TRN.pick, z);
+  B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (ev.target.closest('.cnd')) return; if (TRN.pick) { ev.trDone = 1; return drop(TRN.pick, z); }
     const d = z.dataset.drop; if (d === 'c') { SND.se('click'); condPick(+z.dataset.i, +z.dataset.l || 0); } else if (d === 'g') { SND.se('click'); goPick(+z.dataset.i); } else if (d === 'mvnew') { SND.se('click'); mvPick(); } }); });   // わくを タップ：一覧の ウィンドウ
   if (TRN.pick) zonesFor(TRN.pick).forEach(z => z.classList.add('can'));   // えらんだ ものを おける わく だけ ひからせる
   // 技の 優先度：番号 か 技名を ドラッグして ほかの 行へ（その位置に 入れる）
@@ -5269,7 +5276,7 @@ function renderTrain(uid) {
     const ids = W.mv.map(x => x.id), [r] = W.mv.splice(TRN.rsel, 1); W.mv.splice(i, 0, r); trRemap(W, ids); TRN.rsel = null; TRN.sel = null; SND.se('click'); touch(); },
     (t) => !t.closest('.cnd, .gs, .rb, .rc, .rh, button, [data-drop]')));
   if (TRN.rsel != null) { const e = B.querySelector(`.trr[data-row="${TRN.rsel}"]`); if (e) e.classList.add('rsel'); else TRN.rsel = null; }
-  B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', () => { if (TRN.pick) return; TRN.rsel = null; SND.se('click'); mvSwap(+e.dataset.i); }));   // 置いた 技：タップで 技を えらびなおす
+  B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', (ev) => { if (TRN.pick || ev.trDone) return; /* パレットで えらんだ ものを おいた クリック では ひらかない */ TRN.rsel = null; SND.se('click'); mvSwap(+e.dataset.i); }));   // 置いた 技：タップで 技を えらびなおす
   B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { const ids = W.mv.map(x => x.id); W.mv.splice(+b.dataset.rm, 1); trRemap(W, ids); TRN.sel = null; SND.se('back'); touch(); });
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     if (g.dataset.k === 'cq') sc.n = STG_ENC(STG_DEC(sc.n ?? K.n0)[0], b.dataset.v); else if (g.dataset.k === 'cv') sc.n = STG_ENC(+b.dataset.v, STG_DEC(sc.n ?? K.n0)[1]);   // 能力の 段階：以上・以下 と 段階を べつべつに
@@ -5283,13 +5290,15 @@ function renderTrain(uid) {
   act('revert', () => { TRN.W = trClone(T.draft || T.prog, m); TRN.dirty = false; TRN.sel = null; redo(); });
   act('clr', () => { TRN.W = trBlank(m); TRN.sel = null; touch(); });
   act('load', () => trLoadFrom(m));
-  if (trSame) { MO.flip(B, '.trr[data-key]', trRows0, true); MO.flip(B, '.cnd[data-key]', trC0, true); }   // ならびかえは すべる・あたらしい じょうけんは ぽんと でる
-  else { MO.stagger(B.querySelectorAll('.trnat, .trr'), 34, 8); if (!keep) MO.stagger(B.querySelectorAll('.trpal .pal'), 10, 4); }   // ひらいた／モンスターを かえた：じゅんばんに
-  MO.trUid = uid;
   scr.querySelectorAll(':scope > .trside, :scope > .trbtns').forEach(e => e.remove());   // まえに そとへ だした パレット・ボタン
-  if (keep) [scr, B.querySelector('.trside'), B.querySelector('.trmons')].forEach((e, i) => { if (e) [e.scrollTop, e.scrollLeft] = keep[i]; });   // そうさ しても 画面は そのまま（出しなおさない）
-  else show('scTrain');
-  trSideFix(); requestAnimationFrame(trSideFix);
+  if (!keep) show('scTrain');
+  trSideFix();   // たて画面：パレット・ボタンを そとへ（うごかす まえに。そうしないと なかみの いちが ずれる）
+  if (keep) [scr, scr.querySelector('.trside'), B.querySelector('.trmons')].forEach((e, i) => { if (e) [e.scrollTop, e.scrollLeft] = keep[i]; });   // そうさ しても 画面は そのまま（出しなおさない）
+  // うごきは いちが きまってから（さきに はかると 行が ずれて うごき、つぎの タップが べつの ところに あたる）
+  if (trSame) { MO.flip(B, '.trr[data-key]', trRows0, true); MO.flip(B, '.cnd[data-key]', trC0, true); }   // ならびかえは すべる・あたらしい じょうけんは ぽんと でる
+  else { MO.stagger(B.querySelectorAll('.trnat, .trr'), 34, 8); if (!keep) MO.stagger(scr.querySelectorAll('.trpal .pal'), 10, 4); }   // ひらいた／モンスターを かえた：じゅんばんに
+  MO.trUid = uid;
+  requestAnimationFrame(trSideFix);
 }
 // たて画面の パレット：したの タブの たかさ と パレットの たかさ を CSS へ（パレットは いちばん した・なかみは その ぶん あける）
 function trSideFix() { const sd = document.querySelector('#scTrain .trside'), tb = $('tabbar'), R = document.documentElement, sc = $('scTrain'); if (!sd) return;
