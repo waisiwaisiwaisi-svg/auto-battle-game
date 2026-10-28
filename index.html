@@ -938,7 +938,7 @@ h2,h3,.sec-title > span:first-child,.plate .top b,.ov h2,.mkres h3{text-shadow:1
 .plate .hp::after,.bmon .bh::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(11,9,20,.45) 5px 6px),linear-gradient(rgba(255,255,255,.28) 0 2px,transparent 2px)}
 /* がめんの きりかえ：ドットで パッと */
 @keyframes scrin{0%{opacity:0;transform:translateY(12px)}50%{opacity:.6;transform:translateY(4px)}100%{opacity:1;transform:none}}
-.screen.scr-in:not(#scBattle){animation:scrin .2s steps(3) both}
+.screen.scr-in:not(#scBattle){animation:scrin .2s steps(3) backwards}   /* backwards：おわったら transform を のこさない（のこると なかの position:fixed が きかない） */
 /* タイトル：PRESS START ふうに てんめつ */
 @keyframes pressblink{0%,60%{filter:none}61%,100%{filter:brightness(1.25)}}
 .tbig{animation:pressblink 1s steps(1) infinite!important}
@@ -1185,6 +1185,8 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trpk{font:inherit;font-size:13px;text-align:left;padding:9px 10px;border-radius:6px;border:1px solid var(--edge);background:rgba(255,255,255,.04);color:var(--ink);display:flex;flex-direction:column;gap:2px;cursor:pointer}
 .trpk small{font-size:10.5px;color:var(--dim)}
 .trpk:hover,.trpk:focus-visible{border-color:var(--acc);outline:none}
+.trpk.cur{border-color:var(--acc);background:rgba(255,209,102,.12)}
+.trr.rsel{outline:3px dashed #ffd166;outline-offset:-3px;filter:brightness(1.12)}   /* ならびかえ：えらんだ 技（つぎに タップした 技の ばしょへ） */
 .trpk.ng{opacity:.35;cursor:default}
 .trcw{display:flex;flex-direction:column;gap:8px}
 .trseg2 button{font-size:13px;padding:6px 10px}
@@ -1283,7 +1285,8 @@ html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage
 .trnat{background:linear-gradient(180deg,#2f2750,#1d1733)!important}
 .trr{background:linear-gradient(180deg,#2a2346,#1f1a36)!important;border-left-width:4px!important;box-shadow:inset 5px 0 0 var(--c,#888),0 3px 0 rgba(0,0,0,.4)!important;padding-left:12px!important}
 .trside{background:#1b1630!important}
-html.tabs:not(.land) .trside{bottom:calc(70px + var(--sab))}   /* たて画面：したの タブに かくれない ように タブの うえに とめる */
+html:not(.land) #scTrain .trside{position:fixed!important;top:auto!important;left:max(12px,calc(50% - 248px));right:max(12px,calc(50% - 248px));bottom:var(--trTabH,0px);z-index:20;margin:0}   /* たて画面：パレットは たたんでも ひらいても いちばん した（タブの すぐ うえ） */
+html:not(.land) #scTrain #trBody{padding-bottom:calc(var(--trSideH,0px) + 8px)}   /* した の パレットに かくれない ぶん あける */
 .trmons button.on,.trnatsel button.on{border-image-source:var(--fr-gold)!important}
 .trnatsel button,.trnatsel button.on{background:linear-gradient(180deg,#33295a,#221c3c)!important;color:var(--ink)!important}
 .trnatsel button.on{background:linear-gradient(180deg,color-mix(in srgb,var(--g) 45%,#2a2148),#221c3c)!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
@@ -5056,7 +5059,7 @@ function trtLoop() {
   if (!on) return;
   const q = typeof st.sel === 'function' ? st.sel() : st.sel; let t = q ? document.querySelector(q) : null;
   if (t && t.closest('.trside.mini')) { TR_MINI = false; const sd = t.closest('.trside'); sd.classList.remove('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▼ たたむ'; }
-  if (t && !home && !t.closest('.trside')) { const sd = document.querySelector('#scTrain .trside'); if (sd && getComputedStyle(sd).position === 'sticky' && !sd.classList.contains('mini')) { const r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.top && r1.top < r2.bottom) { TR_MINI = true; sd.classList.add('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▲ パレットを ひらく'; TRT.scrolled = -1; } } }   // あんない している ボタンが したの パレットに かくれる：たたむ（もう いちど まんなかへ）
+  if (t && !home && !t.closest('.trside')) { const sd = document.querySelector('#scTrain .trside'); if (sd && getComputedStyle(sd).position !== 'static' && !sd.classList.contains('mini')) { const r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.top && r1.top < r2.bottom) { TR_MINI = true; sd.classList.add('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▲ パレットを ひらく'; TRT.scrolled = -1; } } }   // あんない している ボタンが したの パレットに かくれる：たたむ（もう いちど まんなかへ）
   const bub = TRT.el.querySelector('.bub'), vw = innerWidth, vh = innerHeight;
   if (TRT.scrolled !== TRT.i) { const sc = st.scr ? document.querySelector(st.scr()) : t; if (sc) { TRT.scrolled = TRT.i; const box = sc.closest('.screen'); if (box) { const r0 = sc.getBoundingClientRect(), b0 = box.getBoundingClientRect(), k = box.clientHeight / (b0.height || 1); box.scrollBy({ top: (r0.top - b0.top - (st.scr ? 12 : b0.height / 2 - r0.height / 2)) * k, behavior: 'smooth' }); } } }   // 訓練の 画面 だけ スクロール（まわりの わくは うごかさない）
   // ひからせる ところ（おく ものと おく ばしょ の 2つ ある ことも）：まわりを うすぐらく して あなを あける
@@ -5130,7 +5133,7 @@ function renderTrain(uid) {
     <h3>撃ち方 <span class="dim">→「〜撃つ」の 枠へ</span></h3><div class="trpal">${Object.entries(TR_GO).map(([a, n]) => `<div class="pal k-go${on('go', a)}" data-kwh="g:${a}" data-k="go" data-v="${a}">${n}</div>`).join('')}</div>
     <h3>条件 <span class="dim">→「使うとき」の 枠へ</span></h3><div class="trpal">${Object.entries(CONDS).map(([t, K]) => `<div class="pal k-c${on('c', t)}${W.mv.some(r => condFits(t, r.id)) ? '' : ' ng'}" data-kwh="c:${t}" data-k="c" data-v="${t}">${K.n}</div>`).join('')}</div>
     <div class="trins">${ins}</div>`;
-  const scr = $('scTrain'), keep = !scr.hidden && [scr, ...['.trside', '.trmons'].map(q => $('trBody').querySelector(q))].map(e => e ? [e.scrollTop, e.scrollLeft] : [0, 0]);   // いまの スクロールを おぼえておく
+  const scr = $('scTrain'), keep = !scr.hidden && [scr, ...['.trside', '.trmons'].map(q => scr.querySelector(q))].map(e => e ? [e.scrollTop, e.scrollLeft] : [0, 0]);   // いまの スクロールを おぼえておく
   const trB0 = $('trBody'), trSame = !$('scTrain').hidden && MO.trUid === uid, trRows0 = trSame ? MO.rects(trB0, '.trr[data-key]') : new Map(), trC0 = trSame ? MO.rects(trB0, '.cnd[data-key]') : new Map();
   $('trBody').innerHTML = `<div class="trtop"><button class="btn sub trtutb" id="trTutB" style="padding:6px 12px;font-size:13px">？ やりかた</button><span class="dim">試合中は見るだけ。この設定どおりに戦う（交代だけは自分でできる）</span></div>
     <div class="trpage"><div class="trmons">${all.map(x => `<button data-u="${x.uid}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
@@ -5140,7 +5143,8 @@ function renderTrain(uid) {
   { const run = () => { let n = 0; B.querySelectorAll('.trmvs .pal').forEach(p => { const ok = (!TR_FLT.t || p.dataset.ft === TR_FLT.t) && (!TR_FLT.c || p.dataset.fc === TR_FLT.c) && (!TR_FLT.q || p.dataset.fn.includes(TR_FLT.q)); p.hidden = !ok; if (ok) n++; });
       const pal = B.querySelector('.trmvs'); if (pal) pal.dataset.none = n ? '' : '1'; };
     B.querySelectorAll('[data-flt]').forEach(el => el.addEventListener(el.tagName === 'INPUT' ? 'input' : 'change', () => { TR_FLT[el.dataset.flt] = el.value.trim(); run(); })); run(); }   // 技の しぼりこみ（えらび なおしても 入力中の 文字は きえない）
-  { const sd = B.querySelector('.trside'), mb = sd && sd.querySelector('.trmini'); if (mb) mb.onclick = () => { TR_MINI = !TR_MINI; sd.classList.toggle('mini', TR_MINI); mb.textContent = TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'; SND.se('click'); }; }   // パレットを たたんで したの らんを ひろく みる
+  { const sd = B.querySelector('.trside'), mb = sd && sd.querySelector('.trmini'); if (mb) mb.onclick = () => { TR_MINI = !TR_MINI; sd.classList.toggle('mini', TR_MINI); mb.textContent = TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'; SND.se('click'); trSideFix(); }; }
+   // パレットを たたんで したの らんを ひろく みる
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
   B.querySelectorAll('.trhead i[data-big]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.big, 64)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
@@ -5203,7 +5207,7 @@ function renderTrain(uid) {
   });
   // タップで えらぶ：わくを おす → 一覧の ウィンドウ → こまかい 設定が ある 条件は もう1まい → 決めたら 訓練画面へ もどる
   const pickWin = (title, items, onPick) => {
-    const bg = modal(`<h3 style="margin-bottom:8px">${title}</h3><div class="trpickl">${items.map(([v, n, sub, ng]) => `<button type="button" class="trpk${ng ? ' ng' : ''}" data-v="${v}"${ng ? ' disabled' : ''}>${n}${sub ? `<small>${sub}</small>` : ''}</button>`).join('')}</div><div class="trcwb"><button class="btn sub" data-x="x">とじる</button></div>`);
+    const bg = modal(`<h3 style="margin-bottom:8px">${title}</h3><div class="trpickl">${items.map(([v, n, sub, ng, cur]) => `<button type="button" class="trpk${ng ? ' ng' : ''}${cur ? ' cur' : ''}" data-v="${v}"${ng ? ' disabled' : ''}>${n}${sub ? `<small>${sub}</small>` : ''}</button>`).join('')}</div><div class="trcwb"><button class="btn sub" data-x="x">とじる</button></div>`);
     bg.classList.add('trpickbg'); bg.querySelector('[data-x="x"]').onclick = () => { SND.se('back'); bg.remove(); };
     bg.querySelectorAll('.trpk:not(.ng)').forEach(b => b.onclick = () => { SND.se('click'); bg.remove(); onPick(b.dataset.v); });
   };
@@ -5226,7 +5230,11 @@ function renderTrain(uid) {
       const c = trCondNew(t); if (hasSub(t)) condWin(c, add); else { SND.se('ok'); add(c); } }); };
   const condEdit = (i, L, j) => { const ln = LN(W.mv[i], L), c = ln && ln[j]; if (!c) return;
     condWin(c, (c2) => { ln[j] = c2; TRN.sel = null; touch(); }, () => { ln.splice(j, 1); TRN.sel = null; touch(); }); };
-  const goPick = (i) => pickWin('撃ち方', Object.entries(TR_GO).map(([a, n]) => [a, n + '撃つ', a === (W.mv[i].go || 'auto') ? 'いま' : '']), (a) => { W.mv[i].go = a; SND.se('ok'); touch(); });
+  const goPick = (i) => pickWin('撃ち方', Object.entries(TR_GO).map(([a, n]) => [a, n + '撃つ', '', false, a === (W.mv[i].go || 'auto')]), (a) => { W.mv[i].go = a; SND.se('ok'); touch(); });
+  const mvSwap = (i) => { const r = W.mv[i]; if (!r) return;   // おいた 技の なまえを タップ：ほかの 技に かえる（あわない 条件は はずす）
+    pickWin(`${i + 1}ばんめの 技`, [...new Set(eq.concat(tm))].map(id => { const at = W.mv.findIndex(x => x.id === id); return [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}${at >= 0 && at !== i ? `・${at + 1}ばんめと いれかえ` : ''}`, false, id === r.id]; }), (id) => {
+      if (id === r.id) return; const at = W.mv.findIndex(x => x.id === id); if (at >= 0) W.mv[at].id = r.id; r.id = id;   // ほかの 行に ある 技なら いれかえ
+      for (const x of W.mv) { x.c = trLines(x.c).map(l => l.filter(c => condFits(c.t, x.id))); if (x.x) x.x = x.x.map(l => l.filter(c => condFits(c.t, x.id))); } TRN.info = null; SND.se('ok'); touch(); }); };
   const mvPick = () => pickWin('技を ついか', eq.concat(tm).filter(id => !W.mv.some(r => r.id === id)).map(id => [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}`]), (id) => { W.mv.push({ id, go: 'auto', c: trDefC(id) }); SND.se('ok'); touch(); });
   B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
   B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.l}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.l, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); SND.se('click'); condEdit(+e.dataset.i, +e.dataset.l, +e.dataset.j); }); });
@@ -5235,8 +5243,14 @@ function renderTrain(uid) {
     const d = z.dataset.drop; if (d === 'c') { SND.se('click'); condPick(+z.dataset.i, +z.dataset.l || 0); } else if (d === 'g') { SND.se('click'); goPick(+z.dataset.i); } else if (d === 'mvnew') { SND.se('click'); mvPick(); } }); });   // わくを タップ：一覧の ウィンドウ
   if (TRN.pick) zonesFor(TRN.pick).forEach(z => z.classList.add('can'));   // えらんだ ものを おける わく だけ ひからせる
   // 技の 優先度：番号 か 技名を ドラッグして ほかの 行へ（その位置に 入れる）
-  B.querySelectorAll('.trr[data-row]').forEach(e => drag(e, { rowEl: 1, i: +e.dataset.row }, () => { }, (t) => !t.closest('.cnd, .gs.on, .rb, button')));
-  B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', () => { if (TRN.pick) return; const id = W.mv[+e.dataset.i] && W.mv[+e.dataset.i].id; TRN.info = TRN.info === id ? null : id; TRN.sel = null; SND.se('click'); redo(); }));   // 置いた 技：タップで 内容
+  // わくを タップ：1かいめで えらぶ → ほかの 技の わくを タップで その ばしょへ（ならびかえ）。おなじ わくで やめる
+  B.querySelectorAll('.trr[data-row]').forEach(e => drag(e, { rowEl: 1, i: +e.dataset.row }, () => { const i = +e.dataset.row;
+    if (TRN.rsel == null || TRN.rsel >= W.mv.length) { TRN.rsel = i; SND.se('click'); redo(); return; }
+    if (TRN.rsel === i) { TRN.rsel = null; SND.se('back'); redo(); return; }
+    const ids = W.mv.map(x => x.id), [r] = W.mv.splice(TRN.rsel, 1); W.mv.splice(i, 0, r); trRemap(W, ids); TRN.rsel = null; TRN.sel = null; SND.se('click'); touch(); },
+    (t) => !t.closest('.cnd, .gs, .rb, .rc, .rh, button, [data-drop]')));
+  if (TRN.rsel != null) { const e = B.querySelector(`.trr[data-row="${TRN.rsel}"]`); if (e) e.classList.add('rsel'); else TRN.rsel = null; }
+  B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', () => { if (TRN.pick) return; TRN.rsel = null; SND.se('click'); mvSwap(+e.dataset.i); }));   // 置いた 技：タップで 技を えらびなおす
   B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { const ids = W.mv.map(x => x.id); W.mv.splice(+b.dataset.rm, 1); trRemap(W, ids); TRN.sel = null; SND.se('back'); touch(); });
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     if (g.dataset.k === 'cq') sc.n = STG_ENC(STG_DEC(sc.n ?? K.n0)[0], b.dataset.v); else if (g.dataset.k === 'cv') sc.n = STG_ENC(+b.dataset.v, STG_DEC(sc.n ?? K.n0)[1]);   // 能力の 段階：以上・以下 と 段階を べつべつに
@@ -5253,9 +5267,17 @@ function renderTrain(uid) {
   if (trSame) { MO.flip(B, '.trr[data-key]', trRows0, true); MO.flip(B, '.cnd[data-key]', trC0, true); }   // ならびかえは すべる・あたらしい じょうけんは ぽんと でる
   else { MO.stagger(B.querySelectorAll('.trnat, .trr'), 34, 8); if (!keep) MO.stagger(B.querySelectorAll('.trpal .pal'), 10, 4); }   // ひらいた／モンスターを かえた：じゅんばんに
   MO.trUid = uid;
+  scr.querySelectorAll(':scope > .trside').forEach(e => e.remove());   // まえに そとへ だした パレット
   if (keep) [scr, B.querySelector('.trside'), B.querySelector('.trmons')].forEach((e, i) => { if (e) [e.scrollTop, e.scrollLeft] = keep[i]; });   // そうさ しても 画面は そのまま（出しなおさない）
   else show('scTrain');
+  trSideFix(); requestAnimationFrame(trSideFix);
 }
+// たて画面の パレット：したの タブの たかさ と パレットの たかさ を CSS へ（パレットは いちばん した・なかみは その ぶん あける）
+function trSideFix() { const sd = document.querySelector('#scTrain .trside'), tb = $('tabbar'), R = document.documentElement, sc = $('scTrain'); if (!sd) return;
+  const port = !R.classList.contains('land');   // たて画面：パレットを #scTrain の すぐ したへ（コンテナの なかだと position:fixed が きかない）
+  if (port && sd.parentNode !== sc) { const st = sd.scrollTop; sc.appendChild(sd); sd.scrollTop = st; } else if (!port && sd.parentNode === sc) { const pg = sc.querySelector('.trpage'); if (pg) pg.appendChild(sd); }
+  R.style.setProperty('--trTabH', (tb && !tb.hidden && tb.offsetHeight ? tb.offsetHeight : 0) + 'px'); R.style.setProperty('--trSideH', sd.offsetHeight + 'px'); }
+window.addEventListener('resize', () => { if (!$('scTrain').hidden) trSideFix(); });
 // 確定：今覚えていない技は ワザステッカーを使う（必ず確認）
 async function trConfirm(m) {
   const W = TRN.W, ids = trMvIds(W), eq = equipped(m), add = ids.filter(id => !eq.includes(id));
