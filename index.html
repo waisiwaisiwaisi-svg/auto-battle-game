@@ -1534,7 +1534,9 @@ html.town #scHub #isles.plaza .isle:hover,html.town #scHub #isles.plaza .isle:fo
 html.town #scHub #isles.plaza .isle:hover canvas{filter:drop-shadow(0 0 0 #c8ff5a) drop-shadow(0 0 3px #c8ff5a)}
 html.town #scHub #isles.plaza .isle canvas{position:relative;filter:drop-shadow(0 6px 4px rgba(10,20,60,.3));width:100%!important;height:100%!important;aspect-ratio:auto!important;max-width:none!important;max-height:none!important;image-rendering:pixelated}
 html.short.town #scHub #isles.plaza .isle .islabel{font-size:11px;padding:1px 7px}
-html.town #scHub #isles.plaza .isle .islabel{z-index:10;left:0!important;right:auto!important;top:auto!important;bottom:0!important;white-space:nowrap;transform:none!important}   /* なふだ：まっすぐ しょうめん。だいざの ひだり したの あいて いる ところ */
+html.town #scHub #isles.plaza .isle .islabel{z-index:10;left:0!important;right:auto!important;top:auto!important;bottom:0!important;white-space:nowrap;transform:none!important}
+html.town #scHub #isles.plaza .isle[data-i="0"] .islabel{left:auto!important;right:0!important}
+html.town #scHub #isles.plaza.zig .isle[data-i="0"] .islabel{left:0!important;right:auto!important;top:8%!important;bottom:auto!important}   /* よこの ジグザグ：した の りょうがわに となりが くるので ひだり うえの あき に */   /* アーケード：ひだり したは マイルームの やねに かかるので みぎ したに */   /* なふだ：まっすぐ しょうめん。だいざの ひだり したの あいて いる ところ */
 #plazaChar{position:absolute;pointer-events:none;image-rendering:pixelated}
 html.town:not(.land) #scHub #isles{display:block!important;top:108px!important}
 html.town:not(.land) #scHub #isles .isle canvas{width:100%!important;height:100%!important;max-width:none;max-height:none}
@@ -1567,7 +1569,7 @@ html.isle[data-jt=tower] #jrGrid .jrc:not(.tower){display:none}
 /* ショップ：タブで うりばを わける */
 /* しまの なかの ショップ：スクロール しないで おさまる ように カードを よこながに（え｜なまえ・ねだん） */
 html.isle #scShop{gap:6px}
-html.isle #scShop>.sec-title{justify-content:flex-end;min-height:0;margin:0}html.isle #scShop>.sec-title>span:first-child{display:none}
+html.isle #scShop>.sec-title{justify-content:flex-end;min-height:0;margin:0;flex-shrink:0}html.isle #scShop>.sec-title>span:first-child{display:none}
 html.isle #scShop .shbody{gap:8px}html.isle #scShop .shsec{gap:5px}html.isle #scShop .shh b{font-size:13px}html.isle #scShop .shh .dim{font-size:11px}
 html.isle #scShop .shgrid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:6px}
 html.isle #scShop .shcard{display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-rows:1fr auto auto;column-gap:8px;row-gap:2px;align-items:center;padding:6px 6px 6px 4px;text-align:left}
@@ -3217,8 +3219,10 @@ function islesBuild() {
   box.innerHTML = ISLES.map((I, i) => `<button class="isle" data-i="${i}" aria-label="${I.n}"><canvas></canvas><span class="islabel">${I.n}</span></button>`).join('');
   // たてものの えの すきとおった ところを おしたら、うしろの たてもの（え が ある もの）を えらぶ（かさなって いても ちがう たてものが ひらかない）
   box.addEventListener('click', (ev) => { const b0 = ev.target.closest('.isle'); if (!b0 || ev.target.closest('.islabel') || ev.isleOk) return;
-    const hit = (b) => { const cv = b.querySelector('canvas'), r = cv.getBoundingClientRect(); if (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom || !cv.width) return false;
-      try { const x = Math.floor((ev.clientX - r.left) / r.width * cv.width), y = Math.floor((ev.clientY - r.top) / r.height * cv.height); return cv.getContext('2d').getImageData(x, y, 1, 1).data[3] > 40; } catch (e) { return b === b0; } };
+    const A = $('app'), pt = toApp(ev.clientX, ev.clientY);   // #app の なかの ざひょう（よこむきに まわした ときも ズームの ときも）
+    const hit = (b) => { const cv = b.querySelector('canvas'); if (!cv || !cv.width || !cv.offsetWidth) return false; let x0 = 0, y0 = 0; for (let n = cv; n && n !== A; n = n.offsetParent) { x0 += n.offsetLeft; y0 += n.offsetTop; }
+      const u = (pt.x - x0) / cv.offsetWidth, v = (pt.y - y0) / cv.offsetHeight; if (u < 0 || u >= 1 || v < 0 || v >= 1) return false;
+      try { return cv.getContext('2d').getImageData(Math.floor(u * cv.width), Math.floor(v * cv.height), 1, 1).data[3] > 40; } catch (e) { return b === b0; } };
     const all = [...box.querySelectorAll('.isle')].sort((p, q) => (+q.querySelector('canvas').style.zIndex || 0) - (+p.querySelector('canvas').style.zIndex || 0) || (q.getBoundingClientRect().bottom - p.getBoundingClientRect().bottom));
     const pick = all.find(hit); if (pick === b0) return; ev.stopPropagation(); ev.preventDefault(); if (pick) { const e2 = new MouseEvent('click', { bubbles: true, clientX: ev.clientX, clientY: ev.clientY }); e2.isleOk = 1; pick.dispatchEvent(e2); } }, true);
   box.querySelectorAll('.isle').forEach((b, i) => { b.onclick = () => { SND.se('click'); $('townPop').hidden = true; ISLES[i].act(); }; const cv = b.querySelector('canvas'), k = ISLES[i].k, paint = () => { const a = isleArt(k); cv.width = a.width; cv.height = a.height; cv.getContext('2d').drawImage(a, 0, 0); }; paint(); isleImgThen('OBJ_' + (k === 'room' ? 'house' : k), paint); });
@@ -3237,6 +3241,7 @@ function citySky() {   // うしろの ビルの まち（1かい かく）
 
 // ひろば：しせつを HOME_layout の ばしょに おく。うえの ボタンと したの ブラインドボックスに かからないよう、はみでる ときは ちぢめて まんなかへ
 function plazaLayout(box, els) {
+  box.classList.remove('zig');   // ジグザグの ときだけ つける（なふだの ばしょ）
   const W = box.clientWidth, H = box.clientHeight, L = HOME_LAYOUT[W > H ? 'w' : 't'], [bw, bh] = L.size, sc = Math.max(W / bw, H / bh), ox = (W - bw * sc) / 2;
   const hub = $('scHub'), app = $('app'), br = { top: 0, left: 0 };
   // ばしょは offset で はかる（よこむき ボタンの 回転や ズームが あっても CSS の px の まま）
@@ -3271,7 +3276,7 @@ function plazaLayout(box, els) {
     // ふつうの よこ画面：うえ・した・うえ・した の ジグザグで まんなかも つかう（ショップ↑ マイルーム↓ アーケード↑ くさむら↓）。サモナーは ひだり した の あき
     {
       // うえの れつは はいけいの じめん（うみの てすり より てまえ：480×270 の y≈80）に だいざが のる ように さげる（GY・BK は zig() と おなじ）
-      const zz = ['shop', 'house', 'arena', 'wild'], uh = zuh, uwd = zuw, [s4, sx] = zig();
+      const zz = ['shop', 'house', 'arena', 'wild'], uh = zuh, uwd = zuw, [s4, sx] = zig(); box.classList.add('zig');
       const w = uwd * s4, yU = Math.max(top + 4, GY - BK * uh * s4), off = Math.max(0, bot - 4 - uh * s4 - yU), x0 = (W - w * (1 + 3 * sx)) / 2;
       els.forEach((e, i) => { const k = ISLES[i].k === 'room' ? 'house' : ISLES[i].k, j = zz.indexOf(k), d = j % 2, bw2 = L[k][2] * s4, bh2 = L[k][3] * s4;
         Object.assign(e.style, { position: 'absolute', left: x0 + j * w * sx + (w - bw2) / 2 + 'px', top: (d ? yU + off + uh * s4 - bh2 : yU + (uh * s4 - bh2)) + 'px', width: bw2 + 'px', height: bh2 + 'px', zIndex: 'auto', padding: '0' }); e.querySelector('canvas').style.zIndex = d + 1; });
@@ -3715,7 +3720,7 @@ const defaultSave = () => ({ party: [], box: [], capsules: 10, tier: 0, round: 0
 function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (s && Array.isArray(s.party) && s.party.length) {
+    if (s && Array.isArray(s.party) && (s.party.length || (s.onb >= 2 && s.onb < 4))) {
       // いま ゲームに いない 種族（外した モンスター）は しまっておき、もどったら 返す
       const ok = m => m && SPECIES[m.sid];
       const all = [...s.party, ...(s.box || []), ...(s.stash || [])].filter(m => !(m && m.tutMon));   // tutMon：訓練の チュートリアル用（どこにも のこさない）
@@ -3723,7 +3728,7 @@ function loadSave() {
       s.party = s.party.filter(m => ok(m) && !m.tutMon); s.box = (s.box || []).filter(ok);   // tutMon：訓練の チュートリアル用（のこさない）
       for (const m of all) if (ok(m) && !s.party.includes(m) && !s.box.includes(m)) s.box.push(m);
       while (s.party.length < 1 && s.box.length) s.party.push(s.box.shift());
-      if (s.party.length) return Object.assign(defaultSave(), s);
+      if (s.party.length || (s.onb >= 2 && s.onb < 4)) return Object.assign(defaultSave(), s);   // さいしょの ながれの とちゅう（訓練・はじめの 1たい えらび）は パーティが からでも つづきから
     }
   } catch (e) {}
   return null;
@@ -4584,7 +4589,7 @@ function chestIcon(kind, open, scale) {
   const im = CHEST_IMG[(open ? 'o' : 'c') + kind] || CHEST_IMG['c' + kind] || CHEST_IMG.cwood, z = scale || 1;
   return `<img class="ic pix chimg" alt="" src="${im[0]}" width="${im[1] * z}" height="${im[2] * z}" draggable="false">`;
 }
-const fmtShort = (s) => s >= 3600 ? `${Math.ceil(s / 3600)}じかん` : s >= 60 ? `${Math.ceil(s / 60)}ふん` : `${s}びょう`;   // ブラインドボックスの わく よう
+const fmtShort = (s) => s >= 3600 ? `${Math.floor(s / 3600)}じかん` : s >= 60 ? `${Math.floor(s / 60)}ふん` : `${s}びょう`;   // ブラインドボックスの わく よう
 function renderChests() {
   const box = $('hubChests'); if (!box) return;
   S.chests = S.chests || []; chestTick();
@@ -5079,13 +5084,16 @@ const trtAllowed = (el) => { if (!TRT || !el || !el.closest) return true; if (el
   const st = TRS()[TRT.i], q = st.allow ? st.allow() : st.sel ? [typeof st.sel === 'function' ? st.sel() : st.sel] : [];
   return q.some(x => { const t = el.closest(x); return !!t; }); };
 for (const ev of ['pointerdown', 'mousedown', 'click']) window.addEventListener(ev, (e) => { if (TRT && !trtAllowed(e.target)) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } }, true);
-function trtStart(o) { o = o || {}; trtStop(); document.querySelectorAll('.askbg').forEach(e => e.remove()); /* ほかの がめんの まどが のこって いたら とじる */ TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1, steps: o.steps, scr: o.scr || 'scTrain', onEnd: o.onEnd }; /* steps・scr：ホーム などでも つかう（さいしょの ながれ） */ TRT.el.id = 'trtut'; TRT.el.innerHTML = '<svg class="dim"><path fill-rule="evenodd"></path></svg><div class="hls"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; document.body.appendChild(TRT.el);
+function trtStart(o) { o = o || {}; trtStop(); document.querySelectorAll('.askbg').forEach(e => e.remove()); /* ほかの がめんの まどが のこって いたら とじる */ TRT = { i: 0, f: {}, el: document.createElement('div'), scrolled: -1, steps: o.steps, scr: o.scr || 'scTrain', onEnd: o.onEnd }; /* steps・scr：ホーム などでも つかう（さいしょの ながれ） */ TRT.el.id = 'trtut'; TRT.el.innerHTML = '<svg class="dim"><path fill-rule="evenodd"></path></svg><div class="hls"></div><div class="bub"><div class="tx"></div><div class="bt"><button class="skip">とばす</button><button class="nx">つぎへ ▶</button></div></div>'; (document.documentElement.classList.contains('rot') ? $('app') : document.body).appendChild(TRT.el);
   TRT.el.querySelector('.skip').onclick = () => { SND.se('back'); trtEnd(); };
   TRT.el.querySelector('.nx').onclick = () => { const st = TRS()[TRT.i]; if (st.onNext) st.onNext(); if (st.end) { SND.se('ok'); trtEnd(); return; } SND.se('click'); trtGo(TRT.i + 1); };
   trtGo(0); trtLoop(); }
 function trtGo(i) { TRT.i = i; TRT.scrolled = -1; const st = TRS()[i]; TRT.el.querySelector('.tx').innerHTML = (typeof st.tx === 'function' ? st.tx() : st.tx).replace('○番', `${trtRow() + 1}番`); TRT.el.querySelector('.nx').hidden = !st.next; TRT.el.querySelector('.nx').textContent = st.end ? 'おわり ✔' : 'つぎへ ▶'; }
-function trtEnd() { const T = TRT; if (S && T && !T.steps) { S.trTutDone = 1; save(); } document.querySelectorAll('.trpickbg').forEach(e => e.remove()); /* ひらいて いた 訓練の えらぶ ウィンドウも とじる */ trtStop(); if (T && T.onEnd) T.onEnd(); }
+let TR_SIMSEQ = 0;   // チュートリアルを とばしたら、まだ おわって いない シミュレーションの けっかは ださない
+function trtEnd() { const T = TRT; if (S && T && !T.steps) { S.trTutDone = 1; save(); document.querySelectorAll('.askbg').forEach(e => e.remove()); TR_SIMSEQ++; } document.querySelectorAll('.trpickbg').forEach(e => e.remove()); /* ひらいて いた 訓練の えらぶ ウィンドウも とじる */ trtStop(); if (T && T.onEnd) T.onEnd(); }
 function trtStop() { if (TRT && TRT.el) TRT.el.remove(); TRT = null; $('scTrain').classList.remove('trt-on'); }
+// あんないの いち：よこむきに まわした ときは #app の なかの ざひょう（ふきだしも #app の なかに おく）
+function trtRect(e) { const q = e.getBoundingClientRect(); if (!document.documentElement.classList.contains('rot')) return q; const W = innerWidth; return { left: q.top, top: W - q.right, right: q.bottom, bottom: W - q.left, width: q.height, height: q.width }; }
 function trtLoop() {
   if (!TRT) return; requestAnimationFrame(trtLoop);
   const home = TRT.scr !== 'scTrain', on = !$(TRT.scr).hidden && !(home && document.querySelector('.askbg')) && !document.querySelector('.trpickbg'); /* 訓練の えらぶ ウィンドウが でて いる あいだも かくす（ボタンが かくれない） */ TRT.el.hidden = !on;   // ホームの あんない：まど（ブラインドボックスの なかみ など）が でている あいだは かくす
@@ -5094,16 +5102,16 @@ function trtLoop() {
   const st = TRS()[TRT.i]; if (st.ok && st.ok()) { SND.se('ok'); if (TRT.i + 1 < TRS().length) trtGo(TRT.i + 1); else trtEnd(); return; }
   if (!on) return;
   const q = typeof st.sel === 'function' ? st.sel() : st.sel; let t = q ? document.querySelector(q) : null;
-  if (t && t.closest('.trside') && !t.closest('.trside.mini')) { const sd = t.closest('.trside'), r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.bottom - 4 || r1.top < r2.top + 4) sd.scrollTop += (r1.top - r2.top) - (r2.height - r1.height) / 2; }   // パレットの なかの ものを さす：パレットの なかを スクロール して みせる
+  if (t && t.closest('.trside') && !t.closest('.trside.mini')) { const sd = t.closest('.trside'), r1 = trtRect(t), r2 = trtRect(sd); if (r1.bottom > r2.bottom - 4 || r1.top < r2.top + 4) sd.scrollTop += (r1.top - r2.top) - (r2.height - r1.height) / 2; }   // パレットの なかの ものを さす：パレットの なかを スクロール して みせる
   if (t && t.closest('.trside.mini')) { TR_MINI = false; const sd = t.closest('.trside'); sd.classList.remove('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▼ たたむ'; }
-  if (t && !home && !t.closest('.trside')) { const sd = document.querySelector('#scTrain .trside'); if (sd && getComputedStyle(sd).position !== 'static' && !sd.classList.contains('mini')) { const r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.top && r1.top < r2.bottom) { TR_MINI = true; sd.classList.add('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▲ パレットを ひらく'; TRT.scrolled = -1; } } }   // あんない している ボタンが したの パレットに かくれる：たたむ（もう いちど まんなかへ）
-  const bub = TRT.el.querySelector('.bub'), vw = innerWidth, vh = innerHeight;
-  if (TRT.scrolled !== TRT.i) { const sc = st.scr ? document.querySelector(st.scr()) : t; if (sc) { TRT.scrolled = TRT.i; const box = sc.closest('.screen'); if (box) { const r0 = sc.getBoundingClientRect(), b0 = box.getBoundingClientRect(), k = box.clientHeight / (b0.height || 1); box.scrollBy({ top: (r0.top - b0.top - (st.scr ? 12 : b0.height / 2 - r0.height / 2)) * k, behavior: 'smooth' }); } } }   // 訓練の 画面 だけ スクロール（まわりの わくは うごかさない）
+  if (t && !home && !t.closest('.trside')) { const sd = document.querySelector('#scTrain .trside'); if (sd && getComputedStyle(sd).position !== 'static' && !sd.classList.contains('mini')) { const r1 = trtRect(t), r2 = trtRect(sd); if (r1.bottom > r2.top && r1.top < r2.bottom) { TR_MINI = true; sd.classList.add('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▲ パレットを ひらく'; TRT.scrolled = -1; } } }   // あんない している ボタンが したの パレットに かくれる：たたむ（もう いちど まんなかへ）
+  const bub = TRT.el.querySelector('.bub'), ROT = document.documentElement.classList.contains('rot'), vw = ROT ? innerHeight : innerWidth, vh = ROT ? innerWidth : innerHeight;
+  if (TRT.scrolled !== TRT.i) { const sc = st.scr ? document.querySelector(st.scr()) : t; if (sc) { TRT.scrolled = TRT.i; const box = sc.closest('.screen'); if (box) { const r0 = trtRect(sc), b0 = trtRect(box), k = box.clientHeight / (b0.height || 1); box.scrollBy({ top: (r0.top - b0.top - (st.scr ? 12 : b0.height / 2 - r0.height / 2)) * k, behavior: 'smooth' }); } } }   // 訓練の 画面 だけ スクロール（まわりの わくは うごかさない）
   // ひからせる ところ（おく ものと おく ばしょ の 2つ ある ことも）：まわりを うすぐらく して あなを あける
-  const rs = (st.hl ? st.hl() : q ? [q] : []).map(x => document.querySelector(x)).filter(Boolean).map(e => e.getBoundingClientRect()).filter(r => r.width), box = TRT.el.querySelector('.hls');
+  const rs = (st.hl ? st.hl() : q ? [q] : []).map(x => document.querySelector(x)).filter(Boolean).map(e => trtRect(e)).filter(r => r.width), box = TRT.el.querySelector('.hls');
   while (box.children.length < rs.length) box.appendChild(document.createElement('div')); [...box.children].forEach((d, k) => { const r = rs[k]; d.hidden = !r; if (r) Object.assign(d.style, { left: r.left - 5 + 'px', top: r.top - 5 + 'px', width: r.width + 10 + 'px', height: r.height + 10 + 'px' }); });
   TRT.el.querySelector('.dim path').setAttribute('d', rs.length ? `M0 0H${vw}V${vh}H0Z` + rs.map(r => `M${r.left - 5} ${r.top - 5}h${r.width + 10}v${r.height + 10}h${-r.width - 10}Z`).join('') : '');
-  const r = t ? t.getBoundingClientRect() : null;
+  const r = t ? trtRect(t) : null;
   const bw = Math.min(380, vw - 24), bh = bub.offsetHeight || 120; bub.style.width = bw + 'px';
   let x = vw / 2 - bw / 2, y = vh / 2 - bh / 2;
   if (r && r.width) { x = clamp(r.left + r.width / 2 - bw / 2, 12, vw - bw - 12); const below = r.bottom + 14, above = r.top - 14 - bh;
@@ -5297,9 +5305,10 @@ function renderTrain(uid) {
     if (g.dataset.k === 'cq') sc.n = STG_ENC(STG_DEC(sc.n ?? K.n0)[0], b.dataset.v); else if (g.dataset.k === 'cv') sc.n = STG_ENC(+b.dataset.v, STG_DEC(sc.n ?? K.n0)[1]);   // 能力の 段階：以上・以下 と 段階を べつべつに
     else if (g.dataset.k === 'cn') sc.n = +b.dataset.v; else sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
   act('cdel', () => { LN(W.mv[+sel[0]], sel[1]).splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
-  act('sim', async () => { if (TR_SIM) return; if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok');
-    const bg = modal('<h3>シミュレーションちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'); const log = await trSim(m, W, 5); bg.remove(); if (log) trSimShow(m, W, log); });
-  act('dummy', () => { if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } SND.se('ok'); dummyStart(m, W); });
+  const trNg = () => { const ng = trMvIds(W).filter(id => !eq.includes(id) && !canLearn(m.sid, id)); if (ng.length) say0(`${ng.map(id => MOVES[id] ? MOVES[id].n : id).join('・')} は このモンスターが 覚えられない技です。べつの 技に かえてから ためしてください`); return ng.length > 0; };   /* ほかの 子から コピーした 技など */
+  act('sim', async () => { if (TR_SIM) return; if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } if (trNg()) return; SND.se('ok');
+    const bg = modal('<h3>シミュレーションちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'), seq = TR_SIMSEQ; const log = await trSim(m, W, 5); bg.remove(); if (log && seq === TR_SIMSEQ) trSimShow(m, W, log); });
+  act('dummy', () => { if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } if (trNg()) return; SND.se('ok'); dummyStart(m, W); });
   act('draft', () => { trDraft(); SND.se('ok'); say0('仮保存しました（試合ではまだ使いません）').then(() => { redo(); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.dr`)); }); });
   act('ok', () => trConfirm(m).then(done => { if (!done) return; T.prog = trClone(W, m); T.mode = 'chip'; delete T.draft; if (TRN) TRN.dirty = false; save(); SND.se('ok'); redo(); MO.stamp($('trBody').querySelector('.trstat')); MO.pop($('trBody').querySelector(`.trmons button[data-u="${uid}"] em.ok`)); }));
   act('revert', () => { TRN.W = trClone(T.draft || T.prog, m); TRN.dirty = false; TRN.sel = null; redo(); });
@@ -9825,7 +9834,7 @@ function startOnboarding() { S = defaultSave(); S.onb = 1; startTutorial(); }
 function onbNext() {
   if (!S || !S.onb) return renderHub();
   if (S.onb === 1) return startTutorial();
-  if (S.onb === 2) return trainTutorial(() => { S.onb = 3; onbNext(); });
+  if (S.onb === 2) return trainTutorial(() => { S.onb = 3; save(); onbNext(); });   /* なまえ・はじめの 1たいの まえで とじても 訓練から やりなおさない */
   if (S.onb === 3) { (async () => { if (!S.pname) await askName(true); renderStarter(); })(); return; }
   renderHub();
 }
@@ -12053,7 +12062,7 @@ $('scTitle').addEventListener('click', (e) => { if (e.target.closest('.sndbtn, .
   const A = $('app'), t = $('tapStart'), pin = (el) => { let x = el.offsetWidth / 2, y = el.offsetHeight / 2; for (let q = el; q !== A; q = q.offsetParent) { if (!q) return null; x += q.offsetLeft; y += q.offsetTop; } return { x, y }; };
   const ar = A.getBoundingClientRect(), k = A.clientWidth / (ar.width || 1), pt = (t && pin(t)) || { x: (e.clientX - ar.left) * k, y: (e.clientY - ar.top) * k }, cx = pt.x, cy = pt.y;
   if (t) { t.classList.remove('hit'); void t.offsetWidth; t.classList.add('hit'); }
-  dotPulse(A, cx, cy, () => { titleGo = false; S = loadSave(); if (S) { updAutoBtn(); renderHub(); } else startOnboarding(); });   // パルスが きえてから ホームへ
+  dotPulse(A, cx, cy, () => { titleGo = false; S = loadSave(); if (S && S.onb >= 2 && S.onb < 4 && !S.party.length) onbNext(); else if (S) { updAutoBtn(); renderHub(); } else startOnboarding(); });   // パルスが きえてから ホームへ
 });
 /* ---------- 画面の 向き：横長なら 横レイアウト。スマホを たてに もった ままでも「横画面」で 90度 回して あそべる ---------- */
 let LAND_PREF = (() => { try { return localStorage.getItem('pma_land') === '1'; } catch (e) { return false; } })();
