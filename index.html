@@ -243,7 +243,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .slot[hidden]{display:none!important}
 .slotlabel.boxhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.boxsort{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px;flex-wrap:wrap}.boxsort button{font:inherit;font-size:13px;min-width:30px;padding:3px 6px;color:var(--ink);background:#2a2148;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2)}.boxsort button.on{background:var(--acc);color:#1a1222}.boxsort select{font:inherit;font-size:12px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);padding:3px 6px;max-width:60vw}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.slot{position:relative;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;font-size:12px;text-align:center;touch-action:none;cursor:grab;
+.slot{position:relative;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;font-size:12px;text-align:center;touch-action:pan-y;cursor:grab;
   background:linear-gradient(180deg,var(--win1),var(--win2));box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2),0 4px 0 2px rgba(0,0,0,.35);border-radius:4px}
 .slot canvas{width:64px;height:64px}
 .slot .no{position:absolute;left:5px;top:4px;font-size:15px;color:var(--acc);text-shadow:2px 2px 0 #000}
@@ -256,6 +256,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .slot.view{outline:2px dashed rgba(255,255,255,.5);outline-offset:2px}
 .slot.over{box-shadow:0 0 0 3px var(--good),0 0 18px rgba(79,209,165,.6)!important}
 .slot.dragging{opacity:.3}
+.slot.lift{transform:scale(1.06);box-shadow:0 0 0 3px var(--acc),0 8px 14px rgba(0,0,0,.5)!important;z-index:3}   /* ながおしで もちあげた */
 .boxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:calc(42 * var(--vh));overflow:auto;padding:4px;background:rgba(13,11,20,.5);border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}
 .boxgrid .slot{min-height:84px;font-size:10.5px}
 .boxgrid .slot canvas{width:44px;height:44px}
@@ -1275,6 +1276,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trmini{display:none;align-self:flex-end;font-size:11px;color:var(--dim);padding:2px 6px;margin:-2px -4px 0 0}
 .trside{position:sticky;top:0;align-self:start;max-height:calc(calc(100 * var(--vh)) - 16px);overflow:auto}
 @media (max-width:860px){.trmini{display:block}.trside.mini{padding:2px 8px}.trside.mini > :not(.trmini){display:none}.trpage{grid-template-columns:minmax(0,1fr)}.trr{flex-wrap:wrap}.trr .rc{flex-basis:100%;order:5}.trside{position:sticky;top:auto;bottom:0;z-index:5;max-height:calc(32 * var(--vh));overflow:auto;padding:4px 8px;border-radius:10px;background:#161228;border:1px solid var(--edge);box-shadow:0 -6px 18px rgba(0,0,0,.5)}html.land .trside{bottom:0}
+html.town.land #scTrain .trside{max-height:calc(calc(100 * var(--vh)) - 24px - var(--trTabH,0px))!important}   /* よこ画面：したの メニューに かくれない */
 html.land.tabs #scTrain.screen:not(#scBattle){padding-bottom:0}html.land .trpage{grid-template-columns:minmax(0,1fr) 200px}html.land .trmons{grid-column:1/-1}html.land .trside{position:sticky;top:0;bottom:auto;align-self:start;max-height:calc(calc(100 * var(--vh)) - 16px);box-shadow:none}html.land .trmini{display:none}html.land .trside.mini > :not(.trmini){display:revert}.trhelp{font-size:10px}.pal{padding:4px 7px;font-size:10px}.trside h3{font-size:12px}.trmons{flex-direction:row;max-height:none;overflow-x:auto;padding-bottom:4px}.trmons button{flex:none}}
 /* 訓練：がめんの はばでは なく 訓練の わくの はばで ならびを かえる（中くらいの まどでも くずれない） */
 #trBody{container-type:inline-size}
@@ -1401,6 +1403,7 @@ html.lnar2 #scHub .hme #hRank .hnm{max-width:8.2em;font-size:12px}html.lnar2 #sc
 .kw{color:#ffd84a;text-decoration:underline;text-decoration-color:rgba(255,216,74,.55);text-underline-offset:2px;cursor:help;pointer-events:auto}
 #kwTip{position:fixed;z-index:10000;max-width:min(280px,calc(100vw - 16px));padding:8px 10px;background:#141030;color:#f3eefc;font-size:12px;line-height:1.55;border:2px solid #ffd84a;box-shadow:0 4px 0 rgba(0,0,0,.5);pointer-events:none;text-align:left}
 #kwTip b{display:block;color:#ffd84a;margin-bottom:2px;font-size:13px}
+body:has(.trpickbg) #kwTip{display:none!important}   /* 訓練の えらぶ ウィンドウが でて いる あいだは せつめいを ださない */
 #mvTip{position:fixed;z-index:9999;max-width:min(320px,calc(100vw - 16px));padding:8px 10px;background:#141030;color:#f3eefc;font-size:12px;line-height:1.55;border:2px solid var(--c,#ffd84a);box-shadow:0 4px 0 rgba(0,0,0,.5);text-align:left}
 #mvTip b{display:block;color:#ffd84a;font-size:13px}#mvTip .s{color:#b9b0d6;font-size:11px;margin-bottom:3px}#mvTip .cdl{color:#ff9f6b}
 .trflt{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px}.trflt select,.trflt input{font:inherit;font-size:11px;padding:3px 4px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);min-width:0}.trflt input{flex:1 1 90px}
@@ -1452,6 +1455,9 @@ html.town #scHub .chests .chest{width:64px;min-height:56px!important}
 html:not(.land).town #scHub .hubgrid{flex-direction:column;align-items:stretch}
 html:not(.land).town #scHub .hchest{order:1;overflow:hidden}
 html:not(.land).town #scHub .hchest .chesthead>span{font-size:12px}
+html:not(.land).town #scHub .hchest .chesthead{flex:0 0 auto!important;width:6.4em!important;min-width:0}html:not(.land).town #scHub .hchest .chesthead>span{white-space:normal!important;display:block;width:100%;line-height:1.25;padding-right:4px!important}   /* たて画面：なまえは 2ぎょうに して はこの わくを ひろく */
+.chest .chs{display:none}html.town #scHub .hchest .chest .chn,html.town #scHub .hchest .chest .chl{display:none}html.town #scHub .hchest .chest .chs{display:block;font-size:10px;line-height:1.2;white-space:nowrap;letter-spacing:-.02em}   /* まち：はこの え と みじかい じかん だけ（タップで くわしく） */
+html.town #scHub .hchest .chest{min-height:0;height:auto;padding:4px 1px;overflow:hidden}
 html:not(.land).town #scHub .chests{flex:1 1 0;min-width:0}
 html:not(.land).town #scHub .chests .chest{flex:1 1 0;width:auto;min-width:0}
 html:not(.land).town #scHub .hubgrid>.hcol:nth-child(2){max-width:none}
@@ -1497,9 +1503,9 @@ html.town #tabbar button.on,html.town #tabbar button.home.on{background:linear-g
 html.town #tabbar .tabind,html.town #tabbar .medal{display:none!important}
 html.town #tabbar .badge{top:3px;right:calc(50% - 22px)}
 /* よこ画面でも ひだりを あけない・したに メニューの ぶん あける */
-html.town.land.tabs .screen:not(#scBattle):not(#scTitle):not(#scHub){left:0!important;right:0!important;padding-left:calc(16px + var(--sal))!important;padding-bottom:calc(72px + var(--sab))!important}
-html.town.land.tabs .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scTeam):not(#scTrain):not(#scDex){margin:0 auto;max-width:820px}
-html.town #scHub .hchest{max-width:min(560px,94vw)}
+html.town.land.tabs .screen:not(#scBattle):not(#scTitle):not(#scHub):not(.isl){left:0!important;right:0!important;padding-left:calc(16px + var(--sal))!important;padding-bottom:calc(72px + var(--sab))!important}
+html.town.land.tabs .screen:not(#scBattle):not(#scTitle):not(#scHub):not(#scTeam):not(#scTrain):not(#scDex):not(.isl){margin:0 auto;max-width:820px}
+html.town #scHub .hchest{max-width:min(560px,calc(var(--appW,100vw) * .94))}
 html.town #townPop{max-height:80vh;overflow:auto}
 html.town #scHub .hbar .hres{margin-left:auto!important}
 html.town #tabbar #tabHome .ico{background:none!important}
@@ -1561,7 +1567,7 @@ html.isle[data-jt=tower] #jrGrid .jrc:not(.tower){display:none}
 /* ショップ：タブで うりばを わける */
 /* しまの なかの ショップ：スクロール しないで おさまる ように カードを よこながに（え｜なまえ・ねだん） */
 html.isle #scShop{gap:6px}
-html.isle #scShop>.sec-title{justify-content:flex-end;min-height:0;margin:-2px 0 -4px}html.isle #scShop>.sec-title>span:first-child{display:none}
+html.isle #scShop>.sec-title{justify-content:flex-end;min-height:0;margin:0}html.isle #scShop>.sec-title>span:first-child{display:none}
 html.isle #scShop .shbody{gap:8px}html.isle #scShop .shsec{gap:5px}html.isle #scShop .shh b{font-size:13px}html.isle #scShop .shh .dim{font-size:11px}
 html.isle #scShop .shgrid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:6px}
 html.isle #scShop .shcard{display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-rows:1fr auto auto;column-gap:8px;row-gap:2px;align-items:center;padding:6px 6px 6px 4px;text-align:left}
@@ -1726,7 +1732,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
 
   <section class="screen" id="scTeam">
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">へんせい</span><button class="btn sub" id="btnTeamBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
-    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>して いれかえ　／　<b>タップ</b>で くわしく みる</p>
+    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>（スマホは ながおし）して いれかえ　／　<b>タップ</b>で くわしく みる</p>
     <div class="teamwrap">
       <div class="teamleft">
         <div class="deckbar" id="deckBar"></div>
@@ -3209,6 +3215,12 @@ function isleArt(k) { if (ISLE_ART[k]) return ISLE_ART[k]; const z = 3, c = docu
 function islesBuild() {
   const box = $('isles'); if (box.__built) return; box.__built = 1;
   box.innerHTML = ISLES.map((I, i) => `<button class="isle" data-i="${i}" aria-label="${I.n}"><canvas></canvas><span class="islabel">${I.n}</span></button>`).join('');
+  // たてものの えの すきとおった ところを おしたら、うしろの たてもの（え が ある もの）を えらぶ（かさなって いても ちがう たてものが ひらかない）
+  box.addEventListener('click', (ev) => { const b0 = ev.target.closest('.isle'); if (!b0 || ev.target.closest('.islabel') || ev.isleOk) return;
+    const hit = (b) => { const cv = b.querySelector('canvas'), r = cv.getBoundingClientRect(); if (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom || !cv.width) return false;
+      try { const x = Math.floor((ev.clientX - r.left) / r.width * cv.width), y = Math.floor((ev.clientY - r.top) / r.height * cv.height); return cv.getContext('2d').getImageData(x, y, 1, 1).data[3] > 40; } catch (e) { return b === b0; } };
+    const all = [...box.querySelectorAll('.isle')].sort((p, q) => (+q.querySelector('canvas').style.zIndex || 0) - (+p.querySelector('canvas').style.zIndex || 0) || (q.getBoundingClientRect().bottom - p.getBoundingClientRect().bottom));
+    const pick = all.find(hit); if (pick === b0) return; ev.stopPropagation(); ev.preventDefault(); if (pick) { const e2 = new MouseEvent('click', { bubbles: true, clientX: ev.clientX, clientY: ev.clientY }); e2.isleOk = 1; pick.dispatchEvent(e2); } }, true);
   box.querySelectorAll('.isle').forEach((b, i) => { b.onclick = () => { SND.se('click'); $('townPop').hidden = true; ISLES[i].act(); }; const cv = b.querySelector('canvas'), k = ISLES[i].k, paint = () => { const a = isleArt(k); cv.width = a.width; cv.height = a.height; cv.getContext('2d').drawImage(a, 0, 0); }; paint(); isleImgThen('OBJ_' + (k === 'room' ? 'house' : k), paint); });
   box.classList.add('plaza'); box.insertAdjacentHTML('beforeend', '<canvas id="plazaChar" width="180" height="132"></canvas>');
 }
@@ -3244,7 +3256,12 @@ function plazaLayout(box, els) {
     // ひくい よこ画面：2れつだと ちいさすぎる ときは ブラインドボックスの うえに 1れつ（ショップ・マイルーム・サモナー・アーケード・くさむら）
     const order = ['shop', 'house', null, 'arena', 'wild'], uw = order.reduce((t, k) => t + (k ? L[k][2] : 64), 0), mh = Math.max(...keys.map(k => L[k][3])), rh = bot - top - 8;
     const s3 = Math.min(sc, (W - 16) / uw, rh / mh);
-    if (s3 > s2 * 1.15) {
+    // ジグザグの 大きさ（さきに もとめて、1れつの ほうが 大きく なる ときは 1れつ）
+    const zuh = Math.max(...keys.map(k => L[k][3])), zuw = Math.max(...keys.map(k => L[k][2])), GY = 80 * sc, BK = .4, SXMIN = .7;
+    const zig = () => { let s4 = Math.min(sc * 1.6, (bot - top - 8) * .64 / zuh, (bot - 8 - GY) / ((1.36 - BK) * zuh)), sx = (W - 16 - zuw * s4) / (3 * zuw * s4);
+      if (sx < SXMIN) { sx = SXMIN; s4 = Math.min(s4, (W - 16) / (zuw * (1 + 3 * sx))); } else sx = Math.min(sx, 1.05); return [Math.max(s4, 0), sx]; };
+    const [zs4] = zig();
+    if (s3 > s2 * 1.15 || s3 > zs4 * 1.05) {
       s2 = s3; const yb = bot - 6, gap = (W - uw * s3) / 2; let x = gap; const P = {};
       for (const k of order) { const w = (k ? L[k][2] : 64) * s3; P[k || 'char'] = [x, k ? yb - L[k][3] * s3 : yb - 8 * s3, w]; x += w; }
       els.forEach((e, i) => { const k = ISLES[i].k === 'room' ? 'house' : ISLES[i].k, [x, y] = P[k]; Object.assign(e.style, { position: 'absolute', left: x + 'px', top: y + 'px', width: L[k][2] * s3 + 'px', height: L[k][3] * s3 + 'px', zIndex: 'auto', padding: '0' }); e.querySelector('canvas').style.zIndex = 1; });
@@ -3253,11 +3270,8 @@ function plazaLayout(box, els) {
     }
     // ふつうの よこ画面：うえ・した・うえ・した の ジグザグで まんなかも つかう（ショップ↑ マイルーム↓ アーケード↑ くさむら↓）。サモナーは ひだり した の あき
     {
-      const zz = ['shop', 'house', 'arena', 'wild'], uh = Math.max(...keys.map(k => L[k][3])), uwd = Math.max(...keys.map(k => L[k][2])), av = bot - top - 8;
-      // うえの れつは はいけいの じめん（うみの てすり より てまえ：480×270 の y≈80）に だいざが のる ように さげる
-      const GY = 80 * sc, BK = .4;   // BK：たてものの え の うえから だいざの おくの はし まで の わりあい
-      let s4 = Math.min(sc * 1.6, av * .64 / uh, (bot - 8 - GY) / ((1.36 - BK) * uh)), sx = (W - 16 - uwd * s4) / (3 * uwd * s4);
-      if (sx < .58) { sx = .58; s4 = Math.min(s4, (W - 16) / (uwd * (1 + 3 * sx))); } else sx = Math.min(sx, 1.05);
+      // うえの れつは はいけいの じめん（うみの てすり より てまえ：480×270 の y≈80）に だいざが のる ように さげる（GY・BK は zig() と おなじ）
+      const zz = ['shop', 'house', 'arena', 'wild'], uh = zuh, uwd = zuw, [s4, sx] = zig();
       const w = uwd * s4, yU = Math.max(top + 4, GY - BK * uh * s4), off = Math.max(0, bot - 4 - uh * s4 - yU), x0 = (W - w * (1 + 3 * sx)) / 2;
       els.forEach((e, i) => { const k = ISLES[i].k === 'room' ? 'house' : ISLES[i].k, j = zz.indexOf(k), d = j % 2, bw2 = L[k][2] * s4, bh2 = L[k][3] * s4;
         Object.assign(e.style, { position: 'absolute', left: x0 + j * w * sx + (w - bw2) / 2 + 'px', top: (d ? yU + off + uh * s4 - bh2 : yU + (uh * s4 - bh2)) + 'px', width: bw2 + 'px', height: bh2 + 'px', zIndex: 'auto', padding: '0' }); e.querySelector('canvas').style.zIndex = d + 1; });
@@ -3401,7 +3415,7 @@ function isleScene(k) {
   else if (lead && SPR[lead.sid]) try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * z / bh, [mx, my] = B0.at.mon;
     shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { }
   $('isleTtl').textContent = ISLE_NAME[k];
-  const J = jr(), say = k === 'arena' ? (J.champ ? 'でんどういり おめでとう！ タワーにも のぼろう' : J.badges.length >= GYMS.length ? `つぎは ${LEAGUE[J.league][1]}！` : !J.rival ? 'まずは はじめての 戦いから！' : `つぎの あいては ${GYMS[J.gym].ln}！`)
+  const J = jr(), say = k === 'arena' ? (J.champ ? 'でんどういり おめでとう！ タワーにも のぼろう' : J.badges.length >= GYMS.length ? `つぎは ${LEAGUE[J.league][1]}！` : !J.rival ? 'まずは はじめての 戦いから！' : (J.step || 0) < 2 ? `つぎは ${TYPES[GYMS[J.gym].t].n}ジムの サモナー ${(J.step || 0) + 1}人め！` : `つぎの あいては ${GYMS[J.gym].ln}！`)
     : k === 'shop' ? 'いらっしゃい！ きょうの とくばいも みていってね' : k === 'room' ? (lead ? `${SPECIES[lead.sid].n}「きょうも いっしょに がんばろう！」` : 'おかえり！') : 'しげみが ガサガサ ゆれている……！';
   $('isleSay').textContent = say;
 }
@@ -3704,7 +3718,7 @@ function loadSave() {
     if (s && Array.isArray(s.party) && s.party.length) {
       // いま ゲームに いない 種族（外した モンスター）は しまっておき、もどったら 返す
       const ok = m => m && SPECIES[m.sid];
-      const all = [...s.party, ...(s.box || []), ...(s.stash || [])];
+      const all = [...s.party, ...(s.box || []), ...(s.stash || [])].filter(m => !(m && m.tutMon));   // tutMon：訓練の チュートリアル用（どこにも のこさない）
       s.stash = all.filter(m => !ok(m));
       s.party = s.party.filter(m => ok(m) && !m.tutMon); s.box = (s.box || []).filter(ok);   // tutMon：訓練の チュートリアル用（のこさない）
       for (const m of all) if (ok(m) && !s.party.includes(m) && !s.box.includes(m)) s.box.push(m);
@@ -4570,6 +4584,7 @@ function chestIcon(kind, open, scale) {
   const im = CHEST_IMG[(open ? 'o' : 'c') + kind] || CHEST_IMG['c' + kind] || CHEST_IMG.cwood, z = scale || 1;
   return `<img class="ic pix chimg" alt="" src="${im[0]}" width="${im[1] * z}" height="${im[2] * z}" draggable="false">`;
 }
+const fmtShort = (s) => s >= 3600 ? `${Math.ceil(s / 3600)}じかん` : s >= 60 ? `${Math.ceil(s / 60)}ふん` : `${s}びょう`;   // ブラインドボックスの わく よう
 function renderChests() {
   const box = $('hubChests'); if (!box) return;
   S.chests = S.chests || []; chestTick();
@@ -4582,7 +4597,8 @@ function renderChests() {
     const C = CHESTS[c.kind], left = chestLeft(c);
     const st = left === 0 ? 'ready' : left != null ? 'opening' : '';
     const sub = left === 0 ? '<b style="color:var(--acc)">あける！</b>' : left != null ? `のこり ${fmtTime(left)}<br>💎${gemCost(left)}で すぐ` : opening ? `${fmtTime(C.sec)}<br><span class="dim">まちじゅん</span>` : `${fmtTime(C.sec)}<br><b>タップで かいじょ</b>`;
-    h += `<button class="chest ${st}" data-i="${i}">${chestIcon(c.kind)}<span>${CHEST_SHORT[c.kind] || C.n}</span><span>${sub}</span></button>`;
+    const sub2 = left === 0 ? '<b style="color:var(--acc)">あける！</b>' : left != null ? `のこり<br>${fmtShort(left)}` : `${fmtShort(C.sec)}`;   // まち：みじかく（おりかえさない）
+    h += `<button class="chest ${st}" data-i="${i}">${chestIcon(c.kind)}<span class="chn">${CHEST_SHORT[c.kind] || C.n}</span><span class="chl">${sub}</span><span class="chs">${sub2}</span></button>`;
   }
   if (box._h !== h) { box._h = h; box.innerHTML = h; }   // かわった ときだけ かきかえる
   { const n = S.chests.filter(c => chestLeft(c) === 0).length, b = $('tabHomeBadge'); if (b) { b.hidden = !n; b.textContent = n || ''; } }
@@ -4601,6 +4617,7 @@ async function tapChest(i) {
   if (left === 0) return openChest(i);
   if (S.onb === 5) { S.onbOpen = 1; return openChest(i); }   // さいしょの ながれ：こんかいの ジェムは むりょう
   const cost = gemCost(left);
+  if ((S.gems || 0) < cost) { SND.se('deny'); say0(`のこり ${fmtTime(left)}。\nいますぐ あけるには 💎${cost} ジェムが いります（もっている：${S.gems || 0}）。`); return; }   // たりない ときは きかない
   if (await ask(`のこり ${fmtTime(left)}。\n💎${cost} ジェムで いますぐ あけますか？（もっている：${S.gems || 0}）`, 'あける', 'やめる')) payOpen(i, cost);
 }
 function payOpen(i, cost) {
@@ -4621,6 +4638,7 @@ function rollChest(kind) {
 }
 // あける：中身を 1つずつ 見せる
 function openChest(i) {
+  const fromShop = !$('scShop').hidden;   // ショップで かって あけた ときは ショップへ もどる
   const c = S.chests[i], C = CHESTS[c.kind], R = rollChest(c.kind);
   S.chests.splice(i, 1);
   S.capsules += R.cr; S.tms = S.tms || {};
@@ -4644,7 +4662,7 @@ function openChest(i) {
   $('app').appendChild(bg);
   const showK = () => { bg.querySelector('#rwBody').innerHTML = cards[k]; bg.querySelector('#rwCount').textContent = k ? `${k} / ${cards.length - 1}` : ''; bg.querySelector('#rwNext').textContent = k === cards.length - 1 ? 'とじる' : k === 0 ? 'あける！' : 'つぎへ'; };
   let anim = false;
-  const go = () => { k++; if (k >= cards.length) { bg.remove(); renderHub(); } else { SND.se(k === 1 ? 'card' : /エピック/.test(cards[k]) ? 'epic' : 'card'); showK(); } };
+  const go = () => { k++; if (k >= cards.length) { bg.remove(); if (fromShop) renderShop(); else renderHub(); } else { SND.se(k === 1 ? 'card' : /エピック/.test(cards[k]) ? 'epic' : 'card'); showK(); } };
   bg.querySelector('#rwNext').onclick = () => {   // さいしょは はこが ゆれて → ひらく
     if (anim) return;
     const im = k === 0 && bg.querySelector('#rwBody .chimg');
@@ -4781,6 +4799,7 @@ function teamMon(r) { return r.w === 'p' ? S.party[r.i] : r.w === 'b' ? S.box[r.
 function teamMove(a, b) {
   if (!a || !b || (a.w === b.w && a.i === b.i)) return false;
   const P = S.party, X = S.box, ma = teamMon(a), mb = teamMon(b);
+  if (a.w === 'b' && b.w === 'b' && S.boxSort) { SND.se('deny'); say0('ボックスを ならびかえて いる あいだは、ボックスの なかで いれかえ できません。\n「じぶんで ならべる」に すると いれかえ できます。'); return false; }
   if (!ma) return false;
   if (a.w === 'p' && b.w === 'p') { if (mb) [P[a.i], P[b.i]] = [P[b.i], P[a.i]]; else { P.splice(a.i, 1); P.push(ma); } }
   else if (a.w === 'b' && b.w === 'p') { if (mb) { P[b.i] = ma; X[a.i] = mb; } else { X.splice(a.i, 1); P.push(ma); } }
@@ -4921,10 +4940,10 @@ function renderTeamDetail() {
     if (act === 'tm') return useTM(m);
     if (act === 'boost') return openBoost(m);
     if (act === 'item') return itemMenu(m);
-    if (act === 'train') { TRN = TRN && TRN.uid === m.uid ? TRN : null; return renderTrain(m.uid); }
+    if (act === 'train') { TRN = TRN && TRN.uid === m.uid ? TRN : null; TR_BACK = 'team'; return renderTrain(m.uid); }   // もどるで へんせいへ
     if (act === 'box') teamMove({ w: 'p', i: pi }, { w: 'drop', i: 0 });
     if (act === 'party') teamMove({ w: 'b', i: bi }, { w: 'p', i: S.party.length });
-    if (act === 'release') { ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; save(); renderTeam(); }); return; }
+    if (act === 'release') { if (towerHold(m)) return; ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; teamSheet = false; save(); renderTeam(); }); return; }
     teamSel = null; renderTeam();
   };
 }
@@ -5046,7 +5065,7 @@ const TRT_STEPS = [
   { sel: '.trnatsel', tx: '① まずは<b>作戦</b>です。普段の立ち回りを決めます。<br>どれかひとつタップしてみましょう（★がこのモンスターのおすすめです）。', ok: () => TRT.f.nat },
   { sel: '.trnatsel', allow: () => [], tx: '作戦には、じゃんけんのような相性があります。<br>⚔「<b>どんどん せめる</b>」は 🏹「<b>まあいを たもつ</b>」に、🏹「まあいを たもつ」は 🛡「<b>どっしり かまえる</b>」に、🛡「どっしり かまえる」は ⚔「どんどん せめる」に強くなります。<br>相手より強い作戦だと「<b>よゆう（さくせん◎）</b>」になり、攻撃を受けにくく（防御1.15倍）なります。弱いと「<b>けいかい（さくせん×）</b>」になり、受けやすく（0.87倍）なります。同じグループ同士だと「ライバルだ！」になります。', next: 1 },
   { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが<b>技の行</b>です。上にある技ほど先に撃ちます。<br>左の番号をドラッグすると、順番を入れ替えられます。', next: 1 },
-  { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を置いてみましょう。<br>○番の技の「<b>使うとき</b>」の枠を<b>タップ</b>して、一覧から「<b>相手のHP</b>」を選んでください（右の「相手のHP」をドラッグしても置けます）。<br><small>（タップしてから置き場所をタップしても置けます）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
+  { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を置いてみましょう。<br>○番の技の「<b>使うとき</b>」の枠を<b>タップ</b>して、一覧から「<b>相手のHP</b>」を選んでください（パレットの「相手のHP」をタップしてから 枠を タップしても 置けます）。', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
   { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手のHPが${p}のとき</b>」に、この技を撃ちます。<br>置いた条件をタップすると、${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも変えられます。`; }, next: 1 },
   { sel: '.pal.k-go[data-v="near"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], allow: () => ['.pal.k-go[data-v="near"]', `.trr[data-row="${trtRow()}"] .gs`], tx: '④ 次は<b>撃ち方</b>です。<br>「<b>近づいてから</b>」を ○番の「その場で撃つ」の枠へ置いてみましょう。<br><small>（その位置まで動いてから撃ちます。うまく動けないときは、今の間合いで撃てる技に切り替えます）</small>', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && r.go === 'near'; } },
   { sel: '[data-a="sim"]', tx: '⑤ できたら<b>シミュレーション</b>で試してみましょう！<br>5回戦わせて、結果を見せてくれます。', ok: () => !!document.querySelector('.simtbl') },
@@ -5065,16 +5084,17 @@ function trtStart(o) { o = o || {}; trtStop(); document.querySelectorAll('.askbg
   TRT.el.querySelector('.nx').onclick = () => { const st = TRS()[TRT.i]; if (st.onNext) st.onNext(); if (st.end) { SND.se('ok'); trtEnd(); return; } SND.se('click'); trtGo(TRT.i + 1); };
   trtGo(0); trtLoop(); }
 function trtGo(i) { TRT.i = i; TRT.scrolled = -1; const st = TRS()[i]; TRT.el.querySelector('.tx').innerHTML = (typeof st.tx === 'function' ? st.tx() : st.tx).replace('○番', `${trtRow() + 1}番`); TRT.el.querySelector('.nx').hidden = !st.next; TRT.el.querySelector('.nx').textContent = st.end ? 'おわり ✔' : 'つぎへ ▶'; }
-function trtEnd() { const T = TRT; if (S && T && !T.steps) { S.trTutDone = 1; save(); } trtStop(); if (T && T.onEnd) T.onEnd(); }
+function trtEnd() { const T = TRT; if (S && T && !T.steps) { S.trTutDone = 1; save(); } document.querySelectorAll('.trpickbg').forEach(e => e.remove()); /* ひらいて いた 訓練の えらぶ ウィンドウも とじる */ trtStop(); if (T && T.onEnd) T.onEnd(); }
 function trtStop() { if (TRT && TRT.el) TRT.el.remove(); TRT = null; $('scTrain').classList.remove('trt-on'); }
 function trtLoop() {
   if (!TRT) return; requestAnimationFrame(trtLoop);
-  const home = TRT.scr !== 'scTrain', on = !$(TRT.scr).hidden && !(home && document.querySelector('.askbg')); TRT.el.hidden = !on;   // ホームの あんない：まど（ブラインドボックスの なかみ など）が でている あいだは かくす
+  const home = TRT.scr !== 'scTrain', on = !$(TRT.scr).hidden && !(home && document.querySelector('.askbg')) && !document.querySelector('.trpickbg'); /* 訓練の えらぶ ウィンドウが でて いる あいだも かくす（ボタンが かくれない） */ TRT.el.hidden = !on;   // ホームの あんない：まど（ブラインドボックスの なかみ など）が でている あいだは かくす
   if (!on && !home) return;
   if (!home) $('scTrain').classList.add('trt-on');   // したに よゆうを つくって、さいごの ボタンも まんなかまで スクロール できる
   const st = TRS()[TRT.i]; if (st.ok && st.ok()) { SND.se('ok'); if (TRT.i + 1 < TRS().length) trtGo(TRT.i + 1); else trtEnd(); return; }
   if (!on) return;
   const q = typeof st.sel === 'function' ? st.sel() : st.sel; let t = q ? document.querySelector(q) : null;
+  if (t && t.closest('.trside') && !t.closest('.trside.mini')) { const sd = t.closest('.trside'), r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.bottom - 4 || r1.top < r2.top + 4) sd.scrollTop += (r1.top - r2.top) - (r2.height - r1.height) / 2; }   // パレットの なかの ものを さす：パレットの なかを スクロール して みせる
   if (t && t.closest('.trside.mini')) { TR_MINI = false; const sd = t.closest('.trside'); sd.classList.remove('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▼ たたむ'; }
   if (t && !home && !t.closest('.trside')) { const sd = document.querySelector('#scTrain .trside'); if (sd && getComputedStyle(sd).position !== 'static' && !sd.classList.contains('mini')) { const r1 = t.getBoundingClientRect(), r2 = sd.getBoundingClientRect(); if (r1.bottom > r2.top && r1.top < r2.bottom) { TR_MINI = true; sd.classList.add('mini'); const mb = sd.querySelector('.trmini'); if (mb) mb.textContent = '▲ パレットを ひらく'; TRT.scrolled = -1; } } }   // あんない している ボタンが したの パレットに かくれる：たたむ（もう いちど まんなかへ）
   const bub = TRT.el.querySelector('.bub'), vw = innerWidth, vh = innerHeight;
@@ -5171,6 +5191,11 @@ function renderTrain(uid) {
   const act = (a, f) => { const e = B.querySelector(`[data-a="${a}"]`); if (e) e.onclick = f; };
   const redo = () => renderTrain(uid), touch = () => { for (const r of W.mv) { r.c = r.c.filter(l => l.length); if (r.x) { r.x = r.x.filter(l => l.length); if (!r.x.length) delete r.x; } } TRN.dirty = true; redo(); };   // からの行は つめる
   // 置く：pl = { k:'mv'|'go'|'c', v } 新しく ／ { from:[i,j] } 置いてある条件 ／ { gFrom:i } 置いてある立ち回り。z = 落とした枠
+  // i ばんめの 技を id に する：ほかの 段に ある 技なら 段ごと いれかえ（条件も いっしょに うごく）。あたらしい 技なら おきかえて あわない 条件は はずす
+  const setMv = (i, id) => { const r = W.mv[i]; if (!r || r.id === id) return false; const ids = W.mv.map(x => x.id), at = ids.indexOf(id);
+    if (at >= 0) [W.mv[i], W.mv[at]] = [W.mv[at], W.mv[i]];
+    else { r.id = id; r.c = trLines(r.c).map(l => l.filter(c => condFits(c.t, id))); if (r.x) r.x = r.x.map(l => l.filter(c => condFits(c.t, id))); }
+    trRemap(W, ids); return true; };
   const drop = (pl, z) => {
     const d = z && z.dataset.drop, i = z ? +z.dataset.i : -1;
     const L = z ? +z.dataset.l || 0 : 0, line = (r, l) => LN(r, l) || (l >= 10 ? (r.x[l - 10] = []) : (r.c[l] = []));
@@ -5186,7 +5211,7 @@ function renderTrain(uid) {
     if (!z) return;
     if (pl.k === 'mv') { const at = W.mv.findIndex(r => r.id === pl.v);
       if (d === 'mvnew') { if (at >= 0) return; W.mv.push({ id: pl.v, go: 'auto', c: trDefC(pl.v) }); }
-      else if (d === 'h') { if (at >= 0) [W.mv[at].id, W.mv[i].id] = [W.mv[i].id, pl.v]; else W.mv[i].id = pl.v; for (const r of W.mv) { r.c = trLines(r.c).map(l => l.filter(c => condFits(c.t, r.id))); if (r.x) r.x = r.x.map(l => l.filter(c => condFits(c.t, r.id))); } }   // いれかえた 技に あわない 条件は はずす
+      else if (d === 'h') { if (!setMv(i, pl.v)) return; }   // ほかの 段の 技なら 段ごと いれかえ
       else return; }
     else if (pl.k === 'go') { if (d !== 'g') return; W.mv[i].go = pl.v; }
     else if (pl.k === 'c') { if (d !== 'c' || !condFits(pl.v, W.mv[i].id) || (pl.v === 'rot' && L >= 10)) return; line(W.mv[i], L).push(trCondNew(pl.v)); TRN.sel = `${i}:${L}:${LN(W.mv[i], L).length - 1}`; }
@@ -5243,20 +5268,19 @@ function renderTrain(uid) {
   const hasSub = (t) => !!(CONDS[t].ps || CONDS[t].ns || CONDS[t].cmp);
   const condPick = (i, L) => { const r = W.mv[i]; if (!r) return; const head = L >= 10 ? '使わないとき' : L ? 'または' : '使うとき';
     pickWin(`${head} の 条件`, Object.entries(CONDS).map(([t, K]) => [t, K.n, '', !condFits(t, r.id) || (t === 'rot' && L >= 10)]), (t) => {
-      const add = (c) => { const ln = LN(r, L) || (L >= 10 ? ((r.x || (r.x = []))[L - 10] = []) : (r.c[L] = [])); ln.push(c); TRN.sel = null; touch(); };
+      const add = (c) => { if (!TRN || TRN.W !== W) return; const ln = LN(r, L) || (L >= 10 ? ((r.x || (r.x = []))[L - 10] = []) : (r.c[L] = [])); ln.push(c); TRN.sel = null; touch(); };   // チュートリアルを とばした あと など：もう ちがう 画面
       const c = trCondNew(t); if (hasSub(t)) condWin(c, add); else { SND.se('ok'); add(c); } }); };
   const condEdit = (i, L, j) => { const ln = LN(W.mv[i], L), c = ln && ln[j]; if (!c) return;
     condWin(c, (c2) => { ln[j] = c2; TRN.sel = null; touch(); }, () => { ln.splice(j, 1); TRN.sel = null; touch(); }); };
   const goPick = (i) => pickWin('撃ち方', Object.entries(TR_GO).map(([a, n]) => [a, n + '撃つ', '', false, a === (W.mv[i].go || 'auto')]), (a) => { W.mv[i].go = a; SND.se('ok'); touch(); });
   const mvSwap = (i) => { const r = W.mv[i]; if (!r) return;   // おいた 技の なまえを タップ：ほかの 技に かえる（あわない 条件は はずす）
     pickWin(`${i + 1}ばんめの 技`, [...new Set(eq.concat(tm))].map(id => { const at = W.mv.findIndex(x => x.id === id); return [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}${at >= 0 && at !== i ? `・${at + 1}ばんめと いれかえ` : ''}`, false, id === r.id]; }), (id) => {
-      if (id === r.id) return; const at = W.mv.findIndex(x => x.id === id); if (at >= 0) W.mv[at].id = r.id; r.id = id;   // ほかの 行に ある 技なら いれかえ
-      for (const x of W.mv) { x.c = trLines(x.c).map(l => l.filter(c => condFits(c.t, x.id))); if (x.x) x.x = x.x.map(l => l.filter(c => condFits(c.t, x.id))); } TRN.info = null; SND.se('ok'); touch(); }); };
+      if (!setMv(i, id)) return; TRN.info = null; TRN.sel = null; SND.se('ok'); touch(); }); };
   const mvPick = () => pickWin('技を ついか', eq.concat(tm).filter(id => !W.mv.some(r => r.id === id)).map(id => [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}`]), (id) => { W.mv.push({ id, go: 'auto', c: trDefC(id) }); SND.se('ok'); touch(); });
   B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
   B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.l}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.l, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); SND.se('click'); condEdit(+e.dataset.i, +e.dataset.l, +e.dataset.j); }); });
   B.querySelectorAll('.gs.on').forEach(e => drag(e, { gFrom: +e.dataset.i }, () => { if (TRN.pick) drop(TRN.pick, e); else { SND.se('click'); goPick(+e.dataset.i); } }));
-  B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (ev.target.closest('.cnd')) return; if (TRN.pick) return drop(TRN.pick, z);
+  B.querySelectorAll('.trmain [data-drop]').forEach(z => { if (!z.classList.contains('on')) z.addEventListener('click', (ev) => { if (ev.target.closest('.cnd')) return; if (TRN.pick) { ev.trDone = 1; return drop(TRN.pick, z); }
     const d = z.dataset.drop; if (d === 'c') { SND.se('click'); condPick(+z.dataset.i, +z.dataset.l || 0); } else if (d === 'g') { SND.se('click'); goPick(+z.dataset.i); } else if (d === 'mvnew') { SND.se('click'); mvPick(); } }); });   // わくを タップ：一覧の ウィンドウ
   if (TRN.pick) zonesFor(TRN.pick).forEach(z => z.classList.add('can'));   // えらんだ ものを おける わく だけ ひからせる
   // 技の 優先度：番号 か 技名を ドラッグして ほかの 行へ（その位置に 入れる）
@@ -5267,7 +5291,7 @@ function renderTrain(uid) {
     const ids = W.mv.map(x => x.id), [r] = W.mv.splice(TRN.rsel, 1); W.mv.splice(i, 0, r); trRemap(W, ids); TRN.rsel = null; TRN.sel = null; SND.se('click'); touch(); },
     (t) => !t.closest('.cnd, .gs, .rb, .rc, .rh, button, [data-drop]')));
   if (TRN.rsel != null) { const e = B.querySelector(`.trr[data-row="${TRN.rsel}"]`); if (e) e.classList.add('rsel'); else TRN.rsel = null; }
-  B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', () => { if (TRN.pick) return; TRN.rsel = null; SND.se('click'); mvSwap(+e.dataset.i); }));   // 置いた 技：タップで 技を えらびなおす
+  B.querySelectorAll('.trr .rh').forEach(e => e.addEventListener('click', (ev) => { if (TRN.pick || ev.trDone) return; /* パレットで えらんだ ものを おいた クリック では ひらかない */ TRN.rsel = null; SND.se('click'); mvSwap(+e.dataset.i); }));   // 置いた 技：タップで 技を えらびなおす
   B.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { const ids = W.mv.map(x => x.id); W.mv.splice(+b.dataset.rm, 1); trRemap(W, ids); TRN.sel = null; SND.se('back'); touch(); });
   B.querySelectorAll('.trins .trseg').forEach(g => g.onclick = (ev) => { const b = ev.target.closest('button'); if (!b || !sc) return; const K = CONDS[sc.t];
     if (g.dataset.k === 'cq') sc.n = STG_ENC(STG_DEC(sc.n ?? K.n0)[0], b.dataset.v); else if (g.dataset.k === 'cv') sc.n = STG_ENC(+b.dataset.v, STG_DEC(sc.n ?? K.n0)[1]);   // 能力の 段階：以上・以下 と 段階を べつべつに
@@ -5281,13 +5305,15 @@ function renderTrain(uid) {
   act('revert', () => { TRN.W = trClone(T.draft || T.prog, m); TRN.dirty = false; TRN.sel = null; redo(); });
   act('clr', () => { TRN.W = trBlank(m); TRN.sel = null; touch(); });
   act('load', () => trLoadFrom(m));
-  if (trSame) { MO.flip(B, '.trr[data-key]', trRows0, true); MO.flip(B, '.cnd[data-key]', trC0, true); }   // ならびかえは すべる・あたらしい じょうけんは ぽんと でる
-  else { MO.stagger(B.querySelectorAll('.trnat, .trr'), 34, 8); if (!keep) MO.stagger(B.querySelectorAll('.trpal .pal'), 10, 4); }   // ひらいた／モンスターを かえた：じゅんばんに
-  MO.trUid = uid;
   scr.querySelectorAll(':scope > .trside, :scope > .trbtns').forEach(e => e.remove());   // まえに そとへ だした パレット・ボタン
-  if (keep) [scr, B.querySelector('.trside'), B.querySelector('.trmons')].forEach((e, i) => { if (e) [e.scrollTop, e.scrollLeft] = keep[i]; });   // そうさ しても 画面は そのまま（出しなおさない）
-  else show('scTrain');
-  trSideFix(); requestAnimationFrame(trSideFix);
+  if (!keep) show('scTrain');
+  trSideFix();   // たて画面：パレット・ボタンを そとへ（うごかす まえに。そうしないと なかみの いちが ずれる）
+  if (keep) [scr, scr.querySelector('.trside'), B.querySelector('.trmons')].forEach((e, i) => { if (e) [e.scrollTop, e.scrollLeft] = keep[i]; });   // そうさ しても 画面は そのまま（出しなおさない）
+  // うごきは いちが きまってから（さきに はかると 行が ずれて うごき、つぎの タップが べつの ところに あたる）
+  if (trSame) { MO.flip(B, '.trr[data-key]', trRows0, true); MO.flip(B, '.cnd[data-key]', trC0, true); }   // ならびかえは すべる・あたらしい じょうけんは ぽんと でる
+  else { MO.stagger(B.querySelectorAll('.trnat, .trr'), 34, 8); if (!keep) MO.stagger(scr.querySelectorAll('.trpal .pal'), 10, 4); }   // ひらいた／モンスターを かえた：じゅんばんに
+  MO.trUid = uid;
+  requestAnimationFrame(trSideFix);
 }
 // たて画面の パレット：したの タブの たかさ と パレットの たかさ を CSS へ（パレットは いちばん した・なかみは その ぶん あける）
 function trSideFix() { const sd = document.querySelector('#scTrain .trside'), tb = $('tabbar'), R = document.documentElement, sc = $('scTrain'); if (!sd) return;
@@ -5349,7 +5375,7 @@ function itemMenu(m) {
     box.querySelectorAll('.it .btn').forEach(b => b.onclick = async () => {
       const k = b.dataset.k;
       if (k === 'respec') { if (!evUsed(m)) { say0('まだ ポイントを ふって いません'); return; } if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の きょうかポイントを ふりなおしますか？`))) return; for (const x of STAT6) m.ev[x] = 0; useItem(k); save(); SND.se('heal'); bg.remove(); openBoost(m); return; }
-      if (k === 'reroll4') { if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の わざを 4つ ぜんぶ おぼえなおしますか？`))) return; const before = m.moves.slice(); let tries = 0; do { m.moves = pickMoves(m); } while (m.moves.join() === before.join() && ++tries < 8); useItem(k); save(); SND.se('up'); say0(`${sp.n}は あたらしく ${m.moves.map(id => MOVES[id].n).join('・')} を おぼえた！`); draw(); return; }
+      if (k === 'reroll4') { if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の わざを 4つ ぜんぶ おぼえなおしますか？`))) return; const before = m.moves.slice(); let tries = 0; do { m.moves = pickMoves(m); } while (m.moves.slice().sort().join() === before.slice().sort().join() && ++tries < 8); useItem(k); save(); SND.se('up'); say0(`${sp.n}は あたらしく ${m.moves.map(id => MOVES[id].n).join('・')} を おぼえた！`); draw(); return; }
       draw(k);
     });
   };
@@ -5358,6 +5384,9 @@ function itemMenu(m) {
 // 強化：おなじ モンスターを つかって ポイントを ふやし、のうりょくに ふりわける
 // きょうか できる：おなじ しゅるいの モンスターが ほかに いて、まだ さいだいまで あつめて いない
 const canBoost = (m) => (m.fed || 0) < EV_MAX && [...S.party, ...S.box].some(x => x !== m && x.sid === m.sid);
+// バトルタワーに ちょうせん中の メンバー（にがしたり そざいに したり できない）
+const inTowerRun = (x) => { const R = S && S.tower && S.tower.run; return !!(R && x && R.uids.includes(x.uid)); };
+const towerHold = (x) => { if (!inTowerRun(x)) return false; SND.se('deny'); say0('この モンスターは バトルタワーに ちょうせん中です。\nタワーを やめてから にがしてね。'); return true; };
 function openBoost(m) {
   m.ev = m.ev || {}; for (const k of STAT6) m.ev[k] = m.ev[k] || 0; m.fed = m.fed || 0;
   const sp = SPECIES[m.sid];
@@ -5369,7 +5398,7 @@ function openBoost(m) {
     const st = stats(pv), free = m.fed - evUsed(m) - pendN();
     // つかえるのは おなじ しゅるいの モンスター だけ（1たいで +3）。ボックス → パーティの じゅん
     const tot = (x) => { const b = SPECIES[x.sid].base; return b.hp + b.atk + b.def + b.spd; };
-    const dups = [...S.box.map((x, i) => ({ x, w: 'b', i })), ...S.party.map((x, i) => ({ x, w: 'p', i }))].filter(o => o.x !== m && o.x.sid === m.sid)
+    const dups = [...S.box.map((x, i) => ({ x, w: 'b', i })), ...S.party.map((x, i) => ({ x, w: 'p', i }))].filter(o => o.x !== m && o.x.sid === m.sid && !inTowerRun(o.x))
       .map(o => Object.assign(o, { v: BOOST_SAME })).sort((a, b) => b.v - a.v || (a.w === 'p') - (b.w === 'p') || tot(a.x) - tot(b.x));
     const room = EV_MAX - m.fed, gainOf = (set) => Math.min(room, [...set].reduce((a, j) => a + dups[j].v, 0));
     bg.querySelector('#bst').innerHTML = `<h3 style="margin-bottom:6px">${sp.n}を きょうか</h3>
@@ -5406,10 +5435,14 @@ function openBoost(m) {
   const under = (cx, cy) => { const g = drag && drag.ghost; if (g) g.style.display = 'none'; const el = document.elementFromPoint(cx, cy); if (g) g.style.display = ''; return refOf(el); };
   document.addEventListener('pointerdown', (ev) => {
     if ($('scTeam').hidden) return; const r = refOf(ev.target); if (!r || r.w === 'drop' || !teamMon(r)) return;
-    drag = { r, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, over: null };
+    drag = { r, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, over: null, touch: ev.pointerType === 'touch', armed: ev.pointerType !== 'touch' };
+    // ゆび：ながおし（0.28びょう）で もちあげる。すぐ うごかしたら スクロール（いれかえない）
+    if (drag.touch) { const d = drag; d.tm = setTimeout(() => { if (drag !== d) return; d.armed = true; d.r.el.classList.add('lift'); try { navigator.vibrate && navigator.vibrate(15); } catch (e) { } }, 280); }
   });
+  document.addEventListener('touchmove', (ev) => { if (drag && drag.armed && drag.touch) ev.preventDefault(); }, { passive: false });   // もちあげた あとは スクロール させない
   document.addEventListener('pointermove', (ev) => {
     if (!drag) return;
+    if (!drag.armed) { if (Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) > 8) { clearTimeout(drag.tm); drag = null; } return; }   // ながおし まえに うごいた：スクロール
     if (!drag.moved && Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) > 8) {
       drag.moved = true; const m = teamMon(drag.r); drag.ghost = spriteCanvas(m.sid, 72); drag.ghost.className = 'pix dragghost'; $('app').appendChild(drag.ghost); drag.r.el.classList.add('dragging');
     }
@@ -5420,7 +5453,7 @@ function openBoost(m) {
     if (o && o.el !== drag.r.el) { o.el.classList.add('over'); drag.over = o.el; } else drag.over = null;
   }, { passive: false });
   const end = (ev) => {
-    if (!drag) return; const d = drag; drag = null;
+    if (!drag) return; const d = drag; drag = null; clearTimeout(d.tm); d.r.el.classList.remove('lift');
     if (d.ghost) d.ghost.remove(); d.r.el.classList.remove('dragging'); if (d.over) d.over.classList.remove('over');
     if (d.moved) { justDragged = performance.now(); const o = under(ev.clientX, ev.clientY); teamSel = null; if (o) { teamView = teamMon(d.r).uid; teamDrop = teamView; teamMove(d.r, o); } renderTeam(); }
   };
@@ -5521,7 +5554,7 @@ function monCard(m, where, i, openUid) {
     if (act === 'down') [S.party[i + 1], S.party[i]] = [S.party[i], S.party[i + 1]];
     if (act === 'box') S.box.push(S.party.splice(i, 1)[0]);
     if (act === 'party') S.party.push(S.box.splice(i, 1)[0]);
-    if (act === 'release') { ask(`${sp.n}を にがしますか？`).then(y => { if (!y) return; S.box.splice(i, 1); save(); renderTeam(); }); return; }
+    if (act === 'release') { if (towerHold(S.box[i])) return; ask(`${sp.n}を にがしますか？`).then(y => { if (!y) return; S.box.splice(i, 1); save(); renderTeam(); }); return; }
     save(); renderTeam();
   };
   el.appendChild(a);
@@ -8571,6 +8604,7 @@ function catchProb(e) { return clamp(e.sp.catch * (1.6 - 1.3 * e.hp / e.maxHp) *
 function cmdCapsule() {
   if (B && TUT && TUT.steps && !TUT.frozen && B.kind === 'wild') { say('まずは 戦って、少し 弱らせよう！'); SND.se('back'); return; }   // くさむらの チュートリアル：あんないが でるまで なげられない
   if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; B.paused = false; }   // チュートリアル：ここを おして と とめて いた
+  if (B && B.kind === 'wild' && B.mode === 'intro') { say('しあいが はじまってから なげてね！'); SND.se('back'); return; }   // はじまる まえ：だまって むしを しない
   if (!B || B.kind !== 'wild' || B.mode !== 'fight' || B.catchO || B.paused) return;
   if (S.capsules <= 0) { say('マテリアルが もう ない！'); return; }
   const e = active(1); if (!targetable(e)) return;
@@ -9622,7 +9656,7 @@ function endBattle(res) {
   const caps0 = S.capsules, gems0 = S.gems || 0;
   if (B.kind === 'wild') {
     if (TUT) { TUT = null; tutHide(); $('tutBox').hidden = true; }
-    if (res === 'caught' && S.onb === 4) { S.onb = 5; giveChestKind('wood'); lines.push('草むらのごほうびに、<b>ブラインドボックス</b>をもらいました！'); }   // さいしょの ながれ：つぎは ブラインドボックス
+    if (res === 'caught' && S.onb === 4) { S.onb = 5; giveChestKind('wood'); S.onbChest = 1; lines.push('草むらのごほうびに、<b>ブラインドボックス</b>をもらいました！'); }   // さいしょの ながれ：つぎは ブラインドボックス
     if (res === 'caught') {
       const e = active(1); const nm = { uid: S.uid++, sid: e.mon.sid, nat: e.mon.nat, iv: e.mon.iv, moves: e.mon.moves.slice() };   // 戦った ときの 性格・ステータス・わざ の まま
       S.caught++;
@@ -9817,19 +9851,21 @@ function onbWild() {
   const o = B.sides[1].fs[0]; o.atk *= .35; o.spa *= .35;
 }
 // ホームでの あんない
+// まちの ホームでは ボタンの かわりに たてもの（#isles .isle）を さす
+const isleSel = (k, alt) => () => document.documentElement.classList.contains('town') ? `#isles .isle[data-i="${ISLES.findIndex(I => I.k === k)}"]` : alt;
 const HUB_GRASS = [
-  { sel: '#btnWild', tx: () => `${SPECIES[S.party[0].sid].n}が仲間になりました！<br>一緒に<b>草むら</b>へ行って、モンスターを捕まえてみましょう。「<b>くさむら</b>」をタップしてください。`, ok: () => !!B },
+  { sel: isleSel('wild', '#btnWild'), allow: () => [isleSel('wild', '#btnWild')(), '#btnWild'], tx: () => `${SPECIES[S.party[0].sid].n}が仲間になりました！<br>一緒に<b>草むら</b>へ行って、モンスターを捕まえてみましょう。「<b>くさむら</b>」をタップしてください。`, ok: () => !!B },
 ];
 const HUB_CHEST = [
   { sel: '.chest[data-i="0"]', allow: () => [], tx: '草むらのごほうびに、<b>ブラインドボックス</b>をもらいました！<br>ブラインドボックスからは、モンスター・ワザステッカー・マテリアルなどが出てきます。', next: 1 },
   { sel: '.chest[data-i="0"]', tx: 'ブラインドボックスは、時間が経つと開けられるようになります。<b>ジェム</b>を使えば、すぐに開けることもできます。<br>今回のジェムは<b>無料</b>です！ ブラインドボックスをタップして開けてみましょう。', ok: () => S.onbOpen && !document.querySelector('.askbg') },
-  { sel: '#btnJourney', allow: () => [], tx: () => `これで仲間が<b>${S.party.length + S.box.length}体</b>になりました！<br>準備ができたら「<b>アーケード</b>」へ行ってみましょう。まずはライバルとの「<b>はじめての戦い</b>」、そのあとは<b>ジム戦</b>です。がんばってください！`, next: 1, end: 1 },
+  { sel: isleSel('arena', '#btnJourney'), allow: () => [], tx: () => `これで仲間が<b>${S.party.length + S.box.length}体</b>になりました！<br>準備ができたら「<b>アーケード</b>」へ行ってみましょう。まずはライバルとの「<b>はじめての戦い</b>」、そのあとは<b>ジム戦</b>です。がんばってください！`, next: 1, end: 1 },
 ];
 function onbHub() {
   if (!S || !S.onb || B || TRT || $('scHub').hidden || document.querySelector('.askbg')) return;
   if (S.onb < 4) { if (S.party.length) S.onb = 4; else return; }
   if (S.onb === 4) trtStart({ steps: HUB_GRASS, scr: 'scHub' });
-  else if (S.onb === 5) { if (!(S.chests || []).length) giveChestKind('wood'); renderChests(); trtStart({ steps: HUB_CHEST, scr: 'scHub', onEnd: onbFinish }); }
+  else if (S.onb === 5) { if (!(S.chests || []).length && !S.onbChest) { giveChestKind('wood'); S.onbChest = 1; save(); } /* むりょうの はこは 1かいだけ（よみこみなおしても ふえない） */ renderChests(); trtStart({ steps: HUB_CHEST, scr: 'scHub', onEnd: onbFinish }); }
 }
 async function onbFinish() {
   S.onb = 0; S.tutDone = true; S.trTutDone = 1; delete S.onbOpen; save();
@@ -12350,7 +12386,7 @@ $('btnOpt').onclick = () => {
     const w = x1 - x0 + 1, h = y1 - y0 + 1;
     c.width = w * z; c.height = h * z; c.className = 'pix'; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(t, x0, y0, w, h, 0, 0, c.width, c.height);
     b.className = 'look' + (k === myLook() ? ' on' : ''); b.title = n; b.appendChild(c); b.insertAdjacentHTML('beforeend', `<small>${n}</small>`);
-    b.onclick = () => { if (!S) return; S.look = k; save(); SND.se('ok'); drawLooks(); };
+    b.onclick = () => { if (!S) return; S.look = k; save(); SND.se('ok'); drawLooks(); if (!$('scHub').hidden) try { renderHub(); } catch (e) { } };   // ホームの アイコンも すぐ かえる
     LK.appendChild(b); } };
   if (S) drawLooks(); else LK.previousElementSibling.hidden = true;
   bg.querySelector('#oSeAdj').onclick = () => seAdjust();
@@ -12500,8 +12536,9 @@ async function mkSave() {
   bg.querySelector('#mkOk').onclick = () => { bg.remove(); renderHub(); };
   SND.se('caught');
 }
-$('btnTrainTab').onclick = () => { guildStop(); renderTrain(); };
-$('btnTrBack').onclick = () => trLeave(() => renderHub());
+$('btnTrainTab').onclick = () => { guildStop(); TR_BACK = null; renderTrain(); };
+let TR_BACK = null;   // 訓練の「もどる」の いきさき（へんせいから ひらいた ときは へんせいへ）
+$('btnTrBack').onclick = () => trLeave(() => { const b = TR_BACK; TR_BACK = null; if (b === 'team') renderTeam(); else renderHub(); });
 $('btnGuild').onclick = () => renderGuild();
 $('btnShop').onclick = () => { guildStop(); renderShop(); };
 $('tabHome').onclick = () => { guildStop(); renderHub(); };
@@ -12815,7 +12852,7 @@ function renderTower() {
   body.querySelectorAll('canvas[data-sid]').forEach(c => c.replaceWith(spriteCanvas(c.dataset.sid, 72)));
 }
 function towerStart() {
-  const T = tw(), R = T.run; if (!R) return; const team = towerTeam(); if (!team) { T.run = null; save(); renderTower(); return; }
+  const T = tw(), R = T.run; if (!R) return; const team = towerTeam(); if (!team) { say0('ちょうせん中の メンバーが いないので、きろくを おわりにします。').then(() => { T.best = Math.max(T.best, R.streak); T.run = null; save(); renderTower(); }); return; }
   const n = R.streak, nx = n + 1, tyc = nx % TW_TYCOON === 0, boss = nx % TW_SET === 0;
   const p = clamp(.08 + n * .03 + (boss ? .08 : 0), .08, 1) /* はじめは よわめ、れんしょう するほど つよい こたい */, ids = poolIds().filter(id => n >= TW_SET || !SPECIES[id].rare), en = [];
   // あいての しゅぞくは じぶんの 3たいの つよさ（きほんの のうりょくの ごうけい）に ちかい ものから。れんしょう するほど すこし つよい しゅぞく
@@ -12969,11 +13006,11 @@ async function freeUpload(R) {
 async function startFree() {
   if (!S.party.length) return;
   const R = await rankDb().catch(() => false);
-  if (!R || !R.id) { await say0('いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます'); return startCup(); }
+  if (!R || !R.id) { await say0('いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます'); return freeCpu(); }
   freeUpload(R);
   let rows = [];
   try { const q = await R.db.collection('teams').orderBy('t', 'desc').limit(40).get(); rows = q.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.id !== R.id && freeOk(r.tm)); } catch (e) { rows = []; }
-  if (!rows.length) { await say0('まだ ほかの 人の チームが ありません。コンピューターの チームと たたかいます'); return startCup(); }
+  if (!rows.length) { await say0('まだ ほかの 人の チームが ありません。コンピューターの チームと たたかいます'); return freeCpu(); }
   let i = Math.floor(Math.random() * rows.length); if (rows.length > 1 && rows[i].id === S.freeLast) i = (i + 1) % rows.length;
   const show_ = (k) => {
     const o = rows[k], nm = safeName(o.nm, NAME_MAX) || 'サモナー', bg = modal(`<h3 style="margin-bottom:6px">フリー対戦</h3><p class="dim" style="margin-bottom:8px">あいて：<b class="frNm" style="color:var(--ink)"></b>　${typeof o.r === 'number' ? tierChip(o.r) : ''}</p><div class="frTeam" style="display:flex;gap:8px;justify-content:center;margin-bottom:12px"></div><div class="row" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn sub" data-a="x">やめる</button>${rows.length > 1 ? '<button class="btn sub" data-a="n">ほかの あいて</button>' : ''}<button class="btn" data-a="go">たたかう</button></div>`);
@@ -12982,6 +13019,13 @@ async function startFree() {
     bg.onclick = (e) => { const b = e.target.closest('button[data-a]'); if (!b) return; bg.remove(); SND.se('click'); if (b.dataset.a === 'n') show_((k + 1) % rows.length); else if (b.dataset.a === 'go') freeBattle(o, nm); };
   };
   show_(i);
+}
+// フリー対戦（コンピューター）：たいかいとは べつ。まけても なにも へらない（すすみぐあいも かわらない）
+function freeCpu() {
+  const pool = poolIds().filter(id => !SPECIES[id].rare), enemies = [], k = clamp(S.round * .15 + S.tier * .2, 0, 1);
+  for (let i = 0; i < 3; i++) { let sid; do { sid = choice(pool); } while (enemies.some(e => e.sid === sid) && pool.length > 3); enemies.push(foeMon(sid, k, -1 - i)); }
+  const t = roundTrainer(S.round), nm = 'コンピューター', field = choice(FIELDS);
+  startBattle({ kind: 'cup', free: { id: 'cpu', nm }, boss: false, enemies, field, trainer: { name: nm, spr: trArt(t.k) }, title: 'フリー対戦', intro: `${nm}の チームと フリー対戦！ ${FIELD_NAMES[field]}フィールドで しあい かいし！` });
 }
 function freeBattle(o, nm) {
   S.freeLast = o.id; save();
