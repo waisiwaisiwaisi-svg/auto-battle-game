@@ -183,6 +183,10 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .jrc b{font-size:15px}.jrc small{font-size:11px;opacity:.85}.jrc .dots{display:flex;gap:4px}.jrc .dots i{width:10px;height:10px;border-radius:50%;background:#3a3350;border:1px solid #0d0b14}.jrc .dots i.on{background:var(--acc)}.jrc .dots i.ld{border-radius:2px;width:14px}
 .jrrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px}
 .jrteam{display:flex;align-items:center;gap:2px;padding:3px 8px;background:rgba(255,255,255,.06);border:2px solid var(--line,#4a4466);border-radius:8px;color:var(--ink);cursor:pointer;font:inherit}
+.jrdeck{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;font-size:12px}.jrdeck>b{color:var(--dim);font-weight:400;margin-right:2px}
+.jrdk{display:flex;align-items:center;gap:1px;padding:2px 8px 2px 6px;min-height:34px;background:rgba(255,255,255,.06);border:2px solid var(--line,#4a4466);border-radius:8px;color:var(--ink);font:inherit;cursor:pointer}
+.jrdk em{font-style:normal;font-weight:700;color:var(--acc);margin-right:4px}.jrdk img{height:26px;width:auto;image-rendering:pixelated}.jrdk i{font-style:normal;font-size:11px;color:var(--dim)}
+.jrdk.on{border-color:var(--acc);background:rgba(255,209,102,.14)}.jrdk:disabled{opacity:.45;cursor:default}.jrdk:active:not(:disabled){transform:translateY(1px)}
 .jrteam canvas{image-rendering:pixelated;display:block}.jrteam .sep{width:1px;height:22px;background:#5a5480;margin:0 4px}.jrteam b{font-size:12px;margin-left:6px;white-space:nowrap}.jrteam:active{transform:translateY(1px)}
 @media (max-width:520px){.jrrow{flex-wrap:nowrap;gap:6px}.jrrow .btn{font-size:11px!important;padding:6px 8px!important;flex:0 1 auto}.jrteam{flex:0 0 auto;padding:3px 6px}.jrteam canvas{height:28px;width:auto}.jrteam canvas:nth-of-type(n+4),.jrteam .sep{display:none}.jrteam b{font-size:11px;margin-left:3px}}   /* たて画面：ひかえは はぶいて よこ ならび */
 .jrc>.jtype{position:absolute;top:8px;left:10px}.jrc .in{padding-top:30px}   /* タイプの ふだと ジムの なまえが かさならない ように */
@@ -3341,10 +3345,16 @@ function isleScene(k) {
     q.drawImage(ISLE_IMG.CLERK, f * 64, 0, 64, 64, Math.round(fx - 32 * kz), Math.round(fy - 64 * kz), Math.round(64 * kz), Math.round(64 * kz)); q.restore();
     if (!ISLE.ct) ISLE.ct = setInterval(() => { if (ISLE.k !== 'shop') { clearInterval(ISLE.ct); ISLE.ct = 0; return; } ISLE.cf = (ISLE.cf || 0) + 1; isleScene('shop'); }, 450); }
   const shadow = (x, y, w) => { q.fillStyle = 'rgba(0,0,0,.22)'; q.beginPath(); q.ellipse(x * z, y * z, w * z, 3 * z, 0, 0, 7); q.fill(); };
-  try { const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, ts = 32 * z / h0, [px, py] = B0.at.tr;
+  const lead = S && S.party && S.party[0], team = k === 'arena' && S && S.party ? S.party.slice(0, 6) : [];
+  // アーケード：へんせいの モンスターを ぜんぶ（6たいまで）。サモナーの みぎに 2れつ（おく 3たい・てまえ 3たい）
+  const TP = team.length > 1 ? { tr: [80, 110], mon: [[104, 104], [126, 104], [148, 104], [96, 124], [118, 124], [140, 124]] } : null;
+  const drawMon = (m, mx, my, hh) => { if (!m || !SPR[m.sid]) return; try { const im = SPR[m.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(m.sid, im), kk = Math.min(hh * z / bh, hh * 1.3 * z / bw);
+    shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { } };
+  if (TP) team.slice(0, 3).forEach((m, i) => drawMon(m, TP.mon[i][0], TP.mon[i][1], 22));   // おくの れつは サモナーより さきに かく
+  try { const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, ts = 32 * z / h0, [px, py] = TP ? TP.tr : B0.at.tr;
     shadow(px, py, 8); q.drawImage(ti, Math.round(px * z - ti.width * ts / 2), Math.round(py * z - ti.height * ts), Math.round(ti.width * ts), Math.round(ti.height * ts)); } catch (e) { }
-  const lead = S && S.party && S.party[0];
-  if (lead && SPR[lead.sid]) try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * z / bh, [mx, my] = B0.at.mon;
+  if (TP) team.slice(3).forEach((m, i) => drawMon(m, TP.mon[i + 3][0], TP.mon[i + 3][1], 22));
+  else if (lead && SPR[lead.sid]) try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * z / bh, [mx, my] = B0.at.mon;
     shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { }
   $('isleTtl').textContent = ISLE_NAME[k];
   const J = jr(), say = k === 'arena' ? (J.champ ? 'でんどういり おめでとう！ タワーにも のぼろう' : J.badges.length >= GYMS.length ? `つぎは ${LEAGUE[J.league][1]}！` : !J.rival ? 'まずは はじめての 戦いから！' : `つぎの あいては ${GYMS[J.gym].ln}！`)
@@ -4786,13 +4796,24 @@ function saveDeck(i) {
   if (D[i] && D[i].u.join(',') !== u.join(',') && !(deckArm === i && performance.now() < deckArmT)) { deckArm = i; deckArmT = performance.now() + 3000; SND.se('click'); renderDecks(); deckMsg(`もういちど おすと デッキ${i + 1}を うわがき`); setTimeout(() => { if (deckArm === i && performance.now() >= deckArmT && !$('scTeam').hidden) renderDecks(); }, 3100); return; }
   deckArm = -1; D[i] = { u }; save(); SND.se('ok'); renderDecks(); deckMsg(`デッキ${i + 1}に ほぞんした`);
 }
-function loadDeck(i) {
-  const d = S.decks[i]; if (!d) return; deckArm = -1;
+// デッキを いまの パーティに する（へんせい・アーケードの なかから）。けっかの ことば を かえす（だめなら null）
+function applyDeck(i) {
+  const d = S.decks && S.decks[i]; if (!d) return null; deckArm = -1;
   const all = [...S.party, ...S.box], pick = d.u.map(u => all.find(m => m.uid === u)).filter(Boolean);
-  if (!pick.length) { SND.se('deny'); deckMsg('この デッキの モンスターは もう いない'); return; }
+  if (!pick.length) { SND.se('deny'); return 'この デッキの モンスターは もう いない'; }
   const rest = S.party.filter(m => !pick.includes(m)); S.box = S.box.filter(m => !pick.includes(m)); S.party = pick.slice(0, 6); S.box.unshift(...rest);   // はずれた こは ボックスの さいしょへ
-  teamSel = null; save(); SND.se('ok'); renderTeam(); if (typeof updTeamIco === 'function') updTeamIco();
-  deckMsg(pick.length < d.u.length ? `デッキ${i + 1}を よびだした（いない こ ${d.u.length - pick.length}たいは ぬかした）` : `デッキ${i + 1}を よびだした`);
+  teamSel = null; save(); SND.se('ok'); if (typeof updTeamIco === 'function') updTeamIco();
+  return pick.length < d.u.length ? `デッキ${i + 1}を よびだした（いない こ ${d.u.length - pick.length}たいは ぬかした）` : `デッキ${i + 1}を よびだした`;
+}
+function loadDeck(i) { const t = applyDeck(i); if (t == null) return; if (!/もう いない/.test(t)) renderTeam(); deckMsg(t); }
+// アーケードの なか：デッキを よびだす ボタン（3つ）。いまの へんせいと おなじ デッキは ひかる
+function deckPickHTML() {
+  const D = (S.decks || []).concat([null, null, null]).slice(0, 3), all = new Map([...S.party, ...S.box].map(m => [m.uid, m])), cur = S.party.map(m => m.uid).join(',');
+  return `<span class="jrdeck"><b>デッキ</b>${D.map((d, i) => { const faces = d ? d.u.slice(0, 3).map(u => { const m = all.get(u), f = m && bodyURL(m.sid); return f ? `<img src="${f}" alt="">` : ''; }).join('') : '<i>から</i>';
+    return `<button type="button" class="jrdk${d && d.u.join(',') === cur ? ' on' : ''}" data-dk="${i}"${d ? '' : ' disabled'}><em>${i + 1}</em>${faces}</button>`; }).join('')}</span>`;
+}
+function deckPickBind(root, redraw) {
+  root.querySelectorAll('.jrdk').forEach(b => b.onclick = () => { if (b.classList.contains('on')) return; const t = applyDeck(+b.dataset.dk); if (t == null) return; redraw(); say0(t); });
 }
 // ボックスの ならびかえ：えらんだ じゅんに S.box を ならべなおす（じぶんで ならべる ときは そのまま）
 const DEX_NO = (() => { const o = {}; Object.keys(SPECIES).forEach((id, i) => { o[id] = i; }); return o; })();
@@ -12689,7 +12710,7 @@ const towerOpen = () => !!jr().champ;
 function towerTeam() { const T = tw(); if (!T.run) return null; const all = S.party.concat(S.box); const t = T.run.uids.map(u => all.find(m => m.uid === u)); return t.every(Boolean) ? t : null; }
 function renderTower() {
   if (!towerOpen()) { renderJourney(); return; }
-  show('scTower'); const T = tw(), R = T.run, body = $('twBody'); if (R && R.streak > T.best) T.best = R.streak;   // いまの れんしょうが きろくを こえたら すぐ はんえい
+  show('scTower'); if (ISLE.k === 'arena') isleScene('arena'); const T = tw(), R = T.run, body = $('twBody'); if (R && R.streak > T.best) T.best = R.streak;   // いまの れんしょうが きろくを こえたら すぐ はんえい
   const head = `<div class="card acscore"><span>さいこう <b>${T.best}</b> れんしょう</span><span class="dim">7れんしょう たっせい ${T.sets}かい</span></div>`;
   const dots = (n) => Array.from({ length: TW_SET }, (_, i) => `<i class="${i < n % TW_SET ? 'done' : i === n % TW_SET ? 'now' : ''} ${i === TW_SET - 1 ? 'boss' : ''}"><em>${Math.floor(n / TW_SET) * TW_SET + i + 1}</em></i>`).join('<s></s>');
   if (!R) {
@@ -12698,7 +12719,9 @@ function renderTower() {
       <div class="acpath">${dots(0)}</div>
       <div class="acrules"><span><b>❤</b>まいかい HPは ぜんかい</span><span><b>★</b>7れんしょうごとに ごほうび・21れんしょうごとに タワータイクーン</span><span><b>✖</b>まけたら れんしょうは 0から</span></div></div>
       <div class="card acteam">${team.map(m => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b></div>`).join('')}</div>
+      <div style="margin:-2px 0 4px">${deckPickHTML()}</div>
       <button class="btn" id="twGo">ちょうせん する</button>`;
+    deckPickBind(body, renderTower);
     body.querySelector('#twGo').onclick = () => { SND.se('ok'); T.run = { streak: 0, uids: S.party.slice(0, 3).map(m => m.uid) }; save(); renderTower(); };
   } else {
     const team = towerTeam() || [], n = R.streak, nx = n + 1, tyc = nx % TW_TYCOON === 0, boss = nx % TW_SET === 0;
@@ -12734,10 +12757,11 @@ function towerResult(res, lines) {
   lines.unshift(msg);
 }
 function renderJourney() {
-  show('scJourney'); const J = jr();
+  show('scJourney'); if (ISLE.k === 'arena') isleScene('arena'); const J = jr();   // なかの え：いまの へんせいで かきなおす
   $('jrBadges').textContent = J.badges.length;
   { const nt = J.champ ? null : J.badges.length >= GYMS.length ? LEAGUE[J.league][3] : GYMS[J.gym].t;
-    $('jrStory').innerHTML = '<span></span><span class="jrrow"><button class="btn sub" id="jrSort" style="padding:6px 12px;font-size:12px">' + (nt ? (J.badges.length >= GYMS.length ? `${LEAGUE[J.league][1]}（${TYPES[nt].n}）に あわせて へんせい` : `${TYPES[nt].n}ジムに あわせて へんせい`) : 'つよい じゅんに へんせい') + '</button><button class="jrteam" id="jrTeam" title="へんせいを かえる"></button></span>';
+    $('jrStory').innerHTML = '<span></span><span class="jrrow"><button class="btn sub" id="jrSort" style="padding:6px 12px;font-size:12px">' + (nt ? (J.badges.length >= GYMS.length ? `${LEAGUE[J.league][1]}（${TYPES[nt].n}）に あわせて へんせい` : `${TYPES[nt].n}ジムに あわせて へんせい`) : 'つよい じゅんに へんせい') + '</button><button class="jrteam" id="jrTeam" title="へんせいを かえる"></button></span>' + deckPickHTML();
+    deckPickBind($('jrStory'), renderJourney);
     $('jrSort').onclick = () => { SND.se('ok'); const top = sortPartyFor(nt); renderJourney(); say0(`パーティを ならべかえたよ（せんとう：${top.map(m => SPECIES[m.sid].n).join('・')}）`); };
     { const t = $('jrTeam'); S.party.slice(0, 6).forEach((m, i) => { if (i === 3) t.insertAdjacentHTML('beforeend', '<i class="sep"></i>'); const c = spriteCanvas(m.sid, i < 3 ? 34 : 24); t.appendChild(c); }); t.insertAdjacentHTML('beforeend', '<b>へんせい ›</b>');   // いまの へんせい：タップで へんせいがめんへ（もどると ジムに もどる）
       t.onclick = () => { SND.se('ok'); teamFrom = 'journey'; renderTeam(); }; } }
