@@ -243,7 +243,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .slot[hidden]{display:none!important}
 .slotlabel.boxhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.boxsort{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px;flex-wrap:wrap}.boxsort button{font:inherit;font-size:13px;min-width:30px;padding:3px 6px;color:var(--ink);background:#2a2148;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2)}.boxsort button.on{background:var(--acc);color:#1a1222}.boxsort select{font:inherit;font-size:12px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 1px var(--rim2);padding:3px 6px;max-width:60vw}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.slot{position:relative;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;font-size:12px;text-align:center;touch-action:none;cursor:grab;
+.slot{position:relative;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;font-size:12px;text-align:center;touch-action:pan-y;cursor:grab;
   background:linear-gradient(180deg,var(--win1),var(--win2));box-shadow:0 0 0 2px var(--out),inset 0 0 0 2px var(--rim2),0 4px 0 2px rgba(0,0,0,.35);border-radius:4px}
 .slot canvas{width:64px;height:64px}
 .slot .no{position:absolute;left:5px;top:4px;font-size:15px;color:var(--acc);text-shadow:2px 2px 0 #000}
@@ -256,6 +256,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .slot.view{outline:2px dashed rgba(255,255,255,.5);outline-offset:2px}
 .slot.over{box-shadow:0 0 0 3px var(--good),0 0 18px rgba(79,209,165,.6)!important}
 .slot.dragging{opacity:.3}
+.slot.lift{transform:scale(1.06);box-shadow:0 0 0 3px var(--acc),0 8px 14px rgba(0,0,0,.5)!important;z-index:3}   /* ながおしで もちあげた */
 .boxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:calc(42 * var(--vh));overflow:auto;padding:4px;background:rgba(13,11,20,.5);border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}
 .boxgrid .slot{min-height:84px;font-size:10.5px}
 .boxgrid .slot canvas{width:44px;height:44px}
@@ -1726,7 +1727,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
 
   <section class="screen" id="scTeam">
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">へんせい</span><button class="btn sub" id="btnTeamBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
-    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>して いれかえ　／　<b>タップ</b>で くわしく みる</p>
+    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>（スマホは ながおし）して いれかえ　／　<b>タップ</b>で くわしく みる</p>
     <div class="teamwrap">
       <div class="teamleft">
         <div class="deckbar" id="deckBar"></div>
@@ -3401,7 +3402,7 @@ function isleScene(k) {
   else if (lead && SPR[lead.sid]) try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * z / bh, [mx, my] = B0.at.mon;
     shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { }
   $('isleTtl').textContent = ISLE_NAME[k];
-  const J = jr(), say = k === 'arena' ? (J.champ ? 'でんどういり おめでとう！ タワーにも のぼろう' : J.badges.length >= GYMS.length ? `つぎは ${LEAGUE[J.league][1]}！` : !J.rival ? 'まずは はじめての 戦いから！' : `つぎの あいては ${GYMS[J.gym].ln}！`)
+  const J = jr(), say = k === 'arena' ? (J.champ ? 'でんどういり おめでとう！ タワーにも のぼろう' : J.badges.length >= GYMS.length ? `つぎは ${LEAGUE[J.league][1]}！` : !J.rival ? 'まずは はじめての 戦いから！' : (J.step || 0) < 2 ? `つぎは ${TYPES[GYMS[J.gym].t].n}ジムの サモナー ${(J.step || 0) + 1}人め！` : `つぎの あいては ${GYMS[J.gym].ln}！`)
     : k === 'shop' ? 'いらっしゃい！ きょうの とくばいも みていってね' : k === 'room' ? (lead ? `${SPECIES[lead.sid].n}「きょうも いっしょに がんばろう！」` : 'おかえり！') : 'しげみが ガサガサ ゆれている……！';
   $('isleSay').textContent = say;
 }
@@ -4781,6 +4782,7 @@ function teamMon(r) { return r.w === 'p' ? S.party[r.i] : r.w === 'b' ? S.box[r.
 function teamMove(a, b) {
   if (!a || !b || (a.w === b.w && a.i === b.i)) return false;
   const P = S.party, X = S.box, ma = teamMon(a), mb = teamMon(b);
+  if (a.w === 'b' && b.w === 'b' && S.boxSort) { SND.se('deny'); say0('ボックスを ならびかえて いる あいだは、ボックスの なかで いれかえ できません。\n「じぶんで ならべる」に すると いれかえ できます。'); return false; }
   if (!ma) return false;
   if (a.w === 'p' && b.w === 'p') { if (mb) [P[a.i], P[b.i]] = [P[b.i], P[a.i]]; else { P.splice(a.i, 1); P.push(ma); } }
   else if (a.w === 'b' && b.w === 'p') { if (mb) { P[b.i] = ma; X[a.i] = mb; } else { X.splice(a.i, 1); P.push(ma); } }
@@ -4921,10 +4923,10 @@ function renderTeamDetail() {
     if (act === 'tm') return useTM(m);
     if (act === 'boost') return openBoost(m);
     if (act === 'item') return itemMenu(m);
-    if (act === 'train') { TRN = TRN && TRN.uid === m.uid ? TRN : null; return renderTrain(m.uid); }
+    if (act === 'train') { TRN = TRN && TRN.uid === m.uid ? TRN : null; TR_BACK = 'team'; return renderTrain(m.uid); }   // もどるで へんせいへ
     if (act === 'box') teamMove({ w: 'p', i: pi }, { w: 'drop', i: 0 });
     if (act === 'party') teamMove({ w: 'b', i: bi }, { w: 'p', i: S.party.length });
-    if (act === 'release') { ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; save(); renderTeam(); }); return; }
+    if (act === 'release') { if (towerHold(m)) return; ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; teamSheet = false; save(); renderTeam(); }); return; }
     teamSel = null; renderTeam();
   };
 }
@@ -5358,6 +5360,9 @@ function itemMenu(m) {
 // 強化：おなじ モンスターを つかって ポイントを ふやし、のうりょくに ふりわける
 // きょうか できる：おなじ しゅるいの モンスターが ほかに いて、まだ さいだいまで あつめて いない
 const canBoost = (m) => (m.fed || 0) < EV_MAX && [...S.party, ...S.box].some(x => x !== m && x.sid === m.sid);
+// バトルタワーに ちょうせん中の メンバー（にがしたり そざいに したり できない）
+const inTowerRun = (x) => { const R = S && S.tower && S.tower.run; return !!(R && x && R.uids.includes(x.uid)); };
+const towerHold = (x) => { if (!inTowerRun(x)) return false; SND.se('deny'); say0('この モンスターは バトルタワーに ちょうせん中です。\nタワーを やめてから にがしてね。'); return true; };
 function openBoost(m) {
   m.ev = m.ev || {}; for (const k of STAT6) m.ev[k] = m.ev[k] || 0; m.fed = m.fed || 0;
   const sp = SPECIES[m.sid];
@@ -5369,7 +5374,7 @@ function openBoost(m) {
     const st = stats(pv), free = m.fed - evUsed(m) - pendN();
     // つかえるのは おなじ しゅるいの モンスター だけ（1たいで +3）。ボックス → パーティの じゅん
     const tot = (x) => { const b = SPECIES[x.sid].base; return b.hp + b.atk + b.def + b.spd; };
-    const dups = [...S.box.map((x, i) => ({ x, w: 'b', i })), ...S.party.map((x, i) => ({ x, w: 'p', i }))].filter(o => o.x !== m && o.x.sid === m.sid)
+    const dups = [...S.box.map((x, i) => ({ x, w: 'b', i })), ...S.party.map((x, i) => ({ x, w: 'p', i }))].filter(o => o.x !== m && o.x.sid === m.sid && !inTowerRun(o.x))
       .map(o => Object.assign(o, { v: BOOST_SAME })).sort((a, b) => b.v - a.v || (a.w === 'p') - (b.w === 'p') || tot(a.x) - tot(b.x));
     const room = EV_MAX - m.fed, gainOf = (set) => Math.min(room, [...set].reduce((a, j) => a + dups[j].v, 0));
     bg.querySelector('#bst').innerHTML = `<h3 style="margin-bottom:6px">${sp.n}を きょうか</h3>
@@ -5406,10 +5411,14 @@ function openBoost(m) {
   const under = (cx, cy) => { const g = drag && drag.ghost; if (g) g.style.display = 'none'; const el = document.elementFromPoint(cx, cy); if (g) g.style.display = ''; return refOf(el); };
   document.addEventListener('pointerdown', (ev) => {
     if ($('scTeam').hidden) return; const r = refOf(ev.target); if (!r || r.w === 'drop' || !teamMon(r)) return;
-    drag = { r, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, over: null };
+    drag = { r, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, over: null, touch: ev.pointerType === 'touch', armed: ev.pointerType !== 'touch' };
+    // ゆび：ながおし（0.28びょう）で もちあげる。すぐ うごかしたら スクロール（いれかえない）
+    if (drag.touch) { const d = drag; d.tm = setTimeout(() => { if (drag !== d) return; d.armed = true; d.r.el.classList.add('lift'); try { navigator.vibrate && navigator.vibrate(15); } catch (e) { } }, 280); }
   });
+  document.addEventListener('touchmove', (ev) => { if (drag && drag.armed && drag.touch) ev.preventDefault(); }, { passive: false });   // もちあげた あとは スクロール させない
   document.addEventListener('pointermove', (ev) => {
     if (!drag) return;
+    if (!drag.armed) { if (Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) > 8) { clearTimeout(drag.tm); drag = null; } return; }   // ながおし まえに うごいた：スクロール
     if (!drag.moved && Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) > 8) {
       drag.moved = true; const m = teamMon(drag.r); drag.ghost = spriteCanvas(m.sid, 72); drag.ghost.className = 'pix dragghost'; $('app').appendChild(drag.ghost); drag.r.el.classList.add('dragging');
     }
@@ -5420,7 +5429,7 @@ function openBoost(m) {
     if (o && o.el !== drag.r.el) { o.el.classList.add('over'); drag.over = o.el; } else drag.over = null;
   }, { passive: false });
   const end = (ev) => {
-    if (!drag) return; const d = drag; drag = null;
+    if (!drag) return; const d = drag; drag = null; clearTimeout(d.tm); d.r.el.classList.remove('lift');
     if (d.ghost) d.ghost.remove(); d.r.el.classList.remove('dragging'); if (d.over) d.over.classList.remove('over');
     if (d.moved) { justDragged = performance.now(); const o = under(ev.clientX, ev.clientY); teamSel = null; if (o) { teamView = teamMon(d.r).uid; teamDrop = teamView; teamMove(d.r, o); } renderTeam(); }
   };
@@ -5521,7 +5530,7 @@ function monCard(m, where, i, openUid) {
     if (act === 'down') [S.party[i + 1], S.party[i]] = [S.party[i], S.party[i + 1]];
     if (act === 'box') S.box.push(S.party.splice(i, 1)[0]);
     if (act === 'party') S.party.push(S.box.splice(i, 1)[0]);
-    if (act === 'release') { ask(`${sp.n}を にがしますか？`).then(y => { if (!y) return; S.box.splice(i, 1); save(); renderTeam(); }); return; }
+    if (act === 'release') { if (towerHold(S.box[i])) return; ask(`${sp.n}を にがしますか？`).then(y => { if (!y) return; S.box.splice(i, 1); save(); renderTeam(); }); return; }
     save(); renderTeam();
   };
   el.appendChild(a);
@@ -12500,8 +12509,9 @@ async function mkSave() {
   bg.querySelector('#mkOk').onclick = () => { bg.remove(); renderHub(); };
   SND.se('caught');
 }
-$('btnTrainTab').onclick = () => { guildStop(); renderTrain(); };
-$('btnTrBack').onclick = () => trLeave(() => renderHub());
+$('btnTrainTab').onclick = () => { guildStop(); TR_BACK = null; renderTrain(); };
+let TR_BACK = null;   // 訓練の「もどる」の いきさき（へんせいから ひらいた ときは へんせいへ）
+$('btnTrBack').onclick = () => trLeave(() => { const b = TR_BACK; TR_BACK = null; if (b === 'team') renderTeam(); else renderHub(); });
 $('btnGuild').onclick = () => renderGuild();
 $('btnShop').onclick = () => { guildStop(); renderShop(); };
 $('tabHome').onclick = () => { guildStop(); renderHub(); };
@@ -12815,7 +12825,7 @@ function renderTower() {
   body.querySelectorAll('canvas[data-sid]').forEach(c => c.replaceWith(spriteCanvas(c.dataset.sid, 72)));
 }
 function towerStart() {
-  const T = tw(), R = T.run; if (!R) return; const team = towerTeam(); if (!team) { T.run = null; save(); renderTower(); return; }
+  const T = tw(), R = T.run; if (!R) return; const team = towerTeam(); if (!team) { say0('ちょうせん中の メンバーが いないので、きろくを おわりにします。').then(() => { T.best = Math.max(T.best, R.streak); T.run = null; save(); renderTower(); }); return; }
   const n = R.streak, nx = n + 1, tyc = nx % TW_TYCOON === 0, boss = nx % TW_SET === 0;
   const p = clamp(.08 + n * .03 + (boss ? .08 : 0), .08, 1) /* はじめは よわめ、れんしょう するほど つよい こたい */, ids = poolIds().filter(id => n >= TW_SET || !SPECIES[id].rare), en = [];
   // あいての しゅぞくは じぶんの 3たいの つよさ（きほんの のうりょくの ごうけい）に ちかい ものから。れんしょう するほど すこし つよい しゅぞく
