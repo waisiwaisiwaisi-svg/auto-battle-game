@@ -12049,25 +12049,63 @@ async function bkDb() {
   return BKDB;
 }
 let BK_T = 0, BK_BUSY = null, BK_LAST = 0;
-// セーブの たびに よぶ：3ぷんに 1かい まとめて バックアップ（アプリを とじる ときは すぐ）
-function bkKick() { if (BK_T || !S || ONB_TEST || SAVE_STALE) return; BK_T = setTimeout(() => { BK_T = 0; bkUp().catch(() => { }); }, Math.max(20000, 180000 - (Date.now() - BK_LAST))); }
-document.addEventListener('visibilitychange', () => { if (document.hidden && BK_T) { clearTimeout(BK_T); BK_T = 0; bkUp().catch(() => { }); } });
-function bkUp() { return BK_BUSY || (BK_BUSY = bkUp0().finally(() => { BK_BUSY = null; })); }
-async function bkUp0() {
-  if (!S || SAVE_STALE || ONB_TEST || !S.party || !S.party.length) return false;
+// この 端末の しるし（セーブの そとに おく。どの 端末の バックアップかを みわける）
+const bkDev = () => { try { let d = localStorage.getItem('pma_dev'); if (!d) { d = bkNewCode(); localStorage.setItem('pma_dev', d); } return d; } catch (e) { return 'x'; } };
+// セーブの 中身の ハッシュ：さいごに そろえた ときから あそんで かわったか
+// （bk と、ほうって おくだけで かわる ブラインドボックスの 時計は のぞく）
+// キーの じゅんばん・からの はいれつ／オブジェクトの あるなし では かわらない かたちに（よみこみ なおしで ならびが かわる ため）
+const bkCanon = (v) => Array.isArray(v) ? v.map(bkCanon) : v && typeof v === 'object' ? Object.keys(v).sort().reduce((o, k) => { const c = bkCanon(v[k]); if (c !== undefined && !(c && typeof c === 'object' && !Object.keys(c).length)) o[k] = c; return o; }, {}) : v;
+const bkH = (x) => { const o = { ...x }; delete o.bk; delete o.chestTick; delete o.chestSaved; if (Array.isArray(o.chests)) o.chests = o.chests.map(c => c && { ...c, at: c.at == null ? null : 1 }); const j = JSON.stringify(bkCanon(o)); let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) { h ^= j.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + '.' + j.length; };
+// セーブの たびに よぶ：1ぷんに 1かい まとめて バックアップ（アプリを とじる・ほかの アプリへ うつる ときは すぐ）
+function bkKick() { if (BK_T || !S || ONB_TEST || SAVE_STALE) return; BK_T = setTimeout(() => { BK_T = 0; bkUp().catch(() => { }); }, Math.max(15000, 60000 - (Date.now() - BK_LAST))); }
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { if (BK_T) { clearTimeout(BK_T); BK_T = 0; } bkUp().catch(() => { }); }
+  else bkCheck();   // もどって きたら ほかの 端末で あそんだ ぶんを みる
+});
+function bkUp(force) { return BK_BUSY || (BK_BUSY = bkUp0(force).finally(() => { BK_BUSY = null; })); }
+async function bkUp0(force, X = S) {
+  if (!X || SAVE_STALE || ONB_TEST || !X.party || !X.party.length) return false;
+  const fresh = !X.bk || !bkNorm(X.bk.code), h = bkH(X);
+  if (!force && !fresh && X.bk.h === h) return true;   // かわって いない
   const R = await bkDb(); if (!R) return false;
-  const fresh = !S.bk || !bkNorm(S.bk.code);
-  if (fresh) S.bk = { code: bkNewCode() };
-  const code = S.bk.code, raw = new TextEncoder().encode(JSON.stringify(S));
+  if (fresh) X.bk = { code: bkNewCode() };
+  const code = X.bk.code, raw = new TextEncoder().encode(JSON.stringify(X));
   const zz = await bkZip(raw, true).catch(() => null), iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await bkKey(code), zz || raw));
   const t = Date.now();
-  await R.db.doc('backups/' + R.id).set({ k: await bkId(code), iv: bkB64(iv), d: bkB64(ct), z: zz ? 1 : 0, t, v: 1 });
-  if (fresh || !S.bk.acct) { await R.db.doc(`data/users/${R.id}/bkcode`).set({ c: code, t }).catch(() => { }); S.bk.acct = 1; }
-  BK_LAST = t; S.bk.t = t;
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { }   // save() だと また バックアップを よぶので ちょくせつ
+  await R.db.doc('backups/' + R.id).set({ k: await bkId(code), iv: bkB64(iv), d: bkB64(ct), z: zz ? 1 : 0, t, dev: bkDev(), v: 1 });
+  if (fresh || !X.bk.acct) { await R.db.doc(`data/users/${R.id}/bkcode`).set({ c: code, t }).catch(() => { }); X.bk.acct = 1; }
+  BK_LAST = t; X.bk.t = t; X.bk.base = t; X.bk.h = h;
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(X)); } catch (e) { }   // save() だと また バックアップを よぶので ちょくせつ
   return true;
 }
+/* おなじ コードの 端末どうしを そろえる：ひらいた とき・もどって きた ときに ほかの 端末の あたらしい データが あれば つかう
+   この 端末でも あそんで いて どちらも かわって いたら どちらを のこすか きく */
+let BK_CHK = null;
+function bkCheck() { return BK_CHK || (BK_CHK = bkCheck0().catch(() => { }).finally(() => { BK_CHK = null; })); }
+async function bkCheck0() {
+  if (SAVE_STALE || ONB_TEST) return;
+  let L = S; if (!L) { try { L = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { } }
+  if (!L || !L.bk || !bkNorm(L.bk.code)) return;
+  const code = L.bk.code, R = await bkDb(); if (!R) return;
+  const q = await R.db.collection('backups').where('k', '==', await bkId(code)).limit(20).get();
+  const top = q.docs.map(x => x.data()).filter(d => d && d.d && d.iv).sort((a, b) => (b.t || 0) - (a.t || 0))[0];
+  if (!top || top.dev === bkDev() || (top.t || 0) <= (L.bk.base || L.bk.t || 0)) return;
+  if (S && !$('scBattle').hidden) return;   // バトル中は つぎの ときに
+  const s = await bkOpen(top, code); if (!s) return;
+  if (S && S !== L) { setTimeout(bkCheck, 0); return; }   // しらべて いる あいだに タイトルから はいった：もういちど
+  if (bkH(L) !== L.bk.h) {   // この 端末でも あそんで いた
+    const c = await ask3(`ほかの 端末で あそんだ データが あります（${bkWhen(top.t)}）。\nこの 端末で あそんだ ぶんと、どちらを つかいますか？\nえらばなかった ほうは きえます。`, ['この 端末', 'ほかの 端末', 'あとで']);
+    if (c === 2) return;
+    if (c === 0) { await bkUp0(true, L).catch(() => { }); return; }
+  }
+  s.bk = Object.assign({}, s.bk, { code, base: top.t, t: top.t, acct: L.bk.acct });
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { }
+  const n = loadSave(); if (n) { n.bk.h = bkH(n); try { localStorage.setItem(SAVE_KEY, JSON.stringify(n)); } catch (e) { } }
+  if (S && !$('scTitle').hidden) { S = loadSave(); if (S) updAutoBtn(); return; }   // タイトルでは だまって いれかえる
+  if (S) { if (BK_T) { clearTimeout(BK_T); BK_T = 0; } await ask('ほかの 端末で あそんだ データに そろえます。', 'OK', null); SAVE_STALE = true; location.reload(); }
+}
+setTimeout(bkCheck, 800);
 async function bkOpen(d, code) {   // 1つの バックアップを ひらく（コードが ちがえば null）
   try {
     const pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bkUnb64(d.iv) }, await bkKey(code), bkUnb64(d.d)));
@@ -12098,19 +12136,19 @@ async function bkWin() {
   const B = bg.querySelector('#bkBody');
   bg.querySelector('#bkX').onclick = () => bg.remove();
   bg.querySelector('#bkRes').onclick = () => { bg.remove(); bkRestoreWin(); };
-  const ok = await bkUp().catch(() => false);
+  const ok = await bkUp(true).catch(() => false);
   if (!bg.isConnected) return;
   if (!ok || !S.bk) { B.innerHTML = `<p class="dim">${onlineHint('データの ひきつぎ')}</p>`; return; }
   B.innerHTML = `<p style="margin-bottom:8px">ふっかつコード</p>
     <div class="bkcode" id="bkCode"></div>
     <div class="row" style="margin:8px 0 10px;justify-content:flex-end"><button class="btn sub" id="bkCp" style="font-size:12px;padding:6px 12px">コピー</button></div>
-    <p class="dim" style="font-size:12px;line-height:1.6">この コードを ほかの スマホや PCで いれると、いまの データが そのまま つかえます。データを けして しまった ときも もどせます。<br><b style="color:#ffd166">コードは スクショか メモで かならず ひかえて おいてね。</b>なくすと もどせません。ひとには おしえないでね。</p>
+    <p class="dim" style="font-size:12px;line-height:1.6">この コードを ほかの スマホや PCで 1かい いれると、その あとは どちらの 端末でも つづきから あそべます（ひらいた ときに あたらしい ほうに そろいます）。データを けして しまった ときも もどせます。<br><b style="color:#ffd166">コードは スクショか メモで かならず ひかえて おいてね。</b>なくすと もどせません。ひとには おしえないでね。</p>
     <div class="optrow" style="border:0;flex-wrap:wrap;row-gap:6px"><span class="dim" style="font-size:12px;min-width:0">さいごの バックアップ<br><span id="bkT"></span></span><button class="btn sub" id="bkNow" style="font-size:12px;padding:6px 12px;margin-left:auto;white-space:nowrap">いま バックアップ</button></div>`;
   const C = B.querySelector('#bkCode'); C.textContent = bkFmt(S.bk.code);
   B.querySelector('#bkT').textContent = bkWhen(S.bk.t);
   B.querySelector('#bkCp').onclick = () => { const sel = () => { const r = document.createRange(); r.selectNodeContents(C); const w = getSelection(); w.removeAllRanges(); w.addRange(r); };
     try { navigator.clipboard.writeText(bkFmt(S.bk.code)).then(() => { SND.se('ok'); B.querySelector('#bkCp').textContent = 'コピーしました'; }, sel); } catch (e) { sel(); } };
-  B.querySelector('#bkNow').onclick = async (e) => { e.target.disabled = true; const r = await bkUp().catch(() => false); e.target.disabled = false; if (r) SND.se('ok'); B.querySelector('#bkT').textContent = r ? bkWhen(S.bk.t) : 'しっぱい（つうしんを たしかめてね）'; };
+  B.querySelector('#bkNow').onclick = async (e) => { e.target.disabled = true; const r = await bkUp(true).catch(() => false); e.target.disabled = false; if (r) SND.se('ok'); B.querySelector('#bkT').textContent = r ? bkWhen(S.bk.t) : 'しっぱい（つうしんを たしかめてね）'; };
 }
 // コードを いれて もどす（タイトルからも）
 async function bkRestoreWin() {
@@ -12149,8 +12187,9 @@ async function bkConfirm(f) {
   bg.querySelector('#bkNo').onclick = () => bg.remove();
   bg.querySelector('#bkYes').onclick = () => {
     if (BK_T) { clearTimeout(BK_T); BK_T = 0; }
-    const s = f.s; if (s.bk) s.bk.acct = 0;   // この アカウントにも コードを のこす
+    const s = f.s; s.bk = Object.assign({}, s.bk, { acct: 0, base: f.t, t: f.t });   // acct：この アカウントにも コードを のこす
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { }
+    const n = loadSave(); if (n) { n.bk.h = bkH(n); try { localStorage.setItem(SAVE_KEY, JSON.stringify(n)); } catch (e) { } }   // もどした ままなら「かわって いない」
     SND.se('ok'); SAVE_STALE = true; location.reload();
   };
 }
@@ -12898,7 +12937,7 @@ renderTitle();
 window.__game = {
   tut() { return TUT; }, get town() { return { TOWN, TOWN_B }; },
   get B() { return B; }, get S() { return S; }, set S(v) { S = v; },
-  startWild, startCup, renderHub, bkUp, SPECIES, MOVES, LEARN, save, equipped, learned, canLearn, get TRN() { return TRN; },
+  startWild, startCup, renderHub, bkUp, bkCheck, bkH, SPECIES, MOVES, LEARN, save, equipped, learned, canLearn, get TRN() { return TRN; },
   step(sec) { for (let t = 0; t < sec; t += 1 / 60) bStep(1 / 60); },
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
