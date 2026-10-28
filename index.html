@@ -3210,7 +3210,9 @@ function plazaLayout(box, els) {
     }
   } else if (y0 * sc < top + 4 || y1 * sc > bot - 6) { s2 = Math.min(sc, (bot - top - 16) / (y1 - y0), W * .98 / (x1 - x0)); const cy = top + 6 + ((bot - top - 16) - (y1 - y0) * s2) / 2; T = (x, y) => [W / 2 + (x - (x0 + x1) / 2) * s2, cy + (y - y0) * s2]; }
   els.forEach((e, i) => { const k = ISLES[i].k === 'room' ? 'house' : ISLES[i].k, r = L[k], [x, y] = T(r[0], r[1]); Object.assign(e.style, { position: 'absolute', left: x + 'px', top: y + 'px', width: r[2] * s2 + 'px', height: r[3] * s2 + 'px', zIndex: 'auto', padding: '0' }); e.querySelector('canvas').style.zIndex = keys.indexOf(k) + 1; });   // なふだは いつも てまえ（canvas だけ おくゆきの じゅん）
-  const c = $('plazaChar'); if (c) { let [cx, cy] = T(L.char[0], L.char[1]); if (W > H) cx = W / 2; Object.assign(c.style, { left: cx - 30 * s2 + 'px', top: cy - 44 * s2 + 'px', width: 60 * s2 + 'px', height: 44 * s2 + 'px', zIndex: 3 }); }
+  const c = $('plazaChar'); if (c) { let [cx, cy] = T(L.char[0], L.char[1]), k = s2; if (W > H) cx = W / 2;
+    else { k = Math.max(s2, Math.min(W * .3 / 60, (bot - top) * .16 / 44)); cx = 12 + 30 * k; cy = bot - 10; }   // たて画面：いちばん した の ひだり（マイルームと ブラインドボックスの あいだ）
+    Object.assign(c.style, { left: cx - 30 * k + 'px', top: cy - 44 * k + 'px', width: 60 * k + 'px', height: 44 * k + 'px', zIndex: 3 }); }
 }
 function isleLayout() {
   const box = $('isles'); if (!box) return; const land = document.documentElement.classList.contains('land'), els = [...box.querySelectorAll('.isle')];
