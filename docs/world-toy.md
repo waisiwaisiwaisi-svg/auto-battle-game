@@ -53,3 +53,4 @@
 - 世界観・設定 たたき台：https://claude.ai/artifact/5TBW4esksJCDHWbfyuG4xZ
 - ボックス 発注資料：https://claude.ai/artifact/5WHN1t3Jvd8vN2GUg3WTjh
 - ブラインドボックス・アイコン 発注資料：https://claude.ai/artifact/Tc9nGH6qiNs42eXmvD5gS3
+- ストリート系アイコン 発注資料（剣・盾・王冠・紋章などを街のモチーフに）：https://claude.ai/artifact/JFDjmqte27AxUHGbb47uks

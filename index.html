@@ -1664,7 +1664,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
       <div class="hcol">
         <button class="btn hcta" id="btnRank"><i class="ico big" data-ico="swords"></i><span class="t">オンライン対戦</span><span id="rkSub" class="s">ほかの サモナーと たいせん</span></button>
         <div class="hmodes">
-          <button class="hmode" id="btnJourney"><i class="ico" data-ico="flag"></i><b>アーケード</b><small id="jrSub">ジムを めぐって バッジを あつめる</small></button>
+          <button class="hmode" id="btnJourney"><i class="ico" data-ico="arcade"></i><b>アーケード</b><small id="jrSub">ジムを めぐって バッジを あつめる</small></button>
           <button class="hmode" id="btnCup"><i class="ico" data-ico="trophy"></i><b>フリー対戦</b><small id="cupSub">だれかの チームと たいせん</small></button>
           <button class="hmode" id="btnWild"><i class="ico" data-ico="bush"></i><b>くさむら</b><small>モンスターを つかまえる</small></button>
           <button class="hmode" id="btnOnline"><i class="ico" data-ico="globe"></i><b>フレンド対戦</b><small>あいことばで たいせん</small></button>
@@ -3685,7 +3685,8 @@ const orbImg = (cls) => { const u = orbURL(); return u ? `<img class="pxe orbi${
 function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
   if (name === 'target' && typeof UIA !== 'undefined' && UIA.target) return (ICON_URL[name] = UIA.target.src);   // 訓練の タブ：的
-  if (name === 'shop' && typeof UIA !== 'undefined' && UIA.chest) return (ICON_URL[name] = UIA.chest.src);   // ショップ：ブラインドボックスの 絵
+  if (name === 'shop') { try { if (CHEST_IMG.cwood) return (ICON_URL[name] = CHEST_IMG.cwood[0]); } catch (e) { } }   // ショップ：木の ブラインドボックス（たからばこは ファンタジーっぽいので やめた）
+  if (name === 'crystal' && ORB_URL) return (ICON_URL[name] = ORB_URL);   // ボックス（すいしょうの 絵は やめた）
   if (name === 'capcr') { const u = orbURL(); if (u) return (ICON_URL[name] = u); if (typeof UIA !== 'undefined' && UIA.crystal) return UIA.crystal.src; }   // ボックス：くさむらで なげる 絵
   if (typeof UIA !== 'undefined' && UIA['ic_' + name]) return (ICON_URL[name] = UIA['ic_' + name].src);   // ChatGPT の アイコン（I1）
   const raw = ICONS[name]; if (!raw) return '';
