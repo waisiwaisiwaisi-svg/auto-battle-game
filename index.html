@@ -12244,32 +12244,36 @@ const bkDev = () => { try { let d = localStorage.getItem('pma_dev'); if (!d) { d
 // （bk と、ほうって おくだけで かわる ブラインドボックスの 時計は のぞく）
 // キーの じゅんばん・からの はいれつ／オブジェクトの あるなし では かわらない かたちに（よみこみ なおしで ならびが かわる ため）
 const bkCanon = (v) => Array.isArray(v) ? v.map(bkCanon) : v && typeof v === 'object' ? Object.keys(v).sort().reduce((o, k) => { const c = bkCanon(v[k]); if (c !== undefined && !(c && typeof c === 'object' && !Object.keys(c).length)) o[k] = c; return o; }, {}) : v;
-const bkH = (x) => { const o = { ...x }; delete o.bk; delete o.chestTick; delete o.chestSaved; if (Array.isArray(o.chests)) o.chests = o.chests.map(c => c && { ...c, at: c.at == null ? null : 1 }); const j = JSON.stringify(bkCanon(o)); let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) { h ^= j.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + '.' + j.length; };
+const bkH = (x) => { const o = { ...x }; delete o.bk; delete o.chestTick; delete o.chestSaved; delete o.shop; delete o.guildOn;   /* shop：ひづけが かわると かってに かわる・guildOn：端末ごとの ギルド はんてい（かいものは ジェム などで わかる） */ if (Array.isArray(o.chests)) o.chests = o.chests.map(c => c && { ...c, at: c.at == null ? null : 1 }); const j = JSON.stringify(bkCanon(o)); let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) { h ^= j.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + '.' + j.length; };
 // セーブの たびに よぶ：1ぷんに 1かい まとめて バックアップ（アプリを とじる・ほかの アプリへ うつる ときは すぐ）
 function bkKick() { if (BK_T || !S || ONB_TEST || SAVE_STALE) return; BK_T = setTimeout(() => { BK_T = 0; bkUp().catch(() => { }); }, Math.max(15000, 60000 - (Date.now() - BK_LAST))); }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { if (BK_T) { clearTimeout(BK_T); BK_T = 0; } bkUp().catch(() => { }); }
   else bkCheck();   // もどって きたら ほかの 端末で あそんだ ぶんを みる
 });
-function bkUp(force) { return BK_BUSY || (BK_BUSY = bkUp0(force).finally(() => { BK_BUSY = null; })); }
-async function bkUp0(force, X = S) {
-  if (!X || SAVE_STALE || ONB_TEST || !X.party || !X.party.length) return false;
+let BK_ASK = false;   // どちらを つかうか きいて いる あいだは あげない
+function bkUp(force) { return BK_BUSY || (BK_BUSY = bkUp0(force).then(r => { if (r === true && S && S.bk && S.bk.h && bkH(S) !== S.bk.h) setTimeout(bkKick, 0); return r; }).finally(() => { BK_BUSY = null; })); }   // あげて いる あいだに かわった ぶんは また あとで
+async function bkUp0(force, X = S, over) {
+  if (!X || SAVE_STALE || ONB_TEST || (BK_ASK && !over) || !X.party || !X.party.length) return false;
   const fresh = !X.bk || !bkNorm(X.bk.code), h = bkH(X);
   if (!force && !fresh && X.bk.h === h) return true;   // かわって いない
   const R = await bkDb(); if (!R) return false;
   if (fresh) X.bk = { code: bkNewCode() };
+  else if (!over) {   // ほかの 端末が あとから あげて いたら うわがき しない（もどって きた ときに どちらを つかうか きく）
+    const top = await bkTop(R, X.bk.code); if (top && top.dev !== bkDev() && (top.t || 0) > (X.bk.base || X.bk.t || 0)) { if (!document.hidden) bkCheck(); return 'newer'; } }
   const code = X.bk.code, raw = new TextEncoder().encode(JSON.stringify(X));
   const zz = await bkZip(raw, true).catch(() => null), iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await bkKey(code), zz || raw));
   const t = Date.now();
-  await R.db.doc('backups/' + R.id).set({ k: await bkId(code), iv: bkB64(iv), d: bkB64(ct), z: zz ? 1 : 0, t, dev: bkDev(), v: 1 });
+  await R.db.doc('backups/' + R.id).set({ k: await bkId(code), iv: bkB64(iv), d: bkB64(ct), z: zz ? 1 : 0, t, dev: bkDev(), from: X.bk.base || 0, v: 1 });
   if (fresh || !X.bk.acct) { await R.db.doc(`data/users/${R.id}/bkcode`).set({ c: code, t }).catch(() => { }); X.bk.acct = 1; }
-  BK_LAST = t; X.bk.t = t; X.bk.base = t; X.bk.h = h;
+  BK_LAST = t; X.bk.t = t; X.bk.base = t; X.bk.mine = t; X.bk.h = h;
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(X)); } catch (e) { }   // save() だと また バックアップを よぶので ちょくせつ
   return true;
 }
 /* おなじ コードの 端末どうしを そろえる：ひらいた とき・もどって きた ときに ほかの 端末の あたらしい データが あれば つかう
    この 端末でも あそんで いて どちらも かわって いたら どちらを のこすか きく */
+async function bkTop(R, code) { const q = await R.db.collection('backups').where('k', '==', await bkId(code)).limit(50).get(); return q.docs.map(x => x.data()).filter(d => d && d.d && d.iv).sort((a, b) => (b.t || 0) - (a.t || 0))[0] || null; }
 let BK_CHK = null;
 function bkCheck() { return BK_CHK || (BK_CHK = bkCheck0().catch(() => { }).finally(() => { BK_CHK = null; })); }
 async function bkCheck0() {
@@ -12277,24 +12281,25 @@ async function bkCheck0() {
   let L = S; if (!L) { try { L = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { } }
   if (!L || !L.bk || !bkNorm(L.bk.code)) return;
   const code = L.bk.code, R = await bkDb(); if (!R) return;
-  const q = await R.db.collection('backups').where('k', '==', await bkId(code)).limit(20).get();
-  const top = q.docs.map(x => x.data()).filter(d => d && d.d && d.iv).sort((a, b) => (b.t || 0) - (a.t || 0))[0];
+  const top = await bkTop(R, code);
   if (!top || top.dev === bkDev() || (top.t || 0) <= (L.bk.base || L.bk.t || 0)) return;
   if (S && !$('scBattle').hidden) return;   // バトル中は つぎの ときに
   const s = await bkOpen(top, code); if (!s) return;
   if (S && S !== L) { setTimeout(bkCheck, 0); return; }   // しらべて いる あいだに タイトルから はいった：もういちど
-  if (bkH(L) !== L.bk.h) {   // この 端末でも あそんで いた
-    const c = await ask3(`ほかの 端末で あそんだ データが あります（${bkWhen(top.t)}）。\nこの 端末で あそんだ ぶんと、どちらを つかいますか？\nえらばなかった ほうは きえます。`, ['この 端末', 'ほかの 端末', 'あとで']);
-    if (c === 2) return;
-    if (c === 0) { await bkUp0(true, L).catch(() => { }); return; }
+  if (bkH(L) !== L.bk.h || (L.bk.mine && (top.from || 0) < L.bk.mine)) {   // この 端末でも あそんで いた（まだ あげて いない・または あげた ぶんを あいてが しらない）
+    BK_ASK = true; const c = await ask3(`ほかの 端末で あそんだ データが あります（${bkWhen(top.t)}）。\nこの 端末で あそんだ ぶんと、どちらを つかいますか？\nえらばなかった ほうは きえます。`, ['この 端末', 'ほかの 端末', 'あとで']).finally(() => { BK_ASK = false; });
+    if (c === 2) return;   // あとで：うわがき しない（つぎに もどった ときに また きく）
+    if (c === 0) { L.bk.base = top.t; await bkUp0(true, L, true).catch(() => { }); return; }   // この 端末：あいての あとに かさねて あげる
   }
-  s.bk = Object.assign({}, s.bk, { code, base: top.t, t: top.t, acct: L.bk.acct });
+  s.bk = Object.assign({}, s.bk, { code, base: top.t, t: top.t, acct: L.bk.acct, mine: 0 }); s.guildOn = L.guildOn;   // ギルドの はんていは 端末ごと
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { }
   const n = loadSave(); if (n) { n.bk.h = bkH(n); try { localStorage.setItem(SAVE_KEY, JSON.stringify(n)); } catch (e) { } }
   if (S && !$('scTitle').hidden) { S = loadSave(); if (S) updAutoBtn(); return; }   // タイトルでは だまって いれかえる
-  if (S) { if (BK_T) { clearTimeout(BK_T); BK_T = 0; } await ask('ほかの 端末で あそんだ データに そろえます。', 'OK', null); SAVE_STALE = true; location.reload(); }
+  if (S) { if (BK_T) { clearTimeout(BK_T); BK_T = 0; } SAVE_STALE = true; await ask('ほかの 端末で あそんだ データに そろえます。', 'OK', null); location.reload(); }   // さきに とめる（まっている あいだの セーブで うわがき しない）
 }
 setTimeout(bkCheck, 800);
+window.addEventListener('focus', () => bkCheck()); window.addEventListener('pageshow', () => bkCheck());   // PCで まどを ひらいた まま：もどった とき
+setInterval(() => { if (!document.hidden) bkCheck(); }, 180000);   // ひらいた まま でも ときどき みる
 async function bkOpen(d, code) {   // 1つの バックアップを ひらく（コードが ちがえば null）
   try {
     const pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bkUnb64(d.iv) }, await bkKey(code), bkUnb64(d.d)));
@@ -12376,7 +12381,7 @@ async function bkConfirm(f) {
   bg.querySelector('#bkNo').onclick = () => bg.remove();
   bg.querySelector('#bkYes').onclick = () => {
     if (BK_T) { clearTimeout(BK_T); BK_T = 0; }
-    const s = f.s; s.bk = Object.assign({}, s.bk, { acct: 0, base: f.t, t: f.t });   // acct：この アカウントにも コードを のこす
+    const s = f.s; s.bk = Object.assign({}, s.bk, { acct: 0, base: f.t, t: f.t, mine: 0 }); if (cur) s.guildOn = cur.guildOn;   // acct：この アカウントにも コードを のこす
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { }
     const n = loadSave(); if (n) { n.bk.h = bkH(n); try { localStorage.setItem(SAVE_KEY, JSON.stringify(n)); } catch (e) { } }   // もどした ままなら「かわって いない」
     SND.se('ok'); SAVE_STALE = true; location.reload();
