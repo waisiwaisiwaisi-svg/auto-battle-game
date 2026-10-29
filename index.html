@@ -1185,6 +1185,8 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trpickl{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px;overflow-y:auto;touch-action:pan-y;min-height:0}
 .trpk{font:inherit;font-size:13px;text-align:left;padding:9px 10px;border-radius:6px;border:1px solid var(--edge);background:rgba(255,255,255,.04);color:var(--ink);display:flex;flex-direction:column;gap:2px;cursor:pointer}
 .trpk small{font-size:10.5px;color:var(--dim)}
+.trpk.ty{border-left:5px solid var(--c);background:linear-gradient(90deg,color-mix(in srgb,var(--c) 22%,transparent),rgba(255,255,255,.03) 70%)}.trpk[hidden]{display:none}   /* 技：タイプの いろ */
+.trpkf{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 8px}.trpkf button{font:inherit;font-size:12px;padding:4px 9px;border-radius:12px;border:1px solid var(--edge);background:rgba(255,255,255,.05);color:var(--ink);cursor:pointer}.trpkf button[data-f]:not([data-f=""]){border-color:var(--c);box-shadow:inset 3px 0 0 var(--c)}.trpkf button.on{background:var(--c,#ffd166);color:#0b0914;font-weight:700}   /* タイプで しぼりこむ */
 .trpk:hover,.trpk:focus-visible{border-color:var(--acc);outline:none}
 .trpk.cur{border-color:var(--acc);background:rgba(255,209,102,.12)}
 .trr.rsel{outline:3px dashed #ffd166;outline-offset:-3px;filter:brightness(1.12)}   /* ならびかえ：えらんだ 技（つぎに タップした 技の ばしょへ） */
@@ -1206,6 +1208,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trmons{display:flex;flex-direction:column;gap:4px;max-height:calc(calc(100 * var(--vh)) - 170px);overflow:auto;padding-right:2px}
 .trmons button{display:flex;align-items:center;gap:6px;font:inherit;font-size:12px;text-align:left;padding:3px 5px;border-radius:6px;border:2px solid transparent;background:rgba(255,255,255,.05);color:var(--ink);min-width:0}
 .trmons button.on{border-color:var(--acc);background:rgba(255,200,90,.12)}
+.trmons button[hidden]{display:none!important}@container (max-width:980px){.trmf{flex-direction:column;justify-content:center;width:112px}.trmf select{flex:none!important;width:100%}}.trmf{display:flex;gap:4px;flex:none;flex-wrap:wrap}.trmf select{font:inherit;font-size:12px;padding:4px 6px;background:#120e1c;color:var(--ink);border:2px solid var(--rim2,#3a3458);border-radius:6px;min-width:0;flex:1 1 90px}   /* 訓練：モンスターの しぼりこみ */
 .trmons canvas{flex:none;image-rendering:pixelated}
 .trmons em{font-style:normal;font-size:10px;padding:0 4px;border-radius:3px;background:#3a3a4a;margin-right:2px}.trmons em.ok{background:#2f7a4a}.trmons em.dr{background:#7a5a2a}
 .trmain,.trside{min-width:0;display:flex;flex-direction:column;gap:6px}
@@ -3473,7 +3476,7 @@ function renderWild() {
 }
 $('btnWdBack').onclick = () => $('tabHome').click();
 // したの メニュー：バトル・メニュー
-$('tabBattle').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('バトル', [['オンライン対戦', 'btnRank'], ['フリー対戦', 'btnCup'], ['フレンド対戦', 'btnOnline']]), 0); };
+$('tabBattle').onclick = () => { const tp = $('townPop'); if (tp.parentNode !== $('app')) $('app').appendChild(tp); tp.style.zIndex = 95; isleMenu('バトル', [['オンライン対戦', 'btnRank'], ['フリー対戦', 'btnCup'], ['フレンド対戦', 'btnOnline']]); };   // いまの がめんの うえに ひらく（ホームへ もどらない）
 $('tabMenu').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('メニュー', [['ショップ', 'btnShop'], ['訓練', 'btnTrainTab'], ['コレクション（図鑑）', 'btnDex'], ['ランキング', 'hMe'], ['あそびかた', 'btnHelp'], ['タイプあいしょう', 'btnChart'], ['おと オン／オフ', 'hubSnd'], ['がめんの むき', 'hubRot'], ['せってい', 'btnOpt']]), 0); };
 function hubTown(fk, base) {
   const W = 320, H = 212, z = 3, key = fk; if (HUBTOWN[key] && HUBTOWN[key].ok) return HUBTOWN[key];
@@ -5173,6 +5176,8 @@ let TR_RO = null; $('scTrain').addEventListener('scroll', trDockH, { passive: tr
 // 訓練の「？」の せつめい：ひらいた とき 画面の そとへ はみださない ように よこを ずらす
 document.addEventListener('toggle', (ev) => { const d = ev.target; if (!d.classList || !d.classList.contains('trq') || !d.open) return; const box = d.querySelector(':scope > div'); if (!box) return; box.style.left = '0px';
   const r = box.getBoundingClientRect(), vw = document.documentElement.clientWidth, z = (r.width / box.offsetWidth) || 1, over = r.right - (vw - 8); if (over > 0) box.style.left = -Math.min(over, r.left - 8) / z + 'px'; }, true);
+let TR_MF = { t: '', s: '' };   // 訓練の モンスター いちらんの しぼりこみ（タイプ・訓練の ようす）
+const trSt = (x) => { const ok = x.tr && x.tr.prog && x.tr.prog.mv && x.tr.mode === 'chip', dr = x.tr && x.tr.draft && x.tr.draft.mv; return (ok ? 'ok ' : '') + (dr ? 'dr ' : '') + (!ok && !dr ? 'no' : ''); };
 function renderTrain(uid) {
   if (uid != null && TRN && TRN.uid !== uid && TRN.dirty) { if (TR_ASKING && document.querySelector('.askbg')) return; TR_ASKING = true; ask('今の設定を仮保存しますか？', '仮保存', 'しない').then(y => { TR_ASKING = false; if (y) trDraft(); if (TRN) TRN.dirty = false; renderTrain(uid); }); return; }
   const all = [...S.party, ...S.box];
@@ -5213,7 +5218,7 @@ function renderTrain(uid) {
   const scr = $('scTrain'), keep = !scr.hidden && [scr, ...['.trside', '.trmons'].map(q => scr.querySelector(q))].map(e => e ? [e.scrollTop, e.scrollLeft] : [0, 0]);   // いまの スクロールを おぼえておく
   const trB0 = $('trBody'), trSame = !$('scTrain').hidden && MO.trUid === uid, trRows0 = trSame ? MO.rects(trB0, '.trr[data-key]') : new Map(), trC0 = trSame ? MO.rects(trB0, '.cnd[data-key]') : new Map();
   $('trBody').innerHTML = `<div class="trtop"><button class="btn sub trtutb" id="trTutB" style="padding:6px 12px;font-size:13px">？ やりかた</button><span class="dim">試合中は見るだけ。この設定どおりに戦う（交代だけは自分でできる）</span></div>
-    <div class="trpage"><div class="trmons">${all.map(x => `<button data-u="${x.uid}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
+    <div class="trpage"><div class="trmons"><div class="trmf"><select data-mf="t" aria-label="タイプ"><option value="">タイプ：ぜんぶ</option>${Object.keys(TYPES).filter(t => all.some(x => SPECIES[x.sid].type === t || SPECIES[x.sid].type2 === t)).map(t => `<option value="${t}"${TR_MF.t === t ? ' selected' : ''}>${TYPES[t].n}</option>`).join('')}</select><select data-mf="s" aria-label="訓練"><option value="">訓練：ぜんぶ</option>${[['ok', '設定済み'], ['dr', '仮'], ['no', 'まだ']].map(([v, n]) => `<option value="${v}"${TR_MF.s === v ? ' selected' : ''}>${n}</option>`).join('')}</select></div>${all.map(x => `<button data-u="${x.uid}" data-ty="${SPECIES[x.sid].type} ${SPECIES[x.sid].type2 || ''}" data-st="${trSt(x)}" class="${x.uid === uid ? 'on' : ''}"><i data-sid="${x.sid}"></i><span>${SPECIES[x.sid].n}<br>${where(x)}</span></button>`).join('')}</div>
       <div class="trdock"></div><div class="trmain"><div class="trhead"><i data-big="${m.sid}"></i><div class="trhn"><b>${sp.n}</b><div>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><span class="dim">体格：${bodyTxt(sp)[0]}　性格：${NATURES[m.nat] ? `${NATURES[m.nat].n}（${NATURES[m.nat].d}）` : ''}</span></div></div>${trNatCard(nk, W, m)}${main}</div>
       <div class="trside${TR_MINI ? ' mini' : ''}"><button class="trmini" type="button">${TR_MINI ? '▲ パレットを ひらく' : '▼ たたむ'}</button>${side}</div></div>`;
   const B = $('trBody'); trDockFix(); requestAnimationFrame(trDockFix); if (!TR_RO && window.ResizeObserver) { TR_RO = new ResizeObserver(() => trDockFix()); TR_RO.observe(B); }
@@ -5225,6 +5230,8 @@ function renderTrain(uid) {
   B.querySelectorAll('.trmons i[data-sid]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.sid, 34)));
   B.querySelectorAll('.trhead i[data-big]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.big, 64)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
+  { const mf = () => B.querySelectorAll('.trmons button[data-u]').forEach(b => { b.hidden = +b.dataset.u !== uid && ((TR_MF.t && !b.dataset.ty.split(' ').includes(TR_MF.t)) || (TR_MF.s && !b.dataset.st.includes(TR_MF.s))); });   // しぼりこみ（いま えらんで いる 子は いつも みせる）
+    B.querySelectorAll('.trmf select').forEach(sl => sl.onchange = () => { TR_MF[sl.dataset.mf] = sl.value; SND.se('click'); mf(); }); mf(); }
   $('trTutB').onclick = () => trtStart();
   if (!S.trTutDone && !TRT && !TRN.dirty) setTimeout(() => { if (!TRT && !$('scTrain').hidden) trtStart(); }, 300);   // はじめて ひらいたら やりかたを あんない
   B.querySelectorAll('.trnatsel button').forEach(b => b.onclick = () => { if (TRT) TRT.f.nat = 1; const v = b.dataset.nat; W.nat = v === recPlan(m.sid) ? undefined : v; TRN.dirty = true; SND.se('click'); renderTrain(uid); });   // 作戦：「確定」で 試合に つかう
@@ -5297,9 +5304,12 @@ function renderTrain(uid) {
     window.addEventListener('pointermove', mv, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
   });
   // タップで えらぶ：わくを おす → 一覧の ウィンドウ → こまかい 設定が ある 条件は もう1まい → 決めたら 訓練画面へ もどる
-  const pickWin = (title, items, onPick) => {
-    const bg = modal(`<h3 style="margin-bottom:8px">${title}</h3><div class="trpickl">${items.map(([v, n, sub, ng, cur]) => `<button type="button" class="trpk${ng ? ' ng' : ''}${cur ? ' cur' : ''}" data-v="${v}"${ng ? ' disabled' : ''}>${n}${sub ? `<small>${sub}</small>` : ''}</button>`).join('')}</div><div class="trcwb"><button class="btn sub" data-x="x">とじる</button></div>`);
+  const pickWin = (title, items, onPick) => {   // items：[あたい, なまえ, した の もじ, えらべない, いま, タイプ（技の とき：いろと しぼりこみ）]
+    const tys = [...new Set(items.map(x => x[5]).filter(t => t && TYPES[t]))];
+    const flt = tys.length > 1 ? `<div class="trpkf"><button type="button" class="on" data-f="">ぜんぶ</button>${tys.map(t => `<button type="button" data-f="${t}" style="--c:${TYPES[t].c}">${TYPES[t].n}</button>`).join('')}</div>` : '';
+    const bg = modal(`<h3 style="margin-bottom:8px">${title}</h3>${flt}<div class="trpickl">${items.map(([v, n, sub, ng, cur, t]) => `<button type="button" class="trpk${ng ? ' ng' : ''}${cur ? ' cur' : ''}${t && TYPES[t] ? ' ty' : ''}" data-v="${v}"${t ? ` data-t="${t}" style="--c:${TYPES[t] ? TYPES[t].c : '#888'}"` : ''}${ng ? ' disabled' : ''}>${n}${sub ? `<small>${sub}</small>` : ''}</button>`).join('')}</div><div class="trcwb"><button class="btn sub" data-x="x">とじる</button></div>`);
     bg.classList.add('trpickbg'); bg.querySelector('[data-x="x"]').onclick = () => { SND.se('back'); bg.remove(); };
+    bg.querySelectorAll('.trpkf button').forEach(f => f.onclick = () => { SND.se('click'); bg.querySelectorAll('.trpkf button').forEach(x => x.classList.toggle('on', x === f)); bg.querySelectorAll('.trpk').forEach(b => { b.hidden = !!f.dataset.f && b.dataset.t !== f.dataset.f; }); });
     bg.querySelectorAll('.trpk:not(.ng)').forEach(b => b.onclick = () => { SND.se('click'); bg.remove(); onPick(b.dataset.v); });
   };
   const condWin = (c0, onOk, onDel) => {   // 下位の 条件（どれ・何回・以上／以下 など）
@@ -5323,9 +5333,9 @@ function renderTrain(uid) {
     condWin(c, (c2) => { ln[j] = c2; TRN.sel = null; touch(); }, () => { ln.splice(j, 1); TRN.sel = null; touch(); }); };
   const goPick = (i) => pickWin('撃ち方', Object.entries(TR_GO).map(([a, n]) => [a, n + '撃つ', '', false, a === (W.mv[i].go || 'auto')]), (a) => { W.mv[i].go = a; SND.se('ok'); touch(); });
   const mvSwap = (i) => { const r = W.mv[i]; if (!r) return;   // おいた 技の なまえを タップ：ほかの 技に かえる（あわない 条件は はずす）
-    pickWin(`${i + 1}ばんめの 技`, [...new Set(eq.concat(tm))].map(id => { const at = W.mv.findIndex(x => x.id === id); return [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}${at >= 0 && at !== i ? `・${at + 1}ばんめと いれかえ` : ''}`, false, id === r.id]; }), (id) => {
+    pickWin(`${i + 1}ばんめの 技`, [...new Set(eq.concat(tm))].map(id => { const at = W.mv.findIndex(x => x.id === id); return [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}${at >= 0 && at !== i ? `・${at + 1}ばんめと いれかえ` : ''}`, false, id === r.id, MOVES[id].t]; }), (id) => {
       if (!setMv(i, id)) return; TRN.info = null; TRN.sel = null; SND.se('ok'); touch(); }); };
-  const mvPick = () => pickWin('技を ついか', eq.concat(tm).filter(id => !W.mv.some(r => r.id === id)).map(id => [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}`]), (id) => { W.mv.push({ id, go: 'auto', c: trDefC(id) }); SND.se('ok'); touch(); });
+  const mvPick = () => pickWin('技を ついか', eq.concat(tm).filter(id => !W.mv.some(r => r.id === id)).map(id => [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}`, false, false, MOVES[id].t]), (id) => { W.mv.push({ id, go: 'auto', c: trDefC(id) }); SND.se('ok'); touch(); });
   B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
   B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.l}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.l, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); SND.se('click'); condEdit(+e.dataset.i, +e.dataset.l, +e.dataset.j); }); });
   B.querySelectorAll('.gs.on').forEach(e => drag(e, { gFrom: +e.dataset.i }, () => { if (TRN.pick) drop(TRN.pick, e); else { SND.se('click'); goPick(+e.dataset.i); } }));
