@@ -114,11 +114,16 @@ if (ok) {
   function makeRoom(name) {
     let me = {}, peersSnap = Object.freeze([]), joinedOnce = false, dead = false;
     const handlers = new Set(), peerObj = new Map(), roomRef = ref(rt, 'rooms/' + clean(name));
-    let myRef = null, unsubVal = null, sendT = null, lastSent = 0;
+    let myRef = null, unsubVal = null, unsubConn = null, sendT = null, lastSent = 0, inflight = false, pending = false, online = true;
     const start = (async () => {
       const u = await ready; if (!u) throw { code: 'unavailable' };
       myRef = ref(rt, `rooms/${clean(name)}/${myTab}`);
       await onDisconnect(myRef).remove();
+      // きれて つながりなおすと onDisconnect は きえる：かけなおして、じぶんの presence も かきなおす（とじても のこる ゴーストを ださない）
+      let was = null;
+      unsubConn = onValue(ref(rt, '.info/connected'), (s) => { const c = s.val() === true; online = c; if (dead) return;
+        if (c && was === false) { onDisconnect(myRef).remove().catch(() => { }); if (lastSent || pending) { pending = false; flush().catch(() => { }); } }
+        was = c; });
       unsubVal = onValue(roomRef, (s) => {
         const v = s.val() || {}, now = Date.now(), prev = peerObj, next = new Map();
         const joined = [], updated = [], left = [];
@@ -140,9 +145,14 @@ if (ok) {
       }, (e) => { for (const h of handlers) if (h.err) { try { h.err({ code: 'unavailable', message: String(e && e.message || e) }); } catch (x) { } } });
     })();
     start.catch((e) => console.warn('room', name, e && (e.code || e.message) || e));
+    // おくるのは いつも 1つだけ。まえのが おわるまで つぎは まち、おわったら いちばん あたらしい 中身だけ おくる
+    // （きれて いる あいだは ためない。ためると つながりなおした あと おくれが どんどん ふえる）
     const flush = async () => {
-      sendT = null; if (dead) return; await start; lastSent = Date.now();
-      await rtSet(myRef, { by: (await ready).uid, p: JSON.stringify(me), t: serverTimestamp() });
+      sendT = null; if (dead) return; await start;
+      if (inflight || !online) { pending = true; return; }
+      inflight = true; lastSent = Date.now();
+      try { await rtSet(myRef, { by: (await ready).uid, p: JSON.stringify(me), t: serverTimestamp() }); }
+      finally { inflight = false; if (pending && online && !dead) { pending = false; flush().catch(() => { }); } }
     };
     return {
       presence: async (patch) => {
@@ -151,6 +161,7 @@ if (ok) {
         if (new Blob([JSON.stringify(m)]).size > 4096) throw { code: 'invalid_argument', message: 'presence は 4KB まで' };
         me = m;
         // 1びょうに 15かい まで まとめて おくる（バトルの スナップショットは ひんぱん）
+        if (patch && patch.bye) { if (sendT) clearTimeout(sendT); sendT = null; return flush(); }   // とじる まえ：すぐ おくる
         if (!sendT) { const wait = Math.max(0, 66 - (Date.now() - lastSent)); sendT = setTimeout(() => flush().catch(() => { }), wait); }
       },
       peers: () => peersSnap,
@@ -163,7 +174,7 @@ if (ok) {
       emit: async () => { },
       on: () => () => { },
       connected: () => !dead,
-      leave: () => { dead = true; handlers.clear(); if (unsubVal) unsubVal(); if (sendT) clearTimeout(sendT); if (myRef) rtRemove(myRef).catch(() => { }); },
+      leave: () => { dead = true; handlers.clear(); if (unsubVal) unsubVal(); if (unsubConn) unsubConn(); if (sendT) clearTimeout(sendT); if (myRef) rtRemove(myRef).catch(() => { }); },
     };
   }
   const room = {
