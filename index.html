@@ -1604,7 +1604,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
 /* ロード画面：本体（おおきい スクリプト）を よみこむ あいだ だす。すすみは じかんで よそく（おわったら 100%） */
 (function () {
   var t0 = Date.now(), bar = document.getElementById('bootBar'),  tip = document.getElementById('bootTip'), done = false, p = 0;
-  var TIPS = ['ヒント：訓練で 技の 条件を きめると ぐんと つよく なる', 'ヒント：くさむらで よわらせて マテリアルを なげよう', 'ヒント：ひかえを タップすると こうたい できる', 'ヒント：タイプの あいしょうを ジムに あわせよう', 'ヒント：シミュレーションで 訓練の ききめを ためせる'];
+  var TIPS = ['ヒント：訓練で 技の 条件を きめると ぐんと つよく なる', 'ヒント：くさむらで よわらせて ボックスを なげよう', 'ヒント：ひかえを タップすると こうたい できる', 'ヒント：タイプの あいしょうを ジムに あわせよう', 'ヒント：シミュレーションで 訓練の ききめを ためせる'];
   var k = Math.floor(Math.random() * TIPS.length); tip.textContent = TIPS[k];
   var tipIv = setInterval(function () { k = (k + 1) % TIPS.length; tip.textContent = TIPS[k]; }, 3200);
   var iv = setInterval(function () { if (done) return; var t = (Date.now() - t0) / 1000; p = Math.min(95, Math.round(95 * (1 - Math.exp(-t / 3.2)))); bar.style.width = p + '%'; }, 120);
@@ -1646,7 +1646,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
     <div class="hbar">
       <button class="hme" id="hMe" title="ランキング"><canvas id="hAvatar" class="pix"></canvas><span id="hRank"></span></button>
       <div class="hres">
-        <span class="hres1" data-res="trophy" title="トロフィー"><i class="ico" data-ico="trophy"></i><span class="hrv"><b id="hTrophy">0</b><small>トロフィー</small></span></span><span class="hres1" data-res="crystal" title="マテリアル"><i class="ico" data-ico="capcr"></i><span class="hrv"><b id="hCaps">0</b><small>マテリアル</small></span></span><span class="hres1" data-res="gem" title="ジェム"><i class="ico" data-ico="gem"></i><span class="hrv"><b id="hGems">0</b><small>ジェム</small></span></span>
+        <span class="hres1" data-res="trophy" title="トロフィー"><i class="ico" data-ico="trophy"></i><span class="hrv"><b id="hTrophy">0</b><small>トロフィー</small></span></span><span class="hres1" data-res="crystal" title="ボックス"><i class="ico" data-ico="capcr"></i><span class="hrv"><b id="hCaps">0</b><small>ボックス</small></span></span><span class="hres1" data-res="gem" title="ジェム"><i class="ico" data-ico="gem"></i><span class="hrv"><b id="hGems">0</b><small>ジェム</small></span></span>
       </div>
     </div>
     <div class="hicons"><button class="hicon" id="btnHelp" title="あそびかた"><i class="ico" data-ico="help"></i></button><button class="hicon" id="btnDex" title="ずかん" aria-label="ずかん"><i class="ico" data-ico="book"></i></button><button class="hicon" id="btnChart" title="あいしょう表"><i class="ico" data-ico="chart"></i></button><button class="hicon rotbtn" id="hubRot" aria-label="よこがめん" title="よこがめん">⟳</button><button class="hicon" id="hubSnd" aria-label="おと"><i class="ico" data-ico="note"></i></button><button class="hicon" id="btnOpt" aria-label="せってい"><i class="ico" data-ico="gear"></i></button></div>
@@ -1742,7 +1742,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
         <div class="slots" id="tmMain"></div>
         <div class="slotlabel"><b>ひかえ</b> <span class="dim">— ジム・リーグ・ライバル戦は ひかえも つづけて でる（6たいで たたかう）</span></div>
         <div class="slots" id="tmSub"></div>
-        <div class="slotlabel boxhead"><span><b>ボックス</b> <span class="dim" id="boxCount"></span></span><span class="boxsort"><select id="boxSort" aria-label="ならびかえ"></select><button type="button" id="boxRev" title="じゅんばんを ぎゃくに">⇅</button><select id="boxType" aria-label="タイプで しぼりこみ"></select></span></div>
+        <div class="slotlabel boxhead"><span><b>あずける</b> <span class="dim" id="boxCount"></span></span><span class="boxsort"><select id="boxSort" aria-label="ならびかえ"></select><button type="button" id="boxRev" title="じゅんばんを ぎゃくに">⇅</button><select id="boxType" aria-label="タイプで しぼりこみ"></select></span></div>
         <div class="boxgrid" id="tmBox"></div>
       </div>
       <div class="teamdetail card" id="tmDetail"></div>
@@ -1783,7 +1783,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
       <div id="stampPal" hidden></div>
       <div class="ov" id="pauseOv" hidden><h2>PAUSE</h2><button class="btn" id="btnResume">つづける</button><button class="btn sub" id="btnQuit" style="font-size:13px">しあいを やめる（まけ あつかい）</button></div>
       <div class="ov" id="chooseOv" hidden><h2 style="font-size:22px">つぎは だれを だす？</h2><div class="swaplist" id="chooseList"></div></div>
-      <div id="wildBtns" hidden><button class="cmd" id="cCap"><img class="orbic pix" alt=""><span class="wt"><span class="a">マテリアル</span><span class="b" id="capN"></span></span></button><button class="cmd" id="cRun"><span class="wt"><span class="a">にげる</span><span class="b">くさむらのみ</span></span></button></div>
+      <div id="wildBtns" hidden><button class="cmd" id="cCap"><img class="orbic pix" alt=""><span class="wt"><span class="a">ボックス</span><span class="b" id="capN"></span></span></button><button class="cmd" id="cRun"><span class="wt"><span class="a">にげる</span><span class="b">くさむらのみ</span></span></button></div>
       <div class="ov" id="resultOv" hidden><h2 id="resTitle"></h2><div class="lines" id="resLines"></div><button class="btn" id="resNext">つぎへ</button></div>
     </div>
     <div id="bpanel">
@@ -3332,7 +3332,7 @@ function islesStage() {
 // しまの なか：うえ（よこ画面は ひだり）に しまの なかの ようす、した に もどる・タブ。中身は いままでの 画面を そのまま つかう
 const ISLE = { k: null, jt: 'gym', st: 'deal', bg: {} };
 const ISLE_SCR = { scJourney: 'arena', scTower: 'arena', scShop: 'shop', scWild: 'wild' };
-const ISLE_TABS = { arena: [['ジム', 'gym'], ['リーグ', 'league'], ['タワー', 'tower']], shop: [['おすすめ', 'deal'], ['ボックス', 'box'], ['ステッカー', 'tm'], ['モンスター', 'mon']], wild: [] };
+const ISLE_TABS = { arena: [['ジム', 'gym'], ['リーグ', 'league'], ['タワー', 'tower']], shop: [['おすすめ', 'deal'], ['ブラインド', 'box'], ['ステッカー', 'tm'], ['モンスター', 'mon']], wild: [] };
 const ISLE_NAME = { arena: 'アーケード', shop: 'ショップ', room: 'マイルーム', wild: 'くさむら' };
 function isleJt() { const J = jr(); return !J.champ && J.badges.length >= GYMS.length ? 'league' : 'gym'; }
 // 仮の 絵（アイソメの へや。ゆかと かべは 画面の そとまで つづける）
@@ -3464,7 +3464,7 @@ const WD_N = '日月火水木金土';
 function renderWild() {
   show('scWild'); const today = new Date().getDay(), sun = today === 0;
   $('wdBody').innerHTML = `<div class="card wdcard"><b>エリアを えらぶと やせいの モンスターが でてくる</b><p class="dim">${sun ? 'きょうは にちようび！ どの エリアにも はいれる' : `きょうは ${WD_N[today]}ようび。ほかの エリアは その ようびに はいれる（にちようびは ぜんぶ）`}</p>
-    <div class="wdrow"><span>マテリアル</span><b>${S.capsules || 0}こ</b></div></div>
+    <div class="wdrow"><span>ボックス</span><b>${S.capsules || 0}こ</b></div></div>
     <div class="wdareas">${WILD_DAYS.map((a, i) => [a, i]).sort((x, y) => (sun ? 0 : (y[0][0] === today) - (x[0][0] === today))).map(([[d, n, ts], i]) => { const ok = sun || d === today;   // きょうの エリアを いちばん うえに
       return `<button class="wdarea${ok ? '' : ' off'}${d === today ? ' now' : ''}" data-i="${i}"${ok ? '' : ' disabled'}><span class="wdday">${WD_N[d]}</span><span class="wdan"><b>${n}</b><span class="wdchips">${ts.map(typeChip).join('')}</span></span>${ok ? '<em>はいる ›</em>' : ''}</button>`; }).join('')}</div>`;
   $('wdBody').querySelectorAll('.wdarea:not(:disabled)').forEach(b => b.onclick = () => { SND.se('ok'); ISLE.wild = 1; startWild(WILD_DAYS[+b.dataset.i][2]); });
@@ -3653,7 +3653,7 @@ const ICONS = {
   note: ['....yyyyyy..', '....yyyyyy..', '....y....y..', '....y....y..', '....y....y..', '..yyy..yyy..', '.yyyy.yyyy..', '.yyyy.yyyy..', '..yy...yy...'],
 };
 const ICON_URL = {};
-// マテリアルの アイコン：くさむらで なげる マテリアルの 絵（ゆれる まえの 1まいめ）
+// ボックスの アイコン：くさむらで なげる ボックスの 絵（ゆれる まえの 1まいめ）
 let ORB_URL = null;
 function orbURL() { if (ORB_URL) return ORB_URL; const P = typeof PLFX !== 'undefined' && PLFX.cap_shake; if (!P || !P.img || !P.img.complete || !P.img.naturalWidth) return null;
   const c = document.createElement('canvas'); c.width = P.w; c.height = P.h; c.getContext('2d').drawImage(P.img, 0, 0, P.w, P.h, 0, 0, P.w, P.h); return (ORB_URL = c.toDataURL()); }
@@ -3662,7 +3662,7 @@ function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
   if (name === 'target' && typeof UIA !== 'undefined' && UIA.target) return (ICON_URL[name] = UIA.target.src);   // 訓練の タブ：的
   if (name === 'shop' && typeof UIA !== 'undefined' && UIA.chest) return (ICON_URL[name] = UIA.chest.src);   // ショップ：ブラインドボックスの 絵
-  if (name === 'capcr') { const u = orbURL(); if (u) return (ICON_URL[name] = u); if (typeof UIA !== 'undefined' && UIA.crystal) return UIA.crystal.src; }   // マテリアル：くさむらで なげる 絵
+  if (name === 'capcr') { const u = orbURL(); if (u) return (ICON_URL[name] = u); if (typeof UIA !== 'undefined' && UIA.crystal) return UIA.crystal.src; }   // ボックス：くさむらで なげる 絵
   if (typeof UIA !== 'undefined' && UIA['ic_' + name]) return (ICON_URL[name] = UIA['ic_' + name].src);   // ChatGPT の アイコン（I1）
   const raw = ICONS[name]; if (!raw) return '';
   // まわりの あき（.）を けずって、え が まんなかに くるように する
@@ -3898,7 +3898,7 @@ const SE_BASE = { click: .7, beam: .8, status: .8, ko: .85, up: .8, down: .75, s
 const SE_JIT = { hit: .12, swing: .14, shoot: .1, dash: .12, crit: .06, click: .05 };
 const SE_LIST = [['hit', 'こうげきが あたる'], ['crit', 'きゅうしょ'], ['super', 'こうかばつぐん'], ['weak', 'いまひとつ'], ['swing', 'ふりかぶる'], ['shoot', 'たまを うつ'], ['beam', 'ビーム'], ['boom', 'ばくはつ・ちゃくち'], ['dash', 'とっしん'], ['charge', 'ためる'],
   ['guard', 'ふせぐ'], ['dodge', 'よける'], ['ko', 'たおれる'], ['up', 'のうりょく アップ'], ['down', 'のうりょく ダウン'], ['status', 'じょうたい いじょう'], ['heal', 'かいふく'], ['hazard', 'しかけ'], ['swapOut', 'こうたい（もどる）'], ['swapIn', 'こうたい（でる）'],
-  ['throw', 'マテリアルを なげる'], ['shake', 'マテリアルが ゆれる'], ['caught', 'つかまえた'], ['escape', 'にげられた'], ['chest', 'ブラインドボックス'], ['open', 'ブラインドボックスを あける'], ['card', 'カード'], ['epic', 'レア'],
+  ['throw', 'ボックスを なげる'], ['shake', 'ボックスが ゆれる'], ['caught', 'つかまえた'], ['escape', 'にげられた'], ['chest', 'ブラインドボックス'], ['open', 'ブラインドボックスを あける'], ['card', 'カード'], ['epic', 'レア'],
   ['click', 'ボタン'], ['ok', 'けってい'], ['back', 'もどる'], ['deny', 'できない'], ['beat', 'こどう']];
 const SND = (() => {
   let ac = null, master, musicG, sfxG, song = null, songName = '', next = 0, step = 0, timer = 0, noiseBuf = null;
@@ -4439,7 +4439,7 @@ const shopWeek = () => Math.floor((Date.now() - new Date().getTimezoneOffset() *
 const shopRng = (seed) => () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
 function shopState() { S.shop = S.shop || {}; const d = shopDay(), w = shopWeek(); if (S.shop.day !== d) { S.shop.day = d; S.shop.bought = []; } if (S.shop.week !== w) { S.shop.week = w; S.shop.wb = 0; } return S.shop; }
 const shopFreeReady = () => !!S && !(shopState().bought || []).includes(0);
-// きょうの とくばい 6わく：1わくめは むりょう、のこりは ワザステッカー・モンスター・どうぐ・マテリアル
+// きょうの とくばい 6わく：1わくめは むりょう、のこりは ワザステッカー・モンスター・どうぐ・ボックス
 function shopDeals() {
   const r = shopRng(shopDay() * 7 + 3), pick = (a) => a[Math.floor(r() * a.length)], out = [];
   const free = pick([{ k: 'orb', n: 3 }, { k: 'gem', n: 2 }, { k: 'item' }, { k: 'tm', rar: 0 }]);
@@ -4477,7 +4477,7 @@ function shopSpecial() {
   return L[Math.floor(r() * L.length)];
 }
 function shopNat(o, slot) { let h = shopDay() * 31 + String(slot).split('').reduce((a, c) => a * 7 + c.charCodeAt(0), 0); for (const c of o.id) h = (h * 33 + c.charCodeAt(0)) >>> 0; o.nat = NATURE_KEYS[h % NATURE_KEYS.length]; return o; }   // ショップの モンスターの 性格
-function shopName(o) { return o.k === 'orb' ? `マテリアル ×${o.n}` : o.k === 'gem' ? `ジェム ×${o.n}` : o.k === 'item' ? ITEMS[o.id].n : o.k === 'tm' ? `ワザステッカー「${MOVES[o.id].n}」` : o.k === 'mon' ? SPECIES[o.id].n : ''; }
+function shopName(o) { return o.k === 'orb' ? `ボックス ×${o.n}` : o.k === 'gem' ? `ジェム ×${o.n}` : o.k === 'item' ? ITEMS[o.id].n : o.k === 'tm' ? `ワザステッカー「${MOVES[o.id].n}」` : o.k === 'mon' ? SPECIES[o.id].n : ''; }
 function shopIcon(o) {
   if (o.k === 'orb') return `<i class="ico ico-l" data-ico="capcr"></i>`;
   if (o.k === 'gem') return `<img class="pix" src="${UIA.ic_gem.src}" width="40" height="40" alt="">`;
@@ -4552,7 +4552,7 @@ function renderShop() {
     <div class="shsec" data-k="tm"><div class="shh"><b>ワザステッカー</b><span class="dim">まいにち いれかえ</span></div><div class="shgrid">${shopLine('tm').map((o, j) => deal(o, 't' + j)).join('')}</div></div>
     <div class="shsec" data-k="mon"><div class="shh"><b>モンスター</b><span class="dim">まいにち いれかえ</span></div><div class="shgrid">${shopLine('mon').map((o, j) => deal(o, 'm' + j)).join('')}</div></div>
     <div class="shsec" data-k="sp"><div class="shh"><b>しゅうがわり スペシャル</b><span class="dim">げつようび に いれかえ</span></div>
-      <button class="shspecial${st.wb ? ' sold' : ''}" id="shSp" ${st.wb ? 'disabled' : ''}><span class="shtag">${Math.round((1 - sp.p / sp.was) * 100)}% おとく</span><div class="shgi">${chestIcon(sp.ch, false, 2)}</div><div class="shsd"><b>${sp.n}</b><span>${CHESTS[sp.ch].n}${sp.orb ? `・マテリアル ×${sp.orb}` : ''}${sp.item ? `・どうぐ ×${sp.item}` : ''}</span></div><span class="shp">${st.wb ? 'こうにゅうずみ' : `<s>💎${sp.was}</s> 💎 ${sp.p}`}</span></button></div>
+      <button class="shspecial${st.wb ? ' sold' : ''}" id="shSp" ${st.wb ? 'disabled' : ''}><span class="shtag">${Math.round((1 - sp.p / sp.was) * 100)}% おとく</span><div class="shgi">${chestIcon(sp.ch, false, 2)}</div><div class="shsd"><b>${sp.n}</b><span>${CHESTS[sp.ch].n}${sp.orb ? `・ボックス ×${sp.orb}` : ''}${sp.item ? `・どうぐ ×${sp.item}` : ''}</span></div><span class="shp">${st.wb ? 'こうにゅうずみ' : `<s>💎${sp.was}</s> 💎 ${sp.p}`}</span></button></div>
     <div class="shsec" data-k="box"><div class="shh"><b>ブラインドボックス</b><span class="dim">かうと すぐ あく</span></div><div class="shgrid shch">${SHOP_CHESTS.map(([k, p]) => `<button class="shcard" data-ch="${k}" data-p="${p}"><div class="shgi">${chestIcon(k, false, 2)}</div><b>${CHESTS[k].n}</b><span class="shp">💎 ${p}</span></button>`).join('')}</div></div>
     <div class="dim" style="font-size:11px;text-align:center">ジェムは しあいや ジム・リーグの ごほうびで たまります</div>`;
   const B = $('shBody'); shopPaint(B);
@@ -4656,14 +4656,14 @@ function openChest(i) {
   const owned = new Set([...S.party, ...S.box].map(m => m.sid));
   const monCards = R.mons.map(sid => {
     const m = newMon(sid), sp = SPECIES[sid], r = RARITY[monRarity(sid)], isNew = !owned.has(sid); owned.add(sid);
-    const where = S.party.length < 6 ? (S.party.push(m), 'パーティに くわわった！') : (S.box.push(m), 'ボックスに おくられた');
+    const where = S.party.length < 6 ? (S.party.push(m), 'パーティに くわわった！') : (S.box.push(m), '「あずける」に おくられた');
     const img = spriteCanvas(sid, 96).toDataURL();
     return `<div class="reward"><div style="display:flex;gap:6px;justify-content:center"><span class="rar" style="background:${r.c}">${r.n}</span>${isNew ? '<span class="rar" style="background:#ffd166">NEW</span>' : ''}</div><img src="${img}" class="pix" style="width:96px;height:96px;display:block;margin:6px auto"><div class="big">${sp.n}</div><div style="display:flex;gap:4px;justify-content:center">${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><div class="dim">${NATURES[m.nat].n}・${ivGrade(m)}<br>わざ：${m.moves.map(x => MOVES[x].n).join('・')}<br>${where}</div></div>`;
   });
   S.chLog = [{ t: Date.now(), k: c.kind, mons: R.mons.slice(), cr: R.cr, tms: R.tms.slice(), items: (R.items || []).slice() }, ...(S.chLog || [])].slice(0, 20);   // さいきん 20けんの りれき
   save();
   const cards = [`<div class="reward"><div class="chbox">${chestIcon(c.kind, false, 4)}</div><div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
-    ...monCards, `<div class="reward"><div class="rwic">${orbImg()}</div><div class="big">マテリアル ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
+    ...monCards, `<div class="reward"><div class="rwic">${orbImg()}</div><div class="big">ボックス ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
   for (const k of R.items || []) cards.push(`<div class="reward"><div style="font-size:46px">${ITEMS[k].ic}</div><div class="big">${ITEMS[k].n}</div><div class="dim">${ITEMS[k].d}</div></div>`);
   for (const id of R.tms) { const m = MOVES[id], r = RARITY[tmRarity(id)]; cards.push(`<div class="reward"><span class="chip" style="background:${TYPES[m.t].c};font-size:13px;padding:2px 10px">${TYPES[m.t].n}</span><div class="big"><i class="ico ico-s" data-ico="scroll"></i>${m.n}</div><span style="color:${r.c};font-size:11px;opacity:.8">${r.n}</span><div class="dim">${kwDesc(m)}</div></div>`); }
   const bg = document.createElement('div'); bg.className = 'askbg'; let k = 0;
@@ -4808,7 +4808,7 @@ function teamMon(r) { return r.w === 'p' ? S.party[r.i] : r.w === 'b' ? S.box[r.
 function teamMove(a, b) {
   if (!a || !b || (a.w === b.w && a.i === b.i)) return false;
   const P = S.party, X = S.box, ma = teamMon(a), mb = teamMon(b);
-  if (a.w === 'b' && b.w === 'b' && S.boxSort) { SND.se('deny'); say0('ボックスを ならびかえて いる あいだは、ボックスの なかで いれかえ できません。\n「じぶんで ならべる」に すると いれかえ できます。'); return false; }
+  if (a.w === 'b' && b.w === 'b' && S.boxSort) { SND.se('deny'); say0('「あずける」を ならびかえて いる あいだは、その なかで いれかえ できません。\n「じぶんで ならべる」に すると いれかえ できます。'); return false; }
   if (!ma) return false;
   if (a.w === 'p' && b.w === 'p') { if (mb) [P[a.i], P[b.i]] = [P[b.i], P[a.i]]; else { P.splice(a.i, 1); P.push(ma); } }
   else if (a.w === 'b' && b.w === 'p') { if (mb) { P[b.i] = ma; X[a.i] = mb; } else { X.splice(a.i, 1); P.push(ma); } }
@@ -4935,7 +4935,7 @@ function renderTeamDetail() {
   const sp = SPECIES[m.sid], st = stats(m), inParty = S.party.includes(m), pi = S.party.indexOf(m), bi = S.box.indexOf(m);
   const STN = [['HP', st.hp, 260], ['こうげき', Math.round(st.atk), 110], ['ぼうぎょ', Math.round(st.def), 110], ['すばやさ', st.spd, 130]];
   D.innerHTML = `<button class="shx" data-a="close" title="とじる"></button><button class="shc" data-a="close" title="とじる">×</button><div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
-      <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'ボックス'}　${ivGrade(m)}</div>
+      <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'あずける'}　${ivGrade(m)}</div>
       <div>たいかく：<b style="color:var(--acc)">${bodyTxt(SPECIES[m.sid])[0]}</b> <span class="dim">${bodyTxt(SPECIES[m.sid])[1]}</span></div>
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim" style="display:inline-block">${NATURES[m.nat].d}</span></div><div>さくせん：<b style="color:var(--acc)">${planName(m)}</b><div class="dim" style="font-size:11px">${natRelText(planOfMon(m))}</div></div>` : ''}</div></div>
     <div style="display:flex;flex-direction:column;gap:3px">${statBars(st, avgStats(), { hp: 230, atk: 200, def: 200, spa: 200, spd: 200, spe: 200, eva: 200 }, m)}</div>
@@ -5435,7 +5435,7 @@ function openBoost(m) {
       <div class="bgrid">${STAT6.map(k => `<div class="brow"><span class="kw" data-kw="sv:${k}">${STAT6_N[k]}</span><b style="${pend[k] ? 'color:var(--acc)' : ''}">${st[k]}</b><span class="dim">+${evBonus(pv, k)}</span><i><u style="width:${pv.ev[k] / EV_STAT_MAX * 100}%"></u></i><span style="${pend[k] ? 'color:var(--acc)' : ''}">${pv.ev[k]}/${EV_STAT_MAX}</span><button data-k="${k}" data-d="-1" ${pend[k] ? '' : 'disabled'}>－</button><button data-k="${k}" data-d="1" ${free > 0 && pv.ev[k] < EV_STAT_MAX ? '' : 'disabled'}>＋</button></div>`).join('')}</div>
       <div class="row" style="justify-content:space-between;gap:6px;margin-top:6px;flex-wrap:wrap"><span class="dim" style="font-size:11px;flex:1 1 180px;min-width:0">確定した ポイントは もどせません（${ITEMS.respec.ic}${ITEMS.respec.n}で ふりなおし）</span><span style="display:flex;gap:6px"><button class="btn ok" id="bOk" style="font-size:13px;padding:6px 14px;white-space:nowrap" ${pendN() ? '' : 'disabled'}>確定する${pendN() ? `（${pendN()}）` : ''}</button><button class="btn sub" id="bReset" style="font-size:12px;padding:6px 10px;white-space:nowrap" ${evUsed(m) && itemN('respec') ? '' : 'disabled'}>${ITEMS.respec.ic} ふりなおす ×${itemN('respec')}</button></span></div>
       <div class="sec-title" style="margin-top:10px"><span>つかう モンスター</span><span class="dim">${dups.length}たい</span></div>
-      ${dups.length ? `<div class="bdups">${dups.map((o, j) => `<button class="bdup ${pick.has(j) ? 'on' : ''}" data-j="${j}"><i data-sid="${o.x.sid}"></i><small>${o.w === 'p' ? 'パーティ' : 'ボックス'}</small><small>${o.x.nat && NATURES[o.x.nat] ? NATURES[o.x.nat].n : '－'}</small><small style="color:${o.x.fed ? 'var(--acc)' : 'var(--dim)'}">+${o.x.fed || 0}</small></button>`).join('')}</div>` : `<p class="dim">${sp.n}が ほかに いません（おなじ しゅるいを くさむら・ブラインドボックスで あつめよう）</p>`}
+      ${dups.length ? `<div class="bdups">${dups.map((o, j) => `<button class="bdup ${pick.has(j) ? 'on' : ''}" data-j="${j}"><i data-sid="${o.x.sid}"></i><small>${o.w === 'p' ? 'パーティ' : 'あずける'}</small><small>${o.x.nat && NATURES[o.x.nat] ? NATURES[o.x.nat].n : '－'}</small><small style="color:${o.x.fed ? 'var(--acc)' : 'var(--dim)'}">+${o.x.fed || 0}</small></button>`).join('')}</div>` : `<p class="dim">${sp.n}が ほかに いません（おなじ しゅるいを くさむら・ブラインドボックスで あつめよう）</p>`}
       <div class="row" style="justify-content:space-between;margin-top:12px;gap:8px"><button class="btn" id="bFeed" style="font-size:14px;padding:8px 10px;flex:1;min-width:0;white-space:normal!important;line-height:1.25" ${pick.size && room > 0 ? '' : 'disabled'}>えらんだ ${pick.size}たいを つかう（+${gainOf(pick)}）</button><button class="btn sub" id="bClose">とじる</button></div>`;
     bg.querySelectorAll('i[data-sid]').forEach(el => el.replaceWith(spriteCanvas(el.dataset.sid, 40)));
     bg.querySelectorAll('.brow button').forEach(b => b.onclick = () => { const k = b.dataset.k;
@@ -5965,7 +5965,7 @@ function startBattle(cfg) {
   $('resultOv').hidden = true; $('chooseOv').hidden = true; $('pauseOv').hidden = true;
   $('bTitle').textContent = cfg.title;
   $('bStamp').hidden = !(cfg.trainer || cfg.kind === 'online'); $('stampPal').hidden = true; for (const id of ['stpP', 'stpE']) $(id).hidden = true;   // スタンプ：サモナーが いる バトルだけ
-  $('wildBtns').hidden = cfg.kind !== 'wild'; { const im = $('cCap').querySelector('.orbic'), u = orbURL(); if (u) im.src = u; im.hidden = !u; }   // くさむら：マテリアル・にげるは せんじょうの うえに うかべる（ひかえの ならびは ふつうの バトルと おなじ）
+  $('wildBtns').hidden = cfg.kind !== 'wild'; { const im = $('cCap').querySelector('.orbic'), u = orbURL(); if (u) im.src = u; im.hidden = !u; }   // くさむら：ボックス・にげるは せんじょうの うえに うかべる（ひかえの ならびは ふつうの バトルと おなじ）
 
   say(cfg.intro);
   show('scBattle');
@@ -8641,20 +8641,20 @@ function updateFighter(f, dt) {
 }
 
 /* ---------- 捕獲 ---------- */
-const CATCH_HOT = .45;   // この かくりつ いじょうで マテリアルの ボタンを ひからせる
+const CATCH_HOT = .45;   // この かくりつ いじょうで ボックスの ボタンを ひからせる
 function catchProb(e) { return clamp(e.sp.catch * (1.6 - 1.3 * e.hp / e.maxHp) * (e.state === 'stun' ? 1.15 : 1) * (e.status === 'slp' || e.status === 'frz' ? 2 : e.status ? 1.5 : 1), .04, .95); }
 function cmdCapsule() {
   if (B && TUT && TUT.steps && !TUT.frozen && B.kind === 'wild') { say('まずは 戦って、少し 弱らせよう！'); SND.se('back'); return; }   // くさむらの チュートリアル：あんないが でるまで なげられない
   if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; B.paused = false; }   // チュートリアル：ここを おして と とめて いた
   if (B && B.kind === 'wild' && B.mode === 'intro') { say('しあいが はじまってから なげてね！', 1); SND.se('back'); return; }   // はじまる まえ：だまって むしを しない
   if (!B || B.kind !== 'wild' || B.mode !== 'fight' || B.catchO || B.paused) return;
-  if (S.capsules <= 0) { say('マテリアルが もう ない！'); return; }
+  if (S.capsules <= 0) { say('ボックスが もう ない！'); return; }
   const e = active(1); if (!targetable(e)) return;
   S.capsules--; save(); SND.se('throw');
   const tr = B.sides[0].trainer; tr.shout = .6; tr.pose = 'open';
   B.mode = 'catch';
   B.catchO = { phase: 'throw', t: 0, sx: tr.x, sy: tr.y - 30, tx: e.x, ty: e.y - 12, shakes: 0, p: catchProb(e), x: tr.x, y: tr.y };
-  say('いけっ！ マテリアル！');
+  say('いけっ！ ボックス！');
 }
 function updateCatch(dt) {
   const c = B.catchO, e = active(1); c.t += dt;
@@ -8681,7 +8681,7 @@ function updateCatch(dt) {
         c.phase = 'fail'; SND.se('escape'); if (plOk('cap_break')) plFx('cap_break', c.x, c.y, 1.3); else sheetFx('poof', c.x, c.y, 1.3);
         e.state = 'stun'; e.stT = .4; e.inv = .4;
         burst(c.x, c.y, '#ffffff', 20, 120, .5);
-        say(choice(['ああっ！ マテリアルから でてしまった！', 'おしい！ もうすこしだったのに！', 'だめだ！ にげだした！']));
+        say(choice(['ああっ！ ボックスから でてしまった！', 'おしい！ もうすこしだったのに！', 'だめだ！ にげだした！']));
         B.catchO = null; B.mode = 'fight';
       }
     }
@@ -9704,7 +9704,7 @@ function endBattle(res) {
       const e = active(1); const nm = { uid: S.uid++, sid: e.mon.sid, nat: e.mon.nat, iv: e.mon.iv, moves: e.mon.moves.slice() };   // 戦った ときの 性格・ステータス・わざ の まま
       S.caught++;
       if (S.party.length < 6) { S.party.push(nm); lines.unshift(`${SPECIES[nm.sid].n}が パーティに くわわった！（${NATURES[nm.nat].n}・${ivGrade(nm)}）`); }
-      else { S.box.push(nm); lines.unshift(`${SPECIES[nm.sid].n}は ボックスに おくられた（${NATURES[nm.nat].n}・${ivGrade(nm)}）`); }
+      else { S.box.push(nm); lines.unshift(`${SPECIES[nm.sid].n}は 「あずける」に おくられた（${NATURES[nm.nat].n}・${ivGrade(nm)}）`); }
       const me = active(0);
     } else if (res === 'win') { if (Math.random() < .5) S.capsules += 1; if (Math.random() < .25) S.gems = (S.gems || 0) + 1; }   // ながく あそべるように すくなめ
     else if (res === 'lose') lines.unshift(B.fled ? `${B.fled}は とおぼえに おどろいて にげかえった…` : 'ちからつきて しまった… でも モンスターたちは すぐに げんきに なった');
@@ -9745,7 +9745,7 @@ function showResult() {
     if (B.timeUpLine) L.unshift(B.timeUpLine);
     const R = B.rewards || {}, sd = B.sides[B.my || 0];
     const tile = (k, n, lab, d) => UIA[k] ? `<div class="rtile" style="animation-delay:${d}s">${uiImg(k, 'rti')}<b>${n}</b><small>${lab}</small></div>` : '';
-    const tiles = [R.cr > 0 ? (orbURL() ? `<div class="rtile" style="animation-delay:.5s">${orbImg('rti')}<b>+${R.cr}</b><small>マテリアル</small></div>` : tile('crystal', '+' + R.cr, 'マテリアル', .5)) : '', R.gem > 0 ? tile('gem', '+' + R.gem, 'ジェム', .62) : '', R.chest ? tile('chest', '+1', CHESTS[R.chest].n, .74) : ''].join('');
+    const tiles = [R.cr > 0 ? (orbURL() ? `<div class="rtile" style="animation-delay:.5s">${orbImg('rti')}<b>+${R.cr}</b><small>ボックス</small></div>` : tile('crystal', '+' + R.cr, 'ボックス', .5)) : '', R.gem > 0 ? tile('gem', '+' + R.gem, 'ジェム', .62) : '', R.chest ? tile('chest', '+1', CHESTS[R.chest].n, .74) : ''].join('');
     $('resLines').innerHTML = `${head ? `<div class="rhead">${head}</div>` : ''}<div class="rteam" id="resTeam"></div>${tiles ? `<div class="rtiles">${tiles}</div>` : ''}${L.map((l, i) => `<div class="rl" style="animation-delay:${.85 + i * .15}s">${l}</div>`).join('')}`;
     const tm = $('resTeam'); for (const f of (sd && sd.fs) || []) { if (!f || !SPR[f.mon.sid]) continue; const d = document.createElement('div'); d.className = 'rmon' + (f.hp <= 0 ? ' ko' : ''); d.appendChild(spriteCanvas(f.mon.sid, 52)); const k = Math.max(0, f.hp / f.maxHp);
       d.insertAdjacentHTML('beforeend', `<small>${f.sp.n}</small><i><u style="width:${k * 100}%;background:${k > .5 ? '#7bd88f' : k > .2 ? '#ffd166' : '#ff6b5b'}"></u></i>`); tm.appendChild(d); }
@@ -9881,7 +9881,7 @@ function trainTutorial(done) {
 // さいしょの くさむら：よわい モンスターが でて、かならず つかまえられる
 const WILD_STEPS = [
   { tx: '野生のモンスターが現れました！ 草むらでは、モンスターを捕まえて仲間にできます。<br>まずは戦って、少し弱らせましょう。', pause: true },
-  { tx: '今です！ 下の「<b>マテリアル</b>」をタップして、モンスターを捕まえましょう。<br><small>（弱っているほど捕まえやすくなります）</small>', hideTill: true, hl: () => $('cCap'),
+  { tx: '今です！ 下の「<b>ボックス</b>」をタップして、モンスターを捕まえましょう。<br><small>（弱っているほど捕まえやすくなります）</small>', hideTill: true, hl: () => $('cCap'),
     freeze: () => { const o = tutO(); return !!o && (o.hp < o.maxHp * .75 || TUT.t > 14) && TUT.t > 1.5; }, wait: () => B.mode === 'catch' },
   { tx: '', fin: true },
 ];
@@ -9900,7 +9900,7 @@ const HUB_GRASS = [
   { sel: isleSel('wild', '#btnWild'), allow: () => [isleSel('wild', '#btnWild')(), '#btnWild'], tx: () => `${SPECIES[S.party[0].sid].n}が仲間になりました！<br>一緒に<b>草むら</b>へ行って、モンスターを捕まえてみましょう。「<b>くさむら</b>」をタップしてください。`, ok: () => !!B },
 ];
 const HUB_CHEST = [
-  { sel: '.chest[data-i="0"]', allow: () => [], tx: '草むらのごほうびに、<b>ブラインドボックス</b>をもらいました！<br>ブラインドボックスからは、モンスター・ワザステッカー・マテリアルなどが出てきます。', next: 1 },
+  { sel: '.chest[data-i="0"]', allow: () => [], tx: '草むらのごほうびに、<b>ブラインドボックス</b>をもらいました！<br>ブラインドボックスからは、モンスター・ワザステッカー・ボックスなどが出てきます。', next: 1 },
   { sel: '.chest[data-i="0"]', tx: 'ブラインドボックスは、時間が経つと開けられるようになります。<b>ジェム</b>を使えば、すぐに開けることもできます。<br>今回のジェムは<b>無料</b>です！ ブラインドボックスをタップして開けてみましょう。', ok: () => S.onbOpen && !document.querySelector('.askbg') },
   { sel: isleSel('arena', '#btnJourney'), allow: () => [], tx: () => `これで仲間が<b>${S.party.length + S.box.length}体</b>になりました！<br>準備ができたら「<b>アーケード</b>」へ行ってみましょう。まずはライバルとの「<b>はじめての戦い</b>」、そのあとは<b>ジム戦</b>です。がんばってください！`, next: 1, end: 1 },
 ];
@@ -10547,7 +10547,7 @@ function updHUD() {
   setText($('capN'), `のこり ${S.capsules}`);
   if (B.kind === 'wild') { { const wb = $('wildBtns'), bp = $('bpanel').getBoundingClientRect(), wr = $('cvWrap').getBoundingClientRect(), land = document.documentElement.classList.contains('land');   // たて：したの パネルの うえ／よこ：ひかえと わざの あいだ
       wb.style.bottom = (land ? 10 : Math.max(10, Math.round(wr.bottom - bp.top + 8))) + 'px'; }
-    const e = active(1), hot = B.mode === 'fight' && !B.catchO && S.capsules > 0 && targetable(e) && catchProb(e) >= CATCH_HOT;   // つかまえられそう：マテリアルを ひからせる
+    const e = active(1), hot = B.mode === 'fight' && !B.catchO && S.capsules > 0 && targetable(e) && catchProb(e) >= CATCH_HOT;   // つかまえられそう：ボックスを ひからせる
     $('cCap').classList.toggle('hot', hot); setText($('capN'), hot ? `チャンス！ のこり ${S.capsules}` : `のこり ${S.capsules}`); }
 }
 
@@ -11738,7 +11738,7 @@ function drawFighter0(f) {
   }
 }
 
-// 指示を だすと 指を さす（召喚・マテリアルは 手を ひろげる）
+// 指示を だすと 指を さす（召喚・ボックスは 手を ひろげる）
 // ===== スタンプ（バトル中に きもちを つたえる。ことばは なし・絵だけ。オンラインでは あいてにも とどく）=====
 // [キー, いみ（よみあげ用）]。納品の 絵（st_<キー>）が あれば それ、なければ いまの アイコン
 const STAMPS = [['hello', 'よろしく', 'hand'], ['nice', 'ナイス', 'star'], ['wow', 'すごい', 'excl'], ['thanks', 'ありがとう', 'heart'], ['smug', 'ふふん', 'dstar'], ['what', 'えっ', 'ques'], ['yikes', 'あぶない', 'warn'], ['gg', 'GG', 'crown']];
@@ -11984,12 +11984,12 @@ function render() {
     for (const q of B.parts) drawPart(q);
   });
 
-  // マテリアル
+  // ボックス
   if (B.catchO) {
     const c = B.catchO; let ox = 0;
     if (c.phase === 'shake') ox = Math.round(Math.sin(c.t / .6 * Math.PI * 2) * 2 * (c.t < .35 ? 1 : 0));
     const x = Math.round(c.x) + ox, y = Math.round(c.y);
-    // マテリアル（ChatGPT の 絵）：なげる → ゆれる → つかまえた
+    // ボックス（ChatGPT の 絵）：なげる → ゆれる → つかまえた
     const ck = c.phase === 'throw' ? 'cap_throw' : c.phase === 'done' ? 'cap_caught' : 'cap_shake';
     if (plOk(ck)) { plDraw(ck, ck === 'cap_caught' ? plOnce(ck, Math.min(1, c.t / .6)) : c.phase === 'shake' && c.t >= .35 ? 0 : plLoop(ck, B.t), x, y, 1.1);
       if (c.phase === 'shake') for (let i = 0; i < c.shakes; i++) drawStar(x - 12 + i * 12, y - 24, 4, '#ffd84a'); }
@@ -12194,7 +12194,7 @@ function showChestLog() {
   const ago = (t) => { const m = Math.floor((Date.now() - t) / 60000); return m < 1 ? 'いま' : m < 60 ? `${m}ぷんまえ` : m < 1440 ? `${Math.floor(m / 60)}じかんまえ` : `${Math.floor(m / 1440)}にちまえ`; };
   const row = (e) => { const C = CHESTS[e.k] || { n: 'ブラインドボックス' }, parts = [];
     for (const sid of e.mons) if (SPECIES[sid]) { const r = RARITY[monRarity(sid)]; parts.push(`<span class="clm"><img class="pix" src="${spriteCanvas(sid, 32).toDataURL()}" alt=""><b>${SPECIES[sid].n}</b><i style="background:${r.c}">${r.n}</i></span>`); }
-    if (e.cr) parts.push(`<span class="clt">${orbImg('orbs')}マテリアル ×${e.cr}</span>`);
+    if (e.cr) parts.push(`<span class="clt">${orbImg('orbs')}ボックス ×${e.cr}</span>`);
     for (const k of e.items) if (ITEMS[k]) parts.push(`<span class="clt">${ITEMS[k].ic}${ITEMS[k].n}</span>`);
     for (const id of e.tms) if (MOVES[id]) parts.push(`<span class="clt"><i class="ico ico-s" data-ico="scroll"></i>${MOVES[id].n}</span>`);
     return `<div class="clrow"><div class="clh"><span class="clic">${chestIcon(e.k, false, 2)}</span><b>${C.n}</b><small>${ago(e.t)}</small></div><div class="clb">${parts.join('')}</div></div>`; };
@@ -12202,10 +12202,10 @@ function showChestLog() {
   bg.querySelector('#clClose').onclick = () => bg.remove(); paintIcons(bg);
 }
 $('btnChLog').onclick = showChestLog;
-// もちもの（トロフィー・マテリアル・ジェム）を タップ：なにか せつめい
+// もちもの（トロフィー・ボックス・ジェム）を タップ：なにか せつめい
 const RES_HELP = {
   trophy: 'トロフィー\nたいかいで ゆうしょうしたり、アーケードを クリアしたり、チャンピオンリーグで かつと もらえる。これまでの きろく です。',
-  crystal: 'マテリアル\nくさむらで よわらせた モンスターに なげると つかまえられる。バトルに かったり、ブラインドボックスから でる。',
+  crystal: 'ボックス\nくさむらで よわらせた モンスターに なげると つかまえられる。バトルに かったり、ブラインドボックスから でる。',
   gem: 'ジェム\nブラインドボックスを まち時間なしで すぐ あけられる。バトルに かったり、たいかいで ゆうしょうすると もらえる。',
 };
 document.querySelectorAll('#scHub .hres1').forEach(el => el.addEventListener('click', () => { SND.se('click'); say0(RES_HELP[el.dataset.res]); }));
@@ -12580,7 +12580,7 @@ async function mkSave() {
   if (!regCustomMon(key, CUSTOM.mon[key])) { delete CUSTOM.mon[key]; return; }
   saveCustom();
   const sp = SPECIES[key]; let where = '';
-  if (S) { const m = newMon(key); dexMark(key, 2); where = S.party.length < 6 ? (S.party.push(m), 'パーティに くわわった！') : (S.box.push(m), 'ボックスに おくられた'); save(); }
+  if (S) { const m = newMon(key); dexMark(key, 2); where = S.party.length < 6 ? (S.party.push(m), 'パーティに くわわった！') : (S.box.push(m), '「あずける」に おくられた'); save(); }
   const st = stats({ sid: key, iv: { hp: 15, atk: 15, def: 15, spa: 15, spd: 15, spe: 15, eva: 15 }, lvl: MON_LV }) || {};
   const STY = { melee: 'ちかづいて たたかう', mid: 'バランスがた', ranged: 'はなれて たたかう' };
   const bar = (k, n, v) => `<span>${n}</span><span><i style="width:${clamp(v / 160 * 100, 4, 100)}%"></i></span><b>${v || '-'}</b>`;
@@ -12612,8 +12612,8 @@ $('btnHelp').onclick = () => {
     <p><b>赤い はんい</b>は あいての わざの よちょう。モンスターは じぶんで かわそうと する。</p>
     <p><b>こうたい</b>は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。</p>
     <p><b>障害物</b>は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。</p>
-    <p><b>くさむら</b>で よわらせて <b>マテリアル</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
-    <p><b>ブラインドボックス</b>は 勝つと ときどき もらえる（ジムリーダー・チャンピオンリーグは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・マテリアル・ワザステッカーが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
+    <p><b>くさむら</b>で よわらせて <b>ボックス</b>を なげると つかまえられる。性格・ステータス・わざは つかまえた ときに きまる。</p>
+    <p><b>ブラインドボックス</b>は 勝つと ときどき もらえる（ジムリーダー・チャンピオンリーグは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・ボックス・ワザステッカーが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
     <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ・かいひ の 7つ。すばやさが 高いほど はやく 歩き、かいひが 高いほど 指示なしで よける。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。<b>ぶつりわざ</b>（格闘・とっしん・ひっかき など からだで ぶつかる わざ）は こうげき→ぼうぎょ、<b>ぞくせいわざ</b>（ビーム・弾・ほのお・らくらい・はんい など はなれて とどく わざ）は 属性攻撃→属性防御 で ダメージが きまる。</p>
     <p><b>きょうか</b>：へんせい → きょうか で おなじ しゅるいの モンスターを つかうと ポイントが ふえる（1たい +1。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりなおしのくすり）。</p>
     <p><b>どうぐ</b>：ふりなおしのくすり・すべてわすれのかね・ひとつわすれのは・おなじタイプのいし。ブラインドボックスから でる。へんせい → どうぐ で つかう。</p>
@@ -12925,7 +12925,7 @@ function towerResult(res, lines) {
   const T = tw(), R = T.run; if (!R) return;
   if (res !== 'win') { lines.unshift(`<b style="color:var(--bad)">れんしょう ストップ</b>　${R.streak}れんしょう`); if (R.streak > T.best) { T.best = R.streak; lines.push('<b style="color:var(--acc)">さいこう きろく こうしん！</b>'); } T.run = null; return; }
   S.wins++; R.streak++; const n = R.streak; if (n > T.best) T.best = n; S.gems = (S.gems || 0) + 1; let msg = `${n}れんしょう！　💎+1`;
-  if (n % TW_SET === 0) { T.sets++; S.gems += 10; S.capsules += 3; msg = `<b style="color:var(--acc)">${n}れんしょう たっせい！</b>　💎+11・マテリアル+3`; }
+  if (n % TW_SET === 0) { T.sets++; S.gems += 10; S.capsules += 3; msg = `<b style="color:var(--acc)">${n}れんしょう たっせい！</b>　💎+11・ボックス+3`; }
   if (n % TW_TYCOON === 0) { S.gems += 30; S.trophies++; msg = `<b style="color:var(--acc)">👑 タワータイクーンに かった！ ${n}れんしょう</b>　💎+41・トロフィー+1`; }
   if (n > T.best) T.best = n;
   lines.unshift(msg);
