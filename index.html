@@ -4242,7 +4242,7 @@ function pixDissolve(old) {
   // 黒い マス：1マス＝キャンバスの 1ドット（ひきのばして くっきり）
   const C = DSV.cell, nx = Math.ceil(W / C), ny = Math.ceil(H / C), N = nx * ny;
   const cv = document.createElement('canvas'); cv.width = nx; cv.height = ny; cv.className = 'pix';
-  Object.assign(cv.style, { position: 'absolute', left: 0, top: 0, width: nx * C + 'px', height: ny * C + 'px', zIndex: 60, pointerEvents: 'auto', imageRendering: 'pixelated' });
+  Object.assign(cv.style, { position: 'absolute', left: 0, top: 0, width: W + 'px', height: H + 'px', zIndex: 60, pointerEvents: 'auto', imageRendering: 'pixelated' });   /* がめんの おおきさ ぴったり（はみでて よこスクロールが でない） */
   app.appendChild(cv);
   const g = cv.getContext('2d'), ord = new Float32Array(N); for (let i = 0; i < N; i++) ord[i] = Math.random();
   const paint = (k, inv) => { g.clearRect(0, 0, nx, ny); g.fillStyle = DSV.col; for (let i = 0; i < N; i++) if (inv ? ord[i] >= k : ord[i] < k) g.fillRect(i % nx, (i / nx) | 0, 1, 1); };
@@ -4254,7 +4254,7 @@ function pixDissolve(old) {
     let lv;
     if (t < T1) lv = step(t, T1);   // アウト：黒い マスが ふえる
     else if (t < T2) { lv = 100; if (st.cl) { st.cl.remove(); st.cl = null; } }   // まっくろ
-    else lv = 200 + step(t - T2, DSV.in);   // イン：黒い マスが ぬける
+    else { lv = 200 + step(t - T2, DSV.in); st.cv.style.pointerEvents = 'none'; }   // イン：黒い マスが ぬける（あたらしい がめんは もう おせる）
     if (lv !== st.lv) { st.lv = lv;
       if (lv < 100) paint((lv + 1) / (DSV.steps + 1), false); else if (lv === 100) { g.fillStyle = DSV.col; g.fillRect(0, 0, nx, ny); } else paint((lv - 200 + 1) / (DSV.steps + 1), true); }
     st.raf = requestAnimationFrame(tick);
@@ -5113,11 +5113,16 @@ function trtLoop() {
   while (box.children.length < rs.length) box.appendChild(document.createElement('div')); [...box.children].forEach((d, k) => { const r = rs[k]; d.hidden = !r; if (r) Object.assign(d.style, { left: r.left - 5 + 'px', top: r.top - 5 + 'px', width: r.width + 10 + 'px', height: r.height + 10 + 'px' }); });
   TRT.el.querySelector('.dim path').setAttribute('d', rs.length ? `M0 0H${vw}V${vh}H0Z` + rs.map(r => `M${r.left - 5} ${r.top - 5}h${r.width + 10}v${r.height + 10}h${-r.width - 10}Z`).join('') : '');
   const r = t ? trtRect(t) : null;
-  const bw = Math.min(380, vw - 24), bh = bub.offsetHeight || 120; bub.style.width = bw + 'px';
+  let bw = Math.min(380, vw - 24);
+  const mb = t && t.closest('.askbox'), mr = mb && trtRect(mb), sideR = mr ? vw - mr.right - 14 - 12 : 0, sideL = mr ? mr.left - 14 - 12 : 0, side = mr && Math.max(sideR, sideL) >= 250;   // まどの なかを さす：まどの よこが あいて いれば そとに だす（ひょうを かくさない）
+  if (side) bw = Math.min(380, Math.max(sideR, sideL));
+  bub.style.width = bw + 'px'; const bh = bub.offsetHeight || 120;
   let x = vw / 2 - bw / 2, y = vh / 2 - bh / 2;
-  if (r && r.width) { x = clamp(r.left + r.width / 2 - bw / 2, 12, vw - bw - 12); const below = r.bottom + 14, above = r.top - 14 - bh;
+  if (side) { x = sideR >= sideL ? mr.right + 14 : mr.left - 14 - bw; y = clamp(r && r.width ? r.top : mr.top, 8, vh - bh - 8); }
+  else if (r && r.width) { x = clamp(r.left + r.width / 2 - bw / 2, 12, vw - bw - 12); const below = r.bottom + 14, above = r.top - 14 - bh;
     if (below + bh < vh) y = below; else if (above >= 8) y = above;
-    else { y = clamp(r.top, 8, vh - bh - 8); x = r.right + 14 + bw < vw ? r.right + 14 : r.left - 14 - bw >= 0 ? r.left - 14 - bw : x; } }   // した → うえ → よこ の じゅんに おける ところへ
+    else if (r.right + 14 + bw < vw || r.left - 14 - bw >= 0) { y = clamp(r.top, 8, vh - bh - 8); x = r.right + 14 + bw < vw ? r.right + 14 : r.left - 14 - bw; }
+    else { const ov = (yy) => Math.max(0, Math.min(yy + bh, r.bottom) - Math.max(yy, r.top)); y = ov(8) <= ov(vh - bh - 8) ? 8 : vh - bh - 8; } }   // した → うえ → よこ → がめんの うえか したの はし（さす ものに かさなる ぶんが すくない ほう）
   bub.style.left = x + 'px'; bub.style.top = y + 'px';
 }
 function trDockFix() {   // 訓練：3れつ ならび の ときは ひだりの れつ（モンスター いちらん＋模擬戦・シミュレーション・確定）を がめんに こてい（それ いがいは もとの ばしょへ）
@@ -5238,14 +5243,23 @@ function renderTrain(uid) {
     return [];
   };
   // いちばん ちかい おける わく（ゆびの したに あれば それ、なければ 56px いないの いちばん ちかい もの＝マグネット）
-  const MAG = 56, nearest = (zs, x, y) => { let best = null, bd = MAG; for (const z of zs) { const r = z.getBoundingClientRect(), dx = Math.max(r.left - x, 0, x - r.right), dy = Math.max(r.top - y, 0, y - r.bottom), d = Math.hypot(dx, dy); if (d < bd || (d === 0 && bd > 0)) { bd = d; best = z; } } return best; };
+  const MAG = 56, nearest = (zs, x, y) => { let best = null, bd = MAG;
+    { const u = document.elementFromPoint(x, y), dz = u && u.closest && u.closest('[data-drop]'), mn = B.querySelector('.trmain'), mr = mn && mn.getBoundingClientRect();
+      if (dz && !zs.includes(dz) && !zs.some(z => z.contains(dz))) return null;   /* おけない わくの うえ：となりへ すいつかない */
+      if (mr && (x < mr.left || x > mr.right)) return null; }   /* 技の ひょうの そと（よこの よはく）：すいつかない＝はずす */
+    for (const z of zs) { const r = z.getBoundingClientRect(), dx = Math.max(r.left - x, 0, x - r.right), dy = Math.max(r.top - y, 0, y - r.bottom), d = Math.hypot(dx, dy); if (d < bd || (d === 0 && bd > 0)) { bd = d; best = z; } } return best; };
   const drag = (el, pl, tapFn, okAt) => el.addEventListener('pointerdown', (ev) => {
     if (ev.button > 0 || (okAt && !okAt(ev.target))) return; const sx = ev.clientX, sy = ev.clientY; let g = null, zs = [], tgt = null;
     if (ev.pointerType === 'touch' && !(pl.rowEl && ev.target.closest('.no'))) {   // タッチは タップだけ（うごかしたら スクロール）
       const up1 = (e) => { window.removeEventListener('pointerup', up1); window.removeEventListener('pointercancel', up1); if (e.type === 'pointerup' && Math.hypot(e.clientX - sx, e.clientY - sy) < 10) tapFn(); };
       window.addEventListener('pointerup', up1); window.addEventListener('pointercancel', up1); return; }
     const clear = () => { zs.forEach(z => z.classList.remove('can', 'hov')); };
-    const mv = (e) => { if (!g && Math.hypot(e.clientX - sx, e.clientY - sy) > 6) { g = el.cloneNode(true); g.classList.add('trghost'); g.style.width = el.offsetWidth + 'px'; document.body.appendChild(g); zs = zonesFor(pl); zs.forEach(z => z.classList.add('can')); }
+    // はしまで もっていくと じどうで スクロール（PC：とおくの 行へ はこべる）
+    let ase = null, asT = 0; const scroller = () => { for (let n = B.querySelector('.trmain'); n && n !== document.body; n = n.parentElement) { const o = getComputedStyle(n).overflowY; if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight + 2) return n; } return document.scrollingElement; };
+    const asTick = () => { asT = 0; if (!g || !ase) return; const sc = scroller(), r = sc === document.scrollingElement ? { top: 0, bottom: innerHeight } : sc.getBoundingClientRect(), E = 48, y = ase.clientY;
+      const v = y < r.top + E ? -Math.ceil((r.top + E - y) / 4) : y > r.bottom - E ? Math.ceil((y - (r.bottom - E)) / 4) : 0;
+      if (v) { const t0 = sc.scrollTop; sc.scrollTop += v; if (sc.scrollTop !== t0) mv(ase); asT = requestAnimationFrame(asTick); } };
+    const mv = (e) => { ase = e; if (g && !asT) asT = requestAnimationFrame(asTick); if (!g && Math.hypot(e.clientX - sx, e.clientY - sy) > 6) { g = el.cloneNode(true); g.classList.add('trghost'); g.style.width = el.offsetWidth + 'px'; document.body.appendChild(g); zs = zonesFor(pl); zs.forEach(z => z.classList.add('can')); }
       if (!g) return; e.preventDefault();
       const z = nearest(zs, e.clientX, e.clientY);
       if (z !== tgt) { if (tgt) tgt.classList.remove('hov'); tgt = z; if (z) { z.classList.add('hov'); MO.ok() && z.animate && z.animate([{ transform: 'scale(1.03)' }, { transform: 'none' }], { duration: 140 }); } }
@@ -5253,7 +5267,7 @@ function renderTrain(uid) {
       let gx = e.clientX, gy = e.clientY; if (z) { const r = z.getBoundingClientRect(), cx = clamp(gx, r.left + 8, r.right - 8), cy = clamp(gy, r.top + 6, r.bottom - 6); gx += (cx - gx) * .45; gy += (cy - gy) * .45; }
       g.style.left = Math.round(gx - el.offsetWidth / 2) + 'px'; g.style.top = Math.round(gy - el.offsetHeight / 2) + 'px'; g.classList.toggle('snap', !!z); };
     const up = (e) => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
-      clear(); if (!g) { tapFn(); return; } g.remove(); drop(pl, tgt); };
+      if (asT) cancelAnimationFrame(asT); asT = 0; const g0 = g; g = null; clear(); if (!g0) { tapFn(); return; } g0.remove(); drop(pl, tgt); };
     window.addEventListener('pointermove', mv, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
   });
   // タップで えらぶ：わくを おす → 一覧の ウィンドウ → こまかい 設定が ある 条件は もう1まい → 決めたら 訓練画面へ もどる
@@ -5458,13 +5472,22 @@ function openBoost(m) {
       drag.moved = true; const m = teamMon(drag.r); drag.ghost = spriteCanvas(m.sid, 72); drag.ghost.className = 'pix dragghost'; $('app').appendChild(drag.ghost); drag.r.el.classList.add('dragging');
     }
     if (!drag.moved) return;
-    ev.preventDefault();
+    ev.preventDefault(); drag.last = ev; if (!drag.asT) drag.asT = requestAnimationFrame(asTick);
     const a = toApp(ev.clientX, ev.clientY); drag.ghost.style.left = a.x + 'px'; drag.ghost.style.top = a.y + 'px';
     const o = under(ev.clientX, ev.clientY); if (drag.over && (!o || o.el !== drag.over)) drag.over.classList.remove('over');
     if (o && o.el !== drag.r.el) { o.el.classList.add('over'); drag.over = o.el; } else drag.over = null;
   }, { passive: false });
+  // はしまで もっていくと じどうで スクロール（ボックスの なか → ボックス、がめんの うえ・した → がめん）
+  const scrollerOf = (n) => { for (; n && n !== document.body; n = n.parentElement) { const o = getComputedStyle(n).overflowY; if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight + 2) return n; } return document.scrollingElement; };
+  const asTick = () => { const d = drag; if (!d) return; d.asT = 0; if (!d.moved || !d.last || document.documentElement.classList.contains('rot')) return;
+    const e = d.last, E = 44, bx = $('tmBox'), br = bx && bx.getBoundingClientRect(), inBox = br && e.clientX >= br.left && e.clientX <= br.right && e.clientY >= br.top - E && e.clientY <= br.bottom + E && bx.scrollHeight > bx.clientHeight + 2;
+    const sc = inBox ? bx : scrollerOf($('scTeam').querySelector('.teamwrap')), r = sc === document.scrollingElement ? { top: 0, bottom: innerHeight } : sc.getBoundingClientRect();
+    const v = e.clientY < r.top + E ? -Math.ceil((r.top + E - e.clientY) / 4) : e.clientY > r.bottom - E ? Math.ceil((e.clientY - (r.bottom - E)) / 4) : 0;
+    if (!v) return; const t0 = sc.scrollTop; sc.scrollTop += v; if (sc.scrollTop === t0) return;
+    const o = under(e.clientX, e.clientY); if (d.over && (!o || o.el !== d.over)) d.over.classList.remove('over'); if (o && o.el !== d.r.el) { o.el.classList.add('over'); d.over = o.el; } else d.over = null;
+    d.asT = requestAnimationFrame(asTick); };
   const end = (ev) => {
-    if (!drag) return; const d = drag; drag = null; clearTimeout(d.tm); d.r.el.classList.remove('lift');
+    if (!drag) return; const d = drag; drag = null; clearTimeout(d.tm); if (d.asT) cancelAnimationFrame(d.asT); d.r.el.classList.remove('lift');
     if (d.ghost) d.ghost.remove(); d.r.el.classList.remove('dragging'); if (d.over) d.over.classList.remove('over');
     if (d.moved) { justDragged = performance.now(); const o = under(ev.clientX, ev.clientY); teamSel = null; if (o) { teamView = teamMon(d.r).uid; teamDrop = teamView; teamMove(d.r, o); } renderTeam(); }
   };
@@ -6155,11 +6178,12 @@ function statusFx(f, s) {
 function popText(x, y, txt, col, big) {
   if (NET.host) netEv('tx', [x, y, txt, col, big]); B.texts.push({ x, y, txt, col, life: .9, max: .9, big: big === 'comic' ? 'comic' : !!big }); }
 let sayTimer = 0;
-let SAY_LOCK = 0, SAY_PEND = null;   // hold：みじかい ひとこと（「しあいが はじまってから…」など）は すこしの あいだ ほかの セリフで けさない
+let SAY_LOCK = 0, SAY_PEND = [];   // hold：みじかい ひとこと（「しあいが はじまってから…」など）は すこしの あいだ ほかの セリフで けさない
 function say(t, hold) { const now = performance.now();
-  if (!hold && now < SAY_LOCK) { SAY_PEND = t; return; }   // あとで だす
+  if (!hold && now < SAY_LOCK) { SAY_PEND.push(t); return; }   // あとで じゅんに だす（とばさない）
   if (NET.host) netEv('sa', t); $('banner').textContent = t; sayTimer = 2.2;
-  if (hold) { SAY_LOCK = now + 1500; setTimeout(() => { SAY_LOCK = 0; if (SAY_PEND != null) { const p = SAY_PEND; SAY_PEND = null; if (B) say(p); } }, 1500); } }
+  if (hold) sayLock(1500); }
+let SAY_TM = 0; function sayLock(ms) { SAY_LOCK = performance.now() + ms; clearTimeout(SAY_TM); SAY_TM = setTimeout(() => { SAY_LOCK = 0; if (!B) { SAY_PEND = []; return; } const p = SAY_PEND.shift(); if (p == null) return; say(p); if (SAY_PEND.length) sayLock(900); }, ms); }
 function addDecal(x, y, r, kind) {
   if (NET.host) netEv('de', [x, y, r, kind]);
   const st = B.st;
