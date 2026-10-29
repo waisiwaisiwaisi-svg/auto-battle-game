@@ -8730,7 +8730,7 @@ const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   //
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv && typeof o.iv === 'object' ? iv : undefined, moves: [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(id => typeof id === 'string' && MOVES[id]))].slice(0, 4) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } let to = o.tr; if (typeof to === 'string') try { to = JSON.parse(to); } catch (e) { to = null; }   /* フリー対戦：Firestore には もじで おく */ const tr = trUnpack(to, m); if (tr) m.tr = tr; return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
-function netReset() { clearTimeout(NET.lostT); NET.lostT = 0; SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0 }); }
+function netReset() { clearTimeout(NET.lostT); NET.lostT = 0; SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { const nr = NET.nr, bye = NET.started; try { if (bye) Promise.resolve(nr.presence({ bye: 1 })).catch(() => { }).finally(() => setTimeout(() => { try { nr.leave(); } catch (e) { } }, 800)); else nr.leave(); } catch (e) { } }   /* たいせん中に ぬける：あいてに すぐ しらせる（まつ 15びょうを まない） */ Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0 }); }
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
 async function netOpen(asHost, code, onStatus, opts = {}) {
   const room = await netGetRoom();
@@ -8785,7 +8785,8 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
         if (!NET.preview) { onStatus('', false, true); rankPreview(h.presence.team6, h.presence.r); }
         rankPreviewOpp(Array.isArray(h.presence.pick));
       }
-      if (!NET.started && h.presence.start && h.presence.start.gp && !ch.peers.some(p => p.sameTab && p.peer === h.presence.start.gp)) { onStatus('この へやは もう たいせんが はじまって います（いっぱい）', true); netReset(); return; }   // ほかの ゲストと はじまった
+      const busy = h.presence.inb || (h.presence.start && h.presence.start.gp);   // ホストが ほかの ゲストと たいせん中
+      if (!NET.started && busy && !ch.peers.some(p => p.sameTab && p.peer === busy)) { onStatus('この へやは もう たいせんが はじまって います（いっぱい）', true); netReset(); return; }   // ほかの ゲストと はじまった
       if (!NET.started && h.presence.start && validTeam(h.presence.start.h)) { rankPreviewClose(); NET.peer = h.peer; if (typeof h.presence.start.hr === 'number') NET.oppR = h.presence.start.hr; netGuestStart(h.presence.start); onStatus('', false, true); }
       if (NET.started && h.presence.snap) netGuestSnap(h.presence.snap);
       if (!NET.started && others.some(p => p.presence.role === 'host')) onStatus(`ホストが みつかりました。はじまるのを まっています…`);
@@ -8797,7 +8798,7 @@ function netPeerLeft() {
   if (!B || NET.ended) return;
   NET.ended = true;
   if (NET.host) { say('あいてが つうしんを きりました'); endBattle('win'); }
-  else { B.remote = false; B.mode = 'end'; B.result = 'win'; S.online = S.online || { w: 0, l: 0 }; S.online.w++; B.resLines = ['あいてが つうしんを きりました', rankResult(true)]; save(); showResult(); }   // ゲストも かちを きろく
+  else { B.remote = false; B.mode = 'end'; B.result = 'win'; S.online = S.online || { w: 0, l: 0 }; S.online.w++; B.resLines = ['あいてが つうしんを きりました', rankResult(true)].filter(Boolean); save(); showResult(); }   // ゲストも かちを きろく
 }
 /* ---------- ホスト ---------- */
 // あいての みため（presence の lk。しらない ものなら レイ）
@@ -8818,7 +8819,7 @@ function netHostStart(gteam, mineSel) {
   B.net = 'host';
   // 見せあい用の 6たいは もう いらない（presence は ぜんぶで 4KB まで）
   const noTr = (t) => t.map(o => { const { tr, ...r } = o; return r; });   // 訓練は ホストだけが つかう（ゲストには おくらない：presence を かるく）
-  const startP = { start: { field, h: noTr(mine), g: noTr(gteam), hr: myRank().r, gp: NET.peer }, team: null, team6: null, pick: null, ca: null, la: null };   // え は もう おくった
+  const startP = { start: { field, h: noTr(mine), g: noTr(gteam), hr: myRank().r, gp: NET.peer }, inb: NET.peer, team: null, team6: null, pick: null, ca: null, la: null };   // え は もう おくった
   NET.nr.presence(startP).catch(() => { });
   NET.baseLen = JSON.stringify({ role: 'host', v: 1, r: myRank().r, rk: 1, lk: 'firefighter', start: startP.start }).length;
   if (NET.ranked) B.cfg.title = 'オンライン対戦';
@@ -8968,6 +8969,7 @@ function netReplay(e) {
 }
 function netGuestStep(dt) {
   { const wait = B.snapAt && B.mode !== 'end' && performance.now() - B.snapAt > 2500; if (wait !== !!B.netWait) { B.netWait = wait; $('banner').classList.toggle('waiting', wait); if (wait) say('つうしんを まっています…'); } }   // ホストからの データが とまった
+  if (B.stallAsk && !B.netWait) { document.querySelectorAll('.askbg').forEach(e => { if (/がめんが とまった/.test(e.textContent)) e.remove(); }); B.stallAsk = false; }   // あいてが もどった：まどは とじる
   if (B.netWait && performance.now() - B.snapAt > 40000 && !B.stallAsk && B.mode !== 'end') { B.stallAsk = true;   // ずっと とまって いる（あいてが アプリを とじずに はなれた など）：まけに しないで やめられる
     ask('あいての がめんが とまった まま です。\nしあいを やめますか？（まけには なりません）', 'やめる', 'まつ').then(y => { if (!B || B.kind !== 'online') return; if (!y) { B.stallAsk = false; B.snapAt = performance.now() - 2600; return; }
       if (S) delete S.rkPend; NET.ended = true; B.remote = false; B.mode = 'end'; B.result = 'draw'; B.resLines = ['あいての つうしんが とまったので やめました（しょうぶ なし）']; save(); netReset(); showResult(); }); }
