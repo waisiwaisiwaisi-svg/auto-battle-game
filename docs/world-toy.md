@@ -55,3 +55,4 @@
 - ブラインドボックス・アイコン 発注資料：https://claude.ai/artifact/Tc9nGH6qiNs42eXmvD5gS3
 - ストリート系アイコン 発注資料（剣・盾・王冠・紋章などを街のモチーフに）：https://claude.ai/artifact/JFDjmqte27AxUHGbb47uks
 - ジムの外まわり 発注資料（外壁・タイプ看板をストリート系に）：https://claude.ai/artifact/KoJKJoezUuDcCggoPG4Ki9
+- モンスター描き直し 依頼シート（14体・納品は newmon/r2/）：https://claude.ai/artifact/4S3tjREWEUWJqA2J1f2Un9
