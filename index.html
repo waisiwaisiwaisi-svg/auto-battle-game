@@ -11524,8 +11524,17 @@ function drawHazards() {
 }
 const ST_COL = { brn: '#ff8a3d', par: '#ffd84a', psn: '#b86ad8', tox: '#8a3ab0', slp: '#9fb0ff', frz: '#9fe8ff' };
 // 状態異常・まもる・デコイ などの 見た目
+const BODY_BOX = {};   // 待機の 絵の すけて いない ところ（たいの わく）：{w, h, cy}（もとの 絵の 画素）
+function bodyBox(sid) {
+  if (sid in BODY_BOX) return BODY_BOX[sid];
+  let r = null;
+  try { const im = SPR[sid] && SPR[sid].n, q = im && im.getContext ? im.getContext('2d') : null, d = q && q.getImageData(0, 0, im.width, im.height).data;
+    if (d) { let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1; for (let y = 0; y < im.height; y++) for (let x = 0; x < im.width; x++) if (d[(y * im.width + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      if (x1 >= 0) r = { w: x1 - x0 + 1, h: y1 - y0 + 1, cy: (y0 + y1 + 1) / 2 }; } } catch (e) { }
+  return (BODY_BOX[sid] = r);
+}
 function drawConditions(f, top, oy, img) {
-  const h = img.height * 2, cx = f.x, cy = f.y - h / 2 + oy;
+  const h = img.height * 2, cx = f.x, cy = img.cy != null ? img.cy : f.y - h / 2 + oy;
   if (f.state === 'lag') { // 交代直後の スキ：のこり時間バー
     const w = 46, x = Math.round(cx - w / 2), k = clamp(f.stT / (f.lagMax || SWAP_LAG), 0, 1);
     ctx.fillStyle = '#120e1c'; ctx.fillRect(x - 1, top + 6, w + 2, 5);
@@ -11803,7 +11812,7 @@ function drawFighter0(f) {
     if (f.capHp > 0) { const cw = Math.round(w * f.capHp / f.maxHp); ctx.fillStyle = '#5a3a8a'; ctx.fillRect(x + w - cw, top, cw, 5); ctx.fillStyle = '#8a78c8'; for (let i = 0; i < cw; i += 3) ctx.fillRect(x + w - cw + i, top + (i % 2), 1, 3); }   // のろい：かいふく できない ぶん
     if (f.side === 0) { ctx.fillStyle = '#5ab8ff'; const tx = Math.round(f.x); ctx.fillRect(tx - 4, top - 7, 9, 2); ctx.fillRect(tx - 2, top - 5, 5, 2); }
   }
-  if (!['faint', 'enter', 'return'].includes(f.state)) drawConditions(f, top, oy, { width: img0.width * ms / 2, height: img0.height * ms / 2 });   /* 見た目の 大きさ（半分の幅・半分の高さ） */
+  if (!['faint', 'enter', 'return'].includes(f.state)) { const bb = bodyBox(f.mon.sid); drawConditions(f, top, oy, bb ? { width: bb.w * ms / 2, height: bb.h * ms / 2, cy: f.y + oy - (img0.height - bb.cy) * ms } : { width: img0.width * ms / 2, height: img0.height * ms / 2 }); }   /* 見た目の 大きさ（半分の幅・半分の高さ）。絵の わくでは なく 体の すけて いない ところで はかる（まひの 線などが 頭の 上に でない ように） */
   // ピヨピヨ星
   if (f.dizzy > 0 && f.state !== 'faint') {
     for (let i = 0; i < 4; i++) {
