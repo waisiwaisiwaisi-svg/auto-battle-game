@@ -6022,7 +6022,7 @@ function sendOut(side, idx, pass, lag, at, ko) {
   else { f.x = side ? st.fx1 - 120 : st.fx0 + 120; f.y = (st.fy0 + st.fy1) / 2 + rand(-20, 20); }   // はじめ・たおれた あと：初期位置
   clampF(f); if (st.solid) freeSpot(f);
   f.hurtInv = ko ? KO_INV : 0; f.hurtBy = null;
-  if (!(B.kind === 'wild' && side === 1) && plOk('cap_open')) plFx('cap_open', f.x, f.y + 6, .85);   // ボックスが ひらいて でてくる（やせいは のぞく）
+  if (!(B.kind === 'wild' && side === 1) && plOk('cap_open')) plFx('cap_open', f.x, f.y + 4, .6);   // ボックスが ひらいて でてくる（やせいは のぞく）
   f.state = 'enter'; f.stT = 0.5; f.inv = 0.6; f.cur = null; f.queued = null; f.want = null; f.kx = f.ky = 0; f.face = side ? -1 : 1; f.aiT = rand(.6, 1.2); f.scale = 0;
   f.enterT = 0; f.swIn = B.mode === 'fight'; f.inAt = B.t; f.v = {}; f.hist = []; f.rw = null; f.heat = 0; f.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; f.lastMove = null; f.rotN = 0; f.usedAt = {}; f.shots = [];
   if (pass) { f.st = Object.assign({}, pass.st); if (pass.sub) f.v.sub = pass.sub; }
@@ -8717,7 +8717,7 @@ function updateCatch(dt) {
           endBattle('caught');
         }
       } else {
-        c.phase = 'fail'; SND.se('escape'); if (plOk('cap_break')) plFx('cap_break', c.x, c.y, 1); else sheetFx('poof', c.x, c.y, 1.3);
+        c.phase = 'fail'; SND.se('escape'); if (plOk('cap_break')) plFx('cap_break', c.x, c.y, .7); else sheetFx('poof', c.x, c.y, 1.3);
         e.state = 'stun'; e.stT = .4; e.inv = .4;
         burst(c.x, c.y, '#ffffff', 20, 120, .5);
         say(choice(['ああっ！ ボックスから でてしまった！', 'おしい！ もうすこしだったのに！', 'だめだ！ にげだした！']));
@@ -12054,8 +12054,8 @@ function render() {
     const x = Math.round(c.x) + ox, y = Math.round(c.y);
     // ボックス（ChatGPT の 絵）：なげる → ゆれる → つかまえた
     const ck = c.phase === 'throw' ? 'cap_throw' : c.phase === 'done' ? 'cap_caught' : 'cap_shake';
-    if (plOk(ck)) { plDraw(ck, ck === 'cap_caught' ? plOnce(ck, Math.min(1, c.t / .6)) : c.phase === 'shake' && c.t >= .35 ? 0 : plLoop(ck, B.t), x, y, .85);
-      if (c.phase === 'shake') for (let i = 0; i < c.shakes; i++) drawStar(x - 12 + i * 12, y - 24, 4, '#ffd84a'); }
+    if (plOk(ck)) { plDraw(ck, ck === 'cap_caught' ? plOnce(ck, Math.min(1, c.t / .6)) : c.phase === 'shake' && c.t >= .35 ? 0 : plLoop(ck, B.t), x, y, .6);
+      if (c.phase === 'shake') for (let i = 0; i < c.shakes; i++) drawStar(x - 12 + i * 12, y - 18, 4, '#ffd84a'); }
     else {
     const glow = .35 + Math.sin(B.t * 10) * .15;
     ctx.fillStyle = `rgba(150,240,255,${glow})`; ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fill();
