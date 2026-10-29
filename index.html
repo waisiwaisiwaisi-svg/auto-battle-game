@@ -8723,7 +8723,8 @@ const trPack = (m) => { const P = m.tr && m.tr.mode === 'chip' && m.tr.prog && m
 const trUnpack = (o, m) => { try { if (!o || !Array.isArray(o.m)) return null; const P = trClone({ nat: o.n || undefined, mv: o.m.slice(0, 8).map(r => ({ id: String(r[0]), go: r[1] || 'auto', c: (Array.isArray(r[2]) ? r[2] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 12).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))), x: (Array.isArray(r[3]) ? r[3] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 12).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))) })).filter(r => MOVES[r.id] && m.moves.includes(r.id)) }, m); return P.mv.length ? { mode: 'chip', prog: P } : null; } catch (e) { return null; } };
 const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { sid: m.sid, nat: m.nat, iv: m.iv, moves: m.moves.slice(), ev: m.ev || null, fed: m.fed || 0, tr: trPack(m) }; });
 const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   // しらない 種族（え が とどかなかった など）
-  const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv, moves: (o.moves || []).filter(id => MOVES[id]) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } const tr = trUnpack(o.tr, m); if (tr) m.tr = tr; return m; };
+  const iv = {}; if (o.iv && typeof o.iv === 'object') for (const k of STAT6) { const v = Number(o.iv[k]); iv[k] = Number.isFinite(v) ? Math.max(0, Math.min(31, v | 0)) : 0; }   // ほかの 人の データ：かずを たしかめる（NaN・おおきすぎ・マイナス）
+  const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv && typeof o.iv === 'object' ? iv : undefined, moves: [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(id => typeof id === 'string' && MOVES[id]))].slice(0, 4) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } let to = o.tr; if (typeof to === 'string') try { to = JSON.parse(to); } catch (e) { to = null; }   /* フリー対戦：Firestore には もじで おく */ const tr = trUnpack(to, m); if (tr) m.tr = tr; return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
 function netReset() { SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { try { NET.nr.leave(); } catch (e) { } } Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0 }); }
@@ -13056,19 +13057,25 @@ function roundTrainer(i) {
 const freeOk = (t) => validTeam(t) && t.every(o => SPECIES[o.sid] && !/^c_mon_/.test(o.sid));   // じぶんで かいた モンスターは ほかの 人の がめんに 絵が ないので つかわない
 async function freeUpload(R) {
   const tm = teamOf(S.party, 3); if (!freeOk(tm)) return;
-  const lk = myLook(); await R.db.doc('teams/' + R.id).set({ nm: myName(), lk: /^c_tr_/.test(lk) ? 'boy' : lk, r: myRank().r, t: Date.now(), tm }).catch(() => { });
+  const lk = myLook(), up = tm.map(o => ({ sid: o.sid, nat: o.nat || null, iv: o.iv, moves: o.moves, ev: o.ev || null, fed: o.fed || 0, tr: o.tr ? JSON.stringify(o.tr) : null }));   // Firestore は undefined と はいれつの なかの はいれつが だめ：訓練は もじに
+  try { await R.db.doc('teams/' + R.id).set({ nm: myName(), lk: /^c_tr_/.test(lk) ? 'boy' : lk, r: myRank().r, t: Date.now(), tm: up }); } catch (e) { }
 }
+let FREE_BUSY = false;
 async function startFree() {
-  if (!S.party.length) return;
-  const R = await rankDb().catch(() => false);
+  if (!S.party.length || FREE_BUSY || document.querySelector('.frTeam')) return; FREE_BUSY = true;   // れんだ：まどは 1つだけ
+  const wait = modal('<h3>フリー対戦</h3><p class="dim">あいてを さがしています…</p>');
+  try { await startFree0(); } finally { FREE_BUSY = false; wait.remove(); }
+}
+async function startFree0() {
+  const R = navigator.onLine ? await rankDb().catch(() => false) : false;
   if (!R || !R.id) { await say0('いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます'); return freeCpu(); }
-  freeUpload(R);
+  freeUpload(R).catch(() => { });
   let rows = [];
-  try { const q = await R.db.collection('teams').orderBy('t', 'desc').limit(40).get(); rows = q.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.id !== R.id && freeOk(r.tm)); } catch (e) { rows = []; }
+  try { const q = await R.db.collection('teams').orderBy('t', 'desc').limit(40).get(); rows = q.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.id !== R.id && freeOk(r.tm)); } catch (e) { await say0('いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます'); return freeCpu(); }
   if (!rows.length) { await say0('まだ ほかの 人の チームが ありません。コンピューターの チームと たたかいます'); return freeCpu(); }
-  let i = Math.floor(Math.random() * rows.length); if (rows.length > 1 && rows[i].id === S.freeLast) i = (i + 1) % rows.length;
+  let i; { const ok = rows.map((r, k) => k).filter(k => rows.length < 2 || rows[k].id !== S.freeLast); i = ok[Math.floor(Math.random() * ok.length)]; }   // まえの あいて いがいから おなじ かくりつで
   const show_ = (k) => {
-    const o = rows[k], nm = safeName(o.nm, NAME_MAX) || 'サモナー', bg = modal(`<h3 style="margin-bottom:6px">フリー対戦</h3><p class="dim" style="margin-bottom:8px">あいて：<b class="frNm" style="color:var(--ink)"></b>　${typeof o.r === 'number' ? tierChip(o.r) : ''}</p><div class="frTeam" style="display:flex;gap:8px;justify-content:center;margin-bottom:12px"></div><div class="row" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn sub" data-a="x">やめる</button>${rows.length > 1 ? '<button class="btn sub" data-a="n">ほかの あいて</button>' : ''}<button class="btn" data-a="go">たたかう</button></div>`);
+    const o = rows[k], nm = (typeof o.nm === 'string' && safeName(o.nm, NAME_MAX)) || 'サモナー', bg = modal(`<h3 style="margin-bottom:6px">フリー対戦</h3><p class="dim" style="margin-bottom:8px">あいて：<b class="frNm" style="color:var(--ink)"></b>　${typeof o.r === 'number' ? tierChip(o.r) : ''}</p><div class="frTeam" style="display:flex;gap:8px;justify-content:center;margin-bottom:12px"></div><div class="row" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn sub" data-a="x">やめる</button>${rows.length > 1 ? '<button class="btn sub" data-a="n">ほかの あいて</button>' : ''}<button class="btn" data-a="go">たたかう</button></div>`);
     bg.querySelector('.frNm').textContent = nm;
     for (const t of o.tm) { const c = document.createElement('div'); c.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px'; c.appendChild(spriteCanvas(t.sid, 64)); const n = document.createElement('span'); n.textContent = SPECIES[t.sid].n; c.appendChild(n); bg.querySelector('.frTeam').appendChild(c); }
     bg.onclick = (e) => { const b = e.target.closest('button[data-a]'); if (!b) return; bg.remove(); SND.se('click'); if (b.dataset.a === 'n') show_((k + 1) % rows.length); else if (b.dataset.a === 'go') freeBattle(o, nm); };
