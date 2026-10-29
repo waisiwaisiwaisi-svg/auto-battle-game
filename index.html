@@ -8754,7 +8754,9 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   onStatus(NET.ranked ? 'たいせんの じゅんびを しています…' : asHost ? `あいことば <b class="ncode">${code}</b> <button class="btn sub ncopy" data-code="${code}">コピー</button><br>あいてに つたえてね。${NET.pick6 ? '<b>6たいから 3たい えらぶ</b> たいせん。' : ''}<br>あいてが はいるのを まっています…` : 'ホストを さがしています…');
   if (NET.ranked) setTimeout(() => { if (!NET.started && !NET.preview && NET.ranked && NET.code === code) { onStatus('あいてと つながりませんでした。もういちど さがしてね', true); netReset(); } }, 20000);
   else if (!asHost) setTimeout(() => { if (!NET.started && !NET.preview && NET.guest && NET.code === code && !(NET.nr && NET.nr.peers().some(p => isOther(p) && p.presence && p.presence.role === 'host'))) { onStatus('その あいことばの へやは みつかりませんでした。あいことばを たしかめてね', true); netReset(); } }, 20000);   // まちがった あいことば：ずっと またない
+  const nr0 = NET.nr;
   NET.nr.onPeers((ch) => {
+    if (NET.nr !== nr0) return;   // もう ぬけた へや（bye を おくって leave する までの あいだ）：あたらしい たいせんを はじめない
     const others = ch.peers.filter(p => isOther(p) && p.presence);
     for (const p of others) netCacheArt(p.presence);   // あいての かいた え を さきに おぼえる（チームの チェックより まえ）
     if (NET.started && NET.peer && !NET.ended) {   // あいてが きえた：すこし まつ（いっしゅん きれただけ なら もどって くる）。とじた ときは bye が さきに とどく
@@ -8791,7 +8793,7 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
       if (NET.started && h.presence.snap) netGuestSnap(h.presence.snap);
       if (!NET.started && others.some(p => p.presence.role === 'host')) onStatus(`ホストが みつかりました。はじまるのを まっています…`);
     }
-  }, () => onStatus('つうしんが きれました', true));
+  }, () => { if (NET.nr === nr0) onStatus('つうしんが きれました', true); });
 }
 window.addEventListener('pagehide', () => { if (NET.nr && NET.started && !NET.ended) NET.nr.presence({ bye: 1 }).catch(() => { }); });   // とじる・リロード：あいてには すぐ「きりました」（いっしゅん きれた ときとは わける）
 function netPeerLeft() {
