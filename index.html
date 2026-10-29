@@ -3153,6 +3153,10 @@ function isleMenu(title, items) {
   const p = $('townPop'); p.innerHTML = `<b>${title}</b>` + items.map(([t, id]) => `<button class="btn" data-a="${id}">${t}</button>`).join('') + `<button class="btn sub" data-a="x">とじる</button>`;
   p.hidden = false; p.onclick = (e) => { const b = e.target.closest('button'); if (!b) return; p.hidden = true; const id = b.dataset.a; if (id === 'x') return; if (id === 'hubSnd') { const t = $('hubSnd'); if (t) t.click(); return; } const t = $(id); if (t) t.click(); };
 }
+// まちの メニュー（マイルーム・とうぎじょう など）：そとを タップしたら とじる（したの ものは おさない）
+{ let popT = 0; const outside = (e) => { const p = $('townPop'); return p && !p.hidden && !p.contains(e.target); };
+  document.addEventListener('pointerdown', (e) => { if (!outside(e)) return; $('townPop').hidden = true; popT = performance.now(); e.preventDefault(); e.stopPropagation(); SND.se('back'); }, true);
+  document.addEventListener('click', (e) => { if (performance.now() - popT < 600) { e.preventDefault(); e.stopPropagation(); } }, true); }
 const ISO_U = 1;
 function isleDraw(q, k, t) {   // 200×170 の なかに 1つの しま
   const P = (a, b, h = 0) => [92 + (a - b), 64 + (a + b) * .5 - h];
