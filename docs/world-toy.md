@@ -54,3 +54,4 @@
 - ボックス 発注資料：https://claude.ai/artifact/5WHN1t3Jvd8vN2GUg3WTjh
 - ブラインドボックス・アイコン 発注資料：https://claude.ai/artifact/Tc9nGH6qiNs42eXmvD5gS3
 - ストリート系アイコン 発注資料（剣・盾・王冠・紋章などを街のモチーフに）：https://claude.ai/artifact/JFDjmqte27AxUHGbb47uks
+- ジムの外まわり 発注資料（外壁・タイプ看板をストリート系に）：https://claude.ai/artifact/KoJKJoezUuDcCggoPG4Ki9
