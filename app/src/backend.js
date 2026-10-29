@@ -114,11 +114,14 @@ if (ok) {
   function makeRoom(name) {
     let me = {}, peersSnap = Object.freeze([]), joinedOnce = false, dead = false;
     const handlers = new Set(), peerObj = new Map(), roomRef = ref(rt, 'rooms/' + clean(name));
-    let myRef = null, unsubVal = null, sendT = null, lastSent = 0;
+    let myRef = null, unsubVal = null, unsubConn = null, sendT = null, lastSent = 0;
     const start = (async () => {
       const u = await ready; if (!u) throw { code: 'unavailable' };
       myRef = ref(rt, `rooms/${clean(name)}/${myTab}`);
       await onDisconnect(myRef).remove();
+      // きれて つながりなおすと onDisconnect は きえる：かけなおして、じぶんの presence も かきなおす（とじても のこる ゴーストを ださない）
+      let first = true;
+      unsubConn = onValue(ref(rt, '.info/connected'), (s) => { if (s.val() !== true || dead) return; if (first) { first = false; return; } onDisconnect(myRef).remove().catch(() => { }); if (lastSent) flush().catch(() => { }); });
       unsubVal = onValue(roomRef, (s) => {
         const v = s.val() || {}, now = Date.now(), prev = peerObj, next = new Map();
         const joined = [], updated = [], left = [];
@@ -151,6 +154,7 @@ if (ok) {
         if (new Blob([JSON.stringify(m)]).size > 4096) throw { code: 'invalid_argument', message: 'presence は 4KB まで' };
         me = m;
         // 1びょうに 15かい まで まとめて おくる（バトルの スナップショットは ひんぱん）
+        if (patch && patch.bye) { if (sendT) clearTimeout(sendT); sendT = null; return flush(); }   // とじる まえ：すぐ おくる
         if (!sendT) { const wait = Math.max(0, 66 - (Date.now() - lastSent)); sendT = setTimeout(() => flush().catch(() => { }), wait); }
       },
       peers: () => peersSnap,
@@ -163,7 +167,7 @@ if (ok) {
       emit: async () => { },
       on: () => () => { },
       connected: () => !dead,
-      leave: () => { dead = true; handlers.clear(); if (unsubVal) unsubVal(); if (sendT) clearTimeout(sendT); if (myRef) rtRemove(myRef).catch(() => { }); },
+      leave: () => { dead = true; handlers.clear(); if (unsubVal) unsubVal(); if (unsubConn) unsubConn(); if (sendT) clearTimeout(sendT); if (myRef) rtRemove(myRef).catch(() => { }); },
     };
   }
   const room = {
