@@ -268,6 +268,8 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .teamdetail .dh canvas{width:96px;height:96px;background:#1b1530;border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2);flex:none}
 .teamdetail .acts{display:flex;gap:6px;flex-wrap:wrap}
 .teamdetail .shx,.teamdetail .shc{display:none}
+.teamdetail .favbtn{position:absolute;top:6px;right:8px;width:32px;height:32px;font-size:22px;line-height:30px;padding:0;border:0;background:none;color:#5a5478;text-shadow:1px 1px 0 #0b0914,-1px -1px 0 #0b0914,1px -1px 0 #0b0914,-1px 1px 0 #0b0914;cursor:pointer;z-index:2}.teamdetail .favbtn.on{color:#ffd166}html:not(.land) #tmDetail .favbtn{right:44px}html.land #tmDetail{position:relative}   /* おきにいり */
+.slot .favdot{position:absolute;bottom:2px;left:3px;font-style:normal;font-size:11px;color:#ffd166;text-shadow:1px 1px 0 #0b0914;pointer-events:none}
 /* たて画面：くわしくは 下から せりあがる シート（ボックスの 下に うもれない） */
 html:not(.land) #tmDetail{position:fixed;z-index:30;left:50%;bottom:calc(74px + var(--sab));width:min(100%,520px);max-height:64%;overflow:auto;margin:0;border-radius:10px 10px 0 0;
   transform:translate(-50%,110%);visibility:hidden;transition:transform .34s cubic-bezier(.3,1.2,.5,1),visibility 0s .34s;box-shadow:0 -6px 18px rgba(0,0,0,.55),inset 0 0 0 2px #0b0914;padding-top:22px}
@@ -4875,7 +4877,8 @@ function renderTeam(openUid) {
       const st = stats(m), sp = SPECIES[m.sid];
       d.appendChild(spriteCanvas(m.sid, r.w === 'b' ? 44 : 64));
       d.insertAdjacentHTML('beforeend', `<div>${sp.n}</div><div${r.w === 'b' ? ' class="tsqs"' : ''}>${r.w === 'b' ? [sp.type, sp.type2].filter(Boolean).map(t => `<i class="tsq" style="background:${TYPES[t].c}" title="${TYPES[t].n}"></i>`).join('') : typeChip(sp.type) + (sp.type2 ? typeChip(sp.type2) : '')}</div>${r.w === 'p' ? `<div class="hpw">${(() => { const A = avgStats(); return STAT6.map(k => `<span style="color:${statTone(st[k], A[k]).c}">${STAT6_S[k]}${Math.round(st[k])}</span>`).join(' '); })()}</div>` : ''}`);
-      if (canBoost(m)) d.insertAdjacentHTML('beforeend', '<i class="bdot" title="きょうか できる"></i>');   // おなじ しゅるいが いて きょうか できる：あかい まる
+      if (canBoost(m)) d.insertAdjacentHTML('beforeend', '<i class="bdot" title="きょうか できる"></i>');
+      if (m.fav) d.insertAdjacentHTML('beforeend', '<i class="favdot" title="おきにいり">★</i>');   // おなじ しゅるいが いて きょうか できる：あかい まる
       if (teamSel && teamSel.w === r.w && teamSel.i === r.i) d.classList.add('sel');
       if (teamView === m.uid) d.classList.add('view');
     } else d.insertAdjacentHTML('beforeend', `<div style="font-size:22px;opacity:.5">＋</div><div>${r.w === 'p' && r.i < 3 ? 'しゅつじょう わく' : 'あき'}</div>`);
@@ -4885,9 +4888,9 @@ function renderTeam(openUid) {
   for (let i = 0; i < 6; i++) (i < 3 ? M : U).appendChild(slot(S.party[i], { w: 'p', i }, i < 3 ? 'main' : ''));
   const drop = document.createElement('div'); drop.className = 'slot drop'; drop.dataset.w = 'drop'; drop.dataset.i = 0; drop.innerHTML = '<div style="font-size:18px">⬇</div><div>ここに<br>あずける</div>'; X.appendChild(drop);
   boxSortApply();
-  { const ft = S.boxType || ''; S.box.forEach((m, i) => { const d = slot(m, { w: 'b', i }, ''); if (ft && SPECIES[m.sid].type !== ft && SPECIES[m.sid].type2 !== ft) d.hidden = true; X.appendChild(d); }); }   // タイプで しぼりこみ：かくすだけ（ばんごうは そのまま）
+  { const ft = S.boxType || ''; S.box.forEach((m, i) => { const d = slot(m, { w: 'b', i }, ''); if (ft && !boxPass(m, ft)) d.hidden = true; X.appendChild(d); }); }   // タイプで しぼりこみ：かくすだけ（ばんごうは そのまま）
   boxSortUI();
-  { const ft = S.boxType, n = ft ? S.box.filter(m => SPECIES[m.sid].type === ft || SPECIES[m.sid].type2 === ft).length : S.box.length; $('boxCount').textContent = ft ? `${n} / ${S.box.length}たい` : `${S.box.length}たい`; }
+  { const ft = S.boxType, n = ft ? S.box.filter(m => boxPass(m, ft)).length : S.box.length; $('boxCount').textContent = ft ? `${n} / ${S.box.length}たい` : `${S.box.length}たい`; }
   updTrainBtn(); renderTeamDetail(); renderDecks();
   show('scTeam');
   if (opened) MO.flip(T, '.slot[data-key]', before); else MO.stagger(T.querySelectorAll('.slot'), 18, 6);   // いれかえは まえの 位置から すべる／ひらいた ときは じゅんばんに
@@ -4935,13 +4938,14 @@ function deckPickBind(root, redraw) {
 // ボックスの ならびかえ：えらんだ じゅんに S.box を ならべなおす（じぶんで ならべる ときは そのまま）
 const DEX_NO = (() => { const o = {}; Object.keys(SPECIES).forEach((id, i) => { o[id] = i; }); return o; })();
 const BOX_SORTS = [['きほん', [['', 'じぶんで ならべる'], ['new', 'てに いれた じゅん'], ['dex', 'ずかん ばんごう'], ['name', 'なまえ'], ['type', 'タイプ'], ['rare', 'レアど']]],
-  ['のうりょく', [['power', 'のうりょく ごうけい'], ...STAT6.map(k => ['st_' + k, STAT6_N[k]])]],
-  ['そだてかた', [['iv', 'こたいち（うまれつき）'], ['ev', 'きょうか した かず'], ['tr', '訓練ずみ を さきに'], ['plan', '作戦（⚔近・🛡中・🏹遠）']]]];
+  ['のうりょく', [['power', 'のうりょく ごうけい'], ...STAT6.map(k => ['st_' + k, STAT6_N[k]])]]];
+const boxPass = (m, ft) => ft === 'fav' ? !!m.fav : SPECIES[m.sid].type === ft || SPECIES[m.sid].type2 === ft;   // しぼりこみ：タイプ か おきにいり
 function boxSortUI() {
   const sel = $('boxSort'), rv = $('boxRev'), ty = $('boxType'); if (!sel) return;
   if (!sel.options.length) sel.innerHTML = BOX_SORTS.map(([g, os]) => `<optgroup label="${g}">${os.map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</optgroup>`).join('');
-  if (!ty.options.length) ty.innerHTML = '<option value="">ぜんぶの タイプ</option>' + Object.keys(TYPES).map(t => `<option value="${t}">${TYPES[t].n}</option>`).join('');
-  if (S.boxSort === 'old') { S.boxSort = 'new'; S.boxRev = !S.boxRev; }   // むかしの「ふるい じゅん」
+  if (!ty.options.length) ty.innerHTML = '<option value="">ぜんぶの タイプ</option><option value="fav">★ おきにいり</option>' + Object.keys(TYPES).map(t => `<option value="${t}">${TYPES[t].n}</option>`).join('');
+  if (S.boxSort === 'old') { S.boxSort = 'new'; S.boxRev = !S.boxRev; }
+  if (['iv', 'ev', 'tr', 'plan'].includes(S.boxSort)) S.boxSort = '';   // 「そだてかた」の ならびは なくなった   // むかしの「ふるい じゅん」
   sel.value = S.boxSort || ''; ty.value = S.boxType || ''; rv.classList.toggle('on', !!S.boxRev); rv.disabled = !S.boxSort;
   sel.onchange = () => { S.boxSort = sel.value; S.boxRev = false; SND.se('click'); save(); renderTeam(); };   // ならべかたを かえたら ふつうの むきから
   rv.onclick = () => { S.boxRev = !S.boxRev; SND.se('click'); save(); renderTeam(); };
@@ -4965,7 +4969,7 @@ function renderTeamDetail() {
   teamView = m.uid;
   const sp = SPECIES[m.sid], st = stats(m), inParty = S.party.includes(m), pi = S.party.indexOf(m), bi = S.box.indexOf(m);
   const STN = [['HP', st.hp, 260], ['こうげき', Math.round(st.atk), 110], ['ぼうぎょ', Math.round(st.def), 110], ['すばやさ', st.spd, 130]];
-  D.innerHTML = `<button class="shx" data-a="close" title="とじる"></button><button class="shc" data-a="close" title="とじる">×</button><div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
+  D.innerHTML = `<button class="shx" data-a="close" title="とじる"></button><button class="shc" data-a="close" title="とじる">×</button><button class="favbtn${m.fav ? ' on' : ''}" data-a="fav" title="おきにいり" aria-pressed="${!!m.fav}">★</button><div class="dh"><div></div><div><div style="font-size:18px;font-weight:700">${sp.n}</div><div>${typeChip(sp.type)} ${sp.type2 ? typeChip(sp.type2) : ''}</div>
       <div class="dim">${inParty ? (pi < 3 ? `しゅつじょう ${pi + 1}ばんめ` : 'ひかえ') : 'あずける'}　${ivGrade(m)}</div>
       <div>たいかく：<b style="color:var(--acc)">${bodyTxt(SPECIES[m.sid])[0]}</b> <span class="dim">${bodyTxt(SPECIES[m.sid])[1]}</span></div>
       ${m.nat && NATURES[m.nat] ? `<div>せいかく：<b style="color:var(--acc)">${NATURES[m.nat].n}</b> <span class="dim" style="display:inline-block">${NATURES[m.nat].d}</span></div><div>さくせん：<b style="color:var(--acc)">${planName(m)}</b><div class="dim" style="font-size:11px">${natRelText(planOfMon(m))}</div></div>` : ''}</div></div>
@@ -4975,6 +4979,7 @@ function renderTeamDetail() {
   D.querySelector('.dh > div').replaceWith(spriteCanvas(m.sid, 96));
   D.classList.toggle('open', teamSheet); D.querySelectorAll('[data-a="close"]').forEach(b => b.onclick = () => { teamSheet = false; D.classList.remove('open'); SND.se('back'); });
   if (D._uid !== m.uid) { const dir = D._uid == null ? 0 : 1; D._uid = m.uid; if (dir) [...D.children].forEach(c => MO.swapIn(c, dir)); MO.bars(D); }   // ちがう モンスター：よこから はいって のうりょくバーが のびる
+  { const fb = D.querySelector('.favbtn'); if (fb) fb.onclick = () => { m.fav = !m.fav; if (!m.fav) delete m.fav; SND.se(m.fav ? 'ok' : 'back'); save(); renderTeam(); }; }   // おきにいり
   D.querySelector('.acts').onclick = (ev) => {
     const act = ev.target.dataset && ev.target.dataset.a; if (!act) return;
     if (act === 'tm') return useTM(m);
@@ -4983,7 +4988,7 @@ function renderTeamDetail() {
     if (act === 'train') { TRN = TRN && TRN.uid === m.uid ? TRN : null; TR_BACK = 'team'; return renderTrain(m.uid); }   // もどるで へんせいへ
     if (act === 'box') teamMove({ w: 'p', i: pi }, { w: 'drop', i: 0 });
     if (act === 'party') teamMove({ w: 'b', i: bi }, { w: 'p', i: S.party.length });
-    if (act === 'release') { if (towerHold(m)) return; ask(`${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; teamSheet = false; teamSel = null; save(); renderTeam(); }); return; }
+    if (act === 'release') { if (towerHold(m)) return; ask(`${m.fav ? '★おきにいりの ' : ''}${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; teamSheet = false; teamSel = null; save(); renderTeam(); }); return; }
     teamSel = null; renderTeam();
   };
 }
