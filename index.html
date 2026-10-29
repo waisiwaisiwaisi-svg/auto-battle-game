@@ -131,7 +131,7 @@ h1.tlogo{font-size:clamp(30px,calc(6 * var(--vw)),60px);line-height:1;display:fl
 @keyframes tapblink{0%,55%{opacity:1}56%,100%{opacity:0}}
 #scTitle{cursor:pointer}
 @keyframes tglow{50%{box-shadow:0 4px 0 #b8892a,0 0 0 3px #0d0b14,0 0 22px 4px rgba(255,209,102,.55)}}
-.trestore{position:absolute;right:calc(10px + var(--sar, 0px));bottom:calc(6px + var(--sab));z-index:2;font:inherit;font-size:11px;color:rgba(255,255,255,.7);background:rgba(11,9,20,.55);border:1px solid rgba(255,255,255,.25);padding:4px 10px;cursor:pointer;text-shadow:1px 1px 0 #000}
+.trestore{position:absolute;right:calc(10px + var(--sar, 0px));bottom:calc(30px + var(--sab));z-index:2;font:inherit;font-size:11px;color:rgba(255,255,255,.7);background:rgba(11,9,20,.55);border:1px solid rgba(255,255,255,.25);padding:4px 10px;cursor:pointer;text-shadow:1px 1px 0 #000}
 .bkcode{font-size:20px;letter-spacing:.12em;text-align:center;padding:10px 6px;background:#120e1c;box-shadow:inset 0 0 0 2px var(--rim2);color:#ffd166;user-select:all;-webkit-user-select:all;word-break:break-all}
 .bksum{font-size:13px;line-height:1.7;padding:8px 10px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 2px var(--rim2)}
 .tfoot{position:absolute;left:0;right:0;bottom:calc(8px + var(--sab));text-align:center;font-size:10px;color:rgba(255,255,255,.55);z-index:1;text-shadow:1px 1px 0 #000}
@@ -12217,7 +12217,7 @@ function modal(html) { const bg = document.createElement('div'); bg.className = 
 const BK_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const bkNewCode = () => [...crypto.getRandomValues(new Uint8Array(16))].map(b => BK_ABC[b & 31]).join('');
 const bkFmt = (c) => String(c || '').replace(/(.{4})(?=.)/g, '$1-');
-const bkNorm = (s) => { const c = String(s || '').toUpperCase().replace(/[\s\-ー－]/g, ''); return c.length === 16 && [...c].every(ch => BK_ABC.includes(ch)) ? c : null; };
+const bkNorm = (s) => { const c = String(s || '').normalize('NFKC').toUpperCase().replace(/[\s\-ー－‐‑‒–—―−_.・]/g, '');   /* ぜんかく・いろいろな ハイフン・スペースは むし */ return c.length === 16 && [...c].every(ch => BK_ABC.includes(ch)) ? c : null; };
 const bkHash = async (s) => new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)));
 const bkB64 = (u) => { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
 const bkUnb64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -12244,32 +12244,37 @@ const bkDev = () => { try { let d = localStorage.getItem('pma_dev'); if (!d) { d
 // （bk と、ほうって おくだけで かわる ブラインドボックスの 時計は のぞく）
 // キーの じゅんばん・からの はいれつ／オブジェクトの あるなし では かわらない かたちに（よみこみ なおしで ならびが かわる ため）
 const bkCanon = (v) => Array.isArray(v) ? v.map(bkCanon) : v && typeof v === 'object' ? Object.keys(v).sort().reduce((o, k) => { const c = bkCanon(v[k]); if (c !== undefined && !(c && typeof c === 'object' && !Object.keys(c).length)) o[k] = c; return o; }, {}) : v;
-const bkH = (x) => { const o = { ...x }; delete o.bk; delete o.chestTick; delete o.chestSaved; if (Array.isArray(o.chests)) o.chests = o.chests.map(c => c && { ...c, at: c.at == null ? null : 1 }); const j = JSON.stringify(bkCanon(o)); let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) { h ^= j.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + '.' + j.length; };
+const bkH = (x) => { const o = { ...x }; delete o.bk; delete o.chestTick; delete o.chestSaved; delete o.shop; delete o.guildOn;   /* shop：ひづけが かわると かってに かわる・guildOn：端末ごとの ギルド はんてい（かいものは ジェム などで わかる） */ if (Array.isArray(o.chests)) o.chests = o.chests.map(c => c && { ...c, at: c.at == null ? null : 1 }); const j = JSON.stringify(bkCanon(o)); let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) { h ^= j.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + '.' + j.length; };
 // セーブの たびに よぶ：1ぷんに 1かい まとめて バックアップ（アプリを とじる・ほかの アプリへ うつる ときは すぐ）
 function bkKick() { if (BK_T || !S || ONB_TEST || SAVE_STALE) return; BK_T = setTimeout(() => { BK_T = 0; bkUp().catch(() => { }); }, Math.max(15000, 60000 - (Date.now() - BK_LAST))); }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { if (BK_T) { clearTimeout(BK_T); BK_T = 0; } bkUp().catch(() => { }); }
   else bkCheck();   // もどって きたら ほかの 端末で あそんだ ぶんを みる
 });
-function bkUp(force) { return BK_BUSY || (BK_BUSY = bkUp0(force).finally(() => { BK_BUSY = null; })); }
-async function bkUp0(force, X = S) {
-  if (!X || SAVE_STALE || ONB_TEST || !X.party || !X.party.length) return false;
+let BK_ASK = false;   // どちらを つかうか きいて いる あいだは あげない
+function bkUp(force) { return BK_BUSY || (BK_BUSY = bkUp0(force).then(r => { if (r === true && S && S.bk && S.bk.h && bkH(S) !== S.bk.h) setTimeout(bkKick, 0); return r; }).finally(() => { BK_BUSY = null; })); }   // あげて いる あいだに かわった ぶんは また あとで
+async function bkUp0(force, X = S, over) {
+  if (!X || SAVE_STALE || ONB_TEST || (BK_ASK && !over) || !X.party || !X.party.length) return false;
+  if (X === S && window.PMA_NAME) { const nm = myName(); if (nm && nm !== 'サモナー' && nm !== X.pname) X.pname = nm; }   // オンラインの なまえも いっしょに ひきつぐ
   const fresh = !X.bk || !bkNorm(X.bk.code), h = bkH(X);
   if (!force && !fresh && X.bk.h === h) return true;   // かわって いない
   const R = await bkDb(); if (!R) return false;
   if (fresh) X.bk = { code: bkNewCode() };
+  else if (!over) {   // ほかの 端末が あとから あげて いたら うわがき しない（もどって きた ときに どちらを つかうか きく）
+    const top = await bkTop(R, X.bk.code); if (top && top.dev !== bkDev() && (top.t || 0) > (X.bk.base || X.bk.t || 0)) { if (!document.hidden) bkCheck(); return 'newer'; } }
   const code = X.bk.code, raw = new TextEncoder().encode(JSON.stringify(X));
   const zz = await bkZip(raw, true).catch(() => null), iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await bkKey(code), zz || raw));
   const t = Date.now();
-  await R.db.doc('backups/' + R.id).set({ k: await bkId(code), iv: bkB64(iv), d: bkB64(ct), z: zz ? 1 : 0, t, dev: bkDev(), v: 1 });
+  await R.db.doc('backups/' + R.id).set({ k: await bkId(code), iv: bkB64(iv), d: bkB64(ct), z: zz ? 1 : 0, t, dev: bkDev(), from: X.bk.base || 0, v: 1 });
   if (fresh || !X.bk.acct) { await R.db.doc(`data/users/${R.id}/bkcode`).set({ c: code, t }).catch(() => { }); X.bk.acct = 1; }
-  BK_LAST = t; X.bk.t = t; X.bk.base = t; X.bk.h = h;
+  BK_LAST = t; X.bk.t = t; X.bk.base = t; X.bk.mine = t; X.bk.h = h;
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(X)); } catch (e) { }   // save() だと また バックアップを よぶので ちょくせつ
   return true;
 }
 /* おなじ コードの 端末どうしを そろえる：ひらいた とき・もどって きた ときに ほかの 端末の あたらしい データが あれば つかう
    この 端末でも あそんで いて どちらも かわって いたら どちらを のこすか きく */
+async function bkTop(R, code) { const q = await R.db.collection('backups').where('k', '==', await bkId(code)).limit(50).get(); return q.docs.map(x => x.data()).filter(d => d && d.d && d.iv).sort((a, b) => (b.t || 0) - (a.t || 0))[0] || null; }
 let BK_CHK = null;
 function bkCheck() { return BK_CHK || (BK_CHK = bkCheck0().catch(() => { }).finally(() => { BK_CHK = null; })); }
 async function bkCheck0() {
@@ -12277,24 +12282,25 @@ async function bkCheck0() {
   let L = S; if (!L) { try { L = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { } }
   if (!L || !L.bk || !bkNorm(L.bk.code)) return;
   const code = L.bk.code, R = await bkDb(); if (!R) return;
-  const q = await R.db.collection('backups').where('k', '==', await bkId(code)).limit(20).get();
-  const top = q.docs.map(x => x.data()).filter(d => d && d.d && d.iv).sort((a, b) => (b.t || 0) - (a.t || 0))[0];
+  const top = await bkTop(R, code);
   if (!top || top.dev === bkDev() || (top.t || 0) <= (L.bk.base || L.bk.t || 0)) return;
   if (S && !$('scBattle').hidden) return;   // バトル中は つぎの ときに
   const s = await bkOpen(top, code); if (!s) return;
   if (S && S !== L) { setTimeout(bkCheck, 0); return; }   // しらべて いる あいだに タイトルから はいった：もういちど
-  if (bkH(L) !== L.bk.h) {   // この 端末でも あそんで いた
-    const c = await ask3(`ほかの 端末で あそんだ データが あります（${bkWhen(top.t)}）。\nこの 端末で あそんだ ぶんと、どちらを つかいますか？\nえらばなかった ほうは きえます。`, ['この 端末', 'ほかの 端末', 'あとで']);
-    if (c === 2) return;
-    if (c === 0) { await bkUp0(true, L).catch(() => { }); return; }
+  if (bkH(L) !== L.bk.h || (L.bk.mine && (top.from || 0) < L.bk.mine)) {   // この 端末でも あそんで いた（まだ あげて いない・または あげた ぶんを あいてが しらない）
+    BK_ASK = true; const c = await ask3(`ほかの 端末で あそんだ データが あります（${bkWhen(top.t)}）。\nこの 端末で あそんだ ぶんと、どちらを つかいますか？\nえらばなかった ほうは きえます。`, ['この 端末', 'ほかの 端末', 'あとで']).finally(() => { BK_ASK = false; });
+    if (c === 2) return;   // あとで：うわがき しない（つぎに もどった ときに また きく）
+    if (c === 0) { L.bk.base = top.t; await bkUp0(true, L, true).catch(() => { }); return; }   // この 端末：あいての あとに かさねて あげる
   }
-  s.bk = Object.assign({}, s.bk, { code, base: top.t, t: top.t, acct: L.bk.acct });
+  s.bk = Object.assign({}, s.bk, { code, base: top.t, t: top.t, acct: L.bk.acct, mine: 0 }); s.guildOn = L.guildOn;   // ギルドの はんていは 端末ごと
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { }
   const n = loadSave(); if (n) { n.bk.h = bkH(n); try { localStorage.setItem(SAVE_KEY, JSON.stringify(n)); } catch (e) { } }
   if (S && !$('scTitle').hidden) { S = loadSave(); if (S) updAutoBtn(); return; }   // タイトルでは だまって いれかえる
-  if (S) { if (BK_T) { clearTimeout(BK_T); BK_T = 0; } await ask('ほかの 端末で あそんだ データに そろえます。', 'OK', null); SAVE_STALE = true; location.reload(); }
+  if (S) { if (BK_T) { clearTimeout(BK_T); BK_T = 0; } SAVE_STALE = true; await ask('ほかの 端末で あそんだ データに そろえます。', 'OK', null); location.reload(); }   // さきに とめる（まっている あいだの セーブで うわがき しない）
 }
 setTimeout(bkCheck, 800);
+window.addEventListener('focus', () => bkCheck()); window.addEventListener('pageshow', () => bkCheck());   // PCで まどを ひらいた まま：もどった とき
+setInterval(() => { if (!document.hidden) bkCheck(); }, 180000);   // ひらいた まま でも ときどき みる
 async function bkOpen(d, code) {   // 1つの バックアップを ひらく（コードが ちがえば null）
   try {
     const pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bkUnb64(d.iv) }, await bkKey(code), bkUnb64(d.d)));
@@ -12318,6 +12324,9 @@ const bkWhen = (t) => { if (!t) return '—'; const d = new Date(t), z = (n) => 
 const bkSum = (s) => { const L = s.party[0], nm = L && SPECIES[L.sid] ? SPECIES[L.sid].n : '？';
   return `なまえ：${safeName(s.pname || "", NAME_MAX) || "サモナー"}<br>せんとう：${safeName(nm, 12)} ほか ${s.party.length + (s.box || []).length - 1}たい<br>かったかず：${s.wins || 0}　ジェム：${s.gems || 0}`; };
 const BK_INP = 'width:100%;font:inherit;font-size:16px;letter-spacing:.08em;padding:6px 8px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2);text-transform:uppercase';
+// つながらない ときの ことば（オフライン・サーバーの せってい まち・それ いがい）
+const bkErrMsg = (e) => !navigator.onLine || e === 'offline' ? 'いまは オフラインです。インターネットに つながる ところで もういちど ためしてね。' : e && e.code === 'permission-denied' ? 'いまは データの ひきつぎが つかえません（サーバーの じゅんびちゅう）。じかんを おいて ためしてね。' : onlineHint('データの ひきつぎ');
+const bkRace = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no('timeout'), ms))]);
 // せっていの「データの ひきつぎ」
 async function bkWin() {
   const bg = modal(`<h3 style="margin-bottom:10px">データの ひきつぎ</h3><div id="bkBody"><p class="dim">よみこみちゅう…</p></div>
@@ -12325,25 +12334,27 @@ async function bkWin() {
   const B = bg.querySelector('#bkBody');
   bg.querySelector('#bkX').onclick = () => bg.remove();
   bg.querySelector('#bkRes').onclick = () => { bg.remove(); bkRestoreWin(); };
-  const ok = await bkUp(true).catch(() => false);
+  let err = null; const has = () => S.bk && bkNorm(S.bk.code);
+  const up = bkRace(bkUp(true), 8000).catch(e => { err = e; return false; });   // オフラインでも とまらない（まえの コードが あれば すぐ だす）
+  const ok = has() ? true : await up;
   if (!bg.isConnected) return;
-  if (!ok || !S.bk) { B.innerHTML = `<p class="dim">${onlineHint('データの ひきつぎ')}</p>`; return; }
+  if (!ok || !has()) { B.innerHTML = `<p class="dim">${bkErrMsg(err)}</p>`; return; }
   B.innerHTML = `<p style="margin-bottom:8px">ふっかつコード</p>
     <div class="bkcode" id="bkCode"></div>
     <div class="row" style="margin:8px 0 10px;justify-content:flex-end"><button class="btn sub" id="bkCp" style="font-size:12px;padding:6px 12px">コピー</button></div>
     <p class="dim" style="font-size:12px;line-height:1.6">この コードを ほかの スマホや PCで 1かい いれると、その あとは どちらの 端末でも つづきから あそべます（ひらいた ときに あたらしい ほうに そろいます）。データを けして しまった ときも もどせます。<br><b style="color:#ffd166">コードは スクショか メモで かならず ひかえて おいてね。</b>なくすと もどせません。ひとには おしえないでね。</p>
     <div class="optrow" style="border:0;flex-wrap:wrap;row-gap:6px"><span class="dim" style="font-size:12px;min-width:0">さいごの バックアップ<br><span id="bkT"></span></span><button class="btn sub" id="bkNow" style="font-size:12px;padding:6px 12px;margin-left:auto;white-space:nowrap">いま バックアップ</button></div>`;
   const C = B.querySelector('#bkCode'); C.textContent = bkFmt(S.bk.code);
-  B.querySelector('#bkT').textContent = bkWhen(S.bk.t);
+  B.querySelector('#bkT').textContent = 'たしかめちゅう…'; up.then(r => { if (bg.isConnected) B.querySelector('#bkT').textContent = r ? bkWhen(S.bk.t) : (S.bk.t ? bkWhen(S.bk.t) + '（' + (navigator.onLine ? 'いまは つながらない' : 'オフライン') + '）' : 'まだ（つながったら あげます）'); });
   B.querySelector('#bkCp').onclick = () => { const sel = () => { const r = document.createRange(); r.selectNodeContents(C); const w = getSelection(); w.removeAllRanges(); w.addRange(r); };
     try { navigator.clipboard.writeText(bkFmt(S.bk.code)).then(() => { SND.se('ok'); B.querySelector('#bkCp').textContent = 'コピーしました'; }, sel); } catch (e) { sel(); } };
-  B.querySelector('#bkNow').onclick = async (e) => { e.target.disabled = true; const r = await bkUp(true).catch(() => false); e.target.disabled = false; if (r) SND.se('ok'); B.querySelector('#bkT').textContent = r ? bkWhen(S.bk.t) : 'しっぱい（つうしんを たしかめてね）'; };
+  B.querySelector('#bkNow').onclick = async (e) => { e.target.disabled = true; let er = null; const r = await bkRace(bkUp(true), 8000).catch(x => { er = x; return false; }); if (!bg.isConnected) return; e.target.disabled = false; if (r) SND.se('ok'); B.querySelector('#bkT').textContent = r ? bkWhen(S.bk.t) : 'しっぱい：' + bkErrMsg(er); };
 }
 // コードを いれて もどす（タイトルからも）
 async function bkRestoreWin() {
   const bg = modal(`<h3 style="margin-bottom:10px">データを もどす</h3>
     <p class="dim" style="font-size:12px;margin-bottom:8px">ふっかつコード（16もじ）を いれてね。</p>
-    <input type="text" id="bkIn" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX" style="${BK_INP}">
+    <input type="text" id="bkIn" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX" style="${BK_INP}">
     <p id="bkMsg" class="dim" style="font-size:12px;min-height:1.4em;margin-top:6px"></p>
     <div id="bkAcct"></div>
     <div class="row" style="margin-top:12px;justify-content:space-between"><button class="btn sub" id="bkX">やめる</button><button class="btn" id="bkGo">さがす</button></div>`);
@@ -12351,7 +12362,8 @@ async function bkRestoreWin() {
   bg.querySelector('#bkX').onclick = () => bg.remove();
   const use = async (code) => {
     go.disabled = true; M.textContent = 'さがしています…';
-    let f = null; try { f = await bkFind(code); } catch (e) { M.innerHTML = onlineHint('データの ひきつぎ'); go.disabled = false; return; }
+    let f = null; try { if (!navigator.onLine) throw 'offline'; f = await bkRace(bkFind(code), 15000); } catch (e) { if (bg.isConnected) { M.textContent = bkErrMsg(e); go.disabled = false; } return; }
+    if (!bg.isConnected) return;   // さがして いる あいだに やめた
     go.disabled = false;
     if (!f) { M.textContent = 'その コードの データは みつかりませんでした。'; return; }
     bg.remove(); bkConfirm(f);
@@ -12376,10 +12388,11 @@ async function bkConfirm(f) {
   bg.querySelector('#bkNo').onclick = () => bg.remove();
   bg.querySelector('#bkYes').onclick = () => {
     if (BK_T) { clearTimeout(BK_T); BK_T = 0; }
-    const s = f.s; s.bk = Object.assign({}, s.bk, { acct: 0, base: f.t, t: f.t });   // acct：この アカウントにも コードを のこす
+    const s = f.s; s.bk = Object.assign({}, s.bk, { acct: 0, base: f.t, t: f.t, mine: 0 }); if (cur) s.guildOn = cur.guildOn;   // acct：この アカウントにも コードを のこす
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { }
     const n = loadSave(); if (n) { n.bk.h = bkH(n); try { localStorage.setItem(SAVE_KEY, JSON.stringify(n)); } catch (e) { } }   // もどした ままなら「かわって いない」
-    SND.se('ok'); SAVE_STALE = true; location.reload();
+    if (window.PMA_NAME && s.pname) try { window.PMA_NAME.set(s.pname).catch(() => { }); } catch (e) { }
+    SND.se('ok'); SAVE_STALE = true; setTimeout(() => location.reload(), 300);
   };
 }
 $('btnOpt').onclick = () => {
