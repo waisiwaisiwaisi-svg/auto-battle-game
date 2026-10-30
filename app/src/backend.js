@@ -117,6 +117,7 @@ if (ok) {
     let me = {}, peersSnap = Object.freeze([]), joinedOnce = false, dead = false;
     const handlers = new Set(), peerObj = new Map(), roomRef = ref(rt, 'rooms/' + clean(name));
     let myRef = null, unsubVal = null, unsubConn = null, sendT = null, lastSent = 0, inflight = false, pending = false, online = true;
+    let offAt = 0, offEnd = 0, offLen = 0;   // じぶんの つうしんが きれて いた じかん（.info/connected）
     let cleaned = false;
     const cleanup = () => { if (unsubVal) unsubVal(); if (unsubConn) unsubConn(); unsubVal = unsubConn = null; if (myRef && !cleaned) { cleaned = true; rtRemove(myRef).catch(() => { }); } };
     const start = (async () => {
@@ -125,7 +126,7 @@ if (ok) {
       await onDisconnect(myRef).remove(); if (dead) { cleanup(); return; }
       // きれて つながりなおすと onDisconnect は きえる：かけなおして、じぶんの presence も かきなおす（とじても のこる ゴーストを ださない）
       let was = null;
-      unsubConn = onValue(ref(rt, '.info/connected'), (s) => { const c = s.val() === true; online = c; if (dead) return;
+      unsubConn = onValue(ref(rt, '.info/connected'), (s) => { const c = s.val() === true; online = c; if (!c) { if (!offAt) offAt = Date.now(); } else if (offAt) { offLen = Date.now() - offAt; offEnd = Date.now(); offAt = 0; } if (dead) return;
         if (c && was === false) { onDisconnect(myRef).remove().catch(() => { }); if (lastSent || pending) { pending = false; flush().catch(() => { }); } }
         was = c; });
       unsubVal = onValue(roomRef, (s) => {
@@ -152,11 +153,12 @@ if (ok) {
     start.catch((e) => console.warn('room', name, e && (e.code || e.message) || e));
     // おくるのは いつも 1つだけ。まえのが おわるまで つぎは まち、おわったら いちばん あたらしい 中身だけ おくる
     // （きれて いる あいだは ためない。ためると つながりなおした あと おくれが どんどん ふえる）
+    const write = async () => { lastSent = Date.now(); return rtSet(myRef, { by: (await ready).uid, p: JSON.stringify(me), t: serverTimestamp() }); };   // presence の 1ぎょう（ルールは by・p を みる）
     const flush = async () => {
-      sendT = null; if (dead) return; await start;
+      sendT = null; if (dead) return; await start; if (dead || !myRef) return;
       if (inflight || !online) { pending = true; return; }
-      inflight = true; lastSent = Date.now();
-      try { await rtSet(myRef, { by: (await ready).uid, p: JSON.stringify(me), t: serverTimestamp() }); }
+      inflight = true;
+      try { await write(); }
       finally { inflight = false; if (pending && online && !dead) { pending = false; flush().catch(() => { }); } }
     };
     return {
@@ -167,12 +169,13 @@ if (ok) {
         me = m;
         // 1びょうに 15かい まで まとめて おくる（バトルの スナップショットは ひんぱん）
         if (patch && patch.bye) {   // とじる まえ：まえの 送信を またずに すぐ おくる（おなじ 場所への かきこみは じゅんばんどおり とどくので、あとから ふるい 中身で うわがき されない）
-          if (sendT) clearTimeout(sendT); sendT = null; if (dead) return; await start; if (!myRef) return;
-          pending = false; lastSent = Date.now(); return rtSet(myRef, { by: (await ready).uid, p: JSON.stringify(me), t: serverTimestamp() });
+          if (sendT) clearTimeout(sendT); sendT = null; if (dead) return; await start; if (dead || !myRef || !online) return;   // オフライン：おくれない（まって いると ぬけられない。サーバーが きれた ことに 気づけば へやから きえる）
+          pending = false; return write();
         }
         if (!sendT) { const wait = Math.max(0, 66 - (Date.now() - lastSent)); sendT = setTimeout(() => flush().catch(() => { }), wait); }
       },
       peers: () => peersSnap,
+      offRecent: (min, within) => { const now = Date.now(); return (!!offAt && now - offAt > min) || (offLen > min && now - offEnd < within); },   // じぶんが さいきん きれて いたか
       onPeers: (fn, err) => {
         const h = { fn, err }; handlers.add(h);
         start.then(() => { if (joinedOnce && handlers.has(h)) setTimeout(() => handlers.has(h) && fn({ peers: peersSnap, joined: peersSnap, left: [], updated: [] }), 0); })

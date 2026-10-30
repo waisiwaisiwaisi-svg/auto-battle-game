@@ -69,6 +69,7 @@ html.land.short .reward{min-height:0;gap:4px} html.land.short .reward .big{font-
 .tmlist{display:flex;flex-direction:column;gap:6px;max-height:calc(52 * var(--vh));overflow:auto;text-align:left}
 .tmlist button{background:var(--bg);box-shadow:0 0 0 1px var(--edge);padding:6px 8px;text-align:left;border-left:5px solid var(--c)}
 .tmlist .desc{font-size:10.5px;color:var(--dim)}
+.askbg.onlhide{display:none!important}   /* オンライン対戦の あいだ かくす（おわったら もどす） */
 .askbg{position:fixed;inset:0;overflow:hidden;background:rgba(10,8,18,.72);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
 .askbox{background:var(--panel);border:2px solid var(--edge);border-radius:10px;padding:18px 18px 14px;max-width:360px;width:100%;text-align:center;font-size:14px;line-height:1.6}
 .pvbox{max-width:760px!important}.pvhead{display:flex;justify-content:space-between;align-items:center}.pvt{font-size:26px;color:var(--acc);text-shadow:2px 2px 0 #000;font-variant-numeric:tabular-nums}
@@ -4300,7 +4301,7 @@ function pixDissolve(old) {
   paint(1 / (DSV.steps + 1), false); dsvNow = st; st.raf = requestAnimationFrame(tick);
   return true;
 }
-function show(id) { if (id !== 'scGuild' && typeof guildStop === 'function') guildStop();   /* ギルドを はなれた：チャットの うけとりを とめる（バトルの タブ から など） */ { const tp = $('townPop'); if (tp && tp.parentNode === $('app')) { tp.hidden = true; tp.style.zIndex = ''; const home = $('isles'); if (home && home.parentNode) home.parentNode.appendChild(tp); } }   /* バトルの タブで #app に うつした まどは、がめんが かわったら とじて もとの ばしょへ */ if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && !$('scTrain').hidden) TRN = null;   /* くんれんを はなれた：ほぞん して いない へんこうは すてる（もどったら ほぞんした ものを ひらく） */
+function show(id) { if (id !== 'scGuild') guildStop();   /* ギルドを はなれた：チャットの うけとりを とめる（バトルの タブ から など） */ { const tp = $('townPop'), sc = $(id); if (tp && tp.parentNode === $('app') && !(sc && !sc.hidden)) { tp.hidden = true; tp.style.zIndex = ''; const home = $('isles'); if (home) home.after(tp); } }   /* バトルの タブで #app に うつした まどは、がめんが かわったら とじて もとの ばしょへ */ if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && !$('scTrain').hidden) TRN = null;   /* くんれんを はなれた：ほぞん して いない へんこうは すてる（もどったら ほぞんした ものを ひらく） */
   const same = (() => { const e = document.getElementById(id); return !!(e && !e.hidden); })();   // おなじ 画面の かきなおし：フェードも BGM の はじめなおしも しない
   const prev = same ? null : [...document.querySelectorAll('.screen')].find(s => !s.hidden && !s.dataset.dsv);
   const bat = !same && prev && (id === 'scBattle' || prev.id === 'scBattle');   // ディゾルブは バトルへ いく ときと もどる ときだけ
@@ -5594,7 +5595,6 @@ function ask(msg, ok = 'はい', ng = 'いいえ') {
     const [b1, b2] = bg.querySelectorAll('button');
     const done = v => { bg.remove(); res(v); };
     if (ng) { b1.onclick = () => done(false); b2.onclick = () => done(true); } else b1.onclick = () => done(true);
-    bg._cancel = () => done(ng ? false : true);   // そとから とじる とき（オンライン対戦が はじまった など）：まって いる がわに こたえを かえす
     $('app').appendChild(bg); (ng ? b2 : b1).focus();
   });
 }
@@ -5605,7 +5605,6 @@ function ask3(msg, labels, wrap) {   // ボタンが 3つの かくにん（左�
     bg.innerHTML = `<div class="askbox ask3"><div></div><div class="row${wrap ? ' wrap' : ''}">${labels.map((l, i) => `<button class="btn${i === 0 ? ' sub' : i === 1 ? ' ok' : ''}" data-i="${i}">${l}</button>`).join('')}</div></div>`;
     bg.querySelector('.askbox > div').textContent = msg; bg.querySelector('.askbox > div').style.whiteSpace = 'pre-line';
     bg.querySelectorAll('button').forEach(b => b.onclick = () => { bg.remove(); res(+b.dataset.i); });
-    bg._cancel = () => { bg.remove(); res(0); };   // そとから とじる：いちばん ひだり（キャンセル）
     $('app').appendChild(bg); bg.querySelector('button[data-i="2"]').focus();
   });
 }
@@ -5984,8 +5983,8 @@ function speedOf(f) {
 
 function startBattle(cfg) {
   if (cfg.kind !== 'online' && NET.started && !NET.ended && B && B.kind === 'online') { say0('オンライン対戦中は ほかの しあいは できません'); throw new Error('ONLINE_BUSY'); }   // オンライン対戦中に ほかの しあいは はじめない（のこった まどから など）。よびだし がわが B を いじらない ように とめる
-  if (cfg.kind === 'online') { document.querySelectorAll('.askbg').forEach(e => { if (!e.querySelector('.ncode, .nstat')) { if (e._cancel) e._cancel(); else e.remove(); } }); const tp = $('townPop'); if (tp) tp.hidden = true; }   // マッチした：ほかの まど（フリー対戦の かくにん など）は とじる
-  if (cfg.kind !== 'online') mmBgCancel(cfg.headless ? '' : 'ほかの しあいを はじめたので、オンライン対戦の あいてを さがすのを やめました。');   // まちながら ほかの しあいは できない
+  if (cfg.kind === 'online') { document.querySelectorAll('.askbg').forEach(e => { if (!e.querySelector('.ncode, .nstat')) e.classList.add('onlhide'); }); const tp = $('townPop'); if (tp) tp.hidden = true; }   // マッチした：ほかの まど（フリー対戦の かくにん など）は とじる
+  if (cfg.kind !== 'online') mmBgCancel(cfg.sim ? '' : 'ほかの しあいを はじめたので、オンライン対戦の あいてを さがすのを やめました。');   // まちながら ほかの しあいは できない
   mvTipHide();
   S.auto = false;   // AUTO は なくなった（バトルは いつも 訓練どおり）
   const st = cfg.kind === 'wild' ? makeWild() : makeStadium(cfg.field);
@@ -8777,7 +8776,7 @@ const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   //
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv && typeof o.iv === 'object' ? iv : undefined, moves: [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(id => typeof id === 'string' && MOVES[id]))].slice(0, 4) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } let to = o.tr; if (typeof to === 'string') try { to = JSON.parse(to); } catch (e) { to = null; }   /* フリー対戦：Firestore には もじで おく */ const tr = trUnpack(to, m); if (tr) m.tr = tr; return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
-function netReset() { clearTimeout(NET.lostT); NET.lostT = 0; SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { const nr = NET.nr, bye = NET.started && (!NET.ended || NET.drawExit); try { if (bye) Promise.resolve(nr.presence(NET.drawExit ? { bye: 1, dr: 1 } : { bye: 1 })).catch(() => { }).finally(() => setTimeout(() => { try { nr.leave(); } catch (e) { } }, 800)); else nr.leave(); } catch (e) { } }   /* たいせん中に ぬける：あいてに すぐ しらせる（まつ 15びょうを まない） */ Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0, drawExit: false, wasAway: false, awayAt: 0 }); }
+function netReset(quit) { document.querySelectorAll('.askbg.onlhide').forEach(e => e.classList.remove('onlhide'));   /* 対戦の あいだ かくした まど（こたえは まだ）を もとに もどす */ clearTimeout(NET.lostT); NET.lostT = 0; SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { const nr = NET.nr, bye = NET.started && (quit || !NET.ended || NET.drawExit), stay = NET.drawExit ? 45000 : 800; try { if (bye) Promise.race([Promise.resolve(nr.presence(NET.drawExit ? { bye: 1, dr: 1 } : { bye: 1 })), new Promise(r => setTimeout(r, 3000))]).catch(() => { }).finally(() => setTimeout(() => { try { nr.leave(); } catch (e) { } }, stay)); else nr.leave(); } catch (e) { } }   /* しょうぶ なしの しらせは しばらく のこす（とまって いた あいてが もどって 見られる ように） */   /* たいせん中に ぬける：あいてに すぐ しらせる（まつ 15びょうを まない） */ Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0, drawExit: false }); }
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
 async function netOpen(asHost, code, onStatus, opts = {}) {
   const room = await netGetRoom();
@@ -8844,9 +8843,15 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
 }
 window.addEventListener('pagehide', () => { if (NET.nr && NET.started && !NET.ended) NET.nr.presence({ bye: 1 }).catch(() => { }); });   // とじる・リロード：あいてには すぐ「きりました」（いっしゅん きれた ときとは わける）
 // こちらが ながく はなれて いた（アプリを うしろに した など）あいだに あいてが いなくなった：かちに しない
-const netAway = (on) => { if (on) { if (!NET.awayAt) NET.awayAt = Date.now(); } else if (NET.awayAt) { if (NET.started && !NET.ended && Date.now() - NET.awayAt > 12000) NET.wasAway = true; NET.awayAt = 0; } };   // こちらが うしろに いた・オフラインだった じかんを はかる
-document.addEventListener('visibilitychange', () => netAway(document.hidden));
-window.addEventListener('offline', () => netAway(true)); window.addEventListener('online', () => netAway(false));   // こちらの つうしんが きれて いた あいだに あいてが いなくなっても かちに しない（あいては もう こちらの まけ／かちで おわって いる）
+// こちらが はなれて いた（アプリを うしろに した・オフラインだった）かを はかる。うしろ と オフラインは べつべつに はかり、あいてが きえた ころに かさなって いた ときだけ つかう
+const AWAY = { hid: { at: 0, end: 0, len: 0 }, off: { at: 0, end: 0, len: 0 } };
+const awaySet = (k, on) => { const a = AWAY[k]; if (on) { if (!a.at) a.at = Date.now(); } else if (a.at) { a.len = Date.now() - a.at; a.end = Date.now(); a.at = 0; } };
+document.addEventListener('visibilitychange', () => awaySet('hid', document.hidden));
+window.addEventListener('offline', () => awaySet('off', true)); window.addEventListener('online', () => awaySet('off', false));
+function wasAway() {   // いま 12びょう いじょう はなれて いる か、12びょう いじょう はなれて いて もどって 25びょう いない（あいての 15びょうの まちと かさなる）
+  const now = Date.now(), recent = (a) => (a.at && now - a.at > 12000) || (a.len > 12000 && now - a.end < 25000);
+  return recent(AWAY.hid) || recent(AWAY.off) || navigator.onLine === false || !!(NET.nr && NET.nr.offRecent && NET.nr.offRecent(12000, 25000));
+}
 function netPeerDraw(msg) {   // しょうぶ なし（レート・せいせきは かわらない）
   if (!B || NET.ended) return;
   NET.ended = true; if (S) delete S.rkPend;
@@ -8854,7 +8859,7 @@ function netPeerDraw(msg) {   // しょうぶ なし（レート・せいせき�
 }
 function netPeerLeft(silent) {   // silent：bye なしで いなくなった（こちらが はなれて いた なら しょうぶ なし）。bye（あいてが やめた）は いつも かち
   if (!B || NET.ended) return;
-  if (silent && (NET.wasAway || (NET.awayAt && Date.now() - NET.awayAt > 12000) || navigator.onLine === false)) return netPeerDraw('あいての つうしんが きれました（こちらが はなれて いたので しょうぶ なし）');
+  if (silent && wasAway()) return netPeerDraw('あいての つうしんが きれました（こちらが はなれて いたので しょうぶ なし）');
   NET.ended = true;
   if (NET.host) { say('あいてが つうしんを きりました'); endBattle('win'); }
   else { B.remote = false; B.mode = 'end'; B.result = 'win'; S.online = S.online || { w: 0, l: 0 }; S.online.w++; B.resLines = ['あいてが つうしんを きりました', rankResult(true)].filter(Boolean); save(); showResult(); }   // ゲストも かちを きろく
@@ -9148,7 +9153,7 @@ function rankSpark(h) {
 }
 let RK_TAB = 'p';
 async function renderRank(tab) {
-  guildStop(); RK_TAB = tab || RK_TAB; show('scRank');
+  RK_TAB = tab || RK_TAB; show('scRank');
   const W = $('rkBody'), k = myRank(), t = tierOf(k.r), n = k.w + k.l;
   W.innerHTML = `<div class="card rkme"><i class="ico big" style="background-image:url(${tierBadgeBig(t.i)})"></i>
       <div><div class="tn" style="color:${t.c}">${t.n}</div><div class="rr">${k.r}<small>レート</small></div>
@@ -12685,16 +12690,16 @@ async function mkSave() {
   bg.querySelector('#mkOk').onclick = () => { bg.remove(); renderHub(); };
   SND.se('caught');
 }
-$('btnTrainTab').onclick = () => { guildStop(); TR_BACK = null; renderTrain(); };
+$('btnTrainTab').onclick = () => { TR_BACK = null; renderTrain(); };
 let TR_BACK = null;   // 訓練の「もどる」の いきさき（へんせいから ひらいた ときは へんせいへ）
 $('btnTrBack').onclick = () => trLeave(() => { const b = TR_BACK; TR_BACK = null; if (b === 'team') renderTeam(); else renderHub(); });
 $('btnGuild').onclick = () => renderGuild();
-$('btnShop').onclick = () => { guildStop(); renderShop(); };
-$('tabHome').onclick = () => { guildStop(); renderHub(); };
+$('btnShop').onclick = () => { renderShop(); };
+$('tabHome').onclick = () => { renderHub(); };
 $('hStage').onclick = () => $('btnTeam').click();
 $('hMe').onclick = () => renderRank('p');
 $('btnRkBack').onclick = () => renderHub();
-$('btnGdBack').onclick = () => { guildStop(); renderHub(); };
+$('btnGdBack').onclick = () => { renderHub(); };
 $('btnMkBack').onclick = () => { if (MK && MK.kind === 'emb') { MK.opts.onCancel && MK.opts.onCancel(); return; } MK = null; renderHub(); };
 $('btnHelp').onclick = () => {
   const bg = modal(`<h3 style="margin-bottom:10px">あそびかた</h3><div class="help">
@@ -12741,7 +12746,7 @@ function mvTipShow(b) {
   let y = r.top - h - 8; if (y < 8) y = Math.min(r.bottom + 8, innerHeight - h - 8); t.style.top = y + 'px';
 }
 
-$('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { const rl = rankResult(false); netReset(); /* レートを きめてから ぬける（まだ おわって いない ので bye が でる：あいては すぐ かち） */ B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rl]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); showResult(); } else { netReset(); endBattle('lose'); } }); return; } B.paused = true; $('pauseOv').hidden = false; };
+$('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { const rl = rankResult(false); netReset(); /* レートを きめてから ぬける（まだ おわって いない ので bye が でる：あいては すぐ かち） */ B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rl]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); showResult(); } else { endBattle('lose'); netReset(true); /* レートを きめてから ぬける（bye で あいては すぐ かち） */ } }); return; } B.paused = true; $('pauseOv').hidden = false; };
 $('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
 $('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; if (B.cfg.dummy) { dummyQuit(); return; } B.paused = false; endBattle(B.kind === 'wild' ? 'run' : 'lose'); B.endT = 0; };
 document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end' && B.kind !== 'online') { B.paused = true; $('pauseOv').hidden = false; } });
