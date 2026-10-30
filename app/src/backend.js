@@ -35,7 +35,14 @@ if (ok) {
     const off = onAuthStateChanged(auth, (u) => { if (u && !done) { done = true; off(); res(u); } });
     (auth.currentUser ? Promise.resolve() : signInAnonymously(auth)).catch((e) => { console.warn('auth', e); if (!done) { done = true; res(null); } });
   });
-  let ready = login();
+  // ログインは つかう ときに する（しっぱい したら 10びょう たって また ためす。けした あとは つぎに オンラインを つかう まで しない）
+  let ready = null, readyFail = 0;
+  const getReady = () => {
+    if (ready) return ready;
+    if (readyFail && Date.now() - readyFail < 10000) return Promise.resolve(null);
+    ready = login().then((u) => { if (!u) { ready = null; readyFail = Date.now(); } else nameDefault(u); return u; });
+    return ready;
+  };
 
   // ---- db：Firestore を claude の db と おなじ 形で ----
   const snapOf = (s) => ({ id: s.id, exists: s.exists(), data: () => s.data() });
@@ -67,7 +74,7 @@ if (ok) {
   // ---- user：id と なまえ ----
   const NAME_KEY = 'pma_name';
   const user = {
-    id: async () => { const u = await ready; return u ? u.uid : null; },
+    id: async () => { const u = await getReady(); return u ? u.uid : null; },
     profiles: async (ids) => {
       const out = {}, list = [...new Set([].concat(ids || []))].filter(Boolean);
       for (let i = 0; i < list.length; i += 30) {   // in は 30こ まで
@@ -85,18 +92,18 @@ if (ok) {
       name = String(name || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 12);
       if (!name) return false;
       try { localStorage.setItem(NAME_KEY, name); } catch (e) { }
-      const u = await ready; if (!u) return false;
+      const u = await getReady(); if (!u) return false;
       await setDoc(fsDoc(fs, 'profiles/' + u.uid), { name, t: Date.now() });
       return true;
     },
     // オンラインの データを ぜんぶ けす（ストアの「アカウント削除」）
     wipe: async () => {
-      const u = await ready; if (!u) return;
+      const u = await getReady(); if (!u) return;
       for (const c of ['ranks', 'gmembers', 'gchat', 'guilds', 'profiles', 'teams', 'backups']) { try { await deleteDoc(fsDoc(fs, `${c}/${u.uid}`)); } catch (e) { } }
       try { await deleteDoc(fsDoc(fs, `data/users/${u.uid}/bkcode`)); } catch (e) { }
       try { await deleteUser(u); } catch (e) { try { await auth.signOut(); } catch (x) { } }
       try { localStorage.removeItem(NAME_KEY); } catch (e) { }
-      lobby = null; ready = login(); ready.then(nameDefault);
+      if (lobby) { try { lobby.leave(); } catch (e) { } } lobby = null; ready = null; readyFail = 0;   // つぎに オンラインを つかう まで あたらしい アカウントは つくらない
     },
   };
   const nameDefault = (u) => {   // なまえが まだ なければ てきとうに つける（あとで かえられる）
@@ -105,7 +112,7 @@ if (ok) {
     if (!n) { n = 'トレーナー' + u.uid.slice(-4).toUpperCase(); }
     window.PMA_NAME.set(n).catch(() => { });
   };
-  ready.then(nameDefault);
+  getReady();
 
   let lobby = null;
   // ---- room：Realtime Database で presence を わけあう ----
@@ -121,7 +128,7 @@ if (ok) {
     let cleaned = false;
     const cleanup = () => { if (unsubVal) unsubVal(); if (unsubConn) unsubConn(); unsubVal = unsubConn = null; if (myRef && !cleaned) { cleaned = true; rtRemove(myRef).catch(() => { }); } };
     const start = (async () => {
-      const u = await ready; if (!u) throw { code: 'unavailable' };
+      const u = await getReady(); if (!u) throw { code: 'unavailable' };
       if (dead) return; myRef = ref(rt, `rooms/${clean(name)}/${myKey}`);
       await onDisconnect(myRef).remove(); if (dead) { cleanup(); return; }
       // きれて つながりなおすと onDisconnect は きえる：かけなおして、じぶんの presence も かきなおす（とじても のこる ゴーストを ださない）
@@ -153,7 +160,7 @@ if (ok) {
     start.catch((e) => console.warn('room', name, e && (e.code || e.message) || e));
     // おくるのは いつも 1つだけ。まえのが おわるまで つぎは まち、おわったら いちばん あたらしい 中身だけ おくる
     // （きれて いる あいだは ためない。ためると つながりなおした あと おくれが どんどん ふえる）
-    const write = async () => { lastSent = Date.now(); return rtSet(myRef, { by: (await ready).uid, p: JSON.stringify(me), t: serverTimestamp() }); };   // presence の 1ぎょう（ルールは by・p を みる）
+    const write = async () => { lastSent = Date.now(); return rtSet(myRef, { by: (await getReady()).uid, p: JSON.stringify(me), t: serverTimestamp() }); };   // presence の 1ぎょう（ルールは by・p を みる）
     const flush = async () => {
       sendT = null; if (dead) return; await start; if (dead || !myRef) return;
       if (inflight || !online) { pending = true; return; }
@@ -197,7 +204,7 @@ if (ok) {
 
   window.claude = window.claude || {};
   window.claude.use = async (cap) => {
-    const u = await ready; if (!u) return null;
+    const u = await getReady(); if (!u) return null;
     return cap === 'db' ? db : cap === 'user' ? user : cap === 'room' ? room : null;
   };
 }
@@ -208,8 +215,15 @@ import { Capacitor } from '@capacitor/core';
 if (Capacitor.isNativePlatform()) {
   CapApp.addListener('backButton', () => {
     const vis = (el) => el && !el.hidden && el.offsetParent !== null;
-    const modal = [...document.querySelectorAll('.askbg')].pop();
-    if (modal) { const no = modal.querySelector('.btn.sub, #oClose, #nClose, #muX, #dClose') || modal.querySelector('button'); if (no) no.click(); else modal.remove(); return; }
+    const shown = (el) => el && !el.classList.contains('onlhide') && getComputedStyle(el).display !== 'none';   // 対戦中に かくして いる まどは さわらない
+    const modal = [...document.querySelectorAll('.askbg')].filter(shown).pop();
+    if (modal) {
+      // とじる ボタンを えらぶ じゅん：data-back（あんぜんな ほう）→ とじる 系の ボタン → 「いいえ」。みえて いる ものだけ（ならびの じゅんで なく この じゅんばんで さがす）
+      const sels = ['[data-back]', '#oClose', '#nClose', '#muX', '#dClose', '#bkX', '#bkNo', '[data-x="c"]', '.btn.sub'];
+      let no = null; for (const q of sels) { no = [...modal.querySelectorAll(q)].find(vis); if (no) break; }
+      if (no) no.click(); else if (!modal.querySelector('button')) modal.remove();   // ボタンが 1つだけ（OK など）の まどは もどるでは とじない（おすと すすむ もの が ある）
+      return;
+    }
     const scr = [...document.querySelectorAll('.screen')].find((s) => !s.hidden);
     if (scr && scr.id === 'scBattle') { const p = document.getElementById('btnPause'); if (vis(p)) p.click(); return; }
     if (scr && scr.id !== 'scHub' && scr.id !== 'scTitle') { const back = scr.querySelector('.sec-title .btn.sub'); if (vis(back)) { back.click(); return; } const home = document.getElementById('tabHome'); if (vis(home)) { home.click(); return; } }
