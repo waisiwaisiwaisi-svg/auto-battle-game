@@ -8809,7 +8809,7 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
     if (NET.started && NET.peer && !NET.ended) {   // あいてが きえた：すこし まつ（いっしゅん きれただけ なら もどって くる）。とじた ときは bye が さきに とどく
       const op = others.find(p => p.peer === NET.peer);
       if (op && op.presence.bye) { clearTimeout(NET.lostT); NET.lostT = 0; if (op.presence.dr) netPeerDraw('あいての がめんが とまって いたので、あいてが しあいを やめました（しょうぶ なし）'); else netPeerLeft(); return; }
-      if (!op && !NET.lostT) { NET.lostT = setTimeout(() => { NET.lostT = 0; if (!NET.ended && NET.nr && !NET.nr.peers().some(p => p.peer === NET.peer)) netPeerLeft(); }, 15000); if (B) say('あいての つうしんを まっています…'); }
+      if (!op && !NET.lostT) { NET.lostT = setTimeout(() => { NET.lostT = 0; if (!NET.ended && NET.nr && !NET.nr.peers().some(p => p.peer === NET.peer)) netPeerLeft(true); }, 15000); if (B) say('あいての つうしんを まっています…'); }
       else if (op && NET.lostT) { clearTimeout(NET.lostT); NET.lostT = 0; if (B) say('あいてが もどって きた！'); }
     }
     else if (NET.preview && NET.peer && ch.left.some(p => p.peer === NET.peer)) { rankPreviewClose(); onStatus('あいてが いなくなりました。もういちど さがしてね', true); netReset(); return; }
@@ -8852,9 +8852,9 @@ function netPeerDraw(msg) {   // しょうぶ なし（レート・せいせき�
   NET.ended = true; if (S) delete S.rkPend;
   B.remote = false; B.mode = 'end'; B.result = 'draw'; B.resLines = [msg]; save(); showResult();
 }
-function netPeerLeft() {
+function netPeerLeft(silent) {   // silent：bye なしで いなくなった（こちらが はなれて いた なら しょうぶ なし）。bye（あいてが やめた）は いつも かち
   if (!B || NET.ended) return;
-  if (NET.wasAway || (NET.awayAt && Date.now() - NET.awayAt > 12000) || navigator.onLine === false) return netPeerDraw('あいての つうしんが きれました（こちらが はなれて いたので しょうぶ なし）');
+  if (silent && (NET.wasAway || (NET.awayAt && Date.now() - NET.awayAt > 12000) || navigator.onLine === false)) return netPeerDraw('あいての つうしんが きれました（こちらが はなれて いたので しょうぶ なし）');
   NET.ended = true;
   if (NET.host) { say('あいてが つうしんを きりました'); endBattle('win'); }
   else { B.remote = false; B.mode = 'end'; B.result = 'win'; S.online = S.online || { w: 0, l: 0 }; S.online.w++; B.resLines = ['あいてが つうしんを きりました', rankResult(true)].filter(Boolean); save(); showResult(); }   // ゲストも かちを きろく
