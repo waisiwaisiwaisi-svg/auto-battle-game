@@ -12741,7 +12741,7 @@ function mvTipShow(b) {
   let y = r.top - h - 8; if (y < 8) y = Math.min(r.bottom + 8, innerHeight - h - 8); t.style.top = y + 'px';
 }
 
-$('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { NET.ended = true; B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rankResult(false)]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); netReset(); showResult(); } else { netReset(); endBattle('lose'); } }); return; } B.paused = true; $('pauseOv').hidden = false; };
+$('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { const rl = rankResult(false); netReset(); /* レートを きめてから ぬける（まだ おわって いない ので bye が でる：あいては すぐ かち） */ B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rl]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); showResult(); } else { netReset(); endBattle('lose'); } }); return; } B.paused = true; $('pauseOv').hidden = false; };
 $('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
 $('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; if (B.cfg.dummy) { dummyQuit(); return; } B.paused = false; endBattle(B.kind === 'wild' ? 'run' : 'lose'); B.endT = 0; };
 document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end' && B.kind !== 'online') { B.paused = true; $('pauseOv').hidden = false; } });
