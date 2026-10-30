@@ -12,6 +12,7 @@ import {
   getFirestore, connectFirestoreEmulator, doc as fsDoc, collection as fsCol, getDoc, getDocs, setDoc, updateDoc,
   deleteDoc, query as fsQuery, where, orderBy, limit as fsLimit, onSnapshot, documentId,
 } from 'firebase/firestore';
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
 import {
   getDatabase, connectDatabaseEmulator, ref, set as rtSet, remove as rtRemove, onValue, onDisconnect, serverTimestamp,
 } from 'firebase/database';
@@ -22,12 +23,13 @@ window.PMA_APP = { native: true, online: !!ok };
 
 if (ok) {
   const app = initializeApp(cfg);
-  const auth = getAuth(app), fs = getFirestore(app), rt = getDatabase(app);
+  const auth = getAuth(app), fs = getFirestore(app), rt = getDatabase(app), fns = getFunctions(app, 'asia-northeast1');
   const emu = window.PMA_FIREBASE_EMULATOR;   // テスト用：{ host: '127.0.0.1' }
   if (emu) {
     connectAuthEmulator(auth, `http://${emu.host}:9099`, { disableWarnings: true });
     connectFirestoreEmulator(fs, emu.host, 8080);
     connectDatabaseEmulator(rt, emu.host, 9000);
+    connectFunctionsEmulator(fns, emu.host, 5001);
   }
   // ---- ログイン（匿名）。はじめての ときだけ アカウントが できる ----
   const login = () => new Promise((res) => {
@@ -52,7 +54,7 @@ if (ok) {
     return {
       id: r.id,
       get: async () => snapOf(await getDoc(r)),
-      set: (d) => setDoc(r, d),
+      set: (d, o) => (o && o.merge ? setDoc(r, d, { merge: true }) : setDoc(r, d)),
       update: (d) => updateDoc(r, d),
       delete: () => deleteDoc(r),
       onSnapshot: (next, err) => onSnapshot(r, (s) => next(snapOf(s)), err),
@@ -70,6 +72,8 @@ if (ok) {
     };
   };
   const db = { doc: (p) => docApi(p), collection: (p) => queryApi(p) };
+  // ---- fn：サーバー（Cloud Functions）で きめる もの。ゲームは window.claude.use('fn') が あれば こちらを つかう ----
+  const fn = { call: async (name, data) => (await httpsCallable(fns, name, { timeout: 20000 })(data || {})).data };
 
   // ---- user：id と なまえ ----
   const NAME_KEY = 'pma_name';
@@ -205,7 +209,7 @@ if (ok) {
   window.claude = window.claude || {};
   window.claude.use = async (cap) => {
     const u = await getReady(); if (!u) return null;
-    return cap === 'db' ? db : cap === 'user' ? user : cap === 'room' ? room : null;
+    return cap === 'db' ? db : cap === 'user' ? user : cap === 'room' ? room : cap === 'fn' ? fn : null;
   };
 }
 

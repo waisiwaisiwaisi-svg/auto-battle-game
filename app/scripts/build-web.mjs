@@ -35,6 +35,12 @@ for (const f of fs.readdirSync(path.join(root, '..', 'se8bit')).filter((f) => f.
 let html = fs.readFileSync(path.join(root, '..', 'index.html'), 'utf8');
 html = html.replace(/<link rel="preconnect"[^>]*>(<link rel="preconnect"[^>]*>)?\s*/g, '')
   .replace(/<link href="https:\/\/fonts\.googleapis\.com[^>]*>/, '<link href="fonts/fonts.css" rel="stylesheet">');
+// テスト用の そうさ口（window.__game）は 配信版から はずす（PMA_DEBUG=1 の ときだけ のこす）
+if (!process.env.PMA_DEBUG) {
+  const n0 = html.length;
+  html = html.replace(/\nwindow\.__game = \{[\s\S]*?\n\};\n/, '\n');
+  if (html.length === n0) throw new Error('window.__game が みつかりません（build-web.mjs を なおして）');
+}
 const inject = '<script src="firebase-config.js"></script><script src="backend.js"></script>';
 if (!html.includes('</title>')) throw new Error('index.html に <title> が ありません');
 html = html.replace('</title>', '</title>\n' + inject);

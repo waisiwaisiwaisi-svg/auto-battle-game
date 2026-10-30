@@ -36,6 +36,18 @@
    ```
    ルールの中身：`app/firebase/firestore.rules`・`app/firebase/database.rules.json`
    （読むのはログインした人全員、書けるのは自分のデータだけ。通報は書くだけで読めない）
+4. **サーバーの しごと（Cloud Functions）**：レート・せんせき・ギルドポイント・日替わりの むりょう を サーバーで きめる（チート たいさく）。
+   Firebase を **Blaze プラン**（従量課金）に して から：
+   ```sh
+   cd app/functions && npm install && cd ..
+   npx firebase deploy --only functions,firestore,database
+   ```
+   - `matchStart`／`matchReport`：へやの ようすを サーバーが よんで 試合を きろく → ふたりの けっかが あえば レートと ギルドポイントを つける。くいちがいは どちらにも つけず `flags/{uid}.disp` に かぞえる
+   - `matchSweep`（5ふん ごと）：10ぷん たっても かたほう だけ の 試合（とちゅうで ぬけた）を のこった ほうの もうしでで きめる
+   - `guildWin1`：ふつうの バトルの かち +1（30びょうに 1かい・1日 60かい まで）／`claimDaily`：むりょう（日本時間の 1日 1かい）
+   - `ranks` の r・w・l・h と `gmembers` の pts・tot・wk は ルールで クライアントからは かけない（サーバーだけ）
+   - ためす：`npx firebase emulators:start --config firebase.emu.json --only auth,firestore,database,functions --project demo-pma`
+   - 配信用の ビルド（`npm run build`）は テスト用の `window.__game` を はずす（のこす ときは `PMA_DEBUG=1`）
 
 `firebase-config.js` がない／中身が `YOUR_...` のままだと、アプリはオフライン専用で動きます（1人用の遊びは全部できます）。
 

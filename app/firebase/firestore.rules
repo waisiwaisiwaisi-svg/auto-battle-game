@@ -5,9 +5,12 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function mine(uid) { return signedIn() && request.auth.uid == uid; }
 
+    // r・w・l・h（レート・せんせき）は サーバー（Cloud Functions）だけが かく。クライアントは なまえ・見せる モンスター・じかん だけ
+    function same(f) { return request.resource.data.get(f, null) == (resource == null ? null : resource.data.get(f, null)); }
     match /ranks/{uid} {
       allow read: if signedIn();
-      allow write: if mine(uid) && (request.resource == null || (request.resource.data.r is int && request.resource.data.r >= 0 && request.resource.data.r < 5000));
+      allow delete: if mine(uid);
+      allow create, update: if mine(uid) && same('r') && same('w') && same('l') && same('h');
     }
     match /guilds/{uid} {
       allow read: if signedIn();
@@ -18,9 +21,11 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if mine(uid) && (request.resource == null || (request.resource.data.tm is list && request.resource.data.tm.size() <= 3));
     }
+    // ギルドの ポイント（pts・tot・wk）は サーバーだけが ふやす
     match /gmembers/{uid} {
       allow read: if signedIn();
-      allow write: if mine(uid);
+      allow delete: if mine(uid);
+      allow create, update: if mine(uid) && same('pts') && same('tot') && same('wk');
     }
     match /gchat/{uid} {
       allow read: if signedIn();
@@ -40,6 +45,11 @@ service cloud.firestore {
     match /data/users/{uid}/{doc} {
       allow read, write: if mine(uid);
     }
+    // サーバーだけが つかう（試合・日替わり・かいすう・くいちがいの きろく）
+    match /matches/{id} { allow read, write: if false; }
+    match /claims/{uid} { allow read, write: if false; }
+    match /limits/{uid} { allow read, write: if false; }
+    match /flags/{uid} { allow read, write: if false; }
     match /profiles/{uid} {
       allow read: if signedIn();
       allow write: if mine(uid) && (request.resource == null || (request.resource.data.name is string && request.resource.data.name.size() <= 12));
