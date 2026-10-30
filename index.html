@@ -2815,7 +2815,7 @@ for (const k in OLD_TYPES) if (!TYPES[k]) Object.defineProperty(TYPES, k, { valu
 for (const k in CHART) delete CHART[k]; Object.assign(CHART, {"water":{"fire":2.0,"grass":0.5,"ground":2.0,"elec":0.5},"fire":{"water":0.5,"grass":2.0,"wind":0.5,"elec":2.0},"grass":{"water":2.0,"fire":0.5,"ground":2.0,"wind":0.5},"elec":{"wind":2.0,"ground":0.5,"fire":0.5,"water":2.0},"wind":{"elec":0.5,"fire":2.0,"grass":2.0,"ground":0.5},"ground":{"elec":2.0,"grass":0.5,"water":0.5,"wind":2.0},"ghost":{"demi":2.0,"dragon":0.5,"fairy":0.5,"bug":2.0},"demi":{"ghost":0.5,"bug":2.0,"machine":2.0,"dragon":0.5},"fairy":{"dragon":2.0,"machine":0.5,"bug":0.5,"ghost":2.0},"dragon":{"fairy":0.5,"ghost":2.0,"machine":0.5,"demi":2.0},"bug":{"demi":0.5,"machine":2.0,"fairy":2.0,"ghost":0.5},"machine":{"bug":0.5,"fairy":2.0,"demi":0.5,"dragon":2.0}});
 { const T = {"a_fire2":["fire","beast"],"a_fire3":["fire","beast"],"a_fire5":["fire","demi"],"a_fire6":["fire","bug"],"a_fire7":["fire","beast"],"a_fire9":["fire","beast"],"a_fire10":["fire","dragon"],"a_water3":["water","beast"],"a_water5":["water","fairy"],"a_grass1":["grass","beast"],"a_grass3":["grass","fairy"],"a_grass9":["grass","beast"],"a_grass10":["grass","beast"],"a_elec3":["elec","beast"],"a_elec4":["elec","machine"],"a_elec5":["elec","beast"],"a_elec9":["elec","beast"],"a_elec10":["elec","beast"],"a_ice3":["water","beast"],"a_ice7":["water","demi"],"a_ice8":["water","beast"],"a_ice9":["normal","beast"],"a_ice10":["wind","fairy"],"a_fighting1":["normal","demi"],"a_fighting9":["ground","beast"],"a_fighting10":["ground","demi"],"a_poison2":["grass","beast"],"a_poison5":["wind","dragon"],"a_poison8":["grass","beast"],"a_poison9":["grass","dragon"],"a_poison10":["ground","fairy"],"a_ground3":["normal","beast"],"a_ground7":["ground","beast"],"a_ground10":["ground","machine"],"a_wind1":["wind","beast"],"a_wind6":["wind","beast"],"a_wind8":["wind","beast"],"a_wind10":["wind","dragon"],"a_dragon1":["elec","dragon"],"a_dragon3":["water","dragon"],"a_dragon4":["wind","fairy"],"a_dragon7":["normal","machine"],"b_fire1":["fire","ghost"],"b_fire2":["fire","fairy"],"kamadon":["fire","machine"],"b_fire4":["elec","ghost"],"b_fire5":["fire","machine"],"b_fire6":["fire","dragon"],"b_fire8":["fire","machine"],"b_fire10":["fire","fairy"],"pottoko":["water","machine"],"b_water4":["water","machine"],"b_water6":["water","fairy"],"b_water7":["water","demi"],"b_water9":["water","beast"],"b_grass1":["grass","fairy"],"b_grass2":["grass","demi"],"b_grass7":["grass","ghost"],"b_grass10":["grass","beast"],"b_elec2":["elec","beast"],"b_elec3":["elec","demi"],"b_elec4":["elec","beast"],"b_elec8":["elec","bug"],"b_elec9":["elec","fairy"],"b_elec10":["elec","beast"],"b_ice2":["water","beast"],"hyoukyuu":["water","beast"],"yukidome":["water","ghost"],"b_ice8":["water","bug"],"b_ice9":["ground","beast"],"b_fighting1":["grass","demi"],"b_fighting3":["wind","demi"],"b_fighting5":["wind","beast"],"b_fighting6":["ground","demi"],"b_fighting7":["normal","demi"],"b_fighting8":["grass","bug"],"b_fighting9":["ground","demi"],"b_fighting10":["normal","demi"],"b_poison6":["grass","bug"],"b_poison7":["wind","ghost"],"b_poison9":["ground","bug"],"b_poison10":["wind","ghost"],"b_ground3":["normal","machine"],"b_ground4":["ground","machine"],"b_ground8":["ground","demi"],"b_ground9":["ground","beast"],"b_wind4":["wind","fairy"],"b_wind6":["wind","ghost"],"b_wind8":["wind","machine"],"sorabune":["wind","machine"],"b_wind10":["wind","beast"],"b_dragon1":["grass","ghost"],"b_dragon2":["ground","dragon"],"b_dragon3":["water","dragon"],"b_dragon5":["wind","dragon"],"b_dragon6":["ground","dragon"],"b_dragon7":["fire","dragon"],"b_dragon8":["grass","dragon"],"b_dragon10":["ground","dragon"],"g1":["normal","ghost"],"g2":["fire","ghost"],"noroinui":["normal","ghost"],"kitsunemen":["normal","ghost"],"g5":["normal","ghost"],"g6":["normal","ghost"],"medamasho":["normal","ghost"],"g9":["wind","ghost"],"g10":["water","ghost"],"c_fire2":["fire","beast"],"c_fire4":["fire","demi"],"c_fire5":["fire","machine"],"c_fire6":["fire","beast"],"c_fire7":["fire","machine"],"c_water3":["water","demi"],"c_water5":["water","dragon"],"c_water8":["water","ghost"],"c_water10":["grass","beast"],"c_grass5":["grass","beast"],"c_grass7":["grass","machine"],"c_grass8":["grass","fairy"],"c_grass10":["grass","demi"],"c_elec1":["elec","machine"],"c_elec4":["elec","beast"],"c_elec5":["elec","machine"],"c_elec6":["elec","machine"],"c_elec7":["elec","dragon"],"c_elec8":["elec","machine"],"c_ice2":["water","machine"],"c_ice10":["water","fairy"],"c_fighting5":["normal","demi"],"c_fighting7":["normal","ghost"],"c_fighting8":["ground","machine"],"c_poison8":["grass","fairy"],"c_poison9":["grass","machine"],"c_ground9":["ground","ghost"],"c_wind6":["wind","beast"],"c_dragon2":["normal","dragon"],"c_dragon5":["normal","dragon"],"c_dragon6":["ground","dragon"],"c_dragon7":["elec","dragon"],"c_dragon8":["normal","dragon"],"c_dragon10":["normal","dragon"],"d_bug1":["wind","bug"],"d_bug3":["normal","bug"],"d_bug4":["ground","bug"],"d_bug5":["ground","ghost"],"d_bug6":["normal","bug"],"d_bug7":["wind","bug"],"d_bug9":["grass","bug"],"d_bug12":["fire","bug"],"d_bug15":["normal","bug"],"d_bug16":["ground","bug"],"d_bug17":["water","bug"],"e_fox1":["water","demi"],"e_fox2":["normal","fairy"],"e_sheep1":["normal","beast"],"e_cloud1":["wind","ghost"],"e_rose1":["grass","beast"],"a_grass7":["grass","demi"],"a_elec2":["elec","fairy"],"a_ground5":["ground","machine"],"a_dragon10":["water","dragon"],"b_fire7":["wind","demi"],"b_water5":["elec","ghost"],"b_grass3":["grass","beast"],"b_poison8":["grass","ghost"],"b_ground7":["ground","beast"],"f_jelly1":["water","fairy"],"f_frost1":["water","fairy"],"f_witch1":["grass","fairy"],"f_icek1":["water","ghost"],"f_coffin1":["ground","ghost"],"n_x1":["elec","bug"],"n_x2":["fire","bug"],"n_x4":["fire","ghost"],"n_burner":["fire","machine"],"n_pipe":["normal","ghost"],"n_amp":["elec","machine"]}; for (const id in T) if (SPECIES[id]) { SPECIES[id].type = T[id][0]; SPECIES[id].type2 = T[id][1]; } }
 { const T = {"tackle":"beast","rockfall":"ground","quake":"ground","stealth-rock":"ground","close-combat":"demi","knock-off":"beast","calm-mind":"fairy","ice-beam":"water","body-press":"demi","psychic":"fairy","iron-defense":"machine","ice-punch":"water","poison-jab":"bug","focus-blast":"demi","dazzling-gleam":"fairy","stone-edge":"ground","rock-slide":"ground","toxic":"grass","drain-punch":"demi","fake-out":"beast","trick-room":"fairy","rock-tomb":"ground","mirror-coat":"fairy","flash-cannon":"machine","iron-head":"machine","trick":"fairy","sludge-wave":"grass","quick-attack":"beast","ice-shard":"water","ice-fang":"water","crunch":"beast","rapid-spin":"beast","psychic-noise":"fairy","bulk-up":"demi","play-rough":"fairy","body-slam":"beast","gunk-shot":"grass","sludge-bomb":"grass","toxic-spikes":"grass","blizzard":"water","moonblast":"fairy","aura-sphere":"demi","roar":"beast","triple-axel":"beast","metal-burst":"machine","psyshock":"fairy","alluring-voice":"fairy","rock-blast":"ground","freeze-dry":"water","slack-off":"beast","rock-wall":"ground","ice-wall":"water","poison-swamp":"grass","icicle-drop":"water","acid-rain":"grass","far-strike":"demi","intimidate":"beast","powder-snow":"water","avalanche":"water","aurora-veil":"water","psycho-cut":"fairy","zen-headbutt":"fairy","cross-poison":"bug","head-smash":"ground","finisher":"demi","psy-link":"fairy","slap-dash":"beast","duel-arena":"demi","future-sight":"fairy","snatch":"fairy","sandstorm":"ground","snowscape":"water","rewind":"fairy","third-fist":"demi","healing-wish":"fairy","psychic-terrain":"fairy","gravity":"ground","smack-down":"ground","haze":"wind","rage-mode":"beast","mystic-shot":"fairy","side-change":"fairy","high-jump-kick":"demi","rollout":"ground","hako-punch":"demi","mini-turret":"machine","self-destruct":"machine"}; for (const id in T) if (MOVES[id]) MOVES[id].t = T[id]; }
-// まえの タイプ → あたらしい 属性・種族（じぶんで かいた モンスター・ふるい データ）
+// まえの タイプ → あたらしい 属性・種族（ふるい データ）
 const LEG_ATTR = { ice: 'water', rock: 'ground', poison: 'grass' }, LEG_RACE = { fighting: 'demi', psychic: 'fairy' };
 function newTypes(t1, t2) { const ts = [t1, t2].filter(Boolean), a = ts.map(t => TYPE_ATTR.includes(t) ? t : LEG_ATTR[t]).find(Boolean), r = ts.map(t => TYPE_RACE.includes(t) ? t : LEG_RACE[t]).find(Boolean); return [a || 'normal', r || 'beast']; }
 for (const k in COVER) delete COVER[k];
@@ -2905,7 +2905,7 @@ const myName = () => safeName((window.PMA_NAME && window.PMA_NAME.get()) || (typ
 // みんなの なまえ：db に かいた なまえ（nm）が あれば それ、なければ アカウントの なまえ
 const pickName = (doc, prof) => safeName(doc && doc.nm, NAME_MAX) || (prof && prof.name) || 'サモナー';
 const okHex = (c) => typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c);
-let CUSTOM = { tr: {}, mon: {} };
+let CUSTOM = { tr: {} };
 function saveCustom() { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(CUSTOM)); } catch (e) { } }
 // え（w×h・pal・RLE）を たしかめる：へんな データは つかわない
 function cleanArt(a, maxW, maxH, frames) {
@@ -2923,81 +2923,9 @@ function regCustomTrainer(k, a, other) {
   if (i >= 0) TR_LOOKS[i][1] = nm; else TR_LOOKS.push([k, nm]);
   return true;
 }
-// じぶんの モンスター：え から きまった タイプ・のうりょく で 種族として とうろく
-const CUSTOM_REF = (() => { const ids = Object.keys(SPECIES).filter(id => SPR[id] && SPECIES[id].ext); const met = ids.map(id => Math.sqrt(SPR[id].n.width * SPR[id].n.height) * SPR[id].ms).sort((a, b) => a - b), vs = ids.map(id => SPECIES[id].vsz || 1).sort((a, b) => a - b), tot = ids.map(id => { const b = SPECIES[id].base; return b.hp + b.atk + b.def + b.spd; }).sort((a, b) => a - b); return { M: met[met.length >> 1] || 60, V: vs[vs.length >> 1] || 1, T: tot[tot.length >> 1] || 210 }; })();
-function customLearn(id, sp) {
-  let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; const r = () => ((h = (h * 16807 + 11) % 2147483647) / 2147483647);
-  const my = [sp.type, sp.type2].filter(Boolean), cov = (COVER[sp.type] || COVER.normal).slice().sort(() => r() - .5).slice(0, 3), wk = STYLE_K[sp.style] || STYLE_K.mid;
-  const atk = Object.keys(MOVES).filter(k => k !== 'tackle' && MOVES[k].cat !== 'stat' && MOVES[k].k !== 'counter' && !MOVES[k].ohko);
-  const pick = (list, n, wf) => list.map(k => [k, wf(MOVES[k]) * (.4 + r())]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, n).map(x => x[0]);
-  const out = [], add = (k) => { if (k && !out.includes(k)) out.push(k); };
-  pick(atk.filter(k => my.includes(MOVES[k].t)), 4, m => (wk[m.k] || 1) * (m.power >= 100 ? .7 : 1)).forEach(add);
-  pick(atk.filter(k => cov.includes(MOVES[k].t)), 2, m => wk[m.k] || 1).forEach(add);
-  if (!out.some(k => INDIRECT(MOVES[k]))) add(pick(atk.filter(k => INDIRECT(MOVES[k]) && (my.includes(MOVES[k].t) || cov.includes(MOVES[k].t))), 1, () => 1)[0] || pick(atk.filter(k => INDIRECT(MOVES[k])), 1, () => 1)[0]);
-  pick(Object.keys(MOVES).filter(k => MOVES[k].cat === 'stat' && !['wall', 'floor'].includes(MOVES[k].k) && (my.includes(MOVES[k].t) || MOVES[k].t === 'normal' || (MOVES[k].t === 'wind' && sp.fly))), 2, m => my.includes(m.t) ? 2 : 1).forEach(add);
-  if (!out.length) add('ember');
-  return out.map((k, i) => [i < 2 ? 1 : 1 + i * 2, k]);
-}
-function regCustomMon(id, c0) {
-  { const [a, r] = newTypes(c0.type, c0.type2); c0 = { ...c0, type: a, type2: r }; }   // 新タイプ（属性＋種族）に なおす：まえの タイプで かいた ものも
-  const art = cleanArt(c0, 48, 48, false); if (!art || !TYPES[c0.type]) return false;
-  const T = (t) => TYPES[t] ? t : null, b = c0.base || {}, st = (v) => clamp(Math.round(+v || 50), 25, 110);
-  const r = clamp(+c0.r || 1, .7, 1.45), style = ['melee', 'mid', 'ranged'].includes(c0.style) ? c0.style : 'mid';
-  const sp = { n: safeName(c0.name) || 'オリジナル', type: c0.type, base: { hp: st(b.hp), atk: st(b.atk), def: st(b.def), spd: st(b.spd) }, moves: [], style, catch: .5, rare: 0, custom: 1,
-    desc: 'サモナーが じぶんで かいた オリジナルの モンスター。', prof: { h: +(r * .7).toFixed(1), wt: +(r * r * 18).toFixed(1), home: 'サモナーの スケッチブック', trait: 'せかいに 1ぴき だけの モンスター。', evo: null }, sz: r };
-  const t2 = T(c0.type2); if (t2 && t2 !== sp.type) sp.type2 = t2;
-  if (c0.fly || sp.type === 'wind' || sp.type2 === 'wind') sp.fly = true;
-  AISpr.DATA[id] = { w: art.w, h: art.h, pal: art.pal, d: art.d };
-  const fr = bakeFrames(AISpr.framesOf(id), art.w + AISpr.PAD * 2, art.h + AISpr.PAD);
-  const met0 = Math.sqrt(fr.idle0.n.width * fr.idle0.n.height) || 1;
-  SPR[id] = { fr, n: fr.idle0.n, w: fr.idle0.w, ms: CUSTOM_REF.M * r / met0 };
-  sp.vsz = CUSTOM_REF.V * r; sp.bz = clamp((r - 1) * 1.6, -.7, .7); sp.sizeCat = r < .85 ? 's' : r > 1.2 ? 'l' : 'm';
-  SPECIES[id] = sp; try { delete _base6[id]; } catch (e) { }   // きどう ちゅうは まだ ない
-  LEARN[id] = customLearn(id, sp); sp.moves = LEARN[id].slice(0, 2).map(x => x[1]);
-  return true;
-}
-// いろ → タイプ（あか＝ほのお、あお＝みず、みどり＝くさ、きいろ＝でんき …）
-function colorType(R, G, B_) {
-  const mx = Math.max(R, G, B_) / 255, mn = Math.min(R, G, B_) / 255, l = (mx + mn) / 2, d = mx - mn, s_ = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-  let h = 0; if (d) { const r = R / 255, g = G / 255, b = B_ / 255; h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h = (h * 60 + 360) % 360; }
-  if (s_ < .14) return l > .78 ? (B_ > R + 8 ? 'ice' : 'normal') : l > .32 ? 'rock' : 'ghost';
-  if (h < 22 || h >= 345) return l < .32 ? 'fighting' : 'fire';
-  if (h < 48) return s_ < .55 && l < .62 ? 'ground' : 'fire';
-  if (h < 68) return s_ < .45 ? 'ground' : 'elec';
-  if (h < 92) return 'bug';
-  if (h < 150) return l > .78 ? 'wind' : 'grass';
-  if (h < 190) return l > .7 ? (h < 170 ? 'wind' : 'ice') : 'water';
-  if (h < 245) return l > .78 ? 'ice' : 'water';
-  if (h < 272) return 'dragon';
-  if (h < 305) return l < .38 ? 'ghost' : 'poison';
-  return 'psychic';
-}
-// え から タイプ・たたかいかた・のうりょく を きめる
-function analyzeMon(idx, pal, w, h) {
-  const rgb = pal.map(c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]);
-  const cnt = {}; let n = 0, x0 = w, x1 = -1, y0 = h, y1 = -1, sat = 0, colored = 0; const rowW = new Array(h).fill(0);
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const v = idx[y * w + x]; if (!v) continue; n++; rowW[y]++; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
-    const [R, G, B_] = rgb[v - 1], mx = Math.max(R, G, B_), mn = Math.min(R, G, B_), l = (mx + mn) / 510, s_ = mx === mn ? 0 : (mx - mn) / (255 - Math.abs(mx + mn - 255) || 1);
-    if (l < .17) continue;   // りんかくの くろは かぞえない
-    colored++; sat += s_;
-    const best = colorType(R, G, B_);
-    cnt[best] = (cnt[best] || 0) + 1; }
-  if (!n) return null;
-  const ord = Object.entries(cnt).sort((a, b) => b[1] - a[1]), type = ord.length ? ord[0][0] : 'normal', type2 = ord[1] && ord[1][1] >= colored * .22 ? ord[1][0] : null;
-  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, asp = bw / bh, fill = n / (bw * bh), sv = colored ? sat / colored : 0;
-  const style = asp > 1.25 ? 'melee' : asp < .8 ? 'ranged' : 'mid';
-  const wide = Math.max(...rowW), bottom = rowW[y1], top = rowW.slice(y0, y0 + Math.ceil(bh / 2)).reduce((a, b) => Math.max(a, b), 0);
-  const fly = type === 'wind' || type2 === 'wind' || (bottom <= wide * .25 && top >= wide * .95 && bh >= 8);
-  const r = clamp(.72 + n / (w * h) * 1.5, .72, 1.4);
-  // のうりょく：大きい→HP・ぼうぎょ、みっしり→ぼうぎょ、あざやか・ちかい→こうげき、ほそい・ちいさい→すばやさ
-  const wt = { hp: 1 + (r - 1) * 1.2, def: .8 + fill * .5 + (r - 1) * .6, atk: .85 + sv * .4 + (style === 'melee' ? .15 : 0), spd: 1 + (1 - r) * 1.1 + (asp < .9 ? .1 : 0) + (fly ? .1 : 0) };
-  const sum = wt.hp + wt.def + wt.atk + wt.spd, base = {}; for (const k in wt) base[k] = clamp(Math.round(CUSTOM_REF.T * wt[k] / sum), 30, 95);
-  return { type, type2, style, fly, r: +r.toFixed(2), base };
-}
 function loadCustom() {
-  try { const c = JSON.parse(localStorage.getItem(CUSTOM_KEY) || 'null'); if (c && typeof c === 'object') CUSTOM = { tr: c.tr || {}, mon: c.mon || {} }; } catch (e) { }
+  try { const c = JSON.parse(localStorage.getItem(CUSTOM_KEY) || 'null'); if (c && typeof c === 'object') CUSTOM = { tr: c.tr || {} }; } catch (e) { }   // じぶんで かいた モンスター（mon）は もう つかわない
   for (const k of Object.keys(CUSTOM.tr)) if (!/^c_tr_[a-z0-9]+$/.test(k) || !regCustomTrainer(k, CUSTOM.tr[k])) delete CUSTOM.tr[k];
-  for (const k of Object.keys(CUSTOM.mon)) { let ok = false; try { ok = /^c_mon_[a-z0-9]+$/.test(k) && regCustomMon(k, CUSTOM.mon[k]); } catch (e) { } if (!ok) delete CUSTOM.mon[k]; }
 }
 loadCustom();   // 絵の サモナー（48ドット）の 倍率。ドット数が ちがう 絵は 同じ 背たけに なるよう ちょうせい
 
@@ -8779,8 +8707,8 @@ const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); return { 
 const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   // しらない 種族（え が とどかなかった など）
   const iv = {}; if (o.iv && typeof o.iv === 'object') for (const k of STAT6) { const v = Number(o.iv[k]); iv[k] = Number.isFinite(v) ? Math.max(0, Math.min(31, v | 0)) : 0; }   // ほかの 人の データ：かずを たしかめる（NaN・おおきすぎ・マイナス）
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv && typeof o.iv === 'object' ? iv : undefined, moves: [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(id => typeof id === 'string' && MOVES[id]))].slice(0, 4) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } let to = o.tr; if (typeof to === 'string') try { to = JSON.parse(to); } catch (e) { to = null; }   /* フリー対戦：Firestore には もじで おく */ const tr = trUnpack(to, m); if (tr) m.tr = tr; return m; };
-const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
-const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
+const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
+const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && SPECIES[o.sid] && o.iv && Array.isArray(o.moves));
 let NET_OPEN = 0;   // へやに はいる ための ばんごう（はいる とちゅうで やめたら ふるい ものは すてる）
 function netReset(quit) { NET_OPEN++; document.querySelectorAll('.askbg.onlhide').forEach(e => e.classList.remove('onlhide'));   /* 対戦の あいだ かくした まど（こたえは まだ）を もとに もどす */ clearTimeout(NET.lostT); NET.lostT = 0; SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { const nr = NET.nr, bye = NET.started && (quit || !NET.ended || NET.drawExit), stay = NET.drawExit ? 45000 : 800; try { if (bye) Promise.race([Promise.resolve(nr.presence(NET.drawExit ? { bye: 1, dr: 1 } : { bye: 1 })), new Promise(r => setTimeout(r, 3000))]).catch(() => { }).finally(() => setTimeout(() => { try { nr.leave(); } catch (e) { } }, stay)); else nr.leave(); } catch (e) { } }   /* しょうぶ なしの しらせは しばらく のこす（とまって いた あいてが もどって 見られる ように） */   /* たいせん中に ぬける：あいてに すぐ しらせる（まつ 15びょうを まない） */ Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0, drawExit: false }); }
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
@@ -8795,14 +8723,11 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   await guildMe().catch(() => { });   // あいてに ギルドめいを みせる
   if (tok !== NET_OPEN || NET.nr !== nrJ) return;
   NET.team6 = teamOf(S.party, 6); NET.team6Full = teamOf(S.party, 6); NET.myPick = null; NET.preview = null;   // team6 は presence に いれる ため 訓練を けずる ことが ある。試合には team6Full（訓練つき）を つかう
-  const me = { role: asHost ? 'host' : 'guest', nm: myName(), team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, p6: NET.pick6 ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined, ca: {} };   // おなじ ポーズは おくらない
-  // じぶんで かいた もの の え（la：サモナー、ca：モンスター）。あいては はじまる まえに うけとって おぼえる。presence は 4KB まで なので 入りきらない え は おくらない
-  for (const o of NET.team6) if (CUSTOM.mon[o.sid] && !me.ca[o.sid]) me.ca[o.sid] = CUSTOM.mon[o.sid];
+  const me = { role: asHost ? 'host' : 'guest', nm: myName(), team: teamOf(S.party), team6: NET.team6, v: 1, r: myRank().r, rk: NET.ranked ? 1 : 0, p6: NET.pick6 ? 1 : 0, lk: myLook(), gn: GUILD.gname || undefined, la: (t => t && { ...t, f: t.f.map((x, i) => i && x === t.f[0] ? '' : x) })(CUSTOM.tr[myLook()]) || undefined };   // おなじ ポーズは おくらない
+  // じぶんで かいた サモナーの え（la）。あいては はじまる まえに うけとって おぼえる。presence は 4KB まで なので 入りきらない え は おくらない
   const fits = () => presOk(me);
-  if (me.la) me.la = chunkS(me.la); for (const k in me.ca) me.ca[k] = chunkS(me.ca[k]);
+  if (me.la) me.la = chunkS(me.la);
   if (!fits()) delete me.la;
-  for (const sid of Object.keys(me.ca).reverse()) { if (fits()) break; if (me.team.some(o => o.sid === sid)) continue; delete me.ca[sid]; NET.team6 = me.team6 = NET.team6.filter(o => o.sid !== sid); NET.team6Full = NET.team6Full.filter(o => o.sid !== sid); }
-  if (!fits()) me.ca = {};   // それでも はいらない：え は おくらない（あいてには かわりの すがたで みえる）
   if (!fits()) for (const o of [...NET.team6].reverse()) { if (fits()) break; if (!me.team.some(x => x.sid === o.sid)) delete o.tr; }   // まだ はいらない：見せあい だけの 子の 訓練は おくらない
   if (!fits() && NET.pick6) { for (const o of NET.team6) delete o.tr; me.team = me.team.map(o => { const { tr, ...r } = o; return r; }); }   // えらぶ たいせん：訓練は えらんだ あと（pt）で おくる
   NET.me = me;
@@ -8881,9 +8806,8 @@ function netPeerLeft(silent) {   // silent：bye なしで いなくなった（
 function oppName() { const p = NET.nr && NET.nr.peers().find(x => isOther(x) && x.presence && x.presence.lk); const n = p && safeName(p.presence.nm, NAME_MAX), g = p && safeName(p.presence.gn, 10); return (n || 'あいて') + (g ? `（${g}）` : ''); }
 function netCacheArt(pr) {
   if (!pr || typeof pr !== 'object') return;
-  if (pr.la || pr.ca) pr = { ...pr, la: unchunkS(pr.la), ca: unchunkS(pr.ca) };
+  if (pr.la) pr = { ...pr, la: unchunkS(pr.la) };
   if (typeof pr.lk === 'string' && /^c_tr_[a-z0-9]+$/.test(pr.lk) && pr.la && !TRAINER_ART['o_' + pr.lk.slice(5)]) regCustomTrainer('o_' + pr.lk.slice(5), pr.la, true);
-  if (pr.ca && typeof pr.ca === 'object') for (const sid of Object.keys(pr.ca).slice(0, 6)) if (/^c_mon_[a-z0-9]+$/.test(sid) && (!SPECIES[sid] || (SPECIES[sid].custom && !CUSTOM.mon[sid]))) { try { regCustomMon(sid, pr.ca[sid]); } catch (e) { } }
 }
 function oppLook() { const p = NET.nr && NET.nr.peers().find(x => isOther(x) && x.presence && x.presence.lk); const k = p && p.presence.lk;
   if (typeof k === 'string' && /^c_tr_[a-z0-9]+$/.test(k)) { netCacheArt(p.presence); if (TRAINER_ART['o_' + k.slice(5)]) return 'o_' + k.slice(5); }   // あいての かいた サモナー（じぶんの みため には まぜない）
@@ -9521,7 +9445,7 @@ function rankPreview(oppTeam, oppR) {
   const mine = NET.team6, need = Math.min(3, mine.length); let sel = [], left = PICK_SEC;
   const ov = document.createElement('div'); ov.className = 'askbg pv'; $('app').appendChild(ov); NET.preview = { ov };
   const card = (o, i, mineSide) => { const known = !!SPECIES[o.sid], sid = known ? o.sid : 'a_fire2', sp = SPECIES[sid], k = mineSide ? sel.indexOf(i) : -1;   /* え が とどかなかった じぶんで かいた モンスター：たいせんと おなじ かわりの すがたで */
-    return `<button class="pvc ${mineSide ? 'mine' : ''} ${k >= 0 ? 'on' : ''}" data-i="${i}" ${mineSide ? '' : 'disabled'}>${k >= 0 ? `<span class="pvn">${k + 1}</span>` : ''}<i data-sid="${sid}"></i><b>${known ? sp.n : 'オリジナル'}</b><span>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</span></button>`; };
+    return `<button class="pvc ${mineSide ? 'mine' : ''} ${k >= 0 ? 'on' : ''}" data-i="${i}" ${mineSide ? '' : 'disabled'}>${k >= 0 ? `<span class="pvn">${k + 1}</span>` : ''}<i data-sid="${sid}"></i><b>${known ? sp.n : '？？？'}</b><span>${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</span></button>`; };
   const draw = () => {
     const done = !!NET.myPick, t = tierOf(typeof oppR === 'number' ? oppR : 1000);
     ov.innerHTML = `<div class="askbox pvbox">
@@ -9543,7 +9467,7 @@ function rankPreview(oppTeam, oppR) {
       if (NET.guest && NET.team6Full) { up.pt = NET.myPick.map(i => NET.team6Full[i]).filter(Boolean);   // えらんだ 3たいの 訓練を ちゃんと とどける
         const me = () => Object.assign({}, NET.me || {}, up);
         if (!presOk(me())) { const nt = (l) => (l || []).map(o => { const { tr, ...r } = o; return r; }); up.team6 = nt(NET.me && NET.me.team6); up.team = nt(NET.me && NET.me.team); }
-        if (!presOk(me())) { up.ca = null; up.la = null; }
+        if (!presOk(me())) up.la = null;
         if (!presOk(me())) delete up.pt;   // それでも はいらない：いままでどおり
         Object.assign(NET.me || {}, up); }
       NET.nr.presence(up).catch(() => { }); } draw(); if (NET.host && NET.nr) { const g = NET.peer && NET.nr.peers().find(p => p.peer === NET.peer && p.presence && !p.presence.bye); if (g && !NET.started) { const gp = rankPickOk(g.presence.pick, (g.presence.team6 || []).length); if (gp) { rankPreviewClose(); netHostStart(netGuestPicked(g.presence, gp), NET.myPick.map(i => (NET.team6Full || NET.team6)[i])); } } } };
@@ -11508,7 +11432,7 @@ function drawStar(x, y, r, col) {
 // 浮かぶ モンスター（いまの 64ドットの え に あわせる：はねを ひろげて とぶ・ただよう・からだが 宙に ある もの）
 // 浮かんで 見え、障害物の 上を 飛びこえる（弾も 上から うつので 障害物に 止められない）。オリジナルは かいた え から きまる sp.fly
 const FLOAT_LOOK = new Set(['a_fire10', 'a_elec5', 'a_poison5', 'a_poison9', 'a_wind6', 'a_wind8', 'a_wind10', 'a_dragon4', 'b_fire4', 'b_fire8', 'b_water4', 'b_water6', 'b_ice8', 'b_poison7', 'b_wind4', 'b_wind6', 'b_wind8', 'sorabune', 'b_wind10', 'b_dragon5', 'g1', 'g2', 'kitsunemen', 'medamasho', 'g9', 'g10', 'c_fire5', 'c_water5', 'c_elec1', 'c_elec4', 'c_elec5', 'c_elec8', 'c_ground9', 'c_wind6', 'c_dragon10', 'd_bug1', 'd_bug5', 'd_bug7', 'd_bug9', 'd_bug12', 'd_bug17', 'a_dragon10', 'b_fire7', 'f_jelly1']);
-const floats = (sid) => SPECIES[sid] && SPECIES[sid].custom ? !!SPECIES[sid].fly : FLOAT_LOOK.has(sid);
+const floats = (sid) => FLOAT_LOOK.has(sid);
 const flies = (f) => !!(f && f.sp && f.mon && floats(f.mon.sid)) && !(typeof B !== 'undefined' && B && B.gravity > 0) && !(f.v && f.v.grounded > 0);   // じゅうりょく・うちおとす：とべない
 const hovers = (f) => !(f && f.state === 'wind' && f.cur && f.cur.id === 'roost') && flies(f);   // はねやすめ中は じめんに おりる
 // はばたく か ただよう か（羽の ある もの・鳥・竜は はばたき、ゴースト・くも・あわ などは ただよう）
@@ -12368,7 +12292,7 @@ const bkDev = () => { try { let d = localStorage.getItem('pma_dev'); if (!d) { d
 // （bk と、ほうって おくだけで かわる ブラインドボックスの 時計は のぞく）
 // キーの じゅんばん・からの はいれつ／オブジェクトの あるなし では かわらない かたちに（よみこみ なおしで ならびが かわる ため）
 const bkCanon = (v) => Array.isArray(v) ? v.map(bkCanon) : v && typeof v === 'object' ? Object.keys(v).sort().reduce((o, k) => { const c = bkCanon(v[k]); if (c !== undefined && !(c && typeof c === 'object' && !Object.keys(c).length)) o[k] = c; return o; }, {}) : v;
-const bkCustOn = () => !!(CUSTOM && (Object.keys(CUSTOM.mon).length || Object.keys(CUSTOM.tr).length));
+const bkCustOn = () => !!(CUSTOM && Object.keys(CUSTOM.tr).length);
 const bkCH = () => { if (!bkCustOn()) return ''; const j = JSON.stringify(bkCanon(CUSTOM)); let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) { h ^= j.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + '.' + j.length; };   // じぶんで かいた モンスター・サモナー（べつの ほぞん ばしょ）の ハッシュ：かわったら あげなおす（ゲームの データの ハッシュ bk.h とは わける：まえの 版の h と くいちがわない ように）
 const bkH = (x) => { const o = { ...x }; delete o._cust; delete o.bkOff; delete o.bk; delete o.chestTick; delete o.chestSaved; delete o.shop; delete o.guildOn;   /* shop：ひづけが かわると かってに かわる・guildOn：端末ごとの ギルド はんてい（かいものは ジェム などで わかる） */ if (Array.isArray(o.chests)) o.chests = o.chests.map(c => c && { ...c, at: c.at == null ? null : 1 }); const j = JSON.stringify(bkCanon(o)); let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) { h ^= j.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + '.' + j.length; };
 // セーブの たびに よぶ：1ぷんに 1かい まとめて バックアップ（アプリを とじる・ほかの アプリへ うつる ときは すぐ）
@@ -12391,7 +12315,7 @@ async function bkUp0(force, X = S, over) {
   if (fresh) X.bk = { code: bkNewCode() };
   else if (!over) {   // ほかの 端末が あとから あげて いたら うわがき しない（もどって きた ときに どちらを つかうか きく）
     const top = await bkTop(R, X.bk.code); if (top && top.dev !== bkDev() && (top.t || 0) > (X.bk.base || X.bk.t || 0)) { if (!document.hidden) bkCheck(); return 'newer'; } }
-  const code = X.bk.code, t = Date.now(), raw = new TextEncoder().encode(JSON.stringify({ ...X, _t: t, ...(bkCustOn() ? { _cust: CUSTOM } : {}) }));   // _t：なかみに ときを いれる（そとの t を かきかえた にせものを みわける）   // じぶんで かいた モンスター・サモナー（べつの ほぞん ばしょ）も いっしょに
+  const code = X.bk.code, t = Date.now(), raw = new TextEncoder().encode(JSON.stringify({ ...X, _t: t, ...(bkCustOn() ? { _cust: CUSTOM } : {}) }));   // _t：なかみに ときを いれる（そとの t を かきかえた にせものを みわける）   // じぶんで かいた サモナー（べつの ほぞん ばしょ）も いっしょに
   const zz = await bkZip(raw, true).catch(() => null), iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await bkKey(code), zz || raw));
   if (!live()) return false;   // ふるい データを あげない
@@ -12452,10 +12376,10 @@ async function bkCheck0() {
 setTimeout(bkCheck, 800);
 window.addEventListener('focus', () => bkCheck()); window.addEventListener('pageshow', () => bkCheck());   // PCで まどを ひらいた まま：もどった とき
 setInterval(() => { if (!document.hidden) bkCheck(); }, 180000);   // ひらいた まま でも ときどき みる
-function bkCustIn(s) {   // バックアップに はいって いた じぶんで かいた モンスター・サモナーを この 端末に くわえる（つうじょうの セーブを よむ まえに：しらない 種族は はずされる ため）
+function bkCustIn(s) {   // バックアップに はいって いた じぶんで かいた サモナーを この 端末に くわえる（つうじょうの セーブを よむ まえに：しらない 種族は はずされる ため）
   const c = s && s._cust; if (s) delete s._cust; if (!c || typeof c !== 'object') return;
   let add = false;
-  for (const [g, re, reg] of [['mon', /^c_mon_[a-z0-9]+$/, regCustomMon], ['tr', /^c_tr_[a-z0-9]+$/, regCustomTrainer]]) for (const k of Object.keys(c[g] || {})) { const v = c[g][k]; if (!re.test(k) || !v || typeof v !== 'object' || JSON.stringify(CUSTOM[g][k]) === JSON.stringify(v)) continue;   /* あたらしい もの・かきなおした もの（この 端末に しか ない ものは けさない） */
+  for (const [g, re, reg] of [['tr', /^c_tr_[a-z0-9]+$/, regCustomTrainer]]) for (const k of Object.keys(c[g] || {})) { const v = c[g][k]; if (!re.test(k) || !v || typeof v !== 'object' || JSON.stringify(CUSTOM[g][k]) === JSON.stringify(v)) continue;   /* あたらしい もの・かきなおした もの（この 端末に しか ない ものは けさない） */
     let ok = false; try { ok = !!reg(k, v); } catch (e) { } if (ok) { CUSTOM[g][k] = v; add = true; } else if (CUSTOM[g][k]) try { reg(k, CUSTOM[g][k]); } catch (e) { } }   // こわれた え で いまの え を けさない
   if (add) { saveCustom(); try { loadCustom(); } catch (e) { } }
 }
@@ -12629,7 +12553,7 @@ const MK_PAL = ['#0f0e1c', '#ffffff', '#fde2c4', '#f2b98a', '#c98a5a', '#7a4a2a'
 const MK_POSES = ['たつ', 'ゆびさす', 'てを ひらく', 'かちポーズ'];
 let MK = null;   // いま かいている もの
 function mkEdit(kind, key, opts) {
-  const emb = kind === 'emb', W = emb ? 16 : 32, H = kind === 'tr' ? 40 : emb ? 16 : 32, src = emb ? (opts && opts.src) || null : key ? (kind === 'tr' ? CUSTOM.tr[key] : CUSTOM.mon[key]) : null;
+  const emb = kind === 'emb', W = emb ? 16 : 32, H = kind === 'tr' ? 40 : emb ? 16 : 32, src = emb ? (opts && opts.src) || null : key ? CUSTOM.tr[key] : null;
   if (emb) show('scMaker');
   const pal = MK_PAL.slice(); const toIdx = (a, str) => { const o = new Uint8Array(W * H), t = rleDec(str, a.w * a.h); for (let y = 0; y < Math.min(H, a.h); y++) for (let x = 0; x < Math.min(W, a.w); x++) { const v = t[y * a.w + x]; if (!v) continue; const c = a.pal[v - 1]; let i = pal.indexOf(c); if (i < 0 && pal.length < 63) { pal.push(c); i = pal.length - 1; } o[y * W + x] = i + 1; } return o; };
   const frames = kind === 'tr' ? [0, 1, 2, 3].map(i => src ? toIdx(src, src.f[i]) : new Uint8Array(W * H)) : [src ? toIdx(src, src.d) : new Uint8Array(W * H)];
@@ -12653,7 +12577,6 @@ function mkEdit(kind, key, opts) {
     for (let i = 0; i < W * H; i++) if (f[i]) { g.fillStyle = MK.pal[f[i] - 1]; g.fillRect((i % W) * CELL, ((i / W) | 0) * CELL, CELL, CELL); }
     g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 1; g.beginPath(); for (let x = 0; x <= W; x++) { g.moveTo(x * CELL + .5, 0); g.lineTo(x * CELL + .5, H * CELL); } for (let y = 0; y <= H; y++) { g.moveTo(0, y * CELL + .5); g.lineTo(W * CELL, y * CELL + .5); } g.stroke();
     if (MK.mirror) { g.strokeStyle = 'rgba(255,209,102,.45)'; g.beginPath(); g.moveTo(W / 2 * CELL, 0); g.lineTo(W / 2 * CELL, H * CELL); g.stroke(); }
-    if (kind === 'mon') { g.strokeStyle = 'rgba(120,200,255,.25)'; g.beginPath(); g.moveTo(0, (H - .5) * CELL); g.lineTo(W * CELL, (H - .5) * CELL); g.stroke(); }
     prev();
   };
   const prev = () => {   // じっさいの 大きさ（2ばい）で みる
@@ -12695,10 +12618,8 @@ function mkEdit(kind, key, opts) {
   }
   $('mkCancel').onclick = () => emb ? (MK.opts.onCancel && MK.opts.onCancel()) : renderHub();
   if ($('mkDel')) $('mkDel').onclick = async () => {
-    if (kind === 'mon' && S && [...S.party, ...S.box].some(m => m.sid === key)) { await ask('この モンスターは なかまに いるので けせません。', 'OK', null); return; }
     if (!(await ask('けしますか？ もとに もどせません。'))) return;
-    if (kind === 'tr') { delete CUSTOM.tr[key]; const i = TR_LOOKS.findIndex(x => x[0] === key); if (i >= 0) TR_LOOKS.splice(i, 1); if (S && S.look === key) { S.look = 'boy'; save(); } }
-    else delete CUSTOM.mon[key];
+    delete CUSTOM.tr[key]; { const i = TR_LOOKS.findIndex(x => x[0] === key); if (i >= 0) TR_LOOKS.splice(i, 1); } if (S && S.look === key) { S.look = 'boy'; save(); }
     saveCustom(); renderHub();
   };
   $('mkSave').onclick = () => mkSave();
@@ -12717,36 +12638,12 @@ async function mkSave() {
   }
   const name = safeName($('mkName').value); if (!name) { $('mkName').focus(); $('mkName').placeholder = 'なまえを いれてね'; return; }
   if (!MK.frames[0].some(v => v)) { await ask('なにも かかれて いません。', 'OK', null); return; }
-  if (MK.kind === 'tr') {
-    const fr = MK.frames.map((f, i) => MK.touched[i] && f.some(v => v) ? f : MK.frames[0]);
-    const pk = mkPack(fr, MK.W, MK.H, MK.pal), key = MK.key || 'c_tr_' + Date.now().toString(36);
-    CUSTOM.tr[key] = { name, w: pk.w, h: pk.h, pal: pk.pal, f: pk.enc };
-    if (!regCustomTrainer(key, CUSTOM.tr[key])) return; saveCustom();
-    if (S && !MK.key) { S.look = key; save(); }
-    SND.se('ok'); renderHub(); return;
-  }
-  const pk = mkPack(MK.frames, MK.W, MK.H, MK.pal);
-  if (MK.key) {   // かきなおし：え と なまえ だけ（タイプ・のうりょくは そのまま）
-    const old = CUSTOM.mon[MK.key]; CUSTOM.mon[MK.key] = { ...old, name, w: pk.w, h: pk.h, pal: pk.pal, d: pk.enc[0] };
-    regCustomMon(MK.key, CUSTOM.mon[MK.key]); saveCustom(); SND.se('ok'); renderHub(); return;
-  }
-  const an = analyzeMon(MK.frames[0], MK.pal, MK.W, MK.H); if (!an) return;
-  const key = 'c_mon_' + Date.now().toString(36);
-  CUSTOM.mon[key] = { name, w: pk.w, h: pk.h, pal: pk.pal, d: pk.enc[0], ...an };
-  if (!regCustomMon(key, CUSTOM.mon[key])) { delete CUSTOM.mon[key]; return; }
-  saveCustom();
-  const sp = SPECIES[key]; let where = '';
-  if (S) { const m = newMon(key); dexMark(key, 2); where = S.party.length < 6 ? (S.party.push(m), 'パーティに くわわった！') : (S.box.push(m), '「あずける」に おくられた'); save(); }
-  const st = stats({ sid: key, iv: { hp: 15, atk: 15, def: 15, spa: 15, spd: 15, spe: 15, eva: 15 }, lvl: MON_LV }) || {};
-  const STY = { melee: 'ちかづいて たたかう', mid: 'バランスがた', ranged: 'はなれて たたかう' };
-  const bar = (k, n, v) => `<span>${n}</span><span><i style="width:${clamp(v / 160 * 100, 4, 100)}%"></i></span><b>${v || '-'}</b>`;
-  const bg = modal(`<div class="mkres"><h3>${sp.n} が うまれた！</h3><div id="mkResImg"></div><div>${typeChip(sp.type)}${sp.type2 ? ' ' + typeChip(sp.type2) : ''}</div>
-    <div class="dim" style="font-size:12px">${STY[sp.style]}${sp.fly ? '・そらを とぶ' : ''}・大きさ ${{ s: 'ちいさい', m: 'ふつう', l: 'おおきい' }[sp.sizeCat] || 'ふつう'}</div>
-    <div class="sts">${bar('hp', 'HP', st.hp)}${bar('atk', 'こうげき', st.atk)}${bar('def', 'ぼうぎょ', st.def)}${bar('spe', 'すばやさ', st.spe)}</div>
-    <div style="font-size:12px">${where}</div><button class="btn" id="mkOk" style="padding:8px 24px">OK</button></div>`);
-  bg.querySelector('#mkResImg').appendChild(spriteCanvas(key, 96));
-  bg.querySelector('#mkOk').onclick = () => { bg.remove(); renderHub(); };
-  SND.se('caught');
+  const fr = MK.frames.map((f, i) => MK.touched[i] && f.some(v => v) ? f : MK.frames[0]);   // サモナー
+  const pk = mkPack(fr, MK.W, MK.H, MK.pal), key = MK.key || 'c_tr_' + Date.now().toString(36);
+  CUSTOM.tr[key] = { name, w: pk.w, h: pk.h, pal: pk.pal, f: pk.enc };
+  if (!regCustomTrainer(key, CUSTOM.tr[key])) return; saveCustom();
+  if (S && !MK.key) { S.look = key; save(); }
+  SND.se('ok'); renderHub();
 }
 $('btnTrainTab').onclick = () => { TR_BACK = null; renderTrain(); };
 let TR_BACK = null;   // 訓練の「もどる」の いきさき（へんせいから ひらいた ときは へんせいへ）
@@ -13210,7 +13107,7 @@ function roundTrainer(i) {
 }
 // ===== フリー対戦：だれかが ほぞんした チーム（しゅつじょう 3たい・訓練こみ）と たたかう。リアルタイムでは ない =====
 // teams/<じぶんの id> に じぶんの しゅつじょう 3たいを おく（フリー対戦を はじめる たびに 上書き）
-const freeOk = (t) => validTeam(t) && t.every(o => SPECIES[o.sid] && !/^c_mon_/.test(o.sid));   // じぶんで かいた モンスターは ほかの 人の がめんに 絵が ないので つかわない
+const freeOk = (t) => validTeam(t);
 async function freeUpload(R) {
   const tm = teamOf(S.party, 3); if (!freeOk(tm)) return;
   const lk = myLook(), up = tm.map(o => ({ sid: o.sid, nat: o.nat || null, iv: o.iv, moves: o.moves, ev: o.ev || null, fed: o.fed || 0, tr: o.tr ? JSON.stringify(o.tr) : null }));   // Firestore は undefined と はいれつの なかの はいれつが だめ：訓練は もじに
