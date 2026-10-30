@@ -111,14 +111,18 @@ if (ok) {
   // ---- room：Realtime Database で presence を わけあう ----
   const myTab = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
   const clean = (s) => String(s).replace(/[.#$\[\]\/]/g, '_').slice(0, 60) || 'lobby';
+  let roomSeq = 0;
   function makeRoom(name) {
+    const myKey = myTab + '-' + (++roomSeq);   // へやごとに ちがう キー（おなじ あいことばに すぐ はいりなおしても、まえの へやの leave が あたらしい ほうを けさない）
     let me = {}, peersSnap = Object.freeze([]), joinedOnce = false, dead = false;
     const handlers = new Set(), peerObj = new Map(), roomRef = ref(rt, 'rooms/' + clean(name));
     let myRef = null, unsubVal = null, unsubConn = null, sendT = null, lastSent = 0, inflight = false, pending = false, online = true;
+    let cleaned = false;
+    const cleanup = () => { if (unsubVal) unsubVal(); if (unsubConn) unsubConn(); unsubVal = unsubConn = null; if (myRef && !cleaned) { cleaned = true; rtRemove(myRef).catch(() => { }); } };
     const start = (async () => {
       const u = await ready; if (!u) throw { code: 'unavailable' };
-      myRef = ref(rt, `rooms/${clean(name)}/${myTab}`);
-      await onDisconnect(myRef).remove();
+      if (dead) return; myRef = ref(rt, `rooms/${clean(name)}/${myKey}`);
+      await onDisconnect(myRef).remove(); if (dead) { cleanup(); return; }
       // きれて つながりなおすと onDisconnect は きえる：かけなおして、じぶんの presence も かきなおす（とじても のこる ゴーストを ださない）
       let was = null;
       unsubConn = onValue(ref(rt, '.info/connected'), (s) => { const c = s.val() === true; online = c; if (dead) return;
@@ -132,7 +136,7 @@ if (ok) {
           const pj = row.p || '{}', old = prev.get(peer);
           if (old && old._pj === pj) { next.set(peer, old); continue; }
           let presence = {}; try { presence = JSON.parse(pj) || {}; } catch (e) { }
-          const p = Object.freeze({ peer, by: row.by || null, isMe: row.by === u.uid, sameTab: peer === myTab, kind: 'viewer', guest: false, presence: Object.freeze(presence), updatedAt: now, _pj: pj });
+          const p = Object.freeze({ peer, by: row.by || null, isMe: row.by === u.uid, sameTab: peer === myKey, kind: 'viewer', guest: false, presence: Object.freeze(presence), updatedAt: now, _pj: pj });
           next.set(peer, p); (old ? updated : joined).push(p);
         }
         for (const [peer, p] of prev) if (!next.has(peer)) left.push(p);
@@ -143,6 +147,7 @@ if (ok) {
         const ch = { peers: peersSnap, joined, left, updated };
         for (const h of handlers) { try { h.fn(ch); } catch (e) { console.error(e); } }
       }, (e) => { for (const h of handlers) if (h.err) { try { h.err({ code: 'unavailable', message: String(e && e.message || e) }); } catch (x) { } } });
+      if (dead) cleanup();   // じゅんびの とちゅうで leave された：いま つけた ものを はずす
     })();
     start.catch((e) => console.warn('room', name, e && (e.code || e.message) || e));
     // おくるのは いつも 1つだけ。まえのが おわるまで つぎは まち、おわったら いちばん あたらしい 中身だけ おくる
@@ -161,7 +166,10 @@ if (ok) {
         if (new Blob([JSON.stringify(m)]).size > 4096) throw { code: 'invalid_argument', message: 'presence は 4KB まで' };
         me = m;
         // 1びょうに 15かい まで まとめて おくる（バトルの スナップショットは ひんぱん）
-        if (patch && patch.bye) { if (sendT) clearTimeout(sendT); sendT = null; return flush(); }   // とじる まえ：すぐ おくる
+        if (patch && patch.bye) {   // とじる まえ：まえの 送信を またずに すぐ おくる（おなじ 場所への かきこみは じゅんばんどおり とどくので、あとから ふるい 中身で うわがき されない）
+          if (sendT) clearTimeout(sendT); sendT = null; if (dead) return; await start; if (!myRef) return;
+          pending = false; lastSent = Date.now(); return rtSet(myRef, { by: (await ready).uid, p: JSON.stringify(me), t: serverTimestamp() });
+        }
         if (!sendT) { const wait = Math.max(0, 66 - (Date.now() - lastSent)); sendT = setTimeout(() => flush().catch(() => { }), wait); }
       },
       peers: () => peersSnap,
@@ -174,7 +182,7 @@ if (ok) {
       emit: async () => { },
       on: () => () => { },
       connected: () => !dead,
-      leave: () => { dead = true; handlers.clear(); if (unsubVal) unsubVal(); if (unsubConn) unsubConn(); if (sendT) clearTimeout(sendT); if (myRef) rtRemove(myRef).catch(() => { }); },
+      leave: () => { dead = true; handlers.clear(); if (sendT) clearTimeout(sendT); cleanup(); },
     };
   }
   const room = {

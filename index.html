@@ -3689,8 +3689,7 @@ const WS_IMG = {
 for (const k in WS_IMG) { ICON_URL['ws_' + k] = WS_IMG[k][0]; ICON_URL['ws32_' + k] = WS_IMG[k][1]; }
 // ボックスの アイコン：くさむらで なげる ボックスの 絵（ゆれる まえの 1まいめ）
 let ORB_URL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAADr0lEQVR4nN2WSWgUQRSG/+qMaIyRiWYGFY0mStwFMWhE44ILUXAOHgQREUFxAxdQxLsX8aAeRCFe4paD4GEEI2oQUVAkqCiGEGLGJWSbmMQZM1mnS17VVHX3dM9ExJMPiqquevW+flXvVRXwvwvLNJCXW8j/Jah/oFuwfJlgeTNDaL9XDR6cA8YYwMYBfASce/8H6agxod8ZEe0JZUEUFG8DWsOcoD4vWOxVL3jwOWCUgk2+Yg3+PCqNZRA9loINJYDBVj8CK/stnXTY+p0PRPvBmbUOYzw42xvS9dWhEzpzR7Rb2lpE/anmPHrfNWL2zqlweOiAVcUB1DoNZ3LLbzVDB/MdQ12fwwJmF58dVv+mSvbGXoGbQ6hsaELzpTrEG27KfsNAoKhSTlyxRdTTKqfgXBmwYWAB6t+s04anzNzk+X+GahCsbOVBuTTmMJj/uk3LkGUM6Y3IVSE7Pa112YEKSpOY/xoQOyH64o23s0IebzSwMV+aGazvwuhQv7VSHqL3sL81LCd9l5tCS5outJw589eATZoovj9cKBT1s7iJDdQorUV5RT6e398h+r/e/5HZw1gkgNiPuzKXRPgb6HjU45qQDtv6zJQD3ATvO4zwxT2ItfhBqZV9SfmII4F1gpspg0rtV0LDlp3ttvrtkdwp8zArUED6joiagTsT3DR1dH68WuSCqT0E8w6swm3W6aQ1CKAgAmk7wgJztou64eluF4yCJmUBnJtiK+wgKt21zB00OdObXX+25LQbtvTYN72PSihoNs347JrfbQO5PEx2LEQy8RijbSUYbZurFaJfHmrYtAUHHJPVXmobbTS3BMn3OaJ4ifPw/nlULI19/6LNt0S9aHONJ4yiNBr/85uM6RsiEkjlnoT5PJZoLCHv7Ad6b7sV4a7D2ykcyfZ5YMEm1zJ2NN5wBA6dpeTh21XzZZRyZxqlS1oc25aTm1geTiJpjojiBSNRy8lV8oP9IbCjSU2zDFD0GuNEUbCS0BNPQwrDbDayAukpkFs0ICcxQ+cTeadggXl7XQYC+SkU6TNDeEi2qCw6vl8MlR7apfX1Hop3B4Fn1WLwe55IYpJoU7U0XLpv7CuqM4LQxZcoKJa3Bd0cGT1UCgKcOgvfhXKcnpkmJiSs/bMLnUyTVxfg9YvLLtBQtM4bWF5x0nWCFBbvBk+Ogo8Mi1oY/5XQxcpBjlnlV+Abn+ewo9JBPRN1HtKzUAk9D/9GFp+6qW968pI8UyAl+uNfP3xJ0mHU9xvhLavzjcKspwAAAABJRU5ErkJggg==";   // ボックスの 1まい絵（どうぐ・ごほうび・くさむらの ボタン）
-function orbURL() { if (ORB_URL) return ORB_URL; const P = typeof PLFX !== 'undefined' && PLFX.cap_shake; if (!P || !P.img || !P.img.complete || !P.img.naturalWidth) return null;
-  const c = document.createElement('canvas'); c.width = P.w; c.height = P.h; c.getContext('2d').drawImage(P.img, 0, 0, P.w, P.h, 0, 0, P.w, P.h); return (ORB_URL = c.toDataURL()); }
+function orbURL() { return ORB_URL; }   // ボックスの 絵は とどいた 1まい絵（むかしの PLFX から きりだす 予備は もう つかわない）
 const orbImg = (cls) => { const u = orbURL(); return u ? `<img class="pxe orbi${cls ? ' ' + cls : ''}" src="${u}" alt="" draggable="false">` : ''; };
 function iconURL(name) {
   if (ICON_URL[name]) return ICON_URL[name];
@@ -4301,7 +4300,7 @@ function pixDissolve(old) {
   paint(1 / (DSV.steps + 1), false); dsvNow = st; st.raf = requestAnimationFrame(tick);
   return true;
 }
-function show(id) { if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && !$('scTrain').hidden) TRN = null;   /* くんれんを はなれた：ほぞん して いない へんこうは すてる（もどったら ほぞんした ものを ひらく） */
+function show(id) { if (id !== 'scGuild' && typeof guildStop === 'function') guildStop();   /* ギルドを はなれた：チャットの うけとりを とめる（バトルの タブ から など） */ { const tp = $('townPop'); if (tp && tp.parentNode === $('app')) { tp.hidden = true; tp.style.zIndex = ''; const home = $('isles'); if (home && home.parentNode) home.parentNode.appendChild(tp); } }   /* バトルの タブで #app に うつした まどは、がめんが かわったら とじて もとの ばしょへ */ if (id !== 'scTrain' && typeof TRN !== 'undefined' && TRN && !$('scTrain').hidden) TRN = null;   /* くんれんを はなれた：ほぞん して いない へんこうは すてる（もどったら ほぞんした ものを ひらく） */
   const same = (() => { const e = document.getElementById(id); return !!(e && !e.hidden); })();   // おなじ 画面の かきなおし：フェードも BGM の はじめなおしも しない
   const prev = same ? null : [...document.querySelectorAll('.screen')].find(s => !s.hidden && !s.dataset.dsv);
   const bat = !same && prev && (id === 'scBattle' || prev.id === 'scBattle');   // ディゾルブは バトルへ いく ときと もどる ときだけ
@@ -4959,11 +4958,9 @@ function boxSortApply() {
   let k = S.boxSort; if (!k || !S.box || S.box.length < 2) return;
   let rev = !!S.boxRev; if (k === 'old') { k = 'new'; rev = !rev; }
   const tot = (m) => { const o = stats(m); return STAT6.reduce((a, x) => a + o[x], 0); }, ti = (m) => Object.keys(TYPES).indexOf(SPECIES[m.sid].type), dex = (m) => DEX_NO[m.sid] ?? 9999;
-  const evn = (m) => STAT6.reduce((a, x) => a + ((m.ev || {})[x] || 0), 0), trd = (m) => m.tr && m.tr.prog && m.tr.prog.mv ? 1 : 0, PO = { yuukan: 0, nonki: 1, reisei: 2 }, pl = (m) => PO[NAT_GRP[planOfMon(m)] === 'atk' ? 'yuukan' : NAT_GRP[planOfMon(m)] === 'def' ? 'nonki' : 'reisei'];
   const sk = /^st_/.test(k) ? k.slice(3) : null, cache = new Map(), st = (m) => { if (!cache.has(m)) cache.set(m, stats(m)); return cache.get(m); };
   const f = sk ? (a, b) => st(b)[sk] - st(a)[sk] || dex(a) - dex(b) : { new: (a, b) => b.uid - a.uid, dex: (a, b) => dex(a) - dex(b) || b.uid - a.uid, type: (a, b) => ti(a) - ti(b) || dex(a) - dex(b) || b.uid - a.uid,
-    rare: (a, b) => monRarity(b.sid) - monRarity(a.sid) || dex(a) - dex(b), power: (a, b) => tot(b) - tot(a) || dex(a) - dex(b), name: (a, b) => SPECIES[a.sid].n.localeCompare(SPECIES[b.sid].n, 'ja') || b.uid - a.uid,
-    iv: (a, b) => ivTotal(b) - ivTotal(a) || dex(a) - dex(b), ev: (a, b) => evn(b) - evn(a) || dex(a) - dex(b), tr: (a, b) => trd(b) - trd(a) || dex(a) - dex(b), plan: (a, b) => pl(a) - pl(b) || dex(a) - dex(b) }[k];
+    rare: (a, b) => monRarity(b.sid) - monRarity(a.sid) || dex(a) - dex(b), power: (a, b) => tot(b) - tot(a) || dex(a) - dex(b), name: (a, b) => SPECIES[a.sid].n.localeCompare(SPECIES[b.sid].n, 'ja') || b.uid - a.uid }[k];   // そだてかたの ならべかえ（iv・ev・tr・plan）は やめた
   if (f) S.box.sort(rev ? (a, b) => f(b, a) : f);
 }
 function renderTeamDetail() {
@@ -5246,7 +5243,7 @@ function renderTrain(uid) {
   B.querySelectorAll('.trhead i[data-big]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.big, 64)));
   B.querySelectorAll('.trmons button').forEach(b => b.onclick = () => { const u = +b.dataset.u; if (u !== uid) { SND.se('click'); renderTrain(u); } });
   { const mf = () => B.querySelectorAll('.trmons button[data-u]').forEach(b => { b.hidden = +b.dataset.u !== uid && ((TR_MF.t && !b.dataset.ty.split(' ').includes(TR_MF.t)) || (TR_MF.s && !b.dataset.st.includes(TR_MF.s))); });   // しぼりこみ（いま えらんで いる 子は いつも みせる）
-    B.querySelectorAll('.trmf select').forEach(sl => sl.onchange = () => { TR_MF[sl.dataset.mf] = sl.value; SND.se('click'); mf(); }); mf(); }
+    B.querySelectorAll('.trmf select').forEach(sl => { const k = sl.dataset.mf; if (![...sl.options].some(o => o.value === TR_MF[k])) TR_MF[k] = '';   /* もう いない タイプで しぼって いたら はずす（えらんで いる 表示と あわせる） */ sl.value = TR_MF[k]; sl.onchange = () => { TR_MF[k] = sl.value; SND.se('click'); mf(); }; }); mf(); }
   $('trTutB').onclick = () => trtStart();
   if (!S.trTutDone && !TRT && !TRN.dirty) setTimeout(() => { if (!TRT && !$('scTrain').hidden) trtStart(); }, 300);   // はじめて ひらいたら やりかたを あんない
   B.querySelectorAll('.trnatsel button').forEach(b => b.onclick = () => { if (TRT) TRT.f.nat = 1; const v = b.dataset.nat; W.nat = v === recPlan(m.sid) ? undefined : v; TRN.dirty = true; SND.se('click'); renderTrain(uid); });   // 作戦：「確定」で 試合に つかう
@@ -5597,6 +5594,7 @@ function ask(msg, ok = 'はい', ng = 'いいえ') {
     const [b1, b2] = bg.querySelectorAll('button');
     const done = v => { bg.remove(); res(v); };
     if (ng) { b1.onclick = () => done(false); b2.onclick = () => done(true); } else b1.onclick = () => done(true);
+    bg._cancel = () => done(ng ? false : true);   // そとから とじる とき（オンライン対戦が はじまった など）：まって いる がわに こたえを かえす
     $('app').appendChild(bg); (ng ? b2 : b1).focus();
   });
 }
@@ -5607,6 +5605,7 @@ function ask3(msg, labels, wrap) {   // ボタンが 3つの かくにん（左�
     bg.innerHTML = `<div class="askbox ask3"><div></div><div class="row${wrap ? ' wrap' : ''}">${labels.map((l, i) => `<button class="btn${i === 0 ? ' sub' : i === 1 ? ' ok' : ''}" data-i="${i}">${l}</button>`).join('')}</div></div>`;
     bg.querySelector('.askbox > div').textContent = msg; bg.querySelector('.askbox > div').style.whiteSpace = 'pre-line';
     bg.querySelectorAll('button').forEach(b => b.onclick = () => { bg.remove(); res(+b.dataset.i); });
+    bg._cancel = () => { bg.remove(); res(0); };   // そとから とじる：いちばん ひだり（キャンセル）
     $('app').appendChild(bg); bg.querySelector('button[data-i="2"]').focus();
   });
 }
@@ -5984,8 +5983,8 @@ function speedOf(f) {
 }
 
 function startBattle(cfg) {
-  if (cfg.kind !== 'online' && !cfg.headless && NET.started && !NET.ended && B && B.kind === 'online') return;   // オンライン対戦中に ほかの しあいは はじめない（のこった まどから など）
-  if (cfg.kind === 'online') { document.querySelectorAll('.askbg').forEach(e => { if (!e.querySelector('.ncode, .nstat')) e.remove(); }); const tp = $('townPop'); if (tp) tp.hidden = true; }   // マッチした：ほかの まど（フリー対戦の かくにん など）は とじる
+  if (cfg.kind !== 'online' && NET.started && !NET.ended && B && B.kind === 'online') { say0('オンライン対戦中は ほかの しあいは できません'); throw new Error('ONLINE_BUSY'); }   // オンライン対戦中に ほかの しあいは はじめない（のこった まどから など）。よびだし がわが B を いじらない ように とめる
+  if (cfg.kind === 'online') { document.querySelectorAll('.askbg').forEach(e => { if (!e.querySelector('.ncode, .nstat')) { if (e._cancel) e._cancel(); else e.remove(); } }); const tp = $('townPop'); if (tp) tp.hidden = true; }   // マッチした：ほかの まど（フリー対戦の かくにん など）は とじる
   if (cfg.kind !== 'online') mmBgCancel(cfg.headless ? '' : 'ほかの しあいを はじめたので、オンライン対戦の あいてを さがすのを やめました。');   // まちながら ほかの しあいは できない
   mvTipHide();
   S.auto = false;   // AUTO は なくなった（バトルは いつも 訓練どおり）
@@ -8778,7 +8777,7 @@ const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   //
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv && typeof o.iv === 'object' ? iv : undefined, moves: [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(id => typeof id === 'string' && MOVES[id]))].slice(0, 4) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } let to = o.tr; if (typeof to === 'string') try { to = JSON.parse(to); } catch (e) { to = null; }   /* フリー対戦：Firestore には もじで おく */ const tr = trUnpack(to, m); if (tr) m.tr = tr; return m; };
 const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(o => o && (SPECIES[o.sid] || /^c_mon_[a-z0-9]+$/.test(o.sid)) && o.iv && Array.isArray(o.moves));
-function netReset() { clearTimeout(NET.lostT); NET.lostT = 0; SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { const nr = NET.nr, bye = NET.started; try { if (bye) Promise.resolve(nr.presence({ bye: 1 })).catch(() => { }).finally(() => setTimeout(() => { try { nr.leave(); } catch (e) { } }, 800)); else nr.leave(); } catch (e) { } }   /* たいせん中に ぬける：あいてに すぐ しらせる（まつ 15びょうを まない） */ Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0 }); }
+function netReset() { clearTimeout(NET.lostT); NET.lostT = 0; SND.onSe = null; NET.ranked = false; NET.pick6 = false; rankPreviewClose(); NET.myPick = null; if (NET.nr) { const nr = NET.nr, bye = NET.started && (!NET.ended || NET.drawExit); try { if (bye) Promise.resolve(nr.presence(NET.drawExit ? { bye: 1, dr: 1 } : { bye: 1 })).catch(() => { }).finally(() => setTimeout(() => { try { nr.leave(); } catch (e) { } }, 800)); else nr.leave(); } catch (e) { } }   /* たいせん中に ぬける：あいてに すぐ しらせる（まつ 15びょうを まない） */ Object.assign(NET, { host: false, guest: false, nr: null, code: '', q: 0, ev: [], seen: 0, inp: { dg: 0, sw: [0, 0], ch: [0, 0] }, done: { dg: 0, sw: 0, ch: 0 }, peer: null, started: false, ended: false, startGone: false, snapFail: 0, drawExit: false, wasAway: false, awayAt: 0 }); }
 // へや：ホストは あいての チームが とどいたら はじめる。ゲストは ホストの start を まつ
 async function netOpen(asHost, code, onStatus, opts = {}) {
   const room = await netGetRoom();
@@ -8809,7 +8808,7 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
     for (const p of others) netCacheArt(p.presence);   // あいての かいた え を さきに おぼえる（チームの チェックより まえ）
     if (NET.started && NET.peer && !NET.ended) {   // あいてが きえた：すこし まつ（いっしゅん きれただけ なら もどって くる）。とじた ときは bye が さきに とどく
       const op = others.find(p => p.peer === NET.peer);
-      if (op && op.presence.bye) { clearTimeout(NET.lostT); NET.lostT = 0; netPeerLeft(); return; }
+      if (op && op.presence.bye) { clearTimeout(NET.lostT); NET.lostT = 0; if (op.presence.dr) netPeerDraw('あいての がめんが とまって いたので、あいてが しあいを やめました（しょうぶ なし）'); else netPeerLeft(); return; }
       if (!op && !NET.lostT) { NET.lostT = setTimeout(() => { NET.lostT = 0; if (!NET.ended && NET.nr && !NET.nr.peers().some(p => p.peer === NET.peer)) netPeerLeft(); }, 15000); if (B) say('あいての つうしんを まっています…'); }
       else if (op && NET.lostT) { clearTimeout(NET.lostT); NET.lostT = 0; if (B) say('あいてが もどって きた！'); }
     }
@@ -8844,8 +8843,18 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   }, () => { if (NET.nr === nr0) onStatus('つうしんが きれました', true); });
 }
 window.addEventListener('pagehide', () => { if (NET.nr && NET.started && !NET.ended) NET.nr.presence({ bye: 1 }).catch(() => { }); });   // とじる・リロード：あいてには すぐ「きりました」（いっしゅん きれた ときとは わける）
+// こちらが ながく はなれて いた（アプリを うしろに した など）あいだに あいてが いなくなった：かちに しない
+const netAway = (on) => { if (on) { if (!NET.awayAt) NET.awayAt = Date.now(); } else if (NET.awayAt) { if (NET.started && !NET.ended && Date.now() - NET.awayAt > 12000) NET.wasAway = true; NET.awayAt = 0; } };   // こちらが うしろに いた・オフラインだった じかんを はかる
+document.addEventListener('visibilitychange', () => netAway(document.hidden));
+window.addEventListener('offline', () => netAway(true)); window.addEventListener('online', () => netAway(false));   // こちらの つうしんが きれて いた あいだに あいてが いなくなっても かちに しない（あいては もう こちらの まけ／かちで おわって いる）
+function netPeerDraw(msg) {   // しょうぶ なし（レート・せいせきは かわらない）
+  if (!B || NET.ended) return;
+  NET.ended = true; if (S) delete S.rkPend;
+  B.remote = false; B.mode = 'end'; B.result = 'draw'; B.resLines = [msg]; save(); showResult();
+}
 function netPeerLeft() {
   if (!B || NET.ended) return;
+  if (NET.wasAway || (NET.awayAt && Date.now() - NET.awayAt > 12000) || navigator.onLine === false) return netPeerDraw('あいての つうしんが きれました（こちらが はなれて いたので しょうぶ なし）');
   NET.ended = true;
   if (NET.host) { say('あいてが つうしんを きりました'); endBattle('win'); }
   else { B.remote = false; B.mode = 'end'; B.result = 'win'; S.online = S.online || { w: 0, l: 0 }; S.online.w++; B.resLines = ['あいてが つうしんを きりました', rankResult(true)].filter(Boolean); save(); showResult(); }   // ゲストも かちを きろく
@@ -9022,7 +9031,7 @@ function netGuestStep(dt) {
   if (B.stallAsk && !B.netWait) { document.querySelectorAll('.askbg').forEach(e => { if (/がめんが とまった/.test(e.textContent)) e.remove(); }); B.stallAsk = false; }   // あいてが もどった：まどは とじる
   if (B.netWait && performance.now() - B.snapAt > 40000 && !B.stallAsk && B.mode !== 'end') { B.stallAsk = true;   // ずっと とまって いる（あいてが アプリを とじずに はなれた など）：まけに しないで やめられる
     ask('あいての がめんが とまった まま です。\nしあいを やめますか？（まけには なりません）', 'やめる', 'まつ').then(y => { if (!B || B.kind !== 'online') return; if (!y) { B.stallAsk = false; B.snapAt = performance.now() - 2600; return; }
-      if (S) delete S.rkPend; NET.ended = true; B.remote = false; B.mode = 'end'; B.result = 'draw'; B.resLines = ['あいての つうしんが とまったので やめました（しょうぶ なし）']; save(); netReset(); showResult(); }); }
+      if (S) delete S.rkPend; NET.ended = true; NET.drawExit = true; B.remote = false; B.mode = 'end'; B.result = 'draw'; B.resLines = ['あいての つうしんが とまったので やめました（しょうぶ なし）']; save(); netReset(); showResult(); }); }
   if (B.rt != null && B.lastArr != null) {   // さいせい時刻：いつもの はやさで すすめ、さいごに とどいた データの すこし まえに ゆっくり あわせる
     const now = performance.now() / 1000, tgt = B.lastT + Math.min(.25, now - B.lastArr) - NET_DELAY;
     B.rt += dt; if (Math.abs(tgt - B.rt) > 1) B.rt = tgt; else B.rt += (tgt - B.rt) * Math.min(1, dt * 2.5);
