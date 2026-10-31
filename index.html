@@ -6814,15 +6814,15 @@ function fireMove(f) {
     }
     case 'cone':
       if (m.pat === 'breath') {   // りゅうのためいき：はての ない おうぎの いき
-        fxPush({ type: 'breath', x: f.x, y: f.y - BODY, ang: cur.ang, half: cur.half || m.half, rad: m.rad, col, life: .5, max: .5 });   // あたりはんてい と おなじ 大きさ B.shake = Math.max(B.shake, 5); SND.se('beam');
+        fxPush({ type: 'breath', x: f.x, y: f.y, ang: cur.ang, half: cur.half || m.half, rad: m.rad, col, life: .5, max: .5 });   // あたりはんてい と おなじ 大きさ B.shake = Math.max(B.shake, 5); SND.se('beam');
         if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang, cur.chg ? { chg: cur.chg } : {}); endAct(f, .35); break; }
-      if (m.pat === 'sound') { fxp({ type: 'sound', x: f.x, y: f.y - BODY, ang: cur.ang, half: m.half, rad: m.rad, col, life: .5 }); B.shake = Math.max(B.shake, 3);
+      if (m.pat === 'sound') { fxp({ type: 'sound', x: f.x, y: f.y, ang: cur.ang, half: m.half, rad: m.rad, col, life: .5 }); B.shake = Math.max(B.shake, 3);
         if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang); endAct(f, .35); break; }
-      typeFx(f.x, f.y - BODY, m.t, 8, m.rad * 2, .4, { ang: cur.ang, spread: m.half });
-      if (gfxOf(m, 'cone')) { const gk = gfxOf(m, 'cone'); fxp({ type: 'pl', k: gk, x: f.x + DM.cos(cur.ang) * f.r * .5, y: f.y - BODY + DM.sin(cur.ang) * f.r * .5, s: m.rad * 1.1 / (PLFX[gk].w * PIX_D), ang: cur.ang, fy: DM.cos(cur.ang) < 0, life: PLFX[gk].n * PLFX[gk].ms / 1000 }); }   // 大技の 専用の 扇
-      else if (plOk('n_fan')) fxp({ type: 'pl', k: 'n_fan', x: f.x + DM.cos(cur.ang) * f.r * .5, y: f.y - BODY + DM.sin(cur.ang) * f.r * .5, s: m.rad * 1.1 / (64 * PIX_D), ang: cur.ang, fy: DM.cos(cur.ang) < 0, col, life: .42 });   // おうぎ（白い 絵を わざの 色に）
-      else if (m.t === 'fire' || m.t === 'ice') sheetFx(m.t === 'fire' ? 'flamer' : 'blizzard', f.x + DM.cos(cur.ang) * m.rad * .5, f.y - BODY + DM.sin(cur.ang) * m.rad * .5, m.rad / 70, m.t === 'fire' ? cur.ang : null);
-      else for (let i = 1; i <= 3; i++) sheetFx(FXEL[m.t] ? m.t : 'normal', f.x + DM.cos(cur.ang + (i - 2) * m.half * .6) * m.rad * (.3 + i * .18), f.y - BODY + DM.sin(cur.ang + (i - 2) * m.half * .6) * m.rad * (.3 + i * .18), .8);
+      typeFx(f.x, f.y, m.t, 8, m.rad * 2, .4, { ang: cur.ang, spread: m.half });
+      if (gfxOf(m, 'cone')) { const gk = gfxOf(m, 'cone'); fxp({ type: 'pl', k: gk, x: f.x + DM.cos(cur.ang) * f.r * .5, y: f.y + DM.sin(cur.ang) * f.r * .5, s: m.rad * 1.1 / (PLFX[gk].w * PIX_D), ang: cur.ang, fy: DM.cos(cur.ang) < 0, life: PLFX[gk].n * PLFX[gk].ms / 1000 }); }   // 大技の 専用の 扇
+      else if (plOk('n_fan')) fxp({ type: 'pl', k: 'n_fan', x: f.x + DM.cos(cur.ang) * f.r * .5, y: f.y + DM.sin(cur.ang) * f.r * .5, s: m.rad * 1.1 / (64 * PIX_D), ang: cur.ang, fy: DM.cos(cur.ang) < 0, col, life: .42 });   // おうぎ（白い 絵を わざの 色に）
+      else if (m.t === 'fire' || m.t === 'ice') sheetFx(m.t === 'fire' ? 'flamer' : 'blizzard', f.x + DM.cos(cur.ang) * m.rad * .5, f.y + DM.sin(cur.ang) * m.rad * .5, m.rad / 70, m.t === 'fire' ? cur.ang : null);
+      else for (let i = 1; i <= 3; i++) sheetFx(FXEL[m.t] ? m.t : 'normal', f.x + DM.cos(cur.ang + (i - 2) * m.half * .6) * m.rad * (.3 + i * .18), f.y + DM.sin(cur.ang + (i - 2) * m.half * .6) * m.rad * (.3 + i * .18), .8);
       B.shake = Math.max(B.shake, 3);
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) { if (losClear(f, o)) hit(f, o, m, cur.ang); else blockedFx(f, o, m); }
       endAct(f, .35); break;
@@ -6887,7 +6887,7 @@ function chanTick(f, o, oT) {
   if (m.k === 'beam') {
     const L = cur.len; for (let d = 30 + (cur.n % 2) * 25; d < L; d += 60) typeFx(f.x + c * d, f.y - BODY + s * d, m.t, 1, 60, .3);
     if (L < m.len - 1) impactFx(f.x + c * L, f.y + s * L - BODY * .5, m.t, .3);
-  } else typeFx(f.x, f.y - BODY, m.t, 7, m.rad * 2.2, .4, { ang: cur.ang, spread: m.half });
+  } else typeFx(f.x, f.y, m.t, 7, m.rad * 2.2, .4, { ang: cur.ang, spread: m.half });
   if (cur.n-- % 2 === 0) SND.se('beam', 1.4);
   const mir = m.k === 'beam' && beamMirror(f, m, cur.ang, cur.len, { tick: true, noHit: true });   // はんしゃのかべに あたって いる：もどる ビームを みせる
   if (mir && !cur.mirSaid) { cur.mirSaid = 1; popText(f.x + c * cur.len, f.y + s * cur.len - 40, 'はねかえした！', '#ff9ad0'); SND.se('guard'); }
@@ -8663,6 +8663,8 @@ function updateFighter(f, dt) {
           cur.chainGo = false; cur.ang = DM.atan2(o.y - f.y, o.x - f.x); cur.t = 0; cur.wind = .32; f.state = 'wind'; burst(f.x, f.y, '#8a6ae8', 8, 90, .3);   // いっかい ずつ はんいを みせてから つっこむ
           break; }
         if (cur.trail) { addTrail(f, m, cur.trail); cur.trail = null; }
+        if (m.back && !cur.back && cur.hit && oT && f.hp > 0) { const hs = hideSpot(f, o);   // ヒットアンドアウェイ：あてたら ちかくの かべ（中きょり いない）の うしろへ さっと かくれる
+          if (hs && DM.hypot(hs.x - f.x, hs.y - f.y) <= UTURN_HIDE_R) { endAct(f, .08); f.order = { k: 'hide', t: UTURN_HIDE_T, spot: hs, re: .5, ox: o.x, oy: o.y, fast: 1 }; f.queued = null; f.navT = 0; popText(f.x, f.y - 96, 'さっと かくれる！', '#bfe8ff', 'comic'); break; } }
         if (m.back && !cur.back) { cur.back = true; cur.hit = true; cur.ang = DM.atan2(cur.sy - f.y, cur.sx - f.x); cur.dlen = DM.hypot(cur.sx - f.x, cur.sy - f.y); cur.d = 0; if (cur.dlen > 8) break; }   // ヒットアンドアウェイ：もとの ばしょへ もどる
         endAct(f, wall ? .6 : .35);
       }
@@ -10325,7 +10327,7 @@ function moveDesc(m) {
   if (m.sp) add({ taunt: '6秒間、相手は変化技が使えない', encore: '5秒間、相手に同じ技を繰り返させる', yawn: 'しばらくして相手を眠らせる', trick: '相手の能力アップを奪う', roar: '相手を無理やり控えと交代させる（野生は逃げる）' }[m.sp]);
   if (m.guardDash) add('ガードしながらゆっくり進む'); if (m.grab) add('投げ技：つかんで5連打（まもる・カウンターでは防げない）');
   if (m.slap) add('横に吹き飛ばす。壁にぶつかるとひるむ（3秒）'); if (m.bigKb) add('当たった相手を遠くへ吹き飛ばす'); if (m.noKb) add('相手を吹き飛ばさない');
-  if (m.back) add('当てたら元の場所へ戻る'); if (m.pat === 'orbit') add('相手の周りを回って渦を作る（流される）'); if (m.trail) add('通った道が3秒燃える');
+  if (m.back) add('当てたら近くの壁（中距離まで）の後ろへすばやく隠れる。壁がなければ元の場所へ戻る'); if (m.pat === 'orbit') add('相手の周りを回って渦を作る（流される）'); if (m.trail) add('通った道が3秒燃える');
   if (m.chain && !m.roll) add('当たるともう一度突進。その後も当たるたびに50%で続く'); if (m.charge2) add('1回目は力をためる。2回目で細いビームを放つ');
   if (m.multiHit) add(`跳ね返りながら${m.life}秒残る`); if (m.blastR) add('広い範囲に落ちる'); if (m.whip) add('右・左と2回振る');
   if (m.hits && !m.whip) add(`${m.hits}回続けて攻撃（だんだん強くなる）`);
@@ -10651,6 +10653,7 @@ function autoMoves(f) {
 }
 /* ---- うごきの しじ：かくれろ（しょうがいぶつの かげへ）・まわりこめ（かべを まわって よこ・うしろから ねらえる ところへ） ---- */
 const ORDER_T = { hide: 6, flank: 4.5 }, ORDER_CD = 2;
+const UTURN_HIDE_R = 240, UTURN_HIDE_T = 2.2;   // ヒットアンドアウェイ：かくれに いく かべの きょり（中きょり）・かくれている じかん
 // かくれる ばしょ：あいてから 見て 障害物の まうしろ（よこはばの まんなか）。障害物・技の かべ ごとに ためして いちばん 近い ところ
 // はなれる ばしょ：あいてから 340〜420 はなれた あるける ところ（いまの ばしょから ちかい ほう）
 function farSpot(f, o) { let best = null, bs = 1e9;
@@ -10719,10 +10722,10 @@ function orderStep(f, o, dt) {
     moveDir(f, DM.cos(a), DM.sin(a), dt, nav && f.navPath && f.navPath.length > 0); return true;
   }
   if (R.k === 'hide' && DM.hypot(o.x - R.ox, o.y - R.oy) > 60) { R.re = 0; R.ox = o.x; R.oy = o.y; }   // あいてが うごいたら すぐ みなおす
-  if (R.re <= 0) { R.re = .5; const sp = orderSpot(f, o, R.k); if (sp && (R.k === 'hide' || (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o)))) R.spot = sp; }   // かくれる：いつも あいての まうしろへ   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
+  if (R.re <= 0) { R.re = .5; const sp = R.fast ? (((h) => h && DM.hypot(h.x - f.x, h.y - f.y) <= UTURN_HIDE_R ? h : null)(hideSpot(f, o))) : orderSpot(f, o, R.k); if (sp && (R.k === 'hide' || (R.k === 'flank' ? !losFrom(R.spot.x, R.spot.y, o) : losFrom(R.spot.x, R.spot.y, o)))) R.spot = sp; }   // かくれる：いつも あいての まうしろへ   // いまの ばしょが だめに なったら えらびなおす   // あいてが うごいたら ばしょを えらびなおす
   const d = DM.hypot(R.spot.x - f.x, R.spot.y - f.y);
   if (R.k === 'flank' && (d < 50 || R.t < ORDER_T.flank - 1.2) && losFrom(f.x, f.y, o) && DM.hypot(f.x - o.x, f.y - o.y) < 330) { f.order = null; f.aiT = 0; return false; }
-  if (d > 10) { f.paceT = 1.7; const tight = R.k === 'hide', nav = useNav(f) && !walkClear(f, R.spot.x, R.spot.y, tight ? 0 : OBST_GAP), a = nav ? navDir(f, R.spot.x, R.spot.y, tight) : DM.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, DM.cos(a), DM.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
+  if (d > 10) { f.paceT = R.fast ? 2.6 : 1.7; const tight = R.k === 'hide', nav = useNav(f) && !walkClear(f, R.spot.x, R.spot.y, tight ? 0 : OBST_GAP), a = nav ? navDir(f, R.spot.x, R.spot.y, tight) : DM.atan2(R.spot.y - f.y, R.spot.x - f.x); moveDir(f, DM.cos(a), DM.sin(a), dt, nav && f.navPath && f.navPath.length > 0); }
   return true;
 }
 const DODGE_CMD_CD = 5;   // かわすの 指示は 1かい つかうと 5びょう つかえない
@@ -11013,7 +11016,7 @@ function drawWeather(st) {   // てんき：あめ・はれ・すな・ゆき
 }
 function drawChan(f) {
   const cur = f.cur, m = cur.m, cs = (FX_STYLE[m.t] || FX_STYLE.normal).cols, fl = .75 + .25 * DM.sin(B.t * 40);
-  const k = Math.min(1, (cur.ch != null ? cur.ch : cur.t - cur.wind) / .1 + .2), c = DM.cos(cur.ang), s = DM.sin(cur.ang), ox = f.x, oy = f.y - BODY;
+  const k = Math.min(1, (cur.ch != null ? cur.ch : cur.t - cur.wind) / .1 + .2), c = DM.cos(cur.ang), s = DM.sin(cur.ang), ox = f.x, oy = f.y - (m.k === 'cone' ? 0 : BODY);   // おうぎは あしもとから（よこくの はんい・あたりはんてい と そろえる）
   { const gb = gfxOf(m, 'body'), gc = gfxOf(m, 'cone'), fy = c < 0;   // 大技の 専用の 絵（ビーム・扇）
     if (m.k === 'beam' && gb) { const L = (cur.len != null ? cur.len : m.len) * k, gsc = (GFX[m.fxid] && GFX[m.fxid].sc) || 1, bs = Math.max(1, m.wid * 2.2 * gsc / (32 * PIX_D)), sk = gfxOf(m, 'start'), tk = gfxOf(m, 'tip');
       plStretch(gb, plLoop(gb, B.t), ox, oy, cur.ang, L, m.wid * 2.2 * gsc * fl);
