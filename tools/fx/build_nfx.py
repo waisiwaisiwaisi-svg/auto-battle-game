@@ -108,6 +108,9 @@ for p in sorted(FX.glob('K/K_*_*f.png')):
     if nm in K_BOTTOM: kw['ay'] = Image.open(p).height - 2
     if nm in K_LEFT: kw['ax'] = 0
     out['k_' + nm] = sheet(p, n, 90 if nm in K_LOOP else 75, **kw)
+    if nm.endswith('_wall'):   # かべ：6コマ（よこ・よこひび・たて・たてひび・ななめ・ななめひび）。コマごとの えの はんい fb（かべの えと おなじ）
+        im = Image.open(p).convert('RGBA'); w = im.width // n; out['k_' + nm]['ay'] = im.height - 1
+        out['k_' + nm]['fb'] = [list(im.crop((i * w, 0, i * w + w, im.height)).getbbox() or (0, 0, w, im.height)) for i in range(n)]
 # ---- 優先度C（5回目の 納品）----
 add('n_conf', 'C_conf', 120); add('n_scared', 'E_scared', 140); add('n_anger', 'E_anger', 140); add('n_encore', 'E_encore', 140)
 def no_soil(p):   # やどりぎ：めばえの 下の 土を けす（くきの 下はしは ふちどりで とじる）
@@ -143,6 +146,7 @@ icons('F_small_2_9', ['star', 'hand_up', 'hand_down', 'warn', 'ban', 'arrow_down
 icons('F_small_3_9', [None, 'note', 'heart', 'key', 'check', 'target', 'rps_rock', 'rps_scissors', 'rps_paper'])   # 画面の 向き（ホーム）は もとの 絵の まま
 icons('F_digits_14', ['d0', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'plus', 'minus', 'times', 'pct'])
 icons('F_type_attr_7', ['ty_fire', 'ty_water', 'ty_grass', 'ty_wind', 'ty_earth', 'ty_elec', 'ty_none'])   # 新タイプ用：まだ ゲームで つかわない
+icons('F_item_12', ['it_respec', 'it_reroll4', 'it_reroll1', 'it_retype', 'it_pick1', 'it_xtype', 'it_xdash', 'it_xproj', 'it_xmelee', 'it_xarea', 'it_xbeam', 'it_xsup'])   # アイテム（シール）
 icons('F_type_race_7', ['ty_machine', 'ty_bug', 'ty_spirit', 'ty_dragon', 'ty_fairy', 'ty_demi', 'ty_beast'])
 # バトルの スタンプ（effects/ST/ST_<キー>.png・ことば なしの 絵）→ UIA の st_<キー>。ゲームの STAMPS の キーと そろえる
 for p in sorted(FX.glob('ST/ST_*.png')):
