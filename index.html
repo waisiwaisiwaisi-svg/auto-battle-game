@@ -5001,14 +5001,14 @@ function renderTeamDetail() {
 /* ---------- アイテム ---------- */
 const ITEMS = {
   respec: { n: 'リセットボタン', ic: '🔘', d: 'きょうかポイントの ふりわけを ぜんぶ もどす（つかった 数は そのまま）' },
-  reroll4: { n: 'ぜんぶはりかえシート', ic: '🔁', d: 'はってある ワザステッカー 4まいを ぜんぶ はがして、ランダムに はりかえる' },
-  reroll1: { n: 'はりかえシール', ic: '🏷️', d: 'えらんだ ワザステッカー 1まいを、その モンスターが おぼえる わざの なかから ランダムに はりかえる' },
-  retype: { n: 'おなじいろシール', ic: '🎨', d: 'えらんだ ワザステッカーを、おなじ タイプの わざ（おぼえられる もの）に ランダムに はりかえる' },
+  reroll4: { n: 'ぜんぶはりかえシート', ic: '🔁', d: 'おぼえている わざ 4つを ぜんぶ、ランダムに はりかえる' },
+  reroll1: { n: 'はりかえシール', ic: '🏷️', d: 'えらんだ わざ 1つを、その モンスターが おぼえる わざの なかから ランダムに はりかえる' },
+  retype: { n: 'おなじいろシール', ic: '🎨', d: 'えらんだ わざを、おなじ タイプの わざ（おぼえられる もの）に ランダムに はりかえる' },
   // 上位版（でにくい）
-  pick1: { n: 'えらべるはりかえシール', ic: '✂️', d: 'えらんだ ワザステッカー 1まいを、その モンスターが おぼえる わざの なかから 好きな わざに はりかえる（はりかえシールの 上位版）', w: .35 },
-  xtype: { n: 'ひみつのステッカー', ic: '🌟', d: 'その モンスターの タイプ（属性か 種族）の わざなら、ふだんは おぼえない わざでも 好きに えらんで はれる（おなじいろシールの 上位版）', w: .25 },
+  pick1: { n: 'えらべるはりかえシール', ic: '✂️', d: 'えらんだ わざ 1つを、その モンスターが おぼえる わざの なかから 好きな わざに はりかえる（はりかえシールの 上位版）', w: .35 },
+  xtype: { n: 'ひみつのシール', ic: '🌟', d: 'その モンスターの タイプ（属性か 種族）の わざなら、ふだんは おぼえない わざでも 好きに えらんで はれる（おなじいろシールの 上位版）', w: .25 },
 };
-for (const k in X_SCROLL) { const x = X_SCROLL[k]; ITEMS[k] = { n: x.n, ic: x.ic, d: x.any ? `${x.what}の わざなら、タイプに かかわらず 好きな ステッカーを えらんで はれる` : `その モンスターが おぼえられる ${x.what}の わざから、好きな ステッカーを えらんで はれる`, w: .2 }; }
+for (const k in X_SCROLL) { const x = X_SCROLL[k]; ITEMS[k] = { n: x.n, ic: x.ic, d: x.any ? `${x.what}の わざなら、タイプに かかわらず 好きな わざを えらんで はれる` : `その モンスターが おぼえられる ${x.what}の わざから、好きな わざを えらんで はれる`, w: .2 }; }
 const X_ITEMS = ['pick1', 'xtype', ...Object.keys(X_SCROLL)];   // わざを えらんで おぼえる アイテム
 const itemPick = (r) => { const ks = Object.keys(ITEMS), W = ks.map(k => ITEMS[k].w ?? 1); let x = r() * W.reduce((a, b) => a + b, 0); for (let i = 0; i < ks.length; i++) { x -= W[i]; if (x < 0) return ks[i]; } return ks[ks.length - 1]; };   // 上位版は でにくい
 const itemN = (k) => (S.items && S.items[k]) || 0;
@@ -5443,7 +5443,7 @@ function itemMenu(m) {
     const box = bg.querySelector('#itm');
     if (pickFor && slot != null) {   // えらんで おぼえる：あたらしい わざを えらぶ
       const pool = xPool(m, slot, pickFor);
-      box.innerHTML = `<h3 style="margin-bottom:6px">${ITEMS[pickFor].ic} ${ITEMS[pickFor].n}</h3><p class="dim" style="margin-bottom:8px">${MOVES[m.moves[slot]].n} の かわりに はる ステッカーを えらんでね</p><div class="tmlist">${pool.map(id => { const mv = MOVES[id];
+      box.innerHTML = `<h3 style="margin-bottom:6px">${ITEMS[pickFor].ic} ${ITEMS[pickFor].n}</h3><p class="dim" style="margin-bottom:8px">${MOVES[m.moves[slot]].n} の かわりに はる わざを えらんでね</p><div class="tmlist">${pool.map(id => { const mv = MOVES[id];
         return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}</span><div class="desc">${kwDesc(mv)}</div></button>`; }).join('')}</div>
         <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn sub" id="iBack">もどる</button></div>`;
       box.querySelector('#iBack').onclick = () => draw(pickFor);
@@ -5469,7 +5469,7 @@ function itemMenu(m) {
     box.querySelectorAll('.it .btn').forEach(b => b.onclick = async () => {
       const k = b.dataset.k;
       if (k === 'respec') { if (!evUsed(m)) { say0('まだ ポイントを ふって いません'); return; } if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の きょうかポイントを ふりなおしますか？`))) return; act('respec', m.uid).then(r => { if (r !== 'ok') return; m = monU(m.uid) || m; SND.se('heal'); bg.remove(); openBoost(m); }); return; }
-      if (k === 'reroll4') { if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の ワザステッカーを 4まい ぜんぶ はりかえますか？`))) return; act('reroll4', m.uid).then(r => { if (!r || !r.after) return; m = monU(m.uid) || m; SND.se('up'); say0(`${sp.n}は あたらしく ${r.after.map(id => MOVES[id].n).join('・')} を おぼえた！`); draw(); }); return; }
+      if (k === 'reroll4') { if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の わざを 4つ ぜんぶ はりかえますか？`))) return; act('reroll4', m.uid).then(r => { if (!r || !r.after) return; m = monU(m.uid) || m; SND.se('up'); say0(`${sp.n}は あたらしく ${r.after.map(id => MOVES[id].n).join('・')} を おぼえた！`); draw(); }); return; }
       draw(k);
     });
   };
@@ -13066,7 +13066,7 @@ $('btnHelp').onclick = () => {
     <p><b>ブラインドボックス</b>は 勝つと ときどき もらえる（ジムリーダー・チャンピオンリーグは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・ボックス・ワザステッカーが でる。<b>💎ジェム</b>で すぐ あけられる。</p>
     <p><b>ステータス</b>は HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ・かいひ の 7つ。すばやさが 高いほど はやく 歩き、かいひが 高いほど 指示なしで よける。種族値・個体値（0〜31）・せいかく（↑1.1ばい ↓0.9ばい）で きまる。<b>ぶつりわざ</b>（格闘・とっしん・ひっかき など からだで ぶつかる わざ）は こうげき→ぼうぎょ、<b>ぞくせいわざ</b>（ビーム・弾・ほのお・らくらい・はんい など はなれて とどく わざ）は 属性攻撃→属性防御 で ダメージが きまる。</p>
     <p><b>きょうか</b>：へんせい → きょうか で おなじ しゅるいの モンスターを つかうと ポイントが ふえる（1たい +1。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは リセットボタン）。</p>
-    <p><b>アイテム</b>：リセットボタン・ぜんぶはりかえシート・はりかえシール・おなじいろシールなど。上位版の えらべるはりかえシール・ひみつのステッカー・〇〇パックは でにくい。ブラインドボックスから でる。へんせい → アイテム で つかう。</p>
+    <p><b>アイテム</b>：リセットボタン・ぜんぶはりかえシート・はりかえシール・おなじいろシールなど。上位版の えらべるはりかえシール・ひみつのシール・〇〇パックは でにくい。ブラインドボックスから でる。へんせい → アイテム で つかう。</p>
     <p><b>ワザステッカー</b>で すきな わざを おぼえさせよう（てもち → ワザステッカー）。</p>
     <p class="dim">PC：X＝こうたい</p></div>
     <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn sub" id="hTut">チュートリアル</button><button class="btn" id="hClose">とじる</button></div>`);
