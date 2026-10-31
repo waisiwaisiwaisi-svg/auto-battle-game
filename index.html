@@ -4422,9 +4422,9 @@ function canLearn(sid, id) {
   const txt = sp.n + (sp.desc || '') + (sp.prof ? (sp.prof.home || '') + (sp.prof.trait || '') : '');
   return !!(LOOK_KW[m.t] && LOOK_KW[m.t].test(txt));
 }
-// わざの かたちの まきもの：その かたちの わざを 好きに えらんで おぼえる。any：タイプに かかわらず（とっしん だけ）。ほかは その子が おぼえられる わざ だけ
+// わざの かたちの まきもの：その子が おぼえられる その かたちの わざを 好きに えらんで おぼえる（any を つけると タイプに かかわらず）
 const X_SCROLL = {
-  xdash: { n: 'とっしんのまきもの', ic: '💨', what: '突進', any: 1, f: (m) => m.k === 'dash' },
+  xdash: { n: 'とっしんのまきもの', ic: '💨', what: '突進', f: (m) => m.k === 'dash' },
   xproj: { n: 'とびどうぐのまきもの', ic: '🏹', what: '飛び道具', f: (m) => m.k === 'proj' },
   xmelee: { n: 'せっきんのまきもの', ic: '👊', what: '近接・前方を切る', f: (m) => m.k === 'melee' || m.k === 'swipe' },
   xarea: { n: 'はんいのまきもの', ic: '💥', what: 'まわり・足元・扇・範囲', f: (m) => ['aoe', 'strike', 'multi', 'cone', 'wave'].includes(m.k) },
