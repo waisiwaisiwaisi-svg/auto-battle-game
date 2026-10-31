@@ -7486,9 +7486,10 @@ function hit(att, def, m, ang, opt) {
   if (B.stats) { const k = MOVE_ID.get(m); B.stats.hit[k] = (B.stats.hit[k] || 0) + 1; B.stats.dmg[k] = (B.stats.dmg[k] || 0) + dmg; B.stats.dmgPct[k] = (B.stats.dmgPct[k] || 0) + dmg / def.maxHp; }
   const stance = def.state === 'stance' && def.cur && def.cur.m.k === 'stance';
   const armored = def.cur && def.cur.m.armor && ['wind', 'dash', 'act', 'chan'].includes(def.state);   // スーパーアーマー：わざの あいだは ひるまない・とめられない
-  const aggNoKb = !opt.tick && m.k === 'proj' && !heavy && !((m.power || 0) >= 100) && def.mon && natOf(def) === 'yuukan';   // どんどん せめる：ふつうの 弾では おしもどされない（ひるみは する）
+  const aggNoKb = !opt.tick && m.k === 'proj' && !heavy && !((m.power || 0) >= 100) && def.mon && natOf(def) === 'yuukan';   // どんどん せめる：ふつうの 弾では 当たったときの 硬直なし・おしもどされない（追加効果の ひるみは 効く）
   if (armored && !opt.tick) popText(def.x, def.y - 100, 'アーマー！', '#ffb070');
   if (opt.tick) { def.kx += DM.cos(ang) * 45 * K; def.ky += DM.sin(ang) * 45 * K; }   // うちつづける わざ：ひるませず すこし おすだけ
+  else if (aggNoKb) { B.hitstop = Math.max(B.hitstop, .03); }   // どんどん せめる：ふつうの 弾は うけながら すすむ（わざも とまらない）
   else if (stance || armored || def.state === 'rage' || def.state === 'grab') { def.kx += DM.cos(ang) * 50 * K; def.ky += DM.sin(ang) * 50 * K; B.hitstop = Math.max(B.hitstop, .04); }   // まちぶせ・あばれ・つかみ中は ひるまない
   else if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) !== 'rock') {   // ✌️ を ためている あいだは ✊ でしか とめられない
     def.kx += DM.cos(ang) * 60 * K; def.ky += DM.sin(ang) * 60 * K; B.hitstop = Math.max(B.hitstop, .03);
