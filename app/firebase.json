@@ -26,6 +26,14 @@
   },
   "functions": {
     "source": "functions",
-    "runtime": "nodejs22"
+    "runtime": "nodejs22",
+    "predeploy": [
+      "node scripts/build-functions.mjs"
+    ],
+    "ignore": [
+      "node_modules",
+      ".git",
+      "*.log"
+    ]
   }
 }

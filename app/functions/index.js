@@ -3,7 +3,9 @@
    - matchStart  … へやの presence を サーバーが よんで「ほんとうに はじまった 試合」を きろく
    - matchReport … ふたりの けっかが あったら レート・せんせき・ギルドポイントを かきこむ
                    くいちがい は どちらにも つけない（flags に かぞえる）
-   - matchSweep  … 10ぷん たっても かたほう だけ（とちゅうで ぬけた）：のこった ほうの もうしでで きめる
+   - matchLog / matchVerify … ホストの きろく（シード・チーム・そうさ）を うけとり、ゲームを サーバーで さいげん して ほんとうの かちまけを きめる
+                   （どの 端末でも おなじ けいさんに なる ように ゲームを つくって ある）。ちがう ことを いった ほうは flags.cheat
+   - matchSweep  … 10ぷん たっても きまらない：きろくが あれば それで、なければ のこった ほうの もうしでで きめる
    - guildWin1   … ふつうの バトルの かち（+1）。かいすう に せいげん
    - claimDaily  … 日替わりの むりょう（サーバーの 日づけで 1日 1かい）
    ranks の r・w・l・h、gmembers の pts・tot・wk は ここ（管理者）だけが かける（firestore.rules）
@@ -11,6 +13,7 @@
 'use strict';
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
+const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { setGlobalOptions } = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 const { FieldValue } = require('firebase-admin/firestore');
@@ -26,7 +29,7 @@ const uidOf = (req) => { const u = req.auth && req.auth.uid; if (!u) throw new H
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 exports.matchStart = onCall(async (req) => {
-  const uid = uidOf(req), code = req.data && req.data.code;
+  const uid = uidOf(req), code = req.data && req.data.code, team = req.data && req.data.team;
   if (typeof code !== 'string' || !/^[A-Za-z0-9_-]{1,40}$/.test(code)) throw new HttpsError('invalid-argument', 'code');
   let m = null;
   for (let i = 0; i < 4 && !m; i++) {   // ホストの start が まだ とどいて いない ことが ある
@@ -35,39 +38,53 @@ exports.matchStart = onCall(async (req) => {
     if (!m) await sleep(800);
   }
   if (!m || (uid !== m.a && uid !== m.b)) throw new HttpsError('failed-precondition', 'no-match');
+  const gt = uid === m.b && Array.isArray(team) && team.length <= 3 && JSON.stringify(team).length < 20000 ? team : null;   // ゲストが うけとった じぶんの チーム（ホストの きろくと くらべる）
   const ref = fs.doc('matches/' + m.mid);
   await fs.runTransaction(async (tx) => {
     const d = await tx.get(ref);
-    if (d.exists) { const v = d.data(); if (v.a !== m.a || v.b !== m.b) throw new HttpsError('failed-precondition', 'mismatch'); return; }
-    tx.set(ref, { a: m.a, b: m.b, rk: m.rk, t0: Date.now(), rep: {}, open: true });
+    if (d.exists) { const v = d.data(); if (v.a !== m.a || v.b !== m.b) throw new HttpsError('failed-precondition', 'mismatch'); if (gt && !v.gt) tx.update(ref, { gt }); return; }
+    tx.set(ref, { a: m.a, b: m.b, rk: m.rk, code, gk: m.gk, t0: Date.now(), rep: {}, open: true, ...(gt ? { gt } : {}) });
   });
   return { mid: m.mid, rk: m.rk };
 });
 
-// けっかを かきこむ（トランザクションの なか）
-async function settle(tx, ref, v, out, extra = {}) {
-  const now = Date.now(), win = out === 'a' ? v.a : out === 'b' ? v.b : null, lose = out === 'a' ? v.b : out === 'b' ? v.a : null;
+// けっかを かきこむ（トランザクションの なか）。j：L.judge の かえり
+async function settle(tx, ref, v, j, extra = {}) {
+  const out = j.out, now = Date.now(), win = out === 'a' ? v.a : out === 'b' ? v.b : null, lose = out === 'a' ? v.b : out === 'b' ? v.a : null;
   const rA = fs.doc('ranks/' + v.a), rB = fs.doc('ranks/' + v.b), gW = win ? fs.doc('gmembers/' + win) : null;
   const fA = fs.doc('flags/' + v.a), fB = fs.doc('flags/' + v.b);
-  const [da, db, dg] = await Promise.all([tx.get(rA), tx.get(rB), gW ? tx.get(gW) : null]);
-  if (v.rk && win) {
+  const pair = fs.doc('pairs/' + [v.a, v.b].sort().join('_') + '_' + L.jstDay(now));   // おなじ ふたりの 試合（なれあい）：1日 3かい まで レートを うごかす
+  const [da, db, dg, fa, fb, dp] = await Promise.all([tx.get(rA), tx.get(rB), gW ? tx.get(gW) : null, tx.get(fA), tx.get(fB), tx.get(pair)]);
+  const banned = (fa.exists && fa.data().hide) || (fb.exists && fb.data().hide);   // ずるの うたがいが おおい 人との 試合は レート・ギルドに いれない
+  const pn = dp.exists ? dp.data().n || 0 : 0, rated = v.rk && win && pn < PAIR_DAY && !banned;
+  if (v.rk && win) tx.set(pair, { n: pn + 1, t: now }, { merge: true });
+  if (rated) {
     const ka = da.exists ? da.data() : {}, kb = db.exists ? db.data() : {};
     const ra = typeof ka.r === 'number' ? ka.r : 1000, rb = typeof kb.r === 'number' ? kb.r : 1000;
     const na = L.elo(ra, rb, win === v.a ? 1 : 0), nb = L.elo(rb, ra, win === v.b ? 1 : 0);
     const put = (ref_, k, r0, r1, won) => tx.set(ref_, { r: r1, w: (k.w || 0) + (won ? 1 : 0), l: (k.l || 0) + (won ? 0 : 1), h: (Array.isArray(k.h) ? k.h : [r0]).concat(r1).slice(-30), t: now }, { merge: true });
     put(rA, ka, ra, na, win === v.a); put(rB, kb, rb, nb, win === v.b);
   }
-  if (gW && dg && dg.exists && dg.data().gid) {
+  if (gW && dg && dg.exists && dg.data().gid && pn < PAIR_DAY && !banned) {
     const g = dg.data(), wk = L.weekNo(now);
     tx.set(gW, { wk, pts: (g.wk === wk ? g.pts || 0 : 0) + GUILD_ONLINE, tot: (g.tot || 0) + GUILD_ONLINE }, { merge: true });
   }
-  if (out === 'dispute') for (const f of [fA, fB]) tx.set(f, { disp: FieldValue.increment(1), t: now }, { merge: true });
-  tx.update(ref, { open: false, out, win: win || null, lose: lose || null, t1: now, ...extra });
+  // くいちがい・ずる の かず。おおい 人は ランキングに ださない（hide）
+  for (const [side, f, d, rk] of [['a', fA, fa, rA], ['b', fB, fb, rB]]) {
+    const o = d.exists ? d.data() : {}, n = (o.n || 0) + 1, disp = (o.disp || 0) + (out === 'dispute' ? 1 : 0), cheat = (o.cheat || 0) + (j.cheat && j.cheat[side] ? 1 : 0);
+    const div = (o.div || 0) + (side === 'a' && v.rp && v.rp.div > 0 ? 1 : 0);   // ホストの がめんが サーバーの さいげんと ちがった（ゲームを いじった うたがい）
+    const hide = cheat >= CHEAT_HIDE || div >= DIV_HIDE || (disp >= DISP_MIN && disp / n > DISP_RATE);
+    tx.set(f, { n, disp, cheat, div, hide, t: now }, { merge: true });
+    if (hide !== !!o.hide) tx.set(rk, { hide }, { merge: true });
+  }
+  tx.update(ref, { open: false, out, win: win || null, lose: lose || null, rated: !!rated, cheat: j.cheat || {}, t1: now, ...extra });
 }
+const PAIR_DAY = 3, CHEAT_HIDE = 2, DIV_HIDE = 3, DISP_MIN = 5, DISP_RATE = 0.3;
 
 exports.matchReport = onCall(async (req) => {
-  const uid = uidOf(req), mid = req.data && req.data.mid, res = req.data && req.data.res;
+  const uid = uidOf(req), mid = req.data && req.data.mid, res = req.data && req.data.res, inp = req.data && req.data.inp;
   if (typeof mid !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(mid) || !L.RES.includes(res)) throw new HttpsError('invalid-argument', 'arg');
+  const gin = Array.isArray(inp) && inp.length <= 400 && inp.every((x) => typeof x === 'string' && x.length < 400) ? inp : null;   // ゲストが おくった そうさ
   const ref = fs.doc('matches/' + mid);
   return fs.runTransaction(async (tx) => {
     const d = await tx.get(ref); if (!d.exists) throw new HttpsError('not-found', 'match');
@@ -75,24 +92,66 @@ exports.matchReport = onCall(async (req) => {
     if (!side) throw new HttpsError('permission-denied', 'member');
     if (!v.open) return { done: true, out: v.out, me: side };
     if (v.rep && v.rep[side]) return { done: false, me: side };   // 1かい だけ
-    const rep = { ...(v.rep || {}), [side]: res }, out = L.decide(rep, false);
-    if (!out) { tx.update(ref, { ['rep.' + side]: res }); return { done: false, me: side }; }
-    await settle(tx, ref, { ...v, rep }, out, { ['rep.' + side]: res });
-    return { done: true, out, me: side };
+    const rep = { ...(v.rep || {}), [side]: res }, extra = { ['rep.' + side]: res, ...(side === 'b' && gin ? { gin } : {}) };
+    let rp = v.rp;
+    if (side === 'b' && gin && rp && !rp.tamper) {   // さいげんの あとに ゲストの そうさが とどいた：ホストの きろくと くらべなおす
+      const lg = await tx.get(fs.doc('matchlogs/' + mid)); let rec = null; try { rec = lg.exists ? JSON.parse(lg.data().js) : null; } catch (e) { rec = null; }
+      const bad = rec && L.checkRec(v, rec, gin); if (bad) { rp = { tamper: bad }; extra.rp = rp; }
+    }
+    const j = L.judge({ ...v, rep, rp }, false);
+    if (!j) { tx.update(ref, extra); return { done: false, me: side }; }
+    await settle(tx, ref, { ...v, rep, rp }, j, extra);
+    return { done: true, out: j.out, me: side };
+  });
+});
+
+// ホスト：たたかいの きろく（シード・ばしょ・チーム・そうさ）。うけとったら matchlogs の トリガーで さいげん する
+exports.matchLog = onCall(async (req) => {
+  const uid = uidOf(req), mid = req.data && req.data.mid, rec = req.data && req.data.rec;
+  if (typeof mid !== 'string' || !/^[A-Za-z0-9_-]{1,120}$/.test(mid) || !rec || typeof rec !== 'object') throw new HttpsError('invalid-argument', 'arg');
+  const js = JSON.stringify(rec); if (js.length > 800000) throw new HttpsError('invalid-argument', 'size');
+  const m = await fs.doc('matches/' + mid).get(); if (!m.exists) throw new HttpsError('not-found', 'match');
+  if (m.data().a !== uid) throw new HttpsError('permission-denied', 'host');
+  const ref = fs.doc('matchlogs/' + mid);
+  await fs.runTransaction(async (tx) => { const d = await tx.get(ref); if (!d.exists) tx.set(ref, { js, t: Date.now() }); });
+  return { ok: true };
+});
+
+// さいげん：ゲームを サーバーで うごかして ほんとうの けっかを だす
+exports.matchVerify = onDocumentCreated({ document: 'matchlogs/{mid}', memory: '2GiB', timeoutSeconds: 180 }, async (ev) => {
+  const mid = ev.params.mid, ref = fs.doc('matches/' + mid), d0 = await ref.get(); if (!d0.exists) return;
+  const v0 = d0.data(); let rec = null; try { rec = JSON.parse(ev.data.data().js); } catch (e) { rec = null; }
+  let rp;
+  const bad = L.checkRec(v0, rec, v0.gin || null);
+  if (bad) rp = { tamper: bad };
+  else {
+    try {
+      const out = await require('./replay').replay({ seed: rec.seed, field: rec.field, h: rec.h, g: rec.g, log: rec.log, steps: rec.steps, glk: rec.glk, gnm: rec.gnm, tr: Array.isArray(rec.tr) ? rec.tr : null });
+      if (out.ver !== rec.ver) rp = { end: 'ver', ver: out.ver, cver: rec.ver };   // ちがう バージョン：さいげん できない（ふたりの もうしで）
+      else if (!out.hOk || !out.gOk) rp = { tamper: 'team' };
+      else { const lx = rec.log.length && rec.log[rec.log.length - 1]; rp = { end: out.r.res ? (lx && lx[1] === 'x' && lx[0] >= out.r.n ? 'x' : 'ko') : 'none', res: out.r.res, n: out.r.n, hp: JSON.stringify(out.r.hp), div: out.r.div || 0 }; }
+    } catch (e) { console.warn('replay', mid, e && e.message); rp = { end: 'err', err: String(e && e.message || e).slice(0, 200) }; }
+  }
+  await fs.runTransaction(async (tx) => {
+    const d = await tx.get(ref); if (!d.exists) return; const v = { ...d.data(), rp };
+    if (!v.open) { tx.update(ref, { rp }); return; }
+    const j = L.judge(v, false); if (!j) { tx.update(ref, { rp }); return; }
+    await settle(tx, ref, v, j, { rp });
   });
 });
 
 exports.matchSweep = onSchedule('every 5 minutes', async () => {
   const q = await fs.collection('matches').where('open', '==', true).where('t0', '<', Date.now() - STALE).limit(200).get();
-  for (const doc of q.docs) {
-    await fs.runTransaction(async (tx) => {
-      const d = await tx.get(doc.ref); if (!d.exists || !d.data().open) return;
-      const v = d.data(), out = L.decide(v.rep, true);
-      if (out === 'none') { tx.update(doc.ref, { open: false, out, t1: Date.now() }); return; }
-      await settle(tx, doc.ref, v, out);
-    }).catch((e) => console.warn('sweep', doc.id, e && e.message));
-  }
+  for (const doc of q.docs) await sweepOne(doc.ref).catch((e) => console.warn('sweep', doc.id, e && e.message));
 });
+async function sweepOne(ref) {
+  return fs.runTransaction(async (tx) => {
+    const d = await tx.get(ref); if (!d.exists || !d.data().open) return;
+    const v = d.data(), j = L.judge(v, true);
+    if (!j || j.out === 'none' || j.out === 'unverified') { tx.update(ref, { open: false, out: j ? j.out : 'none', t1: Date.now() }); return; }
+    await settle(tx, ref, v, j);
+  });
+}
 
 exports.guildWin1 = onCall(async (req) => {
   const uid = uidOf(req), now = Date.now(), day = L.jstDay(now);

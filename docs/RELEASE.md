@@ -46,6 +46,10 @@
    - `matchSweep`（5ふん ごと）：10ぷん たっても かたほう だけ の 試合（とちゅうで ぬけた）を のこった ほうの もうしでで きめる
    - `guildWin1`：ふつうの バトルの かち +1（30びょうに 1かい・1日 60かい まで）／`claimDaily`：むりょう（日本時間の 1日 1かい）
    - `ranks` の r・w・l・h と `gmembers` の pts・tot・wk は ルールで クライアントからは かけない（サーバーだけ）
+   - **さいげんで たしかめる（matchLog → matchVerify）**：ホストは 試合の きろく（シード・チーム・そうさ）を おくる。サーバーは ヘッドレス Chromium で ゲームを うごかして ほんとうの かちまけを きめる（`functions/game/index.html` は deploy の まえに じどうで つくられる）。メモリ 2GiB の 関数に なる
+   - ゲームは どの 端末でも おなじ けいさんに なる ように して ある（三角関数などは じぶんで けいさん・たたかいの らんすうは シードつき・1/60びょう きざみ）。**バトルの しくみを かえた ときは、アプリと サーバーを いっしょに 出す**（GAME_VER が ちがう 試合は さいげん しないで ふたりの もうしでで きめる）
+   - flags/{uid}：n（試合）・disp（くいちがい）・cheat（してない かちを いった）・div（ホストの がめんが さいげんと ちがった）。おおい 人は ranks.hide＝true（ランキングに ださない・レート／ギルドに いれない）
+   - おなじ ふたりの 試合は 1日 3かい まで レートを うごかす（なれあい たいさく）
    - ためす：`npx firebase emulators:start --config firebase.emu.json --only auth,firestore,database,functions --project demo-pma`
    - 配信用の ビルド（`npm run build`）は テスト用の `window.__game` を はずす（のこす ときは `PMA_DEBUG=1`）
 

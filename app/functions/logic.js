@@ -45,7 +45,38 @@ function findMatch(rows, code) {
   const guest = list.find((x) => x.key === gpOf(host) && x.p.role === 'guest');
   if (!guest || guest.by === host.by) return null;
   const mid = (cleanRoom('pma-' + code) + '_' + guest.key).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 120);
-  return { mid, a: host.by, b: guest.by, rk: !!(host.p.rk && guest.p.rk) };
+  return { mid, a: host.by, b: guest.by, rk: !!(host.p.rk && guest.p.rk), gk: guest.key };
 }
 
-module.exports = { elo, decide, weekNo, jstDay, cleanRoom, findMatch, RES };
+// たたかいの シード（クライアントの seedOf と おなじ）：へや＋ゲストの キー から きまる
+const seedOf = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; };
+
+// ホストの きろく を しらべる（さいげん の まえ）。だめなら 'tamper'
+const monKey = (o) => o && JSON.stringify([o.sid, o.nat || null, ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'eva'].map((k) => (o.iv && o.iv[k]) | 0), [...(o.moves || [])].sort(), o.fed | 0, o.ev ? ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'eva'].map((k) => o.ev[k] | 0) : null]);
+function checkRec(v, rec, gInp) {
+  if (!rec || typeof rec !== 'object' || !Array.isArray(rec.h) || !Array.isArray(rec.g) || !Array.isArray(rec.log)) return 'shape';
+  if ((rec.seed >>> 0) !== seedOf(v.code + '|' + v.gk)) return 'seed';   // シードは ホストが えらべない
+  if (Array.isArray(v.gt) && v.gt.length && (rec.g.length !== v.gt.length || rec.g.some((o, i) => monKey(o) !== monKey(v.gt[i])))) return 'gteam';   // ゲストの チームを かえた
+  if (Array.isArray(gInp)) { const sent = new Set(gInp); for (const e of rec.log) if (e && e[1] === 'g') { const j = JSON.stringify(e[2]); if (!sent.has(j)) return 'ginp'; } }   // ゲストが おくって いない そうさ
+  return '';
+}
+
+// けっかを きめる：v（試合）・final（じかんぎれ）。かえす もの：{ out, cheat: { a, b } } か null（まつ）
+//  - さいげん で ふつうに おわった（たおれた・タイムアップ）：それが ただしい。ちがう ことを いった ほうに cheat
+//  - きろくを いじった：ホストに cheat・この 試合は なし
+//  - さいげん で おわらなかった（とちゅうで ぬけた など）・きろく なし：ふたりの もうしで（きろく なしで ホスト だけ の ときは つけない）
+function judge(v, final) {
+  const rep = v.rep || {}, rp = v.rp;
+  if (rp && rp.tamper) return { out: 'void', cheat: { a: true } };
+  if (rp && rp.end === 'ko') {
+    const out = rp.res === 'win' ? 'a' : rp.res === 'lose' ? 'b' : 'draw';
+    const want = (side) => (out === 'draw' ? 'draw' : out === side ? 'win' : 'lose');
+    return { out, cheat: { a: rep.a === 'win' && want('a') !== 'win', b: rep.b === 'win' && want('b') !== 'win' } };   // してない かちを いった ほう（あいてに だまされて まけと いった ほうは ちがう）
+  }
+  if (!rp && !final) return null;   // ホストの きろくを まつ
+  const d = decide(rep, final); if (!d) return null;
+  if (!rp && final && rep.a && !rep.b && d === 'a') return { out: 'unverified', cheat: {} };   // きろく なしで ホストが かちと いう だけ：つけない
+  return { out: d, cheat: {} };
+}
+
+module.exports = { elo, decide, weekNo, jstDay, cleanRoom, findMatch, RES, seedOf, checkRec, judge, monKey };

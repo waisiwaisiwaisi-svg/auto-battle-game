@@ -5,6 +5,7 @@ import { build } from 'esbuild';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stampVer } from './game-ver.mjs';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const www = path.join(root, 'www');
@@ -32,7 +33,7 @@ fs.mkdirSync(path.join(www, 'se8bit'), { recursive: true });   // 効果音
 for (const f of fs.readdirSync(path.join(root, '..', 'se8bit')).filter((f) => f.endsWith('.wav'))) fs.copyFileSync(path.join(root, '..', 'se8bit', f), path.join(www, 'se8bit', f));
 
 // ゲーム本体
-let html = fs.readFileSync(path.join(root, '..', 'index.html'), 'utf8');
+let { html, ver } = stampVer(fs.readFileSync(path.join(root, '..', 'index.html'), 'utf8'));   // GAME_VER：サーバーの さいげんと そろえる
 html = html.replace(/<link rel="preconnect"[^>]*>(<link rel="preconnect"[^>]*>)?\s*/g, '')
   .replace(/<link href="https:\/\/fonts\.googleapis\.com[^>]*>/, '<link href="fonts/fonts.css" rel="stylesheet">');
 // テスト用の そうさ口（window.__game）は 配信版から はずす（PMA_DEBUG=1 の ときだけ のこす）
@@ -45,4 +46,4 @@ const inject = '<script src="firebase-config.js"></script><script src="backend.j
 if (!html.includes('</title>')) throw new Error('index.html に <title> が ありません');
 html = html.replace('</title>', '</title>\n' + inject);
 fs.writeFileSync(path.join(www, 'index.html'), html);
-console.log('www/ を つくりました', (html.length / 1024 / 1024).toFixed(2) + 'MB');
+console.log('www/ を つくりました', (html.length / 1024 / 1024).toFixed(2) + 'MB', 'GAME_VER ' + ver);
