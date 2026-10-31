@@ -1,30 +1,33 @@
 // 技の強さを数値にする（わざの つよさ テスト）
 //
-// しくみ：おなじ モンスター どうしを 1たい1で なんども たたかわせる。
-//   ためす がわ：[ためす技, たいあたり, スピードスター]   あいて：[たいあたり, スピードスター]
-//   くらべる もと：ためす がわも [たいあたり, スピードスター]（あいてと おなじ）
-//   1しあいの けっか＝（じぶんの のこりHP% − あいての のこりHP%）。−1〜+1
-//   つよさ点＝（ためす技を もった ときの へいきん − くらべる もとの へいきん）× 100
-//   ＝ その技を 1つ たすと、1たい1の しあいが どれだけ ゆうりに なるか（0＝たしても かわらない）。
-//   ほじょ技（のうりょくアップ・まもる など）も、ほかの 2つの こうげきを たすける ぶんが 点に なる。
-// こうへいに する ため：
-//   - ためす がわの タイプは ためす技と おなじ（タイプ一致は いつも 1.5ばい）
-//   - あいての タイプは どの タイプにも ふつう（こうかばつぐん・いまひとつ なし）
-//   - こうげき と とくこう、ぼうぎょ と とくぼう を おなじ 数に（物理・属性で ふこうへいに ならない）
-//   - 戦いの みためは うごかさない（ゲームの 中の たたかいと おなじ しくみを そのまま つかう）
+// しくみ：おなじ モンスター どうしを 1たい1で なんども たたかわせる（ゲームの 中の たたかいと おなじ しくみ）。
+//   2つの「型」で はかる：
+//     物理型：こうげき 高め・とくこう 低め。もち技 [たいあたり, つきとばし]（あいても 物理型）
+//     属性型：とくこう 高め・こうげき 低め。もち技 [スピードスター, エコーボイス]（あいても 属性型）
+//   ためす がわ だけ、もち技に ためす技を 1つ たす。
+//   つよさ点＝（たした ときの「じぶんの のこりHP% − あいての のこりHP%」の へいきん − たさない ときの へいきん）× 100
+//   → のうりょくアップ・ダウンの ねうちは 型で かわる（こうげきアップは 物理型で、あいての とくこうダウンは 属性型で 点が でる）
+// あわせて はかる もの：
+//   1回あたりの ダメージ（実際に あたった ぶん。はずれ・よけ・れんぞくヒット・うちつづけ も こみ）
+//   実威力：1回あたりの ダメージを「威力100・はずれない 1ぱつ」と くらべた 数（ふつうの 威力と おなじ ものさし）
+//   足きり：その ダメージで、全モンスターの なんわりを 1回・2回で たおせるか、まんなかの モンスターを なん回で たおせるか（確定数）
+// こうへいに する ため：ためす がわの タイプは ためす技と おなじ（タイプ一致は いつも 1.5ばい）、あいては どの タイプにも ふつう。
 //
-// つかいかた：node tools/movepower/movepower.js [--n 12] [--moves ember,surf] [--out tools/movepower/out]
+// つかいかた：node tools/movepower/movepower.js [--n 24] [--moves ember,surf] [--out tools/movepower/out]
 //   → out/movepower.json と out/movepower.html（表）
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 
 const ROOT = path.resolve(__dirname, '../..');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const N = +arg('n', 12), OUT = path.resolve(arg('out', path.join(__dirname, 'out'))), ONLY = arg('moves', '');
+const N = +arg('n', 24), OUT = path.resolve(arg('out', path.join(__dirname, 'out'))), ONLY = arg('moves', '');
 const SID = arg('sid', 'a_fire5'), NAT = 'reisei', FIELDS = ['grass', 'fire', 'water', 'elec'], STEPS = 60 * 120;
-const KIT = ['tackle', 'swift'], BASE_MINE = KIT, FOE = KIT;
+const STYLES = {
+  phys: { n: '物理型', kit: ['tackle', 'slap-dash'], atk: 1.25, spa: .75 },
+  spec: { n: '属性型', kit: ['swift', 'echoed-voice'], atk: .75, spa: 1.25 },
+};
 
-// ゲームの ページに ためしの たたかいを 1つ たす（ゲームの ファイルは かえない。コピーに いれる）
+// ゲームの ページに ためしの たたかいを たす（ゲームの ファイルは かえない。コピーに いれる）
 const SIM = `
 window.PMA_MOVESIM = (job) => {
   if (!S) S = defaultSave(); const mute0 = SND.opt.mute; SND.opt.mute = true;
@@ -33,56 +36,76 @@ window.PMA_MOVESIM = (job) => {
     const iv = { hp: 20, atk: 20, def: 20, spa: 20, spd: 20, spe: 20, eva: 20 }, mk = () => ({ sid: job.sid, nat: job.nat, iv, moves: ['tackle'] });
     startBattle({ kind: 'online', seed: job.seed >>> 0, field: job.field, enemies: monsFrom([mk()], job.seed), p0: monsFrom([mk()], job.seed), trainer: { name: '-', spr: trArt('boy') }, title: '-', intro: '-', skill: .5 });
     B.net = 'host'; B.replay = { log: [], i: 0 };
-    const set = (f, moves, type) => { f.moves = moves.slice(); f.cd = {}; f.sp = Object.assign({}, f.sp, { type, type2: null });
-      const a = Math.round((f.atk + f.spa) / 2), d = Math.round((f.def + f.sdef) / 2); f.atk = f.spa = a; f.def = f.sdef = d; };
-    for (const f of B.sides[0].fs) set(f, job.mine, job.type);
-    for (const f of B.sides[1].fs) set(f, job.foe, 'zz_none');   // どの タイプにも ふつう
+    const set = (f, moves, type, st) => { f.moves = moves.slice(); f.cd = {}; f.sp = Object.assign({}, f.sp, { type, type2: null });
+      const a = (f.atk + f.spa) / 2, d = Math.round((f.def + f.sdef) / 2); f.atk = Math.round(a * st.atk); f.spa = Math.round(a * st.spa); f.def = f.sdef = d; };
+    const me = B.sides[0].fs[0], foe = B.sides[1].fs[0];
+    set(me, job.mine, job.type, job.st); set(foe, job.foe, 'zz_none', job.st);
+    const tm = MOVES[job.test]; let unit = 0;
+    if (tm) { const ref = { pow: 20, power: 100, k: 'dash', cat: tm.cat === 'spec' ? 'spec' : 'phys', t: job.type, e: {} }; unit = estDmg(me, foe, ref) / 100; }   // 威力1ぶんの ダメージ（はずれない 1ぱつ）
+    let dmg = 0, uses = 0; const hpF0 = foe.maxHp, D0 = tm && tm.cat === 'spec' ? foe.sdef : foe.def;
+    window.__dmg = (att, def, m, d) => { if (att === me && def === foe && m && m.fxid === job.test) dmg += d; };
+    window.__use = (f, id) => { if (f === me && id === job.test) uses++; };
     while (B.stepN < job.steps && B.mode !== 'end') bStep(FIX_DT);
-    const a = B.sides[0].fs[0], b = B.sides[1].fs[0], hp = (f) => f.fainted ? 0 : Math.max(0, f.hp) / f.maxHp;
-    const r = { d: hp(a) - hp(b), win: B.mode === 'end' ? (B.result === 'win' ? 1 : B.result === 'lose' ? 0 : .5) : (hp(a) > hp(b) ? 1 : hp(a) < hp(b) ? 0 : .5), t: B.stepN / 60 };
+    window.__dmg = window.__use = null;
+    const hp = (f) => f.fainted ? 0 : Math.max(0, f.hp) / f.maxHp;
+    const r = { d: hp(me) - hp(foe), win: B.mode === 'end' ? (B.result === 'win' ? 1 : B.result === 'lose' ? 0 : .5) : (hp(me) > hp(foe) ? 1 : hp(me) < hp(foe) ? 0 : .5), t: B.stepN / 60, dmg, uses, unit, hp0: hpF0, D0 };
     B = null; return r;
-  } finally { SND.opt.mute = mute0; }
+  } finally { SND.opt.mute = mute0; window.__dmg = window.__use = null; }
 };
+// 全モンスターの HP・ぼうぎょ・とくぼう（足きりの けいさん）
+window.PMA_MONSTATS = () => Object.keys(SPECIES).map(sid => { const f = mkFighter(fixMon({ uid: 0, sid, nat: 'reisei', iv: { hp: 20, atk: 20, def: 20, spa: 20, spd: 20, spe: 20, eva: 20 }, moves: ['tackle'] }), 1); return { sid, hp: f.maxHp, def: f.def, sdef: f.sdef }; });
 `;
+const HOOKS = [
+  ['def.hp = Math.max(0, def.hp - dmg); def.hurtAt = B.t;', 'def.hp = Math.max(0, def.hp - dmg); def.hurtAt = B.t; if (window.__dmg) window.__dmg(att, def, m, dmg);'],
+  ['function beginMove(f, id) {', 'function beginMove(f, id) { if (window.__use) window.__use(f, id);'],
+];
 
 (async () => {
   let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const anchor = 'window.PMA_REPLAY = (job) => {'; if (!html.includes(anchor)) throw new Error('PMA_REPLAY が みつからない');
   html = html.replace(anchor, SIM + anchor);
+  for (const [a, b] of HOOKS) { if (html.split(a).length !== 2) throw new Error('フックの ばしょが みつからない: ' + a); html = html.replace(a, b); }
   fs.mkdirSync(OUT, { recursive: true }); const tmp = path.join(ROOT, '.movepower_tmp.html'); fs.writeFileSync(tmp, html);
   const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
   try {
     await p.goto('file://' + tmp); await p.waitForTimeout(1500);
     const info = await p.evaluate(() => { const G = window.__game, M = G.MOVES, X = G.run(o => o);
-      return Object.keys(M).map(id => ({ id, n: M[id].n, t: M[id].t, k: M[id].k, cat: M[id].cat || '', desc: X.moveDesc(M[id]) })); });
-    const ids = ONLY ? ONLY.split(',') : info.map(x => x.id).filter(id => !KIT.includes(id));
-    const run = (mine, type) => p.evaluate(([mine, type, n, sid, nat, fields, steps, foe]) => {
-      const out = []; for (let i = 0; i < n; i++) out.push(window.PMA_MOVESIM({ seed: 1000 + i * 7919, field: fields[i % fields.length], sid, nat, mine, foe, type, steps })); return out;
-    }, [mine, type, N, SID, NAT, FIELDS, STEPS, FOE]);
-    const avg = (a, k) => a.reduce((s, x) => s + x[k], 0) / a.length;
-    // くらべる もと（たいあたり・スピードスター）は タイプ ごとに（タイプ一致が かわるので）
-    const baseBy = {};
-    const base = async (type) => baseBy[type] || (baseBy[type] = await run(BASE_MINE, type));
+      return Object.keys(M).map(id => ({ id, n: M[id].n, t: M[id].t, k: M[id].k, cat: M[id].cat || '', power: M[id].power || Math.round((M[id].pow || 0) * 5), desc: X.moveDesc(M[id]) })); });
+    const mons = await p.evaluate(() => window.PMA_MONSTATS());
+    const kits = Object.values(STYLES).flatMap(s => s.kit);
+    const ids = ONLY ? ONLY.split(',') : info.map(x => x.id).filter(id => !kits.includes(id));
+    const run = (st, mine, type, test) => p.evaluate(([st, mine, type, test, n, sid, nat, fields, steps]) => {
+      const out = []; for (let i = 0; i < n; i++) out.push(window.PMA_MOVESIM({ seed: 1000 + i * 7919, field: fields[i % fields.length], sid, nat, mine, foe: st.kit, type, steps, st, test })); return out;
+    }, [st, mine, type, test, N, SID, NAT, FIELDS, STEPS]);
+    const avg = (a, f) => a.reduce((s, x) => s + f(x), 0) / a.length, r1 = (v) => Math.round(v * 10) / 10;
+    const baseBy = {}; const base = async (k, type) => baseBy[k + type] || (baseBy[k + type] = await run(STYLES[k], STYLES[k].kit, type, ''));
     const res = []; let i = 0;
     for (const id of ids) {
       const m = info.find(x => x.id === id); if (!m) continue;
-      const r = await run([id, ...KIT], m.t), b0 = await base(m.t);
-      res.push({ ...m, score: Math.round((avg(r, 'd') - avg(b0, 'd')) * 1000) / 10, win: Math.round(avg(r, 'win') * 100), t: Math.round(avg(r, 't')) });
+      const o = { ...m };
+      for (const k of Object.keys(STYLES)) {
+        const r = await run(STYLES[k], [id, ...STYLES[k].kit], m.t, id), b0 = await base(k, m.t);
+        o[k] = r1((avg(r, x => x.d) - avg(b0, x => x.d)) * 100); o[k + 'Win'] = Math.round(avg(r, x => x.win) * 100);
+        const uses = r.reduce((s, x) => s + x.uses, 0), dmg = r.reduce((s, x) => s + x.dmg, 0), time = r.reduce((s, x) => s + x.t, 0);
+        o[k + 'Uses'] = r1(uses / time * 60);   // 1分あたり なんかい つかったか
+        if (m.cat !== 'stat' && uses) {
+          const per = dmg / uses, unit = r[0].unit, hp0 = r[0].hp0, D0 = r[0].D0;
+          o[k + 'Per'] = r1(per / hp0 * 100);   // 1回で あいての HPの なん%
+          o[k + 'Real'] = unit ? Math.round(per / unit) : 0;   // 実威力
+          const key = m.cat === 'spec' ? 'sdef' : 'def', ko = (n) => Math.round(mons.filter(x => per * n * (D0 / x[key]) >= x.hp).length / mons.length * 100);
+          o[k + 'KO1'] = ko(1); o[k + 'KO2'] = ko(2);   // 足きり：1回・2回で たおせる モンスターの わりあい
+          const hits = mons.map(x => Math.ceil(x.hp / Math.max(.01, per * (D0 / x[key])))).sort((p, q) => p - q); o[k + 'Hits'] = per / hp0 < .01 ? 0 : hits[hits.length >> 1];   // 確定数（まんなかの モンスターを なん回で たおせるか）
+        }
+      }
+      // 総合：その技に むいた 型の 点（物理技は 物理型、属性技は 属性型、ほじょ技は よい ほう）
+      const fit = m.cat === 'phys' ? 'phys' : m.cat === 'spec' ? 'spec' : (o.phys >= o.spec ? 'phys' : 'spec');
+      Object.assign(o, { fit, score: o[fit], real: o[fit + 'Real'] || 0, per: o[fit + 'Per'] || 0, ko1: o[fit + 'KO1'] || 0, ko2: o[fit + 'KO2'] || 0, hits: o[fit + 'Hits'] || 0, uses: o[fit + 'Uses'] });
+      res.push(o);
       if (++i % 20 === 0) console.log(i + '/' + ids.length);
     }
     res.sort((a, c) => c.score - a.score);
-    const meta = { n: N, sid: SID, nat: NAT, fields: FIELDS, steps: STEPS, foe: FOE, date: new Date().toISOString(), errors: errs.slice(0, 20) };
+    const meta = { n: N, sid: SID, nat: NAT, fields: FIELDS, steps: STEPS, styles: STYLES, mons: mons.length, date: new Date().toISOString(), errors: errs.slice(0, 20) };
     fs.writeFileSync(path.join(OUT, 'movepower.json'), JSON.stringify({ meta, res }, null, 1));
-    fs.writeFileSync(path.join(OUT, 'movepower.html'), page(meta, res));
     console.log('done', res.length, 'moves', errs.length ? 'errors: ' + errs.slice(0, 3).join(' / ') : '');
   } finally { await b.close(); fs.unlinkSync(tmp); }
 })();
-
-function page(meta, res) {
-  const T = { fire: '火', water: '水', grass: '草', wind: '風', ground: '土', elec: '雷', normal: '無', machine: '機械', bug: '虫', ghost: '霊', demi: '亜人', fairy: '妖精', dragon: '竜', beast: '獣' };
-  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  const rows = res.map((r, i) => `<tr><td>${i + 1}</td><td><b>${esc(r.n)}</b></td><td>${T[r.t] || r.t}</td><td>${esc(r.k)}</td><td class="n ${r.score >= 0 ? 'p' : 'm'}">${r.score > 0 ? '+' : ''}${r.score}</td><td class="n">${r.win}%</td><td class="n">${r.t}秒</td><td class="d">${esc(r.desc)}</td></tr>`).join('');
-  return `<!doctype html><meta charset="utf-8"><title>技の強さ</title><style>body{font:14px system-ui,sans-serif;margin:16px}table{border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:3px 8px;text-align:left}.n{text-align:right;font-variant-numeric:tabular-nums}.p{color:#0a7}.m{color:#c33}.d{color:#666;font-size:12px}</style>
-<h1>技の強さ</h1><p>1たい1で ${meta.n}しあいずつ。つよさ点＝その技を たいあたり・スピードスターに たすと、たさない ときより どれだけ ゆうりか（のこりHPの さ ×100）。</p>
-<table><tr><th>#</th><th>技</th><th>タイプ</th><th>かたち</th><th>つよさ点</th><th>勝率</th><th>しあい時間</th><th>効果</th></tr>${rows}</table>`;
-}
