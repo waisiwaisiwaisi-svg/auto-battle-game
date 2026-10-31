@@ -1860,6 +1860,10 @@ const mkRng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5
 // みための ものだけ（つぶ・あと・矢印）：たたかいの らんすうを つかわない（でる かずが 端末で ちがっても けっかが かわらない）
 const ACTS = {};   // セーブを かえる しごと：なまえ → しごと（await・ask を つかわない。ひきすうは かずや もじ だけ）。act() で よぶ
 const visOnly = (fn) => function (...a) { const p = SIM_RNG; SIM_RNG = null; try { return fn.apply(this, a); } finally { SIM_RNG = p; } };
+// じならし：ゆれる じめんを しきつめる（絵が まだ なければ しょうげきはを ばらまく）。みためだけ
+const quakeFx = visOnly((m, st) => { const qk = gfxOf(m, 'quake');
+  if (qk) { const S = PLFX[qk], sc = 1.6, W = S.w * PIX_D * sc, H = S.h * PIX_D * sc; for (let y = st.fy0 + H / 2; y < st.fy1; y += H * 1.1) for (let x = st.fx0 + W / 2; x < st.fx1; x += W) plFx(qk, x, y, sc); }
+  else for (let i = 0; i < 7; i++) sheetFx('shockwave', rand(st.fx0 + 40, st.fx1 - 40), rand(st.fy0 + 20, st.fy1 - 10), 1.2); });
 /* =====================================================================
    ユーティリティ
    ===================================================================== */
@@ -4860,7 +4864,7 @@ function teamMove(a, b) {
   else return false;
   SND.se('swapIn'); save(); return true;
 }
-// ===== モーションの アイテム（ドットの トンマナ：ぼかし なし・ピクセル単位の 移動・みじかく すこし はねる）=====
+// ===== モーションの どうぐ（ドットの トンマナ：ぼかし なし・ピクセル単位の 移動・みじかく すこし はねる）=====
 // ・まえの 位置から つなげる（FLIP）・入ってくる ものは じゅんばんに（段階リビール）・おいた／きまった ところは ぽんと おさまる
 const MO = {
   ok: () => !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
@@ -5511,7 +5515,9 @@ function xPool(m, i, k) {
 ACTS.xlearn = (uid, k, i, id) => {
   const m = monU(uid); if (!m || !X_ITEMS.includes(k) || !itemN(k) || !m.moves[i | 0] || !xPool(m, i | 0, k).includes(id)) return 'no';
   const old = m.moves[i | 0]; m.moves[i | 0] = id;
-  if (!canLearn(m.sid, id)) m.xL = [...new Set([...(m.xL || []), id])].slice(-8);   // ふだんは おぼえない わざ：あとから わすれても また つけられる
+  if (!canLearn(m.sid, id)) m.xL = [...new Set([...(m.xL || []), id])];   // ふだんは おぼえない わざ（はずしたら また アイテムが いる）
+  else m.tmL = [...new Set([...(m.tmL || []), id])];
+  if (m.xL) { m.xL = m.xL.filter(x => m.moves.includes(x)); if (!m.xL.length) delete m.xL; }   // いま つけている ものだけ のこす
   useItem(k); save(); return { old, nu: id };
 };
 ACTS.tm = (uid, id, slot) => {   // ワザステッカーで おぼえる
@@ -6886,9 +6892,7 @@ function fireMove(f) {
         endAct(f, .3); if (f.hp > 0) { f.hp = 0; faint(f, o); } break; }
       if (m.quake) {   // じならし：フィールド ぜんたいが ゆれる。モンスターが おいた かべ・いわを ぜんぶ くずす
         B.shake = Math.max(B.shake, 14); SND.se('boom'); const st = B.st;
-        const qk = gfxOf(m, 'quake');
-        if (qk) { const S = PLFX[qk], sc = 1.6, W = S.w * PIX_D * sc, H = S.h * PIX_D * sc; for (let y = st.fy0 + H / 2; y < st.fy1; y += H * 1.1) for (let x = st.fx0 + W / 2; x < st.fx1; x += W) plFx(qk, x, y, sc); }   // ゆれる じめんを しきつめる
-        else for (let i = 0; i < 7; i++) sheetFx('shockwave', rand(st.fx0 + 40, st.fx1 - 40), rand(st.fy0 + 20, st.fy1 - 10), 1.2);
+        quakeFx(m, st);   // みためだけ（たたかいの 乱数は つかわない）
         for (let i = 0; i < 40; i++) B.parts.push({ x: rand(st.fx0, st.fx1), y: rand(st.fy0, st.fy1), vx: rand(-20, 20), vy: -rand(40, 120), life: .6, max: .6, col: choice(['#d8b060', '#a07840', '#e8d8a8']), size: 4, g: 260, shape: 'chunk' });
         if (B.walls.length) { for (const w of B.walls.slice()) for (const b of w.blocks) if (!b.gone) damageWall(b, null, 999); B.walls = B.walls.filter(w => w.blocks.some(b => !b.gone) && !(w.one && w.hp <= 0)); wallsChanged(); say('じめんが ゆれて しかけた かべが くずれた！'); }
         if (targetable(o) && !flies(o)) hit(f, o, m, DM.atan2(o.y - f.y, o.x - f.x));
@@ -6943,7 +6947,7 @@ function chanTick(f, o, oT) {
   if (m.k === 'beam') {
     const L = cur.len; for (let d = 30 + (cur.n % 2) * 25; d < L; d += 60) typeFx(f.x + c * d, f.y - BODY + s * d, vt(m), 1, 60, .3);
     if (L < m.len - 1) impactFx(f.x + c * L, f.y + s * L - BODY * .5, vt(m), .3);
-  } else typeFx(f.x, f.y, vt(m), 7, m.rad * 2.2, .4, { ang: cur.ang, spread: m.half });
+  } else typeFx(f.x, f.y - (m.k === 'cone' ? 0 : BODY), vt(m), 7, m.rad * 2.2, .4, { ang: cur.ang, spread: m.half });
   if (cur.n-- % 2 === 0) SND.se('beam', 1.4);
   const mir = m.k === 'beam' && beamMirror(f, m, cur.ang, cur.len, { tick: true, noHit: true });   // はんしゃのかべに あたって いる：もどる ビームを みせる
   if (mir && !cur.mirSaid) { cur.mirSaid = 1; popText(f.x + c * cur.len, f.y + s * cur.len - 40, 'はねかえした！', '#ff9ad0'); SND.se('guard'); }
@@ -8862,7 +8866,7 @@ const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); let mv = 
   return Object.assign({ sid: m.sid, nat: m.nat, iv: m.iv, moves: mv.slice(0, 4), ev, fed, tr: trPack(m) }, xl.length ? { xL: xl } : {}); });
 const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   // しらない 種族（え が とどかなかった など）
   const iv = {}; if (o.iv && typeof o.iv === 'object') for (const k of STAT6) { const v = Number(o.iv[k]); iv[k] = Number.isFinite(v) ? Math.max(0, Math.min(31, v | 0)) : 0; }   // ほかの 人の データ：かずを たしかめる（NaN・おおきすぎ・マイナス）
-  const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv && typeof o.iv === 'object' ? iv : undefined, moves: [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(id => typeof id === 'string' && MOVES[id]))].slice(0, 4) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } let to = o.tr; if (typeof to === 'string') try { to = JSON.parse(to); } catch (e) { to = null; }   /* フリー対戦：Firestore には もじで おく */ const tr = trUnpack(to, m); if (tr) m.tr = tr; return m; };
+  const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv && typeof o.iv === 'object' ? iv : undefined, xL: Array.isArray(o.xL) ? o.xL.filter(id => typeof id === 'string' && xOk(o.sid, id)).slice(0, 8) : undefined, moves: [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(id => typeof id === 'string' && MOVES[id]))].slice(0, 4) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } let to = o.tr; if (typeof to === 'string') try { to = JSON.parse(to); } catch (e) { to = null; }   /* フリー対戦：Firestore には もじで おく */ const tr = trUnpack(to, m); if (tr) m.tr = tr; return m; };
 // ほかの 人の モンスター：ゲームで ありえる かず・おぼえられる 技 だけ（なおさずに はねる。ふつうに あそんだ データは teamOf で かならず とおる）
 const intIn = (v, a, b) => Number.isInteger(v) && v >= a && v <= b;
 function monOk(o) {
