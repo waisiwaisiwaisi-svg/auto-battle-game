@@ -2205,7 +2205,7 @@ function fixMon(m, bias) {
     m.iv = { hp: cv(m.iv.hp), atk: cv(m.iv.atk), def: cv(m.iv.def), spa: rIv(), spd: rIv(), spe: cv(m.iv.spd), eva: rIv() };
   }
   const L = learned(m);
-  if (Array.isArray(m.moves) && m.moves.some(id => MOVES[id] && MOVES[id].cat === 'stat' && !canLearn(m.sid, id))) m.moves = m.moves.filter(id => !(MOVES[id] && MOVES[id].cat === 'stat' && !canLearn(m.sid, id))).concat(['tackle']);   // おぼえられない ほじょわざは おきかえ（下で うめる）
+  if (Array.isArray(m.moves) && m.moves.some(id => MOVES[id] && MOVES[id].cat === 'stat' && !canKnow(m, id))) m.moves = m.moves.filter(id => !(MOVES[id] && MOVES[id].cat === 'stat' && !canKnow(m, id))).concat(['tackle']);   // おぼえられない ほじょわざは おきかえ（下で うめる）
   if (Array.isArray(m.moves) && m.moves.includes('tackle')) { m.moves = m.moves.filter(id => id !== 'tackle'); for (const id of pickMoves(m)) if (m.moves.length < 4 && !m.moves.includes(id)) m.moves.push(id); }   // むかしの たいあたりは わざに おきかえ
   if (m.tr) for (const k of ['prog', 'draft']) if (m.tr[k] && m.tr[k].mv && !m.tr[k].hv) m.tr[k] = trClone(m.tr[k], m);   // まもる系が じどう だった ころの 訓練：「攻撃を受けた瞬間」を つける
   if (Array.isArray(m.moves) && m.moves.some(id => !MOVES[id]) && m.moves.filter(id => MOVES[id]).length) { m.moves = m.moves.filter(id => MOVES[id]); for (const id of pickMoves(m)) if (m.moves.length < 4 && !m.moves.includes(id)) m.moves.push(id); }   // けした 技だけ はずして うめる
@@ -4422,6 +4422,9 @@ function canLearn(sid, id) {
   const txt = sp.n + (sp.desc || '') + (sp.prof ? (sp.prof.home || '') + (sp.prof.trait || '') : '');
   return !!(LOOK_KW[m.t] && LOOK_KW[m.t].test(txt));
 }
+// どうぐ（ひでんのまきもの・とっしんのまきもの）で おぼえた わざ：その モンスターの タイプか 突進の わざだけ
+const xOk = (sid, id) => { const sp = SPECIES[sid], mv = MOVES[id]; return !!(sp && mv && id !== 'tackle' && (mv.t === sp.type || mv.t === sp.type2 || mv.k === 'dash')); };
+const canKnow = (m, id) => canLearn(m.sid, id) || (!!m && Array.isArray(m.xL) && m.xL.includes(id) && xOk(m.sid, id));
 const TM_POOL = () => [...new Set(Object.keys(MOVES100).filter(id => MOVES[id]).concat(NEW_IDS))];   // あたらしい 技も ふつうに でる
 const CHEST_WEIGHT = { wood: 30, silver: 38, gold: 18, giant: 6, magic: 6, legend: 2 };
 function giveChestKind(kind) { S.chests = S.chests || []; if (S.chests.length >= 4) return null; S.chests.unshift({ kind, at: NOW() + CHESTS[kind].sec * 1000 }); return kind; }
@@ -4447,7 +4450,7 @@ function shopDeals() {
   const r = shopRng(shopDay() * 7 + 3), pick = (a) => a[Math.floor(r() * a.length)], out = [];
   const free = pick([{ k: 'orb', n: 3 }, { k: 'gem', n: 2 }, { k: 'item' }, { k: 'tm', rar: 0 }]);
   const tms = TM_POOL(), mons = poolIds();
-  const mk = (o) => { if (o.k === 'item' && !o.id) o.id = pick(Object.keys(ITEMS)); if (o.k === 'tm' && !o.id) { const rr = o.rar ?? (r() < .6 ? 0 : r() < .8 ? 1 : 2), L = tms.filter(id => tmRarity(id) === rr); o.id = pick(L.length ? L : tms); o.rar = tmRarity(o.id); } if (o.k === 'mon') { const rr = r() < .55 ? 0 : r() < .85 ? 1 : 2, L = mons.filter(id => monRarity(id) === rr); o.id = pick(L.length ? L : mons); o.rar = monRarity(o.id); } return o; };
+  const mk = (o) => { if (o.k === 'item' && !o.id) o.id = itemPick(r); if (o.k === 'tm' && !o.id) { const rr = o.rar ?? (r() < .6 ? 0 : r() < .8 ? 1 : 2), L = tms.filter(id => tmRarity(id) === rr); o.id = pick(L.length ? L : tms); o.rar = tmRarity(o.id); } if (o.k === 'mon') { const rr = r() < .55 ? 0 : r() < .85 ? 1 : 2, L = mons.filter(id => monRarity(id) === rr); o.id = pick(L.length ? L : mons); o.rar = monRarity(o.id); } return o; };
   out.push(Object.assign(mk(free), { p: 0 }));
   out.push(mk({ k: 'tm' }), mk({ k: 'tm' }), mk({ k: 'mon' }), mk({ k: 'item' }), { k: 'orb', n: 5 });
   for (const o of out.slice(1)) o.p = o.k === 'tm' ? SHOP_TM_P[o.rar] : o.k === 'mon' ? SHOP_MON_P[o.rar] : o.k === 'item' ? 6 : 3;
@@ -4554,7 +4557,7 @@ async function shopBuySpecial() {
 ACTS.shopBuySpecial = () => {
   const st = shopState(), o = shopSpecial(); if (st.wb) return 'sold';
   if ((S.gems || 0) < o.p) { SND.se('deny'); say0('ジェムが たりません'); return 'gems'; }
-  S.gems -= o.p; st.wb = 1; if (o.orb) S.capsules += o.orb; S.items = S.items || {}; for (let k = 0; k < (o.item || 0); k++) { const id = choice(Object.keys(ITEMS)); S.items[id] = (S.items[id] || 0) + 1; }
+  S.gems -= o.p; st.wb = 1; if (o.orb) S.capsules += o.orb; S.items = S.items || {}; for (let k = 0; k < (o.item || 0); k++) { const id = itemPick(rnd); S.items[id] = (S.items[id] || 0) + 1; }
   S.chests = S.chests || []; S.chests.push({ kind: o.ch, at: 0 }); save(); clerkPlay('buy'); openChest(S.chests.length - 1); renderShop(); return 'ok';
 };
 ACTS.sync = () => 'ok';
@@ -4670,7 +4673,7 @@ function rollChest(kind) {
   for (let k = 0; k < C.mon; k++) { const r = rollR(); out.mons.push(choice(mR[r].length ? mR[r] : mp)); }
   // どうぐ：いい はこほど おおく でる
   out.items = []; const IT_N = { wood: .3, silver: .5, gold: 1, giant: 1.5, magic: 2.5, legend: 3 }[kind] || .5, keys = Object.keys(ITEMS);
-  for (let n = IT_N; n > 0; n--) if (n >= 1 || rnd() < n) out.items.push(choice(keys));
+  for (let n = IT_N; n > 0; n--) if (n >= 1 || rnd() < n) out.items.push(itemPick(rnd));
   return out;
 }
 // あける：中身を 1つずつ 見せる
@@ -4992,7 +4995,13 @@ const ITEMS = {
   reroll4: { n: 'すべてわすれのかね', ic: '🔔', d: 'おぼえている わざ 4つを ぜんぶ ランダムに おぼえなおす' },
   reroll1: { n: 'ひとつわすれのは', ic: '🍃', d: 'えらんだ わざ 1つを、その モンスターが おぼえる わざの なかから ランダムに おぼえなおす' },
   retype: { n: 'おなじタイプのいし', ic: '💠', d: 'えらんだ わざを、おなじ タイプの わざ（おぼえられる もの）から ランダムに おぼえなおす' },
+  // 上位版（でにくい）
+  pick1: { n: 'えらびなおしのは', ic: '🌿', d: 'えらんだ わざ 1つを、その モンスターが おぼえる わざの なかから 好きな わざに おぼえなおす（ひとつわすれのはの 上位版）', w: .35 },
+  xtype: { n: 'ひでんのまきもの', ic: '📜', d: 'その モンスターの タイプ（属性か 種族）の わざなら、ふだんは おぼえない わざでも 好きに えらんで おぼえる（おなじタイプのいしの 上位版）', w: .25 },
+  xdash: { n: 'とっしんのまきもの', ic: '💨', d: '突進の わざなら、タイプに かかわらず 好きに えらんで おぼえる', w: .25 },
 };
+const X_ITEMS = ['pick1', 'xtype', 'xdash'];   // わざを えらんで おぼえる どうぐ
+const itemPick = (r) => { const ks = Object.keys(ITEMS), W = ks.map(k => ITEMS[k].w ?? 1); let x = r() * W.reduce((a, b) => a + b, 0); for (let i = 0; i < ks.length; i++) { x -= W[i]; if (x < 0) return ks[i]; } return ks[ks.length - 1]; };   // 上位版は でにくい
 const itemN = (k) => (S.items && S.items[k]) || 0;
 function useItem(k) { S.items = S.items || {}; S.items[k] = Math.max(0, itemN(k) - 1); }
 // わざの おぼえなおし
@@ -5363,7 +5372,7 @@ function renderTrain(uid) {
     if (g.dataset.k === 'cq') sc.n = STG_ENC(STG_DEC(sc.n ?? K.n0)[0], b.dataset.v); else if (g.dataset.k === 'cv') sc.n = STG_ENC(+b.dataset.v, STG_DEC(sc.n ?? K.n0)[1]);   // 能力の 段階：以上・以下 と 段階を べつべつに
     else if (g.dataset.k === 'cn') sc.n = +b.dataset.v; else sc.p = typeof K.ps[0][0] === 'number' ? +b.dataset.v : b.dataset.v; SND.se('click'); touch(); });
   act('cdel', () => { LN(W.mv[+sel[0]], sel[1]).splice(+sel[2], 1); TRN.sel = null; SND.se('back'); touch(); });
-  const trNg = () => { const ng = trMvIds(W).filter(id => !eq.includes(id) && !canLearn(m.sid, id)); if (ng.length) say0(`${ng.map(id => MOVES[id] ? MOVES[id].n : id).join('・')} は このモンスターが 覚えられない技です。べつの 技に かえてから ためしてください`); return ng.length > 0; };   /* ほかの 子から コピーした 技など */
+  const trNg = () => { const ng = trMvIds(W).filter(id => !eq.includes(id) && !canKnow(m, id)); if (ng.length) say0(`${ng.map(id => MOVES[id] ? MOVES[id].n : id).join('・')} は このモンスターが 覚えられない技です。べつの 技に かえてから ためしてください`); return ng.length > 0; };   /* ほかの 子から コピーした 技など */
   act('sim', async () => { if (TR_SIM) return; if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } if (trNg()) return; SND.se('ok');
     const bg = modal('<h3>シミュレーションちゅう…</h3><div class="dim">うらで 5かい たたかっています</div>'), seq = TR_SIMSEQ; const log = await trSim(m, W, 5); bg.remove(); if (log && seq === TR_SIMSEQ) trSimShow(m, W, log); });
   act('dummy', () => { if (W.mv.length < 1) { say0('技を 1つ いじょう 設定してください'); return; } if (trNg()) return; SND.se('ok'); dummyStart(m, W); });
@@ -5421,15 +5430,25 @@ function updTrainBtn() { const b = $('btnTrain'); if (!b) return; return; b.text
 function itemMenu(m) {
   const sp = SPECIES[m.sid];
   const bg = modal('<div id="itm"></div>');
-  const draw = (pickFor) => {
+  const draw = (pickFor, slot) => {
     const box = bg.querySelector('#itm');
+    if (pickFor && slot != null) {   // えらんで おぼえる：あたらしい わざを えらぶ
+      const pool = xPool(m, slot, pickFor);
+      box.innerHTML = `<h3 style="margin-bottom:6px">${ITEMS[pickFor].ic} ${ITEMS[pickFor].n}</h3><p class="dim" style="margin-bottom:8px">${MOVES[m.moves[slot]].n} の かわりに おぼえる わざを えらんでね</p><div class="tmlist">${pool.map(id => { const mv = MOVES[id];
+        return `<button data-id="${id}" style="--c:${TYPES[mv.t].c}"><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}</span><div class="desc">${kwDesc(mv)}</div></button>`; }).join('')}</div>
+        <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn sub" id="iBack">もどる</button></div>`;
+      box.querySelector('#iBack').onclick = () => draw(pickFor);
+      box.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => act('xlearn', m.uid, pickFor, slot, b.dataset.id).then(r => { if (!r || !r.nu) return; m = monU(m.uid) || m; SND.se('up'); say0(`${sp.n}は ${MOVES[r.old].n}を わすれて ${MOVES[r.nu].n}を おぼえた！`); draw(); }));
+      return;
+    }
     if (pickFor) {   // わざを えらぶ
-      box.innerHTML = `<h3 style="margin-bottom:6px">${ITEMS[pickFor].ic} ${ITEMS[pickFor].n}</h3><p class="dim" style="margin-bottom:8px">おぼえなおす わざを えらんでね</p><div class="tmlist">${m.moves.map((id, i) => { const mv = MOVES[id], n = rerollPool(m, i, pickFor === 'retype').length;
+      box.innerHTML = `<h3 style="margin-bottom:6px">${ITEMS[pickFor].ic} ${ITEMS[pickFor].n}</h3><p class="dim" style="margin-bottom:8px">おぼえなおす わざを えらんでね</p><div class="tmlist">${m.moves.map((id, i) => { const mv = MOVES[id], n = X_ITEMS.includes(pickFor) ? xPool(m, i, pickFor).length : rerollPool(m, i, pickFor === 'retype').length;
         return `<button data-i="${i}" style="--c:${TYPES[mv.t].c}" ${n ? '' : 'disabled'}><b>${mv.n}</b>${mvUseTag(mv)} <span class="dim">${moveSub(mv)}・こうほ ${n}こ</span><div class="desc">${kwDesc(mv)}</div></button>`; }).join('')}</div>
         <div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn sub" id="iBack">もどる</button></div>`;
       box.querySelector('#iBack').onclick = () => draw();
       box.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => {
-        const i = +b.dataset.i, pool = rerollPool(m, i, pickFor === 'retype'); if (!pool.length) return;
+        const i = +b.dataset.i; if (X_ITEMS.includes(pickFor)) { if (xPool(m, i, pickFor).length) draw(pickFor, i); return; }
+        const pool = rerollPool(m, i, pickFor === 'retype'); if (!pool.length) return;
         act('reroll1', m.uid, pickFor, i).then(r => { if (!r || !r.nu) return; m = monU(m.uid) || m; SND.se('up'); say0(`${sp.n}は ${MOVES[r.old].n}を わすれて ${MOVES[r.nu].n}を おぼえた！`); draw(); });
       });
       return;
@@ -5470,6 +5489,21 @@ ACTS.reroll1 = (uid, k, i) => {   // k：reroll1（おぼえる わざから）�
   const m = monU(uid); if (!m || !['reroll1', 'retype'].includes(k) || !itemN(k) || !m.moves[i | 0]) return 'no';
   const pool = rerollPool(m, i | 0, k === 'retype'); if (!pool.length) return 'no';
   const old = m.moves[i | 0], nu = choice(pool); m.moves[i | 0] = nu; if (k === 'retype') m.tmL = [...new Set([...(m.tmL || []), nu])]; useItem(k); save(); return { old, nu };
+};
+// わざを えらんで おぼえる どうぐ：えらべる わざ
+function xPool(m, i, k) {
+  const cur = m.moves, sp = SPECIES[m.sid]; let ids;
+  if (k === 'pick1') ids = rerollPool(m, i, false);
+  else if (k === 'xtype') ids = Object.keys(MOVES).filter(id => id !== 'tackle' && (MOVES[id].t === sp.type || MOVES[id].t === sp.type2));
+  else if (k === 'xdash') ids = Object.keys(MOVES).filter(id => MOVES[id].k === 'dash');
+  else ids = [];
+  return ids.filter(id => MOVES[id] && !cur.includes(id));
+}
+ACTS.xlearn = (uid, k, i, id) => {
+  const m = monU(uid); if (!m || !X_ITEMS.includes(k) || !itemN(k) || !m.moves[i | 0] || !xPool(m, i | 0, k).includes(id)) return 'no';
+  const old = m.moves[i | 0]; m.moves[i | 0] = id;
+  if (!canLearn(m.sid, id)) m.xL = [...new Set([...(m.xL || []), id])].slice(-8);   // ふだんは おぼえない わざ：あとから わすれても また つけられる
+  useItem(k); save(); return { old, nu: id };
 };
 ACTS.tm = (uid, id, slot) => {   // ワザステッカーで おぼえる
   const m = monU(uid); if (!m || !MOVES[id] || !canLearn(m.sid, id) || m.moves.includes(id) || (!tmFree() && !(S.tms && S.tms[id] > 0))) return 'no';
@@ -8813,9 +8847,10 @@ async function netGetRoom() {
 const trPack = (m) => { const P = m.tr && m.tr.mode === 'chip' && m.tr.prog && m.tr.prog.mv ? trClone(m.tr.prog, m) : null; if (!P) return undefined;
   return { n: P.nat || 0, m: P.mv.map(r => [r.id, r.go === 'auto' ? 0 : r.go, r.c.map(l => l.map(c => c.n != null ? [c.t, c.p, c.n] : [c.t, c.p]))].concat(r.x && r.x.length ? [r.x.map(l => l.map(c => c.n != null ? [c.t, c.p, c.n] : [c.t, c.p]))] : [])) }; };
 const trUnpack = (o, m) => { try { if (!o || !Array.isArray(o.m)) return null; const P = trClone({ nat: o.n || undefined, mv: o.m.slice(0, 8).map(r => ({ id: String(r[0]), go: r[1] || 'auto', c: (Array.isArray(r[2]) ? r[2] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 12).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))), x: (Array.isArray(r[3]) ? r[3] : []).slice(0, 4).map(l => (Array.isArray(l) ? l : []).slice(0, 12).map(c => Object.assign({ t: c[0], p: c[1] }, c[2] != null ? { n: c[2] } : {}))) })).filter(r => MOVES[r.id] && m.moves.includes(r.id)) }, m); return P.mv.length ? { mode: 'chip', prog: P } : null; } catch (e) { return null; } };
-const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); let mv = m.moves.filter(id => canLearn(m.sid, id)); if (!mv.length) mv = pickMoves(m).filter(id => canLearn(m.sid, id));   // あいてが たしかめる ので、いまは おぼえられない むかしの 技は おくらない
+const teamOf = (list, n = 3) => list.slice(0, n).map(m => { fixMon(m); let mv = m.moves.filter(id => canKnow(m, id)); if (!mv.length) mv = pickMoves(m).filter(id => canLearn(m.sid, id));   // あいてが たしかめる ので、いまは おぼえられない むかしの 技は おくらない
   const fed = Math.max(0, Math.min(EV_MAX, m.fed | 0)); let ev = null; if (m.ev) { ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, m.ev[k] | 0, fed - t)); ev[k] = v; t += v; } }
-  return { sid: m.sid, nat: m.nat, iv: m.iv, moves: mv.slice(0, 4), ev, fed, tr: trPack(m) }; });
+  const xl = mv.slice(0, 4).filter(id => !canLearn(m.sid, id));
+  return Object.assign({ sid: m.sid, nat: m.nat, iv: m.iv, moves: mv.slice(0, 4), ev, fed, tr: trPack(m) }, xl.length ? { xL: xl } : {}); });
 const monFrom = (o) => { if (!SPECIES[o.sid]) o = { ...o, sid: 'a_fire2' };   // しらない 種族（え が とどかなかった など）
   const iv = {}; if (o.iv && typeof o.iv === 'object') for (const k of STAT6) { const v = Number(o.iv[k]); iv[k] = Number.isFinite(v) ? Math.max(0, Math.min(31, v | 0)) : 0; }   // ほかの 人の データ：かずを たしかめる（NaN・おおきすぎ・マイナス）
   const m = fixMon({ uid: 0, sid: o.sid, nat: o.nat, iv: o.iv && typeof o.iv === 'object' ? iv : undefined, moves: [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(id => typeof id === 'string' && MOVES[id]))].slice(0, 4) }); if (o.ev && typeof o.ev === 'object') { const fed = Math.min(EV_MAX, o.fed | 0); m.fed = fed; m.ev = {}; let t = 0; for (const k of STAT6) { const v = Math.max(0, Math.min(EV_STAT_MAX, o.ev[k] | 0)); m.ev[k] = Math.min(v, fed - t); t += m.ev[k]; } } let to = o.tr; if (typeof to === 'string') try { to = JSON.parse(to); } catch (e) { to = null; }   /* フリー対戦：Firestore には もじで おく */ const tr = trUnpack(to, m); if (tr) m.tr = tr; return m; };
@@ -8825,7 +8860,8 @@ function monOk(o) {
   if (!o || typeof o !== 'object' || !SPECIES[o.sid]) return false;
   if (!NATURES[o.nat]) return false;   // せいかくが ない と ばらばらに きまる（さいげん できない）
   if (!o.iv || typeof o.iv !== 'object' || !STAT6.every(k => o.iv[k] == null || intIn(o.iv[k], 0, 31))) return false;
-  if (!Array.isArray(o.moves) || !o.moves.length || o.moves.length > 4 || new Set(o.moves).size !== o.moves.length || !o.moves.every(id => typeof id === 'string' && MOVES[id] && canLearn(o.sid, id))) return false;
+  if (!Array.isArray(o.moves) || !o.moves.length || o.moves.length > 4 || new Set(o.moves).size !== o.moves.length || !o.moves.every(id => typeof id === 'string' && MOVES[id] && canKnow(o, id))) return false;
+  if (o.xL != null && (!Array.isArray(o.xL) || o.xL.length > 8 || !o.xL.every(id => typeof id === 'string' && xOk(o.sid, id)))) return false;
   const fed = o.fed == null ? 0 : o.fed; if (!intIn(fed, 0, EV_MAX)) return false;
   if (o.ev != null) { if (typeof o.ev !== 'object') return false; let t = 0; for (const k of STAT6) { const v = o.ev[k] == null ? 0 : o.ev[k]; if (!intIn(v, 0, EV_STAT_MAX)) return false; t += v; } if (t > fed) return false; }
   return true;
@@ -8842,7 +8878,7 @@ async function srvFn() { if (SRV_FN) return SRV_FN; if (!SRV_APP()) return null;
    おなじ らんすう・じこく で この 端末でも うごかす（がめんも そのまま でる）。けっかが ちがえば サーバーの ほうに する */
 let SRV_SAVE = false;   // サーバーの セーブを つかって いる
 const SAVE_PROT = ['tutGem', 'gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt'];   // サーバーが きめる ところ
-const MON_PROT = ['uid', 'sid', 'iv', 'nat', 'ev', 'fed', 'lvl', 'tmL'];   // モンスターの サーバーが きめる ところ（わざ・訓練・ならびは 端末で かえて よい）
+const MON_PROT = ['uid', 'sid', 'iv', 'nat', 'ev', 'fed', 'lvl', 'tmL', 'xL'];   // モンスターの サーバーが きめる ところ（わざ・訓練・ならびは 端末で かえて よい）
 const saveHash = (x) => { const o = {}; for (const k of SAVE_PROT) if (x[k] !== undefined) o[k] = x[k]; o.mons = [...(x.party || []), ...(x.box || [])].map(m => MON_PROT.map(k => m[k] === undefined ? null : m[k])); return seedOf(JSON.stringify(o)).toString(36); };
 const cloneJ = (x) => JSON.parse(JSON.stringify(x));
 let ACT_SEED = 0;
@@ -8855,7 +8891,7 @@ function mergeSave(srv, loc) {
   const byUid = new Map([...(srv.party || []), ...(srv.box || [])].map(m => [m.uid, m])), used = new Set();
   const fix = (m) => { const sm = m && byUid.get(m.uid); if (!sm || used.has(sm.uid)) return null; used.add(sm.uid);
     const o = { ...m }; for (const k of MON_PROT) { if (sm[k] !== undefined) o[k] = cloneJ(sm[k]); else delete o[k]; }
-    const okMv = (id) => typeof id === 'string' && MOVES[id] && canLearn(sm.sid, id) && (learned(sm).includes(id) || (sm.moves || []).includes(id) || (sm.tmL || []).includes(id));   // ワザステッカーで おぼえた ものも
+    const okMv = (id) => typeof id === 'string' && MOVES[id] && ((canLearn(sm.sid, id) && (learned(sm).includes(id) || (sm.moves || []).includes(id) || (sm.tmL || []).includes(id))) || ((sm.xL || []).includes(id) && xOk(sm.sid, id)));   // ワザステッカーで おぼえた ものも
     const mv = [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(okMv))].slice(0, 4); o.moves = mv.length ? mv : cloneJ(sm.moves || []);
     return o; };
   s.party = (loc.party || []).map(fix).filter(Boolean).slice(0, 6); s.box = (loc.box || []).map(fix).filter(Boolean);
