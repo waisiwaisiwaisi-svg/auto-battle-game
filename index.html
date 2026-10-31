@@ -1852,8 +1852,8 @@ const sq = (v) => v * v, cb = (v) => v * v * v;
 let SIM_RNG = null;
 const GAME_VER = 'dev';
 // じこく：サーバーで きめる しごと（act）の あいだは サーバーの じこく。ふだんは 端末の じこく＋サーバーとの ずれ
-let ACT_NOW = null, SRV_SKEW = 0;
-const NOW = () => (ACT_NOW != null ? ACT_NOW : Date.now() + SRV_SKEW);
+let ACT_NOW = null, SRV_SKEW = 0, BCLK = null;   // BCLK：たたかいの とけい（チケットの じこく＋たたかいの じかん。端末でも サーバーでも おなじ）
+const NOW = () => (BCLK != null ? BCLK : ACT_NOW != null ? ACT_NOW : Date.now() + SRV_SKEW);
 const jstD = (t) => new Date((t == null ? NOW() : t) + 9 * 36e5);   // 日本時間（getUTC… で よむ）。日替わり・しゅうがわりは みんな 日本時間   // ビルドで ファイルの ハッシュに おきかわる（サーバーの さいげんは おなじ バージョン どうし だけ）
 const rnd = () => (SIM_RNG ? SIM_RNG() : Math.random());
 const mkRng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
@@ -3441,12 +3441,12 @@ const WILD_DAYS = [   // [ようび（0=にち）, なまえ, タイプ]
 ];
 const WD_N = '日月火水木金土';
 function renderWild() {
-  show('scWild'); const today = new Date().getDay(), sun = today === 0;
+  show('scWild'); const today = jstD().getUTCDay(), sun = today === 0;   // ようびは 日本時間（サーバーと おなじ）
   $('wdBody').innerHTML = `<div class="card wdcard"><b>エリアを えらぶと やせいの モンスターが でてくる</b><p class="dim">${sun ? 'きょうは にちようび！ どの エリアにも はいれる' : `きょうは ${WD_N[today]}ようび。ほかの エリアは その ようびに はいれる（にちようびは ぜんぶ）`}</p>
     <div class="wdrow"><span>ボックス</span><b>${S.capsules || 0}こ</b></div></div>
     <div class="wdareas">${WILD_DAYS.map((a, i) => [a, i]).sort((x, y) => (sun ? 0 : (y[0][0] === today) - (x[0][0] === today))).map(([[d, n, ts], i]) => { const ok = sun || d === today;   // きょうの エリアを いちばん うえに
       return `<button class="wdarea${ok ? '' : ' off'}${d === today ? ' now' : ''}" data-i="${i}"${ok ? '' : ' disabled'}><span class="wdday">${WD_N[d]}</span><span class="wdan"><b>${n}</b><span class="wdchips">${ts.map(typeChip).join('')}</span></span>${ok ? '<em>はいる ›</em>' : ''}</button>`; }).join('')}</div>`;
-  $('wdBody').querySelectorAll('.wdarea:not(:disabled)').forEach(b => b.onclick = () => { SND.se('ok'); ISLE.wild = 1; startWild(WILD_DAYS[+b.dataset.i][2]); });
+  $('wdBody').querySelectorAll('.wdarea:not(:disabled)').forEach(b => b.onclick = () => { SND.se('ok'); battleGo('wild', +b.dataset.i); });
 }
 $('btnWdBack').onclick = () => $('tabHome').click();
 // したの メニュー：バトル・メニュー
@@ -4554,7 +4554,8 @@ ACTS.shopBuySpecial = () => {
   S.gems -= o.p; st.wb = 1; if (o.orb) S.capsules += o.orb; S.items = S.items || {}; for (let k = 0; k < (o.item || 0); k++) { const id = choice(Object.keys(ITEMS)); S.items[id] = (S.items[id] || 0) + 1; }
   S.chests = S.chests || []; S.chests.push({ kind: o.ch, at: 0 }); save(); clerkPlay('buy'); openChest(S.chests.length - 1); renderShop(); return 'ok';
 };
-ACTS.sync = () => 'ok';   // わざ・訓練・ならび などを サーバーへ（act の まえに かさねる だけ）
+ACTS.sync = () => 'ok';
+ACTS.tutGem = () => { if (S.tutGem) return 'done'; S.tutGem = 1; S.gems = (S.gems || 0) + 10; save(); return 'ok'; };   // チュートリアルの はじめての クリア（1かい だけ）   // わざ・訓練・ならび などを サーバーへ（act の まえに かさねる だけ）
 function shopPaint(root) { paintIcons(root); root.querySelectorAll('i[data-shmon]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.shmon, 56))); }
 function renderShop() {
   if (!S) return; show('scShop'); const st = shopState(), deals = shopDeals(), sp = shopSpecial(), jn = NOW() + 9 * 36e5;
@@ -4735,8 +4736,8 @@ function useTM(m) {
       return `<button data-i="${i}" style="--c:${TYPES[o.t].c}"><b>${o.n}</b> <span class="dim">${TYPES[o.t].n}</span><div class="desc">${kwDesc(o)}</div></button>`; }).join('')}</div><button class="btn sub" style="margin-top:10px;width:100%">もどる</button></div>`;
     bg.querySelector('.btn.sub').onclick = step1;
     bg.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => {
-      const old = MOVES[m.moves[+b.dataset.i]].n; m.moves[+b.dataset.i] = id; tmTake(id);
-      save(); close(); renderTeam(m.uid); say0(`${SPECIES[m.sid].n}は ${old}を わすれて ${mv.n}を おぼえた！`);
+      const old = MOVES[m.moves[+b.dataset.i]].n; close();
+      act('tm', m.uid, id, +b.dataset.i).then(r => { if (r !== 'ok') return; renderTeam(m.uid); say0(`${SPECIES[m.sid].n}は ${old}を わすれて ${mv.n}を おぼえた！`); });
     });
   };
   $('app').appendChild(bg); step1();
@@ -4978,7 +4979,7 @@ function renderTeamDetail() {
     if (act === 'train') { TRN = TRN && TRN.uid === m.uid ? TRN : null; TR_BACK = 'team'; return renderTrain(m.uid); }   // もどるで へんせいへ
     if (act === 'box') teamMove({ w: 'p', i: pi }, { w: 'drop', i: 0 });
     if (act === 'party') teamMove({ w: 'b', i: bi }, { w: 'p', i: S.party.length });
-    if (act === 'release') { if (towerHold(m)) return; ask(`${m.fav ? '★おきにいりの ' : ''}${sp.n}を にがしますか？\nもう もどって きません。`).then(y => { if (!y) return; S.box.splice(S.box.indexOf(m), 1); teamView = null; teamSheet = false; teamSel = null; save(); renderTeam(); }); return; }
+    if (act === 'release') { if (towerHold(m)) return; ask(`${m.fav ? '★おきにいりの ' : ''}${sp.n}を にがしますか？\nもう もどって きません。`).then(async y => { if (!y) return; await act('release', m.uid); teamView = null; teamSheet = false; teamSel = null; renderTeam(); }); return; }
     teamSel = null; renderTeam();
   };
 }
@@ -5397,7 +5398,7 @@ async function trConfirm(m) {
   const free = eq.filter(id => !ids.includes(id)), slot = Math.max(0, 4 - eq.length), forget = add.map((_, i) => i < slot ? null : free[i - slot]);
   const msg = add.length ? `ワザステッカーを使います：\n` + add.map((id, i) => `・${MOVES[id].n} を覚える${forget[i] ? `（${MOVES[forget[i]].n} を忘れる）` : ''}`).join('\n') + '\nワザステッカーを使って確定しますか？' : 'ワザステッカーは使いません。\nこの設定で確定しますか？';
   if (add.length && !await ask(msg, '確定', 'やめる')) return false;   // ワザステッカーを 使う ときだけ 確認
-  add.forEach((id, i) => { if (forget[i]) m.moves[m.moves.indexOf(forget[i])] = id; else m.moves.push(id); tmTake(id); });
+  for (let i = 0; i < add.length; i++) { const cur = monU(m.uid) || m, slot_ = forget[i] ? cur.moves.indexOf(forget[i]) : 4; const r = await act('tm', m.uid, add[i], slot_); if (r !== 'ok') return false; }   // ワザステッカー：サーバーで（アプリ版）
   return true;
 }
 // ほかの モンスターの プログラムを よびだす（コピー）
@@ -5426,8 +5427,7 @@ function itemMenu(m) {
       box.querySelector('#iBack').onclick = () => draw();
       box.querySelectorAll('.tmlist button').forEach(b => b.onclick = () => {
         const i = +b.dataset.i, pool = rerollPool(m, i, pickFor === 'retype'); if (!pool.length) return;
-        const old = MOVES[m.moves[i]].n, nu = choice(pool); m.moves[i] = nu; useItem(pickFor); save(); SND.se('up');
-        say0(`${sp.n}は ${old}を わすれて ${MOVES[nu].n}を おぼえた！`); draw();
+        act('reroll1', m.uid, pickFor, i).then(r => { if (!r || !r.nu) return; m = monU(m.uid) || m; SND.se('up'); say0(`${sp.n}は ${MOVES[r.old].n}を わすれて ${MOVES[r.nu].n}を おぼえた！`); draw(); });
       });
       return;
     }
@@ -5437,13 +5437,42 @@ function itemMenu(m) {
     box.querySelector('#iClose').onclick = () => { bg.remove(); renderTeam(m.uid); };
     box.querySelectorAll('.it .btn').forEach(b => b.onclick = async () => {
       const k = b.dataset.k;
-      if (k === 'respec') { if (!evUsed(m)) { say0('まだ ポイントを ふって いません'); return; } if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の きょうかポイントを ふりなおしますか？`))) return; for (const x of STAT6) m.ev[x] = 0; useItem(k); save(); SND.se('heal'); bg.remove(); openBoost(m); return; }
-      if (k === 'reroll4') { if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の わざを 4つ ぜんぶ おぼえなおしますか？`))) return; const before = m.moves.slice(); let tries = 0; do { m.moves = pickMoves(m); } while (m.moves.slice().sort().join() === before.slice().sort().join() && ++tries < 8); useItem(k); save(); SND.se('up'); say0(`${sp.n}は あたらしく ${m.moves.map(id => MOVES[id].n).join('・')} を おぼえた！`); draw(); return; }
+      if (k === 'respec') { if (!evUsed(m)) { say0('まだ ポイントを ふって いません'); return; } if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の きょうかポイントを ふりなおしますか？`))) return; act('respec', m.uid).then(r => { if (r !== 'ok') return; m = monU(m.uid) || m; SND.se('heal'); bg.remove(); openBoost(m); }); return; }
+      if (k === 'reroll4') { if (!(await ask(`${ITEMS[k].n}を つかって、${sp.n}の わざを 4つ ぜんぶ おぼえなおしますか？`))) return; act('reroll4', m.uid).then(r => { if (!r || !r.after) return; m = monU(m.uid) || m; SND.se('up'); say0(`${sp.n}は あたらしく ${r.after.map(id => MOVES[id].n).join('・')} を おぼえた！`); draw(); }); return; }
       draw(k);
     });
   };
   draw();
 }
+/* ---- モンスターの のうりょく・わざを かえる しごと（アプリ版は サーバーで さきに）。ひきすうは uid（オブジェクトは わたさない） ---- */
+const monU = (uid) => [...S.party, ...S.box].find(x => x.uid === uid);
+ACTS.release = (uid) => { const m = monU(uid); if (!m || inTowerRun(m) || S.party.length + S.box.length <= 1) return 'no'; S.party = S.party.filter(x => x !== m); S.box = S.box.filter(x => x !== m); if (!S.party.length && S.box.length) S.party.push(S.box.shift()); save(); return 'ok'; };
+ACTS.boost = (uid, food) => {   // おなじ しゅるいを つかって きょうかポイントを ふやす
+  const m = monU(uid); if (!m || !Array.isArray(food)) return 'no'; m.fed = m.fed || 0;
+  const list = [...new Set(food)].map(monU).filter(x => x && x !== m && x.sid === m.sid && !inTowerRun(x)); if (!list.length) return 'no';
+  const room = EV_MAX - m.fed, use = list.slice(0, Math.ceil(room / BOOST_SAME)); if (room <= 0 || !use.length) return 'full';
+  const gone = new Set(use); if (S.party.filter(x => !gone.has(x)).length < 1) return 'party';
+  S.box = S.box.filter(x => !gone.has(x)); S.party = S.party.filter(x => !gone.has(x));
+  m.fed = Math.min(EV_MAX, m.fed + use.length * BOOST_SAME); save(); return 'ok';
+};
+ACTS.evAdd = (uid, add) => {   // ふりわけを 確定（ふやす だけ。へらすのは ふりなおしのくすり）
+  const m = monU(uid); if (!m || !add || typeof add !== 'object') return 'no'; m.ev = m.ev || {}; for (const k of STAT6) m.ev[k] = m.ev[k] || 0;
+  let free = (m.fed || 0) - evUsed(m);
+  for (const k of STAT6) { const v = Math.max(0, add[k] | 0), can = Math.min(v, free, EV_STAT_MAX - m.ev[k]); if (can > 0) { m.ev[k] += can; free -= can; } }
+  save(); return 'ok';
+};
+ACTS.respec = (uid) => { const m = monU(uid); if (!m || !itemN('respec') || !evUsed(m)) return 'no'; for (const k of STAT6) m.ev[k] = 0; useItem('respec'); save(); return 'ok'; };
+ACTS.reroll4 = (uid) => { const m = monU(uid); if (!m || !itemN('reroll4')) return 'no'; const before = m.moves.slice(); let tries = 0; do { m.moves = pickMoves(m); } while (m.moves.slice().sort().join() === before.slice().sort().join() && ++tries < 8); useItem('reroll4'); save(); return { before, after: m.moves.slice() }; };
+ACTS.reroll1 = (uid, k, i) => {   // k：reroll1（おぼえる わざから）・retype（おなじ タイプから）
+  const m = monU(uid); if (!m || !['reroll1', 'retype'].includes(k) || !itemN(k) || !m.moves[i | 0]) return 'no';
+  const pool = rerollPool(m, i | 0, k === 'retype'); if (!pool.length) return 'no';
+  const old = m.moves[i | 0], nu = choice(pool); m.moves[i | 0] = nu; if (k === 'retype') m.tmL = [...new Set([...(m.tmL || []), nu])]; useItem(k); save(); return { old, nu };
+};
+ACTS.tm = (uid, id, slot) => {   // ワザステッカーで おぼえる
+  const m = monU(uid); if (!m || !MOVES[id] || !canLearn(m.sid, id) || m.moves.includes(id) || (!tmFree() && !(S.tms && S.tms[id] > 0))) return 'no';
+  if (m.moves.length < 4) m.moves.push(id); else if (m.moves[slot | 0]) m.moves[slot | 0] = id; else return 'no';
+  m.tmL = [...new Set([...(m.tmL || []), id])]; tmTake(id); save(); return 'ok';
+};
 // 強化：おなじ モンスターを つかって ポイントを ふやし、のうりょくに ふりわける
 // きょうか できる：おなじ しゅるいの モンスターが ほかに いて、まだ さいだいまで あつめて いない
 const canBoost = (m) => (m.fed || 0) < EV_MAX && [...S.party, ...S.box].some(x => x !== m && x.sid === m.sid);
@@ -5476,17 +5505,16 @@ function openBoost(m) {
     bg.querySelectorAll('.brow button').forEach(b => b.onclick = () => { const k = b.dataset.k;
       if (+b.dataset.d < 0) { if (pend[k]) pend[k]--; } else if (m.fed - evUsed(m) - pendN() > 0 && m.ev[k] + (pend[k] || 0) < EV_STAT_MAX) pend[k] = (pend[k] || 0) + 1;
       SND.se('up'); draw(); });
-    bg.querySelector('#bOk').onclick = () => { if (!pendN()) return; for (const k of STAT6) m.ev[k] += pend[k] || 0; pend = {}; SND.se('heal'); save(); draw(); };   // 確定
-    bg.querySelector('#bReset').onclick = async () => { if (!itemN('respec')) return; if (!(await ask(`${ITEMS.respec.n}を 1こ つかって ふりなおしますか？`))) return; for (const k of STAT6) m.ev[k] = 0; pend = {}; useItem('respec'); save(); SND.se('heal'); draw(); };
+    bg.querySelector('#bOk').onclick = () => { if (!pendN()) return; const add = { ...pend }; pend = {}; act('evAdd', m.uid, add).then(() => { m = monU(m.uid) || m; SND.se('heal'); draw(); }); };   // 確定
+    bg.querySelector('#bReset').onclick = async () => { if (!itemN('respec')) return; if (!(await ask(`${ITEMS.respec.n}を 1こ つかって ふりなおしますか？`))) return; pend = {}; await act('respec', m.uid); m = monU(m.uid) || m; SND.se('heal'); draw(); };
     bg.querySelectorAll('.bdup').forEach(b => b.onclick = () => { const j = +b.dataset.j; if (pick.has(j)) pick.delete(j); else if (gainOf(pick) < room) pick.add(j); draw(); });
     bg.querySelector('#bFeed').onclick = async () => {
       const list = [...pick].map(j => dups[j]), gain = gainOf(pick);
       if (list.some(o => o.w === 'p') && S.party.length - list.filter(o => o.w === 'p').length < 1) { say0('パーティが 0たいに なってしまいます'); return; }
       if (!(await ask(`${list.length}たいを つかって ${sp.n}を きょうかしますか？（+${gain}）\nつかった モンスターは いなくなります。`))) return;
-      const gone = new Set(list.map(o => o.x));
-      S.box = S.box.filter(x => !gone.has(x)); S.party = S.party.filter(x => !gone.has(x));
+      await act('boost', m.uid, list.map(o => o.x.uid)); m = monU(m.uid) || m;
       { const pi = S.party.indexOf(m), bi = S.box.indexOf(m); teamSel = pi >= 0 ? { w: 'p', i: pi } : bi >= 0 ? { w: 'b', i: bi } : null; }   /* つかった ぶん ずれるので えらんだ 子を さがしなおす */
-      m.fed = Math.min(EV_MAX, m.fed + gain); pick = new Set(); SND.se('heal'); save(); draw();
+      pick = new Set(); SND.se('heal'); draw();
     };
     bg.querySelector('#bClose').onclick = async () => { if (pendN() && !(await ask('ふりわけた ポイントが まだ 確定して いません。\n確定しないで とじますか？（ふりわけは もとに もどります）', 'とじる', 'もどる'))) return; bg.remove(); renderTeam(m.uid); };
   };
@@ -5628,7 +5656,7 @@ function monCard(m, where, i, openUid) {
     if (act === 'down') [S.party[i + 1], S.party[i]] = [S.party[i], S.party[i + 1]];
     if (act === 'box') S.box.push(S.party.splice(i, 1)[0]);
     if (act === 'party') S.party.push(S.box.splice(i, 1)[0]);
-    if (act === 'release') { if (towerHold(S.box[i])) return; ask(`${sp.n}を にがしますか？`).then(y => { if (!y) return; S.box.splice(i, 1); teamSel = null; save(); renderTeam(); }); return; }
+    if (act === 'release') { if (towerHold(S.box[i])) return; const ru = S.box[i] && S.box[i].uid; ask(`${sp.n}を にがしますか？`).then(async y => { if (!y) return; await act('release', ru); teamSel = null; renderTeam(); }); return; }
     save(); renderTeam();
   };
   el.appendChild(a);
@@ -5973,7 +6001,7 @@ function speedOf(f) {
 
 // たたかいは シードつきの らんすう で はじめる（おなじ シード・おなじ そうさ なら どの 端末でも おなじ けっか：サーバーで さいげん して たしかめる）
 function startBattle(cfg) {
-  const seed = cfg.seed != null ? cfg.seed >>> 0 : (Math.random() * 4294967296) >>> 0, rng = mkRng(seed), prev = SIM_RNG; SIM_RNG = rng;
+  const seed = cfg.seed != null ? cfg.seed >>> 0 : (rnd() * 4294967296) >>> 0, rng = mkRng(seed), prev = SIM_RNG; SIM_RNG = rng;   // act の なかでは サーバーの シードから
   try { startBattle0(cfg); } finally { SIM_RNG = prev; }
   if (B) Object.assign(B, { rng, seed, stepN: 0, hq: [], ilog: [], stepAcc: 0 });
 }
@@ -7188,7 +7216,7 @@ function useStatusMove(f, o, m) {
       if (B.kind === 'wild' || idx < 0) { failMove(f, 'でも かわりが いない！'); return; }
       if (plOk('n_baton')) plFx('n_baton', f.x, f.y + 4, 1.8); else pillarFx(f, '#ffd166', .8); typeFx(f.x, f.y - BODY, 'normal', 20, 120, .7);
       { const pass = { st: Object.assign({}, f.st), sub: f.v.sub || 0 };
-        if (canPickSwap(f.side)) { const f0 = f; setTimeout(() => { if (B && active(0) === f0 && f0.hp > 0) chooseSwap(i => doSwitch(f0, i, pass, false, true), 'うけわたす あいてを えらぶ', { skip: B.sides[0].act }); }, 0); }   // うけわたし：じぶんの こうたいさきを えらぶ
+        if (canPickSwap(f.side)) { const f0 = f; (B.nextFns = B.nextFns || []).push(() => { if (B && active(0) === f0 && f0.hp > 0) chooseSwap(i => doSwitch(f0, i, pass, false, true), 'うけわたす あいてを えらぶ', { skip: B.sides[0].act }); }); }   // うけわたし：じぶんの こうたいさきを えらぶ
         else doSwitch(f, idx, pass, false, true); }
       break;
     }
@@ -7218,7 +7246,7 @@ function rayEffect(f, o, m) {
       if (o && plOk('n_scared')) plFx('n_scared', o.x, o.y - BODY * 2.2, 1.8, .8);   // おびえる しるし
       if (B.kind === 'wild') { say(`${o.sp.n}は おどろいて にげだした！`); B.fled = o.sp.n; endBattle(o.side === 1 ? 'run' : 'lose'); return; }
       { const idx = benchIdx(o.side, true); if (idx < 0) { say('でも かわりが いない！'); return; } if (plOk('sum_swap')) plFx('sum_swap', o.x, o.y - BODY, 1.2, .6); else fxp({ type: 'swap', x: o.x, y: o.y - BODY, col: '#ffffff', life: .7 });
-        if (canPickSwap(o.side)) { const o0 = o; setTimeout(() => { if (B && active(0) === o0 && o0.hp > 0) chooseSwap(i => doSwitch(o0, i, null, true), 'ふきとばされた！ だれを だす？', { skip: B.sides[0].act }); }, 0); } else doSwitch(o, idx, null, true); }
+        if (canPickSwap(o.side)) { const o0 = o; (B.nextFns = B.nextFns || []).push(() => { if (B && active(0) === o0 && o0.hp > 0) chooseSwap(i => doSwitch(o0, i, null, true), 'ふきとばされた！ だれを だす？', { skip: B.sides[0].act }); }); } else doSwitch(o, idx, null, true); }
       break;
   }
 }
@@ -7248,7 +7276,7 @@ function forceSwitch(f, o) {
   const idx = benchIdx(o.side, true); if (idx < 0) return;
   if (plOk('sum_swap')) plFx('sum_swap', o.x, o.y - BODY, 1.2, .6); else fxp({ type: 'swap', x: o.x, y: o.y - BODY, col: '#ffffff', life: .7 });
   say(`${o.sp.n}は ふきとばされて ひっこんだ！`);
-  if (canPickSwap(o.side)) { const o0 = o; setTimeout(() => { if (B && active(0) === o0 && o0.hp > 0) chooseSwap(i => doSwitch(o0, i, null, true), 'ふきとばされた！ だれを だす？', { skip: B.sides[0].act }); }, 0); } else doSwitch(o, idx, null, true);
+  if (canPickSwap(o.side)) { const o0 = o; (B.nextFns = B.nextFns || []).push(() => { if (B && active(0) === o0 && o0.hp > 0) chooseSwap(i => doSwitch(o0, i, null, true), 'ふきとばされた！ だれを だす？', { skip: B.sides[0].act }); }); } else doSwitch(o, idx, null, true);
 }
 function benchIdx(side, random) {
   const sd = B.sides[side];
@@ -7474,7 +7502,7 @@ function afterHitSelf(att, def, m, dmg, opt) {
   if (e.drain && att.hp > 0 && !(att.v.healBlock > 0)) { const id = MOVE_ID.get(m); att.drains = att.drains || {}; if (drainLeft(att, id) > 0) { att.drains[id] = (att.drains[id] || 0) + 1; healHp(att, dmg * e.drain / 100); } }
   if (e.recoil && att.hp > 0) { const r = Math.max(1, Math.round(dmg * e.recoil / 100)); att.hp = Math.max(0, att.hp - r); popText(att.x, att.y - 66, `-${r}`, '#ff9a8a'); if (att.hp <= 0) faint(att, def); }
   if (e.self && att.hp > 0 && (!opt || !opt.tick || opt.first)) changeStages(att, e.self, true);
-  if (m.switchOut && att.hp > 0 && (B.kind === 'cup' || B.kind === 'online') && att === active(att.side)) { const idx = benchIdx(att.side); if (idx >= 0) { att.pendingOut = idx; if (canPickSwap(att.side)) { const a0 = att; setTimeout(() => { if (B && a0.pendingOut != null) chooseSwap(i => { a0.pendingOut = i; }, 'こうたいさきを えらぶ', { skip: B.sides[0].act }); }, 0); } popText(att.x, att.y - 100, 'こうたい！', '#7fd8ff', 'comic'); fxp({ type: 'swap', x: att.x, y: att.y - BODY, col: '#7fd8ff', life: .7 }); } }
+  if (m.switchOut && att.hp > 0 && (B.kind === 'cup' || B.kind === 'online') && att === active(att.side)) { const idx = benchIdx(att.side); if (idx >= 0) { att.pendingOut = idx; if (canPickSwap(att.side)) { const a0 = att; (B.nextFns = B.nextFns || []).push(() => { if (B && a0.pendingOut != null) chooseSwap(i => { a0.pendingOut = i; }, 'こうたいさきを えらぶ', { skip: B.sides[0].act }); }); } popText(att.x, att.y - 100, 'こうたい！', '#7fd8ff', 'comic'); fxp({ type: 'swap', x: att.x, y: att.y - BODY, col: '#7fd8ff', life: .7 }); } }
   if (m.selfConfuse && att.hp > 0) att.v.confuse = Math.max(att.v.confuse || 0, m.selfConfuse);   // さんれんスピン：めが まわる
 }
 // どくどく・おにび など「あたれば状態異常」の弾
@@ -8796,11 +8824,12 @@ async function srvFn() { if (SRV_FN) return SRV_FN; if (!SRV_APP()) return null;
    それを かえる しごと（act）は さきに サーバーで うごかし（この ゲームの コードを サーバーの ブラウザで）、
    おなじ らんすう・じこく で この 端末でも うごかす（がめんも そのまま でる）。けっかが ちがえば サーバーの ほうに する */
 let SRV_SAVE = false;   // サーバーの セーブを つかって いる
-const SAVE_PROT = ['gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt'];   // サーバーが きめる ところ
+const SAVE_PROT = ['tutGem', 'gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt'];   // サーバーが きめる ところ
 const MON_PROT = ['uid', 'sid', 'iv', 'nat', 'ev', 'fed', 'lvl', 'tmL'];   // モンスターの サーバーが きめる ところ（わざ・訓練・ならびは 端末で かえて よい）
 const saveHash = (x) => { const o = {}; for (const k of SAVE_PROT) if (x[k] !== undefined) o[k] = x[k]; o.mons = [...(x.party || []), ...(x.box || [])].map(m => MON_PROT.map(k => m[k] === undefined ? null : m[k])); return seedOf(JSON.stringify(o)).toString(36); };
 const cloneJ = (x) => JSON.parse(JSON.stringify(x));
-function actRun(name, args, seed, now) { const f = ACTS[name]; if (!f) throw new Error('act ' + name); const p = SIM_RNG, pn = ACT_NOW; SIM_RNG = mkRng(seed >>> 0); ACT_NOW = now; try { return f(...args); } finally { SIM_RNG = p; ACT_NOW = pn; } }
+let ACT_SEED = 0;
+function actRun(name, args, seed, now) { const f = ACTS[name]; if (!f) throw new Error('act ' + name); const p = SIM_RNG, pn = ACT_NOW, ps = ACT_SEED; SIM_RNG = mkRng(seed >>> 0); ACT_NOW = now; ACT_SEED = seed >>> 0; try { return f(...args); } finally { SIM_RNG = p; ACT_NOW = pn; ACT_SEED = ps; } }
 // 端末で かえた ところ（わざ・訓練・ならび・せってい など）を サーバーの セーブに かさねる。サーバーが きめる ところは サーバーの まま
 function mergeSave(srv, loc) {
   if (!loc || typeof loc !== 'object' || !Array.isArray(loc.party)) return cloneJ(srv);
@@ -8818,18 +8847,19 @@ function mergeSave(srv, loc) {
   delete s.stash;
   return s;
 }
-// はじめて サーバーに セーブを つくる：この 端末の データを ありえる はんいに なおして つかう
+// はじめて サーバーに セーブを つくる（さいしょの ながれが おわった とき）。あたらしい プロフィール だけ うけつける：
+//   ジェム・ボックスは さいしょの ぶん まで、モンスターは 3たい まで（しゅるい だけ。のうりょく・せいかく・わざは サーバーで きめなおす）
 function importSave(loc) {
   const d = defaultSave(); if (!loc || typeof loc !== 'object' || !Array.isArray(loc.party)) return d;
   const s = cloneJ(loc), n = (v, a, b) => Math.max(a, Math.min(b, Number.isFinite(+v) ? Math.floor(+v) : a));
-  s.gems = n(s.gems, 0, 3000); s.capsules = n(s.capsules, 0, 300);
-  for (const k of ['items', 'tms']) { const o = {}; const src = s[k] && typeof s[k] === 'object' ? s[k] : {}; for (const id in src) if ((k === 'items' ? ITEMS[id] : MOVES[id])) o[id] = n(src[id], 0, 99); s[k] = o; }
-  s.chests = (Array.isArray(s.chests) ? s.chests : []).filter(c => c && CHESTS[c.kind]).slice(0, 4).map(c => ({ kind: c.kind, at: c.at == null ? null : NOW() + Math.min(Math.max(0, (+c.at || 0) - NOW()), CHESTS[c.kind].sec * 1000) }));
-  const mons = [...(s.party || []), ...(s.box || [])].filter(m => m && monOk({ ...m, fed: m.fed | 0 })).slice(0, 600); let uid = 1;
-  for (const m of mons) { m.uid = uid++; m.fed = n(m.fed, 0, EV_MAX); delete m.tmL; }
-  s.party = mons.slice(0, Math.min(6, (s.party || []).length || 1)); s.box = mons.slice(s.party.length); s.uid = uid;
-  if (!s.party.length) return d;
-  s.imported = NOW(); return Object.assign(d, s);
+  for (const k of SAVE_PROT) delete s[k];   // サーバーが きめる ところは うけとらない
+  const o = Object.assign(d, s); S = o;
+  o.gems = n(loc.gems, 0, 50); o.capsules = n(loc.capsules, 0, 20);
+  o.chests = (Array.isArray(loc.chests) && loc.chests.length) ? [{ kind: 'wood', at: NOW() + CHESTS.wood.sec * 1000 }] : [];
+  const sids = [...new Set([...(loc.party || []), ...(loc.box || [])].map(m => m && m.sid).filter(sid => SPECIES[sid]))].slice(0, 3);
+  o.uid = 1; o.party = sids.map(sid => newMon(sid)); o.box = [];
+  if (!o.party.length) o.party.push(newMon(STARTERS[0]));
+  delete o.stash; delete o.tkt; o.imported = NOW(); return o;
 }
 // サーバーの ブラウザから よぶ
 window.PMA_ACT = (pre, name, args, seed, now) => { S = Object.assign(defaultSave(), cloneJ(pre)); let out = null; try { out = actRun(name, args, seed, now); } catch (e) { return { err: String(e && e.message || e) }; } const post = cloneJ(S); return { post, h: saveHash(S), out: out == null || typeof out !== 'object' ? out : cloneJ(out) }; };
@@ -8838,29 +8868,78 @@ window.PMA_IMPORT = (loc) => importSave(loc);
 // この 端末から：サーバーで うごかしてから おなじ ことを ここでも
 let ACT_BUSY = false;
 async function act(name, ...args) {
-  if (!SRV_SAVE) return ACTS[name](...args);   // claude.ai 版・サーバーの セーブが まだ：この 端末で
+  if (!SRV_SAVE && SRV_APP() && (SAVE_SERVER_ON || window.PMA_SAVE_ON) && S && !S.onb) { await saveInit(); if (!SRV_SAVE) { say0('サーバーに つながりません。オンラインで あそんでね'); return undefined; } }   // アプリ版は いつも サーバーで（さいしょの ながれ だけ この 端末で）
+  if (!SRV_SAVE) return ACTS[name](...args);   // claude.ai 版・さいしょの ながれ：この 端末で
   if (ACT_BUSY) return undefined; ACT_BUSY = true;
   try {
     const f = await srvFn(); if (!f) { say0('サーバーに つながりません。オンラインで あそんでね'); return undefined; }
     let r; try { r = await f.call('act', { name, args, loc: cloneJ(S) }); } catch (e) { say0(`サーバーに つながりませんでした（${e && e.code || 'error'}）。もういちど ためしてね`); return undefined; }
     if (r.err) { say0('できませんでした（' + r.err + '）'); return undefined; }
     SRV_SKEW = r.now - Date.now();
-    S = Object.assign(defaultSave(), r.pre);   // サーバーの セーブ（うごかす まえ）
+    if (name === 'battleEnd') {   // たたかいは この 端末で もう おわって ごほうびも ついて いる：おなじ か くらべる だけ
+      window.PMA_LASTACT = { name, out: r.out, res: B && B.result, n: B && B.stepN, steps: args[1], logN: (args[0] || []).length };   // テスト用
+      delete S.tkt; if (saveHash(S) !== r.h) { window.PMA_MISMATCH = (window.PMA_MISMATCH || 0) + 1; const g = await f.call('saveGet', {}).catch(() => null); if (g && g.s) { adoptSave(g.s); if (!B && !$('scHub').hidden) renderHub(); } }
+      saveLocal(); return r.out;
+    }
+    adoptSave(r.pre);   // サーバーの セーブ（うごかす まえ）
     const out = actRun(name, args, r.seed, r.now);   // おなじ しごとを ここでも（がめんも でる）
-    if (saveHash(S) !== r.h) { const g = await f.call('saveGet', {}).catch(() => null); if (g && g.s) { S = Object.assign(defaultSave(), g.s); renderHub(); } }   // ずれた：サーバーの ほう
+    if (saveHash(S) !== r.h) { window.PMA_MISMATCH = (window.PMA_MISMATCH || 0) + 1; const g = await f.call('saveGet', {}).catch(() => null); if (g && g.s) { adoptSave(g.s); renderHub(); } }   // ずれた：サーバーの ほう（PMA_MISMATCH：テスト用の かず）
     saveLocal(); return out;
   } finally { ACT_BUSY = false; }
 }
+/* ---- たたかい：はじまりは サーバーが チケット（あいて・シード）を きめる。おわったら サーバーが きろくから さいげん して ごほうびを つける ---- */
+const BSTART = {
+  wild: (i) => { const d = WILD_DAYS[i | 0], today = jstD().getUTCDay(); if (!d || (today !== 0 && d[0] !== today)) return; ISLE.wild = 1; startWild(d[2]); },   // きょう はいれる エリア だけ
+  rival: (t) => startRival(!!t), journey: (gi) => startJourney(gi | 0), league: () => startLeague(), tower: () => towerStart(), arcade: () => arcadeStart(),
+  cup: (f) => startCup(f), cpu: () => freeCpu(), free: (o, nm) => freeBattle(o, nm),
+};
+function battleGo(k, ...a) { if (!SRV_SAVE) return BSTART[k](...a); return act('battleStart', k, a); }
+ACTS.battleStart = (k, a) => {
+  const f = BSTART[k]; if (!f) return 'bad';
+  if (S.tkt) { const B1 = B; ACTS.battleEnd([[1, 'x', S.tkt.k === 'wild' ? 'run' : 'lose']], 2); B = B1; }   // まえの たたかいを おわらせずに つぎ：やめた（まけ）あつかい
+  delete S.tkt; const pre = cloneJ(S), B0 = B;
+  f(...(Array.isArray(a) ? a : []));
+  if (B && B !== B0 && !B.cfg.sim && !B.cfg.dummy) { B.tnow = ACT_NOW; S.tkt = { k, a: Array.isArray(a) ? a : [], seed: ACT_SEED, now: ACT_NOW, pre }; save(); return 'ok'; }
+  return 'none';
+};
+// おわった：サーバーでは チケットの ときの セーブに もどして おなじ たたかいを つくり、そうさの きろくで さいごまで うごかす（endBattle が ごほうびを つける）
+ACTS.battleEnd = (log, steps) => {
+  const T = S.tkt; if (!T || !BSTART[T.k]) return 'none';
+  S = Object.assign(defaultSave(), cloneJ(T.pre));
+  const p = SIM_RNG, pn = ACT_NOW; SIM_RNG = mkRng(T.seed >>> 0); ACT_NOW = T.now;
+  try { BSTART[T.k](...T.a); } finally { SIM_RNG = p; ACT_NOW = pn; }
+  if (!B) return 'none'; B.tnow = T.now;
+  const mute0 = SND.opt.mute; SND.opt.mute = true;
+  try { B.replay = { log: Array.isArray(log) ? log : [], i: 0, rewards: true }; const max = Math.min(steps | 0 || 1, 60 * (MATCH_T + 120)); while (B && B.stepN < max && B.mode !== 'end') bStep(FIX_DT); }
+  finally { SND.opt.mute = mute0; }
+  const res = B && B.mode === 'end' ? B.result : 'none';
+  delete S.tkt; save(); return res;
+};
+// この 端末で たたかった けっか（ごほうびも つけた あと）を サーバーに たしかめて もらう。ちがえば サーバーの セーブに する
+async function battleVerify() {
+  if (!SRV_SAVE || !B || !S.tkt || B.kind === 'online') return;
+  const log = (B.ilog || []).slice(), steps = B.stepN + 1;
+  return act('battleEnd', log, steps);
+}
 // アプリを ひらいた とき：サーバーの セーブを もらう（はじめては この 端末の データから つくる）
-const SAVE_SERVER_ON = false;   // ぜんぶの しごとを サーバーへ うつし おわるまで off（テストは window.PMA_SAVE_ON）
+const SAVE_SERVER_ON = true;   // アプリ版は セーブを サーバーで まもる（claude.ai 版は この 端末で）
 async function saveInit() {
-  if (!SRV_APP() || SRV_SAVE || !S || !(SAVE_SERVER_ON || window.PMA_SAVE_ON)) return;
+  if (!SRV_APP() || SRV_SAVE || !S || S.onb || !(SAVE_SERVER_ON || window.PMA_SAVE_ON)) return;   // さいしょの ながれの あいだは まだ（おわったら はじめる）
   const f = await srvFn(); if (!f) return;
-  const r = await f.call('saveGet', { loc: cloneJ(S) }).catch(() => null); if (!r || !r.s) return;
-  SRV_SKEW = r.now - Date.now(); S = Object.assign(defaultSave(), r.s); SRV_SAVE = true; saveLocal();
+  const r = await f.call('saveGet', { loc: cloneJ(S) }).catch((e) => { if (/moved/.test(String(e && (e.message || e.code)))) say0('この データは ほかの 端末へ うつしました。ふっかつコードで よびだした 端末で あそんでね'); return null; }); if (!r || !r.s) return;
+  SRV_SKEW = r.now - Date.now(); adoptSave(r.s); SRV_SAVE = true; saveLocal();
   if (!$('scHub').hidden) renderHub();
 }
 const saveLocal = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { } };
+// サーバーの セーブに する：S と モンスターの オブジェクトは そのまま つかう（ひらいて いる がめんの さんしょうが きれない）
+function adoptSave(ns) {
+  ns = Object.assign(defaultSave(), ns); if (!S) { S = ns; return; }
+  const old = new Map([...(S.party || []), ...(S.box || [])].map(m => [m.uid, m]));
+  const keep = (m) => { const o = old.get(m.uid); if (!o) return m; for (const k of Object.keys(o)) if (!(k in m)) delete o[k]; return Object.assign(o, m); };
+  ns.party = (ns.party || []).map(keep); ns.box = (ns.box || []).map(keep);
+  for (const k of Object.keys(S)) if (!(k in ns)) delete S[k];
+  Object.assign(S, ns);
+}
 // 試合を サーバーに きろく：はじまった（へやの ようすを サーバーが たしかめる）→ おわった（ふたりの けっかが あえば レート・ギルドに）
 function netMatchStart(team) { const code = NET.code; return srvFn().then(f => f ? f.call('matchStart', { code, ...(team ? { team } : {}) }).then(r => r && r.mid || null) : null).catch(() => null); }   // team：ゲストの じぶんの チーム（ホストが かえて いないか サーバーが みる）
 function netSendLog() {   // ホスト：たたかいの きろくを サーバーへ（サーバーが さいげん して かちまけを きめる）
@@ -9754,7 +9833,8 @@ function hostApply(c) { HQ_RUN = true; try {
   } finally { HQ_RUN = false; } }
 function bStep(dt) {
   const b = B; if (!b || !b.rng || b.remote) return bStep0(dt);
-  const prev = SIM_RNG; SIM_RNG = b.rng;
+  if (b.userPause) return;   // プレイヤーが とめて いる：ステップも すすめない（とめた かどうかで けっかが かわらない）
+  const prev = SIM_RNG, pc = BCLK; SIM_RNG = b.rng; if (b.tnow != null) BCLK = b.tnow + Math.round(b.t * 1000);
   try {
     const n = b.stepN = (b.stepN || 0) + 1;
     if (b.replay) { const R = b.replay;
@@ -9762,9 +9842,10 @@ function bStep(dt) {
       if (b.choosing && b.choosePick) { if (++R.wait > 900 && !R.log.slice(R.i).some(e => e[1] === 'h' && e[2][0] === 'ch')) { R.wait = 0; const sd = b.sides[0], i = sd.fs.findIndex((x, j) => !x.fainted && x.hp > 0 && j !== sd.act); hostApply(['ch', i < 0 ? 0 : i]); } } else R.wait = 0;   // きろくに ない えらび（ホストの がめんと ちがって いた）：15びょうで じどう（ゲームの じどうと おなじ）
     }
     else if (b.hq.length) for (const c of b.hq.splice(0)) { b.ilog.push([n, 'h', c]); hostApply(c); }
+    if (b.nextFns && b.nextFns.length) for (const fn of b.nextFns.splice(0)) fn();   // まえの ステップで きまった えらぶ まど（いつも おなじ ステップで ひらく）
     bStep0(dt);
     if (n % 30 === 0 && B === b) (b.trace = b.trace || []).push(stepHash(b));   // とちゅうの ようす（サーバーの さいげんと くらべて ずれた ところが わかる）
-  } finally { SIM_RNG = prev; }
+  } finally { SIM_RNG = prev; BCLK = pc; }
 }
 const stepHash = (b) => { let h = 2166136261; const add = (v) => { const t = String(v); for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } }; add(b.mode); add(b.paused ? 1 : 0); for (const sd of b.sides) { add(sd.act); for (const f of sd.fs) { add(f.x.toFixed(3)); add(f.y.toFixed(3)); add(f.hp.toFixed(3)); add(f.state); } } add(b.projs.length); return h.toString(36); };
 function bStep0(dt) {
@@ -9962,9 +10043,10 @@ function learnLines(m, before) {
   }
   return lines;
 }
-function endBattle(res) {
+function endBattle(res) {   // らんすうは いつも この たたかいの もの（ステップの そとで おわっても おなじ ごほうび）
+  if (B && B.rng && (SIM_RNG !== B.rng || (B.tnow != null && BCLK == null))) { const p = SIM_RNG, pc = BCLK; SIM_RNG = B.rng; if (B.tnow != null) BCLK = B.tnow + Math.round(B.t * 1000); try { return endBattle(res); } finally { SIM_RNG = p; BCLK = pc; } }
   if (B.mode === 'end') return;
-  if (B.replay) { B.mode = 'end'; B.result = res; return; }   // サーバーの さいげん：ごほうび・きろくは なし
+  if (B.replay && !B.replay.rewards) { B.mode = 'end'; B.result = res; return; }   // サーバーの さいげん（オンライン）：ごほうび・きろくは なし
   if (B.cfg.sim) { B.mode = 'end'; B.result = res; return; }   // シミュレーション：ごほうび・きろくは なし
   if (B.cfg.dummy) { setTimeout(dummyQuit, 0); B.mode = 'end'; B.result = res; B.endT = 99; B.resLines = []; return; }   // 模擬戦：そのまま 訓練へ
   SND.play(res === 'win' || res === 'caught' ? 'win' : res === 'lose' ? 'lose' : '');
@@ -10008,7 +10090,8 @@ function endBattle(res) {
   }
   // ブラインドボックスは ときどき：ボス（ジムリーダー・リーグ など）は かならず、サモナー戦 35%、くさむらは でない
   let ck = null; if (res === 'win' && !B.cfg.tutorial && B.kind !== 'wild' && rnd() < (B.cfg.boss || (B.cfg.journey && B.cfg.journey.league != null) ? 1 : .35)) { ck = giveChest(); if (!ck) lines.push('ブラインドボックスが いっぱいで もらえなかった…'); }
-  B.rewards = { cr: S.capsules - caps0, gem: (S.gems || 0) - gems0, chest: ck };   // リザルトで アイコンつきで ならべる
+  B.rewards = { cr: S.capsules - caps0, gem: (S.gems || 0) - gems0, chest: ck };
+  if (SRV_SAVE && !B.replay && S.tkt) { const log = (B.ilog || []).slice(), steps = B.stepN + 1; setTimeout(() => { act('battleEnd', log, steps); }, 0); }   // サーバーに たしかめて もらう（ちがえば サーバーの ほう）   // リザルトで アイコンつきで ならべる
   B.resLines = lines;
   save();
 }
@@ -10187,7 +10270,7 @@ function onbHub() {
   else if (S.onb === 5) { if (!(S.chests || []).length && !S.onbChest) { giveChestKind('wood'); S.onbChest = 1; save(); } /* むりょうの はこは 1かいだけ（よみこみなおしても ふえない） */ renderChests(); trtStart({ steps: HUB_CHEST, scr: 'scHub', onEnd: onbFinish }); }
 }
 async function onbFinish() {
-  S.onb = 0; S.tutDone = true; S.trTutDone = 1; delete S.onbOpen; save();
+  S.onb = 0; S.tutDone = true; S.trTutDone = 1; delete S.onbOpen; save(); setTimeout(saveInit, 300);   // さいしょの ながれが おわった：サーバーの セーブを つくる
   if (ONB_TEST) { await ask('テストはここまでです。元のデータに戻します。', 'OK', ''); S = ONB_TEST; ONB_TEST = null; renderHub(); }
 }
 // せっていの テスト：いまの データは そのまま（ほぞん しない）で、さいしょの ながれを とおしで ためす
@@ -10198,7 +10281,7 @@ async function onbTest() {
 function tutEnd(res, lines) {
   const first = !S.tutDone, onb = S.onb === 1; S.tutDone = true; S.auto = TUT ? TUT.auto0 : S.auto; TUT = null; tutHide(); $('tutBox').hidden = true;
   if (onb) S.onb = 2;   // さいしょの ながれ：つぎは 訓練の チュートリアル
-  if (res === 'win') { lines.unshift('<b style="color:var(--acc)">チュートリアル クリア！</b>'); if (first && !onb) { S.gems = (S.gems || 0) + 10; S.goTrain = 1; } /* はじめての クリアは ジェム 10こ */ lines.push(onb ? '次は「訓練」で、技の使い方を決めてみましょう！' : '次は下の「訓練」タブで、技の使い方を決めてみましょう！'); }
+  if (res === 'win') { lines.unshift('<b style="color:var(--acc)">チュートリアル クリア！</b>'); if (first && !onb) { if (SRV_SAVE) setTimeout(() => act('tutGem'), 0); else S.gems = (S.gems || 0) + 10; S.goTrain = 1; } /* はじめての クリアは ジェム 10こ */ lines.push(onb ? '次は「訓練」で、技の使い方を決めてみましょう！' : '次は下の「訓練」タブで、技の使い方を決めてみましょう！'); }
   else lines.unshift('チュートリアルを終えました。ヘルプ（？）から、いつでもやり直せます。');
 }
 $('tutNext').onclick = () => { if (!TUT) return; tutHide(); $('tutBox').hidden = true; if (B) B.padT = 0; tutGo(TUT.i + 1); };
@@ -12726,6 +12809,7 @@ async function bkConfirm(f) {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { }
     const n = loadSave(); if (n) { n.bk.h = bkH(n); try { localStorage.setItem(SAVE_KEY, JSON.stringify(n)); } catch (e) { } }   // もどした ままなら「かわって いない」
     if (window.PMA_NAME && s.pname) try { window.PMA_NAME.set(s.pname).catch(() => { }); } catch (e) { }
+    if (SRV_APP() && s.bk && bkNorm(s.bk.code)) { try { const fn = await srvFn(); if (fn) await fn.call('saveClaim', { k: await bkId(bkNorm(s.bk.code)) }); } catch (e) { } }   // アプリ版：サーバーの セーブも この 端末へ うつす（ふっかつコードで ほんにん と わかる）
     SND.se('ok'); SAVE_STALE = true; setTimeout(() => location.reload(), 300);
   };
 }
@@ -12757,7 +12841,7 @@ $('btnOpt').onclick = () => {
   bg.querySelector('#oTutB').onclick = () => { bg.remove(); startTutorial(); };   // テスト：いつでも チュートリアルを たしかめる
   bg.querySelector('#oTutT').onclick = () => { bg.remove(); trainTutorial(() => renderHub()); };
   bg.querySelector('#oTutA').onclick = () => { bg.remove(); onbTest(); };
-  bg.querySelector('#oTutR').onclick = () => { bg.remove(); startRival(true); };   // テスト：はじめての戦い（初回の 会話つき）
+  bg.querySelector('#oTutR').onclick = () => { bg.remove(); battleGo('rival', 1); };   // テスト：はじめての戦い（初回の 会話つき）
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
   
   const LK = bg.querySelector('#oLooks');
@@ -12950,10 +13034,10 @@ function mvTipShow(b) {
   let y = r.top - h - 8; if (y < 8) y = Math.min(r.bottom + 8, innerHeight - h - 8); t.style.top = y + 'px';
 }
 
-$('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { netReport('lose'); const rl = rankResult(false); netReset(); /* レートを きめてから ぬける（まだ おわって いない ので bye が でる：あいては すぐ かち） */ B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rl]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); showResult(); } else { if (B.ilog) B.ilog.push([B.stepN + 1, 'x', 'lose']); endBattle('lose'); netReset(true); /* レートを きめてから ぬける（bye で あいては すぐ かち） */ } }); return; } B.paused = true; $('pauseOv').hidden = false; };
-$('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B && !B.choosing) B.paused = false; };
-$('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; if (B.cfg.dummy) { dummyQuit(); return; } B.paused = false; endBattle(B.kind === 'wild' ? 'run' : 'lose'); B.endT = 0; };
-document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end' && B.kind !== 'online') { B.paused = true; $('pauseOv').hidden = false; } });
+$('btnPause').onclick = () => { if (!B || B.mode === 'end' || B.choosing) return; if (B.kind === 'online') { ask('オンライン対戦を やめますか？（まけ あつかい）').then(y => { if (!y || !B) return; if (B.remote) { netReport('lose'); const rl = rankResult(false); netReset(); /* レートを きめてから ぬける（まだ おわって いない ので bye が でる：あいては すぐ かち） */ B.remote = false; B.mode = 'end'; B.result = 'lose'; B.resLines = ['たいせんを やめた', rl]; S.online = S.online || { w: 0, l: 0 }; S.online.l++; save(); showResult(); } else { if (B.ilog) B.ilog.push([B.stepN + 1, 'x', 'lose']); endBattle('lose'); netReset(true); /* レートを きめてから ぬける（bye で あいては すぐ かち） */ } }); return; } B.paused = true; B.userPause = true; $('pauseOv').hidden = false; };
+$('btnResume').onclick = () => { $('pauseOv').hidden = true; if (B) B.userPause = false; if (B && !B.choosing) B.paused = false; };
+$('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; if (B.cfg.dummy) { dummyQuit(); return; } B.paused = false; B.userPause = false; const r = B.kind === 'wild' ? 'run' : 'lose'; if (B.ilog) B.ilog.push([B.stepN + 1, 'x', r]); endBattle(r); B.endT = 0; };   // x：サーバーの さいげんでも ここで おわる
+document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end' && B.kind !== 'online') { B.paused = true; B.userPause = true; $('pauseOv').hidden = false; } });
 
 // あいての わざ：おぼえている中から ランダムに4つ（こうげきわざを 2つ以上）
 function pickMoves(m) {
@@ -13198,14 +13282,14 @@ function renderTower() {
       <div style="margin:-2px 0 4px">${deckPickHTML()}</div>
       <button class="btn" id="twGo">ちょうせん する</button>`;
     deckPickBind(body, renderTower);
-    body.querySelector('#twGo').onclick = () => { SND.se('ok'); T.run = { streak: 0, uids: S.party.slice(0, 3).map(m => m.uid) }; save(); renderTower(); };
+    body.querySelector('#twGo').onclick = () => { SND.se('ok'); act('towerBegin').then(() => renderTower()); };
   } else {
     const team = towerTeam() || [], n = R.streak, nx = n + 1, tyc = nx % TW_TYCOON === 0, boss = nx % TW_SET === 0;
     body.innerHTML = head + `<div class="card"><div class="acscore" style="margin-bottom:8px"><span>いま <b style="font-size:20px">${n}</b> れんしょう</span><span class="dim">つぎは ${nx}せんめ</span></div><div class="acpath">${dots(n)}</div></div>
       <div class="card acteam">${team.map(m => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b></div>`).join('')}</div>
       <div class="row" style="gap:10px"><button class="btn" id="twGo" style="flex:2">${tyc ? 'タワータイクーンに ちょうせん！' : boss ? 'ボスに ちょうせん！' : 'つぎの たたかいへ'}</button><button class="btn sub" id="twQuit" style="flex:1">やめる</button></div>`;
-    body.querySelector('#twGo').onclick = () => { SND.se('ok'); towerStart(); };
-    body.querySelector('#twQuit').onclick = async () => { if (!(await ask(`バトルタワーを やめますか？\n${n}れんしょうで きろくします。`))) return; T.best = Math.max(T.best, n); T.run = null; save(); renderTower(); };
+    body.querySelector('#twGo').onclick = () => { SND.se('ok'); battleGo('tower'); };
+    body.querySelector('#twQuit').onclick = async () => { if (!(await ask(`バトルタワーを やめますか？\n${n}れんしょうで きろくします。`))) return; await act('towerQuit'); renderTower(); };
   }
   body.querySelectorAll('canvas[data-sid]').forEach(c => c.replaceWith(spriteCanvas(c.dataset.sid, 72)));
 }
@@ -13246,13 +13330,13 @@ function renderJourney() {
   { const R = rivalTr(), b = document.createElement('button'); b.className = 'jrc league rival' + (J.rival ? '' : ' next');   // はじめての 戦い（ライバル）
     b.style.backgroundImage = `linear-gradient(90deg,rgba(20,16,40,.85),rgba(20,16,40,.35)),url(${ARENAS.grass.img})`;
     b.innerHTML = `${J.rival ? '<span class="badge">✔</span>' : ''}<div class="in rvin"><span class="rvface"></span><span class="rvt"><b>はじめての戦い</b><small>${R.name}と しょうぶ${J.rival ? '（もういちど たたかえる）' : '！ まずは ここから'}</small></span></div>`;
-    b.querySelector('.rvface').appendChild(lookCanvas(R.look, 48)); b.onclick = () => { SND.se('ok'); startRival(); }; g.appendChild(b); }
+    b.querySelector('.rvface').appendChild(lookCanvas(R.look, 48)); b.onclick = () => { SND.se('ok'); battleGo('rival'); }; g.appendChild(b); }
   GYMS.forEach((G, i) => {
     const open = (i <= J.gym || J.champ) && J.rival, done = J.badges.includes(G.f), cur = i === J.gym && !J.champ && J.rival, step = i < J.gym || J.champ ? 3 : J.step;
     const b = document.createElement('button'); b.className = 'jrc' + (open ? '' : ' lock') + (cur ? ' next' : '');
     b.style.backgroundImage = `url(${ARENAS[G.st || G.f].img})`;
     b.innerHTML = `${done ? `<span class="badge">${gymMedal(G.t)}</span>` : ''}<span class="jtype">${typeChip(G.t)}</span><div class="in"><b>${TYPES[G.t].n}ジム</b><small>${G.ln}</small><div class="dots"><i class="${step > 0 ? 'on' : ''}"></i><i class="${step > 1 ? 'on' : ''}"></i><i class="ld ${done ? 'on' : ''}"></i></div><small>${!open ? (!J.rival && i === 0 ? 'はじめての戦いの あとに あく' : 'まえの ジムを クリアすると あく') : cur ? (J.step < 2 ? `サモナー ${J.step + 1}人め` : 'ジムリーダーに ちょうせん') : 'リーダーに さいせん'}</small>${open ? `<small class="jrec">おすすめ ${strongVs(G.t).map(typeChip).join('')}</small>` : ''}</div>`;
-    if (open) b.onclick = () => { SND.se('ok'); startJourney(i); };
+    if (open) b.onclick = () => { SND.se('ok'); battleGo('journey', i); };
     g.appendChild(b);
   });
   const L = document.createElement('button'), lo = J.badges.length >= GYMS.length;
@@ -13265,7 +13349,7 @@ function renderJourney() {
       <div class="lgx-row">${LEAGUE.map((x, i) => `<div class="lgx-p${i < k ? ' done' : i === k ? ' cur' : ''}${i === LEAGUE.length - 1 ? ' champ' : ''}"><span class="lgx-f"><img src="${url(x[0])}" alt="">${i < k ? '<em>✔</em>' : ''}</span><i>${x[1].split(' ')[1]}</i>${x[3] ? typeChip(x[3]) : '<span class="chip lgx-any">ぜんぶ</span>'}</div>`).join('')}</div>
       <div class="lgx-next"><span class="lgx-nt">つぎ：<b>${LEAGUE[k][1]}</b></span>${ace ? `<span class="lgx-ace"><span class="lgx-ac"></span><span><i>エース</i><b>${SPECIES[ace].n}</b></span></span>` : ''}<span class="lgx-go">▶ ちょうせん</span></div></div>`;
     if (ace) L.querySelector('.lgx-ac').appendChild(spriteCanvas(ace, 40)); }
-  if (lo) L.onclick = () => { SND.se('ok'); startLeague(); };
+  if (lo) L.onclick = () => { SND.se('ok'); battleGo('league'); };
   g.appendChild(L);
   { const T = tw(), op = towerOpen(), b = document.createElement('button');
     if (!op) { b.className = 'jrc league tower lock'; b.innerHTML = `<div class="in"><b>バトルタワー</b><small>でんどういり すると ちょうせん できる</small></div>`; }
@@ -13282,6 +13366,10 @@ function renderJourney() {
    ===================================================================== */
 const AC_N = 10, AC_BOSS = [4, 9];
 const ac = () => { S.arcade = S.arcade || { best: 0, bestStage: 0, clears: 0, run: null }; return S.arcade; };
+ACTS.towerBegin = () => { const T = tw(); if (T.run) return 'run'; T.run = { streak: 0, uids: S.party.slice(0, 3).map(m => m.uid) }; save(); return 'ok'; };
+ACTS.towerQuit = () => { const T = tw(), R = T.run; if (!R) return 'none'; T.best = Math.max(T.best, R.streak || 0); T.run = null; save(); return 'ok'; };
+ACTS.arcadeNew = () => { arcadeNew(); return 'ok'; };
+ACTS.arcadeQuit = () => { const A = ac(), R = A.run; if (!R) return 'none'; if (R.score > A.best) A.best = R.score; A.bestStage = Math.max(A.bestStage, R.stage); A.run = null; save(); return 'ok'; };
 function arcadeNew() {
   const A = ac(), team = S.party.slice(0, 3);
   const order = FIELDS.slice().sort(() => rnd() - .5);
@@ -13336,15 +13424,15 @@ function renderArcade() {
       <div class="acrules"><span><b>❤</b>HPは つぎの たたかいへ ひきつぐ</span><span><b>✚</b>かつと 40% かいふく・ボスの あとは ぜんかい</span><span><b>✖</b>まけたら そこで おわり</span></div></div>
       <div class="card acteam acstage" style="${st ? `--stg:${st}` : ''}">${team.map(m => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b></div>`).join('')}</div>
       <button class="btn" id="acGo">スタート</button>`;
-    body.querySelector('#acGo').onclick = () => { SND.se('ok'); arcadeNew(); };
+    body.querySelector('#acGo').onclick = () => { SND.se('ok'); act('arcadeNew'); };
   } else {
     const team = arcadeTeam() || [];
     body.innerHTML = head + `<div class="card"><div class="acscore" style="margin-bottom:8px"><span>ステージ <b>${R.stage + 1}</b>/${AC_N}</span><span>スコア <b style="font-size:20px">${R.score}</b></span></div>
       <div class="acstages">${R.order.concat(R.order).slice(0, AC_N).map((f, i) => `<i class="${i < R.stage ? 'done' : i === R.stage ? 'now' : ''} ${AC_BOSS.includes(i) ? 'boss' : ''}" style="background-image:url(${ARENAS[f].img})"></i>`).join('')}</div></div>
       <div class="card acteam">${team.map((m, i) => `<div><canvas data-sid="${m.sid}"></canvas><b>${SPECIES[m.sid].n}</b><span class="bar"><i style="width:${Math.round(R.hp[i] * 100)}%;background:${R.hp[i] > .5 ? '#7bd88f' : R.hp[i] > .2 ? '#ffd166' : '#ff6a6a'}"></i></span><small>${R.hp[i] > 0 ? Math.round(R.hp[i] * 100) + '%' : 'ひんし'}</small></div>`).join('')}</div>
       <div class="row" style="gap:10px"><button class="btn" id="acGo" style="flex:2">${AC_BOSS.includes(R.stage) ? 'ボスに ちょうせん！' : 'つぎの たたかいへ'}</button><button class="btn sub" id="acQuit" style="flex:1">あきらめる</button></div>`;
-    body.querySelector('#acGo').onclick = () => { SND.se('ok'); arcadeStart(); };
-    body.querySelector('#acQuit').onclick = async () => { if (!(await ask('アーケードを おわりますか？\nここまでの スコアで きろくします。'))) return; if (R.score > A.best) A.best = R.score; A.bestStage = Math.max(A.bestStage, R.stage); A.run = null; save(); renderArcade(); };
+    body.querySelector('#acGo').onclick = () => { SND.se('ok'); battleGo('arcade'); };
+    body.querySelector('#acQuit').onclick = async () => { if (!(await ask('アーケードを おわりますか？\nここまでの スコアで きろくします。'))) return; await act('arcadeQuit'); renderArcade(); };
   }
   body.querySelectorAll('canvas[data-sid]').forEach(c => c.replaceWith(spriteCanvas(c.dataset.sid, R ? 56 : 80)));
 }
@@ -13370,17 +13458,17 @@ async function startFree() {
 }
 async function startFree0() {
   const R = navigator.onLine ? await rankDb().catch(() => false) : false;
-  if (!R || !R.id) { await say0('いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます'); return freeCpu(); }
+  if (!R || !R.id) { await say0('いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます'); return battleGo('cpu'); }
   freeUpload(R).catch(() => { });
   let rows = [];
   try { const q = await R.db.collection('teams').orderBy('t', 'desc').limit(40).get(); rows = q.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.id !== R.id && freeOk(r.tm)); } catch (e) { await say0('いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます'); return freeCpu(); }
-  if (!rows.length) { await say0('まだ ほかの 人の チームが ありません。コンピューターの チームと たたかいます'); return freeCpu(); }
+  if (!rows.length) { await say0('まだ ほかの 人の チームが ありません。コンピューターの チームと たたかいます'); return battleGo('cpu'); }
   let i; { const ok = rows.map((r, k) => k).filter(k => rows.length < 2 || rows[k].id !== S.freeLast); i = ok[Math.floor(rnd() * ok.length)]; }   // まえの あいて いがいから おなじ かくりつで
   const show_ = (k) => {
     const o = rows[k], nm = (typeof o.nm === 'string' && safeName(o.nm, NAME_MAX)) || 'サモナー', bg = modal(`<h3 style="margin-bottom:6px">フリー対戦</h3><p class="dim" style="margin-bottom:8px">あいて：<b class="frNm" style="color:var(--ink)"></b>　${typeof o.r === 'number' ? tierChip(o.r) : ''}</p><div class="frTeam" style="display:flex;gap:8px;justify-content:center;margin-bottom:12px"></div><div class="row" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn sub" data-a="x">やめる</button>${rows.length > 1 ? '<button class="btn sub" data-a="n">ほかの あいて</button>' : ''}<button class="btn" data-a="go">たたかう</button></div>`);
     bg.querySelector('.frNm').textContent = nm;
     for (const t of o.tm) { const c = document.createElement('div'); c.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px'; c.appendChild(spriteCanvas(t.sid, 64)); const n = document.createElement('span'); n.textContent = SPECIES[t.sid].n; c.appendChild(n); bg.querySelector('.frTeam').appendChild(c); }
-    bg.onclick = (e) => { const b = e.target.closest('button[data-a]'); if (!b) return; bg.remove(); SND.se('click'); if (b.dataset.a === 'n') show_((k + 1) % rows.length); else if (b.dataset.a === 'go') freeBattle(o, nm); };
+    bg.onclick = (e) => { const b = e.target.closest('button[data-a]'); if (!b) return; bg.remove(); SND.se('click'); if (b.dataset.a === 'n') show_((k + 1) % rows.length); else if (b.dataset.a === 'go') battleGo('free', o, nm); };
   };
   show_(i);
 }
@@ -13472,7 +13560,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { SAVE_GEN++; S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ act, ACTS, saveInit, SRVS: () => SRV_SAVE, saveHash, mergeSave, importSave, NETo: NET, validTeam, monOk, shopBuyDeal, shopSig, shopItemOf, chooseSwap, NEW_IDS, moveBlocked, openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderTower, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ battleGo, WILD_DAYS, jstD, cmdCapsule, act, ACTS, saveInit, SRVS: () => SRV_SAVE, saveHash, mergeSave, importSave, NETo: NET, validTeam, monOk, shopBuyDeal, shopSig, shopItemOf, chooseSwap, NEW_IDS, moveBlocked, openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderTower, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 
 

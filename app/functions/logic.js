@@ -67,7 +67,7 @@ function checkRec(v, rec, gInp) {
 //  - さいげん で おわらなかった（とちゅうで ぬけた など）・きろく なし：ふたりの もうしで（きろく なしで ホスト だけ の ときは つけない）
 function judge(v, final) {
   const rep = v.rep || {}, rp = v.rp;
-  if (rp && rp.tamper) return { out: 'void', cheat: { a: true } };
+  if (rp && rp.tamper) return { out: 'void', cheat: rp.tamper === 'gown' ? { b: true } : { a: true } };   // gown：ゲストが もって いない モンスター
   if (rp && rp.end === 'ko') {
     const out = rp.res === 'win' ? 'a' : rp.res === 'lose' ? 'b' : 'draw';
     const want = (side) => (out === 'draw' ? 'draw' : out === side ? 'win' : 'lose');
@@ -79,4 +79,13 @@ function judge(v, final) {
   return { out: d, cheat: {} };
 }
 
-module.exports = { elo, decide, weekNo, jstDay, cleanRoom, findMatch, RES, seedOf, checkRec, judge, monKey };
+// チームの モンスターが その 人の サーバーの セーブに いるか（しゅるい・個体値・せいかく・きょうか が おなじ 子。1たい 1かい）
+const ownKey = (o) => JSON.stringify([o.sid, o.nat || null, ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'eva'].map((k) => (o.iv && o.iv[k]) | 0), o.fed | 0, ['hp', 'atk', 'def', 'spa', 'spd', 'spe', 'eva'].map((k) => (o.ev && o.ev[k]) | 0)]);
+function ownOk(team, save) {
+  if (!save) return true;   // サーバーの セーブが まだ ない 人（ふるい アプリ）は みない
+  const pool = new Map(); for (const m of [...(save.party || []), ...(save.box || [])]) { const k = ownKey(m); pool.set(k, (pool.get(k) || 0) + 1); }
+  for (const o of team || []) { const k = ownKey(o), n = pool.get(k) || 0; if (!n) return false; pool.set(k, n - 1); }
+  return true;
+}
+
+module.exports = { elo, decide, weekNo, jstDay, cleanRoom, findMatch, RES, seedOf, checkRec, judge, monKey, ownOk };

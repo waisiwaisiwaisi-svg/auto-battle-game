@@ -122,7 +122,12 @@ exports.matchVerify = onDocumentCreated({ document: 'matchlogs/{mid}', memory: '
   const mid = ev.params.mid, ref = fs.doc('matches/' + mid), d0 = await ref.get(); if (!d0.exists) return;
   const v0 = d0.data(); let rec = null; try { rec = JSON.parse(ev.data.data().js); } catch (e) { rec = null; }
   let rp;
-  const bad = L.checkRec(v0, rec, v0.gin || null);
+  let bad = L.checkRec(v0, rec, v0.gin || null);
+  if (!bad && rec) {   // もちもの：サーバーの セーブに いる モンスター だけ
+    const sv = async (u) => { const d = await fs.doc('saves/' + u).get(); if (!d.exists || d.data().moved) return null; try { return JSON.parse(d.data().js); } catch (e) { return null; } };
+    const [sa, sb] = await Promise.all([sv(v0.a), sv(v0.b)]);
+    if (!L.ownOk(rec.h, sa)) bad = 'own'; else if (!L.ownOk(rec.g, sb)) bad = 'gown';
+  }
   if (bad) rp = { tamper: bad };
   else {
     try {
@@ -162,19 +167,40 @@ const loadSave = async (tx, ref) => { const d = await tx.get(ref); if (!d.exists
 exports.saveGet = onCall({ memory: '2GiB', timeoutSeconds: 60 }, async (req) => {
   const uid = uidOf(req), ref = fs.doc('saves/' + uid), loc = req.data && req.data.loc;
   const d = await ref.get();
+  if (d.exists && d.data().moved) throw new HttpsError('failed-precondition', 'moved');   // ほかの 端末へ うつした
   if (d.exists) { try { return { s: JSON.parse(d.data().js), v: d.data().v || 0, now: Date.now() }; } catch (e) { /* こわれた：つくりなおす */ } }
   const s = await require('./replay').call('PMA_IMPORT', loc && typeof loc === 'object' ? loc : null);
   const js = JSON.stringify(s); if (js.length > SAVE_MAX) throw new HttpsError('resource-exhausted', 'size');
   await fs.runTransaction(async (tx) => { const x = await tx.get(ref); if (!x.exists) tx.set(ref, { js, v: 1, t: Date.now(), imp: 1 }); });
   const x = await ref.get(); return { s: JSON.parse(x.data().js), v: x.data().v || 1, now: Date.now() };
 });
-const ACT_NAMES = new Set(['sync', 'shopBuyDeal', 'shopBuyChest', 'shopBuySpecial', 'openChest', 'payOpen']);
+// ほかの 端末の セーブを ひきつぐ：ふっかつコードの ハッシュ（backups の k）で もちぬしを さがし、その セーブを じぶんへ うつす
+exports.saveClaim = onCall(async (req) => {
+  const uid = uidOf(req), k = req.data && req.data.k;
+  if (typeof k !== 'string' || !/^[0-9a-f]{32}$/.test(k)) throw new HttpsError('invalid-argument', 'k');
+  const q = await fs.collection('backups').where('k', '==', k).limit(5).get(); if (q.empty) throw new HttpsError('not-found', 'code');
+  const owner = q.docs.map((d) => d.id).find((id) => id !== uid); if (!owner) return { ok: true, same: true };
+  const from = fs.doc('saves/' + owner), to = fs.doc('saves/' + uid);
+  return fs.runTransaction(async (tx) => {
+    const d = await tx.get(from); if (!d.exists || !d.data().js) throw new HttpsError('not-found', 'save');
+    const t = await tx.get(to);
+    tx.set(to, { js: d.data().js, v: ((t.exists && t.data().v) || 0) + 1, t: Date.now(), from: owner });
+    tx.set(from, { moved: uid, t: Date.now() });   // もとの 端末では もう つかえない（2つに わかれない）
+    return { ok: true };
+  });
+});
+const ACT_NAMES = new Set(['sync', 'shopBuyDeal', 'shopBuyChest', 'shopBuySpecial', 'openChest', 'payOpen', 'battleStart', 'battleEnd', 'release', 'boost', 'evAdd', 'respec', 'reroll4', 'reroll1', 'tm', 'towerBegin', 'towerQuit', 'arcadeNew', 'arcadeQuit', 'tutGem']);
 exports.act = onCall({ memory: '2GiB', timeoutSeconds: 60 }, async (req) => {
   const uid = uidOf(req), name = req.data && req.data.name, args = (req.data && req.data.args) || [], loc = req.data && req.data.loc;
   if (!ACT_NAMES.has(name) || !Array.isArray(args) || JSON.stringify(args).length > 200000) throw new HttpsError('invalid-argument', 'act');
   const ref = fs.doc('saves/' + uid), P = require('./replay');
+  if (name === 'battleStart' && args[0] === 'free') {   // フリー対戦の あいては サーバーが よむ（クライアントが よわい チームを つくれない）
+    const o = Array.isArray(args[1]) && args[1][0], id = o && typeof o.id === 'string' ? o.id : '';
+    const d = id && /^[A-Za-z0-9_-]{1,64}$/.test(id) ? await fs.doc('teams/' + id).get() : null; if (!d || !d.exists) throw new HttpsError('not-found', 'team');
+    args[1] = [{ ...d.data(), id }, String((args[1] && args[1][1]) || '').slice(0, 20)];
+  }
   for (let i = 0; i < 3; i++) {   // ほかの しごとと かさなったら やりなおす
-    const d = await ref.get(); if (!d.exists) throw new HttpsError('failed-precondition', 'nosave');
+    const d = await ref.get(); if (!d.exists) throw new HttpsError('failed-precondition', 'nosave'); if (d.data().moved) throw new HttpsError('failed-precondition', 'moved');
     const v = d.data().v || 0, srv = JSON.parse(d.data().js);
     const pre = await P.call('PMA_MERGE', srv, loc && typeof loc === 'object' ? loc : null);
     const seed = (Math.random() * 4294967296) >>> 0, now = Date.now();
