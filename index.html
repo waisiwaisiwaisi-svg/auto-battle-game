@@ -5880,6 +5880,7 @@ function buildNav(st) {
   for (let c = 0; c < nw * nh; c++) if (walk[c]) { const x = (c % nw + .5) * NAV, y = ((c / nw | 0) + .5) * NAV; comfy[c] = all.some(o => circRect(x, y, NAV_R + OBST_GAP, o)) ? 0 : 1; }
   st.nav = { nw, nh, walk, comfy };
 }
+const AGG_WIND = .6;   // どんどん せめる：近接・前方を きる わざの ふりかぶりの じかんの ばいりつ
 const MATCH_T = 240;   // 1しあいの じかん（びょう）。すぎたら タイムアップで はんてい（3たい どうしの ふつうの しあいは 4ふん いないに おわる）
 const CAM_MAX = 2.3, CAM_PAD = 130, CAM_TALL_LO = .4, CAM_TALL_UP = .24;   // たて画面：みえる よこはばは フィールドの 40%〜24%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 2.3ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
@@ -6476,6 +6477,7 @@ function beginMove(f, id) {
   if (m.charge2 && f.v.charged) cur.wind = .35;   // ためてあれば みじかい よびどうさで はなつ
   if (m.chargeUp) { const c = clamp((dist(f, o) - 140) / 260, 0, 1); if (m.k === 'cone') { cur.half = m.half * (1 + c); cur.wind += c * m.chargeUp; } else { cur.chg = c; cur.wind += c * m.chargeUp; } }   // ためて はなつ：とおい ほど ながく ためて とおくまで とどく
   if (isDamaging(m) && !boost && cur.wind < .26) { cur.wind = Math.max(cur.wind, m.prio > 0 ? .14 : .24); cur.quick = 1; }   /* すぐ でる こうげき：みじかい よびどうさ（ひいて → うつ） */
+  if ((m.k === 'melee' || m.k === 'swipe') && isDamaging(m) && !boost && natOf(f) === 'yuukan') cur.wind = Math.max(.12, cur.wind * AGG_WIND);   // どんどん せめる：ちかくの こうげきは ふりかぶりが みじかい（とちゅうで つぶされにくい）
   if (m.nth) { f.nthC = f.nthC || {}; const c = f.nthC[id] = (f.nthC[id] || 0) + 1; cur.nthB = c % m.nth === 0; if (cur.nthB && !B.headless) popText(f.x, f.y - 104, 'つよい いちげき！', '#ffd166', true); }   // N かいめ だけ つよい
   if (m.useSelf) changeStages(f, m.useSelf, true);
   if (m.charges) { const C = chgS(f, id); C.n = Math.max(0, C.n - 1); }   // スケイルショット：うつと ぼうぎょ↓ すばやさ↑
