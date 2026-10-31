@@ -5882,6 +5882,7 @@ function buildNav(st) {
   for (let c = 0; c < nw * nh; c++) if (walk[c]) { const x = (c % nw + .5) * NAV, y = ((c / nw | 0) + .5) * NAV; comfy[c] = all.some(o => circRect(x, y, NAV_R + OBST_GAP, o)) ? 0 : 1; }
   st.nav = { nw, nh, walk, comfy };
 }
+const RETREAT_K = .35;   // まあいを たもつ：うしろへ さがる ときの はやさ（まうしろで 1.35ばい）
 const MATCH_T = 240;   // 1しあいの じかん（びょう）。すぎたら タイムアップで はんてい（3たい どうしの ふつうの しあいは 4ふん いないに おわる）
 const CAM_MAX = 2.3, CAM_PAD = 130, CAM_TALL_LO = .4, CAM_TALL_UP = .24;   // たて画面：みえる よこはばは フィールドの 40%〜24%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 2.3ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
@@ -7486,7 +7487,8 @@ function hit(att, def, m, ang, opt) {
   if (B.stats) { const k = MOVE_ID.get(m); B.stats.hit[k] = (B.stats.hit[k] || 0) + 1; B.stats.dmg[k] = (B.stats.dmg[k] || 0) + dmg; B.stats.dmgPct[k] = (B.stats.dmgPct[k] || 0) + dmg / def.maxHp; }
   const stance = def.state === 'stance' && def.cur && def.cur.m.k === 'stance';
   const armored = def.cur && def.cur.m.armor && ['wind', 'dash', 'act', 'chan'].includes(def.state);   // スーパーアーマー：わざの あいだは ひるまない・とめられない
-  const aggNoKb = !opt.tick && m.k === 'proj' && !heavy && !((m.power || 0) >= 100) && def.mon && natOf(def) === 'yuukan';   // どんどん せめる：ふつうの 弾では 当たったときの 硬直なし・おしもどされない（追加効果の ひるみは 効く）
+  const aggNoKb = (!opt.tick && m.k === 'proj' && !heavy && !((m.power || 0) >= 100) && def.mon && natOf(def) === 'yuukan')
+    || (!opt.tick && ['melee', 'swipe', 'dash'].includes(m.k) && !heavy && !((m.power || 0) >= 100) && !m.shove && !m.slap && !m.bigKb && def.mon && natOf(def) === 'nonki');   // どっしり かまえる：ちかくの こうげき（近接・前方を きる・突進）では 硬直なし・おしもどされない（追加効果の ひるみは 効く）   // どんどん せめる：ふつうの 弾では 当たったときの 硬直なし・おしもどされない（追加効果の ひるみは 効く）
   if (armored && !opt.tick) popText(def.x, def.y - 100, 'アーマー！', '#ffb070');
   if (opt.tick) { def.kx += DM.cos(ang) * 45 * K; def.ky += DM.sin(ang) * 45 * K; }   // うちつづける わざ：ひるませず すこし おすだけ
   else if (aggNoKb) { B.hitstop = Math.max(B.hitstop, .03); }   // どんどん せめる：ふつうの 弾は うけながら すすむ（わざも とまらない）
@@ -8449,6 +8451,7 @@ function moveDir(f, mx, my, dt, nav) {
     if (rnd() < dt * 25) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: -mx * 60 + rand(-15, 15), vy: -rand(10, 30), life: .3, max: .3, col: '#d8c8a8', size: 3, g: 60 });
   } else if (f.pace < 1.3) f.rushing = false;
   if (f.v && f.v.enrage > 0) sp *= 1.3;   // いかりモード：はやい
+  if ((mx || my) && f.mon && natOf(f) === 'reisei') { const o = B.sides[1 - f.side] && active(1 - f.side); if (o && o.hp > 0) { const dx = f.x - o.x, dy = f.y - o.y, d = DM.hypot(dx, dy) || 1, L = DM.hypot(mx, my) || 1, c = (mx * dx + my * dy) / (L * d); if (c > 0) sp *= 1 + RETREAT_K * c; } }   // まあいを たもつ：あいてから はなれる むきは はやい
   if (B.zones.length && !hovers(f)) { const zs = B.zones.find(z => z.side !== f.side && MOVES[z.id].slow && inZoneFloor(z, f.x, f.y)); if (zs) sp *= MOVES[zs.id].slow; }   // ありじごく：あしが とられる
   if (f.v.root > 0 || f.v.magnet) sp = 0;   // かげぬい・マグネットパワー：うごけない
   if (f.v.slowT > 0) sp *= f.v.slowK || .7;   // こなゆき など：あしが おそく なる
