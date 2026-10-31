@@ -4422,9 +4422,9 @@ function canLearn(sid, id) {
   const txt = sp.n + (sp.desc || '') + (sp.prof ? (sp.prof.home || '') + (sp.prof.trait || '') : '');
   return !!(LOOK_KW[m.t] && LOOK_KW[m.t].test(txt));
 }
-// わざの かたちの まきもの：その かたちの わざなら、タイプに かかわらず 好きに えらんで おぼえる
+// わざの かたちの まきもの：その かたちの わざを 好きに えらんで おぼえる。any：タイプに かかわらず（とっしん だけ）。ほかは その子が おぼえられる わざ だけ
 const X_SCROLL = {
-  xdash: { n: 'とっしんのまきもの', ic: '💨', what: '突進', f: (m) => m.k === 'dash' },
+  xdash: { n: 'とっしんのまきもの', ic: '💨', what: '突進', any: 1, f: (m) => m.k === 'dash' },
   xproj: { n: 'とびどうぐのまきもの', ic: '🏹', what: '飛び道具', f: (m) => m.k === 'proj' },
   xmelee: { n: 'せっきんのまきもの', ic: '👊', what: '近接・前方を切る', f: (m) => m.k === 'melee' || m.k === 'swipe' },
   xarea: { n: 'はんいのまきもの', ic: '💥', what: 'まわり・足元・扇・範囲', f: (m) => ['aoe', 'strike', 'multi', 'cone', 'wave'].includes(m.k) },
@@ -4432,7 +4432,7 @@ const X_SCROLL = {
   xsup: { n: 'へんかのまきもの', ic: '✨', what: '変化（攻撃しない）', f: (m) => m.cat === 'stat' },
 };
 // どうぐ（ひでんのまきもの・かたちの まきもの）で おぼえた わざ：その モンスターの タイプか、まきものの かたちの わざだけ
-const xOk = (sid, id) => { const sp = SPECIES[sid], mv = MOVES[id]; return !!(sp && mv && id !== 'tackle' && (mv.t === sp.type || mv.t === sp.type2 || Object.values(X_SCROLL).some(x => x.f(mv)))); };
+const xOk = (sid, id) => { const sp = SPECIES[sid], mv = MOVES[id]; return !!(sp && mv && id !== 'tackle' && (mv.t === sp.type || mv.t === sp.type2 || Object.values(X_SCROLL).some(x => x.any && x.f(mv)))); };
 const canKnow = (m, id) => canLearn(m.sid, id) || (!!m && Array.isArray(m.xL) && m.xL.includes(id) && xOk(m.sid, id));
 const TM_POOL = () => [...new Set(Object.keys(MOVES100).filter(id => MOVES[id]).concat(NEW_IDS))];   // あたらしい 技も ふつうに でる
 const CHEST_WEIGHT = { wood: 30, silver: 38, gold: 18, giant: 6, magic: 6, legend: 2 };
@@ -5008,7 +5008,7 @@ const ITEMS = {
   pick1: { n: 'えらびなおしのは', ic: '🌿', d: 'えらんだ わざ 1つを、その モンスターが おぼえる わざの なかから 好きな わざに おぼえなおす（ひとつわすれのはの 上位版）', w: .35 },
   xtype: { n: 'ひでんのまきもの', ic: '📜', d: 'その モンスターの タイプ（属性か 種族）の わざなら、ふだんは おぼえない わざでも 好きに えらんで おぼえる（おなじタイプのいしの 上位版）', w: .25 },
 };
-for (const k in X_SCROLL) { const x = X_SCROLL[k]; ITEMS[k] = { n: x.n, ic: x.ic, d: `${x.what}の わざなら、タイプに かかわらず 好きに えらんで おぼえる`, w: .2 }; }
+for (const k in X_SCROLL) { const x = X_SCROLL[k]; ITEMS[k] = { n: x.n, ic: x.ic, d: x.any ? `${x.what}の わざなら、タイプに かかわらず 好きに えらんで おぼえる` : `その モンスターが おぼえられる ${x.what}の わざから、好きに えらんで おぼえる`, w: .2 }; }
 const X_ITEMS = ['pick1', 'xtype', ...Object.keys(X_SCROLL)];   // わざを えらんで おぼえる どうぐ
 const itemPick = (r) => { const ks = Object.keys(ITEMS), W = ks.map(k => ITEMS[k].w ?? 1); let x = r() * W.reduce((a, b) => a + b, 0); for (let i = 0; i < ks.length; i++) { x -= W[i]; if (x < 0) return ks[i]; } return ks[ks.length - 1]; };   // 上位版は でにくい
 const itemN = (k) => (S.items && S.items[k]) || 0;
@@ -5504,7 +5504,7 @@ function xPool(m, i, k) {
   const cur = m.moves, sp = SPECIES[m.sid]; let ids;
   if (k === 'pick1') ids = rerollPool(m, i, false);
   else if (k === 'xtype') ids = Object.keys(MOVES).filter(id => id !== 'tackle' && (MOVES[id].t === sp.type || MOVES[id].t === sp.type2));
-  else if (X_SCROLL[k]) ids = Object.keys(MOVES).filter(id => id !== 'tackle' && X_SCROLL[k].f(MOVES[id]));
+  else if (X_SCROLL[k]) ids = Object.keys(MOVES).filter(id => id !== 'tackle' && X_SCROLL[k].f(MOVES[id]) && (X_SCROLL[k].any || canLearn(m.sid, id)));
   else ids = [];
   return ids.filter(id => MOVES[id] && !cur.includes(id));
 }
