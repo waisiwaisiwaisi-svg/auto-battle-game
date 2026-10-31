@@ -11779,7 +11779,7 @@ function drawStar(x, y, r, col) {
 
 // 浮かぶ モンスター（いまの 64ドットの え に あわせる：はねを ひろげて とぶ・ただよう・からだが 宙に ある もの）
 // 浮かんで 見え、障害物の 上を 飛びこえる（弾も 上から うつので 障害物に 止められない）。オリジナルは かいた え から きまる sp.fly
-const FLOAT_LOOK = new Set(['a_fire10', 'a_elec5', 'a_poison5', 'a_poison9', 'a_wind6', 'a_wind8', 'a_wind10', 'a_dragon4', 'b_fire4', 'b_fire8', 'b_water4', 'b_water6', 'b_ice8', 'b_poison7', 'b_wind4', 'b_wind6', 'b_wind8', 'sorabune', 'b_wind10', 'b_dragon5', 'g1', 'g2', 'kitsunemen', 'medamasho', 'g9', 'g10', 'c_fire5', 'c_water5', 'c_elec1', 'c_elec4', 'c_elec5', 'c_elec8', 'c_ground9', 'c_wind6', 'c_dragon10', 'd_bug1', 'd_bug5', 'd_bug7', 'd_bug9', 'd_bug12', 'd_bug17', 'a_dragon10', 'b_fire7', 'f_jelly1']);
+const FLOAT_LOOK = new Set(['a_fire10', 'a_elec5', 'a_poison5', 'a_poison9', 'a_wind6', 'a_wind8', 'a_wind10', 'b_fire8', 'b_water4', 'b_water6', 'b_ice8', 'b_poison7', 'b_wind4', 'b_wind6', 'b_wind8', 'sorabune', 'b_wind10', 'g1', 'g2', 'kitsunemen', 'medamasho', 'g9', 'g10', 'c_fire5', 'c_water5', 'c_elec1', 'c_elec4', 'c_elec5', 'c_elec8', 'c_ground9', 'c_wind6', 'c_dragon10', 'd_bug1', 'd_bug5', 'd_bug7', 'd_bug9', 'd_bug12', 'd_bug17', 'a_dragon10', 'b_fire7', 'f_jelly1', 'a_ice10', 'b_dragon1', 'e_cloud1', 'f_frost1', 'f_witch1', 'f_icek1', 'n_x2', 'n_moth', 'n_furin', 'n_koinobori', 'n_cotton', 'n_tvghost']);
 const floats = (sid) => FLOAT_LOOK.has(sid);
 const flies = (f) => !!(f && f.sp && f.mon && floats(f.mon.sid)) && !(typeof B !== 'undefined' && B && B.gravity > 0) && !(f.v && f.v.grounded > 0);   // じゅうりょく・うちおとす：とべない
 const hovers = (f) => !(f && f.state === 'wind' && f.cur && f.cur.id === 'roost') && flies(f);   // はねやすめ中は じめんに おりる
