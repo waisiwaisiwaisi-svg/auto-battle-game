@@ -185,3 +185,15 @@ cd android && ./gradlew bundleRelease
 - **似ている作品との関係**：モンスターを捕まえる・ジム・バッジ・殿堂入りなど、有名作品に近い用語や仕組みがあります。名前・絵・用語が既存作品と同じにならないよう確認してください（似すぎると著作権・商標で削除や却下の対象になります）。
 - **ユーザー生成コンテンツ**（名前・ギルド名・チャット）：NGワードの伏せ字、通報、ブロック、連絡先の掲載が必要です（アプリ内に実装済み。連絡先は7章）。
 - **最低限の機能**（Apple 4.2）：Web をそのまま包んだだけのアプリは却下されやすいですが、本作はオフラインで遊べるゲームなので問題ありません。
+
+
+## PC版（Steam）
+
+`app/desktop/` は ゲーム（`app/www`）を Electron の まどで うごかす PC版です。
+
+- ためす：`cd app/desktop && npm install && npm start`（F11 か Alt+Enter で ぜんがめん）
+- つくる：`npm run dist:win`／`dist:mac`／`dist:linux` → `app/desktop/dist/` に できる。GitHub の「PC アプリ（Steam）」ワークフローでも 3つ とも つくれる（Firebase の 設定は Android と おなじ シークレット `FIREBASE_CONFIG_JS`）
+- Steam に のせる：Steamworks で アプリを つくり、SteamPipe（steamcmd）で `dist/win-unpacked` などを アップロード。起動ファイルは `PixelMonsterArena.exe`（Mac は `.app`、Linux は `PixelMonsterArena`）
+- Mac で 配るときは Apple の 署名・公証（notarize）が いる（electron-builder の `mac.identity` と `notarize` を せってい）
+- Firebase の API キーに「HTTP リファラーの せいげん」を かけて いる ときは、PC版（`app://game`）からも つかえる ように する
+- セーブは PC の ユーザーフォルダ（Electron の userData）に のこる。2つ いっぺんには ひらけない
