@@ -1850,10 +1850,15 @@ const DM = (() => {
 const sq = (v) => v * v, cb = (v) => v * v * v;
 // たたかいの らんすう：シードつき（おなじ シード・おなじ そうさ なら おなじ けっか）。たたかいの そと では いつもの らんすう
 let SIM_RNG = null;
-const GAME_VER = 'dev';   // ビルドで ファイルの ハッシュに おきかわる（サーバーの さいげんは おなじ バージョン どうし だけ）
+const GAME_VER = 'dev';
+// じこく：サーバーで きめる しごと（act）の あいだは サーバーの じこく。ふだんは 端末の じこく＋サーバーとの ずれ
+let ACT_NOW = null, SRV_SKEW = 0;
+const NOW = () => (ACT_NOW != null ? ACT_NOW : Date.now() + SRV_SKEW);
+const jstD = (t) => new Date((t == null ? NOW() : t) + 9 * 36e5);   // 日本時間（getUTC… で よむ）。日替わり・しゅうがわりは みんな 日本時間   // ビルドで ファイルの ハッシュに おきかわる（サーバーの さいげんは おなじ バージョン どうし だけ）
 const rnd = () => (SIM_RNG ? SIM_RNG() : Math.random());
 const mkRng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 // みための ものだけ（つぶ・あと・矢印）：たたかいの らんすうを つかわない（でる かずが 端末で ちがっても けっかが かわらない）
+const ACTS = {};   // セーブを かえる しごと：なまえ → しごと（await・ask を つかわない。ひきすうは かずや もじ だけ）。act() で よぶ
 const visOnly = (fn) => function (...a) { const p = SIM_RNG; SIM_RNG = null; try { return fn.apply(this, a); } finally { SIM_RNG = p; } };
 /* =====================================================================
    ユーティリティ
@@ -4416,21 +4421,21 @@ function canLearn(sid, id) {
 }
 const TM_POOL = () => [...new Set(Object.keys(MOVES100).filter(id => MOVES[id]).concat(NEW_IDS))];   // あたらしい 技も ふつうに でる
 const CHEST_WEIGHT = { wood: 30, silver: 38, gold: 18, giant: 6, magic: 6, legend: 2 };
-function giveChestKind(kind) { S.chests = S.chests || []; if (S.chests.length >= 4) return null; S.chests.unshift({ kind, at: Date.now() + CHESTS[kind].sec * 1000 }); return kind; }
+function giveChestKind(kind) { S.chests = S.chests || []; if (S.chests.length >= 4) return null; S.chests.unshift({ kind, at: NOW() + CHESTS[kind].sec * 1000 }); return kind; }
 function giveChest() {
   S.chests = S.chests || [];
   if (S.chests.length >= 4) return null;
   // しゅるいは ランダム（いい はこほど でにくい）。てに いれた ときから かいじょの 時間が すすむ
   const W = CHEST_WEIGHT; let x = rnd() * Object.values(W).reduce((a, b) => a + b, 0), kind = 'wood';
   for (const k in W) { x -= W[k]; if (x <= 0) { kind = k; break; } }
-  S.chests.push({ kind, at: Date.now() + CHESTS[kind].sec * 1000 });
+  S.chests.push({ kind, at: NOW() + CHESTS[kind].sec * 1000 });
   return kind;
 }
 /* ---- ショップ（クラロワふう）：まいにち いれかわる とくばい・むりょう プレゼント・ブラインドボックス・しゅうがわりの スペシャル ---- */
 const SHOP_TM_P = [4, 10, 25], SHOP_MON_P = [8, 20, 50];
 const SHOP_CHESTS = [['silver', 8], ['gold', 20], ['giant', 45], ['magic', 55], ['legend', 120]];
-const shopDay = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
-const shopWeek = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000 - 4 * 864e5) / 6048e5);   // げつようび で かわる
+const shopDay = () => { const d = jstD(); return d.getUTCFullYear() * 10000 + (d.getUTCMonth() + 1) * 100 + d.getUTCDate(); };
+const shopWeek = () => Math.floor((NOW() + 9 * 36e5 - 4 * 864e5) / 6048e5);   // げつようび で かわる（日本時間）
 const shopRng = (seed) => () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
 function shopState() { S.shop = S.shop || {}; const d = shopDay(), w = shopWeek(); if (S.shop.day !== d) { S.shop.day = d; S.shop.bought = []; } if (S.shop.week !== w) { S.shop.week = w; S.shop.wb = 0; } return S.shop; }
 const shopFreeReady = () => !!S && !(shopState().bought || []).includes(0);
@@ -4515,38 +4520,45 @@ function shopDetail(i) {
   const sig = shopSig(o), bb = bg.querySelector('[data-x="b"]'); if (bb) bb.onclick = () => { bg.remove(); shopBuyDeal(i, sig); };   // ひらいた ときの しなもの・ねだんで かう
 }
 const shopSig = (o) => o ? JSON.stringify([o.k, o.id, o.p | 0, o.nat || '', shopDay()]) : '';   // しなもの・ねだん・日づけ（ひづけが かわると いれかわる）
-let SHOP_BUSY = false;
-async function shopBuyDeal(i, sig) {
-  if (SHOP_BUSY) return;
-  const st = shopState(), o = shopItemOf(i); if (!o || (st.bought || []).includes(i)) return;
-  if (sig && shopSig(o) !== sig) { SND.se('deny'); say0('ショップの しなものが いれかわりました。もういちど えらんでね'); renderShop(); return; }   // ひらいて いる あいだに 日づけが かわった
-  if (!o.p && SRV_APP()) {   // アプリ版の むりょう：サーバーの 日づけで 1日 1かい（端末の とけいを かえても ふえない）
-    SHOP_BUSY = true; let r = null; try { const f = await srvFn(); r = f && await f.call('claimDaily', { k: 'free' }); } catch (e) { r = null; } finally { SHOP_BUSY = false; }
-    if (!r) { SND.se('deny'); say0('むりょうの うけとりは オンラインの ときに できます'); return; }
-    if (!r.ok) { st.bought = [...new Set([...(st.bought || []), i])]; save(); SND.se('deny'); say0('きょうの むりょうは もう うけとりました'); renderShop(); return; }
-    if ((shopState().bought || []).includes(i)) return; }
-  if (o.p > 0) { if ((S.gems || 0) < o.p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${o.p}・もっている 💎${S.gems || 0}）`); return; }
+// かう：がめんで きいて から act（アプリ版は サーバーで さきに うごく）。ACTS.○○ は きかずに かえる だけ
+function shopBuyDeal(i, sig) { return act('shopBuyDeal', i, sig || ''); }
+ACTS.shopBuyDeal = (i, sig) => {
+  const st = shopState(), o = shopItemOf(i); if (!o || (st.bought || []).includes(i)) return 'sold';
+  if (sig && shopSig(o) !== sig) { SND.se('deny'); say0('ショップの しなものが いれかわりました。もういちど えらんでね'); renderShop(); return 'changed'; }   // ひらいて いる あいだに 日づけが かわった（日づけは サーバーの じこく）
+  if (o.p > 0) { if ((S.gems || 0) < o.p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${o.p}・もっている 💎${S.gems || 0}）`); return 'gems'; }
     S.gems -= o.p; }
   st.bought = [...(st.bought || []), i]; const got = shopGive(o); save(); SND.se(o.p ? 'ok' : 'card'); clerkPlay('buy');
   const bg = modal(`<div class="shgot"><div class="shgi">${shopIcon(o)}</div><b>${shopName(o)}</b><div class="dim">${o.k === 'item' ? kw(ITEMS[o.id].d) : o.k === 'tm' ? kwDesc(MOVES[o.id]) : o.k === 'mon' ? (got === 'box' ? 'てもちが いっぱいなので ボックスに おくった！' : 'なかまに なった！') : 'てに いれた！'}</div><button class="btn" data-x="c" style="margin-top:10px">OK</button></div>`);
-  shopPaint(bg); bg.querySelector('[data-x="c"]').onclick = () => bg.remove(); renderShop();
-}
+  shopPaint(bg); bg.querySelector('[data-x="c"]').onclick = () => bg.remove(); renderShop(); return 'ok';
+};
 async function shopBuyChest(kind, p) {
+  if (!CHESTS[kind]) return; p = (SHOP_CHESTS.find(x => x[0] === kind) || [0, 0])[1];
   if ((S.gems || 0) < p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${p}・もっている 💎${S.gems || 0}）`); return; }
   if (!(await ask(`${CHESTS[kind].n}を 💎${p} で かって すぐ あけますか？`, 'かう', 'やめる'))) return;
-  S.gems -= p; S.chests = S.chests || []; S.chests.push({ kind, at: 0 }); save(); clerkPlay('buy'); openChest(S.chests.length - 1); renderShop();
+  return act('shopBuyChest', kind);
 }
+ACTS.shopBuyChest = (kind) => {
+  const row = SHOP_CHESTS.find(x => x[0] === kind); if (!row) return 'bad'; const p = row[1];   // ねだんは ショップの ひょうから（たのまれた かずは つかわない）
+  if ((S.gems || 0) < p) { SND.se('deny'); say0('ジェムが たりません'); return 'gems'; }
+  S.gems -= p; S.chests = S.chests || []; S.chests.push({ kind, at: 0 }); save(); clerkPlay('buy'); openChest(S.chests.length - 1); renderShop(); return 'ok';
+};
 async function shopBuySpecial() {
   const st = shopState(), o = shopSpecial(); if (st.wb) return;
   if ((S.gems || 0) < o.p) { SND.se('deny'); say0(`ジェムが たりません（ひつよう 💎${o.p}・もっている 💎${S.gems || 0}）`); return; }
   if (!(await ask(`${o.n}を 💎${o.p} で かいますか？`, 'かう', 'やめる'))) return;
-  S.gems -= o.p; st.wb = 1; if (o.orb) S.capsules += o.orb; S.items = S.items || {}; for (let k = 0; k < (o.item || 0); k++) { const id = choice(Object.keys(ITEMS)); S.items[id] = (S.items[id] || 0) + 1; }
-  S.chests = S.chests || []; S.chests.push({ kind: o.ch, at: 0 }); save(); clerkPlay('buy'); openChest(S.chests.length - 1); renderShop();
+  return act('shopBuySpecial');
 }
+ACTS.shopBuySpecial = () => {
+  const st = shopState(), o = shopSpecial(); if (st.wb) return 'sold';
+  if ((S.gems || 0) < o.p) { SND.se('deny'); say0('ジェムが たりません'); return 'gems'; }
+  S.gems -= o.p; st.wb = 1; if (o.orb) S.capsules += o.orb; S.items = S.items || {}; for (let k = 0; k < (o.item || 0); k++) { const id = choice(Object.keys(ITEMS)); S.items[id] = (S.items[id] || 0) + 1; }
+  S.chests = S.chests || []; S.chests.push({ kind: o.ch, at: 0 }); save(); clerkPlay('buy'); openChest(S.chests.length - 1); renderShop(); return 'ok';
+};
+ACTS.sync = () => 'ok';   // わざ・訓練・ならび などを サーバーへ（act の まえに かさねる だけ）
 function shopPaint(root) { paintIcons(root); root.querySelectorAll('i[data-shmon]').forEach(e => e.replaceWith(spriteCanvas(e.dataset.shmon, 56))); }
 function renderShop() {
-  if (!S) return; show('scShop'); const st = shopState(), deals = shopDeals(), sp = shopSpecial(), now = new Date(), nx = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  const left = Math.max(0, Math.round((nx - now) / 1000)), hm = `${Math.floor(left / 3600)}じかん ${Math.floor(left % 3600 / 60)}ふん`;
+  if (!S) return; show('scShop'); const st = shopState(), deals = shopDeals(), sp = shopSpecial(), jn = NOW() + 9 * 36e5;
+  const left = Math.max(0, Math.round((864e5 - jn % 864e5) / 1000)),   /* 日本時間の よる 0じ まで */ hm = `${Math.floor(left / 3600)}じかん ${Math.floor(left % 3600 / 60)}ふん`;
   $('shGems').innerHTML = `<img class="pix" src="${UIA.ic_gem.src}" width="18" height="18" alt=""> ${S.gems || 0}`;
   const rar = (o) => o.rar != null ? `<span class="rar" style="background:${RARITY[o.rar].c}">${RARITY[o.rar].n}</span>` : '';
   const deal = (o, i) => { const sold = (st.bought || []).includes(i);
@@ -4568,13 +4580,13 @@ function renderShop() {
 // ギルドに はいって いると ブラインドボックスが 5% はやく あく（あく じこくを すこしずつ まえに ずらす。とじていた あいだの ぶんも）
 const GUILD_CHEST = .05;
 function chestTick() {
-  if (!S) return; const now = Date.now(), last = S.chestTick || now; S.chestTick = now;
+  if (!S) return; const now = NOW(), last = S.chestTick || now; S.chestTick = now;
   if (!S.guildOn || now <= last) return;
   let ch = false; for (const c of S.chests || []) if (c.at != null && c.at > last) { const run = Math.min(now, c.at) - last; c.at = Math.max(last, c.at - run * GUILD_CHEST); ch = true; }
   if (ch && now - (S.chestSaved || 0) > 15000) { S.chestSaved = now; save(); }
 }
 function setGuildOn(on) { if (!S) return; chestTick(); if (!!S.guildOn !== !!on) { S.guildOn = !!on; save(); if (!$('scHub').hidden) renderHub(); } }
-const chestLeft = (c) => c.at == null ? null : Math.max(0, Math.ceil((c.at - Date.now()) / 1000));
+const chestLeft = (c) => c.at == null ? null : Math.max(0, Math.ceil((c.at - NOW()) / 1000));
 const gemCost = (sec) => Math.max(1, Math.ceil(sec / 60));
 const fmtTime = (s) => s >= 3600 ? `${Math.floor(s / 3600)}じかん${Math.floor(s % 3600 / 60)}ふん` : s >= 60 ? `${Math.floor(s / 60)}ふん${s % 60 ? (s % 60) + 'びょう' : ''}` : `${s}びょう`;
 // ブラインドボックスの ドット絵（c=しまっている / o=あいた）：[画像, はば, たかさ]
@@ -4601,7 +4613,7 @@ const fmtShort = (s) => s >= 3600 ? `${Math.floor(s / 3600)}じかん` : s >= 60
 function renderChests() {
   const box = $('hubChests'); if (!box) return;
   S.chests = S.chests || []; chestTick();
-  for (const c of S.chests) if (c.at == null) { c.at = Date.now() + CHESTS[c.kind].sec * 1000; save(); }   // むかしの セーブ：いまから すすめる
+  for (const c of S.chests) if (c.at == null) { c.at = NOW() + CHESTS[c.kind].sec * 1000; save(); }   // むかしの セーブ：いまから すすめる
   const opening = false;
   let h = '';
   for (let i = 0; i < 4; i++) {
@@ -4627,16 +4639,24 @@ function renderChests() {
 async function tapChest(i) {
   const c = S.chests[i]; if (!c) return;
   const C = CHESTS[c.kind], left = chestLeft(c);
-  if (left === 0) return openChest(i);
-  if (S.onb === 5) { S.onbOpen = 1; return openChest(i); }   // さいしょの ながれ：こんかいの ジェムは むりょう
+  if (left === 0) return act('openChest', i);
+  if (S.onb === 5) return act('openChest', i, 1);   // さいしょの ながれ：こんかいの ジェムは むりょう
   const cost = gemCost(left);
   if ((S.gems || 0) < cost) { SND.se('deny'); say0(`のこり ${fmtTime(left)}。\nいますぐ あけるには 💎${cost} ジェムが いります（もっている：${S.gems || 0}）。`); return; }   // たりない ときは きかない
-  if (await ask(`のこり ${fmtTime(left)}。\n💎${cost} ジェムで いますぐ あけますか？（もっている：${S.gems || 0}）`, 'あける', 'やめる')) payOpen(i, cost);
+  if (await ask(`のこり ${fmtTime(left)}。\n💎${cost} ジェムで いますぐ あけますか？（もっている：${S.gems || 0}）`, 'あける', 'やめる')) return act('payOpen', i);
 }
-function payOpen(i, cost) {
-  if ((S.gems || 0) < cost) { say0('ジェムが たりません'); return; }
-  S.gems -= cost; openChest(i);
-}
+ACTS.payOpen = (i) => {   // ジェムで すぐ あける（のこり じかんは サーバーの じこくで けいさん）
+  const c = S.chests && S.chests[i]; if (!c) return 'none'; const left = chestLeft(c); if (left === 0) { openChest(i); return 'ok'; }
+  const cost = gemCost(left == null ? CHESTS[c.kind].sec : left);
+  if ((S.gems || 0) < cost) { say0('ジェムが たりません'); return 'gems'; }
+  S.gems -= cost; openChest(i); return 'ok';
+};
+ACTS.openChest = (i, onb) => {
+  const c = S.chests && S.chests[i]; if (!c) return 'none';
+  if (onb && S.onb === 5) S.onbOpen = 1;   // さいしょの ながれ
+  else if (chestLeft(c) !== 0) return 'locked';
+  openChest(i); return 'ok';
+};
 function rollChest(kind) {
   const C = CHESTS[kind], out = { cr: randi(C.cr[0], C.cr[1]), tms: [], mons: [] };
   const rollR = () => { let x = rnd() * 100, r = 0; for (; r < 2 && x >= C.rar[r]; r++) x -= C.rar[r]; return r; };
@@ -4664,7 +4684,7 @@ function openChest(i) {
     const img = spriteCanvas(sid, 96).toDataURL();
     return `<div class="reward"><div style="display:flex;gap:6px;justify-content:center"><span class="rar" style="background:${r.c}">${r.n}</span>${isNew ? '<span class="rar" style="background:#ffd166">NEW</span>' : ''}</div><img src="${img}" class="pix" style="width:96px;height:96px;display:block;margin:6px auto"><div class="big">${sp.n}</div><div style="display:flex;gap:4px;justify-content:center">${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><div class="dim">${NATURES[m.nat].n}・${ivGrade(m)}<br>わざ：${m.moves.map(x => MOVES[x].n).join('・')}<br>${where}</div></div>`;
   });
-  S.chLog = [{ t: Date.now(), k: c.kind, mons: R.mons.slice(), cr: R.cr, tms: R.tms.slice(), items: (R.items || []).slice() }, ...(S.chLog || [])].slice(0, 20);   // さいきん 20けんの りれき
+  S.chLog = [{ t: NOW(), k: c.kind, mons: R.mons.slice(), cr: R.cr, tms: R.tms.slice(), items: (R.items || []).slice() }, ...(S.chLog || [])].slice(0, 20);   // さいきん 20けんの りれき
   save();
   const cards = [`<div class="reward"><div class="chbox">${chestIcon(c.kind, false, 4)}</div><div class="big">${C.n}</div><div class="dim">タップで あける</div></div>`,
     ...monCards, `<div class="reward"><div class="rwic">${orbImg()}</div><div class="big">ボックス ×${R.cr}</div><div class="dim">モンスターを つかまえる どうぐ</div></div>`];
@@ -8771,6 +8791,76 @@ const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t
 const SRV_APP = () => !!(window.PMA_APP && window.PMA_APP.online);
 let SRV_FN = null;
 async function srvFn() { if (SRV_FN) return SRV_FN; if (!SRV_APP()) return null; try { SRV_FN = window.claude && window.claude.use ? await window.claude.use('fn') : null; } catch (e) { SRV_FN = null; } return SRV_FN; }
+/* ===== セーブを サーバーで まもる（アプリ版）=====
+   ジェム・どうぐ・ワザステッカー・ボックス・モンスター・すすみぐあい は サーバーの セーブが ただしい（端末では かえられない）。
+   それを かえる しごと（act）は さきに サーバーで うごかし（この ゲームの コードを サーバーの ブラウザで）、
+   おなじ らんすう・じこく で この 端末でも うごかす（がめんも そのまま でる）。けっかが ちがえば サーバーの ほうに する */
+let SRV_SAVE = false;   // サーバーの セーブを つかって いる
+const SAVE_PROT = ['gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt'];   // サーバーが きめる ところ
+const MON_PROT = ['uid', 'sid', 'iv', 'nat', 'ev', 'fed', 'lvl', 'tmL'];   // モンスターの サーバーが きめる ところ（わざ・訓練・ならびは 端末で かえて よい）
+const saveHash = (x) => { const o = {}; for (const k of SAVE_PROT) if (x[k] !== undefined) o[k] = x[k]; o.mons = [...(x.party || []), ...(x.box || [])].map(m => MON_PROT.map(k => m[k] === undefined ? null : m[k])); return seedOf(JSON.stringify(o)).toString(36); };
+const cloneJ = (x) => JSON.parse(JSON.stringify(x));
+function actRun(name, args, seed, now) { const f = ACTS[name]; if (!f) throw new Error('act ' + name); const p = SIM_RNG, pn = ACT_NOW; SIM_RNG = mkRng(seed >>> 0); ACT_NOW = now; try { return f(...args); } finally { SIM_RNG = p; ACT_NOW = pn; } }
+// 端末で かえた ところ（わざ・訓練・ならび・せってい など）を サーバーの セーブに かさねる。サーバーが きめる ところは サーバーの まま
+function mergeSave(srv, loc) {
+  if (!loc || typeof loc !== 'object' || !Array.isArray(loc.party)) return cloneJ(srv);
+  const s = cloneJ(loc);
+  for (const k of SAVE_PROT) { if (srv[k] !== undefined) s[k] = cloneJ(srv[k]); else delete s[k]; }
+  const byUid = new Map([...(srv.party || []), ...(srv.box || [])].map(m => [m.uid, m])), used = new Set();
+  const fix = (m) => { const sm = m && byUid.get(m.uid); if (!sm || used.has(sm.uid)) return null; used.add(sm.uid);
+    const o = { ...m }; for (const k of MON_PROT) { if (sm[k] !== undefined) o[k] = cloneJ(sm[k]); else delete o[k]; }
+    const okMv = (id) => typeof id === 'string' && MOVES[id] && canLearn(sm.sid, id) && (learned(sm).includes(id) || (sm.moves || []).includes(id) || (sm.tmL || []).includes(id));   // ワザステッカーで おぼえた ものも
+    const mv = [...new Set((Array.isArray(o.moves) ? o.moves : []).filter(okMv))].slice(0, 4); o.moves = mv.length ? mv : cloneJ(sm.moves || []);
+    return o; };
+  s.party = (loc.party || []).map(fix).filter(Boolean).slice(0, 6); s.box = (loc.box || []).map(fix).filter(Boolean);
+  for (const sm of byUid.values()) if (!used.has(sm.uid)) s.box.push(cloneJ(sm));   // サーバーに だけ ある：あずける へ
+  if (!s.party.length && s.box.length) s.party.push(s.box.shift());
+  delete s.stash;
+  return s;
+}
+// はじめて サーバーに セーブを つくる：この 端末の データを ありえる はんいに なおして つかう
+function importSave(loc) {
+  const d = defaultSave(); if (!loc || typeof loc !== 'object' || !Array.isArray(loc.party)) return d;
+  const s = cloneJ(loc), n = (v, a, b) => Math.max(a, Math.min(b, Number.isFinite(+v) ? Math.floor(+v) : a));
+  s.gems = n(s.gems, 0, 3000); s.capsules = n(s.capsules, 0, 300);
+  for (const k of ['items', 'tms']) { const o = {}; const src = s[k] && typeof s[k] === 'object' ? s[k] : {}; for (const id in src) if ((k === 'items' ? ITEMS[id] : MOVES[id])) o[id] = n(src[id], 0, 99); s[k] = o; }
+  s.chests = (Array.isArray(s.chests) ? s.chests : []).filter(c => c && CHESTS[c.kind]).slice(0, 4).map(c => ({ kind: c.kind, at: c.at == null ? null : NOW() + Math.min(Math.max(0, (+c.at || 0) - NOW()), CHESTS[c.kind].sec * 1000) }));
+  const mons = [...(s.party || []), ...(s.box || [])].filter(m => m && monOk({ ...m, fed: m.fed | 0 })).slice(0, 600); let uid = 1;
+  for (const m of mons) { m.uid = uid++; m.fed = n(m.fed, 0, EV_MAX); delete m.tmL; }
+  s.party = mons.slice(0, Math.min(6, (s.party || []).length || 1)); s.box = mons.slice(s.party.length); s.uid = uid;
+  if (!s.party.length) return d;
+  s.imported = NOW(); return Object.assign(d, s);
+}
+// サーバーの ブラウザから よぶ
+window.PMA_ACT = (pre, name, args, seed, now) => { S = Object.assign(defaultSave(), cloneJ(pre)); let out = null; try { out = actRun(name, args, seed, now); } catch (e) { return { err: String(e && e.message || e) }; } const post = cloneJ(S); return { post, h: saveHash(S), out: out == null || typeof out !== 'object' ? out : cloneJ(out) }; };
+window.PMA_MERGE = (srv, loc) => mergeSave(srv, loc);
+window.PMA_IMPORT = (loc) => importSave(loc);
+// この 端末から：サーバーで うごかしてから おなじ ことを ここでも
+let ACT_BUSY = false;
+async function act(name, ...args) {
+  if (!SRV_SAVE) return ACTS[name](...args);   // claude.ai 版・サーバーの セーブが まだ：この 端末で
+  if (ACT_BUSY) return undefined; ACT_BUSY = true;
+  try {
+    const f = await srvFn(); if (!f) { say0('サーバーに つながりません。オンラインで あそんでね'); return undefined; }
+    let r; try { r = await f.call('act', { name, args, loc: cloneJ(S) }); } catch (e) { say0(`サーバーに つながりませんでした（${e && e.code || 'error'}）。もういちど ためしてね`); return undefined; }
+    if (r.err) { say0('できませんでした（' + r.err + '）'); return undefined; }
+    SRV_SKEW = r.now - Date.now();
+    S = Object.assign(defaultSave(), r.pre);   // サーバーの セーブ（うごかす まえ）
+    const out = actRun(name, args, r.seed, r.now);   // おなじ しごとを ここでも（がめんも でる）
+    if (saveHash(S) !== r.h) { const g = await f.call('saveGet', {}).catch(() => null); if (g && g.s) { S = Object.assign(defaultSave(), g.s); renderHub(); } }   // ずれた：サーバーの ほう
+    saveLocal(); return out;
+  } finally { ACT_BUSY = false; }
+}
+// アプリを ひらいた とき：サーバーの セーブを もらう（はじめては この 端末の データから つくる）
+const SAVE_SERVER_ON = false;   // ぜんぶの しごとを サーバーへ うつし おわるまで off（テストは window.PMA_SAVE_ON）
+async function saveInit() {
+  if (!SRV_APP() || SRV_SAVE || !S || !(SAVE_SERVER_ON || window.PMA_SAVE_ON)) return;
+  const f = await srvFn(); if (!f) return;
+  const r = await f.call('saveGet', { loc: cloneJ(S) }).catch(() => null); if (!r || !r.s) return;
+  SRV_SKEW = r.now - Date.now(); S = Object.assign(defaultSave(), r.s); SRV_SAVE = true; saveLocal();
+  if (!$('scHub').hidden) renderHub();
+}
+const saveLocal = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { } };
 // 試合を サーバーに きろく：はじまった（へやの ようすを サーバーが たしかめる）→ おわった（ふたりの けっかが あえば レート・ギルドに）
 function netMatchStart(team) { const code = NET.code; return srvFn().then(f => f ? f.call('matchStart', { code, ...(team ? { team } : {}) }).then(r => r && r.mid || null) : null).catch(() => null); }   // team：ゲストの じぶんの チーム（ホストが かえて いないか サーバーが みる）
 function netSendLog() {   // ホスト：たたかいの きろくを サーバーへ（サーバーが さいげん して かちまけを きめる）
@@ -12532,6 +12622,7 @@ async function bkCheck0() {
 }
 setTimeout(bkCheck, 800);
 setTimeout(() => { mrepFlush(); }, 3000);   // まえに とどけられなかった 試合の けっか
+setTimeout(() => { saveInit(); }, 1500); window.addEventListener('online', () => saveInit());   // サーバーの セーブ
 window.addEventListener('focus', () => bkCheck()); window.addEventListener('pageshow', () => bkCheck());   // PCで まどを ひらいた まま：もどった とき
 setInterval(() => { if (!document.hidden) bkCheck(); }, 180000);   // ひらいた まま でも ときどき みる
 function bkCustIn(s) {   // バックアップに はいって いた じぶんで かいた サモナーを この 端末に くわえる（つうじょうの セーブを よむ まえに：しらない 種族は はずされる ため）
@@ -13381,7 +13472,7 @@ window.__game = {
   force(id) { const f = active(0); if (f && B.mode === 'fight') { f.cd[id] = 0; f.queued = id; } },
   newGame(sid) { SAVE_GEN++; S = defaultSave(); S.party.push(newMon(sid || 'kamadon', 5)); save(); renderHub(); },
   addMon(sid, lv) { S.party.push(newMon(sid, lv)); save(); },
-  run(fn) { return fn({ NETo: NET, validTeam, monOk, shopBuyDeal, shopSig, shopItemOf, chooseSwap, NEW_IDS, moveBlocked, openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderTower, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
+  run(fn) { return fn({ act, ACTS, saveInit, SRVS: () => SRV_SAVE, saveHash, mergeSave, importSave, NETo: NET, validTeam, monOk, shopBuyDeal, shopSig, shopItemOf, chooseSwap, NEW_IDS, moveBlocked, openChest, jr, startJourney, isDefMove, damageProp, beginMove, teamOf, monFrom, trClone, newMon, fixMon, cdScale, speedOf, giveOrder, spotOk, flies, rayLen, foeMon, strongMoves, LEARN, NATURES, NATURE_KEYS, base6, STAT6, FIELDS, TR_PLAN, EV_MAX, moveDesc, moveSub, guildWin, renderGuild, recPlan, renderTrain, renderTower, renderArcade, renderJourney, renderChart, renderShop, renderTeam, healMax, moveReach, losClear: (a, b) => losClear(a, b), persona: (f) => persona(f), hit, rpsOf, beginMove, B, MOVES, active, useStatusMove, statusHit, applyHazards, rayLen, losClear, SND, canLearn, TM_POOL, SPECIES, poolIds, SPR, wallSprite, typeFx, burst, startJourney, startLeague, renderJourney, jr, arcadeNew, arcadeStart, renderArcade, ac, startBattle, render, aiPickMove, smartScore, natPref, estDmg, targetable, canAct, opp, teamOf, monFrom, CUSTOM: () => CUSTOM, fixMon: (m, b) => fixMon(m, b), moveDesc, KIND_LABEL, PAT_LABEL, TYPES, updHUD, renderDex, renderTitle, show, plFx, impactFx, fxp, sendOut: typeof sendOut === "function" ? sendOut : null, shellSc, statFx }); },
 };
 
 

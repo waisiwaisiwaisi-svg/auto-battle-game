@@ -47,6 +47,10 @@ service cloud.firestore {
     }
     // サーバーだけが つかう（試合・日替わり・かいすう・くいちがいの きろく）
     match /matches/{id} { allow read, write: if false; }
+    match /matchlogs/{id} { allow read, write: if false; }
+    match /pairs/{id} { allow read, write: if false; }
+    // セーブ：サーバーだけが かく（じぶんの ものは よめる）
+    match /saves/{uid} { allow read: if mine(uid); allow write: if false; }
     match /claims/{uid} { allow read, write: if false; }
     match /limits/{uid} { allow read, write: if false; }
     match /flags/{uid} { allow read, write: if false; }

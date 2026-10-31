@@ -10,7 +10,7 @@ async function openPage() {
   const b = await pptr.launch({ executablePath: exe, args, headless: true });
   const p = await b.newPage();
   await p.goto('file://' + path.join(__dirname, 'game', 'index.html'), { waitUntil: 'domcontentloaded', timeout: 90000 });
-  await p.waitForFunction(() => window.PMA_REPLAY && window.PMA_CHECK, { timeout: 90000 });
+  await p.waitForFunction(() => window.PMA_REPLAY && window.PMA_CHECK && window.PMA_ACT, { timeout: 90000 });
   p.on('close', () => { pageP = null; }); b.on('disconnected', () => { pageP = null; });
   return p;
 }
@@ -20,4 +20,6 @@ async function replay(job) {
   const p = await page();
   return p.evaluate((j) => ({ ver: window.PMA_VER, hOk: window.PMA_CHECK(j.h), gOk: window.PMA_CHECK(j.g), r: window.PMA_REPLAY(j) }), job);
 }
-module.exports = { replay };
+// ページの window.PMA_○○ を よぶ（セーブの しごと）
+async function call(fn, ...args) { const p = await page(); return p.evaluate((f, a) => window[f](...a), fn, args); }
+module.exports = { replay, call };

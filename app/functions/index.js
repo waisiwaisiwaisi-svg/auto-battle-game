@@ -153,6 +153,40 @@ async function sweepOne(ref) {
   });
 }
 
+/* ---- セーブ：サーバーが もつ（saves/{uid}.js）。クライアントは よむ だけ ----
+   saveGet：サーバーの セーブ（なければ クライアントの データを ありえる はんいに なおして つくる）
+   act：クライアントで かえた ところ（わざ・訓練・ならび）を かさね、しごと（ショップ・ボックス・たたかいの けっか…）を
+        ゲームの コードで うごかして ほぞん。おなじ シード・じこく を かえすので クライアントも おなじ けっかに なる */
+const SAVE_MAX = 900000;
+const loadSave = async (tx, ref) => { const d = await tx.get(ref); if (!d.exists) return null; try { return { s: JSON.parse(d.data().js), v: d.data().v || 0 }; } catch (e) { return null; } };
+exports.saveGet = onCall({ memory: '2GiB', timeoutSeconds: 60 }, async (req) => {
+  const uid = uidOf(req), ref = fs.doc('saves/' + uid), loc = req.data && req.data.loc;
+  const d = await ref.get();
+  if (d.exists) { try { return { s: JSON.parse(d.data().js), v: d.data().v || 0, now: Date.now() }; } catch (e) { /* こわれた：つくりなおす */ } }
+  const s = await require('./replay').call('PMA_IMPORT', loc && typeof loc === 'object' ? loc : null);
+  const js = JSON.stringify(s); if (js.length > SAVE_MAX) throw new HttpsError('resource-exhausted', 'size');
+  await fs.runTransaction(async (tx) => { const x = await tx.get(ref); if (!x.exists) tx.set(ref, { js, v: 1, t: Date.now(), imp: 1 }); });
+  const x = await ref.get(); return { s: JSON.parse(x.data().js), v: x.data().v || 1, now: Date.now() };
+});
+const ACT_NAMES = new Set(['sync', 'shopBuyDeal', 'shopBuyChest', 'shopBuySpecial', 'openChest', 'payOpen']);
+exports.act = onCall({ memory: '2GiB', timeoutSeconds: 60 }, async (req) => {
+  const uid = uidOf(req), name = req.data && req.data.name, args = (req.data && req.data.args) || [], loc = req.data && req.data.loc;
+  if (!ACT_NAMES.has(name) || !Array.isArray(args) || JSON.stringify(args).length > 200000) throw new HttpsError('invalid-argument', 'act');
+  const ref = fs.doc('saves/' + uid), P = require('./replay');
+  for (let i = 0; i < 3; i++) {   // ほかの しごとと かさなったら やりなおす
+    const d = await ref.get(); if (!d.exists) throw new HttpsError('failed-precondition', 'nosave');
+    const v = d.data().v || 0, srv = JSON.parse(d.data().js);
+    const pre = await P.call('PMA_MERGE', srv, loc && typeof loc === 'object' ? loc : null);
+    const seed = (Math.random() * 4294967296) >>> 0, now = Date.now();
+    const r = await P.call('PMA_ACT', pre, name, args, seed, now);
+    if (r.err) return { err: r.err };
+    const js = JSON.stringify(r.post); if (js.length > SAVE_MAX) throw new HttpsError('resource-exhausted', 'size');
+    const ok = await fs.runTransaction(async (tx) => { const x = await tx.get(ref); if ((x.data().v || 0) !== v) return false; tx.set(ref, { js, v: v + 1, t: now }); return true; });
+    if (ok) return { pre, seed, now, h: r.h, v: v + 1, out: r.out };
+  }
+  throw new HttpsError('aborted', 'busy');
+});
+
 exports.guildWin1 = onCall(async (req) => {
   const uid = uidOf(req), now = Date.now(), day = L.jstDay(now);
   const lim = fs.doc('limits/' + uid), gm = fs.doc('gmembers/' + uid);
