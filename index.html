@@ -2159,6 +2159,8 @@ const MOVE_FIX = {
   'hyper-voice': { bigKb: 1 }, 'focus-blast': { pat: 'palm' }, moonblast: { pat: 'moon' }, gust: { look: 'blade' }, 'iron-defense': { look: 'iron' },
 };
 for (const id in MOVE_FIX) if (MOVES[id]) { const fx = MOVE_FIX[id]; Object.assign(MOVES[id], fx, fx.e ? { e: Object.assign({}, MOVES[id].e, fx.e) } : {}); const e = MOVES[id].e; for (const k in e) if (e[k] == null) delete e[k]; }
+// 見た目だけの タイプ（わざの タイプは そのまま）：名前に「どく」が つく わざは どくの エフェクト
+const vt = (m) => (m && m.fxt) || m.t;
 // クールダウンは わざごと（つよい わざほど ながい。すばやさで すこし かわる）
 for (const id in MOVES) if (!(MOVES[id].cd > 0)) MOVES[id].cd = 4;
 // ぶつり／ぞくせい は わざの かたちで きめる：からだで ぶつかる わざ（格闘・とっしん・ひっかき など）＝ぶつり（こうげき→ぼうぎょ）、
@@ -2850,6 +2852,8 @@ Object.assign(TYPES, { fire: { n: '火', c: '#ff7a3d' }, water: { n: '水', c: '
 for (const k in OLD_TYPES) if (!TYPES[k]) Object.defineProperty(TYPES, k, { value: OLD_TYPES[k], enumerable: false });   // ならべる ときには でてこない
 for (const k in CHART) delete CHART[k]; Object.assign(CHART, {"water":{"fire":2.0,"grass":0.5,"ground":2.0,"elec":0.5},"fire":{"water":0.5,"grass":2.0,"wind":0.5,"elec":2.0},"grass":{"water":2.0,"fire":0.5,"ground":2.0,"wind":0.5},"elec":{"wind":2.0,"ground":0.5,"fire":0.5,"water":2.0},"wind":{"elec":0.5,"fire":2.0,"grass":2.0,"ground":0.5},"ground":{"elec":2.0,"grass":0.5,"water":0.5,"wind":2.0},"ghost":{"demi":2.0,"dragon":0.5,"fairy":0.5,"bug":2.0},"demi":{"ghost":0.5,"bug":2.0,"machine":2.0,"dragon":0.5},"fairy":{"dragon":2.0,"machine":0.5,"bug":0.5,"ghost":2.0},"dragon":{"fairy":0.5,"ghost":2.0,"machine":0.5,"demi":2.0},"bug":{"demi":0.5,"machine":2.0,"fairy":2.0,"ghost":0.5},"machine":{"bug":0.5,"fairy":2.0,"demi":0.5,"dragon":2.0}});
 { const T = {"a_fire2":["fire","beast"],"a_fire3":["fire","beast"],"a_fire5":["fire","demi"],"a_fire6":["fire","bug"],"a_fire7":["fire","beast"],"a_fire9":["fire","beast"],"a_fire10":["fire","dragon"],"a_water3":["water","beast"],"a_water5":["water","beast"],"a_grass1":["grass","beast"],"a_grass3":["grass","fairy"],"a_grass9":["grass","beast"],"a_grass10":["grass","beast"],"a_elec3":["elec","beast"],"a_elec4":["elec","machine"],"a_elec5":["elec","beast"],"a_elec9":["elec","beast"],"a_elec10":["elec","beast"],"a_ice3":["water","beast"],"a_ice7":["water","demi"],"a_ice8":["water","beast"],"a_ice9":["normal","beast"],"a_ice10":["wind","fairy"],"a_fighting1":["normal","demi"],"a_fighting9":["ground","beast"],"a_fighting10":["ground","demi"],"a_poison2":["grass","beast"],"a_poison5":["wind","dragon"],"a_poison8":["grass","beast"],"a_poison9":["grass","dragon"],"a_poison10":["ground","fairy"],"a_ground3":["normal","beast"],"a_ground7":["ground","beast"],"a_ground10":["ground","fairy"],"a_wind1":["wind","beast"],"a_wind6":["wind","beast"],"a_wind8":["wind","beast"],"a_wind10":["wind","dragon"],"a_dragon1":["elec","dragon"],"a_dragon3":["water","dragon"],"a_dragon4":["wind","fairy"],"a_dragon7":["normal","machine"],"b_fire1":["fire","ghost"],"b_fire2":["fire","fairy"],"kamadon":["fire","machine"],"b_fire4":["elec","ghost"],"b_fire5":["fire","fairy"],"b_fire6":["fire","dragon"],"b_fire8":["fire","machine"],"b_fire10":["fire","fairy"],"pottoko":["water","machine"],"b_water4":["water","machine"],"b_water6":["water","beast"],"b_water7":["water","demi"],"b_water9":["water","beast"],"b_grass1":["grass","fairy"],"b_grass2":["grass","demi"],"b_grass7":["grass","ghost"],"b_grass10":["grass","beast"],"b_elec2":["elec","beast"],"b_elec3":["elec","demi"],"b_elec4":["elec","beast"],"b_elec8":["elec","bug"],"b_elec9":["elec","fairy"],"b_elec10":["elec","beast"],"b_ice2":["water","beast"],"hyoukyuu":["water","beast"],"yukidome":["water","ghost"],"b_ice8":["water","bug"],"b_ice9":["ground","beast"],"b_fighting1":["grass","demi"],"b_fighting3":["wind","demi"],"b_fighting5":["wind","beast"],"b_fighting6":["ground","demi"],"b_fighting7":["normal","demi"],"b_fighting8":["grass","bug"],"b_fighting9":["ground","demi"],"b_fighting10":["normal","demi"],"b_poison6":["grass","bug"],"b_poison7":["wind","ghost"],"b_poison9":["ground","bug"],"b_poison10":["wind","beast"],"b_ground3":["normal","machine"],"b_ground4":["ground","machine"],"b_ground8":["ground","demi"],"b_ground9":["ground","beast"],"b_wind4":["wind","fairy"],"b_wind6":["wind","ghost"],"b_wind8":["wind","machine"],"sorabune":["wind","machine"],"b_wind10":["wind","beast"],"b_dragon1":["grass","ghost"],"b_dragon2":["ground","dragon"],"b_dragon3":["water","dragon"],"b_dragon5":["wind","dragon"],"b_dragon6":["ground","dragon"],"b_dragon7":["fire","dragon"],"b_dragon8":["grass","dragon"],"b_dragon10":["ground","dragon"],"g1":["normal","ghost"],"g2":["fire","ghost"],"noroinui":["normal","ghost"],"kitsunemen":["normal","ghost"],"g5":["normal","beast"],"g6":["normal","ghost"],"medamasho":["normal","ghost"],"g9":["wind","ghost"],"g10":["water","ghost"],"c_fire2":["fire","beast"],"c_fire4":["fire","demi"],"c_fire5":["fire","machine"],"c_fire6":["fire","beast"],"c_fire7":["fire","demi"],"c_water3":["water","demi"],"c_water5":["water","dragon"],"c_water8":["water","ghost"],"c_water10":["grass","beast"],"c_grass5":["ground","beast"],"c_grass7":["grass","machine"],"c_grass8":["grass","fairy"],"c_grass10":["grass","demi"],"c_elec1":["elec","machine"],"c_elec4":["elec","beast"],"c_elec5":["elec","machine"],"c_elec6":["elec","machine"],"c_elec7":["elec","dragon"],"c_elec8":["elec","machine"],"c_ice2":["water","machine"],"c_ice10":["water","fairy"],"c_fighting5":["normal","demi"],"c_fighting7":["normal","ghost"],"c_fighting8":["ground","machine"],"c_poison8":["grass","fairy"],"c_poison9":["grass","machine"],"c_ground9":["ground","fairy"],"c_wind6":["wind","beast"],"c_dragon2":["normal","dragon"],"c_dragon5":["normal","dragon"],"c_dragon6":["ground","dragon"],"c_dragon7":["elec","dragon"],"c_dragon8":["normal","dragon"],"c_dragon10":["normal","dragon"],"d_bug1":["wind","bug"],"d_bug3":["normal","bug"],"d_bug4":["ground","bug"],"d_bug5":["ground","bug"],"d_bug6":["normal","bug"],"d_bug7":["wind","bug"],"d_bug9":["grass","bug"],"d_bug12":["fire","bug"],"d_bug15":["normal","bug"],"d_bug16":["ground","bug"],"d_bug17":["water","bug"],"e_fox1":["water","fairy"],"e_fox2":["normal","fairy"],"e_sheep1":["normal","beast"],"e_cloud1":["wind","ghost"],"e_rose1":["grass","beast"],"a_grass7":["grass","demi"],"a_elec2":["elec","fairy"],"a_ground5":["ground","machine"],"a_dragon10":["water","dragon"],"b_fire7":["wind","machine"],"b_water5":["elec","ghost"],"b_grass3":["grass","beast"],"b_poison8":["grass","ghost"],"b_ground7":["ground","beast"],"f_jelly1":["water","fairy"],"f_frost1":["water","fairy"],"f_witch1":["grass","fairy"],"f_icek1":["water","ghost"],"f_coffin1":["ground","ghost"],"n_x1":["elec","bug"],"n_x2":["fire","bug"],"n_x4":["fire","ghost"],"n_burner":["fire","machine"],"n_pipe":["normal","ghost"],"n_amp":["elec","machine"],"n_vine":["grass","dragon"],"n_tvghost":["elec","ghost"],"n_moth":["elec","bug"],"n_parrot":["wind","demi"],"n_lavaoni":["fire","demi"],"n_ladybug":["fire","bug"],"n_rail":["elec","bug"],"n_wireoni":["elec","demi"],"n_furin":["wind","fairy"],"n_koinobori":["wind","fairy"],"n_cerberus":["fire","beast"],"n_cotton":["normal","fairy"],"n_raiju":["elec","beast"]}; for (const id in T) if (SPECIES[id]) { SPECIES[id].type = T[id][0]; SPECIES[id].type2 = T[id][1]; } }
+// 名前に「どく」が つく わざは どくの エフェクト（わざの タイプは そのまま）
+for (const id of ['toxic', 'sludge-wave', 'gunk-shot', 'sludge-bomb', 'toxic-spikes', 'poison-swamp', 'acid-rain', 'venom-stack', 'cross-poison']) if (MOVES[id]) MOVES[id].fxt = 'poison';
 { const T = {"tackle":"beast","rockfall":"ground","quake":"ground","stealth-rock":"ground","close-combat":"demi","knock-off":"beast","calm-mind":"fairy","ice-beam":"water","body-press":"demi","psychic":"fairy","iron-defense":"machine","ice-punch":"water","poison-jab":"bug","focus-blast":"demi","dazzling-gleam":"fairy","stone-edge":"ground","rock-slide":"ground","toxic":"grass","drain-punch":"demi","fake-out":"beast","trick-room":"fairy","rock-tomb":"ground","mirror-coat":"fairy","flash-cannon":"machine","iron-head":"machine","trick":"fairy","sludge-wave":"grass","quick-attack":"beast","ice-shard":"water","ice-fang":"water","crunch":"beast","rapid-spin":"beast","psychic-noise":"fairy","bulk-up":"demi","play-rough":"fairy","body-slam":"beast","gunk-shot":"grass","sludge-bomb":"grass","toxic-spikes":"grass","blizzard":"water","moonblast":"fairy","aura-sphere":"demi","roar":"beast","triple-axel":"beast","metal-burst":"machine","psyshock":"fairy","alluring-voice":"fairy","rock-blast":"ground","freeze-dry":"water","slack-off":"beast","rock-wall":"ground","ice-wall":"water","poison-swamp":"grass","icicle-drop":"water","acid-rain":"grass","far-strike":"demi","intimidate":"beast","powder-snow":"water","avalanche":"water","aurora-veil":"water","psycho-cut":"fairy","zen-headbutt":"fairy","cross-poison":"bug","head-smash":"ground","finisher":"demi","psy-link":"fairy","slap-dash":"beast","duel-arena":"demi","future-sight":"fairy","snatch":"fairy","sandstorm":"ground","snowscape":"water","rewind":"fairy","third-fist":"demi","healing-wish":"fairy","psychic-terrain":"fairy","gravity":"ground","smack-down":"ground","haze":"wind","rage-mode":"beast","mystic-shot":"fairy","side-change":"fairy","high-jump-kick":"demi","rollout":"ground","hako-punch":"demi","mini-turret":"machine","self-destruct":"machine"}; for (const id in T) if (MOVES[id]) MOVES[id].t = T[id]; }
 // まえの タイプ → あたらしい 属性・種族（ふるい データ）
 const LEG_ATTR = { ice: 'water', rock: 'ground', poison: 'grass' }, LEG_RACE = { fighting: 'demi', psychic: 'fairy' };
@@ -6498,7 +6502,7 @@ function projBlast(p, R) {
   if (p.blasted) return; p.blasted = true;   // 1つの たまは 1かいだけ ばくはつ（あたった ときと きえる ときの 2かい よばれる ことが ある）
   const o = active(1 - p.side), gx = p.pat === 'lob' ? p.tx : p.x, gy = p.pat === 'lob' ? p.ty : p.y + BODY;
   wallsInArea(gx, gy, R, p.m);
-  fxPush({ type: 'shock', x: gx, y: gy, rad: R, col: TYPES[p.m.t].c, life: .35, max: .35 }); if (gBurst(p.m, gx, gy, R)) { } else if (plOk('a_burst_' + p.m.t)) plFx('a_burst_' + p.m.t, gx, gy + R * .25, R * 2.4 / (64 * PIX_D) + .2); else sheetFx(STRIKE_FX[p.m.t] || 'boom', gx, gy - R * .6, R / 40 + .2); addDecal(gx, gy, R * .45, p.m.t === 'fire' ? 'scorch' : 'crater'); B.shake = Math.max(B.shake, 4);
+  fxPush({ type: 'shock', x: gx, y: gy, rad: R, col: TYPES[vt(p.m)].c, life: .35, max: .35 }); if (gBurst(p.m, gx, gy, R)) { } else if (plOk('a_burst_' + vt(p.m))) plFx('a_burst_' + vt(p.m), gx, gy + R * .25, R * 2.4 / (64 * PIX_D) + .2); else sheetFx(STRIKE_FX[p.m.t] || 'boom', gx, gy - R * .6, R / 40 + .2); addDecal(gx, gy, R * .45, p.m.t === 'fire' ? 'scorch' : 'crater'); B.shake = Math.max(B.shake, 4);
   if (!p.hitDone && targetable(o) && DM.hypot(o.x - gx, o.y - gy) <= R + o.r) { p.hitDone = true; hit(p.f, o, p.m, DM.atan2(o.y - gy, o.x - gx), { decoy: p.decoy || null, mul: p.mul }); }
 }
 
@@ -6545,10 +6549,10 @@ function updBlasts(dt) {
   for (const b of B.blasts) {
     if (b.done) continue;
     b.t -= dt; if (b.t > 0) continue; b.done = true;
-    const m = b.m, o = active(1 - b.side), col = TYPES[m.t].c;
-    if (b.look === 'wave') { if (!gBurst(m, b.x, b.y, b.r, 'wave')) fxPush({ type: 'shock', x: b.x, y: b.y, rad: b.r, col, life: .4, max: .4 }); typeFx(b.x, b.y - 10, m.t, 8, b.r * 2, .4); B.shake = Math.max(B.shake, 4); }
-    else if (b.look === 'spike') { if (!gBurst(m, b.x, b.y, 22, 'spike') && !gBurst(m, b.x, b.y, 22)) sheetFx(STRIKE_FX[m.t] || 'boom', b.x, b.y - 22, .75); burst(b.x, b.y, col, 5, 80, .35); addDecal(b.x, b.y, 12, 'crater'); B.shake = Math.max(B.shake, 2); }
-    else { if (!gBurst(m, b.x, b.y, b.r)) sheetFx(STRIKE_FX[m.t] || 'boom', b.x, b.y - b.r * .7, b.r / 40 + .3); burst(b.x, b.y, col, 7, 100, .4); addDecal(b.x, b.y, b.r * .5, m.t === 'elec' || m.t === 'fire' ? 'scorch' : 'crater'); B.shake = Math.max(B.shake, 4); }
+    const m = b.m, o = active(1 - b.side), col = TYPES[vt(m)].c;
+    if (b.look === 'wave') { if (!gBurst(m, b.x, b.y, b.r, 'wave')) fxPush({ type: 'shock', x: b.x, y: b.y, rad: b.r, col, life: .4, max: .4 }); typeFx(b.x, b.y - 10, vt(m), 8, b.r * 2, .4); B.shake = Math.max(B.shake, 4); }
+    else if (b.look === 'spike') { if (!gBurst(m, b.x, b.y, 22, 'spike') && !gBurst(m, b.x, b.y, 22)) sheetFx(STRIKE_FX[vt(m)] || 'boom', b.x, b.y - 22, .75); burst(b.x, b.y, col, 5, 80, .35); addDecal(b.x, b.y, 12, 'crater'); B.shake = Math.max(B.shake, 2); }
+    else { if (!gBurst(m, b.x, b.y, b.r)) sheetFx(STRIKE_FX[vt(m)] || 'boom', b.x, b.y - b.r * .7, b.r / 40 + .3); burst(b.x, b.y, col, 7, 100, .4); addDecal(b.x, b.y, b.r * .5, m.t === 'elec' || m.t === 'fire' ? 'scorch' : 'crater'); B.shake = Math.max(B.shake, 4); }
     hitClones(o, c => { const d = DM.hypot(c.x - b.x, c.y - b.y); return d <= b.r + 14 && d >= b.ring - 14; });
     if (b.m) wallsInArea(b.x, b.y, b.r, m);
     if (!targetable(o) || b.decoy || B.blasts.some(x => x.grp === b.grp && x.hitDone)) continue;
@@ -6574,7 +6578,7 @@ function placeMines(f, o, m) {   // ほうしボム：あいての まわりに 
     const a = i / n * Math.PI * 2 + rand(-.35, .35), r = i ? rand(55, 115) : rand(0, 25);
     const x = clamp(c.x + DM.cos(a) * r, B.st.fx0 + 12, B.st.fx1 - 12), y = clamp(c.y + DM.sin(a) * r * .75, B.st.fy0 + 12, B.st.fy1 - 12);
     OB().push({ k: 'mine', x, y, r: 15, side: f.side, f, m, life: 14, arm: .45 + i * .08, uid: ++B.uidc });
-    fxPush({ type: 'toss', x0: f.x, y0: f.y - BODY, x1: x, y1: y, col: TYPES[m.t].c, hz: 'spore', life: .4 + i * .05, max: .4 + i * .05 });
+    fxPush({ type: 'toss', x0: f.x, y0: f.y - BODY, x1: x, y1: y, col: TYPES[vt(m)].c, hz: 'spore', life: .4 + i * .05, max: .4 + i * .05 });
   }
   say(`${f.sp.n}は ほうしの たまを ばらまいた！`);
 }
@@ -6602,7 +6606,7 @@ function updObs(dt) {
     switch (ob.k) {
       case 'mine':
         if (ob.arm <= 0 && gr && DM.hypot(x.x - ob.x, x.y - ob.y) < ob.r + x.r * .6) {
-          ob.life = 0; sheetFx('boom', ob.x, ob.y - 20, 1.1); fxPush({ type: 'shock', x: ob.x, y: ob.y, rad: 46, col: TYPES[ob.m.t].c, life: .35, max: .35 }); typeFx(ob.x, ob.y - 10, ob.m.t, 12, 110, .5); B.shake = Math.max(B.shake, 5); SND.se('boom'); addDecal(ob.x, ob.y, 16, 'crater');
+          ob.life = 0; sheetFx('boom', ob.x, ob.y - 20, 1.1); fxPush({ type: 'shock', x: ob.x, y: ob.y, rad: 46, col: TYPES[vt(ob.m)].c, life: .35, max: .35 }); typeFx(ob.x, ob.y - 10, ob.m.t, 12, 110, .5); B.shake = Math.max(B.shake, 5); SND.se('boom'); addDecal(ob.x, ob.y, 16, 'crater');
           if (targetable(x)) hit(ob.f, x, ob.m, DM.atan2(x.y - ob.y, x.x - ob.x), { mul: .75, decoy: null });
         }
         break;
@@ -6725,12 +6729,12 @@ function fireMove(f) {
   f.fireT = B.t;
   if (B.stats && f.cur) { const k = f.cur.id; B.stats.fire[k] = (B.stats.fire[k] || 0) + 1; }
   if (f.cur && f.cur.m) SND.se({ melee: 'swing', swipe: 'swing', proj: 'shoot', beam: 'beam', cone: 'beam', aoe: 'boom', strike: 'boom', multi: 'boom', dash: 'dash' }[f.cur.m.k] || 'charge');
-  if (f.cur && f.cur.m) { const m0 = f.cur.m; fxPush({ type: 'flash', x: f.x, y: f.y - BODY, rad: 22, col: (FX_STYLE[m0.t] || FX_STYLE.normal).cols[1], life: .16, max: .16 }); typeFx(f.x, f.y - BODY, m0.t, 8, 90, .35, { ang: f.cur.ang, spread: .5 }); }
+  if (f.cur && f.cur.m) { const m0 = f.cur.m; fxPush({ type: 'flash', x: f.x, y: f.y - BODY, rad: 22, col: (FX_STYLE[vt(m0)] || FX_STYLE.normal).cols[1], life: .16, max: .16 }); typeFx(f.x, f.y - BODY, vt(m0), 8, 90, .35, { ang: f.cur.ang, spread: .5 }); }
   const cur = f.cur, m = cur.m, o = opp(f);
-  const col = TYPES[m.t].c;
+  const col = TYPES[vt(m)].c;
   const dc = cur.decoy && o && o.clones && o.clones.includes(cur.decoy) ? cur.decoy : null;
   if (o && m.aim === 'lock' && (m.k === 'proj' || m.k === 'melee')) cur.ang = dc ? DM.atan2(dc.y - f.y, dc.x - f.x) : DM.atan2(o.y - f.y, o.x - f.x);
-  if (dc && m.k === 'melee') { if (m.punch) fxp({ type: 'fist', x: dc.x, y: dc.y - BODY, ang: cur.ang, col: TYPES[m.t].c, life: .35 }); else if (isBite(m)) fxp({ type: 'bite', x: dc.x, y: dc.y - BODY, col: TYPES[m.t].c, life: .42 }); else sheetFx('slash', dc.x, dc.y - BODY, .9, cur.ang, TYPES[m.t].c); popClone(o, dc); endAct(f, .3); return; }   // ぶんしんを なぐった
+  if (dc && m.k === 'melee') { if (m.punch) fxp({ type: 'fist', x: dc.x, y: dc.y - BODY, ang: cur.ang, col: TYPES[vt(m)].c, life: .35 }); else if (isBite(m)) fxp({ type: 'bite', x: dc.x, y: dc.y - BODY, col: TYPES[vt(m)].c, life: .42 }); else sheetFx('slash', dc.x, dc.y - BODY, .9, cur.ang, TYPES[vt(m)].c); popClone(o, dc); endAct(f, .3); return; }   // ぶんしんを なぐった
   // 失敗する条件
   if (m.k === 'vault') {   // そらをとぶ・あなをほる：空／地中に かくれて あいての ところへ。おりてくる ばしょは 見えるので よけられる
     cur.t = 0; cur.wind = 1.4; cur.tx = o ? o.x : f.x; cur.ty = o ? o.y : f.y; f.state = 'hide'; f.inv = 0;
@@ -6740,7 +6744,7 @@ function fireMove(f) {
   }
   if (o && o.clones && ['aoe', 'strike', 'beam', 'cone', 'swipe', 'multi'].includes(m.k) && !(cur.pts && m.k === 'strike')) hitClones(o, c => inZone(cur, f, c.x, c.y, 14));   // はんいの わざ：ぶんしんも けす
   if (m.chan && (m.k === 'beam' || m.k === 'cone')) { cur.ch = 0; cur.next = 0; cur.n = Math.round(m.chan / CHAN_TICK); cur.landed = 0; f.state = 'chan'; B.shake = Math.max(B.shake, 3); return; }
-  if (m.charge2 && !f.v.charged) { f.v.charged = 1; if (gfxOf(m, 'charge')) plFx(gfxOf(m, 'charge'), f.x, f.y - BODY, 1.6); fxp({ type: 'pillar', x: f.x, y: f.y, col: '#8a6ae8', w: 26, life: .8 }); typeFx(f.x, f.y - BODY, m.t, 18, 120, .6); SND.se('charge'); say(`${f.sp.n}は りゅうの ちからを ためこんだ！`); endAct(f, .2); return; }   // がりょうてんせい：1かいめは ためる
+  if (m.charge2 && !f.v.charged) { f.v.charged = 1; if (gfxOf(m, 'charge')) plFx(gfxOf(m, 'charge'), f.x, f.y - BODY, 1.6); fxp({ type: 'pillar', x: f.x, y: f.y, col: '#8a6ae8', w: 26, life: .8 }); typeFx(f.x, f.y - BODY, vt(m), 18, 120, .6); SND.se('charge'); say(`${f.sp.n}は りゅうの ちからを ためこんだ！`); endAct(f, .2); return; }   // がりょうてんせい：1かいめは ためる
   if (m.charge2) f.v.charged = 0;
   if (m.k === 'warp') { warpStrike(f, o, m, dc); return; }
   if (m.k === 'rage') { cur.rt = 0; cur.next = 0; cur.landed = 0; f.state = 'rage'; sheetFx('buff', f.x, f.y - BODY, 1.3); say(`${f.sp.n}は あばれだした！`); return; }
@@ -6756,11 +6760,11 @@ function fireMove(f) {
         fxPush({ type: 'shock', x: f.x, y: f.y, rad: f.r + 46, col, life: .3, max: .3 }); sheetFx('claw', f.x, f.y - BODY, 1.2, cur.ang); sheetFx('claw', f.x, f.y - BODY, 1.2, cur.ang + Math.PI);
         if (targetable(o) && dist(f, o) <= f.r + o.r + 46) hit(f, o, m, DM.atan2(o.y - f.y, o.x - f.x)); endAct(f, .3); break; }
       if (m.pat === 'combo' && (cur.hits || 0) < 2) {   // すばやく 2かい（1かい ぶんの ダメージを わけて）
-        sheetFx('slash', f.x + DM.cos(cur.ang) * (f.r + 14), f.y - BODY + DM.sin(cur.ang) * (f.r + 14), .8, cur.ang + (cur.hits ? .8 : -.8), TYPES[m.t].c);
+        sheetFx('slash', f.x + DM.cos(cur.ang) * (f.r + 14), f.y - BODY + DM.sin(cur.ang) * (f.r + 14), .8, cur.ang + (cur.hits ? .8 : -.8), TYPES[vt(m)].c);
         if (!cur.hits && targetable(o) && dist(f, o) < MELEE_R && losClear(f, o)) { const gap = Math.max(0, dist(f, o) - (f.r + o.r + 6)), px = f.x, py = f.y; cur.ang = DM.atan2(o.y - f.y, o.x - f.x); stepClear(f, cur.ang, gap); if (gap > 4) fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 }); }   // 1かいめ：ふみこむ
         if (targetable(o) && dist(f, o) <= f.r + o.r + 22 + 30 && losClear(f, o)) hit(f, o, m, cur.ang, { mul: .55, tick: !cur.hits });
         cur.hits = (cur.hits || 0) + 1; if (cur.hits < 2) { cur.t = cur.wind - .12; return; } endAct(f, .22); break; }
-      if (!m.punch && !isBite(m)) sheetFx('slash', f.x + DM.cos(cur.ang) * (f.r + 14), f.y - BODY + DM.sin(cur.ang) * (f.r + 14), .9, cur.ang, TYPES[m.t].c);
+      if (!m.punch && !isBite(m)) sheetFx('slash', f.x + DM.cos(cur.ang) * (f.r + 14), f.y - BODY + DM.sin(cur.ang) * (f.r + 14), .9, cur.ang, TYPES[vt(m)].c);
       const near = targetable(o) && dist(f, o) < MELEE_R && losClear(f, o);
       if ((m.lunge || near) && o) {   // あいてへ むかって ふみこむ（近い きょりなら とどく まで）
         const gap = Math.max(0, dist(f, o) - (f.r + o.r + 6)), step = near ? gap : Math.min(m.lunge, gap), px = f.x, py = f.y;
@@ -6772,7 +6776,7 @@ function fireMove(f) {
       endAct(f, .22); break;
     case 'swipe':
       wallsInArea(f.x + DM.cos(cur.ang) * (f.r + m.rad * .5), f.y + DM.sin(cur.ang) * (f.r + m.rad * .5), m.rad * .5, m);
-      if (m.whip) { fxp({ type: 'whip', x: f.x, y: f.y - BODY, ang: cur.ang, dir: cur.hits % 2 ? -1 : 1, rad: m.rad + f.r, col: TYPES[m.t].c, life: .24 }); SND.se('swing'); }
+      if (m.whip) { fxp({ type: 'whip', x: f.x, y: f.y - BODY, ang: cur.ang, dir: cur.hits % 2 ? -1 : 1, rad: m.rad + f.r, col: TYPES[vt(m)].c, life: .24 }); SND.se('swing'); }
       else if (m.spinSelf) sheetFx('claw', f.x, f.y - BODY, (m.rad + f.r) / 60, cur.ang + cur.hits * 2.1);
       else if (!isBite(m)) sheetFx('claw', f.x + DM.cos(cur.ang) * (m.rad * .6 + f.r * .5), f.y - BODY + DM.sin(cur.ang) * (m.rad * .6 + f.r * .5), (m.rad + f.r) / 60, cur.ang);
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) { if (losClear(f, o)) hit(f, o, m, cur.ang, { hitNo: cur.hits }); else blockedFx(f, o, m); }
@@ -6805,9 +6809,9 @@ function fireMove(f) {
       cur.len = rayLen(f, cur.ang, m.len * (1 + .6 * (cur.chg || 0)));   // 障害物で とまる（ためた ぶん とおくまで）
       const L = cur.len, ex = f.x + DM.cos(cur.ang) * L, ey = f.y + DM.sin(cur.ang) * L;
       if (L < m.len - 2 && !beamMirror(f, m, cur.ang, L)) { const hx = f.x + DM.cos(cur.ang) * (L + 6), hy = f.y + DM.sin(cur.ang) * (L + 6), wb = wallBlocksAt(hx, hy, 8)[0]; if (wb) damageWall(wb, m); else damageProp(propsAt(hx, hy, 8)[0], m); }
-      fxPush({ type: 'beam', x: f.x, y: f.y - BODY, ang: cur.ang, len: L, wid: m.wid, col, look: m.look, mid: m.fxid, life: .3, max: .3 }); for (let d = 20; d < L; d += 40) typeFx(f.x + DM.cos(cur.ang) * d, f.y - BODY + DM.sin(cur.ang) * d, m.t, 2, 70, .4);
+      fxPush({ type: 'beam', x: f.x, y: f.y - BODY, ang: cur.ang, len: L, wid: m.wid, col, look: m.look, mid: m.fxid, life: .3, max: .3 }); for (let d = 20; d < L; d += 40) typeFx(f.x + DM.cos(cur.ang) * d, f.y - BODY + DM.sin(cur.ang) * d, vt(m), 2, 70, .4);
       B.shake = Math.max(B.shake, 3);
-      if (L < m.len) { impactFx(ex, ey - BODY * .5, m.t, .6); addDecal(ex, ey, 14, m.t === 'fire' || m.t === 'elec' ? 'scorch' : 'crater'); }
+      if (L < m.len) { impactFx(ex, ey - BODY * .5, vt(m), .6); addDecal(ex, ey, 14, vt(m) === 'fire' || vt(m) === 'elec' ? 'scorch' : 'crater'); }
       if (m.look) addDecal(f.x + DM.cos(cur.ang) * L / 2, f.y + DM.sin(cur.ang) * L / 2, 16, 'crater');
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang, cur.chg ? { chg: cur.chg } : undefined);
       endAct(f, .35); break;
@@ -6818,11 +6822,11 @@ function fireMove(f) {
         if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang, cur.chg ? { chg: cur.chg } : {}); endAct(f, .35); break; }
       if (m.pat === 'sound') { fxp({ type: 'sound', x: f.x, y: f.y, ang: cur.ang, half: m.half, rad: m.rad, col, life: .5 }); B.shake = Math.max(B.shake, 3);
         if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang); endAct(f, .35); break; }
-      typeFx(f.x, f.y, m.t, 8, m.rad * 2, .4, { ang: cur.ang, spread: m.half });
+      typeFx(f.x, f.y, vt(m), 8, m.rad * 2, .4, { ang: cur.ang, spread: m.half });
       if (gfxOf(m, 'cone')) { const gk = gfxOf(m, 'cone'); fxp({ type: 'pl', k: gk, x: f.x + DM.cos(cur.ang) * f.r * .5, y: f.y + DM.sin(cur.ang) * f.r * .5, s: m.rad * 1.1 / (PLFX[gk].w * PIX_D), ang: cur.ang, fy: DM.cos(cur.ang) < 0, life: PLFX[gk].n * PLFX[gk].ms / 1000 }); }   // 大技の 専用の 扇
       else if (plOk('n_fan')) fxp({ type: 'pl', k: 'n_fan', x: f.x + DM.cos(cur.ang) * f.r * .5, y: f.y + DM.sin(cur.ang) * f.r * .5, s: m.rad * 1.1 / (64 * PIX_D), ang: cur.ang, fy: DM.cos(cur.ang) < 0, col, life: .42 });   // おうぎ（白い 絵を わざの 色に）
-      else if (m.t === 'fire' || m.t === 'ice') sheetFx(m.t === 'fire' ? 'flamer' : 'blizzard', f.x + DM.cos(cur.ang) * m.rad * .5, f.y + DM.sin(cur.ang) * m.rad * .5, m.rad / 70, m.t === 'fire' ? cur.ang : null);
-      else for (let i = 1; i <= 3; i++) sheetFx(FXEL[m.t] ? m.t : 'normal', f.x + DM.cos(cur.ang + (i - 2) * m.half * .6) * m.rad * (.3 + i * .18), f.y + DM.sin(cur.ang + (i - 2) * m.half * .6) * m.rad * (.3 + i * .18), .8);
+      else if (vt(m) === 'fire' || vt(m) === 'ice') sheetFx(vt(m) === 'fire' ? 'flamer' : 'blizzard', f.x + DM.cos(cur.ang) * m.rad * .5, f.y + DM.sin(cur.ang) * m.rad * .5, m.rad / 70, m.t === 'fire' ? cur.ang : null);
+      else for (let i = 1; i <= 3; i++) sheetFx(FXEL[vt(m)] ? vt(m) : 'normal', f.x + DM.cos(cur.ang + (i - 2) * m.half * .6) * m.rad * (.3 + i * .18), f.y + DM.sin(cur.ang + (i - 2) * m.half * .6) * m.rad * (.3 + i * .18), .8);
       B.shake = Math.max(B.shake, 3);
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) { if (losClear(f, o)) hit(f, o, m, cur.ang); else blockedFx(f, o, m); }
       endAct(f, .35); break;
@@ -6842,11 +6846,11 @@ function fireMove(f) {
         const n = m.pat === 'pulse3' ? 3 : 2, pts = []; for (let i = 0; i < n; i++) pts.push({ x: f.x, y: f.y, d: i * .32, r: m.rad * (1 + i * .45), ring: i ? m.rad * (1 + (i - 1) * .45) * .85 : 0 });
         addBlasts(f, m, pts, cur.uid, 'wave'); endAct(f, .4); break; }
       if (m.pat === 'front') {   // まえに おおきな なみ
-        typeFx(f.x, f.y - BODY, m.t, 14, m.rad * 2, .5, { ang: cur.ang, spread: 1.1 });
-        for (let i = 1; i <= 3; i++) sheetFx(AOE_FX[m.t] || 'shockwave', f.x + DM.cos(cur.ang + (i - 2) * .6) * m.rad * .6, f.y - 14 + DM.sin(cur.ang + (i - 2) * .6) * m.rad * .6, .9, null, TYPES[m.t].c);
+        typeFx(f.x, f.y - BODY, vt(m), 14, m.rad * 2, .5, { ang: cur.ang, spread: 1.1 });
+        for (let i = 1; i <= 3; i++) sheetFx(AOE_FX[vt(m)] || 'shockwave', f.x + DM.cos(cur.ang + (i - 2) * .6) * m.rad * .6, f.y - 14 + DM.sin(cur.ang + (i - 2) * .6) * m.rad * .6, .9, null, TYPES[vt(m)].c);
         B.shake = Math.max(B.shake, 6); if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, cur.ang); endAct(f, .4); break; }
       if (m.pat === 'donut') fxPush({ type: 'shock', x: f.x, y: f.y, rad: m.rad, col, life: .45, max: .45 });   // わ：ちかくは あんぜん
-      if (!gBurst(m, f.x, f.y, m.rad)) sheetFx(AOE_FX[m.t] || 'shockwave', f.x, f.y - 14, m.rad / 55, null, TYPES[m.t].c); typeFx(f.x, f.y - 10, m.t, 10, m.rad * 2, .45);
+      if (!gBurst(m, f.x, f.y, m.rad)) sheetFx(AOE_FX[vt(m)] || 'shockwave', f.x, f.y - 14, m.rad / 55, null, TYPES[vt(m)].c); typeFx(f.x, f.y - 10, vt(m), 10, m.rad * 2, .45);
       B.shake = Math.max(B.shake, 6);
       if (m.t === 'ground' || m.t === 'rock' || m.t === 'fire') addDecal(f.x, f.y, m.rad * .4, m.t === 'fire' ? 'scorch' : 'crater');
       wallsInArea(f.x, f.y, m.rad, m);
@@ -6854,7 +6858,7 @@ function fireMove(f) {
       endAct(f, .4); break;
     case 'strike':
       if (cur.pts) { addBlasts(f, m, cur.pts, cur.uid); if (m.pat === 'cage') cageRocks(f, m, cur.pts[0]); endAct(f, .3); break; }
-      if (!gBurst(m, cur.tx, cur.ty, m.rad)) sheetFx(STRIKE_FX[m.t] || 'boom', cur.tx, cur.ty - m.rad * .7, m.rad / 40 + .3);
+      if (!gBurst(m, cur.tx, cur.ty, m.rad)) sheetFx(STRIKE_FX[vt(m)] || 'boom', cur.tx, cur.ty - m.rad * .7, m.rad / 40 + .3);
       B.shake = Math.max(B.shake, 5); wallsInArea(cur.tx, cur.ty, m.rad, m);
       burst(cur.tx, cur.ty, col, 8, 110, .45);
       addDecal(cur.tx, cur.ty, m.rad * .5, m.t === 'elec' || m.t === 'fire' ? 'scorch' : 'crater');
@@ -6862,7 +6866,7 @@ function fireMove(f) {
       endAct(f, .3); break;
     case 'multi':
       if (m.pattern === 'meteor') { addBlasts(f, m, cur.pts.map((p, i) => ({ x: p.x, y: p.y, d: .3 + i * .17, r: m.rad })), cur.uid, 'meteor'); endAct(f, .35); break; }   // ななめ うえから いんせきが ふってくる
-      for (const p of cur.pts) { if (!gBurst(m, p.x, p.y, m.rad)) sheetFx(STRIKE_FX[m.t] || 'boom', p.x, p.y - m.rad * .7, m.rad / 40 + .3); addDecal(p.x, p.y, m.rad * .5, 'crater'); }
+      for (const p of cur.pts) { if (!gBurst(m, p.x, p.y, m.rad)) sheetFx(STRIKE_FX[vt(m)] || 'boom', p.x, p.y - m.rad * .7, m.rad / 40 + .3); addDecal(p.x, p.y, m.rad * .5, 'crater'); }
       B.shake = Math.max(B.shake, 7);
       if (targetable(o) && inZone(cur, f, o.x, o.y, o.r)) hit(f, o, m, DM.atan2(o.y - f.y, o.x - f.x));
       endAct(f, .35); break;
@@ -6877,17 +6881,17 @@ function fireMove(f) {
 // 障害物に さえぎられた：ぶつかった 場所で はじける
 function blockedFx(f, o, m) {
   const a = DM.atan2(o.y - f.y, o.x - f.x), L = rayLen(f, a, dist(f, o)), x = f.x + DM.cos(a) * L, y = f.y + DM.sin(a) * L;
-  impactFx(x, y - BODY * .5, m.t, .45); 
+  impactFx(x, y - BODY * .5, vt(m), .45); 
 }
-const id2col = (m) => m.t === 'normal' ? '#ffffff' : TYPES[m.t].c;
+const id2col = (m) => vt(m) === 'normal' ? '#ffffff' : TYPES[vt(m)].c;
 function endAct(f, t) { if (['wind', 'chan', 'dash', 'rage', 'grab', 'stance'].includes(f.state)) { f.state = 'act'; f.stT = t; if (f.cur && f.cur.m.recharge) { f.stT = Math.max(t, f.cur.m.recharge); popText(f.x, f.y - 96, 'はんどうで うごけない', '#a49ac0'); } } afterMoveUsed(f); }
 // うちつづける わざの 1回ぶん
 function chanTick(f, o, oT) {
   const cur = f.cur, m = cur.m, c = DM.cos(cur.ang), s = DM.sin(cur.ang);
   if (m.k === 'beam') {
-    const L = cur.len; for (let d = 30 + (cur.n % 2) * 25; d < L; d += 60) typeFx(f.x + c * d, f.y - BODY + s * d, m.t, 1, 60, .3);
-    if (L < m.len - 1) impactFx(f.x + c * L, f.y + s * L - BODY * .5, m.t, .3);
-  } else typeFx(f.x, f.y, m.t, 7, m.rad * 2.2, .4, { ang: cur.ang, spread: m.half });
+    const L = cur.len; for (let d = 30 + (cur.n % 2) * 25; d < L; d += 60) typeFx(f.x + c * d, f.y - BODY + s * d, vt(m), 1, 60, .3);
+    if (L < m.len - 1) impactFx(f.x + c * L, f.y + s * L - BODY * .5, vt(m), .3);
+  } else typeFx(f.x, f.y, vt(m), 7, m.rad * 2.2, .4, { ang: cur.ang, spread: m.half });
   if (cur.n-- % 2 === 0) SND.se('beam', 1.4);
   const mir = m.k === 'beam' && beamMirror(f, m, cur.ang, cur.len, { tick: true, noHit: true });   // はんしゃのかべに あたって いる：もどる ビームを みせる
   if (mir && !cur.mirSaid) { cur.mirSaid = 1; popText(f.x + c * cur.len, f.y + s * cur.len - 40, 'はねかえした！', '#ff9ad0'); SND.se('guard'); }
@@ -6998,8 +7002,8 @@ function damageWall(b, m, n) {
 function wallBreakFx(w, b) { if (plOk('n_wall_break')) { const S = PLFX.n_wall_break, sc = (WALL_B + 8) / (S.w * PIX_D) * 1.3; fxp({ type: 'pl', k: 'n_wall_break', x: b.x, y: b.y + WALL_B / 2, s: sc, life: S.n * S.ms / 1000, col: w.reflect ? '#ff9ec7' : { ice: '#9fe8ff', grass: '#62d26f' }[w.t] || null }); return; }   // 納品の 壁の 破壊（岩いがいは 色を ぬる）
   const k = w.reflect ? 'brk_mirror' : 'brk_' + wArt(w); if (PLFX[k]) plFx(k, b.x, b.y + WALL_B / 2 - PLFX[k].h * PIX_D * .45, (WALL_B + 8) / (PLFX[k].w * PIX_D) * 1.1); else sheetFx(w.reflect ? 'barrier' : 'poof', b.x, b.y - 16, .9); }
 // 壁が 出る しゅんかん（納品の 絵。岩いがいは 色を ぬる）
-function wallUpFx(m, b, s) { if (!plOk('n_wall_up')) { sheetFx(WALL_FX[m.t] || 'slam', b.x, b.y - 14, s, null, TYPES[m.t].c); return; }
-  const S = PLFX.n_wall_up, sc = (WALL_B + 8) / (S.w * PIX_D) * 1.3; fxp({ type: 'pl', k: 'n_wall_up', x: b.x, y: b.y + WALL_B / 2, s: sc, life: S.n * S.ms / 1000, col: m.t === 'rock' || m.t === 'ground' ? null : m.reflect ? '#ff9ec7' : TYPES[m.t].c }); }
+function wallUpFx(m, b, s) { if (!plOk('n_wall_up')) { sheetFx(WALL_FX[vt(m)] || 'slam', b.x, b.y - 14, s, null, TYPES[vt(m)].c); return; }
+  const S = PLFX.n_wall_up, sc = (WALL_B + 8) / (S.w * PIX_D) * 1.3; fxp({ type: 'pl', k: 'n_wall_up', x: b.x, y: b.y + WALL_B / 2, s: sc, life: S.n * S.ms / 1000, col: m.t === 'rock' || m.t === 'ground' ? null : m.reflect ? '#ff9ec7' : TYPES[vt(m)].c }); }
 // いち（x, y）の まわり r に ある かべの ブロック
 const wallBlocksAt = (x, y, r) => B.wallRects ? B.wallRects.filter(b => circRect(x, y, r, b)) : [];
 // はんしゃのかべ：ビーム（直線・照射）も はねかえす。とまった ところが あいての はんしゃのかべ なら、おなじ 線を もどって うった 本人に あたる
@@ -7009,7 +7013,7 @@ function beamMirror(f, m, ang, L, opt) {
   const w = B.walls.find(q => q.reflect && q.side !== f.side && q.blocks.includes(wb)); if (!w) return false;
   const ex = f.x + c * L, ey = f.y + s * L, back = ang + Math.PI, rem = m.len - L, own = active(w.side) || f;
   if (!opt || !opt.tick) { damageWall(wb, m, 1); popText(ex, ey - 40, 'はねかえした！', '#ff9ad0'); SND.se('guard'); }
-  if (!opt || opt.fx !== false) { fxPush({ type: 'beam', x: ex, y: ey - BODY, ang: back, len: Math.min(rem, L), wid: m.wid, col: TYPES[m.t].c, look: m.look, life: .3, max: .3 }); fxp({ type: 'glint', x: ex, y: ey - BODY, col: '#ff7ab0', life: .3 }); }
+  if (!opt || opt.fx !== false) { fxPush({ type: 'beam', x: ex, y: ey - BODY, ang: back, len: Math.min(rem, L), wid: m.wid, col: TYPES[vt(m)].c, look: m.look, life: .3, max: .3 }); fxp({ type: 'glint', x: ex, y: ey - BODY, col: '#ff7ab0', life: .3 }); }
   if (rem >= L - f.r && targetable(f) && !(opt && opt.noHit)) hit(own, f, m, back, opt && opt.tick ? opt : undefined);
   return true;
 }
@@ -7041,7 +7045,7 @@ function placeWall(f, o, m) {
   if (!w.shape && plOk(wlKey(w))) { w.one = true; w.hpMax = w.hp = wallHp(w) * 2; }   // まっすぐな かべは 1まいの 絵・たいりょくも 1つ
   B.walls.push(w); wallsChanged();
   for (const b of w.blocks) wallUpFx(m, b, .8);
-  typeFx(w.x, w.y - 10, m.t, 16, 120, .5); B.shake = Math.max(B.shake, 4);
+  typeFx(w.x, w.y - 10, vt(m), 16, 120, .5); B.shake = Math.max(B.shake, 4);
   say(`${m.n}が あらわれた！`);
 }
 const FLOOR_LIFE = 99999;
@@ -7071,19 +7075,19 @@ function shadowStrike(f, o, m) {   // かげがえし：かげに しずんで �
 }
 function addStack(def, m, att) {   // つみかさね：たまると 状態異常
   const SK = m.stack; def.v.stk = (def.v.stk || 0) + 1; def.v.stkT = 6; if (SK.slow) { def.v.slowT = 3; def.v.slowK = Math.max(.35, 1 - SK.slow * def.v.stk); }
-  popText(def.x + 18, def.y - 100, '●'.repeat(def.v.stk) + '○'.repeat(Math.max(0, SK.n - def.v.stk)), TYPES[m.t].c);
+  popText(def.x + 18, def.y - 100, '●'.repeat(def.v.stk) + '○'.repeat(Math.max(0, SK.n - def.v.stk)), TYPES[vt(m)].c);
   if (def.v.stk >= SK.n) { def.v.stk = 0; def.v.slowT = 0; if (!def.status) setStatus(def, SK.st, att); }
 }
 function placeFloor(f, o, m) {
   const x = o ? o.x : f.x + f.face * 120, y = o ? o.y : f.y;
   B.zones = B.zones.filter(z => z.side !== f.side || z.t !== m.t);
-  const z = { id: MOVE_ID.get(m), t: m.t, x, y, rad: m.rad, life: FLOOR_LIFE, max: FLOOR_LIFE, side: f.side, tick: .5, uid: ++B.uidc, f, pat: m.pat || '' };   // ゆかは きえない（おなじ わざを おきなおすと うつる）
+  const z = { id: MOVE_ID.get(m), t: m.t, vt: vt(m), x, y, rad: m.rad, life: FLOOR_LIFE, max: FLOOR_LIFE, side: f.side, tick: .5, uid: ++B.uidc, f, pat: m.pat || '' };   // ゆかは きえない（おなじ わざを おきなおすと うつる）
   const a = DM.atan2(y - f.y, x - f.x), R = m.rad, P = (px, py, r) => ({ x: clamp(px, B.st.fx0, B.st.fx1), y: clamp(py, B.st.fy0, B.st.fy1), rad: r });
   if (z.pat === 'blob') z.parts = [P(x, y, R * .8), P(x + R * .7, y - R * .25, R * .55), P(x - R * .6, y + R * .3, R * .6), P(x - R * .1, y - R * .5, R * .45)];   // ぶよぶよ ひろがる ぬま
   if (z.pat === 'strip') z.parts = [-1.5, -.5, .5, 1.5].map(i => P(x + DM.cos(a) * i * R * .75, y + DM.sin(a) * i * R * .75 * .62, R * .5));   // あいてへ むかう ほのおの みち
   if (z.pat === 'grid') z.parts = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].map(([i, j]) => P(x + i * R * .8, y + j * R * .8 * .62, R * .42));   // ＋の かたちの でんきの マス
   B.zones.push(z);
-  fxPush({ type: 'shock', x, y, rad: m.rad, col: TYPES[m.t].c, life: .4, max: .4 }); typeFx(x, y - 6, m.t, 18, m.rad * 2, .5);
+  fxPush({ type: 'shock', x, y, rad: m.rad, col: TYPES[vt(m)].c, life: .4, max: .4 }); typeFx(x, y - 6, vt(m), 18, m.rad * 2, .5);
   say(`${m.n}が ひろがった！`);
 }
 const inZoneFloor = (z, x, y) => z.parts ? z.parts.some(q => sq((x - q.x) / q.rad) + sq((y - q.y) / (q.rad * .62)) < 1) : sq((x - z.x) / z.rad) + sq((y - z.y) / (z.rad * .62)) < 1;
@@ -7100,7 +7104,7 @@ function updatePlaced(dt) {
       const zm = MOVES[z.id] || {}; if (zm.bugHeal) { const me = active(z.side); if (me && targetable(me) && !hovers(me) && hasType(me, 'bug') && me.hp < me.maxHp && inZoneFloor(z, me.x, me.y)) healHp(me, me.maxHp * .03); }   // みつだまり：みかたの むしは かいふく
       const x = active(1 - z.side); if (x && targetable(x) && !hovers(x) && inZoneFloor(z, x.x, x.y) && !zm.noDmg) { floorDmg(x, z, 0); if (zm.stack && x.hp > 0 && !x.status && (z.ska = (z.ska || 0) + (zm.stack.rate || 1)) >= 1) { z.ska -= 1; addStack(x, zm, z.f); } const e = MOVES[z.id].e || {}; if (e.st && x.hp > 0 && rnd() * 100 < e.stCh) setStatus(x, e.st, z.f); }
     }
-    if (rnd() < dt * 10) { const q = z.parts ? choice(z.parts) : z; typeFx(q.x + rand(-q.rad, q.rad) * .8, q.y + rand(-q.rad, q.rad) * .45, z.t, 1, 30, .5); }
+    if (rnd() < dt * 10) { const q = z.parts ? choice(z.parts) : z; typeFx(q.x + rand(-q.rad, q.rad) * .8, q.y + rand(-q.rad, q.rad) * .45, z.vt || z.t, 1, 30, .5); }
     if (z.pat === 'pull') for (const sd of B.sides) { const x = sd.fs[sd.act]; if (sd === B.sides[z.side] || !x || !targetable(x) || hovers(x) || !inZoneFloor(z, x.x, x.y) || x.state === 'dash') continue;   // ありじごく：まんなかへ ひきこむ
       const d = DM.hypot(z.x - x.x, z.y - x.y); if (d > 6) { const pl = (MOVES[z.id] && MOVES[z.id].pull) || 55; x.x += (z.x - x.x) / d * pl * dt; x.y += (z.y - x.y) / d * pl * dt; clampF(x); } }
   }
@@ -7112,7 +7116,7 @@ function floorDmg(x, src, frac) {
   const dmg = frac ? Math.max(1, Math.round(x.maxHp * frac * Math.min(eff, 2))) : 1;   // frac 0：ゆか（いつも 1）
   x.hp = Math.max(0, x.hp - dmg); x.flash = .1; B.lastDmgT = B.t;
   
-  typeFx(x.x, x.y - 8, src.t, 5, 60, .35);
+  typeFx(x.x, x.y - 8, src.vt || src.t, 5, 60, .35);
   if (x.hp <= 0) faint(x, active(src.side));
 }
 function useStatusMove(f, o, m) {
@@ -7121,7 +7125,7 @@ function useStatusMove(f, o, m) {
     case 'wall': placeWall(f, o, m); break;
     case 'floor': placeFloor(f, o, m); break;
     case 'clone': makeClones(f); break;
-    case 'self': changeStages(f, e.self, true); typeFx(f.x, f.y - BODY, m.t, 8, 80, .5); if (m.look === 'iron') { plFx('iron', f.x, f.y + 4, (f.r * 2 + 30) / (PLFX.iron.w * PIX_D), .55); } else sheetFx('buff', f.x, f.y - BODY, 1.2); break;
+    case 'self': changeStages(f, e.self, true); typeFx(f.x, f.y - BODY, vt(m), 8, 80, .5); if (m.look === 'iron') { plFx('iron', f.x, f.y + 4, (f.r * 2 + 30) / (PLFX.iron.w * PIX_D), .55); } else sheetFx('buff', f.x, f.y - BODY, 1.2); break;
     case 'flip': flipStages(f); break;
     case 'perish': for (const x of [f, o]) if (x && x.hp > 0 && !(x.v.perish > 0)) x.v.perish = 10; for (let i = 0; i < 3; i++) fxp({ type: 'shock', x: f.x, y: f.y - BODY, rad: 60 + i * 40, col: '#c8a8ff', life: .4 + i * .15 }); say('ほろびのうたが ひびいた！ 10びょうで ほろびる（こうたいすると とける）'); break;
     case 'duel': if (o) { B.sides[o.side].lockT = 15; B.duelT = 15; popText(f.x, f.y - 110, 'タイプ相性 なし！', '#ff8a6a', 'comic'); fxPush({ type: 'ring', x: o.x, y: o.y, rad: 70, col: '#ff8a6a', life: .6, max: .6 }); say(`${o.sp.n}は けっとうのばに とらわれた！ 15びょう こうたい できない・タイプ相性 なし`); } break;
@@ -7136,7 +7140,7 @@ function useStatusMove(f, o, m) {
     case 'wish': (B.wishes = B.wishes || []).push({ side: f.side, x: f.x, y: f.y, t: 3 }); say(`${f.sp.n}は ねがいごとを した！`); break;   // 3びょうご あしもとの みかたを かいふく
     case 'link': {   // サイコリンク：すぐに つなぐ
       if (!o || !targetable(o) || dist(f, o) > m.tether.r - 20) { failMove(f, 'とどかない！'); return; }
-      o.v.teth = { att: f, m: Object.assign({}, m, { cat: 'spec', pow: 6 }), t: m.tether.t, r: m.tether.r, k: m.tether.k, next: .5 }; burst(o.x, o.y - BODY, TYPES[m.t].c, 10, 90, .35); popText(o.x, o.y - 104, 'つながった！', '#ff9ad0'); say(`${f.sp.n}は ${o.sp.n}と ねんりきのいとで つながった！`); break; }
+      o.v.teth = { att: f, m: Object.assign({}, m, { cat: 'spec', pow: 6 }), t: m.tether.t, r: m.tether.r, k: m.tether.k, next: .5 }; burst(o.x, o.y - BODY, TYPES[vt(m)].c, 10, 90, .35); popText(o.x, o.y - 104, 'つながった！', '#ff9ad0'); say(`${f.sp.n}は ${o.sp.n}と ねんりきのいとで つながった！`); break; }
     case 'shadow': if (!o || !targetable(o) || dist(f, o) > (m.reach || 200)) { failMove(f, 'とどかない！'); return; } shadowStrike(f, o, m); break;   // かげがえし
     case 'echo': {   // ざんきょう：かげに なって あいての うしろへ かけぬけ、しるしを きざむ
       if (!o || !targetable(o) || dist(f, o) > 380) { failMove(f, 'とどかない！'); return; }
@@ -7149,7 +7153,7 @@ function useStatusMove(f, o, m) {
     case 'hwish': case 'memento': {   // じぶんは たおれて つぎの みかたを たすける／あいてを よわらせる
       if (m.k === 'hwish') { B.sides[f.side].hwish = 1; say(`${f.sp.n}は いのちのバトンを たくした！`); } else if (o && targetable(o)) { changeStages(o, { atk: -2, spa: -2 }); say(`${f.sp.n}は わすれがたみを のこした！`); }
       fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 50, col: m.k === 'hwish' ? '#ff9ad0' : '#8a78c8', life: .8 }); endAct(f, .2); if (f.hp > 0) { f.hp = 0; faint(f, o); } break; }
-    case 'terrain': B.terrain = { k: m.tk, t: 15 }; say({ elec: 'でんげきのばに なった！（雷↑・ねむらない）', grass: 'くさはらのばに なった！（草↑・すこしずつ かいふく）', psy: 'ねんりきのばに なった！（妖精↑・とっしんが きかない）' }[m.tk]); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 140, col: TYPES[m.t].c, life: .6, max: .6 }); break;
+    case 'terrain': B.terrain = { k: m.tk, t: 15 }; say({ elec: 'でんげきのばに なった！（雷↑・ねむらない）', grass: 'くさはらのばに なった！（草↑・すこしずつ かいふく）', psy: 'ねんりきのばに なった！（妖精↑・とっしんが きかない）' }[m.tk]); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 140, col: TYPES[vt(m)].c, life: .6, max: .6 }); break;
     case 'gravity': B.gravity = 8; say('じゅうりょくが つよく なった！ とぶ ことが できない'); B.shake = Math.max(B.shake, 6); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#c8a8ff', life: .6, max: .6 }); break;
     case 'mimic': {   // ものまね：あいてが さいごに つかった 技を この たたかいの あいだ おぼえる
       const id2 = o && o.lastMove, m2 = MOVES[id2], me = MOVE_ID.get(m), ix = f.moves.indexOf(me);
@@ -7170,9 +7174,9 @@ function useStatusMove(f, o, m) {
     case 'painsplit': { if (!o || !targetable(o)) return; const avg = (f.hp + o.hp) / 2; f.hp = Math.min(f.maxHp, Math.round(avg)); o.hp = Math.min(o.maxHp, Math.round(avg)); fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: '#ffb0c8', life: .45 }); say('おたがいの HPを わけあった！'); break; }
     case 'endeavor': { if (!o || !targetable(o)) return; if (o.hp <= f.hp) { failMove(f, 'こうかが ない！'); return; } o.hp = Math.max(1, Math.round(f.hp)); o.flash = .15; fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: '#ffd166', life: .45 }); popText(o.x, o.y - 100, 'がむしゃら！', '#ffd166', 'comic'); break; }
     case 'cure': { const had = f.status || f.v.confuse > 0 || f.v.stk > 0;   // オーロラベール：じぶんの 状態異常・こんらん・つみかさねを なおす
-      f.status = ''; f.statusT = 0; f.toxN = 1; f.v.confuse = 0; f.v.stk = 0; f.v.slowT = 0; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 44, col: '#bfe8ff', life: .7 }); typeFx(f.x, f.y - BODY, m.t, 14, 90, .6);
+      f.status = ''; f.statusT = 0; f.toxN = 1; f.v.confuse = 0; f.v.stk = 0; f.v.slowT = 0; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 44, col: '#bfe8ff', life: .7 }); typeFx(f.x, f.y - BODY, vt(m), 14, 90, .6);
       popText(f.x, f.y - 104, had ? 'すっきり！' : 'かわりなし', had ? '#bfe8ff' : '#a49ac0'); say(had ? `${f.sp.n}の 状態異常が なおった！` : `${f.sp.n}は ${m.n}に つつまれた`); break; }
-    case 'shield': f.v.shield = Math.round(f.maxHp * (m.shield || .25)); f.v.shieldT = m.life || 8; f.v.zsh = !!m.zarya; f.v.zab = 0; f.v.zup = 0; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 44, col: '#bfe8ff', life: .7 }); typeFx(f.x, f.y - BODY, m.t, 14, 90, .6); say(`${f.sp.n}は ${m.n}に つつまれた！`); break;
+    case 'shield': f.v.shield = Math.round(f.maxHp * (m.shield || .25)); f.v.shieldT = m.life || 8; f.v.zsh = !!m.zarya; f.v.zab = 0; f.v.zup = 0; fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 44, col: '#bfe8ff', life: .7 }); typeFx(f.x, f.y - BODY, vt(m), 14, 90, .6); say(`${f.sp.n}は ${m.n}に つつまれた！`); break;
     case 'gshift': f.v.gshift = 1; if (plOk('n_phase')) plFx('n_phase', f.x, f.y - BODY, 1.6); else fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 40, col: '#8a78c8', life: .8 }); typeFx(f.x, f.y - BODY, 'ghost', 14, 90, .6); say(`${f.sp.n}の からだが すけた！ ノーマルと かくとうの わざが すりぬける！`); break;
     case 'scare': scareAway(f, o); break;
     case 'leaves': startLeaves(f, m); break;
@@ -7204,7 +7208,7 @@ function useStatusMove(f, o, m) {
       if (hz[m.hz] >= max) { failMove(f, 'でも もう しかけられない！'); return; }
       hz[m.hz]++;
       const tx = f.side === 0 ? B.st.fx1 - 120 : B.st.fx0 + 120;
-      fxp({ type: 'toss', x0: f.x, y0: f.y - BODY, x1: tx, y1: (B.st.fy0 + B.st.fy1) / 2, col: TYPES[m.t].c, hz: m.hz, life: .55 });
+      fxp({ type: 'toss', x0: f.x, y0: f.y - BODY, x1: tx, y1: (B.st.fy0 + B.st.fy1) / 2, col: TYPES[vt(m)].c, hz: m.hz, life: .55 });
       SND.se('hazard'); osd.hzAt = osd.hzAt || {}; osd.hzAt[m.hz] = B.t + .5;   // とどいた しゅんかんから 地面に あらわれる
       { const x = osd.fs[osd.act]; if (x && x.swIn && x.hp > 0 && B.t - (x.inAt || -9) < .8) setTimeout(() => { if (B && x.hp > 0 && osd.fs[osd.act] === x) applyHazards(x, m.hz); }, 500); }   // 出てきた すぐ あと（こうたいが ひと足 はやかった）：とどいた ときに ダメージ
       B.shake = Math.max(B.shake, 3);
@@ -7222,9 +7226,9 @@ function useStatusMove(f, o, m) {
     }
     case 'ray': {
       if (!o || !targetable(o)) return;
-      if (!losClear(f, o)) { const a = DM.atan2(o.y - f.y, o.x - f.x), L = rayLen(f, a, dist(f, o)); fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: f.x + DM.cos(a) * L, y1: f.y + DM.sin(a) * L - BODY, col: TYPES[m.t].c, life: .45 }); blockedFx(f, o, m); return; }
+      if (!losClear(f, o)) { const a = DM.atan2(o.y - f.y, o.x - f.x), L = rayLen(f, a, dist(f, o)); fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: f.x + DM.cos(a) * L, y1: f.y + DM.sin(a) * L - BODY, col: TYPES[vt(m)].c, life: .45 }); blockedFx(f, o, m); return; }
       if (m.sp === 'encore') fxp({ type: 'sound', x: f.x, y: f.y - BODY, ang: DM.atan2(o.y - f.y, o.x - f.x), half: .3, rad: dist(f, o) + 20, col: '#ffd166', life: .55, notes: 1 });
-      else { fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: TYPES[m.t].c, life: .45 }); sheetFx('magicshot', o.x, o.y - BODY, 1.1, DM.atan2(o.y - f.y, o.x - f.x)); }
+      else { fxp({ type: 'ray', x0: f.x, y0: f.y - BODY, x1: o.x, y1: o.y - BODY, col: TYPES[vt(m)].c, life: .45 }); sheetFx('magicshot', o.x, o.y - BODY, 1.1, DM.atan2(o.y - f.y, o.x - f.x)); }
       if (o.inv > 0) { popText(o.x, o.y - 66, 'かわした！', '#7fd8ff'); return; }
       rayEffect(f, o, m);
       break;
@@ -7444,10 +7448,10 @@ function hit(att, def, m, ang, opt) {
   popText(def.x + rand(-6, 6), def.y - 66, String(dmg), eff > 1 ? '#ffd166' : eff < 1 ? '#a49ac0' : '#ffffff', eff > 1 || heavy);
   burst(def.x, def.y - BODY, id2col(m), heavy ? 16 : 8, 110, .4);
   fxPush({ type: 'impact', x: def.x, y: def.y - BODY, rad: heavy ? 34 : 22, rot: rnd(), life: .28, max: .28 });
-  if (gfxOf(m, 'hit')) { plFx(gfxOf(m, 'hit'), def.x, def.y - BODY, 1.3); typeFx(def.x, def.y - BODY, m.t, 12, 140, .5); }   // 大技の 専用の あたり
-  else impactFx(def.x, def.y - BODY, m.t, clamp((heavy ? .6 : .25) + (eff > 1 ? .3 : 0) + (crit ? .2 : 0), 0, 1));
-  if (m.punch || opt.throw) fxp({ type: 'fist', x: def.x - DM.cos(ang) * 8, y: def.y - BODY - DM.sin(ang) * 8, ang, col: TYPES[m.t].c, life: .35, big: heavy });   // こぶし：グーの ヒット
-  if (isBite(m)) fxp({ type: 'bite', x: def.x, y: def.y - BODY, col: TYPES[m.t].c, life: .42, big: heavy });   // きば：かみつきの ヒット
+  if (gfxOf(m, 'hit')) { plFx(gfxOf(m, 'hit'), def.x, def.y - BODY, 1.3); typeFx(def.x, def.y - BODY, vt(m), 12, 140, .5); }   // 大技の 専用の あたり
+  else impactFx(def.x, def.y - BODY, vt(m), clamp((heavy ? .6 : .25) + (eff > 1 ? .3 : 0) + (crit ? .2 : 0), 0, 1));
+  if (m.punch || opt.throw) fxp({ type: 'fist', x: def.x - DM.cos(ang) * 8, y: def.y - BODY - DM.sin(ang) * 8, ang, col: TYPES[vt(m)].c, life: .35, big: heavy });   // こぶし：グーの ヒット
+  if (isBite(m)) fxp({ type: 'bite', x: def.x, y: def.y - BODY, col: TYPES[vt(m)].c, life: .42, big: heavy });   // きば：かみつきの ヒット
   if (crit) { popText(def.x, def.y - 104, 'きゅうしょ！', '#ff9ad0', true); if (plOk('hit_crit')) plFx('hit_crit', def.x, def.y - BODY, .85); else sheetFx('crit', def.x, def.y - BODY, 1.3); }
   if (big && (heavy || eff > 1 || crit)) { def.dizzy = 1.0; }
   if (big && eff > 1) say('ばつぐんの いりょくだ！');
@@ -7463,7 +7467,7 @@ function hit(att, def, m, ang, opt) {
     if (m.mark) { def.v.mark = m.mark; popText(def.x, def.y - 112, 'しるし', '#ffd84a', true); }   // しるし：べつの 技で はじける
     if (m.stack) addStack(def, m, att);
     if (false) { const SK = m.stack; def.v.stk = (def.v.stk || 0) + 1; def.v.stkT = 6; if (SK.slow) { def.v.slowT = 3; def.v.slowK = Math.max(.35, 1 - SK.slow * def.v.stk); }   // つみかさね：たまると 状態異常
-      popText(def.x + 18, def.y - 100, '●'.repeat(def.v.stk) + '○'.repeat(Math.max(0, SK.n - def.v.stk)), TYPES[m.t].c);
+      popText(def.x + 18, def.y - 100, '●'.repeat(def.v.stk) + '○'.repeat(Math.max(0, SK.n - def.v.stk)), TYPES[vt(m)].c);
       if (def.v.stk >= SK.n) { def.v.stk = 0; def.v.slowT = 0; if (!def.status) setStatus(def, SK.st, att); } }
     if (m.root) { def.v.root = m.root; popText(def.x, def.y - 112, 'うごけない！', '#c8a8ff'); }   // かげぬい：うごけない（技は だせる）
     if (m.silence) { def.v.silence = m.silence; def.queued = null; popText(def.x, def.y - 112, 'ふういん！', '#c8a8ff'); say(`${def.sp.n}は 技を ふうじられた！`); }   // ふういん：技が だせない（うごける）
@@ -8453,7 +8457,7 @@ function updateEffects(f, dt) {
   if (v.stkT > 0) { v.stkT -= dt; if (v.stkT <= 0) { v.stkT = 0; v.stk = 0; } }
   if (v.teth) { const T = v.teth, a = T.att; T.t -= dt; T.next -= dt;   // つなぎ：はなれたら きれる
     if (T.t <= 0 || !a || a.hp <= 0 || active(a.side) !== a || f.hp <= 0 || dist(a, f) > T.r) { v.teth = null; if (f.hp > 0 && a) { popText(f.x, f.y - 100, 'つなぎが きれた', '#c8a8ff'); burst((a.x + f.x) / 2, (a.y + f.y) / 2 - BODY, '#ff9ad0', 8, 80, .3); } }
-    else if (T.next <= 0) { T.next = .5; const an = DM.atan2(f.y - a.y, f.x - a.x); burst(f.x, f.y - BODY, TYPES[T.m.t].c, 4, 50, .25); hit(a, f, T.m, an, { tick: true, first: false, mul: T.k * clamp(1 - (dist(a, f) - 70) / 380, .1, 1), sure: 1 }); v.slowT = Math.max(v.slowT || 0, .6); v.slowK = .7; } }
+    else if (T.next <= 0) { T.next = .5; const an = DM.atan2(f.y - a.y, f.x - a.x); burst(f.x, f.y - BODY, TYPES[vt(T.m)].c, 4, 50, .25); hit(a, f, T.m, an, { tick: true, first: false, mul: T.k * clamp(1 - (dist(a, f) - 70) / 380, .1, 1), sure: 1 }); v.slowT = Math.max(v.slowT || 0, .6); v.slowK = .7; } }
   if (v.counter) { v.counter.t -= dt; if (v.counter.t <= 0) v.counter = null; }
   if (v.encore) { v.encore.t -= dt; if (v.encore.t <= 0) v.encore = null; }
   if (v.yawn > 0) { v.yawn -= dt; if (v.yawn <= 0) { v.yawn = 0; setStatus(f, 'slp', null); } }
@@ -8555,7 +8559,7 @@ function updateFighter(f, dt) {
       const cur = f.cur; if (!cur) { f.state = 'free'; break; }
       cur.t += dt;
       if (rnd() < dt * 30) {   // ため：タイプの 光の 粒が からだに あつまる
-        const S_ = FX_STYLE[cur.m.t] || FX_STYLE.normal, a = rand(0, 6.28), r = rand(26, 44);
+        const S_ = FX_STYLE[vt(cur.m)] || FX_STYLE.normal, a = rand(0, 6.28), r = rand(26, 44);
         B.parts.push({ x: f.x + DM.cos(a) * r, y: f.y - BODY + DM.sin(a) * r * .7, vx: -DM.cos(a) * r * 3, vy: -DM.sin(a) * r * 2.1, life: .3, max: .3, col: choice(S_.cols), size: 5, g: 0, glow: true });
       }
       const m = cur.m;
@@ -8674,8 +8678,8 @@ function updateFighter(f, dt) {
       const cur = f.cur; if (!cur) { f.state = 'free'; break; }
       const m = cur.m; cur.rt += dt;
       if (oT) { const a = DM.atan2(o.y - f.y, o.x - f.x); f.paceT = 1.9; if (dist(f, o) > f.r + o.r + 10) moveDir(f, DM.cos(a), DM.sin(a), dt); }
-      if (rnd() < dt * 24) { const a = rand(0, 7); B.parts.push({ x: f.x + DM.cos(a) * m.rad * .8, y: f.y + DM.sin(a) * m.rad * .5, vx: DM.cos(a) * 60, vy: -rand(20, 60), life: .35, max: .35, col: choice(FX_STYLE[m.t] ? FX_STYLE[m.t].cols : ['#ffffff']), size: 4, g: 0, glow: true }); }
-      if (cur.rt >= cur.next) { cur.next += .45; fxPush({ type: 'shock', x: f.x, y: f.y, rad: m.rad, col: TYPES[m.t].c, life: .3, max: .3 }); sheetFx('claw', f.x, f.y - BODY, 1.1, rand(0, 7)); B.shake = Math.max(B.shake, 3); SND.se('swing');
+      if (rnd() < dt * 24) { const a = rand(0, 7); B.parts.push({ x: f.x + DM.cos(a) * m.rad * .8, y: f.y + DM.sin(a) * m.rad * .5, vx: DM.cos(a) * 60, vy: -rand(20, 60), life: .35, max: .35, col: choice(FX_STYLE[vt(m)] ? FX_STYLE[vt(m)].cols : ['#ffffff']), size: 4, g: 0, glow: true }); }
+      if (cur.rt >= cur.next) { cur.next += .45; fxPush({ type: 'shock', x: f.x, y: f.y, rad: m.rad, col: TYPES[vt(m)].c, life: .3, max: .3 }); sheetFx('claw', f.x, f.y - BODY, 1.1, rand(0, 7)); B.shake = Math.max(B.shake, 3); SND.se('swing');
         if (o && o.clones) hitClones(o, c => DM.hypot(c.x - f.x, c.y - f.y) < m.rad + 10);
         if (oT && DM.hypot(o.x - f.x, o.y - f.y) <= m.rad + o.r) { if (hit(f, o, m, DM.atan2(o.y - f.y, o.x - f.x), { mul: .3, tick: true, first: !cur.landed })) cur.landed++; } }
       if (cur.rt >= (m.rageT || 3) && f.state === 'rage') { changeStages(f, { atk: -2 }, true); say(`${f.sp.n}は あばれつかれた！`); endAct(f, .5); }
@@ -10522,7 +10526,7 @@ function dummyTick(dt) {
   DUM.atkT -= dt;
   if (S.atk !== 'none' && DUM.atkT <= 0 && d.state === 'free' && !d.cur && canAct(d)) { const id = dollMove(S.atk, d, f); DUM.atkT = 3.5; if (id) { d.cd = {}; beginMove(d, id); if (d.cur) d.cur.doll = 1; } }
   if (d.cur && d.cur.doll && d.state === 'wind' && d.cur.t + dt * 2 >= d.cur.wind) {   // 人形の こうげきは ためおわったら かならず とどく（にげられて「攻撃を受けた瞬間」が ためせない のを ふせぐ）
-    const m = d.cur.m; d.cur = null; d.state = 'act'; d.stT = .3; burst(f.x, f.y - BODY, TYPES[m.t] ? TYPES[m.t].c : '#ffffff', 14, 140, .4); hit(d, f, m, DM.atan2(f.y - d.y, f.x - d.x)); }
+    const m = d.cur.m; d.cur = null; d.state = 'act'; d.stT = .3; burst(f.x, f.y - BODY, TYPES[vt(m)] ? TYPES[vt(m)].c : '#ffffff', 14, 140, .4); hit(d, f, m, DM.atan2(f.y - d.y, f.x - d.x)); }
 }
 // 人形の こうげき：えらんだ しゅるい（ふつう／大技／タイプ一致／ばつぐん）に ぴったり あう 技を えらぶ（「攻撃を受けた瞬間」「相手が溜め中」を ためせる）
 function dollMove(k, d, f) {
@@ -10631,7 +10635,7 @@ function setupCmds() {
     b.querySelector('.a').style.fontSize = m.n.length > 8 ? '10.5px' : m.n.length > 6 ? '11.5px' : '';
     b.querySelector('.b').textContent = moveSub(m); b.querySelector('.b')._t = null; b.dataset.eff = '';
     b.querySelector('.d').textContent = moveDesc(m);
-    b.style.setProperty('--c', TYPES[m.t].c);
+    b.style.setProperty('--c', TYPES[vt(m)].c);
   });
 }
 function canCommand() { if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; B.paused = false; return true; } if (B && B.train) return false; return B && B.mode === 'fight' && !B.paused; }   // チュートリアル：とまっている ときに しじ → うごきだす
@@ -11015,7 +11019,7 @@ function drawWeather(st) {   // てんき：あめ・はれ・すな・ゆき
   ctx.restore();
 }
 function drawChan(f) {
-  const cur = f.cur, m = cur.m, cs = (FX_STYLE[m.t] || FX_STYLE.normal).cols, fl = .75 + .25 * DM.sin(B.t * 40);
+  const cur = f.cur, m = cur.m, cs = (FX_STYLE[vt(m)] || FX_STYLE.normal).cols, fl = .75 + .25 * DM.sin(B.t * 40);
   const k = Math.min(1, (cur.ch != null ? cur.ch : cur.t - cur.wind) / .1 + .2), c = DM.cos(cur.ang), s = DM.sin(cur.ang), ox = f.x, oy = f.y - (m.k === 'cone' ? 0 : BODY);   // おうぎは あしもとから（よこくの はんい・あたりはんてい と そろえる）
   { const gb = gfxOf(m, 'body'), gc = gfxOf(m, 'cone'), fy = c < 0;   // 大技の 専用の 絵（ビーム・扇）
     if (m.k === 'beam' && gb) { const L = (cur.len != null ? cur.len : m.len) * k, gsc = (GFX[m.fxid] && GFX[m.fxid].sc) || 1, bs = Math.max(1, m.wid * 2.2 * gsc / (32 * PIX_D)), sk = gfxOf(m, 'start'), tk = gfxOf(m, 'tip');
@@ -11725,7 +11729,7 @@ const PROJ_ROWS = {
 const PROJ_ROT = { ice: Math.PI / 2, bug: Math.PI / 4, grass: Math.PI / 4 };   // とぶ 向きに あわせて まわす（絵の もとの 向き）
 function drawProj(p) {
   if (drawProjX(p)) return;
-  const x = Math.round(p.x), y = Math.round(p.y), t = p.m.t, R = p.r, S_ = FX_STYLE[t] || FX_STYLE.normal;
+  const x = Math.round(p.x), y = Math.round(p.y), t = vt(p.m), R = p.r, S_ = FX_STYLE[t] || FX_STYLE.normal;
   glowDot(x, y, R * 2.2, S_.cols[1], .35);
   if (rnd() < .45) B.parts.push({ x: p.x + rand(-2, 2), y: p.y + rand(-2, 2), vx: -p.vx * .15 + rand(-12, 12), vy: -p.vy * .15 + rand(-12, 12), life: .32, max: .32, col: choice(S_.cols), size: 5, g: 0, shape: S_.shape, rot: rnd() * 6, vr: 6, glow: rnd() < .5 });
   ctx.fillStyle = 'rgba(10,8,18,.25)'; ctx.beginPath(); ctx.ellipse(x, y + BODY + (p.h || 0), R * (p.h ? .7 : 1), R * .4, 0, 0, 7); ctx.fill();
