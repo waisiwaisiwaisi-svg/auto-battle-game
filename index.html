@@ -7486,9 +7486,10 @@ function hit(att, def, m, ang, opt) {
   if (B.stats) { const k = MOVE_ID.get(m); B.stats.hit[k] = (B.stats.hit[k] || 0) + 1; B.stats.dmg[k] = (B.stats.dmg[k] || 0) + dmg; B.stats.dmgPct[k] = (B.stats.dmgPct[k] || 0) + dmg / def.maxHp; }
   const stance = def.state === 'stance' && def.cur && def.cur.m.k === 'stance';
   const armored = def.cur && def.cur.m.armor && ['wind', 'dash', 'act', 'chan'].includes(def.state);   // スーパーアーマー：わざの あいだは ひるまない・とめられない
+  const aggArm = !opt.tick && m.k === 'proj' && !heavy && !((m.power || 0) >= 100) && def.mon && natOf(def) === 'yuukan';   // どんどん せめる：ふつうの 弾では ひるまない（すこし おされる だけ）
   if (armored && !opt.tick) popText(def.x, def.y - 100, 'アーマー！', '#ffb070');
   if (opt.tick) { def.kx += DM.cos(ang) * 45 * K; def.ky += DM.sin(ang) * 45 * K; }   // うちつづける わざ：ひるませず すこし おすだけ
-  else if (stance || armored || def.state === 'rage' || def.state === 'grab') { def.kx += DM.cos(ang) * 50 * K; def.ky += DM.sin(ang) * 50 * K; B.hitstop = Math.max(B.hitstop, .04); }   // まちぶせ・あばれ・つかみ中は ひるまない
+  else if (stance || armored || aggArm || def.state === 'rage' || def.state === 'grab') { def.kx += DM.cos(ang) * 50 * K; def.ky += DM.sin(ang) * 50 * K; B.hitstop = Math.max(B.hitstop, .04); }   // まちぶせ・あばれ・つかみ中は ひるまない
   else if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) !== 'rock') {   // ✌️ を ためている あいだは ✊ でしか とめられない
     def.kx += DM.cos(ang) * 60 * K; def.ky += DM.sin(ang) * 60 * K; B.hitstop = Math.max(B.hitstop, .03);
   }
@@ -7524,7 +7525,7 @@ function hit(att, def, m, ang, opt) {
   const e = m.e || {};
   if (def.hp > 0 && big) {
     if (e.st && rnd() * 100 < e.stCh) setStatus(def, e.st, att);
-    if (e.flinch && !lagHit && rnd() * 100 < e.flinch) { def.state = 'stun'; def.stT = Math.max(def.stT, .7); def.flinchTo = Math.max(def.flinchTo || 0, B.t + def.stT); popText(def.x, def.y - 80, 'ひるんだ！', '#ffffff'); }
+    if (e.flinch && !lagHit && !aggArm && rnd() * 100 < e.flinch) { def.state = 'stun'; def.stT = Math.max(def.stT, .7); def.flinchTo = Math.max(def.flinchTo || 0, B.t + def.stT); popText(def.x, def.y - 80, 'ひるんだ！', '#ffffff'); }
     if (e.foe && rnd() * 100 < e.foeCh) changeStages(def, e.foe);
     if (m.healBlock) { def.v.healBlock = 6; }
     if (m.mark) { def.v.mark = m.mark; popText(def.x, def.y - 112, 'しるし', '#ffd84a', true); }   // しるし：べつの 技で はじける
