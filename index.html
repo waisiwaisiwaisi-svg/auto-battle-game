@@ -8664,7 +8664,7 @@ function updateFighter(f, dt) {
           break; }
         if (cur.trail) { addTrail(f, m, cur.trail); cur.trail = null; }
         if (m.back && !cur.back && cur.hit && oT && f.hp > 0) { const hs = hideSpot(f, o);   // ヒットアンドアウェイ：あてたら ちかくの かべ（中きょり いない）の うしろへ さっと かくれる
-          if (hs && DM.hypot(hs.x - f.x, hs.y - f.y) <= UTURN_HIDE_R) { endAct(f, .08); f.order = { k: 'hide', t: UTURN_HIDE_T, spot: hs, re: .5, ox: o.x, oy: o.y, fast: 1 }; f.queued = null; f.navT = 0; popText(f.x, f.y - 96, 'さっと かくれる！', '#bfe8ff', 'comic'); break; } }
+          if (hs && DM.hypot(hs.x - f.x, hs.y - f.y) <= UTURN_HIDE_R) { endAct(f, .08); f.order = { k: 'hide', t: UTURN_HIDE_T, spot: hs, re: .5, ox: o.x, oy: o.y, fast: 1 }; f.queued = null; f.navT = 0; break; } }
         if (m.back && !cur.back) { cur.back = true; cur.hit = true; cur.ang = DM.atan2(cur.sy - f.y, cur.sx - f.x); cur.dlen = DM.hypot(cur.sx - f.x, cur.sy - f.y); cur.d = 0; if (cur.dlen > 8) break; }   // ヒットアンドアウェイ：もとの ばしょへ もどる
         endAct(f, wall ? .6 : .35);
       }
