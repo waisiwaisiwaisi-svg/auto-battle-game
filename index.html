@@ -4689,7 +4689,7 @@ ACTS.payOpen = (i) => {   // ジェムで すぐ あける（のこり じかん
 };
 ACTS.openChest = (i, onb) => {
   const c = S.chests && S.chests[i]; if (!c) return 'none';
-  if (onb && S.onb === 5) S.onbOpen = 1;   // さいしょの ながれ
+  if (onb && S.onb === 5 && S.onbChest && !S.onbOpen && c.kind === 'wood') S.onbOpen = 1;   // さいしょの ながれの ブラインドボックス（1かい だけ）   // さいしょの ながれ
   else if (chestLeft(c) !== 0) return 'locked';
   openChest(i); return 'ok';
 };
@@ -8919,7 +8919,7 @@ async function srvFn() { if (SRV_FN) return SRV_FN; if (!SRV_APP()) return null;
    それを かえる しごと（act）は さきに サーバーで うごかし（この ゲームの コードを サーバーの ブラウザで）、
    おなじ らんすう・じこく で この 端末でも うごかす（がめんも そのまま でる）。けっかが ちがえば サーバーの ほうに する */
 let SRV_SAVE = false;   // サーバーの セーブを つかって いる
-const SAVE_PROT = ['tutGem', 'gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt', 'osb'];   // osb：オフラインの らんすうの たね（サーバーが きめる）   // サーバーが きめる ところ
+const SAVE_PROT = ['tutGem', 'gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt', 'osb', 'onb'];   // osb：オフラインの らんすうの たね（サーバーが きめる）   // サーバーが きめる ところ
 const MON_PROT = ['uid', 'sid', 'iv', 'nat', 'ev', 'fed', 'lvl', 'tmL', 'xL'];   // モンスターの サーバーが きめる ところ（わざ・訓練・ならびは 端末で かえて よい）
 const saveHash = (x) => { const o = {}; for (const k of SAVE_PROT) if (x[k] !== undefined) o[k] = x[k]; o.mons = [...(x.party || []), ...(x.box || [])].map(m => MON_PROT.map(k => m[k] === undefined ? null : m[k])); return seedOf(JSON.stringify(o)).toString(36); };
 const cloneJ = (x) => JSON.parse(JSON.stringify(x));
@@ -8968,26 +8968,38 @@ function offAct(name, args) {
   if (name === 'battleStart' && args[0] === 'free') { say0('この たいせんは オンラインで あそんでね'); return undefined; }   // あいての チームは サーバーに ある
   if (!OFF_SAID) { OFF_SAID = true; say0('オフラインで あそんでいます。つながったら サーバーに おくります'); }
   S.ojr = S.ojr || []; const now = NOW();
-  if (name === 'battleEnd') { S.ojr.push({ name, args: cloneJ(args), now }); delete S.tkt; S.osb.n++; saveLocal(); return B ? B.result : undefined; }   // たたかいは もう この 端末で おわって ごほうびも ついて いる
-  const out = actRun(name, args, seedOf(S.osb.b + ':' + S.osb.n), now); S.ojr.push({ name, args: cloneJ(args), now }); S.osb.n++; saveLocal(); return out;
+  const q = S.osb.n;   // とおしばんごう（サーバーは もう やった ばんごうを やりなおさない）
+  if (name === 'battleEnd') { S.ojr.push({ q, name, args: cloneJ(args), now }); delete S.tkt; S.osb.n++; saveLocal(); return B ? B.result : undefined; }   // たたかいは もう この 端末で おわって ごほうびも ついて いる
+  const out = actRun(name, args, seedOf(S.osb.b + ':' + q), now); S.ojr.push({ q, name, args: cloneJ(args), now }); S.osb.n++; saveLocal(); return out;
 }
 let OFF_SYNCING = null;
+const OFF_CHUNK = 150, OFF_BYTES = 1500000;   // いちどに おくる かず・おおきさ（サーバーの うけつけは 400こ まで）
 function offSync(f) {
   if (OFF_SYNCING) return OFF_SYNCING;
   return (OFF_SYNCING = (async () => { try {
-    const fn = f || await srvFn(); if (!fn || !S || !S.ojr || !S.ojr.length) return !(S && S.ojr && S.ojr.length);
-    const r = await fn.call('actSync', { jr: S.ojr, loc: cloneJ(S) }); if (!r || !r.s) return false;
-    SRV_SKEW = r.now - Date.now(); adoptSave(r.s); delete S.ojr; SRV_SAVE = true; saveLocal(); if (!B && $('scHub') && !$('scHub').hidden) renderHub(); return true;
+    const fn = f || await srvFn(); if (!fn || !S) return false;
+    while (S.ojr && S.ojr.length) {
+      const sent = []; let sz = 0; for (const e of S.ojr) { const l = JSON.stringify(e).length; if (sent.length >= OFF_CHUNK || (sent.length && sz + l > OFF_BYTES)) break; sent.push(e); sz += l; }
+      const r = await fn.call('actSync', { jr: sent, loc: cloneJ(S) }); if (!r || !r.s || !r.s.osb) return false;
+      SRV_SKEW = r.now - Date.now();
+      const done = r.s.osb.n | 0; S.ojr = (S.ojr || []).filter(e => !(e.q < done));   // サーバーで たしかめおわった ぶんだけ けす（おくった あとに ふえた きろくは のこす）
+      if (S.ojr.length) { saveLocal(); continue; }   // まだ のこって いる：この 端末の セーブ（ぜんぶ やった あと）は そのまま
+      if (r.h !== saveHash(S)) { window.PMA_MISMATCH = (window.PMA_MISMATCH || 0) + 1; }   // ずれた：サーバーの ほう
+      adoptSave(r.s); delete S.ojr; SRV_SAVE = true; saveLocal(); if (!B && $('scHub') && !$('scHub').hidden) renderHub(); return true;
+    }
+    return true;
   } catch (e) { return false; } finally { OFF_SYNCING = null; } })());
 }
 // サーバーの ブラウザから よぶ：オフラインの きろくを じゅんばんに やりなおす（じこくは まえの きろく〜いま の あいだに おさめる）
 window.PMA_OFFSYNC = (s0, jr, t0, tNow) => {
-  let s = Object.assign(defaultSave(), cloneJ(s0)); if (!s.osb || !Array.isArray(jr)) return { post: s, n: 0 };
-  let last = t0 || 0, n = 0; const outs = [], ob = s.osb.b, n0 = s.osb.n | 0;   // たねの ばんごうは きろくの なんばんめ か で きめる（たたかいの さいげんで セーブが もどっても ずれない）
-  for (const e of jr) { const now = Math.min(tNow, Math.max(last, Number.isFinite(+e.now) ? +e.now : last)); last = now;
-    S = s; let o; try { if (ACTS[e.name] && Array.isArray(e.args)) o = actRun(e.name, cloneJ(e.args), seedOf(ob + ':' + (n0 + n)), now); } catch (er) { o = 'err:' + er.message; }
+  let s = Object.assign(defaultSave(), cloneJ(s0)); if (!s.osb || !Array.isArray(jr)) return { post: s, n: 0, h: saveHash(s) };
+  let last = t0 || 0, n = 0; const outs = [], ob = s.osb.b, n0 = s.osb.n | 0;   // たねの ばんごうは とおしばんごう（たたかいの さいげんで セーブが もどっても ずれない）
+  for (const e of jr) { const q = Number.isInteger(e.q) ? e.q : n0 + n; if (q < n0 + n) continue;   // もう やった：やりなおさない（おくりなおし）
+    if (q > n0 + n) return { gap: n0 + n, post: cloneJ(s), n, h: saveHash(s) };   // とんで いる：うけつけない
+    const now = Math.min(tNow, Math.max(last, Number.isFinite(+e.now) ? +e.now : last)); last = now;
+    S = s; let o; try { if (ACTS[e.name] && Array.isArray(e.args)) o = actRun(e.name, cloneJ(e.args), seedOf(ob + ':' + q), now); } catch (er) { o = 'err:' + er.message; }
     outs.push(o && typeof o === 'object' ? 'obj' : o); s = S; n++; s.osb = { b: ob, n: n0 + n }; }
-  delete s.ojr; return { post: cloneJ(s), n, outs };
+  delete s.ojr; return { post: cloneJ(s), n, outs, h: saveHash(s) };
 };
 // この 端末から：サーバーで うごかしてから おなじ ことを ここでも
 let ACT_BUSY = false;
@@ -9195,7 +9207,7 @@ function oppLook() { const p = NET.nr && NET.nr.peers().find(x => isOther(x) && 
 const monsFrom = (t, seed) => { const p = SIM_RNG; SIM_RNG = mkRng((seed ^ 0x9e3779b9) >>> 0); try { return t.map(monFrom); } finally { SIM_RNG = p; } };
 const seedOf = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; };
 // たたかいの ようすを まとめる（さいげんと くらべる）
-const battleSum = () => ({ res: B.mode === 'end' ? B.result : null, n: B.stepN, hp: B.sides.map(sd => sd.fs.map(f => Math.round(Math.max(0, f.hp) * 100) / 100)), fa: B.sides.map(sd => sd.fs.map(f => f.fainted ? 1 : 0)) });
+const battleSum = () => ({ res: B.mode === 'end' ? B.result : null, x: B.endBy === 'x' ? 1 : 0, n: B.stepN, hp: B.sides.map(sd => sd.fs.map(f => Math.round(Math.max(0, f.hp) * 100) / 100)), fa: B.sides.map(sd => sd.fs.map(f => f.fainted ? 1 : 0)) });
 // サーバーで さいげん：ホストの きろく（シード・ばしょ・チーム・そうさ）から たたかいを もういちど うごかす。job：{ seed, field, h, g, log, steps }
 window.PMA_CHECK = (t) => validTeam(t); window.PMA_VER = GAME_VER;   // サーバー：チームが ありえる ものか
 window.PMA_REPLAY = (job) => {
@@ -9968,7 +9980,7 @@ function bStep(dt) {
   try {
     const n = b.stepN = (b.stepN || 0) + 1;
     if (b.replay) { const R = b.replay;
-      while (R.i < R.log.length && R.log[R.i][0] <= n) { const e = R.log[R.i++]; if (e[1] === 'h') hostApply(e[2]); else if (e[1] === 'g') NET.pending = e[2]; else if (e[1] === 'x' && B.mode !== 'end') endBattle(e[2]); }   // x：ステップの そとで おわった（あいてが きれた・やめた）
+      while (R.i < R.log.length && R.log[R.i][0] <= n) { const e = R.log[R.i++]; if (e[1] === 'h') hostApply(e[2]); else if (e[1] === 'g') NET.pending = e[2]; else if (e[1] === 'x' && B.mode !== 'end' && (e[2] === 'lose' || e[2] === 'run')) { B.endBy = 'x'; endBattle(e[2]); } }   /* x：じぶんで やめた（まけ・にげた）だけ。かちは たたかいの けいさんで きまる（きろくで かちには できない） */   // x：ステップの そとで おわった（あいてが きれた・やめた）
       if (b.choosing && b.choosePick) { if (++R.wait > 900 && !R.log.slice(R.i).some(e => e[1] === 'h' && e[2][0] === 'ch')) { R.wait = 0; const sd = b.sides[0], i = sd.fs.findIndex((x, j) => !x.fainted && x.hp > 0 && j !== sd.act); hostApply(['ch', i < 0 ? 0 : i]); } } else R.wait = 0;   // きろくに ない えらび（ホストの がめんと ちがって いた）：15びょうで じどう（ゲームの じどうと おなじ）
     }
     else if (b.hq.length) for (const c of b.hq.splice(0)) { b.ilog.push([n, 'h', c]); hostApply(c); }
