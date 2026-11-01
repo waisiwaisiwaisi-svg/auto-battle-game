@@ -3626,6 +3626,16 @@ if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') 
 .serow .seplay{font-size:0!important;background:url(${UIA.play.src}) center/26px no-repeat!important;box-shadow:none!important}
 .sndbtn:not(.rotbtn){font-size:0!important;background-image:url(${UIA.spk_on.src})!important;background-position:center!important;background-size:24px!important;background-repeat:no-repeat!important;image-rendering:pixelated}.sndbtn.off:not(.rotbtn){background-image:url(${UIA.spk_off.src})!important}`;   // ボタンも ドットの 絵（U6）
   document.head.appendChild(st);
+  { // ボタンの 絵は ふちと なかを べつべつに のばすので、画面の ばいりつ に よっては つなぎめに すきまが でて 線に みえる：なかの 色を したに しく（ふちから 4px うち がわ）
+    const IMG = {}, img = (k) => { if (!UIA[k] || !UIA[k].src) return null; if (!IMG[k]) { IMG[k] = new Image(); IMG[k].onload = () => mk(); IMG[k].src = UIA[k].src; } return IMG[k]; };
+    const mid = (k) => { const im = img(k); if (!im || !im.naturalWidth) return null; try { const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(c.width >> 1, c.height >> 1, 1, 1).data; return d[3] > 200 ? `rgb(${d[0]},${d[1]},${d[2]})` : null; } catch (e) { return null; } };
+    const bg = (k) => { const c = mid(k); return c ? `background:linear-gradient(${c},${c}) center / calc(100% - 8px) calc(100% - 8px) no-repeat!important;` : ''; };
+    const R = [['.btn,.btn.sub', 'b8_gold'], ['.btn.sub', 'b8_navy'], ['.btn.danger', 'b8_red'], ['.btn.ok', 'b8_green'], ['.btn:disabled', 'b8_off']];
+    const H = [['.btn:hover:not(:disabled)', 'b8_gold_h'], ['.btn.sub:hover:not(:disabled)', 'b8_navy_h'], ['.btn.danger:hover:not(:disabled)', 'b8_red_h'], ['.btn.ok:hover:not(:disabled)', 'b8_green_h']];
+    const A = [['.btn:active:not(:disabled)', 'b8_gold_d'], ['.btn.sub:active:not(:disabled)', 'b8_navy_d'], ['.btn.danger:active:not(:disabled)', 'b8_red_d'], ['.btn.ok:active:not(:disabled)', 'b8_green_d']];
+    let mk = () => { const css = R.map(([q, k]) => bg(k) && `${q}{${bg(k)}}`).join('') + `@media (hover:hover){${H.map(([q, k]) => bg(k) && `${q}{${bg(k)}}`).join('')}}` + A.map(([q, k]) => bg(k) && `${q}{${bg(k)}}`).join('');
+      let el = document.getElementById('btnFillCss'); if (!el) { el = document.createElement('style'); el.id = 'btnFillCss'; document.head.appendChild(el); } el.textContent = css; };
+    let mkT = 0; const mk0 = mk; mk = () => { clearTimeout(mkT); mkT = setTimeout(mk0, 0); }; mk(); }
 }
 const ICONS = {
   swords: ['s.........s.', 'ss.......ss.', '.ss.....ss..', '..ss...ss...', '...ss.ss....', '....sss.....', '...ss.ss....', '..yy...yy...', '.yny...yny..', 'nn.......nn.', 'n.........n.'],
