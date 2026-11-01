@@ -111,6 +111,10 @@ for p in sorted(FX.glob('K/K_*_*f.png')):
     if nm.endswith('_wall'):   # かべ：6コマ（よこ・よこひび・たて・たてひび・ななめ・ななめひび）。コマごとの えの はんい fb（かべの えと おなじ）
         im = Image.open(p).convert('RGBA'); w = im.width // n; out['k_' + nm]['ay'] = im.height - 1
         out['k_' + nm]['fb'] = [list(im.crop((i * w, 0, i * w + w, im.height)).getbbox() or (0, 0, w, im.height)) for i in range(n)]
+# ---- Lグループ（うちつづける おうぎの つぶ・ビッグウェーブの 水流）：キーは l_ ＋ なまえ ----
+for p in sorted(FX.glob('L/L_*_*f.png')):
+    nm = re.sub(r'^L_|_\d+f\.png$', '', p.name); n = nf(p)
+    out['l_' + nm] = sheet(p, n, 100 if nm.endswith('_trail') else 70, **({'ax': 0} if nm.endswith('_trail') else {}))
 # ---- 優先度C（5回目の 納品）----
 add('n_conf', 'C_conf', 120); add('n_scared', 'E_scared', 140); add('n_anger', 'E_anger', 140); add('n_encore', 'E_encore', 140)
 def no_soil(p):   # やどりぎ：めばえの 下の 土を けす（くきの 下はしは ふちどりで とじる）
