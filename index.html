@@ -9062,7 +9062,7 @@ async function battleVerify() {
 // アプリを ひらいた とき：サーバーの セーブを もらう（はじめては この 端末の データから つくる）
 let SAVE_FAIL_T = 0;
 addEventListener('online', () => { SAVE_FAIL_T = 0; if (S && S.ojr && S.ojr.length) offSync(); });   // つながったら オフラインの ぶんを おくる
-const SAVE_SERVER_ON = true;   // アプリ版は セーブを サーバーで まもる（claude.ai 版は この 端末で）
+const SAVE_SERVER_ON = false;   // アプリ版も いまは この 端末で（サーバーの しごと〔Cloud Functions〕は Blaze プランに してから true に もどす）
 async function saveInit() {
   if (!SRV_APP() || SRV_SAVE || !S || S.onb || !(SAVE_SERVER_ON || window.PMA_SAVE_ON)) return;   // さいしょの ながれの あいだは まだ（おわったら はじめる）
   if (Date.now() - SAVE_FAIL_T < 60000) return;   // さっき つながらなかった：しばらく まつ（まいかい またせない）
