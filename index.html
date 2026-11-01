@@ -7396,7 +7396,7 @@ function hit(att, def, m, ang, opt) {
   if (m.pat === 'palm' && plOk('palm_hit') && !opt.tick) plFx('palm_hit', def.x, def.y - BODY, 1.3);   // きあいだまが はじける
   if (B.stats) { B.stats.tryhit[MOVE_ID.get(m)] = (B.stats.tryhit[MOVE_ID.get(m)] || 0) + 1; if (def.inv > 0) B.stats.dodged[MOVE_ID.get(m)] = (B.stats.dodged[MOVE_ID.get(m)] || 0) + 1; }
   if ('decoy' in opt ? opt.decoy : att.cur && att.cur.decoy) return false;
-  if (def.hurtInv > 0 && def.state !== 'stun' && !opt.tick && !(def.hurtBy && def.hurtBy.att === att && def.hurtBy.m === m)) {   // むてき じかん（くらった あと・たおれた あとの こうたい）
+  if (def.hurtInv > 0 && def.state !== 'stun' && !(def.v.root > 0) && !opt.tick && !(def.hurtBy && def.hurtBy.att === att && def.hurtBy.m === m)) {   /* かげぬいで うごけない あいだも むてきに しない */   // むてき じかん（くらった あと・たおれた あとの こうたい）
     return false; }
   if (def.inv > 0 && !opt.sure && !opt.throw) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
   if (gshiftOn(def) && isDamaging(m) && GSHIFT_T.includes(m.t)) { if (!opt.tick || opt.first) popText(def.x, def.y - 66, 'すりぬけた', '#b8a8f0'); if ((!opt.tick || opt.first) && plOk('n_phase')) plFx('n_phase', def.x, def.y - BODY, 1.4); burst(def.x, def.y - BODY, '#8a78c8', 6, 50, .3); return false; }   // ゴーストシフト：ノーマル・かくとうを すかす
@@ -12097,7 +12097,7 @@ function drawFighter0(f) {
   if (f.state === 'enter' || f.state === 'return') { sx = sy = Math.max(.05, f.scale); }
   if (f.state === 'lag') { sy = 1 + DM.sin(B.t * 14) * .03; sx = 2 - sy; }
   if (f.state === 'dodge') alpha = .75;
-  if (f.hurtInv > 0 && !['faint', 'enter', 'return', 'stun'].includes(f.state)) alpha = (alpha == null ? 1 : alpha) * (Math.floor(B.t * 14) % 2 ? .4 : 1);   // むてき：ちかちか
+  if (f.hurtInv > 0 && !(f.v.root > 0) && !['faint', 'enter', 'return', 'stun'].includes(f.state)) alpha = (alpha == null ? 1 : alpha) * (Math.floor(B.t * 14) % 2 ? .4 : 1);   // むてき：ちかちか
   if ((f.clones && f.clones.some(c => !c.doll)) || f.isClone) alpha = (alpha == null ? 1 : alpha) * (.8 + .2 * DM.sin(B.t * 9 + (f.isClone ? f.x : 0)));   // ぶんしんちゅうは ぜんいん すこし ゆらぐ
   const warpU = f.state === 'wind' && f.cur && f.cur.m.k === 'warp' ? clamp(f.cur.t / f.cur.wind, 0, 1) : 0;   // かげに しずむ
   if (warpU) { ctx.fillStyle = 'rgba(40,20,60,.7)'; ctx.beginPath(); ctx.ellipse(f.x, f.y, 18 + warpU * 10, 7 + warpU * 3, 0, 0, 7); ctx.fill(); alpha = (alpha == null ? 1 : alpha) * (1 - warpU * .85); sy *= 1 - warpU * .6; }
