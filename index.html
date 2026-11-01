@@ -13226,7 +13226,7 @@ function leagueTeam(type, n, p) {
   const ids = poolIds().filter(id => !LEAGUE.some(x => x[4] === id)), ace = leagueAce(type); let pool = (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids.slice()).filter(id => id !== ace).sort((a, b) => baseTot(b) - baseTot(a));
   if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id) && id !== ace).sort((a, b) => baseTot(b) - baseTot(a)));
   const top = pool.slice(0, n + (type ? 2 : 6)), out = [];
-  while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = choice(c.length ? c : top); top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }
+  while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = (c.length ? c : top)[0]; top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }   // メンバーは いつも おなじ（弱点を しらべて そなえられる）
   if (type === 'fairy' && out.length >= 2) {   // アカリ：1ばんめは 出場時に けっとうのば、2ばんめは 出場時に ぶっとびてんし
     const teach = (e, sp) => { e.moves = [sp, ...e.moves.filter(id => id !== sp).slice(0, 3)]; autoTrain(e); const mv = e.tr.prog.mv, i = mv.findIndex(r => r.id === sp), r = mv.splice(i, 1)[0];
       r.c = [[TRC('enter')]]; r.go = sp === 'hako-punch' ? 'near' : 'auto'; mv.unshift(r); for (const x of mv) if (x !== r) x.c = x.c.filter(l => !l.some(c => c.t === 'enter')); e.moves = mv.map(x => x.id); };   // この 技だけ 出場時（ほかの 出場時は はずす）
