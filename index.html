@@ -5038,7 +5038,7 @@ const TR_NAT = { yuukan: ['勇敢', '前へ前へ。ほとんど隠れない'], 
 const TR_STAT = { atk: '攻撃', def: '防御', spa: '属性攻撃', spd: '属性防御', spe: '素早さ' };
 // 作戦（ドラクエの「さくせん」の ような もの）：たちまわりの ほうしんを きめる。中身は 性格の うごき を つかう
 // 作戦は 3つ（性格の 3すくみ と おなじ：👊近・🛹中・👣遠）。えらばなければ その子の 性格どおり
-const TR_PLAN = [['yuukan', 'どんどん せめる', '技を 撃たない ときは 近い 距離（〜150）を たもつ。ほとんど かくれない'], ['nonki', 'どっしり かまえる', '技を 撃たない ときは 普通の 距離（150〜290）を たもつ。かべ・かいふく・カウンターで まちかまえる'], ['reisei', 'まあいを たもつ', '技を 撃たない ときは 遠い 距離（290〜）を たもつ。ひまな ときは 陰で まつ']];
+const TR_PLAN = [['yuukan', 'がんがん', '技を 撃たない ときは 近い 距離（〜150）を たもつ。ほとんど かくれない'], ['nonki', 'どっしり', '技を 撃たない ときは 普通の 距離（150〜290）を たもつ。かべ・かいふく・カウンターで まちかまえる'], ['reisei', 'ちくちく', '技を 撃たない ときは 遠い 距離（290〜）を たもつ。ひまな ときは 陰で まつ']];
 const PLAN_R = { yuukan: 70, nonki: 220, reisei: 350 };   // 作戦ごとの 技を 撃たない ときの 間合い（近い 〜150・普通 150〜290・遠い 290〜 に おさまる ように）
 const trPlanOf = (n) => n && NATURES[n] ? (TR_PLAN.find(p => p[0] === n) || TR_PLAN.find(p => NAT_GRP[p[0]] === NAT_GRP[n]) || [])[0] : undefined;   // むかしの 作戦（いのちだいじに など）は おなじ グループの 作戦に
 const planName = (m) => { const k = planOfMon(m), P = TR_PLAN.find(p => p[0] === k); return (P ? P[1] : '') + (m.tr && m.tr.prog && m.tr.prog.mv && trPlanOf(m.tr.prog.nat) ? '' : '（おすすめ）'); };
@@ -5132,7 +5132,7 @@ const TRS = () => (TRT && TRT.steps) || TRT_STEPS;   // いまの あんない�
 const TRT_STEPS = [
   { tx: 'ここは<b>訓練</b>です。バトルでモンスターがどう動くかを組み立てる場所です。<br>一緒にひとつ作ってみましょう！', next: 1 },
   { sel: '.trnatsel', tx: '① まずは<b>作戦</b>です。普段の立ち回りを決めます。<br>どれかひとつタップしてみましょう（★がこのモンスターのおすすめです）。', ok: () => TRT.f.nat },
-  { sel: '.trnatsel', allow: () => [], tx: '作戦には、じゃんけんのような相性があります。<br>👊「<b>どんどん せめる</b>」は 👣「<b>まあいを たもつ</b>」に、👣「まあいを たもつ」は 🛹「<b>どっしり かまえる</b>」に、🛹「どっしり かまえる」は 👊「どんどん せめる」に強くなります。<br>相手より強い作戦だと「<b>よゆう（さくせん◎）</b>」になり、攻撃を受けにくく（防御1.15倍）なります。弱いと「<b>けいかい（さくせん×）</b>」になり、受けやすく（0.87倍）なります。同じグループ同士だと「ライバルだ！」になります。', next: 1 },
+  { sel: '.trnatsel', allow: () => [], tx: '作戦には、じゃんけんのような相性があります。<br>👊「<b>がんがん</b>」は 👣「<b>ちくちく</b>」に、👣「ちくちく」は 🛹「<b>どっしり</b>」に、🛹「どっしり」は 👊「がんがん」に強くなります。<br>相手より強い作戦だと「<b>よゆう（さくせん◎）</b>」になり、攻撃を受けにくく（防御1.07倍）なります。弱いと「<b>けいかい（さくせん×）</b>」になり、受けやすく（0.93倍）なります。同じグループ同士だと「ライバルだ！」になります。', next: 1 },
   { sel: () => `.trr[data-row="${trtRow()}"]`, allow: () => [], tx: '② これが<b>技の行</b>です。上にある技ほど先に撃ちます。<br>左の番号をドラッグすると、順番を入れ替えられます。', next: 1 },
   { sel: '.pal.k-c[data-v="ophp"]', scr: () => `.trr[data-row="${trtRow()}"]`, hl: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc[data-l="0"]`], allow: () => ['.pal.k-c[data-v="ophp"]', `.trr[data-row="${trtRow()}"] .rc`], tx: '③ 条件を置いてみましょう。<br>○番の技の「<b>使うとき</b>」の枠を<b>タップ</b>して、一覧から「<b>相手のHP</b>」を選んでください（パレットの「相手のHP」をタップしてから 枠を タップしても 置けます）。', ok: () => { const r = trtW() && trtW().mv[trtRow()]; return !!r && trLines(r.c).some(l => l.some(c => c.t === 'ophp')); } },
   { sel: () => `.trr[data-row="${trtRow()}"] .cnd`, allow: () => [`.trr[data-row="${trtRow()}"] .cnd`, '.trins'], tx: () => { const r = trtW() && trtW().mv[trtRow()], c = r && trLines(r.c).flat().find(x => x.t === 'ophp'), p = c ? (CONDS.ophp.ps.find(([v]) => String(v) === String(c.p)) || CONDS.ophp.ps[0])[1] : '25%未満'; return `これで「<b>相手のHPが${p}のとき</b>」に、この技を撃ちます。<br>置いた条件をタップすると、${CONDS.ophp.ps.map(x => x[1].replace('未満', '')).filter(x => !p.startsWith(x)).join('・')} にも変えられます。`; }, next: 1 },
@@ -5883,7 +5883,7 @@ function buildNav(st) {
   for (let c = 0; c < nw * nh; c++) if (walk[c]) { const x = (c % nw + .5) * NAV, y = ((c / nw | 0) + .5) * NAV; comfy[c] = all.some(o => circRect(x, y, NAV_R + OBST_GAP, o)) ? 0 : 1; }
   st.nav = { nw, nh, walk, comfy };
 }
-const RETREAT_K = .2;   // まあいを たもつ：うしろへ さがる ときの はやさ（まうしろで 1.2ばい）
+const RETREAT_K = .2;   // ちくちく：うしろへ さがる ときの はやさ（まうしろで 1.2ばい）
 const MATCH_T = 240;   // 1しあいの じかん（びょう）。すぎたら タイムアップで はんてい（3たい どうしの ふつうの しあいは 4ふん いないに おわる）
 const CAM_MAX = 2.3, CAM_PAD = 130, CAM_TALL_LO = .4, CAM_TALL_UP = .24;   // たて画面：みえる よこはばは フィールドの 40%〜24%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 2.3ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
@@ -7490,10 +7490,10 @@ function hit(att, def, m, ang, opt) {
   const armored = def.cur && def.cur.m.armor && ['wind', 'dash', 'act', 'chan'].includes(def.state);   // スーパーアーマー：わざの あいだは ひるまない・とめられない
   const pbSmall = PB_ALL || (!heavy && !((m.power || 0) >= 100));
   const aggNoKb = (!opt.tick && m.k === 'proj' && pbSmall && def.mon && natOf(def) === 'yuukan')
-    || (!opt.tick && ['melee', 'swipe', 'dash'].includes(m.k) && pbSmall && !m.shove && !m.slap && !m.bigKb && def.mon && natOf(def) === 'nonki');   // どっしり かまえる：ちかくの こうげき（近接・前方を きる・突進）では 硬直なし・おしもどされない（追加効果の ひるみは 効く）   // どんどん せめる：ふつうの 弾では 当たったときの 硬直なし・おしもどされない（追加効果の ひるみは 効く）
+    || (!opt.tick && ['melee', 'swipe', 'dash'].includes(m.k) && pbSmall && !m.shove && !m.slap && !m.bigKb && def.mon && natOf(def) === 'nonki');   // どっしり：ちかくの こうげき（近接・前方を きる・突進）では 硬直なし・おしもどされない（追加効果の ひるみは 効く）   // がんがん：ふつうの 弾では 当たったときの 硬直なし・おしもどされない（追加効果の ひるみは 効く）
   if (armored && !opt.tick) popText(def.x, def.y - 100, 'アーマー！', '#ffb070');
   if (opt.tick) { def.kx += DM.cos(ang) * 45 * K; def.ky += DM.sin(ang) * 45 * K; }   // うちつづける わざ：ひるませず すこし おすだけ
-  else if (aggNoKb) { B.hitstop = Math.max(B.hitstop, .03); }   // どんどん せめる：ふつうの 弾は うけながら すすむ（わざも とまらない）
+  else if (aggNoKb) { B.hitstop = Math.max(B.hitstop, .03); }   // がんがん：ふつうの 弾は うけながら すすむ（わざも とまらない）
   else if (stance || armored || def.state === 'rage' || def.state === 'grab') { def.kx += DM.cos(ang) * 50 * K; def.ky += DM.sin(ang) * 50 * K; B.hitstop = Math.max(B.hitstop, .04); }   // まちぶせ・あばれ・つかみ中は ひるまない
   else if (charging(def) && rpsOf(def.cur.m) === 'scissors' && rpsOf(m) !== 'rock') {   // ✌️ を ためている あいだは ✊ でしか とめられない
     def.kx += DM.cos(ang) * 60 * K; def.ky += DM.sin(ang) * 60 * K; B.hitstop = Math.max(B.hitstop, .03);
@@ -7503,7 +7503,7 @@ function hit(att, def, m, ang, opt) {
     def.cur = null; if (!def.v.rampage) def.queued = null;
     if (!lagHit) { def.state = 'stun'; def.stT = heavy ? .45 : .25; }
     def.kx = DM.cos(ang) * (heavy ? 230 : 140) * K; def.ky = DM.sin(ang) * (heavy ? 230 : 140) * K;
-    if (m.noKb || aggNoKb) def.kx = def.ky = 0;   // つららばり：ふきとばさない・どんどん せめる：ふつうの 弾では おしもどされない
+    if (m.noKb || aggNoKb) def.kx = def.ky = 0;   // つららばり：ふきとばさない・がんがん：ふつうの 弾では おしもどされない
     if (m.bigKb) { def.kx = DM.cos(ang) * 1500 * K; def.ky = DM.sin(ang) * 1500 * K; }   // だいおんせい：とおくまで ふきとばす
     if (m.shove) { def.kx = DM.cos(ang) * 900 * K; def.ky = DM.sin(ang) * 900 * K; def.slapT = .75; def.slapStun = m.shove; }   // つきとばし：とっしんの むきへ
     if (m.slap) { const a = ang - Math.PI / 2; def.kx = DM.cos(a) * 900 * K; def.ky = DM.sin(a) * 900 * K; def.slapT = .75; def.slapStun = 0; }   // ひっぱたき：よこに ふきとばす（かべに あたると スタン）
@@ -8358,7 +8358,7 @@ const planDefMul = (def, m) => { if (PB_DEF === 1 || !def.mon || !m) return 1; c
 const NAT_REL = {};
 for (const a of Object.keys(NAT_GRP)) { NAT_REL[a] = {}; for (const b of Object.keys(NAT_GRP)) { const v = natAdv(a, b); NAT_REL[a][b] = v > 0 ? 'mock' : v < 0 ? (a === 'okubyou' ? 'scared' : 'wary') : NAT_GRP[a] === NAT_GRP[b] && a !== 'kimagure' ? 'rival' : null; } }
 // ふだんの 作戦：訓練で きめた 作戦、なければ その モンスターに おすすめの 作戦（性格は のうりょくの 上下だけ）
-let REC_PLAN = null;   // こうげき寄り（どんどん せめる）・まんなか（まあいを たもつ）・まもり寄り（どっしり かまえる）を 3ぶんの1ずつ
+let REC_PLAN = null;   // こうげき寄り（がんがん）・まんなか（ちくちく）・まもり寄り（どっしり）を 3ぶんの1ずつ
 function recPlan(sid) {
   if (!REC_PLAN) { const sc = (id) => { const b = base6(id), st = SPECIES[id].style; return (Math.max(b.atk, b.spa) + b.spe * .5) / ((b.def + b.spd) / 2 + b.hp * .3) * (st === 'melee' ? 1.08 : st === 'ranged' ? .97 : 1); };
     const ids = Object.keys(SPECIES).sort((x, y) => sc(y) - sc(x)), n = ids.length; REC_PLAN = {}; ids.forEach((id, i) => { REC_PLAN[id] = i < n / 3 ? 'yuukan' : i < n * 2 / 3 ? 'reisei' : 'nonki'; }); }
@@ -8456,7 +8456,7 @@ function moveDir(f, mx, my, dt, nav) {
     if (rnd() < dt * 25) B.parts.push({ x: f.x + rand(-6, 6), y: f.y + 2, vx: -mx * 60 + rand(-15, 15), vy: -rand(10, 30), life: .3, max: .3, col: '#d8c8a8', size: 3, g: 60 });
   } else if (f.pace < 1.3) f.rushing = false;
   if (f.v && f.v.enrage > 0) sp *= 1.3;   // いかりモード：はやい
-  if ((mx || my) && f.mon && natOf(f) === 'reisei') { const o = B.sides[1 - f.side] && active(1 - f.side); if (o && o.hp > 0) { const dx = f.x - o.x, dy = f.y - o.y, d = DM.hypot(dx, dy) || 1, L = DM.hypot(mx, my) || 1, c = (mx * dx + my * dy) / (L * d); if (c > 0) sp *= 1 + RETREAT_K * c; } }   // まあいを たもつ：あいてから はなれる むきは はやい
+  if ((mx || my) && f.mon && natOf(f) === 'reisei') { const o = B.sides[1 - f.side] && active(1 - f.side); if (o && o.hp > 0) { const dx = f.x - o.x, dy = f.y - o.y, d = DM.hypot(dx, dy) || 1, L = DM.hypot(mx, my) || 1, c = (mx * dx + my * dy) / (L * d); if (c > 0) sp *= 1 + RETREAT_K * c; } }   // ちくちく：あいてから はなれる むきは はやい
   if (B.zones.length && !hovers(f)) { const zs = B.zones.find(z => z.side !== f.side && MOVES[z.id].slow && inZoneFloor(z, f.x, f.y)); if (zs) sp *= MOVES[zs.id].slow; }   // ありじごく：あしが とられる
   if (f.v.root > 0 || f.v.magnet) sp = 0;   // かげぬい・マグネットパワー：うごけない
   if (f.v.slowT > 0) sp *= f.v.slowK || .7;   // こなゆき など：あしが おそく なる
