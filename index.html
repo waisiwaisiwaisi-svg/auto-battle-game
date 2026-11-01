@@ -6220,6 +6220,8 @@ const GFX = {
   'acid-rain': { burst: 'k_poison_splash', rain: 'k_poison_rain' },
   'psy-link': { thread: 'g_psy_thread' }, 'mini-turret': { idle: 'g_turret_idle', fire: 'g_turret_fire', brk: 'g_turret_break' },
 };
+/* 技名エディタで なおした なまえ */
+Object.entries({"air-slash2": "ウィンスショット", "aqua-jet": "アクアクイック", "aurora-veil": "あらいながす", "avalanche": "ゆきなだれ", "bonemerang": "ブーメラン", "bulk-up": "バルクアップ", "bulldoze": "じならし", "cross-poison": "どくのつめ", "dig": "ディグアホール", "draining-kiss": "ライフショット", "drill-peck": "きりもみとっしん", "duel-arena": "けっとうじょう", "echoed-voice": "エコー", "electric-terrain": "でんかい", "ember": "かきゅう", "encore": "もういっかい", "endeavor": "びょうどう", "fire-punch": "かえんパンチ", "flame-charge": "ファイアダッシュ", "fly": "スカイフォール", "freeze-dry": "とうけつこうせん", "giga-drain": "ライフビーム", "grassy-terrain": "そうげん", "gravity": "じゅうりょくば", "haze": "めぐみのかぜ", "heavy-drop": "ばくはつ", "hurricane": "ウィンドブレス", "ice-fang": "こおりのつめ", "ice-punch": "こおりパンチ", "leaf": "リーフショット", "liquidation": "みずぎり", "nasty-plot": "たくらみ", "outrage": "おおあばれ", "overheat": "バーンビーム", "pain-split": "はんぶんこ", "powder-snow": "こごえるゆか", "psy-link": "ねんし", "psycho-cut": "ねんりきのつめ", "quick-attack": "ビーストクイック", "recover": "いやし", "roost": "かぜのいやし", "shadow-claw": "かげのつめ", "slack-off": "けもののいやし", "sludge-wave": "どくのはどう", "smack-down": "ひきずりおろし", "spore": "きのこボム", "sunny-day": "ひでり", "swift": "スピードショット", "synthesis": "くさのいやし", "thunder-fang": "かみなりのつめ", "trick-or-treat": "みいらとり", "vine": "つたうち", "weather-ball": "てんきだま", "will-o-wisp": "やけどだま", "wood-hammer": "まるたラッシュ"}).forEach(([id, n]) => { if (MOVES[id]) MOVES[id].n = n; });
 for (const k in MOVES) MOVES[k].fxid = k;
 const gfxOf = (m, part) => { const g = m && GFX[m.fxid], k = g && g[part]; return k && plOk(k) ? k : null; };
 // 地面から 出る／はじける 専用の 絵（はんい r に あわせる）。かいたら true
@@ -7212,7 +7214,7 @@ function useStatusMove(f, o, m) {
     case 'self': changeStages(f, e.self, true); typeFx(f.x, f.y - BODY, vt(m), 8, 80, .5); if (m.look === 'iron') { plFx('iron', f.x, f.y + 4, (f.r * 2 + 30) / (PLFX.iron.w * PIX_D), .55); } else sheetFx('buff', f.x, f.y - BODY, 1.2); break;
     case 'flip': flipStages(f); break;
     case 'perish': for (const x of [f, o]) if (x && x.hp > 0 && !(x.v.perish > 0)) x.v.perish = 10; for (let i = 0; i < 3; i++) fxp({ type: 'shock', x: f.x, y: f.y - BODY, rad: 60 + i * 40, col: '#c8a8ff', life: .4 + i * .15 }); say('ほろびのうたが ひびいた！ 10びょうで ほろびる（こうたいすると とける）'); break;
-    case 'duel': if (o) { B.sides[o.side].lockT = 15; B.duelT = 15; popText(f.x, f.y - 110, 'タイプ相性 なし！', '#ff8a6a', 'comic'); fxPush({ type: 'ring', x: o.x, y: o.y, rad: 70, col: '#ff8a6a', life: .6, max: .6 }); say(`${o.sp.n}は けっとうのばに とらわれた！ 15びょう こうたい できない・タイプ相性 なし`); } break;
+    case 'duel': if (o) { B.sides[o.side].lockT = 15; B.duelT = 15; popText(f.x, f.y - 110, 'タイプ相性 なし！', '#ff8a6a', 'comic'); fxPush({ type: 'ring', x: o.x, y: o.y, rad: 70, col: '#ff8a6a', life: .6, max: .6 }); say(`${o.sp.n}は けっとうじょうに とらわれた！ 15びょう こうたい できない・タイプ相性 なし`); } break;
     case 'future': if (o) { addBlasts(f, m, [{ x: o.x, y: o.y, d: m.delay || 2.5, r: m.rad }], f.cur ? f.cur.uid : ++B.uidc, ''); say(`${f.sp.n}は みらいを よちした！`); } break;
     case 'snatch': {   // さきどり：ためている あいての 技を うばって さきに 1.5ばいで うつ
       if (o && charging(o) && o.cur && isDamaging(o.cur.m) && MOVES[o.cur.id]) { const id2 = o.cur.id; o.cur = null; o.queued = null; o.state = 'stun'; o.stT = .3; popText(o.x, o.y - 100, 'うばわれた！', '#ffd84a', 'comic'); say(`${f.sp.n}は ${MOVES[id2].n}を うばった！`); f.snatch = { id: id2, t: B.t + 4 }; f.cur = null; f.state = 'free'; beginMove(f, id2); f.cd[id2] = 0; }
@@ -7224,7 +7226,7 @@ function useStatusMove(f, o, m) {
     case 'wish': (B.wishes = B.wishes || []).push({ side: f.side, x: f.x, y: f.y, t: 3 }); say(`${f.sp.n}は ねがいごとを した！`); break;   // 3びょうご あしもとの みかたを かいふく
     case 'link': {   // サイコリンク：すぐに つなぐ
       if (!o || !targetable(o) || dist(f, o) > m.tether.r - 20) { failMove(f, 'とどかない！'); return; }
-      o.v.teth = { att: f, m: Object.assign({}, m, { cat: 'spec', pow: 6 }), t: m.tether.t, r: m.tether.r, k: m.tether.k, next: .5 }; burst(o.x, o.y - BODY, TYPES[vt(m)].c, 10, 90, .35); popText(o.x, o.y - 104, 'つながった！', '#ff9ad0'); say(`${f.sp.n}は ${o.sp.n}と ねんりきのいとで つながった！`); break; }
+      o.v.teth = { att: f, m: Object.assign({}, m, { cat: 'spec', pow: 6 }), t: m.tether.t, r: m.tether.r, k: m.tether.k, next: .5 }; burst(o.x, o.y - BODY, TYPES[vt(m)].c, 10, 90, .35); popText(o.x, o.y - 104, 'つながった！', '#ff9ad0'); say(`${f.sp.n}は ${o.sp.n}と ねんしで つながった！`); break; }
     case 'shadow': if (!o || !targetable(o) || dist(f, o) > (m.reach || 200)) { failMove(f, 'とどかない！'); return; } shadowStrike(f, o, m); break;   // かげがえし
     case 'echo': {   // ざんきょう：かげに なって あいての うしろへ かけぬけ、しるしを きざむ
       if (!o || !targetable(o) || dist(f, o) > 380) { failMove(f, 'とどかない！'); return; }
@@ -7237,13 +7239,13 @@ function useStatusMove(f, o, m) {
     case 'hwish': case 'memento': {   // じぶんは たおれて つぎの みかたを たすける／あいてを よわらせる
       if (m.k === 'hwish') { B.sides[f.side].hwish = 1; say(`${f.sp.n}は いのちのバトンを たくした！`); } else if (o && targetable(o)) { changeStages(o, { atk: -2, spa: -2 }); say(`${f.sp.n}は わすれがたみを のこした！`); }
       fxp({ type: 'vortex', x: f.x, y: f.y - BODY, rad: 50, col: m.k === 'hwish' ? '#ff9ad0' : '#8a78c8', life: .8 }); endAct(f, .2); if (f.hp > 0) { f.hp = 0; faint(f, o); } break; }
-    case 'terrain': B.terrain = { k: m.tk, t: 15 }; say({ elec: 'でんげきのばに なった！（雷↑・ねむらない）', grass: 'くさはらのばに なった！（草↑・すこしずつ かいふく）', psy: 'ねんりきのばに なった！（妖精↑・とっしんが きかない）' }[m.tk]); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 140, col: TYPES[vt(m)].c, life: .6, max: .6 }); break;
+    case 'terrain': B.terrain = { k: m.tk, t: 15 }; say({ elec: 'でんかいに なった！（雷↑・ねむらない）', grass: 'そうげんに なった！（草↑・すこしずつ かいふく）', psy: 'ねんりきのばに なった！（妖精↑・とっしんが きかない）' }[m.tk]); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 140, col: TYPES[vt(m)].c, life: .6, max: .6 }); break;
     case 'gravity': B.gravity = 8; say('じゅうりょくが つよく なった！ とぶ ことが できない'); B.shake = Math.max(B.shake, 6); fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#c8a8ff', life: .6, max: .6 }); break;
     case 'mimic': {   // ものまね：あいてが さいごに つかった 技を この たたかいの あいだ おぼえる
       const id2 = o && o.lastMove, m2 = MOVES[id2], me = MOVE_ID.get(m), ix = f.moves.indexOf(me);
       if (!m2 || ['copycat', 'mimic'].includes(m2.k) || f.moves.includes(id2) || ix < 0) { failMove(f, 'まねる 技が ない！'); return; }
       f.moves[ix] = id2; f.cd[id2] = 0; popText(f.x, f.y - 104, `${m2.n}を おぼえた！`, '#ffd166', true); say(`${f.sp.n}は ${m2.n}を ものまねした！`); break; }
-    case 'haze': for (const x of [f, o]) if (x) x.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#7f8aa8', life: .6, max: .6 }); say('くろもやで のうりょくの へんかが もとに もどった！'); break;
+    case 'haze': for (const x of [f, o]) if (x) x.st = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }; fxPush({ type: 'shock', x: f.x, y: f.y, rad: 160, col: '#7f8aa8', life: .6, max: .6 }); say('めぐみのかぜで のうりょくの へんかが もとに もどった！'); break;
     case 'soak': case 'halloween': {   // あいての タイプを かえる・たす（こうたいで もどる）
       if (!o || !targetable(o)) return; const nt = m.k === 'soak' ? 'water' : 'ghost';
       if (m.k === 'soak' ? o.sp.type === 'water' : o.sp.type2 === 'ghost') { failMove(f, 'こうかが ない！'); return; }
@@ -7392,7 +7394,7 @@ function changeStages(f, ch, self) {
   if (parts.length) { const up = Object.values(ch)[0] > 0; popText(f.x, f.y - 80, parts.join(' '), up ? '#ffd166' : '#7fb2ff'); statFx(f, up, self && !up); }
 }
 function setStatus(f, s, by) {
-  if (s === 'slp' && B && B.terrain && B.terrain.k === 'elec' && !flies(f)) { popText(f.x, f.y - 80, 'でんげきのばで ねむらない', '#ffe27a'); return; }
+  if (s === 'slp' && B && B.terrain && B.terrain.k === 'elec' && !flies(f)) { popText(f.x, f.y - 80, 'でんかいで ねむらない', '#ffe27a'); return; }
   if (f.status || f.hp <= 0) return false;
   if (by && f.v.sub > 0) return false;
   if ((s === 'brn' && hasType(f, 'fire')) || (s === 'par' && hasType(f, 'elec')) || ((s === 'psn' || s === 'tox') && hasType(f, 'machine')) || (s === 'frz' && hasType(f, 'fire'))) return false;
@@ -10583,7 +10585,7 @@ const KW_SV = {   // のうりょくが なにに きくか（技の 分類は �
 };
 const KW_C = {   // 訓練の 条件
   dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
-  mysts: ['条件：自分の状態異常', '自分が えらんだ 状態異常（火傷・麻痺・毒・凍結）か 混乱に なって いる とき。こおりのみそぎで なおす ときに つかう。「毒」は もうどくも ふくむ。'],
+  mysts: ['条件：自分の状態異常', '自分が えらんだ 状態異常（火傷・麻痺・毒・凍結）か 混乱に なって いる とき。あらいながすで なおす ときに つかう。「毒」は もうどくも ふくむ。'],
   chg: ['条件：この技のチャージ', '1回目で 力を ためて 2回目で 放つ 技（がりょうてんせい など）に 置く。「チャージ済み」は ためおわって すぐ 放てる とき、「まだ」は これから ためる とき。「チャージ済み」だけ 置けば ためるのは お任せ、「まだ」だけ 置けば 放つのは お任せ。この技いがいには 置けない。'],
   stk: ['条件：この技のたまった回数', '時間で 使える 回数が たまる 技（ミニほうだい など）に 置く。たまった 回数が えらんだ 数いじょう ある とき。この技いがいには 置けない。'],
   hit: ['条件：攻撃を受けた瞬間', '相手の攻撃が 当たる その瞬間。ガードシェル・カウンター・だしぬきなどに 置くと、受けた瞬間に その場で 出る（どれでも／大技だけ／相手のタイプ一致の技だけ／自分に ばつぐんの技だけ）。ほかの 条件と「かつ」で くみあわせられる。この条件を 置かなければ、受けた瞬間には 出ない。ガード系の 技いがいには 置けない。'],
@@ -10903,7 +10905,7 @@ function swapTo(i) {
   const sd = B.sides[0], cur = active(0), x = sd.fs[i];
   if (!x || i === sd.act || x.fainted || x.hp <= 0) return;
   if (sd.swapCd > 0) { say(`まだ こうたい できない！（あと ${Math.ceil(sd.swapCd)}びょう）`); SND.se('deny'); return; }
-  if (sd.lockT > 0) { say(`けっとうのばで こうたい できない！（あと ${Math.ceil(sd.lockT)}びょう）`); SND.se('deny'); return; }
+  if (sd.lockT > 0) { say(`けっとうじょうで こうたい できない！（あと ${Math.ceil(sd.lockT)}びょう）`); SND.se('deny'); return; }
   if (!cur || !['free', 'act', 'stun'].includes(cur.state)) return;
   if (hq(['sw', i])) return;
   doSwitch(cur, i); say(`もどれ、${cur.sp.n}！ いけっ、${x.sp.n}！`); cmdPose(0);
@@ -13348,7 +13350,7 @@ const GYM_CON = [
   { c: 'どっしり うけて かえす', plan: 'nonki', sup: (x) => ['counter', 'protect'].includes(x.k) || !!(x.e && x.e.self && x.e.self.def > 0), atk: (x) => isDmgK(x, ['melee', 'strike', 'aoe']) ? 1.2 : 1 },   // つち ジン
   { c: 'しかけと 状態異常', plan: 'reisei', sup: (x) => ['hazard', 'floor'].includes(x.k) || !!(x.e && x.e.st), atk: (x) => x.e && x.e.st ? 1.25 : 1 },   // むし シオリ
   { c: 'そらから ねらいうち', plan: 'reisei', sup: (x) => x.k === 'field' || x.k === 'weather', atk: (x) => isDmgK(x, ['proj', 'beam', 'cone']) ? 1.3 : .85 },   // かぜ タクミ
-  { c: 'けっとうのば（1たい1の しょうぶ）', plan: 'yuukan', sup: (x) => x.k === 'duel', atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.35 : .8 },   // 妖精 アカリ
+  { c: 'けっとうじょう（1たい1の しょうぶ）', plan: 'yuukan', sup: (x) => x.k === 'duel', atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.35 : .8 },   // 妖精 アカリ
   { c: 'ドラゴンの ほんき（大技と のうりょくアップ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0 || x.e.self.spa > 0)), atk: (x) => (x.power || 0) >= 100 ? 1.3 : 1 },   // りゅう アカネ
 ];
 const LEAGUE_PLAN = ['reisei', 'reisei', 'yuukan', 'yuukan', ['yuukan', 'reisei', 'nonki', 'yuukan', 'reisei', 'nonki']];   // チャンピオンは 1たいごとに ちがう 作戦
