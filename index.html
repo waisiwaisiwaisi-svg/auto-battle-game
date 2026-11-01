@@ -5202,7 +5202,10 @@ function trDockH() {   // ひだりの れつの たかさ：みえて いる �
   const sc = $('scTrain'), dk = sc && sc.querySelector('.trpage.dock .trdock'); if (!dk) return;
   const pg = dk.parentNode, k = pg.offsetHeight ? pg.getBoundingClientRect().height / pg.offsetHeight : 1;
   const top0 = (pg.getBoundingClientRect().top - sc.getBoundingClientRect().top) / k + sc.scrollTop;   // ひだりの れつの もとの たかさ
-  const vis = sc.clientHeight - parseFloat(getComputedStyle(sc).paddingBottom || 0) - Math.max(8, top0 - sc.scrollTop) - 8;
+  const tb = $('tabbar'), tr = tb && !tb.hidden ? tb.getBoundingClientRect() : null, dr = dk.getBoundingClientRect();
+  const under = tr && tr.width > 0 && tr.left < dr.right && tr.right > dr.left;   // した の メニューが ひだりの れつに かぶる ときだけ その ぶん あける
+  const padB = under ? parseFloat(getComputedStyle(sc).paddingBottom || 0) : 8;
+  const vis = sc.clientHeight - padB - Math.max(8, top0 - sc.scrollTop) - 8;
   dk.style.height = Math.max(240, vis) + 'px';
 }
 addEventListener('resize', () => { if ($('trBody') && $('trBody').offsetParent) trDockFix(); });
