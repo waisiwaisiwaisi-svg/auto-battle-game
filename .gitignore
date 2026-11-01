@@ -2,3 +2,5 @@ tools/arenas/hit/*.png
 __pycache__/
 tools/promo/frames/
 tools/sizes/sizes/
+.movepower_tmp.html
+tools/movepower/out/

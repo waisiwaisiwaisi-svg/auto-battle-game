@@ -5,3 +5,5 @@ firestore-debug.log
 database-debug.log
 *.keystore
 *.jks
+functions/game/
+functions/.env.local

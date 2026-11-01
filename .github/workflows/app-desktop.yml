@@ -1,0 +1,37 @@
+# PC版（Steam 用）：Windows・Mac・Linux の 実行ファイルを つくる。できた もの（dist の なか）を Steam に のせる
+name: PC アプリ（Steam）
+on:
+  workflow_dispatch:
+  push:
+    paths: ['index.html', 'stage/**', 'app/**', '.github/workflows/app-desktop.yml']
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { os: windows-latest, target: --win, name: windows }
+          - { os: macos-latest, target: --mac, name: mac }
+          - { os: ubuntu-latest, target: --linux, name: linux }
+    runs-on: ${{ matrix.os }}
+    defaults: { run: { working-directory: app } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: app/package-lock.json }
+      - run: npm ci
+      - name: Firebase の 設定
+        shell: bash
+        env: { FIREBASE_CONFIG_JS: '${{ secrets.FIREBASE_CONFIG_JS }}' }
+        run: if [ -n "$FIREBASE_CONFIG_JS" ]; then printf '%s' "$FIREBASE_CONFIG_JS" > firebase-config.js; fi
+      - run: npm run build
+      - run: npm install
+        working-directory: app/desktop
+      - run: npx electron-builder ${{ matrix.target }} --publish never
+        working-directory: app/desktop
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.name }}
+          path: |
+            app/desktop/dist/*-unpacked/**
+            app/desktop/dist/mac-universal/**
+            app/desktop/dist/mac/**

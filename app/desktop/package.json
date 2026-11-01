@@ -1,0 +1,73 @@
+{
+  "name": "pixel-monster-arena-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "ピクセルモンスターアリーナ（PC版：Steam 用）",
+  "main": "main.js",
+  "scripts": {
+    "web": "cd .. && npm run build",
+    "start": "npm run web && electron .",
+    "dist": "npm run web && electron-builder --publish never",
+    "dist:win": "npm run web && electron-builder --win --publish never",
+    "dist:mac": "npm run web && electron-builder --mac --publish never",
+    "dist:linux": "npm run web && electron-builder --linux --publish never"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "com.pixelmonsterarena.desktop",
+    "productName": "Pixel Monster Arena",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../www",
+        "to": "www"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "../assets/icon-only.png"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "../assets/icon-only.png",
+      "category": "public.app-category.games"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "../assets/icon-only.png",
+      "category": "Game"
+    },
+    "executableName": "PixelMonsterArena"
+  }
+}

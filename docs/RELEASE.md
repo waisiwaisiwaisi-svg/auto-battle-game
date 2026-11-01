@@ -36,6 +36,28 @@
    ```
    ルールの中身：`app/firebase/firestore.rules`・`app/firebase/database.rules.json`
    （読むのはログインした人全員、書けるのは自分のデータだけ。通報は書くだけで読めない）
+4. **サーバーの しごと（Cloud Functions）**：レート・せんせき・ギルドポイント・日替わりの むりょう を サーバーで きめる（チート たいさく）。
+   Firebase を **Blaze プラン**（従量課金）に して から：
+   ```sh
+   cd app/functions && npm install && cd ..
+   npx firebase deploy --only functions,firestore,database
+   ```
+   - `matchStart`／`matchReport`：へやの ようすを サーバーが よんで 試合を きろく → ふたりの けっかが あえば レートと ギルドポイントを つける。くいちがいは どちらにも つけず `flags/{uid}.disp` に かぞえる
+   - `matchSweep`（5ふん ごと）：10ぷん たっても かたほう だけ の 試合（とちゅうで ぬけた）を のこった ほうの もうしでで きめる
+   - `guildWin1`：ふつうの バトルの かち +1（30びょうに 1かい・1日 60かい まで）／`claimDaily`：むりょう（日本時間の 1日 1かい）
+   - `ranks` の r・w・l・h と `gmembers` の pts・tot・wk は ルールで クライアントからは かけない（サーバーだけ）
+   - **さいげんで たしかめる（matchLog → matchVerify）**：ホストは 試合の きろく（シード・チーム・そうさ）を おくる。サーバーは ヘッドレス Chromium で ゲームを うごかして ほんとうの かちまけを きめる（`functions/game/index.html` は deploy の まえに じどうで つくられる）。メモリ 2GiB の 関数に なる
+   - ゲームは どの 端末でも おなじ けいさんに なる ように して ある（三角関数などは じぶんで けいさん・たたかいの らんすうは シードつき・1/60びょう きざみ）。**バトルの しくみを かえた ときは、アプリと サーバーを いっしょに 出す**（GAME_VER が ちがう 試合は さいげん しないで ふたりの もうしでで きめる）
+   - flags/{uid}：n（試合）・disp（くいちがい）・cheat（してない かちを いった）・div（ホストの がめんが さいげんと ちがった）。おおい 人は ranks.hide＝true（ランキングに ださない・レート／ギルドに いれない）
+   - おなじ ふたりの 試合は 1日 3かい まで レートを うごかす（なれあい たいさく）
+   - **セーブも サーバー（saves/{uid}）**：ジェム・ボックス・どうぐ・ワザステッカー・ブラインドボックス・モンスター・すすみぐあい は サーバーの セーブが ただしい（`act`／`saveGet`）。
+     ショップ・はこ・どうぐ・きょうか・ワザステッカー・にがす は サーバーで ゲームの コードを うごかして から 端末でも おなじ ように うごく。たたかいは はじまりで チケット（あいて・シード）を つくり、
+     おわったら サーバーが そうさの きろくで さいげん して ごほうびを つける。オンライン対戦の チームは サーバーの セーブに いる モンスター だけ（ちがえば その 試合は なし・cheat）。
+     アプリ版は オンラインが ひつよう（claude.ai 版は いままで どおり 端末で）。さいしょの ながれが おわった とき、端末の データから あたらしい プロフィールとして つくる（ジェム 50・ボックス 20・モンスター 3たい まで。のうりょくは サーバーで きめなおす）。
+     **いま アプリを ためして いる 人の データは、この しくみに なった とき あたらしく なる**。べつの 端末へは ふっかつコードで（`saveClaim`：サーバーの セーブを うつす）
+   - `act`・`saveGet`・`matchVerify` は ゲームの ページを ひらく ので さいしょの 1かいは 数びょう かかる。にぎやかに なったら `minInstances: 1` を おすすめ（すこし お金が かかる）
+   - ためす：`npx firebase emulators:start --config firebase.emu.json --only auth,firestore,database,functions --project demo-pma`
+   - 配信用の ビルド（`npm run build`）は テスト用の `window.__game` を はずす（のこす ときは `PMA_DEBUG=1`）
 
 `firebase-config.js` がない／中身が `YOUR_...` のままだと、アプリはオフライン専用で動きます（1人用の遊びは全部できます）。
 
@@ -169,3 +191,15 @@ cd android && ./gradlew bundleRelease
 - **似ている作品との関係**：モンスターを捕まえる・ジム・バッジ・殿堂入りなど、有名作品に近い用語や仕組みがあります。名前・絵・用語が既存作品と同じにならないよう確認してください（似すぎると著作権・商標で削除や却下の対象になります）。
 - **ユーザー生成コンテンツ**（名前・ギルド名・チャット）：NGワードの伏せ字、通報、ブロック、連絡先の掲載が必要です（アプリ内に実装済み。連絡先は7章）。
 - **最低限の機能**（Apple 4.2）：Web をそのまま包んだだけのアプリは却下されやすいですが、本作はオフラインで遊べるゲームなので問題ありません。
+
+
+## PC版（Steam）
+
+`app/desktop/` は ゲーム（`app/www`）を Electron の まどで うごかす PC版です。
+
+- ためす：`cd app/desktop && npm install && npm start`（F11 か Alt+Enter で ぜんがめん）
+- つくる：`npm run dist:win`／`dist:mac`／`dist:linux` → `app/desktop/dist/` に できる。GitHub の「PC アプリ（Steam）」ワークフローでも 3つ とも つくれる（Firebase の 設定は Android と おなじ シークレット `FIREBASE_CONFIG_JS`）
+- Steam に のせる：Steamworks で アプリを つくり、SteamPipe（steamcmd）で `dist/win-unpacked` などを アップロード。起動ファイルは `PixelMonsterArena.exe`（Mac は `.app`、Linux は `PixelMonsterArena`）
+- Mac で 配るときは Apple の 署名・公証（notarize）が いる（electron-builder の `mac.identity` と `notarize` を せってい）
+- Firebase の API キーに「HTTP リファラーの せいげん」を かけて いる ときは、PC版（`app://game`）からも つかえる ように する
+- セーブは PC の ユーザーフォルダ（Electron の userData）に のこる。2つ いっぺんには ひらけない
