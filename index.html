@@ -8347,8 +8347,8 @@ const MOODS = {
 const NAT_GRP = { yuukan: 'atk', sekkachi: 'atk', nebarizuyoi: 'atk', nonki: 'def', okubyou: 'def', reisei: 'tec', zurugashikoi: 'tec', kimagure: 'tec' };
 const GRP = { atk: { n: '近', ic: '👊', beats: 'tec', c: '#ff8a6a' }, tec: { n: '遠', ic: '👣', beats: 'def', c: '#c08aff' }, def: { n: '中', ic: '🛹', beats: 'atk', c: '#7ab8ff' } };
 const natAdv = (a, b) => { const ga = NAT_GRP[a], gb = NAT_GRP[b]; if (!ga || !gb || ga === gb) return 0; return GRP[ga].beats === gb ? 1 : GRP[gb].beats === ga ? -1 : 0; };
-// うける がわの ぼうぎょに かける 作戦の 3すくみ補正（いまは なし）
-const NAT_DEF = { 1: 1, 0: 1, '-1': 1 };   // 作戦の 3すくみの ぼうぎょ補正は なし（作戦ごとの ボーナスで 3すくみに する）
+// うける がわの ぼうぎょに かける 作戦の 3すくみ補正：にがてな あいてに つよい ときは 1.07ばい、よわい ときは 0.93ばい
+const NAT_DEF = { 1: 1.07, 0: 1, '-1': .93 };   // 作戦の 3すくみ：うける がわの ぼうぎょ補正（よわめ。のこりは 作戦ごとの ボーナス）
 const natDefMul = (def, att) => att && def && att.mon && def.mon ? NAT_DEF[natAdv(natOf(def), natOf(att))] : 1;
 // 作戦ボーナス：にがてな かたちの 技を うけたときの ぼうぎょ（せめる＝ふつうの 弾、かまえる＝ちかくの こうげき）
 const PB_DEF = 1, PB_ALL = 0;
