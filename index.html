@@ -13286,9 +13286,11 @@ function conMoves(em, con, t) {
   if (out.length) em.moves = out;
   return em;
 }
-function journeyFoes(gi, step) { const G = GYMS[gi], leader = step >= 2, con = GYM_CON[gi];
-  return gymTeam(G.t, 3, jProg(gi, step), gi >= 5).map(em => { if (con) { conMoves(em, con, G.t); em.plan = con.plan; } if (gi < EARLY_GYMS && !leader && !jr().champ) noDefMoves(em); if (con) autoTrain(em); return em; }); }
-function leagueFoes(k) { const T = leagueTeam(LEAGUE[k][3], 3, jProg(10 + k, 2)); if (LEAGUE_PLAN[k]) for (const e of T) e.plan = LEAGUE_PLAN[k]; return T; }
+// そだてかたの つよさ（個体値・きょうか・技の えらびかた）の ちょうせい：なか（4〜8）の ジムは 弱点を つかないと きびしく、じょばん（1〜3）は ふつうに かてる
+const GYM_PADJ = [0, 0, 0, .2, .2, .2, .2, .2, 0, 0], LEAGUE_PADJ = [0, .15, -.25, 0, -.3];
+function journeyFoes(gi, step) { const G = GYMS[gi], leader = step >= 2, con = GYM_CON[gi], early = gi < EARLY_GYMS && !jr().champ, full = con && (leader || !early);   // じょばんの ジムの サモナーは コンセプトなし
+  return gymTeam(G.t, 3, jProg(gi, step) + (GYM_PADJ[gi] || 0), gi >= 5).map(em => { if (full) { conMoves(em, con, G.t); em.plan = con.plan; } if (early && !leader) noDefMoves(em); if (full) autoTrain(em); return em; }); }
+function leagueFoes(k) { const T = leagueTeam(LEAGUE[k][3], 3, jProg(10 + k, 2) + (LEAGUE_PADJ[k] || 0)); if (LEAGUE_PLAN[k]) for (const e of T) e.plan = LEAGUE_PLAN[k]; return T; }
 function startJourney(gi) {
   const J = jr(), G = GYMS[gi];
   if (gi > J.gym && !J.champ) return;
