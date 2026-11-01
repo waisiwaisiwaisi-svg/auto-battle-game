@@ -39,7 +39,7 @@ html = html.replace(/<link rel="preconnect"[^>]*>(<link rel="preconnect"[^>]*>)?
 // テスト用の そうさ口（window.__game）は 配信版から はずす（PMA_DEBUG=1 の ときだけ のこす）
 if (!process.env.PMA_DEBUG) {
   const n0 = html.length;
-  html = html.replace(/\nwindow\.__game = \{[\s\S]*?\n\};\n/, '\n');
+  html = html.replace(/\r?\nwindow\.__game = \{[\s\S]*?\r?\n\};\r?\n/, '\n');   // Windows（CRLF）でも
   if (html.length === n0) throw new Error('window.__game が みつかりません（build-web.mjs を なおして）');
 }
 const inject = '<script src="firebase-config.js"></script><script src="backend.js"></script>';

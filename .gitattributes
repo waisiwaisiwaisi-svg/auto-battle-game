@@ -1,0 +1,12 @@
+# Windows でも LF で とりだす（ビルドの さがしもの と GAME_VER を サーバーと そろえる）
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.bat text eol=crlf
+*.cmd text eol=crlf
