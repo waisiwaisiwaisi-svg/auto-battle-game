@@ -8468,7 +8468,8 @@ function moveDir(f, mx, my, dt, nav) {
   }
   let sp = speedOf(f);
   // 緩急：ダッシュ・ふつう・のんびり を なめらかに きりかえる
-  const pt = f.paceT || 1; f.pace = f.pace == null ? pt : f.pace + (pt - f.pace) * Math.min(1, dt * (pt > f.pace ? 7 : 4)); sp *= f.pace;
+  const pt = f.paceT || 1; f.pace = f.pace == null ? pt : f.pace + (pt - f.pace) * Math.min(1, dt * (pt > f.pace ? 7 : 4));
+  if (f.pace > 1) { let r = clamp((f.speStat || 70) / avgStats().spe, .5, 1.25); if (B.trickRoom > 0) r = 1 / r; sp *= 1 + (f.pace - 1) * r; } else sp *= f.pace;   // かけこみの はやさ：すばやさが ひくいと のびが すくない
   if (f.pace > 1.7 && (mx || my)) {   // かけこみ：のこりかげと すなけむり
     if (!f.rushing) { f.rushing = true; SND.se('dash'); fxPush({ type: 'ring', x: f.x, y: f.y, rad: 14, col: '#ffffff', life: .2, max: .2 }); }
     f.ghostT = (f.ghostT || 0) - dt; if (f.ghostT <= 0) { f.ghostT = .07; fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .16, max: .16 }); }
