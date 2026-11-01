@@ -3392,6 +3392,12 @@ const ISLE_IN = (() => {
     if (ok) { g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(ISLE_IMG[ik], 0, 0, c.width, c.height); }   // とどいた 絵で うわがき（たちいちは そのまま）
     return { c, at, ok }; };
 })();
+// へやの え：モンスターの 大きさを たたかいと おなじ わりあいに（まんなかの 大きさの こを 1 として。はみださない ように 0.55〜2.2）
+let ROOM_MED = 0;
+function roomSz(sid, bh) {
+  if (!ROOM_MED) { const hs = Object.keys(SPECIES).filter(id => SPR[id] && SPR[id].fr && SPR[id].fr.idle0).map(id => { try { const im = SPR[id].fr.idle0.n; return sprBox(id, im)[3] * SPR[id].ms; } catch (e) { return 0; } }).filter(x => x > 0).sort((a, b) => a - b); ROOM_MED = hs[hs.length >> 1] || 1; }
+  return clamp(bh * (SPR[sid].ms || 1) / ROOM_MED, .55, 2.2);
+}
 function isleScene(k) {
   const cv = $('isleCv'); if (!cv) return; const B0 = ISLE.bg[k] && ISLE.bg[k].ok ? ISLE.bg[k] : (ISLE.bg[k] = ISLE_IN(k)), z = 3;
   if (!B0.ok) isleImgThen('IN_' + k, () => { if (ISLE.k === k) isleScene(k); });
@@ -3405,7 +3411,7 @@ function isleScene(k) {
   const lead = S && S.party && S.party[0], team = k === 'arena' && S && S.party ? S.party.slice(0, 6) : [];
   // アーケード：へんせいの モンスターを ぜんぶ（6たいまで）。サモナーの みぎに 2れつ（おく 3たい・てまえ 3たい）
   const TP = team.length > 1 ? { tr: [76, 140], mon: [[104, 128], [124, 150], [100, 170], [134, 112], [154, 132], [148, 158]] } : null;   // しゅつじょう 3たいは サモナーの まえに 「く」の じ、ひかえは その うしろ
-  const drawMon = (m, mx, my, hh) => { if (!m || !SPR[m.sid]) return; try { const im = SPR[m.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(m.sid, im), kk = Math.min(hh * z / bh, hh * 1.3 * z / bw);
+  const drawMon = (m, mx, my, hh) => { if (!m || !SPR[m.sid]) return; try { const im = SPR[m.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(m.sid, im), kk = hh * roomSz(m.sid, bh) * z / bh;   // みための 大きさ（身長くらべ）を そのまま
     shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { } };
   const drawTr = () => { try { const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, ts = 32 * z / h0, [px, py] = TP ? TP.tr : B0.at.tr;
     shadow(px, py, 8); q.drawImage(ti, Math.round(px * z - ti.width * ts / 2), Math.round(py * z - ti.height * ts), Math.round(ti.width * ts), Math.round(ti.height * ts)); } catch (e) { } };
@@ -3414,7 +3420,7 @@ function isleScene(k) {
     L.sort((a, b) => a.y - b.y).forEach(o => o.f()); }
   else drawTr();
   if (TP) { }
-  else if (lead && SPR[lead.sid]) try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * z / bh, [mx, my] = B0.at.mon;
+  else if (lead && SPR[lead.sid]) try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * roomSz(lead.sid, bh) * z / bh, [mx, my] = B0.at.mon;
     shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { }
   $('isleTtl').textContent = ISLE_NAME[k];
   const J = jr(), say = k === 'arena' ? (J.champ ? 'でんどういり おめでとう！ タワーにも のぼろう' : J.badges.length >= GYMS.length ? `つぎは ${LEAGUE[J.league][1]}！` : !J.rival ? 'まずは はじめての 戦いから！' : (J.step || 0) < 2 ? `つぎは ${TYPES[GYMS[J.gym].t].n}ジムの サモナー ${(J.step || 0) + 1}人め！` : `つぎの あいては ${GYMS[J.gym].ln}！`)
@@ -11161,7 +11167,7 @@ function drawChan(f) {
     if (m.k === 'beam' && gb) { const L = (cur.len != null ? cur.len : m.len) * k, gsc = (GFX[m.fxid] && GFX[m.fxid].sc) || 1, bs = Math.max(1, m.wid * 2.2 * gsc / (32 * PIX_D)), sk = gfxOf(m, 'start'), tk = gfxOf(m, 'tip');
       plStretch(gb, plLoop(gb, B.t), ox, oy, cur.ang, L, m.wid * 2.2 * gsc * fl);
       if (sk) plDraw(sk, plLoop(sk, B.t), ox, oy, bs, cur.ang, null, null, fy); if (tk) plDraw(tk, plLoop(tk, B.t), ox + c * L, oy + s * L, bs, cur.ang, null, null, fy); return; }
-    if (m.k !== 'beam' && m.k !== 'magnet' && gc) { plDraw(gc, plLoop(gc, B.t), ox + c * f.r * .5, oy + s * f.r * .5, m.rad * k * 1.1 / (PLFX[gc].w * PIX_D), cur.ang, null, null, fy); return; } }
+    /* うちつづける おうぎは 専用の 絵を つかわず まえからの つぶの エフェクト（ブリザード などで 絵の いちが ずれて みえた） */ void gc; }
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   if (m.k === 'magnet') {   // マグネットパワー：じぐざぐの じりょくせん
     const o = opp(f); if (o) { ctx.lineWidth = 3; for (let j = 0; j < 2; j++) { ctx.strokeStyle = j ? 'rgba(255,255,255,.8)' : 'rgba(255,226,122,.7)'; ctx.beginPath(); const N = 8; for (let i = 0; i <= N; i++) { const u = i / N, x = ox + (o.x - ox) * u, y = oy + (o.y - BODY - oy) * u, w = (i === 0 || i === N) ? 0 : DM.sin(B.t * 30 + i * 2 + j * 3) * 10; const nx = -(o.y - BODY - oy), ny = o.x - ox, nl = DM.hypot(nx, ny) || 1; if (i) ctx.lineTo(x + nx / nl * w, y + ny / nl * w); else ctx.moveTo(x, y); } ctx.stroke(); } }
