@@ -95,7 +95,7 @@ for p in sorted(FX.glob('G/G_*_*f.png')):
     nm = re.sub(r'^G_|_\d+f\.png$', '', p.name); n = nf(p)
     kw = {}
     if nm in BOTTOM: kw['ay'] = Image.open(p).height - 2
-    if nm.endswith('_body') or nm == 'psy_thread': kw['ax'] = 0
+    if nm.endswith('_body') or nm in ('psy_thread', 'hurricane', 'blizzard'): kw['ax'] = 0   # おうぎ（ぼうふう・ブリザード）：口もと（ひだりはし）が きじゅん
     if nm == 'dragon_head': kw['ax'] = Image.open(p).width // n * .7
     out['g_' + nm] = sheet(p, n, 90 if nm.endswith(('_body', 'thread', 'idle', 'mark')) else 75, **kw)
 # ---- Kグループ（技の 専用：仮の 爆発・ドリル・ブーメラン・範囲技）：キーは k_ ＋ なまえ ----
