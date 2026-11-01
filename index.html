@@ -7437,7 +7437,7 @@ function hit(att, def, m, ang, opt) {
   if (m.useDef) A = att.def * stageMul(att.st.def);
   if (m.useFoeAtk) A = def.atk * stageMul(def.st.atk);
   if (phys && att.status === 'brn' && !m.useDef) A *= .5;
-  const D = ((phys || m.hitDef) ? def.def * stageMul(def.st.def) : def.sdef * stageMul(def.st.spd)) * natDefMul(def, att);   // 性格の 3すくみ：うける がわの ぼうぎょに 補正
+  const D = ((phys || m.hitDef) ? def.def * stageMul(def.st.def) : def.sdef * stageMul(def.st.spd)) * natDefMul(def, att) * planDefMul(def, m);   // 性格の 3すくみ：うける がわの ぼうぎょに 補正
   const crit = rnd() < (m.e && m.e.crit || m.crit ? 1 / 8 : 1 / 24);
   if (m.sizeDmg) opt = Object.assign({}, opt, { mul: (opt.mul || 1) * clamp(.35 + bodySz(att.sp) * .6, .75, 1.25) });   // おしつぶし：からだが おおきいほど つよい
   const rampId = m.ramp ? MOVE_ID.get(m) : null; if (rampId) { att.ramp = att.ramp || {}; opt = Object.assign({}, opt, { mul: (opt.mul || 1) * (1 + m.ramp * (att.ramp[rampId] || 0)) }); }   // むしくい：あてるたびに つよく
@@ -7487,8 +7487,9 @@ function hit(att, def, m, ang, opt) {
   if (B.stats) { const k = MOVE_ID.get(m); B.stats.hit[k] = (B.stats.hit[k] || 0) + 1; B.stats.dmg[k] = (B.stats.dmg[k] || 0) + dmg; B.stats.dmgPct[k] = (B.stats.dmgPct[k] || 0) + dmg / def.maxHp; }
   const stance = def.state === 'stance' && def.cur && def.cur.m.k === 'stance';
   const armored = def.cur && def.cur.m.armor && ['wind', 'dash', 'act', 'chan'].includes(def.state);   // スーパーアーマー：わざの あいだは ひるまない・とめられない
-  const aggNoKb = (!opt.tick && m.k === 'proj' && !heavy && !((m.power || 0) >= 100) && def.mon && natOf(def) === 'yuukan')
-    || (!opt.tick && ['melee', 'swipe', 'dash'].includes(m.k) && !heavy && !((m.power || 0) >= 100) && !m.shove && !m.slap && !m.bigKb && def.mon && natOf(def) === 'nonki');   // どっしり かまえる：ちかくの こうげき（近接・前方を きる・突進）では 硬直なし・おしもどされない（追加効果の ひるみは 効く）   // どんどん せめる：ふつうの 弾では 当たったときの 硬直なし・おしもどされない（追加効果の ひるみは 効く）
+  const pbSmall = PB_ALL || (!heavy && !((m.power || 0) >= 100));
+  const aggNoKb = (!opt.tick && m.k === 'proj' && pbSmall && def.mon && natOf(def) === 'yuukan')
+    || (!opt.tick && ['melee', 'swipe', 'dash'].includes(m.k) && pbSmall && !m.shove && !m.slap && !m.bigKb && def.mon && natOf(def) === 'nonki');   // どっしり かまえる：ちかくの こうげき（近接・前方を きる・突進）では 硬直なし・おしもどされない（追加効果の ひるみは 効く）   // どんどん せめる：ふつうの 弾では 当たったときの 硬直なし・おしもどされない（追加効果の ひるみは 効く）
   if (armored && !opt.tick) popText(def.x, def.y - 100, 'アーマー！', '#ffb070');
   if (opt.tick) { def.kx += DM.cos(ang) * 45 * K; def.ky += DM.sin(ang) * 45 * K; }   // うちつづける わざ：ひるませず すこし おすだけ
   else if (aggNoKb) { B.hitstop = Math.max(B.hitstop, .03); }   // どんどん せめる：ふつうの 弾は うけながら すすむ（わざも とまらない）
@@ -8349,6 +8350,9 @@ const natAdv = (a, b) => { const ga = NAT_GRP[a], gb = NAT_GRP[b]; if (!ga || !g
 // うける がわの ぼうぎょに かける 作戦の 3すくみ補正（いまは なし）
 const NAT_DEF = { 1: 1, 0: 1, '-1': 1 };   // 作戦の 3すくみの ぼうぎょ補正は なし（作戦ごとの ボーナスで 3すくみに する）
 const natDefMul = (def, att) => att && def && att.mon && def.mon ? NAT_DEF[natAdv(natOf(def), natOf(att))] : 1;
+// 作戦ボーナス：にがてな かたちの 技を うけたときの ぼうぎょ（せめる＝ふつうの 弾、かまえる＝ちかくの こうげき）
+const PB_DEF = 1, PB_ALL = 0;
+const planDefMul = (def, m) => { if (PB_DEF === 1 || !def.mon || !m) return 1; const p = natOf(def); return (p === 'yuukan' && m.k === 'proj') || (p === 'nonki' && ['melee', 'swipe', 'dash'].includes(m.k)) ? PB_DEF : 1; };
 //  じぶんの 性格 → { あいての 性格: きもち }：3すくみ から きまる（つよい あいて＝よゆう、にがて＝けいかい、おなじ なかま＝ライバル）
 const NAT_REL = {};
 for (const a of Object.keys(NAT_GRP)) { NAT_REL[a] = {}; for (const b of Object.keys(NAT_GRP)) { const v = natAdv(a, b); NAT_REL[a][b] = v > 0 ? 'mock' : v < 0 ? (a === 'okubyou' ? 'scared' : 'wary') : NAT_GRP[a] === NAT_GRP[b] && a !== 'kimagure' ? 'rival' : null; } }
