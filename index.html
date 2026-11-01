@@ -13300,7 +13300,7 @@ function autoTrain(e) {
 }
 function aceTrain(em) { const T = ACE_TR[em.sid]; if (!T) return; const ok = T.filter(([id]) => MOVES[id] && canLearn(em.sid, id)); if (ok.length < 2) return;
   em.moves = ok.map(([id]) => id).slice(0, 4); em.tr = { mode: 'chip', prog: { hv: 1, nat: em.nat, mv: ok.map(([id, go, c]) => ({ id, go, c })) } }; }
-const leagueAce = (type) => { const L = LEAGUE.find(x => (x[3] || null) === (type || null)); if (L && L[4] && SPECIES[L[4]]) return L[4];   /* してんのうごとに きめた エース */ const ids = poolIds(); return (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids).sort((a, b) => baseTot(b) - baseTot(a))[0]; };
+const leagueAce = (type) => { const L = LEAGUE.find(x => (x[3] || null) === (type || null)); if (L && L[4] && SPECIES[L[4]]) return L[4];   /* してんのうごとに きめた エース */ const ids = poolIds().filter(id => !LEAGUE.some(x => x[4] === id));   /* ほかの 人が きめた エースは つかわない（かぶらない） */ return (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids).sort((a, b) => baseTot(b) - baseTot(a))[0]; };
 function leagueTeam(type, n, p) {
   const ids = poolIds().filter(id => !LEAGUE.some(x => x[4] === id)), ace = leagueAce(type); let pool = (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids.slice()).filter(id => id !== ace).sort((a, b) => baseTot(b) - baseTot(a));
   if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id) && id !== ace).sort((a, b) => baseTot(b) - baseTot(a)));
