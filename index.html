@@ -13287,9 +13287,9 @@ function conMoves(em, con, t) {
   return em;
 }
 // そだてかたの つよさ（個体値・きょうか・技の えらびかた）の ちょうせい：なか（4〜8）の ジムは 弱点を つかないと きびしく、じょばん（1〜3）は ふつうに かてる
-const GYM_PADJ = [0, 0, 0, .15, .1, .25, .2, 0, 0, 0], LEAGUE_PADJ = [0, .2, -.1, .1, -.1];
+const GYM_PADJ = [0, 0, 0, .2, .15, .3, .25, .05, 0, 0], LEAGUE_PADJ = [0, .45, -.1, .25, -.15];
 // あいての かず（こちらは さいだい 6たい）：じょばんは 3たい、すすむほど ふえて さいごの ジムリーダーと リーグは 6たい
-const GYM_N = [[3, 3], [3, 3], [3, 3], [3, 4], [4, 5], [4, 5], [4, 5], [5, 6], [5, 6], [5, 6]];   // [サモナー, ジムリーダー]
+const GYM_N = [[3, 3], [3, 3], [3, 3], [4, 5], [4, 6], [5, 6], [5, 6], [5, 6], [5, 6], [5, 6]];   // [サモナー, ジムリーダー]
 const LEAGUE_N = 5;   // ＋エース
 function journeyFoes(gi, step) { const G = GYMS[gi], leader = step >= 2, con = GYM_CON[gi], early = gi < EARLY_GYMS && !jr().champ, full = con && (leader || !early);   // じょばんの ジムの サモナーは コンセプトなし
   return gymTeam(G.t, (GYM_N[gi] || [3, 3])[leader ? 1 : 0], jProg(gi, step) + (GYM_PADJ[gi] || 0), gi >= 5).map(em => { if (full) { conMoves(em, con, G.t); em.plan = con.plan; } if (early && !leader) noDefMoves(em); if (full && !early) autoTrain(em); return em; }); }   // じょばんは 訓練なし
