@@ -5083,7 +5083,7 @@ async function trSim(m, W, n) {
   const mates = S.party.filter(x => x.uid !== m.uid).slice(0, 2);   // なかま：パーティの ほかの 2たい（いまの 訓練の まま）
   try {
     for (let k = 0; k < n; k++) {
-      const en = lg ? leagueTeam(type, 3, jProg(10 + J.league, 2)) : gymTeam(type, 3, jProg(gi, J.step || 0), gi >= 5);
+      const en = lg ? leagueFoes(J.league) : journeyFoes(gi, J.step || 0);
       startBattle({ kind: 'cup', sim: true, field: type && FIELDS.includes(type) ? type : choice(FIELDS), enemies: en, p0: [sm, ...mates], title: 'シミュレーション' });
       B.simLog = log; B.simUid = sm.uid; const es = B.sides[1].fs.slice();
       for (let s2 = 0; s2 < 30 * (MATCH_T + 20) && B.mode !== 'end'; s2++) { bStep(1 / 30); if (s2 % 900 === 899) await new Promise(r => setTimeout(r, 0)); }
@@ -8365,7 +8365,7 @@ function recPlan(sid) {
   return REC_PLAN[sid] || 'reisei';
 }
 const planOfMon = (m) => (m.tr && m.tr.prog && m.tr.prog.mv && trPlanOf(m.tr.prog.nat)) || recPlan(m.sid);
-function natOf(f) { if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp); if (f.mon.tutPlan) return f.mon.tutPlan; return f.side === 0 || f.side == null ? planOfMon(f.mon) : recPlan(f.mon.sid); }
+function natOf(f) { if (!NATURES[f.mon.nat]) f.mon.nat = pickNature(f.sp); if (f.mon.tutPlan) return f.mon.tutPlan; if (f.side !== 0 && f.mon.plan) return f.mon.plan; return f.side === 0 || f.side == null ? planOfMon(f.mon) : recPlan(f.mon.sid); }   // plan：ジム・リーグの あいての 作戦
 function moodVs(f, o) {
   const me = natOf(f);
   return NAT_REL[me][natOf(o)] || null;
@@ -10512,7 +10512,7 @@ const KW_SV = {   // のうりょくが なにに きくか（技の 分類は �
   spa: ['属性攻撃', '属性技の ダメージが ふえる。属性技＝はなれて とどく 技（飛び道具・直線・周囲・足元・扇 など）。'],
   spd: ['属性防御', '属性技から うける ダメージが へる。'],
   spe: ['すばやさ', '歩く はやさ。技の 待ち時間と よける 確率には かかわらない。さかさまフィールドの あいだは 遅いほど はやい。'],
-  eva: ['かいひ', '指示なしで 自動で よける 確率（平均 約15%・さいだい 60%）。かげぶんしん などで 回避の 段階が 上がると もっと よける。'],
+  eva: ['かいひ', '指示なしで 自動で よける 確率（平均 約15%・さいだい 60%）。'],
 };
 const KW_C = {   // 訓練の 条件
   dist: ['条件：距離', '相手との 距離。近い＝150未満・普通＝150〜290・遠い＝290以上。'],
@@ -13260,6 +13260,35 @@ function noDefMoves(em) {
   if (!keep.length) keep.push('tackle');
   em.moves = keep; return em;
 }
+// ジム・リーグの あいての チーム（ほんばん・シミュレーション どちらも ここ）
+// ジムの コンセプト：作戦（plan）・この ジムらしい 技（sup＝ほじょ技 1つ・atk＝こうげき技の このみ）。あいては ジムの タイプの 技を 中心に つかう（弱点を つけば かてる）
+const isDmgK = (x, ks) => ks.includes(x.k);
+const GYM_CON = [
+  { c: 'どく・やどりぎで じわじわ', plan: 'nonki', sup: (x) => !!(x.e && (x.e.seed || ['psn', 'tox'].includes(x.e.st))) || x.k === 'heal', atk: (x) => x.e && x.e.drain ? 1.3 : 1 },   // くさ コハル
+  { c: 'とおくから おしながす', plan: 'reisei', sup: (x) => x.k === 'weather', atk: (x) => isDmgK(x, ['proj', 'beam', 'wave', 'cone']) ? 1.3 : .8 },   // みず リク
+  { c: 'あつあつの 大技', plan: 'yuukan', sup: (x) => !!(x.e && x.e.st === 'brn'), atk: (x) => (x.power || 0) >= 90 ? 1.3 : 1 },   // ほのお ショウ
+  { c: 'はんのう そくど（先制・まひ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.st === 'par'), atk: (x) => (x.prio > 0 ? 1.4 : 1) * (x.e && x.e.st === 'par' ? 1.2 : 1) },   // でんき ネネ
+  { c: 'せいど（はずれない 技と かべ）', plan: 'reisei', sup: (x) => ['wall', 'protect'].includes(x.k), atk: (x) => !x.acc || x.acc >= 100 ? 1.3 : .8 },   // きかい ハヤト
+  { c: 'どっしり うけて かえす', plan: 'nonki', sup: (x) => ['counter', 'protect'].includes(x.k) || !!(x.e && x.e.self && x.e.self.def > 0), atk: (x) => isDmgK(x, ['melee', 'strike', 'aoe']) ? 1.2 : 1 },   // つち ジン
+  { c: 'しかけと 状態異常', plan: 'reisei', sup: (x) => ['hazard', 'floor'].includes(x.k) || !!(x.e && x.e.st), atk: (x) => x.e && x.e.st ? 1.25 : 1 },   // むし シオリ
+  { c: 'そらから ねらいうち', plan: 'reisei', sup: (x) => x.k === 'field' || x.k === 'weather', atk: (x) => isDmgK(x, ['proj', 'beam', 'cone']) ? 1.3 : .85 },   // かぜ タクミ
+  { c: 'こころも からだも（近接ラッシュ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0)), atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.35 : .8 },   // 亜人 アカリ
+  { c: 'ドラゴンの ほんき（大技と のうりょくアップ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0 || x.e.self.spa > 0)), atk: (x) => (x.power || 0) >= 100 ? 1.3 : 1 },   // りゅう アカネ
+];
+const LEAGUE_PLAN = ['reisei', 'nonki', 'yuukan', 'reisei', 'nonki'];   // してんのう・チャンピオンの 作戦（作戦も あわせないと きびしい）
+// コンセプトの 技：ジムの タイプの こうげき技を 中心に 3つ＋この ジムらしい ほじょ技 1つ（おぼえられる 技 だけ）
+function conMoves(em, con, t) {
+  const sp = SPECIES[em.sid], b = base6(em.sid), my = [sp.type, sp.type2], L = learned(em);
+  const sc = (id) => { const x = MOVES[id]; return (x.power || (x.pow || 0) * 5) * (my.includes(x.t) ? 1.5 : 1) * (x.t === t ? 1.3 : .6) * ((x.cat === 'phys') === (b.atk >= b.spa) ? 1.25 : 1) * (x.ohko ? .2 : 1) * (x.acc || 100) / 100 * con.atk(x); };
+  const atk = L.filter(id => isDamaging(MOVES[id]) && !AUTO_GUARD[MOVES[id].k]).sort((a, c) => sc(c) - sc(a));
+  const sup = L.filter(id => !isDamaging(MOVES[id]) && con.sup(MOVES[id]));
+  const out = atk.slice(0, sup.length ? 3 : 4); if (sup.length) out.push(sup[0]);
+  if (out.length) em.moves = out;
+  return em;
+}
+function journeyFoes(gi, step) { const G = GYMS[gi], leader = step >= 2, con = GYM_CON[gi];
+  return gymTeam(G.t, 3, jProg(gi, step), gi >= 5).map(em => { if (con) { conMoves(em, con, G.t); em.plan = con.plan; } if (gi < EARLY_GYMS && !leader && !jr().champ) noDefMoves(em); if (con) autoTrain(em); return em; }); }
+function leagueFoes(k) { const T = leagueTeam(LEAGUE[k][3], 3, jProg(10 + k, 2)); if (LEAGUE_PLAN[k]) for (const e of T) e.plan = LEAGUE_PLAN[k]; return T; }
 function startJourney(gi) {
   const J = jr(), G = GYMS[gi];
   if (gi > J.gym && !J.champ) return;
@@ -13268,7 +13297,7 @@ function startJourney(gi) {
   const others = TR_NPC.filter(t => t[0] !== G.lead && t[0] !== myLook());
   const tr = leader ? { name: G.ln, spr: trArt(G.lead) } : (() => { const t = others[(gi * 3 + step) % others.length]; return { name: `${TYPES[G.t].n}ジムの ${t[1].split(' ')[0]}`, spr: trArt(t[0]) }; })();
   startBattle({
-    kind: 'cup', field: G.st || G.f, p0: S.party.slice(0, 6), enemies: gymTeam(G.t, 3, jProg(gi, step), gi >= 5).map(em => gi < EARLY_GYMS && !leader && !jr().champ ? noDefMoves(em) : em), trainer: tr, boss: leader, journey: { gi, step },   // パーティの 6たいで ちょうせん、あいては 3たい
+    kind: 'cup', field: G.st || G.f, p0: S.party.slice(0, 6), enemies: journeyFoes(gi, step), trainer: tr, boss: leader, journey: { gi, step },   // パーティの 6たいで ちょうせん、あいては 3たい
     title: `${TYPES[G.t].n}ジム　${leader ? 'ジムリーダー' : `サモナー ${step + 1}`}`,
     intro: leader ? `${G.ln}「${G.say}」` : `${tr.name}が しょうぶを しかけてきた！`,
   });
@@ -13278,7 +13307,7 @@ const leagueStage = (k) => k >= LEAGUE.length - 1 ? 'champion' : ARENAS[LEAGUE[k
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
-  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: leagueStage(k), p0: S.party.slice(0, 6), enemies: leagueTeam(lt, 3, jProg(10 + k, 2)), trainer: { name: ln, spr: trArt(lk) }, boss: k === LEAGUE.length - 1, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === LEAGUE.length - 1 ? `${ln}「ここまで来たんだね。さいごのしょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
+  const lt = LEAGUE[k][3]; startBattle({ kind: 'cup', field: leagueStage(k), p0: S.party.slice(0, 6), enemies: leagueFoes(k), trainer: { name: ln, spr: trArt(lk) }, boss: k === LEAGUE.length - 1, journey: { league: k }, title: `チャンピオンリーグ　${ln}`, intro: k === LEAGUE.length - 1 ? `${ln}「ここまで来たんだね。さいごのしょうぶだ！」` : `${ln}「${LEAGUE[k][2]}」` });
 }
 // はじめての 戦い：ライバル（いまの チャンピオンと おなじ 人）。かならず かてる よわい あいて
 const rivalTr = () => { const L = LEAGUE[LEAGUE.length - 1]; return { look: L[0], name: 'ライバル ' + L[1].split(' ').pop() }; };
