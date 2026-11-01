@@ -1189,6 +1189,7 @@ html.land #app #bpanel #bench .bmon .bmu{position:static;flex:none;align-self:ce
 .trpickl{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px;overflow-y:auto;touch-action:pan-y;min-height:0}
 .trpk{font:inherit;font-size:13px;text-align:left;padding:9px 10px;border-radius:6px;border:1px solid var(--edge);background:rgba(255,255,255,.04);color:var(--ink);display:flex;flex-direction:column;gap:2px;cursor:pointer}
 .trpk small{font-size:10.5px;color:var(--dim)}
+.trpk .trpkd{font-size:11px;line-height:1.4;color:var(--ink);opacity:.85}
 .stknote{font-size:10px;color:var(--dim);margin:2px 0 6px;line-height:1.4}   /* ★＝ワザステッカーの ちゅうい */
 .trpk.ty{border-left:5px solid var(--c);background:linear-gradient(90deg,color-mix(in srgb,var(--c) 22%,transparent),rgba(255,255,255,.03) 70%)}.trpk[hidden]{display:none}   /* 技：タイプの いろ */
 .trpkf{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 8px}.trpkf button{font:inherit;font-size:12px;padding:4px 9px;border-radius:12px;border:1px solid var(--edge);background:rgba(255,255,255,.05);color:var(--ink);cursor:pointer}.trpkf button[data-f]:not([data-f=""]){border-color:var(--c);box-shadow:inset 3px 0 0 var(--c)}.trpkf button.on{background:var(--c,#ffd166);color:#0b0914;font-weight:700}   /* タイプで しぼりこむ */
@@ -5338,11 +5339,11 @@ function renderTrain(uid) {
     window.addEventListener('pointermove', mv, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
   });
   // タップで えらぶ：わくを おす → 一覧の ウィンドウ → こまかい 設定が ある 条件は もう1まい → 決めたら 訓練画面へ もどる
-  const pickWin = (title, items, onPick) => {   // items：[あたい, なまえ, した の もじ, えらべない, いま, タイプ（技の とき：いろと しぼりこみ）]
+  const pickWin = (title, items, onPick) => {   // items：[あたい, なまえ, した の もじ, えらべない, いま, タイプ（技の とき：いろと しぼりこみ）, こうか（技の とき）]
     const tys = [...new Set(items.map(x => x[5]).filter(t => t && TYPES[t]))];
     const flt = tys.length > 1 ? `<div class="trpkf"><button type="button" class="on" data-f="">ぜんぶ</button>${tys.map(t => `<button type="button" data-f="${t}" style="--c:${TYPES[t].c}">${TYPES[t].n}</button>`).join('')}</div>` : '';
     const star = items.some(x => typeof x[2] === 'string' && x[2].includes('★'));
-    const bg = modal(`<h3 style="margin-bottom:8px">${title}</h3>${flt}${star ? '<p class="stknote">※ ★の ついた 技は、確定すると ワザステッカーを 1まい つかって おぼえます</p>' : ''}<div class="trpickl">${items.map(([v, n, sub, ng, cur, t]) => `<button type="button" class="trpk${ng ? ' ng' : ''}${cur ? ' cur' : ''}${t && TYPES[t] ? ' ty' : ''}" data-v="${v}"${t ? ` data-t="${t}" style="--c:${TYPES[t] ? TYPES[t].c : '#888'}"` : ''}${ng ? ' disabled' : ''}>${n}${sub ? `<small>${sub}</small>` : ''}</button>`).join('')}</div><div class="trcwb"><button class="btn sub" data-x="x">とじる</button></div>`);
+    const bg = modal(`<h3 style="margin-bottom:8px">${title}</h3>${flt}${star ? '<p class="stknote">※ ★の ついた 技は、確定すると ワザステッカーを 1まい つかって おぼえます</p>' : ''}<div class="trpickl">${items.map(([v, n, sub, ng, cur, t, dsc]) => `<button type="button" class="trpk${ng ? ' ng' : ''}${cur ? ' cur' : ''}${t && TYPES[t] ? ' ty' : ''}" data-v="${v}"${t ? ` data-t="${t}" style="--c:${TYPES[t] ? TYPES[t].c : '#888'}"` : ''}${ng ? ' disabled' : ''}>${n}${sub ? `<small>${sub}</small>` : ''}${dsc ? `<span class="trpkd">${dsc}</span>` : ''}</button>`).join('')}</div><div class="trcwb"><button class="btn sub" data-x="x">とじる</button></div>`);
     bg.classList.add('trpickbg'); bg.querySelector('[data-x="x"]').onclick = () => { SND.se('back'); bg.remove(); };
     bg.querySelectorAll('.trpkf button').forEach(f => f.onclick = () => { SND.se('click'); bg.querySelectorAll('.trpkf button').forEach(x => x.classList.toggle('on', x === f)); bg.querySelectorAll('.trpk').forEach(b => { b.hidden = !!f.dataset.f && b.dataset.t !== f.dataset.f; }); });
     bg.querySelectorAll('.trpk:not(.ng)').forEach(b => b.onclick = () => { SND.se('click'); bg.remove(); onPick(b.dataset.v); });
@@ -5368,9 +5369,9 @@ function renderTrain(uid) {
     condWin(c, (c2) => { ln[j] = c2; TRN.sel = null; touch(); }, () => { ln.splice(j, 1); TRN.sel = null; touch(); }); };
   const goPick = (i) => pickWin('撃ち方', Object.entries(TR_GO).map(([a, n]) => [a, n + '撃つ', '', false, a === (W.mv[i].go || 'auto')]), (a) => { W.mv[i].go = a; SND.se('ok'); touch(); });
   const mvSwap = (i) => { const r = W.mv[i]; if (!r) return;   // おいた 技の なまえを タップ：ほかの 技に かえる（あわない 条件は はずす）
-    pickWin(`${i + 1}ばんめの 技`, [...new Set(eq.concat(tm))].map(id => { const at = W.mv.findIndex(x => x.id === id); return [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}${at >= 0 && at !== i ? `・${at + 1}ばんめと いれかえ` : ''}`, false, id === r.id, MOVES[id].t]; }), (id) => {
+    pickWin(`${i + 1}ばんめの 技`, [...new Set(eq.concat(tm))].map(id => { const at = W.mv.findIndex(x => x.id === id); return [id, mvn(id), `${moveSub(MOVES[id])}${tm.includes(id) ? '・★' : ''}${at >= 0 && at !== i ? `・${at + 1}ばんめと いれかえ` : ''}`, false, id === r.id, MOVES[id].t, moveDesc(MOVES[id])]; }), (id) => {
       if (!setMv(i, id)) return; TRN.info = null; TRN.sel = null; SND.se('ok'); touch(); }); };
-  const mvPick = () => pickWin('技を ついか', eq.concat(tm).filter(id => !W.mv.some(r => r.id === id)).map(id => [id, mvn(id), `${TYPES[MOVES[id].t].n}${tm.includes(id) ? '・★' : ''}`, false, false, MOVES[id].t]), (id) => { W.mv.push({ id, go: 'auto', c: trDefC(id) }); SND.se('ok'); touch(); });
+  const mvPick = () => pickWin('技を ついか', eq.concat(tm).filter(id => !W.mv.some(r => r.id === id)).map(id => [id, mvn(id), `${moveSub(MOVES[id])}${tm.includes(id) ? '・★' : ''}`, false, false, MOVES[id].t, moveDesc(MOVES[id])]), (id) => { W.mv.push({ id, go: 'auto', c: trDefC(id) }); SND.se('ok'); touch(); });
   B.querySelectorAll('.trpal .pal').forEach(e => { const pl = { k: e.dataset.k, v: e.dataset.v }; drag(e, pl, () => { TRN.pick = TRN.pick && TRN.pick.k === pl.k && TRN.pick.v === pl.v ? null : pl; TRN.sel = null; SND.se('click'); redo(); }); });
   B.querySelectorAll('.rc .cnd').forEach(e => { const k = `${e.dataset.i}:${e.dataset.l}:${e.dataset.j}`; drag(e, { from: [+e.dataset.i, +e.dataset.l, +e.dataset.j] }, () => { if (TRN.pick) return drop(TRN.pick, e.closest('[data-drop]')); SND.se('click'); condEdit(+e.dataset.i, +e.dataset.l, +e.dataset.j); }); });
   B.querySelectorAll('.gs.on').forEach(e => drag(e, { gFrom: +e.dataset.i }, () => { if (TRN.pick) drop(TRN.pick, e); else { SND.se('click'); goPick(+e.dataset.i); } }));
