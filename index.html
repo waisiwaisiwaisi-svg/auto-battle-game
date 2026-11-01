@@ -13245,7 +13245,7 @@ const GYMS = [
   { f: 'fighting', st: 'fairy', t: 'fairy', lead: 'gym_akari', ln: 'ジムリーダー アカリ', say: 'こころも からだも きたえてきた！' },   // f（バッジの なまえ）は そのまま
   { f: 'dragon', t: 'dragon', lead: 'gym_akane', ln: 'ジムリーダー アカネ', say: 'ドラゴンの ほんきを みせてあげる。' },
 ];
-const LEAGUE = [['league_shiori', 'してんのう シオリ', 'データは もう そろっているの。', 'normal', 'c_fighting7'], ['occult', 'してんのう ヨミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', null], ['league_takumi', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'beast', 'a_fighting9'], ['league_akari', 'してんのう アカリ', 'もえる こころで かかってこい！', 'demi', null], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
+const LEAGUE = [['league_shiori', 'してんのう サトリ', 'データは もう そろっているの。', 'normal', 'c_fighting7'], ['occult', 'してんのう ヨミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', null], ['league_takumi', 'してんのう ガイ', 'リーグの かべは あついぞ！', 'beast', 'a_fighting9'], ['league_akari', 'してんのう ツバキ', 'もえる こころで かかってこい！', 'demi', null], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
 const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; const J = S.journey; if (!J.rival && (J.gym > 0 || J.step > 0 || J.badges.length || J.champ)) J.rival = 1;   /* まえから すすんでいる 人は はじめての 戦いは すんだ ことに */ if (!(J.league >= 0 && J.league < LEAGUE.length)) J.league = J.league >= LEAGUE.length ? LEAGUE.length - 1 : 0; return J; };   // リーグの 人数が かわっても こわれない
 // 敵の モンスター：すすむ（p：0〜1）ほど 個体値・きょうか・わざの くみあわせが つよくなる（のうりょくの 倍率は かけない）
 function foeMon(sid, p, uid) {
@@ -13355,7 +13355,7 @@ const GYM_CON = [
   { c: 'ドラゴンの ほんき（大技と のうりょくアップ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0 || x.e.self.spa > 0)), atk: (x) => (x.power || 0) >= 100 ? 1.3 : 1 },   // りゅう アカネ
 ];
 const LEAGUE_PLAN = ['reisei', 'reisei', 'yuukan', 'yuukan', ['yuukan', 'reisei', 'nonki', 'yuukan', 'reisei', 'nonki']];   // チャンピオンは 1たいごとに ちがう 作戦
-// してんのうの 技の このみ：作戦が あわない あいてに つよく でる 技（ヨミ＝はなれて 撃つ・アカリ＝ちかくの こうげき）
+// してんのうの 技の このみ：作戦が あわない あいてに つよく でる 技（ヨミ＝はなれて 撃つ・ツバキ＝ちかくの こうげき）
 const LEAGUE_CON = [null, { atk: (x) => x.k === 'proj' && (x.power || 0) < 100 ? 2 : .25, sup: () => false }, null, { atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.35 : .8, sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0)) }, null];   // ヨミ：ふつうの 弾（がんがんは ひるまない）・アカリ：こころも からだも（近接ラッシュ）   // してんのう・チャンピオンの 作戦（作戦も あわせないと きびしい）
 // コンセプトの 技：ジムの タイプの こうげき技を 中心に 3つ＋この ジムらしい ほじょ技 1つ（おぼえられる 技 だけ）
 function conMoves(em, con, t) {
@@ -13374,7 +13374,7 @@ const GYM_N = [[3, 3], [3, 3], [3, 3], [4, 5], [4, 6], [5, 6], [5, 6], [5, 6], [
 const LEAGUE_N = 5;   // ＋エース
 function journeyFoes(gi, step) { const G = GYMS[gi], leader = step >= 2, con = GYM_CON[gi], early = gi < EARLY_GYMS && !jr().champ, full = con && (leader || !early);   // じょばんの ジムの サモナーは コンセプトなし
   return gymTeam(G.t, (GYM_N[gi] || [3, 3])[leader ? 1 : 0], jProg(gi, step) + (GYM_PADJ[gi] || 0), gi >= 5).map(em => { if (full) { conMoves(em, con, G.t); em.plan = con.plan; } if (early && !leader) noDefMoves(em); if (full && !early) autoTrain(em); return em; }); }   // じょばんは 訓練なし
-// ヨミ・アカリ（よみ）：じぶんの 弱点を つく あいてに こうかばつぐんの 技を 1つ もつ（タイプを あわせる だけでは かてない）
+// ヨミ・ツバキ（よみ）：じぶんの 弱点を つく あいてに こうかばつぐんの 技を 1つ もつ（タイプを あわせる だけでは かてない）
 function readCover(e) { const ty = [SPECIES[e.sid].type, SPECIES[e.sid].type2].filter(Boolean), weak = Object.keys(TYPES).filter(a => ty.reduce((x, d) => x * effOf(a, d), 1) > 1);
   const L = learned(e).filter(id => isDamaging(MOVES[id]) && !AUTO_GUARD[MOVES[id].k] && !e.moves.includes(id) && weak.some(w => effOf(MOVES[id].t, w) > 1)).sort((a, b) => (MOVES[b].power || 0) - (MOVES[a].power || 0));
   if (L.length) { const i = e.moves.findIndex(id => !isDamaging(MOVES[id])); e.moves[i >= 0 && e.moves.length >= 4 ? i : Math.min(3, e.moves.length)] = L[0]; autoTrain(e); } }
@@ -13398,7 +13398,7 @@ function startJourney(gi) {
   });
 }
 // してんのうは とくいタイプ。会場は その タイプの ステージ、チャンピオンは チャンピオンの ステージ
-const LEAGUE_STAGE = [null, null, null, 'fighting', null];   // アカリ（亜人）は もとの ジムの ステージ
+const LEAGUE_STAGE = [null, null, null, 'fighting', null];   // ツバキ（亜人）は かくとうの ステージ
 const leagueStage = (k) => k >= LEAGUE.length - 1 ? 'champion' : LEAGUE_STAGE[k] || (ARENAS[LEAGUE[k][3]] ? LEAGUE[k][3] : FIELDS[k % FIELDS.length]);
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
