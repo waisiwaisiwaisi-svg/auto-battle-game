@@ -13275,7 +13275,9 @@ const GYM_CON = [
   { c: 'こころも からだも（近接ラッシュ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0)), atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.35 : .8 },   // 亜人 アカリ
   { c: 'ドラゴンの ほんき（大技と のうりょくアップ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0 || x.e.self.spa > 0)), atk: (x) => (x.power || 0) >= 100 ? 1.3 : 1 },   // りゅう アカネ
 ];
-const LEAGUE_PLAN = ['reisei', 'reisei', 'yuukan', 'nonki', 'nonki'];   // してんのう・チャンピオンの 作戦（作戦も あわせないと きびしい）
+const LEAGUE_PLAN = ['reisei', 'reisei', 'yuukan', 'nonki', ['yuukan', 'reisei', 'nonki', 'yuukan', 'reisei', 'nonki']];   // チャンピオンは 1たいごとに ちがう 作戦
+// してんのうの 技の このみ：作戦が あわない あいてに つよく でる 技（ヨミ＝はなれて 撃つ・アカリ＝ちかくの こうげき）
+const LEAGUE_CON = [null, { atk: (x) => isDmgK(x, ['proj', 'beam', 'cone']) ? 1.4 : .7, sup: () => false }, null, { atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.4 : .7, sup: () => false }, null];   // してんのう・チャンピオンの 作戦（作戦も あわせないと きびしい）
 // コンセプトの 技：ジムの タイプの こうげき技を 中心に 3つ＋この ジムらしい ほじょ技 1つ（おぼえられる 技 だけ）
 function conMoves(em, con, t) {
   const sp = SPECIES[em.sid], b = base6(em.sid), my = [sp.type, sp.type2], L = learned(em);
@@ -13298,7 +13300,11 @@ function readCover(e) { const ty = [SPECIES[e.sid].type, SPECIES[e.sid].type2].f
   const L = learned(e).filter(id => isDamaging(MOVES[id]) && !AUTO_GUARD[MOVES[id].k] && !e.moves.includes(id) && weak.some(w => effOf(MOVES[id].t, w) > 1)).sort((a, b) => (MOVES[b].power || 0) - (MOVES[a].power || 0));
   if (L.length) { const i = e.moves.findIndex(id => !isDamaging(MOVES[id])); e.moves[i >= 0 && e.moves.length >= 4 ? i : Math.min(3, e.moves.length)] = L[0]; autoTrain(e); } }
 const LEAGUE_READ = [false, true, false, false, false];
-function leagueFoes(k) { const T = leagueTeam(LEAGUE[k][3], LEAGUE_N, jProg(10 + k, 2) + (LEAGUE_PADJ[k] || 0)); for (const e of T) { if (LEAGUE_PLAN[k]) e.plan = LEAGUE_PLAN[k]; if (LEAGUE_READ[k] && !e.ace) readCover(e); } return T; }
+function leagueFoes(k) { const T = leagueTeam(LEAGUE[k][3], LEAGUE_N, jProg(10 + k, 2) + (LEAGUE_PADJ[k] || 0)), P = LEAGUE_PLAN[k], C = LEAGUE_CON[k];
+  T.forEach((e, i) => { if (P) e.plan = Array.isArray(P) ? P[i % P.length] : P;
+    if (C && !e.ace && !e.moves.some(id => id === 'duel-arena' || id === 'hako-punch')) { conMoves(e, C, LEAGUE[k][3]); autoTrain(e); }
+    if (LEAGUE_READ[k] && !e.ace) readCover(e); });
+  return T; }
 function startJourney(gi) {
   const J = jr(), G = GYMS[gi];
   if (gi > J.gym && !J.champ) return;
