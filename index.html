@@ -13277,7 +13277,7 @@ const GYM_CON = [
 ];
 const LEAGUE_PLAN = ['reisei', 'reisei', 'yuukan', 'nonki', ['yuukan', 'reisei', 'nonki', 'yuukan', 'reisei', 'nonki']];   // チャンピオンは 1たいごとに ちがう 作戦
 // してんのうの 技の このみ：作戦が あわない あいてに つよく でる 技（ヨミ＝はなれて 撃つ・アカリ＝ちかくの こうげき）
-const LEAGUE_CON = [null, { atk: (x) => isDmgK(x, ['proj', 'beam', 'cone']) ? 1.4 : .7, sup: () => false }, null, { atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.4 : .7, sup: () => false }, null];   // してんのう・チャンピオンの 作戦（作戦も あわせないと きびしい）
+const LEAGUE_CON = [null, { atk: (x) => x.k === 'proj' && (x.power || 0) < 100 ? 2 : .25, sup: () => false }, null, { atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 2 : .25, sup: () => false }, null];   // ヨミ：ふつうの 弾（がんがんは ひるまない）・アカリ：ちかくの こうげき（ちくちくは にげやすい）   // してんのう・チャンピオンの 作戦（作戦も あわせないと きびしい）
 // コンセプトの 技：ジムの タイプの こうげき技を 中心に 3つ＋この ジムらしい ほじょ技 1つ（おぼえられる 技 だけ）
 function conMoves(em, con, t) {
   const sp = SPECIES[em.sid], b = base6(em.sid), my = [sp.type, sp.type2], L = learned(em);
