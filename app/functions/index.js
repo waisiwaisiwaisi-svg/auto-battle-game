@@ -168,8 +168,12 @@ exports.saveGet = onCall({ memory: '2GiB', timeoutSeconds: 60 }, async (req) => 
   const uid = uidOf(req), ref = fs.doc('saves/' + uid), loc = req.data && req.data.loc;
   const d = await ref.get();
   if (d.exists && d.data().moved) throw new HttpsError('failed-precondition', 'moved');   // ほかの 端末へ うつした
-  if (d.exists) { try { return { s: JSON.parse(d.data().js), v: d.data().v || 0, now: Date.now() }; } catch (e) { /* こわれた：つくりなおす */ } }
+  if (d.exists) { try { const s0 = JSON.parse(d.data().js); if (!s0.osb) { s0.osb = newOsb(); const v = d.data().v || 0, js = JSON.stringify(s0);
+        const ok = await fs.runTransaction(async (tx) => { const x = await tx.get(ref); if ((x.data().v || 0) !== v) return false; tx.set(ref, { js, v: v + 1, t: Date.now() }, { merge: true }); return true; });
+        if (!ok) { const y = await ref.get(); return { s: JSON.parse(y.data().js), v: y.data().v || 0, now: Date.now() }; } return { s: s0, v: v + 1, now: Date.now() }; }
+      return { s: s0, v: d.data().v || 0, now: Date.now() }; } catch (e) { /* こわれた：つくりなおす */ } }
   const s = await require('./replay').call('PMA_IMPORT', loc && typeof loc === 'object' ? loc : null);
+  s.osb = newOsb();
   const js = JSON.stringify(s); if (js.length > SAVE_MAX) throw new HttpsError('resource-exhausted', 'size');
   await fs.runTransaction(async (tx) => { const x = await tx.get(ref); if (!x.exists) tx.set(ref, { js, v: 1, t: Date.now(), imp: 1 }); });
   const x = await ref.get(); return { s: JSON.parse(x.data().js), v: x.data().v || 1, now: Date.now() };
@@ -189,6 +193,7 @@ exports.saveClaim = onCall(async (req) => {
     return { ok: true };
   });
 });
+const newOsb = () => ({ b: ((Math.random() * 4294967296) >>> 0).toString(36), n: 0 });
 const ACT_NAMES = new Set(['sync', 'shopBuyDeal', 'shopBuyChest', 'shopBuySpecial', 'openChest', 'payOpen', 'battleStart', 'battleEnd', 'release', 'boost', 'evAdd', 'respec', 'reroll4', 'reroll1', 'xlearn', 'tm', 'towerBegin', 'towerQuit', 'arcadeNew', 'arcadeQuit', 'tutGem']);
 exports.act = onCall({ memory: '2GiB', timeoutSeconds: 60 }, async (req) => {
   const uid = uidOf(req), name = req.data && req.data.name, args = (req.data && req.data.args) || [], loc = req.data && req.data.loc;
@@ -203,12 +208,33 @@ exports.act = onCall({ memory: '2GiB', timeoutSeconds: 60 }, async (req) => {
     const d = await ref.get(); if (!d.exists) throw new HttpsError('failed-precondition', 'nosave'); if (d.data().moved) throw new HttpsError('failed-precondition', 'moved');
     const v = d.data().v || 0, srv = JSON.parse(d.data().js);
     const pre = await P.call('PMA_MERGE', srv, loc && typeof loc === 'object' ? loc : null);
+    if (!pre.osb) pre.osb = newOsb();   // オフラインの らんすうの たね（はじめて の とき）
     const seed = (Math.random() * 4294967296) >>> 0, now = Date.now();
     const r = await P.call('PMA_ACT', pre, name, args, seed, now);
     if (r.err) return { err: r.err };
     const js = JSON.stringify(r.post); if (js.length > SAVE_MAX) throw new HttpsError('resource-exhausted', 'size');
     const ok = await fs.runTransaction(async (tx) => { const x = await tx.get(ref); if ((x.data().v || 0) !== v) return false; tx.set(ref, { js, v: v + 1, t: now }); return true; });
     if (ok) return { pre, seed, now, h: r.h, v: v + 1, out: r.out };
+  }
+  throw new HttpsError('aborted', 'busy');
+});
+
+// オフラインで あそんだ きろく（じゅんばん・じこく）を うけとり、サーバーの セーブで おなじ ことを やりなおす（らんすうは セーブの たね osb から。端末では えらべない）
+const OFF_MAX = 400;
+exports.actSync = onCall({ memory: '2GiB', timeoutSeconds: 300 }, async (req) => {
+  const uid = uidOf(req), jr = req.data && req.data.jr, loc = req.data && req.data.loc;
+  if (!Array.isArray(jr) || !jr.length || jr.length > OFF_MAX || JSON.stringify(jr).length > 4000000) throw new HttpsError('invalid-argument', 'jr');
+  for (const e of jr) if (!e || !ACT_NAMES.has(e.name) || !Array.isArray(e.args) || !Number.isFinite(+e.now) || (e.name === 'battleStart' && e.args[0] === 'free')) throw new HttpsError('invalid-argument', 'jr');
+  const ref = fs.doc('saves/' + uid), P = require('./replay');
+  for (let i = 0; i < 3; i++) {
+    const d = await ref.get(); if (!d.exists) throw new HttpsError('failed-precondition', 'nosave'); if (d.data().moved) throw new HttpsError('failed-precondition', 'moved');
+    const v = d.data().v || 0, srv = JSON.parse(d.data().js), lc = loc && typeof loc === 'object' ? loc : null;
+    const pre = await P.call('PMA_MERGE', srv, lc); if (!pre.osb) pre.osb = newOsb();
+    const now = Date.now(), r = await P.call('PMA_OFFSYNC', pre, jr, d.data().t || 0, now);
+    const post = await P.call('PMA_MERGE', r.post, lc);   // ならび・わざ・訓練 など 端末で きめる ところは 端末の まま
+    const js = JSON.stringify(post); if (js.length > SAVE_MAX) throw new HttpsError('resource-exhausted', 'size');
+    const ok = await fs.runTransaction(async (tx) => { const x = await tx.get(ref); if ((x.data().v || 0) !== v) return false; tx.set(ref, { js, v: v + 1, t: now }); return true; });
+    if (ok) return { s: post, v: v + 1, now, n: r.n };
   }
   throw new HttpsError('aborted', 'busy');
 });

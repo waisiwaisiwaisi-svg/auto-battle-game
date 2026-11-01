@@ -3626,6 +3626,16 @@ if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') 
 .serow .seplay{font-size:0!important;background:url(${UIA.play.src}) center/26px no-repeat!important;box-shadow:none!important}
 .sndbtn:not(.rotbtn){font-size:0!important;background-image:url(${UIA.spk_on.src})!important;background-position:center!important;background-size:24px!important;background-repeat:no-repeat!important;image-rendering:pixelated}.sndbtn.off:not(.rotbtn){background-image:url(${UIA.spk_off.src})!important}`;   // ボタンも ドットの 絵（U6）
   document.head.appendChild(st);
+  { // ボタンの 絵は ふちと なかを べつべつに のばすので、画面の ばいりつ に よっては つなぎめに すきまが でて 線に みえる：なかの 色を したに しく（ふちから 4px うち がわ）
+    const IMG = {}, img = (k) => { if (!UIA[k] || !UIA[k].src) return null; if (!IMG[k]) { IMG[k] = new Image(); IMG[k].onload = () => mk(); IMG[k].src = UIA[k].src; } return IMG[k]; };
+    const mid = (k) => { const im = img(k); if (!im || !im.naturalWidth) return null; try { const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d'); g.drawImage(im, 0, 0); const d = g.getImageData(c.width >> 1, c.height >> 1, 1, 1).data; return d[3] > 200 ? `rgb(${d[0]},${d[1]},${d[2]})` : null; } catch (e) { return null; } };
+    const bg = (k) => { const c = mid(k); return c ? `background:linear-gradient(${c},${c}) center / calc(100% - 8px) calc(100% - 8px) no-repeat!important;` : ''; };
+    const R = [['.btn,.btn.sub', 'b8_gold'], ['.btn.sub', 'b8_navy'], ['.btn.danger', 'b8_red'], ['.btn.ok', 'b8_green'], ['.btn:disabled', 'b8_off']];
+    const H = [['.btn:hover:not(:disabled)', 'b8_gold_h'], ['.btn.sub:hover:not(:disabled)', 'b8_navy_h'], ['.btn.danger:hover:not(:disabled)', 'b8_red_h'], ['.btn.ok:hover:not(:disabled)', 'b8_green_h']];
+    const A = [['.btn:active:not(:disabled)', 'b8_gold_d'], ['.btn.sub:active:not(:disabled)', 'b8_navy_d'], ['.btn.danger:active:not(:disabled)', 'b8_red_d'], ['.btn.ok:active:not(:disabled)', 'b8_green_d']];
+    let mk = () => { const css = R.map(([q, k]) => bg(k) && `${q}{${bg(k)}}`).join('') + `@media (hover:hover){${H.map(([q, k]) => bg(k) && `${q}{${bg(k)}}`).join('')}}` + A.map(([q, k]) => bg(k) && `${q}{${bg(k)}}`).join('');
+      let el = document.getElementById('btnFillCss'); if (!el) { el = document.createElement('style'); el.id = 'btnFillCss'; document.head.appendChild(el); } el.textContent = css; };
+    let mkT = 0; const mk0 = mk; mk = () => { clearTimeout(mkT); mkT = setTimeout(mk0, 0); }; mk(); }
 }
 const ICONS = {
   swords: ['s.........s.', 'ss.......ss.', '.ss.....ss..', '..ss...ss...', '...ss.ss....', '....sss.....', '...ss.ss....', '..yy...yy...', '.yny...yny..', 'nn.......nn.', 'n.........n.'],
@@ -5202,7 +5212,10 @@ function trDockH() {   // ひだりの れつの たかさ：みえて いる �
   const sc = $('scTrain'), dk = sc && sc.querySelector('.trpage.dock .trdock'); if (!dk) return;
   const pg = dk.parentNode, k = pg.offsetHeight ? pg.getBoundingClientRect().height / pg.offsetHeight : 1;
   const top0 = (pg.getBoundingClientRect().top - sc.getBoundingClientRect().top) / k + sc.scrollTop;   // ひだりの れつの もとの たかさ
-  const vis = sc.clientHeight - parseFloat(getComputedStyle(sc).paddingBottom || 0) - Math.max(8, top0 - sc.scrollTop) - 8;
+  const tb = $('tabbar'), tr = tb && !tb.hidden ? tb.getBoundingClientRect() : null, dr = dk.getBoundingClientRect();
+  const under = tr && tr.width > 0 && tr.left < dr.right && tr.right > dr.left;   // した の メニューが ひだりの れつに かぶる ときだけ その ぶん あける
+  const padB = under ? parseFloat(getComputedStyle(sc).paddingBottom || 0) : 8;
+  const vis = sc.clientHeight - padB - Math.max(8, top0 - sc.scrollTop) - 8;
   dk.style.height = Math.max(240, vis) + 'px';
 }
 addEventListener('resize', () => { if ($('trBody') && $('trBody').offsetParent) trDockFix(); });
@@ -7396,7 +7409,7 @@ function hit(att, def, m, ang, opt) {
   if (m.pat === 'palm' && plOk('palm_hit') && !opt.tick) plFx('palm_hit', def.x, def.y - BODY, 1.3);   // きあいだまが はじける
   if (B.stats) { B.stats.tryhit[MOVE_ID.get(m)] = (B.stats.tryhit[MOVE_ID.get(m)] || 0) + 1; if (def.inv > 0) B.stats.dodged[MOVE_ID.get(m)] = (B.stats.dodged[MOVE_ID.get(m)] || 0) + 1; }
   if ('decoy' in opt ? opt.decoy : att.cur && att.cur.decoy) return false;
-  if (def.hurtInv > 0 && def.state !== 'stun' && !opt.tick && !(def.hurtBy && def.hurtBy.att === att && def.hurtBy.m === m)) {   // むてき じかん（くらった あと・たおれた あとの こうたい）
+  if (def.hurtInv > 0 && def.state !== 'stun' && !(def.v.root > 0) && !opt.tick && !(def.hurtBy && def.hurtBy.att === att && def.hurtBy.m === m)) {   /* かげぬいで うごけない あいだも むてきに しない */   // むてき じかん（くらった あと・たおれた あとの こうたい）
     return false; }
   if (def.inv > 0 && !opt.sure && !opt.throw) { SND.se('dodge'); popText(def.x, def.y - 66, 'かわした！', '#7fd8ff'); burst(def.x, def.y - BODY, '#7fd8ff', 6, 50, .3); return false; }
   if (gshiftOn(def) && isDamaging(m) && GSHIFT_T.includes(m.t)) { if (!opt.tick || opt.first) popText(def.x, def.y - 66, 'すりぬけた', '#b8a8f0'); if ((!opt.tick || opt.first) && plOk('n_phase')) plFx('n_phase', def.x, def.y - BODY, 1.4); burst(def.x, def.y - BODY, '#8a78c8', 6, 50, .3); return false; }   // ゴーストシフト：ノーマル・かくとうを すかす
@@ -8906,7 +8919,7 @@ async function srvFn() { if (SRV_FN) return SRV_FN; if (!SRV_APP()) return null;
    それを かえる しごと（act）は さきに サーバーで うごかし（この ゲームの コードを サーバーの ブラウザで）、
    おなじ らんすう・じこく で この 端末でも うごかす（がめんも そのまま でる）。けっかが ちがえば サーバーの ほうに する */
 let SRV_SAVE = false;   // サーバーの セーブを つかって いる
-const SAVE_PROT = ['tutGem', 'gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt'];   // サーバーが きめる ところ
+const SAVE_PROT = ['tutGem', 'gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt', 'osb'];   // osb：オフラインの らんすうの たね（サーバーが きめる）   // サーバーが きめる ところ
 const MON_PROT = ['uid', 'sid', 'iv', 'nat', 'ev', 'fed', 'lvl', 'tmL', 'xL'];   // モンスターの サーバーが きめる ところ（わざ・訓練・ならびは 端末で かえて よい）
 const saveHash = (x) => { const o = {}; for (const k of SAVE_PROT) if (x[k] !== undefined) o[k] = x[k]; o.mons = [...(x.party || []), ...(x.box || [])].map(m => MON_PROT.map(k => m[k] === undefined ? null : m[k])); return seedOf(JSON.stringify(o)).toString(36); };
 const cloneJ = (x) => JSON.parse(JSON.stringify(x));
@@ -8926,7 +8939,7 @@ function mergeSave(srv, loc) {
   s.party = (loc.party || []).map(fix).filter(Boolean).slice(0, 6); s.box = (loc.box || []).map(fix).filter(Boolean);
   for (const sm of byUid.values()) if (!used.has(sm.uid)) s.box.push(cloneJ(sm));   // サーバーに だけ ある：あずける へ
   if (!s.party.length && s.box.length) s.party.push(s.box.shift());
-  delete s.stash;
+  delete s.stash; delete s.ojr;
   return s;
 }
 // はじめて サーバーに セーブを つくる（さいしょの ながれが おわった とき）。あたらしい プロフィール だけ うけつける：
@@ -8947,15 +8960,45 @@ function importSave(loc) {
 window.PMA_ACT = (pre, name, args, seed, now) => { S = Object.assign(defaultSave(), cloneJ(pre)); let out = null; try { out = actRun(name, args, seed, now); } catch (e) { return { err: String(e && e.message || e) }; } const post = cloneJ(S); return { post, h: saveHash(S), out: out == null || typeof out !== 'object' ? out : cloneJ(out) }; };
 window.PMA_MERGE = (srv, loc) => mergeSave(srv, loc);
 window.PMA_IMPORT = (loc) => importSave(loc);
+// オフライン：いちど サーバーと つながった データは、つながらない あいだも この 端末で うごかし、やった ことを じゅんばんに きろく（S.ojr）。
+//   らんすうは サーバーが わたした たね（S.osb）から きめる（端末では えらべない）。つながったら きろくを おくり、サーバーが おなじ ことを やりなおして たしかめる
+const offNow = () => typeof navigator !== 'undefined' && navigator.onLine === false;
+let OFF_SAID = false;
+function offAct(name, args) {
+  if (name === 'battleStart' && args[0] === 'free') { say0('この たいせんは オンラインで あそんでね'); return undefined; }   // あいての チームは サーバーに ある
+  if (!OFF_SAID) { OFF_SAID = true; say0('オフラインで あそんでいます。つながったら サーバーに おくります'); }
+  S.ojr = S.ojr || []; const now = NOW();
+  if (name === 'battleEnd') { S.ojr.push({ name, args: cloneJ(args), now }); delete S.tkt; S.osb.n++; saveLocal(); return B ? B.result : undefined; }   // たたかいは もう この 端末で おわって ごほうびも ついて いる
+  const out = actRun(name, args, seedOf(S.osb.b + ':' + S.osb.n), now); S.ojr.push({ name, args: cloneJ(args), now }); S.osb.n++; saveLocal(); return out;
+}
+let OFF_SYNCING = null;
+function offSync(f) {
+  if (OFF_SYNCING) return OFF_SYNCING;
+  return (OFF_SYNCING = (async () => { try {
+    const fn = f || await srvFn(); if (!fn || !S || !S.ojr || !S.ojr.length) return !(S && S.ojr && S.ojr.length);
+    const r = await fn.call('actSync', { jr: S.ojr, loc: cloneJ(S) }); if (!r || !r.s) return false;
+    SRV_SKEW = r.now - Date.now(); adoptSave(r.s); delete S.ojr; SRV_SAVE = true; saveLocal(); if (!B && $('scHub') && !$('scHub').hidden) renderHub(); return true;
+  } catch (e) { return false; } finally { OFF_SYNCING = null; } })());
+}
+// サーバーの ブラウザから よぶ：オフラインの きろくを じゅんばんに やりなおす（じこくは まえの きろく〜いま の あいだに おさめる）
+window.PMA_OFFSYNC = (s0, jr, t0, tNow) => {
+  let s = Object.assign(defaultSave(), cloneJ(s0)); if (!s.osb || !Array.isArray(jr)) return { post: s, n: 0 };
+  let last = t0 || 0, n = 0; const outs = [], ob = s.osb.b, n0 = s.osb.n | 0;   // たねの ばんごうは きろくの なんばんめ か で きめる（たたかいの さいげんで セーブが もどっても ずれない）
+  for (const e of jr) { const now = Math.min(tNow, Math.max(last, Number.isFinite(+e.now) ? +e.now : last)); last = now;
+    S = s; let o; try { if (ACTS[e.name] && Array.isArray(e.args)) o = actRun(e.name, cloneJ(e.args), seedOf(ob + ':' + (n0 + n)), now); } catch (er) { o = 'err:' + er.message; }
+    outs.push(o && typeof o === 'object' ? 'obj' : o); s = S; n++; s.osb = { b: ob, n: n0 + n }; }
+  delete s.ojr; return { post: cloneJ(s), n, outs };
+};
 // この 端末から：サーバーで うごかしてから おなじ ことを ここでも
 let ACT_BUSY = false;
 async function act(name, ...args) {
-  if (!SRV_SAVE && SRV_APP() && (SAVE_SERVER_ON || window.PMA_SAVE_ON) && S && !S.onb) { await saveInit(); if (!SRV_SAVE) { say0('サーバーに つながりません。オンラインで あそんでね'); return undefined; } }   // アプリ版は いつも サーバーで（さいしょの ながれ だけ この 端末で）
+  if (!SRV_SAVE && SRV_APP() && (SAVE_SERVER_ON || window.PMA_SAVE_ON) && S && !S.onb) { await saveInit(); if (!SRV_SAVE) { if (S.osb) return offAct(name, args); say0('サーバーに つながりません。オンラインで あそんでね'); return undefined; } }   // いちど サーバーと つながった データは オフラインでも あそべる（あとで おくる）   // アプリ版は いつも サーバーで（さいしょの ながれ だけ この 端末で）
   if (!SRV_SAVE) return ACTS[name](...args);   // claude.ai 版・さいしょの ながれ：この 端末で
   if (ACT_BUSY) return undefined; ACT_BUSY = true;
   try {
-    const f = await srvFn(); if (!f) { say0('サーバーに つながりません。オンラインで あそんでね'); return undefined; }
-    let r; try { r = await f.call('act', { name, args, loc: cloneJ(S) }); } catch (e) { say0(`サーバーに つながりませんでした（${e && e.code || 'error'}）。もういちど ためしてね`); return undefined; }
+    const f = await srvFn(); if (!f || offNow()) { if (S.osb) return offAct(name, args); say0('サーバーに つながりません。オンラインで あそんでね'); return undefined; }
+    if (S.ojr && S.ojr.length && !(await offSync(f))) return offAct(name, args);   // オフラインの きろくが のこって いる：さきに おくる
+    let r; try { r = await f.call('act', { name, args, loc: cloneJ(S) }); } catch (e) { if (S.osb && /unavailable/.test(String(e && e.code))) return offAct(name, args); say0(`サーバーに つながりませんでした（${e && e.code || 'error'}）。もういちど ためしてね`); return undefined; }   // とどかなかった（unavailable）：オフラインで
     if (r.err) { say0('できませんでした（' + r.err + '）'); return undefined; }
     SRV_SKEW = r.now - Date.now();
     if (name === 'battleEnd') {   // たたかいは この 端末で もう おわって ごほうびも ついて いる：おなじ か くらべる だけ
@@ -8975,11 +9018,12 @@ const BSTART = {
   rival: (t) => startRival(!!t), journey: (gi) => startJourney(gi | 0), league: () => startLeague(), tower: () => towerStart(), arcade: () => arcadeStart(),
   cup: (f) => startCup(f), cpu: () => freeCpu(), free: (o, nm) => freeBattle(o, nm),
 };
-function battleGo(k, ...a) { if (!SRV_SAVE) return BSTART[k](...a); return act('battleStart', k, a); }
+const offOk = () => !SRV_SAVE && SRV_APP() && S && S.osb && !S.onb;   // オフラインでも きろくを のこして あそぶ
+function battleGo(k, ...a) { if (!SRV_SAVE && !offOk()) return BSTART[k](...a); return act('battleStart', k, a); }
 ACTS.battleStart = (k, a) => {
   const f = BSTART[k]; if (!f) return 'bad';
   if (S.tkt) { const B1 = B; ACTS.battleEnd([[1, 'x', S.tkt.k === 'wild' ? 'run' : 'lose']], 2); B = B1; }   // まえの たたかいを おわらせずに つぎ：やめた（まけ）あつかい
-  delete S.tkt; const pre = cloneJ(S), B0 = B;
+  delete S.tkt; const pre = cloneJ(S), B0 = B; delete pre.ojr;   // オフラインの きろくは チケットに いれない
   f(...(Array.isArray(a) ? a : []));
   if (B && B !== B0 && !B.cfg.sim && !B.cfg.dummy) { B.tnow = ACT_NOW; S.tkt = { k, a: Array.isArray(a) ? a : [], seed: ACT_SEED, now: ACT_NOW, pre }; save(); return 'ok'; }
   return 'none';
@@ -8999,16 +9043,20 @@ ACTS.battleEnd = (log, steps) => {
 };
 // この 端末で たたかった けっか（ごほうびも つけた あと）を サーバーに たしかめて もらう。ちがえば サーバーの セーブに する
 async function battleVerify() {
-  if (!SRV_SAVE || !B || !S.tkt || B.kind === 'online') return;
+  if ((!SRV_SAVE && !offOk()) || !B || !S.tkt || B.kind === 'online') return;
   const log = (B.ilog || []).slice(), steps = B.stepN + 1;
   return act('battleEnd', log, steps);
 }
 // アプリを ひらいた とき：サーバーの セーブを もらう（はじめては この 端末の データから つくる）
+let SAVE_FAIL_T = 0;
+addEventListener('online', () => { SAVE_FAIL_T = 0; if (S && S.ojr && S.ojr.length) offSync(); });   // つながったら オフラインの ぶんを おくる
 const SAVE_SERVER_ON = true;   // アプリ版は セーブを サーバーで まもる（claude.ai 版は この 端末で）
 async function saveInit() {
   if (!SRV_APP() || SRV_SAVE || !S || S.onb || !(SAVE_SERVER_ON || window.PMA_SAVE_ON)) return;   // さいしょの ながれの あいだは まだ（おわったら はじめる）
-  const f = await srvFn(); if (!f) return;
-  const r = await f.call('saveGet', { loc: cloneJ(S) }).catch((e) => { if (/moved/.test(String(e && (e.message || e.code)))) say0('この データは ほかの 端末へ うつしました。ふっかつコードで よびだした 端末で あそんでね'); return null; }); if (!r || !r.s) return;
+  if (Date.now() - SAVE_FAIL_T < 60000) return;   // さっき つながらなかった：しばらく まつ（まいかい またせない）
+  const f = await srvFn(); if (!f || offNow()) return;
+  if (S.ojr && S.ojr.length) { if (!(await offSync(f))) SAVE_FAIL_T = Date.now(); return; }   // オフラインで あそんだ ぶんを さきに おくる（セーブも かえって くる）
+  const r = await f.call('saveGet', { loc: cloneJ(S) }).catch((e) => { SAVE_FAIL_T = Date.now(); if (/moved/.test(String(e && (e.message || e.code)))) say0('この データは ほかの 端末へ うつしました。ふっかつコードで よびだした 端末で あそんでね'); return null; }); if (!r || !r.s) return;
   SRV_SKEW = r.now - Date.now(); adoptSave(r.s); SRV_SAVE = true; saveLocal();
   if (!$('scHub').hidden) renderHub();
 }
@@ -10173,7 +10221,7 @@ function endBattle(res) {   // らんすうは いつも この たたかいの 
   // ブラインドボックスは ときどき：ボス（ジムリーダー・リーグ など）は かならず、サモナー戦 35%、くさむらは でない
   let ck = null; if (res === 'win' && !B.cfg.tutorial && B.kind !== 'wild' && rnd() < (B.cfg.boss || (B.cfg.journey && B.cfg.journey.league != null) ? 1 : .35)) { ck = giveChest(); if (!ck) lines.push('ブラインドボックスが いっぱいで もらえなかった…'); }
   B.rewards = { cr: S.capsules - caps0, gem: (S.gems || 0) - gems0, chest: ck };
-  if (SRV_SAVE && !B.replay && S.tkt) { const log = (B.ilog || []).slice(), steps = B.stepN + 1; setTimeout(() => { act('battleEnd', log, steps); }, 0); }   // サーバーに たしかめて もらう（ちがえば サーバーの ほう）   // リザルトで アイコンつきで ならべる
+  if ((SRV_SAVE || offOk()) && !B.replay && S.tkt) { const log = (B.ilog || []).slice(), steps = B.stepN + 1; setTimeout(() => { act('battleEnd', log, steps); }, 0); }   // サーバーに たしかめて もらう（ちがえば サーバーの ほう）   // リザルトで アイコンつきで ならべる
   B.resLines = lines;
   save();
 }
@@ -12097,7 +12145,7 @@ function drawFighter0(f) {
   if (f.state === 'enter' || f.state === 'return') { sx = sy = Math.max(.05, f.scale); }
   if (f.state === 'lag') { sy = 1 + DM.sin(B.t * 14) * .03; sx = 2 - sy; }
   if (f.state === 'dodge') alpha = .75;
-  if (f.hurtInv > 0 && !['faint', 'enter', 'return', 'stun'].includes(f.state)) alpha = (alpha == null ? 1 : alpha) * (Math.floor(B.t * 14) % 2 ? .4 : 1);   // むてき：ちかちか
+  if (f.hurtInv > 0 && !(f.v.root > 0) && !['faint', 'enter', 'return', 'stun'].includes(f.state)) alpha = (alpha == null ? 1 : alpha) * (Math.floor(B.t * 14) % 2 ? .4 : 1);   // むてき：ちかちか
   if ((f.clones && f.clones.some(c => !c.doll)) || f.isClone) alpha = (alpha == null ? 1 : alpha) * (.8 + .2 * DM.sin(B.t * 9 + (f.isClone ? f.x : 0)));   // ぶんしんちゅうは ぜんいん すこし ゆらぐ
   const warpU = f.state === 'wind' && f.cur && f.cur.m.k === 'warp' ? clamp(f.cur.t / f.cur.wind, 0, 1) : 0;   // かげに しずむ
   if (warpU) { ctx.fillStyle = 'rgba(40,20,60,.7)'; ctx.beginPath(); ctx.ellipse(f.x, f.y, 18 + warpU * 10, 7 + warpU * 3, 0, 0, 7); ctx.fill(); alpha = (alpha == null ? 1 : alpha) * (1 - warpU * .85); sy *= 1 - warpU * .6; }
