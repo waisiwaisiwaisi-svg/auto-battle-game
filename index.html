@@ -13163,10 +13163,10 @@ const GYMS = [
   { f: 'ground', t: 'ground', lead: 'gym_jin', ln: 'ジムリーダー ジン', say: 'どっしり かまえて うけてたつ！' },
   { f: 'poison', st: 'bug', t: 'bug', lead: 'gym_shiori', ln: 'ジムリーダー シオリ', say: 'むしの けんきゅう せいか、みせてあげる。' },
   { f: 'wind', t: 'wind', lead: 'gym_takumi', ln: 'ジムリーダー タクミ', say: 'そらから すべて みえているぞ！' },
-  { f: 'fighting', t: 'demi', lead: 'gym_akari', ln: 'ジムリーダー アカリ', say: 'こころも からだも きたえてきた！' },
+  { f: 'fighting', st: 'fairy', t: 'fairy', lead: 'gym_akari', ln: 'ジムリーダー アカリ', say: 'こころも からだも きたえてきた！' },   // f（バッジの なまえ）は そのまま
   { f: 'dragon', t: 'dragon', lead: 'gym_akane', ln: 'ジムリーダー アカネ', say: 'ドラゴンの ほんきを みせてあげる。' },
 ];
-const LEAGUE = [['league_shiori', 'してんのう シオリ', 'データは もう そろっているの。', 'normal', 'c_fighting7'], ['occult', 'してんのう ヨミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', null], ['league_takumi', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'beast', 'a_fighting9'], ['league_akari', 'してんのう アカリ', 'もえる こころで かかってこい！', 'fairy', null], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
+const LEAGUE = [['league_shiori', 'してんのう シオリ', 'データは もう そろっているの。', 'normal', 'c_fighting7'], ['occult', 'してんのう ヨミ', 'くらやみの むこうから ずっと みていたよ…', 'ghost', null], ['league_takumi', 'してんのう タクミ', 'リーグの かべは あついぞ！', 'beast', 'a_fighting9'], ['league_akari', 'してんのう アカリ', 'もえる こころで かかってこい！', 'demi', null], ['girl', 'チャンピオン レイ', '', null, 'c_dragon8']];   // してんのうは とくいタイプ（まえもって へんせいで そなえられる）
 const jr = () => { S.journey = S.journey || { gym: 0, step: 0, badges: [], league: 0, champ: 0 }; const J = S.journey; if (!J.rival && (J.gym > 0 || J.step > 0 || J.badges.length || J.champ)) J.rival = 1;   /* まえから すすんでいる 人は はじめての 戦いは すんだ ことに */ if (!(J.league >= 0 && J.league < LEAGUE.length)) J.league = J.league >= LEAGUE.length ? LEAGUE.length - 1 : 0; return J; };   // リーグの 人数が かわっても こわれない
 // 敵の モンスター：すすむ（p：0〜1）ほど 個体値・きょうか・わざの くみあわせが つよくなる（のうりょくの 倍率は かけない）
 function foeMon(sid, p, uid) {
@@ -13272,12 +13272,12 @@ const GYM_CON = [
   { c: 'どっしり うけて かえす', plan: 'nonki', sup: (x) => ['counter', 'protect'].includes(x.k) || !!(x.e && x.e.self && x.e.self.def > 0), atk: (x) => isDmgK(x, ['melee', 'strike', 'aoe']) ? 1.2 : 1 },   // つち ジン
   { c: 'しかけと 状態異常', plan: 'reisei', sup: (x) => ['hazard', 'floor'].includes(x.k) || !!(x.e && x.e.st), atk: (x) => x.e && x.e.st ? 1.25 : 1 },   // むし シオリ
   { c: 'そらから ねらいうち', plan: 'reisei', sup: (x) => x.k === 'field' || x.k === 'weather', atk: (x) => isDmgK(x, ['proj', 'beam', 'cone']) ? 1.3 : .85 },   // かぜ タクミ
-  { c: 'こころも からだも（近接ラッシュ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0)), atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.35 : .8 },   // 亜人 アカリ
+  { c: 'けっとうのば（1たい1の しょうぶ）', plan: 'yuukan', sup: (x) => x.k === 'duel', atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.35 : .8 },   // 妖精 アカリ
   { c: 'ドラゴンの ほんき（大技と のうりょくアップ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0 || x.e.self.spa > 0)), atk: (x) => (x.power || 0) >= 100 ? 1.3 : 1 },   // りゅう アカネ
 ];
 const LEAGUE_PLAN = ['reisei', 'reisei', 'yuukan', 'yuukan', ['yuukan', 'reisei', 'nonki', 'yuukan', 'reisei', 'nonki']];   // チャンピオンは 1たいごとに ちがう 作戦
 // してんのうの 技の このみ：作戦が あわない あいてに つよく でる 技（ヨミ＝はなれて 撃つ・アカリ＝ちかくの こうげき）
-const LEAGUE_CON = [null, { atk: (x) => x.k === 'proj' && (x.power || 0) < 100 ? 2 : .25, sup: () => false }, null, { atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 2 : .25, sup: () => false }, null];   // ヨミ：ふつうの 弾（がんがんは ひるまない）・アカリ：ちかくの こうげき（どっしりは ひるまない）   // してんのう・チャンピオンの 作戦（作戦も あわせないと きびしい）
+const LEAGUE_CON = [null, { atk: (x) => x.k === 'proj' && (x.power || 0) < 100 ? 2 : .25, sup: () => false }, null, { atk: (x) => isDmgK(x, ['melee', 'dash', 'swipe']) ? 1.35 : .8, sup: (x) => !!(x.e && x.e.self && (x.e.self.atk > 0)) }, null];   // ヨミ：ふつうの 弾（がんがんは ひるまない）・アカリ：こころも からだも（近接ラッシュ）   // してんのう・チャンピオンの 作戦（作戦も あわせないと きびしい）
 // コンセプトの 技：ジムの タイプの こうげき技を 中心に 3つ＋この ジムらしい ほじょ技 1つ（おぼえられる 技 だけ）
 function conMoves(em, con, t) {
   const sp = SPECIES[em.sid], b = base6(em.sid), my = [sp.type, sp.type2], L = learned(em);
@@ -13289,7 +13289,7 @@ function conMoves(em, con, t) {
   return em;
 }
 // そだてかたの つよさ（個体値・きょうか・技の えらびかた）の ちょうせい：なか（4〜8）の ジムは 弱点を つかないと きびしく、じょばん（1〜3）は ふつうに かてる
-const GYM_PADJ = [0, 0, 0, .35, .25, .45, .4, .15, .1, 0], LEAGUE_PADJ = [-.05, .45, -.2, .2, -.2];
+const GYM_PADJ = [0, 0, 0, .35, .25, .45, .4, .15, .1, 0], LEAGUE_PADJ = [-.05, .45, -.2, 0, -.2];
 // あいての かず（こちらは さいだい 6たい）：じょばんは 3たい、すすむほど ふえて さいごの ジムリーダーと リーグは 6たい
 const GYM_N = [[3, 3], [3, 3], [3, 3], [4, 5], [4, 6], [5, 6], [5, 6], [5, 6], [5, 6], [5, 6]];   // [サモナー, ジムリーダー]
 const LEAGUE_N = 5;   // ＋エース
@@ -13299,7 +13299,7 @@ function journeyFoes(gi, step) { const G = GYMS[gi], leader = step >= 2, con = G
 function readCover(e) { const ty = [SPECIES[e.sid].type, SPECIES[e.sid].type2].filter(Boolean), weak = Object.keys(TYPES).filter(a => ty.reduce((x, d) => x * effOf(a, d), 1) > 1);
   const L = learned(e).filter(id => isDamaging(MOVES[id]) && !AUTO_GUARD[MOVES[id].k] && !e.moves.includes(id) && weak.some(w => effOf(MOVES[id].t, w) > 1)).sort((a, b) => (MOVES[b].power || 0) - (MOVES[a].power || 0));
   if (L.length) { const i = e.moves.findIndex(id => !isDamaging(MOVES[id])); e.moves[i >= 0 && e.moves.length >= 4 ? i : Math.min(3, e.moves.length)] = L[0]; autoTrain(e); } }
-const LEAGUE_READ = [false, true, false, true, false];
+const LEAGUE_READ = [false, true, false, false, false];
 function leagueFoes(k) { const T = leagueTeam(LEAGUE[k][3], LEAGUE_N, jProg(10 + k, 2) + (LEAGUE_PADJ[k] || 0)), P = LEAGUE_PLAN[k], C = LEAGUE_CON[k];
   T.forEach((e, i) => { if (P) e.plan = Array.isArray(P) ? P[i % P.length] : P;
     if (C && !e.ace && !e.moves.some(id => id === 'duel-arena' || id === 'hako-punch')) { conMoves(e, C, LEAGUE[k][3]); autoTrain(e); }
@@ -13319,7 +13319,8 @@ function startJourney(gi) {
   });
 }
 // してんのうは とくいタイプ。会場は その タイプの ステージ、チャンピオンは チャンピオンの ステージ
-const leagueStage = (k) => k >= LEAGUE.length - 1 ? 'champion' : ARENAS[LEAGUE[k][3]] ? LEAGUE[k][3] : FIELDS[k % FIELDS.length];
+const LEAGUE_STAGE = [null, null, null, 'fighting', null];   // アカリ（亜人）は もとの ジムの ステージ
+const leagueStage = (k) => k >= LEAGUE.length - 1 ? 'champion' : LEAGUE_STAGE[k] || (ARENAS[LEAGUE[k][3]] ? LEAGUE[k][3] : FIELDS[k % FIELDS.length]);
 function startLeague() {
   const J = jr(); if (J.badges.length < GYMS.length) return;
   const k = J.league, [lk, ln] = LEAGUE[k];
