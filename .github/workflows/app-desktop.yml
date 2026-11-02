@@ -1,7 +1,12 @@
 # PC版（Steam 用）：Windows・Mac・Linux の 実行ファイルを つくる。できた もの（dist の なか）を Steam に のせる
+# Steam に のせる：Actions の「PC アプリ（Steam）」→ Run workflow で「Steam に アップロード」に チェック
+#   さきに リポジトリの Settings → Secrets に いれる：STEAM_APP_ID・STEAM_USERNAME・STEAM_CONFIG_VDF（デポは App ID＋1〜3：Windows・Mac・Linux）（docs/STEAM.md）
 name: PC アプリ（Steam）
 on:
   workflow_dispatch:
+    inputs:
+      steam_upload: { description: 'Steam に アップロード', type: boolean, default: false }
+      steam_branch: { description: 'のせる ブランチ（からっぽ＝ default には 手で いれる。beta など）', type: string, default: '' }
   push:
     paths: ['index.html', 'stage/**', 'app/**', '.github/workflows/app-desktop.yml']
 jobs:
@@ -23,15 +28,42 @@ jobs:
         shell: bash
         env: { FIREBASE_CONFIG_JS: '${{ secrets.FIREBASE_CONFIG_JS }}' }
         run: if [ -n "$FIREBASE_CONFIG_JS" ]; then printf '%s' "$FIREBASE_CONFIG_JS" > firebase-config.js; fi
+      - name: Steam の App ID
+        shell: bash
+        env: { STEAM_APP_ID: '${{ secrets.STEAM_APP_ID }}' }
+        run: if [ -n "$STEAM_APP_ID" ]; then printf '{"appId":%s}\n' "$STEAM_APP_ID" > desktop/steam.json; fi
       - run: npm run build
       - run: npm install
         working-directory: app/desktop
       - run: npx electron-builder ${{ matrix.target }} --publish never
         working-directory: app/desktop
+      - name: まとめる（Mac の .app の なかの リンクを こわさない）
+        shell: bash
+        working-directory: app/desktop/dist
+        run: |
+          d=$(ls -d win-unpacked linux-unpacked mac-universal mac 2>/dev/null | head -1)
+          tar -C "$d" -czf ../desktop-${{ matrix.name }}.tgz .
       - uses: actions/upload-artifact@v4
         with:
           name: desktop-${{ matrix.name }}
-          path: |
-            app/desktop/dist/*-unpacked/**
-            app/desktop/dist/mac-universal/**
-            app/desktop/dist/mac/**
+          path: app/desktop/desktop-${{ matrix.name }}.tgz
+  steam:
+    if: github.event_name == 'workflow_dispatch' && inputs.steam_upload
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: art }
+      - name: ひらく
+        run: for n in windows mac linux; do mkdir -p "out/$n"; tar -C "out/$n" -xzf "art/desktop-$n/desktop-$n.tgz"; done; ls out/*
+      - uses: game-ci/steam-deploy@v3
+        with:
+          username: ${{ secrets.STEAM_USERNAME }}
+          configVdf: ${{ secrets.STEAM_CONFIG_VDF }}
+          appId: ${{ secrets.STEAM_APP_ID }}
+          buildDescription: ${{ github.sha }}
+          rootPath: out
+          depot1Path: windows
+          depot2Path: mac
+          depot3Path: linux
+          releaseBranch: ${{ inputs.steam_branch }}

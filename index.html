@@ -3777,8 +3777,19 @@ window.addEventListener('storage', (e) => { if (e.key !== SAVE_KEY) return; SAVE
   const bg = document.createElement('div'); bg.className = 'askbg'; bg.style.zIndex = 300;
   bg.innerHTML = '<div class="askbox"><div style="margin-bottom:12px">べつの タブ（または まど）で この ゲームが うごいて データが かわりました。<br>この がめんは よみこみなおします。</div><div class="row"><button class="btn">よみこみなおす</button></div></div>';
   bg.querySelector('button').onclick = () => location.reload(); $('app').appendChild(bg); });
+// Steam の 実績（PC版 だけ）：セーブの なかみから きめる（あとから はじめても とれる）。おなじ ものは 2かい おくらない
+const STEAM_SENT = new Set();
+function steamAch() {
+  const D = window.PMA_DESKTOP; if (!S || !D || typeof D.achv !== 'function') return;
+  try {
+    const J = jr(), X = S.dex || {}, ids = poolIds(), got = ids.filter(id => X[id] >= 2).length;
+    const on = { FIRST_WIN: S.wins >= 1, FIRST_CATCH: S.caught >= 1, BADGE_1: J.badges.length >= 1, BADGE_10: J.badges.length >= GYMS.length, CHAMPION: J.champ >= 1,
+      ARCADE_CLEAR: !!(S.arcade && S.arcade.clears >= 1), DEX_50: got >= 50, DEX_ALL: ids.length > 0 && got >= ids.length, TRAIN_FIRST: !!S.trTutDone, ONLINE_WIN: !!(S.rank && S.rank.w >= 1) };
+    for (const k in on) if (on[k] && !STEAM_SENT.has(k)) { STEAM_SENT.add(k); D.achv(k); }
+  } catch (e) { }
+}
 function save() { if (SAVE_STALE || ONB_TEST) return;   // ONB_TEST：はじめからの ながれを ためしている あいだは かきこまない
- if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} bkKick(); if (typeof updTeamIco === 'function') try { updTeamIco(); } catch (e) {} }   // へんせいの タブの 顔も かえる
+ if (S) { for (const m of [...S.party, ...S.box]) dexMark(m.sid, 2); } try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} bkKick(); steamAch(); if (typeof updTeamIco === 'function') try { updTeamIco(); } catch (e) {} }   // へんせいの タブの 顔も かえる
 const newMon = (sid, _lvl, bias) => fixMon({ uid: S ? S.uid++ : 0, sid }, bias);
 /* ===== ステータス（ポケモンと おなじ しくみ） =====
    6つの のうりょく：HP・こうげき・ぼうぎょ・属性攻撃・属性防御・すばやさ
