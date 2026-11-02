@@ -23,17 +23,22 @@ const tr = (() => {
   const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k in I18N_DICT) {
     const v = I18N_DICT[k][LI]; if (!v) continue;
-    if (k.includes('⟦')) { if (/⟧⟦/.test(k) || k.replace(/⟦\d+⟧/g, '').trim().length < 2) continue;   // ならんだ ⟦⟧（どこで わけるか きまらない）・きまった 文字が すくない ものは つかわない
-      const ps = k.split(/⟦(\d+)⟧/); let re = '^'; const ord = []; ps.forEach((p, i) => { if (i % 2) { re += '(.+?)'; ord.push(+p); } else re += esc(p); }); TPL.push({ re: new RegExp(re + '$', 's'), ord, out: v, fx: k.replace(/⟦\d+⟧/g, '').length }); }
+    if (k.includes('⟦')) { if (/⟧⟦/.test(k) || (k.replace(/⟦\d+⟧/g, '').trim().length < 3 && !/[\u4e00-\u9fff]/.test(k))) continue;   // ならんだ ⟦⟧（どこで わけるか きまらない）・きまった 文字が すくない ものは つかわない
+      const ps = k.split(/⟦(\d+)⟧/); let re = '^'; const ord = []; ps.forEach((p, i) => { if (i % 2) { re += '(.+?)'; ord.push(+p); } else re += esc(p); }); TPL.push({ re: new RegExp(re + '$', 's'), ord, out: v, dot: k.includes('・'), fx: k.replace(/⟦\d+⟧/g, '').length }); }
     else { EX.set(k, v); if (k.length >= 2) SUB.push([k, v]); }
   }
   TPL.sort((a, b) => b.fx - a.fx); SUB.sort((a, b) => b[0].length - a[0].length);
   const MISS = new Set(); window.__trMiss = MISS;
+  let NS = null; const NSET = () => NS || (NS = new Set(names().map(x => x[0])));
   let NAMES = null;   // モンスター名・技名 → ローマ字（ながい じゅん）
   const names = () => { if (NAMES) return NAMES; const s = new Set(); try { for (const k in SPECIES) s.add(SPECIES[k].n); for (const k in MOVES) s.add(MOVES[k].n); } catch (e) { return []; } NAMES = [...s].filter(n => n && JPRE.test(n) && !EX.has(n)).sort((a, b) => b.length - a.length).map(n => [n, romaji(n)]); return NAMES; };
   function core(c) {
     let r = EX.get(c); if (r !== undefined) return r;
-    for (const t of TPL) { const m = t.re.exec(c); if (m) return t.out.replace(/⟦(\d+)⟧/g, (_, n) => { const j = t.ord.indexOf(+n); return j >= 0 ? tr1(m[j + 1]) : ''; }); }
+    { const m = c.match(/^(あいての |やせいの )?(.+?)の (.+?)([！!]?)$/); if (m && NSET().has(m[2]) && NSET().has(m[3])) { const pre = m[1] ? (m[1][0] === 'あ' ? (LI ? '对手的' : 'Foe ') : (LI ? '野生的' : 'Wild ')) : ''; return pre + (LI ? romaji(m[2]) + '的' + romaji(m[3]) : romaji(m[2]) + "'s " + romaji(m[3])) + m[4]; } }   // 「モンスターの わざ」
+    const dot = c.includes('・');
+    for (const t of TPL) { if (dot && !t.dot) continue; const m = t.re.exec(c); if (m) return t.out.replace(/⟦(\d+)⟧/g, (_, n) => { const j = t.ord.indexOf(+n); return j >= 0 ? tr1(m[j + 1]) : ''; }); }
+    { const m = c.match(/^([^：]{1,8})：(.+)$/); if (m && EX.has(m[1] + '：')) return EX.get(m[1] + '：') + core(m[2].trim()); if (m && EX.has(m[1])) return EX.get(m[1]) + (LI ? '：' : ': ') + core(m[2].trim()); }   // 「みだし：なかみ」
+    if (c.includes('・')) return c.split('・').map(x => core(x.trim())).filter(x => x !== '').join(LI ? '、' : ', ');   // 「・」で ならべた ものは ひとつずつ
     if (MISS.size < 3000) MISS.add(c);   // 訳が ない 文（しらべる ため）
     r = c; for (const [n, ro] of names()) if (r.includes(n)) r = r.split(n).join(ro);
     if (!JPRE.test(r)) return r;
