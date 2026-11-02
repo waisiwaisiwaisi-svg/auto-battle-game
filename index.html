@@ -8931,8 +8931,10 @@ const validTeam6 = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 6 && 
 const validTeam = (t) => Array.isArray(t) && t.length >= 1 && t.length <= 3 && t.every(monOk);
 // サーバーの しごと（アプリ版だけ。claude.ai 版は いままで どおり この 端末で きめる）
 const SRV_APP = () => !!(window.PMA_APP && window.PMA_APP.online);
+const SRV_FN_ON = false;   // サーバーの しごと（Cloud Functions）：いまは つかわない（Firebase の むりょう プラン）。レート・ギルドの ポイントは ゲームが かく（ルールで かわりかたを せいげん）
+const SRV_RANK = () => SRV_APP() && SRV_FN_ON;
 let SRV_FN = null;
-async function srvFn() { if (SRV_FN) return SRV_FN; if (!SRV_APP()) return null; try { SRV_FN = window.claude && window.claude.use ? await window.claude.use('fn') : null; } catch (e) { SRV_FN = null; } return SRV_FN; }
+async function srvFn() { if (SRV_FN) return SRV_FN; if (!SRV_APP() || !(SRV_FN_ON || window.PMA_SAVE_ON)) return null;   /* PMA_SAVE_ON：テストで サーバーを つかう */ try { SRV_FN = window.claude && window.claude.use ? await window.claude.use('fn') : null; } catch (e) { SRV_FN = null; } return SRV_FN; }
 /* ===== セーブを サーバーで まもる（アプリ版）=====
    ジェム・アイテム・ワザステッカー・ボックス・モンスター・すすみぐあい は サーバーの セーブが ただしい（端末では かえられない）。
    それを かえる しごと（act）は さきに サーバーで うごかし（この ゲームの コードを サーバーの ブラウザで）、
@@ -9484,7 +9486,7 @@ async function rankDb0() {
     {   // サーバーに のこっている レートを つかう（ほかの 端末で あそんだ ぶん）。そろえ おわる まで RANKDB に しない（さきに rankSave が ふるい レートで うわがき しない）
       const snap = await db.doc('ranks/' + R.id).get().catch(() => null);
       const d = snap && snap.exists && snap.data ? snap.data() : null;
-      if (SRV_APP()) rankAdopt(d);   // アプリ版：サーバーが ただしい
+      if (SRV_RANK()) rankAdopt(d);   // サーバーが かく とき：サーバーが ただしい
       else if (d && typeof d.r === 'number' && (d.w || 0) + (d.l || 0) >= (myRank().w + myRank().l)) { Object.assign(myRank(), { r: d.r, w: d.w || 0, l: d.l || 0 }); save(); }
     }
     RANKDB = R;
@@ -9494,8 +9496,13 @@ async function rankDb0() {
 async function rankSave() {
   const R = await rankDb(); if (!R || !R.id) return;
   const k = myRank(), lead = S.party[0];
-  if (SRV_APP()) { R.db.doc('ranks/' + R.id).set({ t: Date.now(), m: lead ? lead.sid : '', nm: myName() }, { merge: true }).catch(() => { }); return; }   // アプリ版：レート・せんせきは サーバーが かく
-  R.db.doc('ranks/' + R.id).set({ r: k.r, w: k.w, l: k.l, t: Date.now(), m: lead ? lead.sid : '', nm: myName() }).catch(() => { });
+  if (SRV_RANK()) { R.db.doc('ranks/' + R.id).set({ t: Date.now(), m: lead ? lead.sid : '', nm: myName() }, { merge: true }).catch(() => { }); return; }   // アプリ版：レート・せんせきは サーバーが かく
+  const doc = () => ({ r: k.r, w: k.w, l: k.l, t: Date.now(), m: lead ? lead.sid : '', nm: myName() });
+  R.db.doc('ranks/' + R.id).set(doc()).catch(async () => {   // ことわられた（ルール：1しあいずつ・±32まで）：サーバーの かずに そろえて かきなおす
+    if (!SRV_APP()) return;
+    try { const sn = await R.db.doc('ranks/' + R.id).get(); const d = sn && sn.exists && sn.data ? sn.data() : null;
+      Object.assign(k, d && typeof d.r === 'number' ? { r: d.r, w: d.w || 0, l: d.l || 0 } : { r: 1000, w: 0, l: 0 }); save();
+      await R.db.doc('ranks/' + R.id).set(doc()); } catch (e) { } });
 }
 // サーバーの レート・せんせきに そろえる（アプリ版：この 端末の かずは よそう だけ）
 const rankAdopt = (d) => { if (!d || typeof d.r !== 'number') return false; const k = myRank(); Object.assign(k, { r: d.r, w: d.w || 0, l: d.l || 0 }); if (Array.isArray(d.h)) k.h = d.h.slice(-30); save(); return true; };
@@ -9638,13 +9645,13 @@ async function guildMe() {
 // かったら じぶんの ギルドに ポイント（オンライン +3、そのほか +1）
 // gmembers を かく：アプリ版では ポイント（pts・tot・wk）は サーバーの かずの まま（ルールで かえられない）
 async function gmSet(R, o) {
-  const ref = R.db.doc('gmembers/' + R.id); if (!SRV_APP()) return ref.set(o);
+  const ref = R.db.doc('gmembers/' + R.id); if (!SRV_RANK()) return ref.set(o);
   for (let i = 0; ; i++) { const c = await ref.get().catch(() => null), v = c && c.exists ? c.data() : {}, x = { ...o };
     for (const k of ['pts', 'tot', 'wk']) { if (v[k] != null) x[k] = v[k]; else delete x[k]; }
     try { await ref.set(x); if (GUILD.me && GUILD.me.gid === x.gid) Object.assign(GUILD.me, { pts: x.pts, tot: x.tot, wk: x.wk }); return; } catch (e) { if (i >= 2) throw e; } }   // サーバーが あいだで ふやした：よみなおして もういちど
 }
 async function guildWin(n) {
-  if (SRV_APP()) {   // アプリ版：オンライン対戦の かちは サーバーが 試合の けっかから つける。ふつうの かちは サーバーに たのむ（かいすうに せいげん）
+  if (SRV_RANK()) {   // サーバーが かく とき：オンライン対戦の かちは サーバーが 試合の けっかから つける。ふつうの かちは サーバーに たのむ（かいすうに せいげん）
     if (n !== 1) return;
     try { const m = GUILD.me || await guildMe(); if (!m || !m.gid) return; const f = await srvFn(); const r = f && await f.call('guildWin1', {}); if (r && r.ok && GUILD.me) { GUILD.me.pts = r.pts; GUILD.me.wk = weekNo(); } } catch (e) { }
     return;

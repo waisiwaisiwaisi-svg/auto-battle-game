@@ -36,7 +36,13 @@
    ```
    ルールの中身：`app/firebase/firestore.rules`・`app/firebase/database.rules.json`
    （読むのはログインした人全員、書けるのは自分のデータだけ。通報は書くだけで読めない）
-4. **サーバーの しごと（Cloud Functions）**：レート・せんせき・ギルドポイント・日替わりの むりょう を サーバーで きめる（チート たいさく）。
+4. **いまは むりょう プラン（Spark）で うごかす**：ゲームの `SRV_FN_ON = false` で サーバーの しごとは つかわない。
+   レート・せんせき（`ranks` の r・w・l）と ギルドポイント（`gmembers` の pts・tot・wk）は ゲームが かき、`firestore.rules` で かわりかたを せいげん する
+   （1かいの かきこみで しあいは 1つ・レートの かわりは ±32 まで・しあいの あいだは 15びょう／ギルドは 1かい +3 まで・10びょう）。
+   ルールを かえたら `npx firebase deploy --only firestore:rules,database`（むりょう プランでも できる）。
+   むりょう プランの うえかぎり：Realtime Database の どうじ せつぞく 100・Firestore の よみ 1日 5まん／かき 2まん。こえた ひは オンラインが とまる（せいきゅう は されない）。
+   Blaze に したら `SRV_FN_ON = true` に して、下の サーバーの しごと と ルール（r・w・l は サーバーだけ）に もどす。
+5. **サーバーの しごと（Cloud Functions：Blaze プランに したら）**：レート・せんせき・ギルドポイント・日替わりの むりょう を サーバーで きめる（チート たいさく）。
    Firebase を **Blaze プラン**（従量課金）に して から：
    ```sh
    cd app/functions && npm install && cd ..
