@@ -3,17 +3,17 @@
 "Tip: Set move conditions in Training to get way stronger!",
 "提示：在训练中设定招式条件，就会变得更强！"
 ],
-"ヒント：くさむらで よわらせて ボックスを なげよう": [
-"Tip: Weaken monsters in tall grass, then throw a Capsule!",
-"提示：在草丛里先削弱对手，再扔出胶囊吧！"
+"ヒント：あきちで よわらせて ボックスを なげよう": [
+"Tip: Weaken monsters in the vacant lot, then throw a Capsule!",
+"提示：在空地里先削弱对手，再扔出胶囊吧！"
 ],
 "ヒント：ひかえを タップすると こうたい できる": [
 "Tip: Tap a bench monster to switch!",
 "提示：点击替补就能替换！"
 ],
-"ヒント：タイプの あいしょうを ジムに あわせよう": [
-"Tip: Pick types that match up well against the Gym!",
-"提示：根据道馆选择相克有利的属性吧！"
+"ヒント：タイプの あいしょうを クルーに あわせよう": [
+"Tip: Pick types that match up well against the Crew!",
+"提示：根据街团选择相克有利的属性吧！"
 ],
 "ヒント：シミュレーションで 訓練の ききめを ためせる": [
 "Tip: Test your Training in a simulation!",
@@ -1115,9 +1115,9 @@
 "Ring deep in the mountains",
 "深山里的拳击台"
 ],
-"チャンピオンを 目指す ボクサー": [
-"A boxer aiming to be Champion",
-"立志成为冠军的拳击手"
+"キングを 目指す ボクサー": [
+"A boxer aiming to be King",
+"立志成为王者的拳击手"
 ],
 "カマの 両腕で 拳法を つかう。（もと：カマキリ）": [
 "Uses kung fu with its two scythe arms. (Based on: mantis)",
@@ -1143,13 +1143,13 @@
 "Stands firm and pushes foes out",
 "稳稳站定，把对手推出去"
 ],
-"赤い マフラーの チャンピオン。（もと：パンダ）": [
-"A Champion in a red scarf. (Based on: panda)",
-"围着红围巾的冠军。（原型：熊猫）"
+"赤い マフラーの キング。（もと：パンダ）": [
+"A King in a red scarf. (Based on: panda)",
+"围着红围巾的王者。（原型：熊猫）"
 ],
-"赤い マフラーの チャンピオン": [
-"A Champion in a red scarf",
-"围着红围巾的冠军"
+"赤い マフラーの キング": [
+"A King in a red scarf",
+"围着红围巾的王者"
 ],
 "紫の 糸で えものを しばる。（もと：クモ）": [
 "Ties up prey with purple thread. (Based on: spider)",
@@ -3371,9 +3371,9 @@
 "Shop",
 "商店"
 ],
-"ジム": [
-"Gym",
-"道馆"
+"クルー": [
+"Crew",
+"街团"
 ],
 "くんれん": [
 "Training",
@@ -3391,9 +3391,9 @@
 "Team Edit",
 "编队"
 ],
-"くさむら": [
-"Tall grass",
-"草丛"
+"あきち": [
+"Vacant lot",
+"空地"
 ],
 "フリー対戦": [
 "Free Battle",
@@ -3415,9 +3415,9 @@
 "My Room",
 "我的房间"
 ],
-"リーグ": [
-"League",
-"联赛"
+"キングバトル": [
+"King Battle",
+"王者之战"
 ],
 "タワー": [
 "Tower",
@@ -3439,9 +3439,9 @@
 "Monsters",
 "怪兽"
 ],
-"でんどういり おめでとう！ タワーにも のぼろう": [
-"You're in the Hall of Fame! Now climb the Tower too",
-"恭喜进入名人堂！也去爬塔吧"
+"レジェンド入り おめでとう！ タワーにも のぼろう": [
+"You're a Legend! Now climb the Tower too",
+"恭喜成为传奇！也去爬塔吧"
 ],
 "つぎは ⟦0⟧！": [
 "Next: ⟦0⟧!",
@@ -3451,9 +3451,9 @@
 "Start with your first battle!",
 "先从第一场战斗开始！"
 ],
-"つぎは ⟦0⟧ジムの サモナー ⟦1⟧人め！": [
-"Next: ⟦0⟧ Gym, Summoner #⟦1⟧!",
-"下一个：⟦0⟧道馆的第⟦1⟧位召唤师！"
+"つぎは ⟦0⟧クルーの メンバー ⟦1⟧人め！": [
+"Next: ⟦0⟧ Crew, Summoner #⟦1⟧!",
+"下一个：⟦0⟧街团的第⟦1⟧位召唤师！"
 ],
 "つぎの あいては ⟦0⟧！": [
 "Next foe: ⟦0⟧!",
@@ -3473,7 +3473,7 @@
 ],
 "しげみが ガサガサ ゆれている……！": [
 "The bushes are rustling...!",
-"草丛沙沙作响……！"
+"空地沙沙作响……！"
 ],
 "ひのやま": [
 "Fire Mountain",
@@ -3643,9 +3643,9 @@
 "Final",
 "决赛"
 ],
-"チャンピオン レイ": [
-"Champion Rei",
-"冠军 Rei"
+"キング レイ": [
+"King Rei",
+"王者 Rei"
 ],
 "こおりの": [
 "Ice",
@@ -3711,9 +3711,9 @@
 "Fairy",
 "妖精之"
 ],
-"チャンピオンの": [
-"Champion's",
-"冠军之"
+"キングの": [
+"King's",
+"王者之"
 ],
 "こうげきが あたる": [
 "Attack hits",
@@ -3859,9 +3859,9 @@
 "Move: ⟦0⟧",
 "招式：⟦0⟧"
 ],
-"コーチから ⟦0⟧を もらった！ （⟦1⟧ジムで たよりに なるよ）": [
-"Got ⟦0⟧ from the coach! (A big help at the ⟦1⟧ Gym)",
-"从教练那里得到了⟦0⟧！（在⟦1⟧道馆很可靠哦）"
+"コーチから ⟦0⟧を もらった！ （⟦1⟧クルーで たよりに なるよ）": [
+"Got ⟦0⟧ from the coach! (A big help at the ⟦1⟧ Crew)",
+"从教练那里得到了⟦0⟧！（在⟦1⟧街团很可靠哦）"
 ],
 "まずは チュートリアルで バトルの きほんを やってみよう！": [
 "First, learn battle basics in the tutorial!",
@@ -4047,9 +4047,9 @@
 "Opens right away",
 "买了马上打开"
 ],
-"ジェムは しあいや ジム・リーグの ごほうびで たまります": [
-"Earn Gems from matches and Gym/League rewards",
-"宝石可以通过对战和道馆、联赛的奖励获得"
+"ジェムは しあいや クルー・キングバトルの ごほうびで たまります": [
+"Earn Gems from matches and Crew/King Battle rewards",
+"宝石可以通过对战和街团、王者之战的奖励获得"
 ],
 "⟦0⟧じかん⟦1⟧ふん": [
 "⟦0⟧h⟦1⟧m",
@@ -4183,17 +4183,17 @@
 "10-battle run, High score ⟦0⟧",
 "10连战、最高分 ⟦0⟧"
 ],
-"でんどういり ⟦0⟧かい・バッジ ⟦1⟧/10": [
-"Hall of Fame ×⟦0⟧, Badges ⟦1⟧/10",
-"殿堂入⟦0⟧次、徽章 ⟦1⟧/10"
+"レジェンド入り ⟦0⟧かい・タグ ⟦1⟧/10": [
+"Legend ×⟦0⟧, Tags ⟦1⟧/10",
+"传奇⟦0⟧次、标签 ⟦1⟧/10"
 ],
-"バッジ ⟦0⟧/10・つぎは ⟦1⟧ジム": [
-"Badges ⟦0⟧/10, Next: ⟦1⟧ Gym",
-"徽章 ⟦0⟧/10、下一个：⟦1⟧道馆"
+"タグ ⟦0⟧/10・つぎは ⟦1⟧クルー": [
+"Tags ⟦0⟧/10, Next: ⟦1⟧ Crew",
+"标签 ⟦0⟧/10、下一个：⟦1⟧街团"
 ],
-"バッジが そろった！ チャンピオンリーグへ": [
-"All Badges collected! On to the Champion League",
-"徽章集齐了！前往冠军联赛"
+"タグが そろった！ キングバトルへ": [
+"All Tags collected! On to the King Battle",
+"标签集齐了！前往王者之战"
 ],
 "・⟦0⟧勝 ⟦1⟧敗": [
 ", ⟦0⟧W ⟦1⟧L",
@@ -4603,9 +4603,9 @@
 ", ",
 "、"
 ],
-"⟦0⟧ジム": [
-"⟦0⟧ Gym",
-"⟦0⟧道馆"
+"⟦0⟧クルー": [
+"⟦0⟧ Crew",
+"⟦0⟧街团"
 ],
 "あう こうげきを うけず、でなかった": [
 "Not hit by a matching attack, so it didn't trigger",
@@ -7327,9 +7327,9 @@
 "⟦0⟧ learned the new move \"⟦1⟧\"!",
 "⟦0⟧学会了新招式「⟦1⟧」！"
 ],
-"草むらのごほうびに、": [
-"Tall grass reward: a ",
-"作为草丛的奖励，你获得了"
+"空き地のごほうびに、": [
+"Vacant lot reward: a ",
+"作为空地的奖励，你获得了"
 ],
 "をもらいました！": [
 " for you!",
@@ -7355,9 +7355,9 @@
 "⟦0⟧ got scared and ran off (howls scare wild ones away)",
 "⟦0⟧被吓跑了（嚎叫会让野生怪兽逃走）"
 ],
-"くさむらから ぶじに にげだした": [
-"Got away safely from the tall grass",
-"安全逃出了草丛"
+"あきちから ぶじに にげだした": [
+"Got away safely from the vacant lot",
+"安全逃出了空地"
 ],
 "⟦0⟧の チームに かった！": [
 "You beat ⟦0⟧'s team!",
@@ -7595,9 +7595,9 @@
 "Finally, defeat the opponent to finish!",
 "最后，打倒对手来收尾吧！"
 ],
-"野生のモンスターが現れました！ 草むらでは、モンスターを捕まえて仲間にできます。": [
-"A wild monster appeared! In the tall grass, you can catch monsters to join your team.",
-"野生怪兽出现了！在草丛里可以捕捉怪兽，让它成为伙伴。"
+"野生のモンスターが現れました！ 空き地では、モンスターを捕まえて仲間にできます。": [
+"A wild monster appeared! In the vacant lot, you can catch monsters to join your team.",
+"野生怪兽出现了！在空地里可以捕捉怪兽，让它成为伙伴。"
 ],
 "まずは戦って、少し弱らせましょう。": [
 "First, battle it to weaken it a bit.",
@@ -7615,9 +7615,9 @@
 "(The weaker it is, the easier to catch)",
 "（越虚弱越容易捕捉）"
 ],
-"くさむらが ガサガサ ゆれている…": [
-"The tall grass is rustling…",
-"草丛在沙沙摇晃…"
+"あきちが ガサガサ ゆれている…": [
+"The vacant lot is rustling…",
+"空地在沙沙摇晃…"
 ],
 "⟦0⟧が仲間になりました！": [
 "⟦0⟧ joined your team!",
@@ -7627,9 +7627,9 @@
 "Let's go to the ",
 "一起去"
 ],
-"草むら": [
-"Tall grass",
-"草丛"
+"空き地": [
+"Vacant lot",
+"空地"
 ],
 "へ行って、モンスターを捕まえてみましょう。「": [
 " together and catch monsters. Tap \"",
@@ -7691,9 +7691,9 @@
 "\" with your Rival, then ",
 "」，之后是"
 ],
-"ジム戦": [
-"Gym battles",
-"道馆战"
+"クルー戦": [
+"Crew battles",
+"街团战"
 ],
 "です。がんばってください！": [
 ". Good luck!",
@@ -7703,9 +7703,9 @@
 "That's the end of the test. Restoring your original data.",
 "测试到此结束。将恢复原来的数据。"
 ],
-"最初の流れ（バトル → 訓練 → 名前・最初のモンスター → 草むら → ブラインドボックス）を通しで試します。 テスト中のデータは保存されず、最後に元のデータに戻ります。": [
-"Test the whole opening flow (Battle → Training → Name, first monster → Tall grass → Blind Box). Test data isn't saved; your original data comes back at the end.",
-"完整测试开头流程（战斗 → 训练 → 名字、第一只怪兽 → 草丛 → 盲盒）。测试中的数据不会保存，最后会恢复原来的数据。"
+"最初の流れ（バトル → 訓練 → 名前・最初のモンスター → 空き地 → ブラインドボックス）を通しで試します。 テスト中のデータは保存されず、最後に元のデータに戻ります。": [
+"Test the whole opening flow (Battle → Training → Name, first monster → Vacant lot → Blind Box). Test data isn't saved; your original data comes back at the end.",
+"完整测试开头流程（战斗 → 训练 → 名字、第一只怪兽 → 空地 → 盲盒）。测试中的数据不会保存，最后会恢复原来的数据。"
 ],
 "チュートリアル クリア！": [
 "Tutorial cleared!",
@@ -9415,13 +9415,13 @@
 "Last 20",
 "最近20条"
 ],
-"トロフィー たいかいで ゆうしょうしたり、アーケードを クリアしたり、チャンピオンリーグで かつと もらえる。これまでの きろく です。": [
-"Trophies: earned by winning tournaments, clearing the Arcade, or winning the Champion League. Here's your record so far.",
-"奖杯：在大赛中夺冠、通关街机或在冠军联赛中获胜即可获得。这是至今的记录。"
+"トロフィー たいかいで ゆうしょうしたり、アーケードを クリアしたり、キングバトルで かつと もらえる。これまでの きろく です。": [
+"Trophies: earned by winning tournaments, clearing the Arcade, or winning the King Battle. Here's your record so far.",
+"奖杯：在大赛中夺冠、通关街机或在王者之战中获胜即可获得。这是至今的记录。"
 ],
-"ボックス くさむらで よわらせた モンスターに なげると つかまえられる。バトルに かったり、ブラインドボックスから でる。": [
-"Capsule: throw it at a monster weakened in tall grass to catch it. Get them by winning battles or from Mystery Boxes.",
-"胶囊：向在草丛中削弱的怪兽投掷即可捕捉。赢得对战或从盲盒中获得。"
+"ボックス あきちで よわらせた モンスターに なげると つかまえられる。バトルに かったり、ブラインドボックスから でる。": [
+"Capsule: throw it at a monster weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
+"胶囊：向在空地中削弱的怪兽投掷即可捕捉。赢得对战或从盲盒中获得。"
 ],
 "ジェム ブラインドボックスを まち時間なしで すぐ あけられる。バトルに かったり、たいかいで ゆうしょうすると もらえる。": [
 "Gems: open a Mystery Box right away, no waiting. Get them by winning battles or tournaments.",
@@ -9803,9 +9803,9 @@
 " to catch it. Nature, stats, and moves are set when you catch it.",
 "即可捕捉。性格、能力值和招式在捕捉时决定。"
 ],
-"は 勝つと ときどき もらえる（ジムリーダー・チャンピオンリーグは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・ボックス・ワザステッカーが でる。": [
-" are sometimes won in battles (always from Gym Leaders and the Champion League; kind is random). Their timer starts when you get them, and they give monsters, Capsules, and Move stickers.",
-"胜利后有时可获得（道馆馆主和冠军联赛必定获得，种类随机）。获得后开始计时，会开出怪兽、胶囊、技贴纸。"
+"は 勝つと ときどき もらえる（ヘッド・キングバトルは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・ボックス・ワザステッカーが でる。": [
+" are sometimes won in battles (always from Crew Heads and the King Battle; kind is random). Their timer starts when you get them, and they give monsters, Capsules, and Move stickers.",
+"胜利后有时可获得（团长和王者之战必定获得，种类随机）。获得后开始计时，会开出怪兽、胶囊、技贴纸。"
 ],
 "💎ジェム": [
 "💎Gems",
@@ -9871,113 +9871,113 @@
 "Left the battle",
 "已退出对战"
 ],
-"ジムリーダー コハル": [
-"Gym Leader Koharu",
-"道馆馆主 Koharu"
+"ヘッド コハル": [
+"Crew Head Koharu",
+"团长 Koharu"
 ],
 "はなと みどりの ちから、うけとめてね！": [
 "Feel the power of flowers and green!",
 "接受花与绿的力量吧！"
 ],
-"ジムリーダー リク": [
-"Gym Leader Riku",
-"道馆馆主 Riku"
+"ヘッド リク": [
+"Crew Head Riku",
+"团长 Riku"
 ],
 "ながれに さからえるかな？": [
 "Can you fight the current?",
 "你能逆流而上吗？"
 ],
-"ジムリーダー ショウ": [
-"Gym Leader Sho",
-"道馆馆主 Sho"
+"ヘッド ショウ": [
+"Crew Head Sho",
+"团长 Sho"
 ],
 "あつあつの しあいを めしあがれ！": [
 "Enjoy a red-hot match!",
 "请享用火热的比赛！"
 ],
-"ジムリーダー ネネ": [
-"Gym Leader Nene",
-"道馆馆主 Nene"
+"ヘッド ネネ": [
+"Crew Head Nene",
+"团长 Nene"
 ],
 "はんのう そくど、ついてこられる？": [
 "Can you keep up with my reflexes?",
 "跟得上我的反应速度吗？"
 ],
-"ジムリーダー ハヤト": [
-"Gym Leader Hayato",
-"道馆馆主 Hayato"
+"ヘッド ハヤト": [
+"Crew Head Hayato",
+"团长 Hayato"
 ],
 "シャッターチャンスは のがさない！ きかいの せいど、みせてやる！": [
 "I never miss a photo op! Behold machine precision!",
 "绝不错过快门时机！见识一下机械的精度！"
 ],
-"ジムリーダー ジン": [
-"Gym Leader Jin",
-"道馆馆主 Jin"
+"ヘッド ジン": [
+"Crew Head Jin",
+"团长 Jin"
 ],
 "どっしり かまえて うけてたつ！": [
 "I'll stand firm and take you on!",
 "我会稳稳地迎战你！"
 ],
-"ジムリーダー シオリ": [
-"Gym Leader Shiori",
-"道馆馆主 Shiori"
+"ヘッド シオリ": [
+"Crew Head Shiori",
+"团长 Shiori"
 ],
 "むしの けんきゅう せいか、みせてあげる。": [
 "Let me show you my bug research!",
 "让你看看我研究虫子的成果。"
 ],
-"ジムリーダー タクミ": [
-"Gym Leader Takumi",
-"道馆馆主 Takumi"
+"ヘッド タクミ": [
+"Crew Head Takumi",
+"团长 Takumi"
 ],
 "そらから すべて みえているぞ！": [
 "I see everything from the sky!",
 "从天空中一切尽收眼底！"
 ],
-"ジムリーダー アカリ": [
-"Gym Leader Akari",
-"道馆馆主 Akari"
+"ヘッド アカリ": [
+"Crew Head Akari",
+"团长 Akari"
 ],
 "こころも からだも きたえてきた！": [
 "I've trained my heart and body!",
 "我锻炼了身心！"
 ],
-"ジムリーダー アカネ": [
-"Gym Leader Akane",
-"道馆馆主 Akane"
+"ヘッド アカネ": [
+"Crew Head Akane",
+"团长 Akane"
 ],
 "ドラゴンの ほんきを みせてあげる。": [
 "I'll show you a dragon's true power.",
 "让你见识龙的真正实力。"
 ],
-"してんのう サトリ": [
-"Elite Four Satori",
-"四天王 Satori"
+"ビッグフォー サトリ": [
+"Big Four Satori",
+"四巨头 Satori"
 ],
 "データは もう そろっているの。": [
 "My data is already complete.",
 "数据已经齐全了。"
 ],
-"してんのう ヨミ": [
-"Elite Four Yomi",
-"四天王 Yomi"
+"ビッグフォー ヨミ": [
+"Big Four Yomi",
+"四巨头 Yomi"
 ],
 "くらやみの むこうから ずっと みていたよ…": [
 "I've been watching you from beyond the dark…",
 "我一直在黑暗的彼端看着你哦…"
 ],
-"してんのう ガイ": [
-"Elite Four Gai",
-"四天王 Gai"
+"ビッグフォー ガイ": [
+"Big Four Gai",
+"四巨头 Gai"
 ],
-"リーグの かべは あついぞ！": [
-"The League's wall is thick!",
-"联盟的壁垒可是很厚的！"
+"キングバトルの かべは あついぞ！": [
+"The King Battle's wall is thick!",
+"王者之战的壁垒可是很厚的！"
 ],
-"してんのう ツバキ": [
-"Elite Four Tsubaki",
-"四天王 Tsubaki"
+"ビッグフォー ツバキ": [
+"Big Four Tsubaki",
+"四巨头 Tsubaki"
 ],
 "もえる こころで かかってこい！": [
 "Come at me with a burning heart!",
@@ -10023,21 +10023,21 @@
 "Dragon's true power (big moves, stat boosts)",
 "龙的真正实力（大招和能力提升）"
 ],
-"⟦0⟧ジムの ⟦1⟧": [
-"⟦1⟧ of the ⟦0⟧ Gym",
-"⟦0⟧道馆的⟦1⟧"
+"⟦0⟧クルーの ⟦1⟧": [
+"⟦1⟧ of the ⟦0⟧ Crew",
+"⟦0⟧街团的⟦1⟧"
 ],
-"⟦0⟧ジム ⟦1⟧": [
-"⟦0⟧ Gym ⟦1⟧",
-"⟦0⟧道馆 ⟦1⟧"
+"⟦0⟧クルー ⟦1⟧": [
+"⟦0⟧ Crew ⟦1⟧",
+"⟦0⟧街团 ⟦1⟧"
 ],
 "⟦0⟧が しょうぶを しかけてきた！": [
 "⟦0⟧ wants to battle!",
 "⟦0⟧向你发起了挑战！"
 ],
-"チャンピオンリーグ ⟦0⟧": [
-"Champion League ⟦0⟧",
-"冠军联赛 ⟦0⟧"
+"キングバトル ⟦0⟧": [
+"King Battle ⟦0⟧",
+"王者之战 ⟦0⟧"
 ],
 "⟦0⟧「ここまで来たんだね。さいごのしょうぶだ！」": [
 "⟦0⟧: “You made it this far. This is the final battle!”",
@@ -10047,10 +10047,6 @@
 "⟦0⟧: “So you're a Summoner too. Let's test your skills!”",
 "⟦0⟧「你也成为召唤师了啊。先来试试身手吧！」"
 ],
-"チャンピオンリーグ": [
-"Champion League",
-"冠军联赛"
-],
 "⟦0⟧に かった！": [
 "Beat ⟦0⟧!",
 "战胜了⟦0⟧！"
@@ -10059,25 +10055,25 @@
 "……Not bad. That was a good battle for your first time.",
 "……挺厉害嘛。作为第一次，打得不错哦。"
 ],
-"わたしもこれから、ジムを巡ってバッジを集めるんだ。": [
-"I'm going to tour the Gyms and collect Badges too.",
-"我接下来也要去挑战道馆、收集徽章。"
+"わたしもこれから、クルーを巡ってタグを集めるんだ。": [
+"I'm going to tour the Crews and collect Tags too.",
+"我接下来也要去挑战街团、收集标签。"
 ],
-"ねえ、競争しない？ どっちが先にジムバッジを10個集められるか！": [
-"Hey, wanna race? Who gets 10 Gym Badges first!",
-"嘿，要不要比一比？看谁先集齐10枚道馆徽章！"
+"ねえ、競争しない？ どっちが先にクルータグを10個集められるか！": [
+"Hey, wanna race? Who gets 10 Crew Tags first!",
+"嘿，要不要比一比？看谁先集齐10枚街团标签！"
 ],
 "まけてしまった… もういちど ちょうせんしよう": [
 "You lost… Let's try again",
 "输了…再挑战一次吧"
 ],
-"👑 チャンピオンリーグ ゆうしょう！ でんどういり！": [
-"👑 Champion League victory! Hall of Fame!",
-"👑 冠军联赛夺冠！进入名人堂！"
+"👑 キングバトル ゆうしょう！ レジェンド入り！": [
+"👑 King Battle victory! Legend!",
+"👑 王者之战夺冠！成为传奇！"
 ],
-"ジムリーダーたちが さらに つよく なって まっている…": [
-"The Gym Leaders are waiting, even stronger…",
-"道馆馆主们变得更强，正在等着你…"
+"ヘッドたちが さらに つよく なって まっている…": [
+"The Crew Heads are waiting, even stronger…",
+"团长们变得更强，正在等着你…"
 ],
 "⟦0⟧に かった！ つぎは ⟦1⟧": [
 "Beat ⟦0⟧! Next: ⟦1⟧",
@@ -10095,17 +10091,17 @@
 "You lost… Try again",
 "输了…再挑战吧"
 ],
-"ヒント：⟦0⟧ジムには ⟦1⟧タイプが つよい。アーケードの「へんせい」ボタンや、きょうか・ワザステッカーで つよく しよう": [
-"Hint: ⟦1⟧ type is strong vs. the ⟦0⟧ Gym. Power up with the Arcade's “Team” button, Training points, and Move stickers",
-"提示：⟦1⟧属性对⟦0⟧道馆很有效。用街机的「编队」按钮、强化和技贴纸变强吧"
+"ヒント：⟦0⟧クルーには ⟦1⟧タイプが つよい。アーケードの「へんせい」ボタンや、きょうか・ワザステッカーで つよく しよう": [
+"Hint: ⟦1⟧ type is strong vs. the ⟦0⟧ Crew. Power up with the Arcade's “Team” button, Training points, and Move stickers",
+"提示：⟦1⟧属性对⟦0⟧街团很有效。用街机的「编队」按钮、强化和技贴纸变强吧"
 ],
 "サモナーに かった！ ⟦0⟧": [
 "Beat the Summoner! ⟦0⟧",
 "战胜了召唤师！⟦0⟧"
 ],
-"⟦0⟧ ⟦1⟧バッジを てにいれた！": [
-"⟦0⟧ Got the ⟦1⟧ Badge!",
-"⟦0⟧ 获得了⟦1⟧徽章！"
+"⟦0⟧ ⟦1⟧タグを てにいれた！": [
+"⟦0⟧ Got the ⟦1⟧ Tag!",
+"⟦0⟧ 获得了⟦1⟧标签！"
 ],
 "⟦0⟧に また かった！": [
 "Beat ⟦0⟧ again!",
@@ -10115,13 +10111,13 @@
 "Got Move sticker “⟦0⟧”",
 "获得了技贴纸「⟦0⟧」"
 ],
-"つぎは ⟦0⟧ジム！": [
-"Next: ⟦0⟧ Gym!",
-"下一个是⟦0⟧道馆！"
+"つぎは ⟦0⟧クルー！": [
+"Next: ⟦0⟧ Crew!",
+"下一个是⟦0⟧街团！"
 ],
-"バッジが 10こ そろった！ チャンピオンリーグへ いこう！": [
-"All 10 Badges! On to the Champion League!",
-"集齐了10枚徽章！前往冠军联赛吧！"
+"タグが 10こ そろった！ キングバトルへ いこう！": [
+"All 10 Tags! On to the King Battle!",
+"集齐了10枚标签！前往王者之战吧！"
 ],
 "さいこう": [
 "Best",
@@ -10227,9 +10223,9 @@
 "Team vs. ⟦0⟧ (⟦1⟧)",
 "针对⟦0⟧（⟦1⟧）编队"
 ],
-"⟦0⟧ジムに あわせて へんせい": [
-"Team for ⟦0⟧ Gym",
-"针对⟦0⟧道馆编队"
+"⟦0⟧クルーに あわせて へんせい": [
+"Team for ⟦0⟧ Crew",
+"针对⟦0⟧街团编队"
 ],
 "つよい じゅんに へんせい": [
 "Team by strength",
@@ -10247,33 +10243,33 @@
 "Team ›",
 "编队 ›"
 ],
-"でんどういり ⟦0⟧かい！ ジムリーダーたちは つよく なって まっている。": [
-"Hall of Fame ×⟦0⟧! The Gym Leaders are waiting, stronger.",
-"第⟦0⟧次进入名人堂！道馆馆主们变得更强，正在等着你。"
+"レジェンド入り ⟦0⟧かい！ ヘッドたちは つよく なって まっている。": [
+"Legend ×⟦0⟧! The Crew Heads are waiting, stronger.",
+"第⟦0⟧次成为传奇！团长们变得更强，正在等着你。"
 ],
-"バッジが そろった！ チャンピオンリーグに いどもう。": [
-"All Badges collected! Take on the Champion League.",
-"徽章集齐了！挑战冠军联赛吧。"
+"タグが そろった！ キングバトルに いどもう。": [
+"All Tags collected! Take on the King Battle.",
+"标签集齐了！挑战王者之战吧。"
 ],
-"10の とうぎじょうを めぐって ジムリーダーに かち、バッジを あつめよう。ぜんぶ そろうと チャンピオンリーグへ。": [
-"Visit 10 arenas, beat the Gym Leaders, and collect Badges. Get them all to reach the Champion League.",
-"巡游10座竞技场，战胜道馆馆主收集徽章。全部集齐即可前往冠军联赛。"
+"10の とうぎじょうを めぐって ヘッドに かち、タグを あつめよう。ぜんぶ そろうと キングバトルへ。": [
+"Visit 10 arenas, beat the Crew Heads, and collect Tags. Get them all to reach the King Battle.",
+"巡游10座竞技场，战胜团长收集标签。全部集齐即可前往王者之战。"
 ],
 "⟦0⟧と しょうぶ⟦1⟧": [
 "Battle ⟦0⟧⟦1⟧",
 "与⟦0⟧对决⟦1⟧"
 ],
-"バッジを 10こ あつめると ちょうせんできる": [
-"Collect 10 Badges to challenge",
-"集齐10枚徽章即可挑战"
+"タグを 10こ あつめると ちょうせんできる": [
+"Collect 10 Tags to challenge",
+"集齐10枚标签即可挑战"
 ],
 "▶ ちょうせん": [
 "▶ Challenge",
 "▶ 挑战"
 ],
-"でんどういり すると ちょうせん できる": [
-"Enter the Hall of Fame to challenge",
-"进入名人堂后即可挑战"
+"レジェンド入り すると ちょうせん できる": [
+"Become a Legend to challenge",
+"成为传奇后即可挑战"
 ],
 "⟦0⟧・⟦1⟧れんしょうごとに ボス、⟦2⟧れんしょうで タイクーン": [
 "Boss every ⟦0⟧, ⟦1⟧ wins; Tycoon at ⟦2⟧ wins",
@@ -10495,9 +10491,9 @@
 "Battle other Summoners",
 "与其他召唤师对战"
 ],
-"ジムを めぐって バッジを あつめる": [
-"Visit Gyms and collect Badges",
-"巡游道馆收集徽章"
+"クルーを めぐって タグを あつめる": [
+"Visit Crews and collect Tags",
+"巡游街团收集标签"
 ],
 "だれかの チームと たいせん": [
 "Battle someone's team",
@@ -10527,9 +10523,9 @@
 "Making-of",
 "制作花絮"
 ],
-"アーケード：バッジ": [
-"Arcade: Badges",
-"街机：徽章"
+"アーケード：タグ": [
+"Arcade: Tags",
+"街机：标签"
 ],
 "モンスターずかん": [
 "Monster Dex",
@@ -10579,9 +10575,9 @@
 "Bench",
 "替补"
 ],
-"— ジム・リーグ・ライバル戦は ひかえも つづけて でる（6たいで たたかう）": [
-"— in Gym, League, and Rival battles the Bench fights too (6 monsters)",
-"— 道馆、联盟、劲敌战中替补也会接着出战（6只战斗）"
+"— クルー・キングバトル・ライバル戦は ひかえも つづけて でる（6たいで たたかう）": [
+"— in Crew, King Battle, and Rival battles the Bench fights too (6 monsters)",
+"— 街团、王者之战、劲敌战中替补也会接着出战（6只战斗）"
 ],
 "ホーム": [
 "Home",
@@ -10599,9 +10595,9 @@
 "Quit match (counts as a loss)",
 "退出比赛（算作失败）"
 ],
-"くさむらのみ": [
-"Tall grass only",
-"仅限草丛"
+"あきちのみ": [
+"Vacant lot only",
+"仅限空地"
 ],
 "かわす": [
 "Dodge",
@@ -10663,13 +10659,13 @@
 "Ace",
 "王牌"
 ],
-"でんどういり ⟦0⟧かい": [
-"Hall of Fame ×⟦0⟧",
-"名人堂 ⟦0⟧次"
+"レジェンド入り ⟦0⟧かい": [
+"Legend ×⟦0⟧",
+"传奇 ⟦0⟧次"
 ],
-"してんのう 4人と チャンピオンに かちぬけ！": [
-"Beat the Elite Four and the Champion!",
-"连胜四天王和冠军！"
+"ビッグフォー 4人と キングに かちぬけ！": [
+"Beat the Big Four and the King!",
+"连胜四巨头和王者！"
 ],
 "おすすめ ⟦0⟧": [
 "Recommended ⟦0⟧",
@@ -10679,21 +10675,21 @@
 "Opens after your first battle",
 "第一场战斗后开放"
 ],
-"まえの ジムを クリアすると あく": [
-"Clear the previous Gym to open",
-"通过上一个道馆后开放"
+"まえの クルーを クリアすると あく": [
+"Clear the previous Crew to open",
+"通过上一个街团后开放"
 ],
 "サモナー ⟦0⟧人め": [
 "Summoner #⟦0⟧",
 "第⟦0⟧位召唤师"
 ],
-"ジムリーダーに ちょうせん": [
-"Challenge the Gym Leader",
-"挑战道馆馆主"
+"ヘッドに ちょうせん": [
+"Challenge the Crew Head",
+"挑战团长"
 ],
 "リーダーに さいせん": [
 "Rematch the Leader",
-"再次挑战馆主"
+"再次挑战团长"
 ],
 "（もういちど たたかえる）": [
 "(You can battle again)",
@@ -10711,17 +10707,17 @@
 "Challenge the Tower Tycoon!",
 "挑战塔之霸主！"
 ],
-"つぎは ジムリーダー！": [
-"Next: Gym Leader!",
-"下一个：道馆馆主！"
+"つぎは ヘッド！": [
+"Next: Crew Head!",
+"下一个：团长！"
 ],
 "つぎは 2人めの サモナー": [
 "Next: 2nd Summoner",
 "下一个：第2位召唤师"
 ],
-"ジムリーダー": [
-"Gym Leader",
-"道馆馆主"
+"ヘッド": [
+"Crew Head",
+"团长"
 ],
 "サモナー ⟦0⟧": [
 "Summoner ⟦0⟧",
@@ -11071,9 +11067,9 @@
 "Summoner name",
 "召唤师名字"
 ],
-"⟦0⟧が ほかに いません（おなじ しゅるいを くさむら・ブラインドボックスで あつめよう）": [
-"No other ⟦0⟧ (collect the same kind in Tall grass or Blind Boxes)",
-"没有其他⟦0⟧（在草丛或盲盒中收集同种怪兽吧）"
+"⟦0⟧が ほかに いません（おなじ しゅるいを あきち・ブラインドボックスで あつめよう）": [
+"No other ⟦0⟧ (collect the same kind in Vacant lot or Blind Boxes)",
+"没有其他⟦0⟧（在空地或盲盒中收集同种怪兽吧）"
 ],
 "パーティ": [
 "Party",
@@ -11315,13 +11311,13 @@
 "Today is ⟦0⟧. Other areas open on their own day (all on Sunday)",
 "今天是⟦0⟧。其他区域在对应的日子开放（星期日全部开放）"
 ],
-"バッジを 10こ あつめると ひらく": [
-"Opens when you collect 10 Badges",
-"收集10个徽章后开放"
+"タグを 10こ あつめると ひらく": [
+"Opens when you collect 10 Tags",
+"收集10个标签后开放"
 ],
-"チャンピオンに なると ひらく": [
-"Opens when you become Champion",
-"成为冠军后开放"
+"キングに なると ひらく": [
+"Opens when you become King",
+"成为王者后开放"
 ],
 "⟦0⟧は やけどを おった": [
 "⟦0⟧ was burned",
