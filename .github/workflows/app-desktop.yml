@@ -41,7 +41,8 @@ jobs:
         shell: bash
         working-directory: app/desktop/dist
         run: |
-          d=$(ls -d win-unpacked linux-unpacked mac-universal mac 2>/dev/null | head -1)
+          d=""; for x in win-unpacked linux-unpacked mac-universal mac; do if [ -d "$x" ]; then d=$x; break; fi; done
+          echo "dir=$d"; [ -n "$d" ]
           tar -C "$d" -czf ../desktop-${{ matrix.name }}.tgz .
       - uses: actions/upload-artifact@v4
         with:
