@@ -31,9 +31,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 exports.matchStart = onCall(async (req) => {
   const uid = uidOf(req), code = req.data && req.data.code, team = req.data && req.data.team;
   if (typeof code !== 'string' || !/^[A-Za-z0-9_-]{1,40}$/.test(code)) throw new HttpsError('invalid-argument', 'code');
+  const ver = req.data && req.data.ver; if (ver != null && (typeof ver !== 'string' || !/^[a-z0-9]{1,16}$/.test(ver))) throw new HttpsError('invalid-argument', 'ver');   // へやは バージョンごと（むかしの 版は ver なし）
   let m = null;
   for (let i = 0; i < 4 && !m; i++) {   // ホストの start が まだ とどいて いない ことが ある
-    const snap = await admin.database().ref('rooms/' + L.cleanRoom('pma-' + code)).get();
+    const snap = await admin.database().ref('rooms/' + L.cleanRoom('pma-' + (ver ? ver + '-' : '') + code)).get();
     m = L.findMatch(snap.val(), code);
     if (!m) await sleep(800);
   }

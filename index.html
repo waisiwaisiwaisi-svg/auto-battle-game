@@ -9102,7 +9102,7 @@ function adoptSave(ns) {
   Object.assign(S, ns);
 }
 // 試合を サーバーに きろく：はじまった（へやの ようすを サーバーが たしかめる）→ おわった（ふたりの けっかが あえば レート・ギルドに）
-function netMatchStart(team) { const code = NET.code; return srvFn().then(f => f ? f.call('matchStart', { code, ...(team ? { team } : {}) }).then(r => r && r.mid || null) : null).catch(() => null); }   // team：ゲストの じぶんの チーム（ホストが かえて いないか サーバーが みる）
+function netMatchStart(team) { const code = NET.code; return srvFn().then(f => f ? f.call('matchStart', { code, ver: GAME_VER, ...(team ? { team } : {}) }).then(r => r && r.mid || null) : null).catch(() => null); }   // team：ゲストの じぶんの チーム（ホストが かえて いないか サーバーが みる）
 function netSendLog() {   // ホスト：たたかいの きろくを サーバーへ（サーバーが さいげん して かちまけを きめる）
   const p = NET.midP, rec = NET.rec && B && B.ilog ? { ...NET.rec, log: B.ilog.slice(0, 4000), steps: B.stepN + 1, ver: GAME_VER, tr: (B.trace || []).slice(0, 2000) } : null; if (!p || !rec) return;
   p.then(mid => mid && srvFn().then(f => f && f.call('matchLog', { mid, rec }).catch(() => new Promise(r => setTimeout(r, 4000)).then(() => f.call('matchLog', { mid, rec }))))).catch(() => { });
@@ -9127,7 +9127,7 @@ async function netOpen(asHost, code, onStatus, opts = {}) {
   if (t0 !== NET_OPEN) return;   // ログインを まつ あいだに やめた
   if (!room) { onStatus(onlineHint('オンライン対戦'), true); return; }
   netReset(); const tok = NET_OPEN; NET.code = code; NET.host = asHost; NET.guest = !asHost; NET.ranked = !!opts.ranked; NET.pick6 = !!opts.ranked || !!opts.pick6; NET.oppR = opts.oppR; NET.rated = false;
-  let nrJ; try { nrJ = await room.join('pma-' + code); } catch (e) { if (tok === NET_OPEN) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); } return; }
+  let nrJ; try { nrJ = await room.join('pma-' + GAME_VER + '-' + code);   /* バージョンごとに わける（ちがう バージョンとは あわない） */ } catch (e) { if (tok === NET_OPEN) { onStatus('へやに はいれませんでした（' + (e && e.code || 'error') + '）', true); netReset(); } return; }
   if (tok !== NET_OPEN) { try { nrJ.leave(); } catch (e) { } return; }   // はいる とちゅうで やめた・べつの へやへ
   NET.nr = nrJ;
   await guildMe().catch(() => { });   // あいてに ギルドめいを みせる
@@ -9860,16 +9860,16 @@ async function mmStart(stat) {
   mmStop(); MM_TOK = tok;
   const r = myRank().r, t0 = Date.now();
   const me0 = MM = { t0, off: null, iv: null };
-  await room.presence({ mm: { r, v: 1 } }).catch(() => { });
+  await room.presence({ mm: { r, v: 1, ver: GAME_VER } }).catch(() => { });   // ver：おなじ バージョンの 人とだけ あう
   if (MM !== me0 || !alive()) return;   // まって いる あいだに やめた（mmStop が mm を けして いる：かきこみは じゅんばんに とどく）
   const look = (peers) => {
     if (!MM) return;
-    const me = peers.find(p => p.isMe && p.sameTab), wait = peers.filter(p => !p.isMe && p.presence && p.presence.mm && typeof p.presence.mm.r === 'number');
+    const me = peers.find(p => p.isMe && p.sameTab), wait = peers.filter(p => !p.isMe && p.presence && p.presence.mm && typeof p.presence.mm.r === 'number' && p.presence.mm.ver === GAME_VER);   // ちがう バージョン（むかしの 版も）とは あわない
     if (!me) return;
     const go = (mate) => {
       const host = me.peer < mate.peer, code = 'r' + hash36([me.peer, mate.peer].sort().join('|'));
       mmStop(true);
-      room.presence({ mm: { r, with: mate.peer } }).catch(() => { });   // あいても こちらに 気づける ように しばらく 出しておく
+      room.presence({ mm: { r, with: mate.peer, ver: GAME_VER } }).catch(() => { });   // あいても こちらに 気づける ように しばらく 出しておく
       setTimeout(() => { if (NET.room && !MM) NET.room.presence({ mm: null }).catch(() => { }); }, 8000);
       stat(`あいてが みつかりました！（${tierOf(mate.presence.mm.r).n} ${mate.presence.mm.r}）`);
       netOpen(host, code, stat, { ranked: true, oppR: mate.presence.mm.r });
