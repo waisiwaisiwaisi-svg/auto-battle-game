@@ -5,12 +5,21 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function mine(uid) { return signedIn() && request.auth.uid == uid; }
 
-    // r・w・l・h（レート・せんせき）は サーバー（Cloud Functions）だけが かく。クライアントは なまえ・見せる モンスター・じかん だけ
     function same(f) { return request.resource.data.get(f, null) == (resource == null ? null : resource.data.get(f, null)); }
+    function nw(f, d) { return request.resource.data.get(f, d); }
+    function od(f, d) { return resource == null ? d : resource.data.get(f, d); }
+    // r・w・l（レート・せんせき）：むりょう プラン（サーバーの しごと なし）なので ゲームが かく。かわりかたを せいげん する
+    //   1かいの かきこみで しあいは 1つまで（w か l が 1つ ふえる）・レートの かわりは ±32 まで（イロレーティングの K）・しあいの あいだは 15びょう いじょう
+    function rankOk() {
+      let r0 = od('r', 1000); let w0 = od('w', 0); let l0 = od('l', 0);
+      let r1 = nw('r', r0); let w1 = nw('w', w0); let l1 = nw('l', l0); let g = (w1 - w0) + (l1 - l0);
+      return r1 is int && w1 is int && l1 is int && r1 >= 0 && w1 >= w0 && l1 >= l0 && g <= 1
+        && (g == 0 ? r1 == r0 : (r1 - r0 <= 32 && r0 - r1 <= 32 && nw('t', 0) is int && nw('t', 0) >= od('t', 0) + 15000 && nw('t', 0) <= request.time.toMillis() + 60000));
+    }
     match /ranks/{uid} {
       allow read: if signedIn();
       allow delete: if mine(uid);
-      allow create, update: if mine(uid) && same('r') && same('w') && same('l') && same('h');
+      allow create, update: if mine(uid) && rankOk();
     }
     match /guilds/{uid} {
       allow read: if signedIn();
@@ -21,11 +30,16 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if mine(uid) && (request.resource == null || (request.resource.data.tm is list && request.resource.data.tm.size() <= 3));
     }
-    // ギルドの ポイント（pts・tot・wk）は サーバーだけが ふやす
+    // ギルドの ポイント（pts・tot・wk）：ゲームが かく。1かいに ふやせるのは 3まで（オンラインの かち）・10びょう あける
+    function gmOk() {
+      let t0 = od('tot', 0); let t1 = nw('tot', t0); let p0 = od('pts', 0); let p1 = nw('pts', 0); let w0 = od('wk', 0); let w1 = nw('wk', w0);
+      return t1 is int && p1 is int && w1 is int && p1 >= 0 && w1 >= w0 && t1 <= t0 + 3 && p1 <= (w1 == w0 ? p0 + 3 : 3)
+        && (t1 <= t0 || (nw('t', 0) is int && nw('t', 0) >= od('t', 0) + 10000 && nw('t', 0) <= request.time.toMillis() + 60000));
+    }
     match /gmembers/{uid} {
       allow read: if signedIn();
       allow delete: if mine(uid);
-      allow create, update: if mine(uid) && same('pts') && same('tot') && same('wk');
+      allow create, update: if mine(uid) && gmOk();
     }
     match /gchat/{uid} {
       allow read: if signedIn();
