@@ -1,0 +1,4 @@
+{
+  "appId": 480,
+  "_memo": "Steamworks で もらった App ID に かえる（480 は Valve の ためし用 Spacewar）。CI では シークレット STEAM_APP_ID が あれば それを つかう"
+}

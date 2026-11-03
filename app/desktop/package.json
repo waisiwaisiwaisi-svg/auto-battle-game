@@ -25,6 +25,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "steam.json",
       "package.json"
     ],
     "extraResources": [
@@ -68,6 +69,12 @@
       "icon": "../assets/icon-only.png",
       "category": "Game"
     },
-    "executableName": "PixelMonsterArena"
+    "executableName": "PixelMonsterArena",
+    "asarUnpack": [
+      "node_modules/steamworks.js/dist/**"
+    ]
+  },
+  "dependencies": {
+    "steamworks.js": "0.4.0"
   }
 }
