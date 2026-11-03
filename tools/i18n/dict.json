@@ -2767,9 +2767,9 @@
 "On hit, swaps the foe with its Bench",
 "命中后让对手与替补交换"
 ],
-"うろこを4発連射する。撃つと自分の防御-1・素早さ+1": [
-"Fires 4 scales in a row. Then own Defense -1, Speed +1",
-"连续发射4片鳞片。发射后自己的防御-1、速度+1"
+"うろこを4発連射する。撃つと自分の防御-1・属性防御-1・素早さ+1": [
+"Fires 4 scales in a row. Then own Defense -1, Sp. Def -1, Speed +1",
+"连续发射4片鳞片。发射后自己的防御-1、特防-1、速度+1"
 ],
 "ひるまずに突き進む突進": [
 "A dash that won't Flinch",
