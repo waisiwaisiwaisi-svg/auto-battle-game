@@ -11690,5 +11690,25 @@
 "⟦0⟧の フィールド": [
 "⟦0⟧ field",
 "⟦0⟧场地"
+],
+"ダブル対戦": [
+"Double Battle",
+"双打对战"
+],
+"2体ずつ でて たたかう": [
+"2 monsters each side",
+"双方各出2只"
+],
+"ダブル対戦は 2体 いじょう ひつようです": [
+"You need at least 2 monsters for a Double Battle",
+"双打对战需要至少2只怪兽"
+],
+"⟦0⟧と ダブル対戦！ 2体ずつ でて たたかう。⟦1⟧フィールドで しあい かいし！": [
+"Double Battle vs ⟦0⟧! 2 each side. Match starts on the ⟦1⟧ field!",
+"与⟦0⟧的双打对战！双方各出2只。在⟦1⟧场地开始比赛！"
+],
+"ダブル対戦では こうたい できない（たおれたら つぎが でる）": [
+"You can't switch in a Double Battle (the next one comes out when one faints)",
+"双打对战中不能替换（倒下后下一只自动出场）"
 ]
 }
