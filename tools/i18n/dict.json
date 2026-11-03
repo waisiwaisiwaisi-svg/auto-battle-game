@@ -11711,8 +11711,16 @@
 "You can't switch in a Double Battle (the next one comes out when one faints)",
 "双打对战中不能替换（倒下后下一只自动出场）"
 ],
-"とっておきの ワザステッカー「⟦0⟧」を もらった": [
-"Got a special Move Sticker: \"⟦0⟧\"!",
-"获得了珍藏技贴纸「⟦0⟧」！"
+"ヘッドの あかし：ワザステッカー「⟦0⟧」を もらった！": [
+"Head's Proof: got the Move Sticker \"⟦0⟧\"!",
+"首领之证：获得了技贴纸「⟦0⟧」！"
+],
+"（ここでしか てに はいらない）": [
+"(only available here)",
+"（只有这里能得到）"
+],
+"これまでに かった ヘッドの あかし：ワザステッカー ⟦0⟧を もらった！": [
+"Proof from the Heads you've beaten: got the Move Stickers ⟦0⟧!",
+"至今击败的首领之证：获得了技贴纸⟦0⟧！"
 ]
 }
