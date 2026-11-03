@@ -5941,7 +5941,7 @@ function buildNav(st) {
 }
 const RETREAT_K = .2;   // ちくちく：うしろへ さがる ときの はやさ（まうしろで 1.2ばい）
 const MATCH_T = 240;   // 1しあいの じかん（びょう）。すぎたら タイムアップで はんてい（3たい どうしの ふつうの しあいは 4ふん いないに おわる）
-const CAM_MAX = 2.3, CAM_PAD = 130, CAM_TALL_LO = .4, CAM_TALL_UP = .24;   // たて画面：みえる よこはばは フィールドの 40%〜24%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 2.3ばい まで）と ふたりの まわりの よゆう
+const CAM_MAX = 2.3, CAM_PAD = 130, CAM_TALL_LO = .45, CAM_TALL_UP = .34;   /* たて画面：よりすぎると ズームが おおきく ゆれるので すこし ひかえめ（.4・.24 → .45・.34） */   // たて画面：みえる よこはばは フィールドの 40%〜24%（まえの やく 2ばい よる）   // カメラ：よりすぎない 上限（全体の 2.3ばい まで）と ふたりの まわりの よゆう
 const NAV = 12, NAV_R = 16;   // 道さがしで 見る 足もとの 半径
 const WALL_GAP = 8, WALL_ART = 10, WALL_UP = 30, WALL_COMFY = 52;   // WALL_COMFY：まわりこむ 道を かべから よこに どれだけ はなすか   // WALL_ART：かべの 絵が ブロックより よこに はみだす ぶん、WALL_UP：うえに のびる ぶん
 const _wg = 0;   // わざで つくった かべからは あるいて この きょり いじょう はなれる
@@ -10226,7 +10226,7 @@ function bVisual(dt) {
     const X0 = Math.min(...vis.map(f => f.x - (f.r || 20) - 40)), X1 = Math.max(...vis.map(f => f.x + (f.r || 20) + 40)), Y0 = Math.min(...vis.map(f => f.y - BODY * 2 - (f.r || 20) - 70)), Y1 = Math.max(...vis.map(f => f.y + 24));
     const both = Math.min(aw / (X1 - X0), ah / (Y1 - Y0)); if (tz > both) tz = both;
     const hw = aw / 2 / tz, hh = ah / 2 / tz; tx = clamp((X0 + X1) / 2, X1 - hw, X0 + hw); ty = clamp(ty, Y1 - hh, Y0 + hh); }
-  B.cam.z += (tz - B.cam.z) * Math.min(1, dt * (tz < B.cam.z ? 5 : 1.6));   // ひく ときは はやく（ふたりが はみでない ように）
+  { const tl = VH > VW * 1.2; B.cam.z += (tz - B.cam.z) * Math.min(1, dt * (tz < B.cam.z ? (tl ? 3 : 5) : (tl ? .8 : 1.6))); }   // ひく ときは はやく（ふたりが はみでない ように）。たて画面は ゆっくり（ゆれない ように）
   B.cam.x += (tx - B.cam.x) * Math.min(1, dt * 4);
   B.cam.y += (ty - B.cam.y) * Math.min(1, dt * 4);
 }
