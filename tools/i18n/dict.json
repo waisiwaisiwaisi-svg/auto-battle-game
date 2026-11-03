@@ -11666,5 +11666,29 @@
 "技の なまえを タップすると せつめいが でる": [
 "Tap a move name to see what it does",
 "点击招式名可查看说明"
+],
+"つぎの ⟦0⟧かいの あいて": [
+"Next: floor ⟦0⟧ opponents",
+"下一层（第⟦0⟧层）的对手"
+],
+"つぎの ⟦0⟧かいの あいて（ボス）": [
+"Next: floor ⟦0⟧ opponents (Boss)",
+"下一层（第⟦0⟧层）的对手（首领）"
+],
+"つぎの ⟦0⟧かいの あいて（タワータイクーン）": [
+"Next: floor ⟦0⟧ opponents (Tower Tycoon)",
+"下一层（第⟦0⟧层）的对手（塔之大亨）"
+],
+"タワーや ドラフトバトルにも ちょうせんしよう": [
+"Try the Tower and Draft Battle too",
+"也来挑战塔和选秀对战吧"
+],
+"レジェンド入り おめでとう！ タワーや ドラフトバトルにも ちょうせんしよう": [
+"You're a Legend! Try the Tower and Draft Battle too",
+"恭喜成为传奇！也来挑战塔和选秀对战吧"
+],
+"⟦0⟧の フィールド": [
+"⟦0⟧ field",
+"⟦0⟧场地"
 ]
 }
