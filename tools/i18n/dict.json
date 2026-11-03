@@ -5031,10 +5031,6 @@
 "→ To move slot (★ = Move Sticker)",
 "→ 放到招式格（★＝技贴纸）"
 ],
-"※ ★の ついた 技は、確定すると ワザステッカーを 1まい つかって おぼえます": [
-"※ Moves with ★ use 1 Move Sticker to learn when you Confirm",
-"※ 带★的招式在确定时会消耗1张技贴纸来学会"
-],
 "→「〜撃つ」の 枠へ": [
 "→ To \"…fire\" slot",
 "→ 放到「〜出招」格"
@@ -11474,5 +11470,17 @@
 "タグ ⟦0⟧こで ひらく": [
 "Opens at ⟦0⟧ Tags",
 "⟦0⟧个标签开放"
+],
+"※ ★の ついた 技は ワザステッカーで おぼえます（ステッカーは なくならない）": [
+"※ Moves marked ★ are learned with Move Stickers (stickers are never used up)",
+"※ 带★的招式用技贴纸学习（贴纸不会消耗）"
+],
+"もっている": [
+"Owned",
+"已拥有"
+],
+"この ワザステッカーは もう もっています（なくならないので なんかいでも つかえます）": [
+"You already have this Move Sticker (it never runs out, so you can use it any number of times)",
+"你已经拥有这张技贴纸（不会消耗，可以无限次使用）"
 ]
 }
