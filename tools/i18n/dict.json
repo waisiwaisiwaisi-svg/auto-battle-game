@@ -11722,5 +11722,101 @@
 "これまでに かった ヘッドの あかし：ワザステッカー ⟦0⟧を もらった！": [
 "Proof from the Heads you've beaten: got the Move Stickers ⟦0⟧!",
 "至今击败的首领之证：获得了技贴纸⟦0⟧！"
+],
+"りゅうのキバ": [
+"Dragon Fang",
+"龙之牙"
+],
+"竜のキバでかみつく。20%でひるませる": [
+"Bites with dragon fangs. 20% chance to make the target flinch",
+"用龙牙咬住。20%使对手畏缩"
+],
+"りゅうだま": [
+"Dragon Orb",
+"龙珠"
+],
+"竜の気をこめた弾をとばす。相手を追いかける": [
+"Fires an orb of dragon energy that chases the target",
+"发射蕴含龙气的弹，会追踪对手"
+],
+"りゅうのほうこう": [
+"Dragon Roar",
+"龙之咆哮"
+],
+"まわりにほえて衝撃を広げる。30%で相手の攻撃-1": [
+"Roars to send a shockwave around. 30% chance to lower foe Attack by 1",
+"咆哮向四周扩散冲击。30%使对手攻击-1"
+],
+"うろこのよろい": [
+"Scale Guard",
+"鳞之铠"
+],
+"うろこをかためる。自分の防御+1・属性防御+1": [
+"Hardens its scales. Raises own Defense and Sp. Def by 1",
+"坚固鳞片。自己的防御+1、属性防御+1"
+],
+"ギアカッター": [
+"Gear Cutter",
+"齿轮切割"
+],
+"回る歯車をまっすぐ速くとばす": [
+"Fires a spinning gear straight and fast",
+"笔直快速地射出旋转齿轮"
+],
+"てっこうせん": [
+"Steel Ray",
+"钢铁光线"
+],
+"はがねの光線をまっすぐ撃つ。撃つと自分の防御-1": [
+"Fires a straight steel ray. Lowers own Defense by 1",
+"笔直发射钢铁光线。发射后自己的防御-1"
+],
+"はがねのとっしん": [
+"Steel Rush",
+"钢铁冲撞"
+],
+"はがねの体でまっすぐ突進する": [
+"Charges straight with a steel body",
+"以钢铁之躯笔直冲撞"
+],
+"オーバークロック": [
+"Overclock",
+"超频"
+],
+"体の回転を上げる。自分の素早さ+2": [
+"Spins up its body. Raises own Speed by 2",
+"提高身体转速。自己的速度+2"
+],
+"でんげきほう": [
+"Volt Cannon",
+"电击炮"
+],
+"電気の光線をまっすぐ撃つ。10%でまひにする": [
+"Fires a straight electric ray. 10% chance to paralyze",
+"笔直发射电光线。10%使对手麻痹"
+],
+"プラズマバースト": [
+"Plasma Burst",
+"等离子爆发"
+],
+"まわりに電気をはじけさせる。20%でまひにする": [
+"Bursts electricity all around. 20% chance to paralyze",
+"向四周迸发电流。20%使对手麻痹"
+],
+"でんじあらし": [
+"Static Storm",
+"电磁风暴"
+],
+"前に電気のあらしを吹きつける": [
+"Blasts a storm of electricity forward",
+"向前方吹出电之风暴"
+],
+"じゅうでん": [
+"Charge Up",
+"充电"
+],
+"体に電気をためる。自分の属性攻撃+1・属性防御+1": [
+"Stores electricity. Raises own Sp. Atk and Sp. Def by 1",
+"在体内储存电力。自己的属性攻击+1、属性防御+1"
 ]
 }
