@@ -12464,7 +12464,7 @@ function render() {
   const cx = lx <= rx ? clamp(px, lx, rx) : st.W > hw * 2 ? clamp(px, hw, st.W - hw) : st.W / 2;
   const cy = ty_ <= by_ ? clamp(py, ty_, by_) : st.H > hh * 2 ? clamp(py, hh, st.H - hh) : st.H / 2;
   const sh = [0, 0];   // がめんは ゆらさない
-  const dq = Math.max(2, Math.round(z * RS * PIX_D)), T = [z * RS, Math.round((BX - cx * z + sh[0]) * RS / dq) * dq, Math.round((BY - cy * z + sh[1]) * RS / dq) * dq];   // カメラも ドットの 格子で うごかす
+  const T = [z * RS, Math.round((BX - cx * z + sh[0]) * RS), Math.round((BY - cy * z + sh[1]) * RS)];   // カメラは がめんの 1ドット ずつ なめらかに（ドットの 格子には そろえない）
   ctx.setTransform(T[0], 0, 0, T[0], T[1], T[2]);
   ctx.imageSmoothingEnabled = false;
   { // ステージの そと：ステージの 絵を かがみうつしに して うすぐらく しきつめる（まっくらな すきまを ださない）
