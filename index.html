@@ -5479,8 +5479,7 @@ async function trConfirm(m) {
   const ng = add.filter(id => !(tmN(id) > 0 && canLearn(m.sid, id)));
   if (ng.length) { await say0(`${ng.map(id => MOVES[id].n).join('・')} は覚えられません（ワザステッカーがないか、このモンスターは覚えられない技です）`); return false; }
   const free = eq.filter(id => !ids.includes(id)), slot = Math.max(0, 4 - eq.length), forget = add.map((_, i) => i < slot ? null : free[i - slot]);
-  const msg = add.length ? `ワザステッカーを使います：\n` + add.map((id, i) => `・${MOVES[id].n} を覚える${forget[i] ? `（${MOVES[forget[i]].n} を忘れる）` : ''}`).join('\n') + '\nワザステッカーを使って確定しますか？' : 'ワザステッカーは使いません。\nこの設定で確定しますか？';
-  if (add.length && !await ask(msg, '確定', 'やめる')) return false;   // ワザステッカーを 使う ときだけ 確認
+  // ワザステッカーは なくならないので 確認は しない（そのまま おぼえる）
   for (let i = 0; i < add.length; i++) { const cur = monU(m.uid) || m, slot_ = forget[i] ? cur.moves.indexOf(forget[i]) : 4; const r = await act('tm', m.uid, add[i], slot_); if (r !== 'ok') return false; }   // ワザステッカー：サーバーで（アプリ版）
   return true;
 }
