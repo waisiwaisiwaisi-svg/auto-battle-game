@@ -10560,8 +10560,8 @@
 "查看详情"
 ],
 "しゅつじょう": [
-"Lineup",
-"出场"
+"In team",
+"出战"
 ],
 "— どの しあいにも でる 3たい（1ばんめから とうじょう）": [
 "— 3 that play in every match (1st goes first)",
@@ -10624,8 +10624,8 @@
 "其他对手"
 ],
 "ボスに ちょうせん！": [
-"Challenge the boss!",
-"挑战Boss！"
+"Challenge the Boss!",
+"挑战首领！"
 ],
 "つぎの たたかいへ": [
 "Next battle",
@@ -10701,7 +10701,7 @@
 ],
 "タワータイクーンに ちょうせん！": [
 "Challenge the Tower Tycoon!",
-"挑战塔之霸主！"
+"挑战塔之大亨！"
 ],
 "つぎは ヘッド！": [
 "Next: Crew Head!",
@@ -11482,5 +11482,177 @@
 "この ワザステッカーは もう もっています（なくならないので なんかいでも つかえます）": [
 "You already have this Move Sticker (it never runs out, so you can use it any number of times)",
 "你已经拥有这张技贴纸（不会消耗，可以无限次使用）"
+],
+"ドラフトバトル": [
+"Draft Battle",
+"选秀对战"
+],
+"ドラフト": [
+"Draft",
+"选秀"
+],
+"かい": [
+"F",
+"层"
+],
+"⟦0⟧かい": [
+"⟦0⟧F",
+"第⟦0⟧层"
+],
+"⟦0⟧かい クリア ⟦1⟧かい": [
+"⟦0⟧F cleared ×⟦1⟧",
+"通关⟦0⟧层 ⟦1⟧次"
+],
+"レジェンド入り おめでとう！ ドラフトバトルにも ちょうせんしよう": [
+"You're a Legend! Try the Draft Battle too",
+"恭喜成为传奇！也来挑战选秀对战吧"
+],
+"えらんだ モンスターと ワザステッカーで 21かいを めざせ！": [
+"Reach the 21st floor with the monsters and Move Stickers you draft!",
+"用选中的怪兽和技贴纸挑战21层！"
+],
+"3体の なかから 1体を 3かい えらぶ": [
+"Pick 1 of 3 monsters, three times",
+"从3只中选1只，共选3次"
+],
+"ワザステッカーを 4まい えらぶ": [
+"Pick 4 Move Stickers",
+"选择4张技贴纸"
+],
+"訓練して たたかう。かつと モンスターと ステッカーが ふえる": [
+"Train, then battle. Wins earn more monsters and stickers",
+"训练后战斗。获胜可获得更多怪兽和贴纸"
+],
+"まけたら さいしょから（ここの モンスターは 手もちに はいらない）": [
+"Lose and you start over (these monsters never join your party)",
+"输了就从头开始（这里的怪兽不会加入手持）"
+],
+"モンスターを えらぶ（⟦0⟧ / 3）": [
+"Pick a monster (⟦0⟧ / 3)",
+"选择怪兽（⟦0⟧ / 3）"
+],
+"技は もう おぼえて いる。えらんだ モンスターは この ドラフトの あいだ だけ つかえる": [
+"They already know moves. Picked monsters can only be used during this draft",
+"已经学会招式。选中的怪兽只能在这次选秀中使用"
+],
+"ごほうび：モンスターを 1体 えらぶ": [
+"Reward: pick 1 monster",
+"奖励：选择1只怪兽"
+],
+"ワザステッカーを えらぶ（⟦0⟧ / 4）": [
+"Pick a Move Sticker (⟦0⟧ / 4)",
+"选择技贴纸（⟦0⟧ / 4）"
+],
+"えらんだ モンスターが おぼえられる ものから。訓練の がめんで 技の 枠に いれると おぼえる": [
+"Only ones your picks can learn. Put it in a move slot in Training to learn it",
+"只出现选中怪兽能学会的。在训练画面放进招式栏即可学会"
+],
+"⟦0⟧が おぼえられる": [
+"⟦0⟧ can learn",
+"⟦0⟧可以学会"
+],
+"だれも おぼえられない": [
+"No one can learn",
+"谁都学不会"
+],
+"えらべる ステッカーが ない": [
+"No stickers to pick",
+"没有可选的贴纸"
+],
+"ごほうび：ワザステッカーの タイプを えらぶ": [
+"Reward: pick a Move Sticker type",
+"奖励：选择技贴纸的属性"
+],
+"えらんだ タイプの ステッカーが 3まい ランダムで もらえる（おぼえられない ものも でる）": [
+"Get 3 random stickers of that type (some may be unlearnable)",
+"随机获得3张该属性的贴纸（也可能有学不会的）"
+],
+"つぎは": [
+"Next:",
+"下一个"
+],
+"ぜんぶで 21かい": [
+"21 floors in all",
+"共21层"
+],
+"しゅつじょう（3体）": [
+"Team (3)",
+"出战（3只）"
+],
+"タップで いれかえ": [
+"Tap to swap",
+"点击替换"
+],
+"ワザステッカー ⟦0⟧まい": [
+"Move Stickers: ⟦0⟧",
+"技贴纸 ⟦0⟧张"
+],
+"訓練する": [
+"Train",
+"训练"
+],
+"⟦0⟧かいへ": [
+"To ⟦0⟧F",
+"前往第⟦0⟧层"
+],
+"リセット（さいしょから）": [
+"Reset (start over)",
+"重置（从头开始）"
+],
+"⟦0⟧かいめの まえ（ここの 訓練は ドラフト専用）": [
+"Before floor ⟦0⟧ (this training is draft-only)",
+"第⟦0⟧层之前（这里的训练只用于选秀）"
+],
+"タワーへ もどる ›": [
+"Back to Tower ›",
+"返回塔 ›"
+],
+"ドラフトを リセットしますか？\nいまの モンスターと ステッカーは なくなり、さいしょから に なります。": [
+"Reset the draft?\nYour current monsters and stickers will be lost and you will start over.",
+"要重置选秀吗？\n现在的怪兽和贴纸会消失，从头开始。"
+],
+"ワザステッカー ⟦0⟧を もらった！": [
+"Got Move Stickers ⟦0⟧!",
+"获得了技贴纸⟦0⟧！"
+],
+"⟦0⟧の ステッカーは もう ぜんぶ もっている": [
+"You already have every ⟦0⟧ sticker",
+"已经拥有全部⟦0⟧贴纸"
+],
+"ドラフト しゅうりょう": [
+"Draft over",
+"选秀结束"
+],
+"⟦0⟧かいまで クリア": [
+"Cleared up to ⟦0⟧F",
+"通关至第⟦0⟧层"
+],
+"⟦0⟧かい クリア！": [
+"Cleared ⟦0⟧F!",
+"通关第⟦0⟧层！"
+],
+"ごほうびの モンスターと ワザステッカーを えらぼう": [
+"Pick your reward monster and Move Stickers",
+"选择奖励的怪兽和技贴纸吧"
+],
+"⟦0⟧かい！ ⟦1⟧が しょうぶを しかけてきた！": [
+"Floor ⟦0⟧! ⟦1⟧ challenges you!",
+"第⟦0⟧层！⟦1⟧发起了挑战！"
+],
+"えらんだ モンスターと ワザステッカーで 21かいを めざす（7かいごとに ボス）": [
+"Reach 21F with drafted monsters and Move Stickers (Boss every 7F)",
+"用选中的怪兽和技贴纸挑战21层（每7层有首领）"
+],
+"いまの かい": [
+"Current floor",
+"当前层数"
+],
+"ドラフトバトル ⟦0⟧かい": [
+"Draft Battle ⟦0⟧F",
+"选秀对战 第⟦0⟧层"
+],
+"⟦0⟧かい クリア！ 💎+1": [
+"Cleared ⟦0⟧F!　💎+1",
+"通关第⟦0⟧层！　💎+1"
 ]
 }
