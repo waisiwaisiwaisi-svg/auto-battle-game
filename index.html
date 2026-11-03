@@ -10239,13 +10239,13 @@ function bVisual(dt) {
   // カメラ
   const a = active(0), e = active(1), st = B.st;
   let tx = st.W / 2, ty = st.H / 2, tz = 1;
-  const vis = (B.dbl ? allActs() : [a, e]).filter(f => f && f.state !== 'bench');
+  const vis = (B.dbl ? (() => { const me = actives(B.my || 0).filter(f => f.hp > 0); return [...new Set([...me, ...me.map(f => dTgt(f, true))])]; })() : [a, e]).filter(f => f && f.state !== 'bench');   // ダブル：じぶんの 2体と、その 2体が たたかって いる あいてを おう
   // ふたりの きょりに あわせて ズーム：はなれると ひいて 全体、ちかいと よる（ただし CAM_MAX ばい まで）
   const aw = Math.max(80, VW - VPAD.l - VPAD.r), ah = Math.max(60, VH - VPAD.t - VPAD.b), fw = st.fx1 - st.fx0 + 60, fh = st.fy1 - st.fy0 + 60;
   const tall = VH > VW * 1.2, LO_W = tall ? CAM_TALL_LO : .66, UP_W = tall ? CAM_TALL_UP : .45;   // たて画面：もっと よる（みえる はばを せまく）
   const fit = Math.min(aw / fw, ah / fh), up = Math.max(fit * CAM_MAX, tall ? aw / (fw * UP_W) : Math.min(ah / st.H, aw / (fw * UP_W)));   // up：たてに ながい 画面では もっと よれる
   tx = (st.fx0 + st.fx1) / 2; ty = (st.fy0 + st.fy1) / 2 - 10; tz = Math.min(up, Math.max(fit, Math.min(ah / st.H, aw / st.W)));
-  if (vis.length === 2 && B.mode !== 'intro') {
+  if (vis.length >= 2 && B.mode !== 'intro') {
     const pts = vis.map(f => [f.x, f.y - BODY]); if (B.catchO) pts.push([B.catchO.x, B.catchO.y]);
     const x0 = Math.min(...pts.map(p => p[0])), x1 = Math.max(...pts.map(p => p[0])), y0 = Math.min(...pts.map(p => p[1])), y1 = Math.max(...pts.map(p => p[1]));
     const rr = Math.max(...vis.map(f => f.r || 20)), pad = CAM_PAD + Math.max(0, rr - 24) * 2.2, bw = x1 - x0 + pad * 2, bh = y1 - y0 + pad * 1.6 + 60;   // おおきい モンスターほど まわりを ひろく
@@ -10260,7 +10260,7 @@ function bVisual(dt) {
       const hw = aw / 2 / tz, hh = ah / 2 / tz; tx = clamp(tx, X1 - hw, X0 + hw); ty = clamp(ty, Y1 - hh, Y0 + hh); }
   }
   if (B.mode === 'intro') { const z0 = Math.max(aw / st.W, ah / st.H), z1 = Math.max(fit, tall ? aw / (fw * LO_W) : Math.min(ah / st.H, aw / (fw * LO_W))), t = B.modeT - (B.vsT || 0); tz = t < .6 ? z0 : z0 + Math.min(1, (t - .6) / 1.6) * (z1 - z0); if (t < 0) { tx = st.W / 2 + DM.sin(B.modeT * 1.1) * 40; ty = st.H * .42; } }
-  if (B.mode === 'intro' && vis.length === 2) {   // はじまりの 演出でも ふたりを がめんに いれる（たて画面で はみでていた）
+  if (B.mode === 'intro' && vis.length >= 2) {   // はじまりの 演出でも ふたりを がめんに いれる（たて画面で はみでていた）
     const X0 = Math.min(...vis.map(f => f.x - (f.r || 20) - 40)), X1 = Math.max(...vis.map(f => f.x + (f.r || 20) + 40)), Y0 = Math.min(...vis.map(f => f.y - BODY * 2 - (f.r || 20) - 70)), Y1 = Math.max(...vis.map(f => f.y + 24));
     const both = Math.min(aw / (X1 - X0), ah / (Y1 - Y0)); if (tz > both) tz = both;
     const hw = aw / 2 / tz, hh = ah / 2 / tz; tx = clamp((X0 + X1) / 2, X1 - hw, X0 + hw); ty = clamp(ty, Y1 - hh, Y0 + hh); }
