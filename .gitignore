@@ -6,3 +6,4 @@ tools/sizes/sizes/
 tools/movepower/out/
 .hitrate_tmp_*.html
 tools/hitrate/out/
+.movepower_tmp_*.html

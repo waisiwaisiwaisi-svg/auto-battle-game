@@ -72,7 +72,7 @@ const HOOKS = [
   const anchor = 'window.PMA_REPLAY = (job) => {'; if (!html.includes(anchor)) throw new Error('PMA_REPLAY が みつからない');
   html = html.replace(anchor, SIM + anchor);
   for (const [a, b] of HOOKS) { if (html.split(a).length !== 2) throw new Error('フックの ばしょが みつからない: ' + a); html = html.replace(a, b); }
-  fs.mkdirSync(OUT, { recursive: true }); const tmp = path.join(ROOT, '.movepower_tmp.html'); fs.writeFileSync(tmp, html);
+  fs.mkdirSync(OUT, { recursive: true }); const tmp = path.join(ROOT, '.movepower_tmp_' + process.pid + '.html'); fs.writeFileSync(tmp, html);
   const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
   try {
     await p.goto('file://' + tmp); await p.waitForTimeout(1500);
