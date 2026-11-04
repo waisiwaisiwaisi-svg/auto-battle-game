@@ -11818,5 +11818,77 @@
 "体に電気をためる。自分の属性攻撃+1・属性防御+1": [
 "Stores electricity. Raises own Sp. Atk and Sp. Def by 1",
 "在体内储存电力。自己的属性攻击+1、属性防御+1"
+],
+"とくせい：": [
+"Ability: ",
+"特性："
+],
+"なんでもや": [
+"Jack of All",
+"万事通"
+],
+"なんでもや！": [
+"Jack of All!",
+"万事通！"
+],
+"自分の タイプと ちがう タイプの 技の 威力が 1.2倍": [
+"Moves of a type it doesn't have deal 1.2x power",
+"与自身属性不同的招式威力变为1.2倍"
+],
+"がんじょう": [
+"Sturdy",
+"结实"
+],
+"がんじょう！": [
+"Sturdy!",
+"结实！"
+],
+"いまの HP いじょうの ダメージを うけても HP1で のこる（1戦に 1かい）": [
+"Survives with 1 HP when hit for at least its current HP (once per battle)",
+"受到大于等于当前HP的伤害时以1HP撑住（每场1次）"
+],
+"ギアチェンジ": [
+"Gear Shift",
+"换挡"
+],
+"ギアチェンジ！": [
+"Gear Shift!",
+"换挡！"
+],
+"技を つかった かいすうが 4かいめごとに、その 技の 威力が 20 あがる": [
+"Every 4th move it uses gains +20 power",
+"每使用第4次招式时，该招式威力+20"
+],
+"むれのちから": [
+"Pack Power",
+"族群之力"
+],
+"むれのちから！": [
+"Pack Power!",
+"族群之力！"
+],
+"たおれていない ひかえの 獣 1体につき 技の 威力が 10% あがる（さいだい 30%）": [
+"+10% move power per Beast still standing on the bench (max 30%)",
+"替补中每有1只未倒下的兽属性，招式威力+10%（最多30%）"
+],
+"おんねん": [
+"Grudge",
+"怨念"
+],
+"おんねん！": [
+"Grudge!",
+"怨念！"
+],
+"たおされると たおした あいての 攻撃と 属攻が 1さがる。チームで さいごの 1体として でると 攻撃と 属攻が 1あがる": [
+"When knocked out, the attacker's Attack and Sp. Atk drop by 1. When sent out as the team's last member, its Attack and Sp. Atk rise by 1",
+"被打倒时，打倒它的对手攻击和特攻-1。作为队伍最后1只出场时，攻击和特攻+1"
+],
+"てかず": [
+"Quick Hands",
+"手数"
+],
+"威力 50いかの 攻撃技の 待ち時間が 20% みじかい": [
+"Attack moves with 50 power or less have 20% shorter cooldowns",
+"威力50以下的攻击招式冷却时间缩短20%"
 ]
 }
