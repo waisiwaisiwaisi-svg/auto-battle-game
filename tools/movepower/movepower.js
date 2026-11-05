@@ -25,7 +25,10 @@ const ROOT = path.resolve(__dirname, '../..');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const N = +arg('n', 24), OUT = path.resolve(arg('out', path.join(__dirname, 'out'))), ONLY = arg('moves', '');
 const TRAIN = arg('train', 'both');   // none：訓練なし だけ・on：訓練あり だけ・both：りょうほう
-const MODES = TRAIN === 'none' ? [[false, '']] : TRAIN === 'on' ? [[true, 'T']] : [[false, ''], [true, 'T']];
+const GO = arg('go', '');   // 撃ち方ごと：--go auto,near,far,hide,flank（訓練あり で ためす技の 撃ち方だけ かえる）
+const MODES = GO ? GO.split(',').map(g => [true, 'G_' + g, g]) : TRAIN === 'none' ? [[false, '']] : TRAIN === 'on' ? [[true, 'T']] : [[false, ''], [true, 'T']];
+const DMG_ONLY = process.argv.includes('--dmg'), FIT_ONLY = process.argv.includes('--fit');   // --dmg：変化技を のぞく・--fit：技に むいた 型 だけで はかる
+const SHARD = arg('shard', '');   // --shard 1/3：3つに わけた 1つめ だけ
 const SID = arg('sid', 'a_fire5'), NAT = 'reisei', FIELDS = ['grass', 'fire', 'water', 'elec'], STEPS = 60 * 120;
 const STYLES = {
   phys: { n: '物理型', kit: ['tackle', 'slap-dash'], atk: 1.25, spa: .75 },
@@ -46,7 +49,7 @@ window.PMA_MOVESIM = (job) => {
     const me = B.sides[0].fs[0], foe = B.sides[1].fs[0];
     set(me, job.mine, job.type, job.st); set(foe, job.foe, 'zz_none', job.st);
     B.train = !!job.train;
-    if (job.train) for (const f of [me, foe]) { const e = { moves: f.moves.slice(), nat: f.mon.nat }; autoTrain(e); f.moves = e.moves.slice(); f.mon.tr = e.tr; }   // 訓練あり：ゲームの じどう訓練（トレーナーと おなじ）
+    if (job.train) for (const f of [me, foe]) { const e = { moves: f.moves.slice(), nat: f.mon.nat }; autoTrain(e); if (job.go && f === me) for (const r of e.tr.prog.mv) if (r.id === job.test) r.go = job.go; f.moves = e.moves.slice(); f.mon.tr = e.tr; }   // 訓練あり：ゲームの じどう訓練（トレーナーと おなじ）
     const tm = MOVES[job.test]; let unit = 0;
     if (tm) { const ref = { pow: 20, power: 100, k: 'dash', cat: tm.cat === 'spec' ? 'spec' : 'phys', t: job.type, e: {} }; unit = estDmg(me, foe, ref) / 100; }   // 威力1ぶんの ダメージ（はずれない 1ぱつ）
     let dmg = 0, uses = 0; const hpF0 = foe.maxHp, D0 = tm && tm.cat === 'spec' ? foe.sdef : foe.def;
@@ -80,18 +83,21 @@ const HOOKS = [
       return Object.keys(M).map(id => ({ id, n: M[id].n, t: M[id].t, k: M[id].k, cat: M[id].cat || '', power: M[id].power || Math.round((M[id].pow || 0) * 5), desc: X.moveDesc(M[id]) })); });
     const mons = await p.evaluate(() => window.PMA_MONSTATS());
     const kits = Object.values(STYLES).flatMap(s => s.kit);
-    const ids = ONLY ? ONLY.split(',') : info.map(x => x.id).filter(id => !kits.includes(id));
-    const run = (st, mine, type, test, train) => p.evaluate(([st, mine, type, test, n, sid, nat, fields, steps, train]) => {
-      const out = []; for (let i = 0; i < n; i++) out.push(window.PMA_MOVESIM({ seed: 1000 + i * 7919, field: fields[i % fields.length], sid, nat, mine, foe: st.kit, type, steps, st, test, train })); return out;
-    }, [st, mine, type, test, N, SID, NAT, FIELDS, STEPS, train]);
+    let ids = ONLY ? ONLY.split(',') : info.map(x => x.id).filter(id => !kits.includes(id));
+    if (DMG_ONLY) ids = ids.filter(id => { const m = info.find(x => x.id === id); return m && m.cat !== 'stat' && m.power > 0; });
+    if (SHARD) { const [a, n] = SHARD.split('/').map(Number); ids = ids.filter((_, i) => i % n === a - 1); }
+    const run = (st, mine, type, test, train, go) => p.evaluate(([st, mine, type, test, n, sid, nat, fields, steps, train, go]) => {
+      const out = []; for (let i = 0; i < n; i++) out.push(window.PMA_MOVESIM({ seed: 1000 + i * 7919, field: fields[i % fields.length], sid, nat, mine, foe: st.kit, type, steps, st, test, train, go })); return out;
+    }, [st, mine, type, test, N, SID, NAT, FIELDS, STEPS, train, go || '']);
     const avg = (a, f) => a.reduce((s, x) => s + f(x), 0) / a.length, r1 = (v) => Math.round(v * 10) / 10;
     const baseBy = {}; const base = async (k, type, tr) => baseBy[k + type + tr] || (baseBy[k + type + tr] = await run(STYLES[k], STYLES[k].kit, type, '', tr));
     const res = []; let i = 0;
     for (const id of ids) {
       const m = info.find(x => x.id === id); if (!m) continue;
       const o = { ...m };
-      for (const [tr, sfx] of MODES) for (const k0 of Object.keys(STYLES)) {
-        const k = k0 + sfx, r = await run(STYLES[k0], [id, ...STYLES[k0].kit], m.t, id, tr), b0 = await base(k0, m.t, tr);
+      for (const [tr, sfx, go] of MODES) for (const k0 of Object.keys(STYLES)) {
+        if (FIT_ONLY && m.cat !== 'stat' && k0 !== (m.cat === 'spec' ? 'spec' : 'phys')) continue;
+        const k = k0 + sfx, r = await run(STYLES[k0], [id, ...STYLES[k0].kit], m.t, id, tr, go), b0 = await base(k0, m.t, tr);
         o[k] = r1((avg(r, x => x.d) - avg(b0, x => x.d)) * 100); o[k + 'Win'] = Math.round(avg(r, x => x.win) * 100);
         const uses = r.reduce((s, x) => s + x.uses, 0), dmg = r.reduce((s, x) => s + x.dmg, 0), time = r.reduce((s, x) => s + x.t, 0);
         o[k + 'Uses'] = r1(uses / time * 60);   // 1分あたり なんかい つかったか
@@ -106,16 +112,17 @@ const HOOKS = [
       }
       // 総合：その技に むいた 型の 点（物理技は 物理型、属性技は 属性型、ほじょ技は よい ほう）
       for (const [, sfx] of MODES) {
-        const fit = m.cat === 'phys' ? 'phys' : m.cat === 'spec' ? 'spec' : (o['phys' + sfx] >= o['spec' + sfx] ? 'phys' : 'spec'), F = fit + sfx;
+        const fit = m.cat === 'spec' ? 'spec' : m.cat !== 'stat' ? 'phys' : (o['phys' + sfx] >= o['spec' + sfx] ? 'phys' : 'spec'), F = fit + sfx;
         Object.assign(o, { ['fit' + sfx]: fit, ['score' + sfx]: o[F], ['real' + sfx]: o[F + 'Real'] || 0, ['per' + sfx]: o[F + 'Per'] || 0, ['ko1' + sfx]: o[F + 'KO1'] || 0, ['ko2' + sfx]: o[F + 'KO2'] || 0, ['hits' + sfx]: o[F + 'Hits'] || 0, ['uses' + sfx]: o[F + 'Uses'] });
       }
+      if (GO) { const gs = GO.split(','); o.bestGo = gs.reduce((a, g) => (o['scoreG_' + g] ?? -1e9) > (o['scoreG_' + a] ?? -1e9) ? g : a, gs[0]); o.score = o['scoreG_' + o.bestGo]; }
       if (o.scoreT != null) o.gain = r1(o.scoreT - o.score);   // 訓練で どれだけ のびるか
       res.push(o);
       if (++i % 20 === 0) console.log(i + '/' + ids.length);
     }
     res.sort((a, c) => c.score - a.score);
-    const meta = { train: TRAIN, n: N, sid: SID, nat: NAT, fields: FIELDS, steps: STEPS, styles: STYLES, mons: mons.length, date: new Date().toISOString(), errors: errs.slice(0, 20) };
-    fs.writeFileSync(path.join(OUT, 'movepower.json'), JSON.stringify({ meta, res }, null, 1));
+    const meta = { go: GO, train: TRAIN, n: N, sid: SID, nat: NAT, fields: FIELDS, steps: STEPS, styles: STYLES, mons: mons.length, date: new Date().toISOString(), errors: errs.slice(0, 20) };
+    fs.writeFileSync(path.join(OUT, SHARD ? 'movepower_' + SHARD.replace('/', 'of') + '.json' : 'movepower.json'), JSON.stringify({ meta, res }, null, 1));
     console.log('done', res.length, 'moves', errs.length ? 'errors: ' + errs.slice(0, 3).join(' / ') : '');
   } finally { await b.close(); fs.unlinkSync(tmp); }
 })();
