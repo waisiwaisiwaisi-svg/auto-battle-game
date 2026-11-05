@@ -6377,6 +6377,24 @@ const GFX = {
 /* 技名エディタで なおした なまえ */
 Object.entries({"air-slash2": "ウィンスショット", "aqua-jet": "アクアクイック", "aurora-veil": "あらいながす", "avalanche": "ゆきなだれ", "bonemerang": "ブーメラン", "bulk-up": "バルクアップ", "bulldoze": "じならし", "cross-poison": "どくのつめ", "dig": "ディグアホール", "draining-kiss": "ライフショット", "drill-peck": "きりもみとっしん", "duel-arena": "けっとうじょう", "echoed-voice": "エコー", "electric-terrain": "でんかい", "ember": "かきゅう", "encore": "もういっかい", "endeavor": "びょうどう", "fire-punch": "かえんパンチ", "flame-charge": "ファイアダッシュ", "fly": "スカイフォール", "freeze-dry": "とうけつこうせん", "giga-drain": "ライフビーム", "grassy-terrain": "そうげん", "gravity": "じゅうりょくば", "haze": "めぐみのかぜ", "heavy-drop": "ばくはつ", "hurricane": "ウィンドブレス", "ice-fang": "こおりのつめ", "ice-punch": "こおりパンチ", "leaf": "リーフショット", "liquidation": "みずぎり", "nasty-plot": "たくらみ", "outrage": "おおあばれ", "overheat": "バーンビーム", "pain-split": "はんぶんこ", "powder-snow": "こごえるゆか", "psy-link": "ねんし", "psycho-cut": "ねんりきのつめ", "quick-attack": "ビーストクイック", "recover": "いやし", "roost": "かぜのいやし", "shadow-claw": "かげのつめ", "slack-off": "けもののいやし", "sludge-wave": "どくのはどう", "smack-down": "ひきずりおろし", "spore": "きのこボム", "sunny-day": "ひでり", "swift": "スピードショット", "synthesis": "くさのいやし", "thunder-fang": "かみなりのつめ", "trick-or-treat": "みいらとり", "vine": "つたうち", "weather-ball": "てんきだま", "will-o-wisp": "やけどだま", "wood-hammer": "まるたラッシュ"}).forEach(([id, n]) => { if (MOVES[id]) MOVES[id].n = n; });
 for (const k in MOVES) MOVES[k].fxid = k;
+// ===== 攻撃技の 全体バランス =====
+// ① 射程で 当たりやすさ：近い（〜150）＝ため みじかめ、遠い（300〜）＝ため ながめ・弾は すこし おそく（とどく きょりは おなじ）
+// ② 威力で ため：100いじょう +0.3びょう、120いじょう +0.5びょう（使える 回数は bigMax：100いじょう 5かい・55〜95 10かい・50いか むせいげん）
+// ③④ 必中・当たりやすい 技の 威力と、予算を そろえる 待ち時間は BAL_TUNE（はかって きめた あたい）
+const BAL_KINDS = ['melee', 'swipe', 'aoe', 'cone', 'dash', 'proj', 'beam', 'strike', 'multi', 'wave', 'vault'];
+const balReach = (m) => ({ melee: 140, swipe: (m.rad || 120) * .8 + 33, dash: (m.len || 180) * .8, aoe: (m.rad || 100) * .75, beam: (m.len || 400) * .8, proj: m.spd ? m.spd * (m.life || 2.2) * .8 : 999, cone: (m.rad || 200) * .8, multi: 260, vault: 520, wave: 420 })[m.k] || 999;   // moveReach と おなじ めやす
+const balRange = (m) => { const r = balReach(m); return r <= 150 ? 'near' : r <= 300 ? 'mid' : 'far'; };
+const BAL_TUNE = {};   // id: [待ち時間, 威力]（はかって きめる）
+for (const id in MOVES) { const m = MOVES[id]; if (!(m.power > 0) || m.cat === 'stat' || m.ohko || !BAL_KINDS.includes(m.k)) continue;
+  m.rng = balRange(m); const w0 = m.wind || 0;
+  if (!(m.prio > 0)) {
+    if (m.rng === 'near') m.wind = w0 * .8;
+    if (m.rng === 'far') { m.wind = w0 * 1.2; if (m.k === 'proj' && m.spd) { m.spd = Math.round(m.spd * .9); m.life = (m.life || 1.8) / .9; } }
+    if (m.power >= 120) m.wind += .5; else if (m.power >= 100) m.wind += .3;
+  }
+  m.wind = Math.round(m.wind * 100) / 100;
+  const T = BAL_TUNE[id]; if (T) { if (T[0]) m.cd = T[0]; if (T[1]) { m.power = T[1]; m.pow = T[1] / 5; } }
+}
 const gfxOf = (m, part) => { const g = m && GFX[m.fxid], k = g && g[part]; return k && plOk(k) ? k : null; };
 // 地面から 出る／はじける 専用の 絵（はんい r に あわせる）。かいたら true
 const RING_FX = new Set(['g_ground_shock', 'g_grand_quake', 'g_dragon_roar', 'g_plasma_burst', 'k_sparkle_flash', 'k_venom_wave', 'k_hyper_voice', 'k_dark_pulse', 'k_charm_song', 'k_psy_cross']);   // わの 絵：あしもとを まんなかに、あたる はんいと おなじ 大きさで
