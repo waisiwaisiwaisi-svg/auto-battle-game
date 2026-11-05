@@ -6379,7 +6379,7 @@ Object.entries({"air-slash2": "ウィンスショット", "aqua-jet": "アクア
 for (const k in MOVES) MOVES[k].fxid = k;
 // ===== 攻撃技の 全体バランス =====
 // ① 射程で 当たりやすさ：近い（〜150）＝ため みじかめ、遠い（300〜）＝ため ながめ・弾は すこし おそく（とどく きょりは おなじ）
-// ② 威力で ため：100いじょう +0.3びょう、120いじょう +0.5びょう（使える 回数は bigMax：100いじょう 5かい・55〜95 10かい・50いか むせいげん）
+// ② 威力で ため：遠い 技は 100いじょう +0.3びょう、120いじょう +0.5びょう（使える 回数は bigMax：100いじょう 5かい・55〜95 10かい・50いか むせいげん）
 // ③④ 必中・当たりやすい 技の 威力と、予算を そろえる 待ち時間は BAL_TUNE（はかって きめた あたい）
 const BAL_KINDS = ['melee', 'swipe', 'aoe', 'cone', 'dash', 'proj', 'beam', 'strike', 'multi', 'wave', 'vault'];
 const balReach = (m) => ({ melee: 140, swipe: (m.rad || 120) * .8 + 33, dash: (m.len || 180) * .8, aoe: (m.rad || 100) * .75, beam: (m.len || 400) * .8, proj: m.spd ? m.spd * (m.life || 2.2) * .8 : 999, cone: (m.rad || 200) * .8, multi: 260, vault: 520, wave: 420 })[m.k] || 999;   // moveReach と おなじ めやす
@@ -6392,10 +6392,10 @@ for (const id in MOVES) { const m = MOVES[id]; if (m.switchOut) { m.power = 45; 
   if (!(m.prio > 0)) {
     if (m.rng === 'near') m.wind = w0 * .8;
     if (m.rng === 'far') { m.wind = w0 * 1.2; if (m.k === 'proj' && m.spd) { m.spd = Math.round(m.spd * .9); m.life = (m.life || 1.8) / .9; } }
-    if (P0 >= 120) m.wind += .5; else if (P0 >= 100) m.wind += .3;
+    if (m.rng === 'far') { if (P0 >= 120) m.wind += .5; else if (P0 >= 100) m.wind += .3; }   // 威力100いじょうで ためを ながく するのは 遠い 技だけ（近い・ふつうは 近づく ぶん おもい。どれも 使える 回数は 5かい）
   }
   m.wind = Math.round(m.wind * 100) / 100;
-  const T = BAL_TUNE[id]; if (T) { if (T[0]) m.cd = T[0]; if (T[1]) { m.power = T[1]; m.pow = T[1] / 5; } }
+  const T = BAL_TUNE[id]; if (T) { if (T[0]) m.cd = T[0]; if (T[1]) { const P = P0 <= 50 ? Math.min(T[1], 50) : P0 < 100 ? Math.min(T[1], 95) : T[1]; m.power = P; m.pow = P / 5; } }   // 威力を かえても 使える 回数の だん（50いか・55〜95・100いじょう）は こえない
 }
 const gfxOf = (m, part) => { const g = m && GFX[m.fxid], k = g && g[part]; return k && plOk(k) ? k : null; };
 // 地面から 出る／はじける 専用の 絵（はんい r に あわせる）。かいたら true
