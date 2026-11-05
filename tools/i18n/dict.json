@@ -2671,10 +2671,6 @@
 "Bites with electric fangs. May cause Paralysis",
 "用带电的牙咬住对手。有时会造成麻痹"
 ],
-"前足や手で相手をはたく。いちばん基本の攻撃": [
-"Slaps the foe with paws or hands. The most basic attack",
-"用前脚或手拍打对手。最基本的攻击"
-],
 "頭から相手に突っこむ": [
 "Rams the foe headfirst",
 "用头撞向对手"
@@ -12002,5 +11998,21 @@
 "⟦0⟧秒間、まわり（ふつうの距離まで）の相手と、自分が置いた技・罠・床・エナジー・お花を自分へ引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
 "For ⟦0⟧ sec, keeps pulling nearby foes (normal range) and its own placed moves, traps, floors, energy and flowers toward itself (it can still move and use moves). A foe once caught is pulled even if it leaves the range",
 "⟦0⟧秒内，持续将周围（普通距离内）的对手，以及自己放置的招式、陷阱、地面、能量和花朵吸向自己（可以移动也能使用招式）。一旦捕获的对手即使离开范围也会被吸引"
+],
+"かならず当たる（相手へ曲がって突っこみ、よけられない）": [
+"Always hits (curves toward the foe and can't be dodged)",
+"必定命中（朝对手转弯冲去，无法躲开）"
+],
+"相手を吹き飛ばし、壁に当てると同じだけの追加ダメージ": [
+"Knocks the foe back; slamming it into a wall deals the same damage again",
+"将对手击飞，撞到墙上时追加同等伤害"
+],
+"かべ -⟦0⟧": [
+"Wall -⟦0⟧",
+"撞墙 -⟦0⟧"
+],
+"前足や手で相手をはたいて吹き飛ばす。壁に当てると同じだけの追加ダメージ": [
+"Slaps the foe with a paw or hand and knocks it back. Slamming it into a wall deals the same damage again",
+"用前爪或手拍打对手并将其击飞。撞到墙上时追加同等伤害"
 ]
 }
