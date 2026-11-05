@@ -6,13 +6,13 @@
 //   撃ち方：どちらも ゲームの おまかせ訓練（autoTrain）。
 //   つよさ点＝（技ありの「じぶんの のこりHP% − あいての のこりHP%」の へいきん − 技なしの へいきん）× 100
 //   かち：技ありの 勝率 と 技なしの 勝率
-// つかいかた：node tools/movepower/teampower.js [--n 24] [--moves ember,surf] [--shard 1/3] [--out tools/movepower/out]
+// つかいかた：node tools/movepower/teampower.js [--n 24] [--seed 0（かえると べつの 乱数・べつの 3たい）] [--moves ember,surf] [--shard 1/3] [--out tools/movepower/out]
 //   → out/teampower(_1of3).json
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '../..');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const N = +arg('n', 24), OUT = path.resolve(arg('out', path.join(__dirname, 'out'))), ONLY = arg('moves', ''), SHARD = arg('shard', ''), SRC = arg('src', path.join(ROOT, 'index.html'));
+const SEED = +arg('seed', 0), N = +arg('n', 24), OUT = path.resolve(arg('out', path.join(__dirname, 'out'))), ONLY = arg('moves', ''), SHARD = arg('shard', ''), SRC = arg('src', path.join(ROOT, 'index.html'));
 
 const SIM = `
 window.PMA_TEAM_FOES = (n, seed) => {   // あいての チームを n こ つくる（クルー 4〜10 の サモナー・ヘッド、ビッグフォー・キング）
@@ -60,13 +60,13 @@ const HOOKS = [['function beginMove(f, id) {', 'function beginMove(f, id) { if (
     const info = await p.evaluate(() => { const M = window.__game.MOVES; return Object.keys(M).map(id => ({ id, n: M[id].n, t: M[id].t, k: M[id].k, cat: M[id].cat || '', power: M[id].power || Math.round((M[id].pow || 0) * 5) })); });
     let ids = ONLY ? ONLY.split(',') : info.filter(m => m.cat !== 'stat' && m.power > 0).map(m => m.id);
     if (SHARD) { const [a, n] = SHARD.split('/').map(Number); ids = ids.filter((_, i) => i % n === a - 1); }
-    const foes = await p.evaluate(([n]) => window.PMA_TEAM_FOES(n, 4242), [N]);
+    const foes = await p.evaluate(([n, s]) => window.PMA_TEAM_FOES(n, 4242 + s * 101), [N, SEED]);
     const res = []; let i = 0;
     for (const id of ids) {
       const m = info.find(x => x.id === id); if (!m) continue;
-      const r = await p.evaluate(([id, foes]) => { const T = window.PMA_TEAM_MINE(id, 77); if (!T) return null; const out = { sids: T.sids, a: [], b: [] };
-        foes.forEach((F, k) => { const seed = 1000 + k * 7919; out.a.push(window.PMA_TEAM_FIGHT({ seed, field: F.field, foes: F.team, mine: T.test, test: id })); out.b.push(window.PMA_TEAM_FIGHT({ seed, field: F.field, foes: F.team, mine: T.base, test: id })); });
-        return out; }, [id, foes]);
+      const r = await p.evaluate(([id, foes, sd]) => { const T = window.PMA_TEAM_MINE(id, 77 + sd); if (!T) return null; const out = { sids: T.sids, a: [], b: [] };
+        foes.forEach((F, k) => { const seed = 1000 + k * 7919 + sd * 31337; out.a.push(window.PMA_TEAM_FIGHT({ seed, field: F.field, foes: F.team, mine: T.test, test: id })); out.b.push(window.PMA_TEAM_FIGHT({ seed, field: F.field, foes: F.team, mine: T.base, test: id })); });
+        return out; }, [id, foes, SEED]);
       if (!r) { res.push({ ...m, skip: 'おぼえる モンスター なし' }); continue; }
       const avg = (a, f) => a.reduce((s, x) => s + f(x), 0) / a.length, r1 = (v) => Math.round(v * 10) / 10;
       const time = r.a.reduce((s, x) => s + x.t, 0) || 1;
