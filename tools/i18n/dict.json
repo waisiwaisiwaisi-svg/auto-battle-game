@@ -2671,10 +2671,6 @@
 "Bites with electric fangs. May cause Paralysis",
 "用带电的牙咬住对手。有时会造成麻痹"
 ],
-"前足や手で相手をはたく。いちばん基本の攻撃": [
-"Slaps the foe with paws or hands. The most basic attack",
-"用前脚或手拍打对手。最基本的攻击"
-],
 "頭から相手に突っこむ": [
 "Rams the foe headfirst",
 "用头撞向对手"
@@ -2767,9 +2763,9 @@
 "On hit, swaps the foe with its Bench",
 "命中后让对手与替补交换"
 ],
-"うろこを4発連射する。撃つと自分の防御-1・素早さ+1": [
-"Fires 4 scales in a row. Then own Defense -1, Speed +1",
-"连续发射4片鳞片。发射后自己的防御-1、速度+1"
+"うろこを4発連射する。撃つと自分の防御-1・属性防御-1・素早さ+1": [
+"Fires 4 scales in a row. Then own Defense -1, Sp. Def -1, Speed +1",
+"连续发射4片鳞片。发射后自己的防御-1、特防-1、速度+1"
 ],
 "ひるまずに突き進む突進": [
 "A dash that won't Flinch",
@@ -2902,10 +2898,6 @@
 "相手と念力の糸でつながり、4秒間ダメージを与え続ける。近いほど強い（1秒で最大威力30）。離れすぎると切れる": [
 "Links to the foe with a psychic thread, dealing damage for 4 sec. Closer is stronger (up to 30 Power/sec). Breaks if too far",
 "用念力之线连住对手，4秒内持续造成伤害。越近越强（每秒最大威力30）。距离太远会断开"
-],
-"10秒間その場から動けない代わりに、まわりの相手と置かれた技・罠を引き寄せ続ける（技は使える）。一度とらえた相手は範囲の外でも引き寄せる": [
-"Can't move for 10 sec, but keeps pulling in nearby foes and placed moves/traps (can use moves). Caught foes keep getting pulled even outside the range",
-"10秒内无法移动，但会持续吸引周围的对手和设置的招式、陷阱（可以使用招式）。被抓住的对手即使在范围外也会被吸过来"
 ],
 "当たった相手を突進の向きへつき飛ばす。壁・障害物・場の端にぶつけると2.5秒ひるむ": [
 "Knocks the foe in the dash direction. Slamming into a wall, obstacle, or field edge makes them Flinch for 2.5 sec",
@@ -5030,10 +5022,6 @@
 "→ 技の 枠へ（★＝ワザステッカー）": [
 "→ To move slot (★ = Move Sticker)",
 "→ 放到招式格（★＝技贴纸）"
-],
-"※ ★の ついた 技は、確定すると ワザステッカーを 1まい つかって おぼえます": [
-"※ Moves with ★ use 1 Move Sticker to learn when you Confirm",
-"※ 带★的招式在确定时会消耗1张技贴纸来学会"
 ],
 "→「〜撃つ」の 枠へ": [
 "→ To \"…fire\" slot",
@@ -8343,10 +8331,6 @@
 "Leaves an afterimage. After 5s, returns to it and regains half the HP lost meanwhile",
 "在原地留下残影。5秒后回到残影处，并恢复期间失去的HP的一半"
 ],
-"⟦0⟧秒間、その場から動けなくなる代わりに、まわり（ふつうの距離まで）の相手と、置いてある技・罠を自分へ引き寄せ続ける（技は使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
-"For ⟦0⟧s, can't move but keeps pulling nearby foes (normal range) and placed moves/traps toward itself (can still use moves). Caught foes keep getting pulled even out of range",
-"⟦0⟧秒内无法移动，但持续把周围（普通距离内）的对手和放置的招式、陷阱拉向自己（可以出招）。一旦抓住的对手即使离开范围也会被拉过来"
-],
 "⟦0⟧回に1回、2.5倍の強い一撃になる": [
 "Every ⟦0⟧th use is a strong ×2.5 hit",
 "每⟦0⟧次有1次变成2.5倍的强力一击"
@@ -10564,8 +10548,8 @@
 "查看详情"
 ],
 "しゅつじょう": [
-"Lineup",
-"出场"
+"In team",
+"出战"
 ],
 "— どの しあいにも でる 3たい（1ばんめから とうじょう）": [
 "— 3 that play in every match (1st goes first)",
@@ -10628,8 +10612,8 @@
 "其他对手"
 ],
 "ボスに ちょうせん！": [
-"Challenge the boss!",
-"挑战Boss！"
+"Challenge the Boss!",
+"挑战首领！"
 ],
 "つぎの たたかいへ": [
 "Next battle",
@@ -10705,7 +10689,7 @@
 ],
 "タワータイクーンに ちょうせん！": [
 "Challenge the Tower Tycoon!",
-"挑战塔之霸主！"
+"挑战塔之大亨！"
 ],
 "つぎは ヘッド！": [
 "Next: Crew Head!",
@@ -11458,5 +11442,585 @@
 "人形：よける": [
 "Dummy: Dodge",
 "人偶：闪避"
+],
+"ひろい あきち": [
+"Wide Vacant Lot",
+"宽阔空地"
+],
+"すべての タイプ": [
+"All types",
+"所有属性"
+],
+"クルーの タグを とるごとに エリアが ふえる（いま タグ ⟦0⟧こ）": [
+"Each Crew Tag you earn opens a new area (Tags: ⟦0⟧)",
+"每获得一个街团标签就会开放新区域（现在标签：⟦0⟧个）"
+],
+"タグ ⟦0⟧こで ひらく": [
+"Opens at ⟦0⟧ Tags",
+"⟦0⟧个标签开放"
+],
+"※ ★の ついた 技は ワザステッカーで おぼえます（ステッカーは なくならない）": [
+"※ Moves marked ★ are learned with Move Stickers (stickers are never used up)",
+"※ 带★的招式用技贴纸学习（贴纸不会消耗）"
+],
+"もっている": [
+"Owned",
+"已拥有"
+],
+"この ワザステッカーは もう もっています（なくならないので なんかいでも つかえます）": [
+"You already have this Move Sticker (it never runs out, so you can use it any number of times)",
+"你已经拥有这张技贴纸（不会消耗，可以无限次使用）"
+],
+"ドラフトバトル": [
+"Draft Battle",
+"选秀对战"
+],
+"ドラフト": [
+"Draft",
+"选秀"
+],
+"かい": [
+"F",
+"层"
+],
+"⟦0⟧かい": [
+"⟦0⟧F",
+"第⟦0⟧层"
+],
+"⟦0⟧かい クリア ⟦1⟧かい": [
+"⟦0⟧F cleared ×⟦1⟧",
+"通关⟦0⟧层 ⟦1⟧次"
+],
+"レジェンド入り おめでとう！ ドラフトバトルにも ちょうせんしよう": [
+"You're a Legend! Try the Draft Battle too",
+"恭喜成为传奇！也来挑战选秀对战吧"
+],
+"えらんだ モンスターと ワザステッカーで 21かいを めざせ！": [
+"Reach the 21st floor with the monsters and Move Stickers you draft!",
+"用选中的怪兽和技贴纸挑战21层！"
+],
+"3体の なかから 1体を 3かい えらぶ": [
+"Pick 1 of 3 monsters, three times",
+"从3只中选1只，共选3次"
+],
+"ワザステッカーを 4まい えらぶ": [
+"Pick 4 Move Stickers",
+"选择4张技贴纸"
+],
+"訓練して たたかう。かつと モンスターと ステッカーが ふえる": [
+"Train, then battle. Wins earn more monsters and stickers",
+"训练后战斗。获胜可获得更多怪兽和贴纸"
+],
+"まけたら さいしょから（ここの モンスターは 手もちに はいらない）": [
+"Lose and you start over (these monsters never join your party)",
+"输了就从头开始（这里的怪兽不会加入手持）"
+],
+"モンスターを えらぶ（⟦0⟧ / 3）": [
+"Pick a monster (⟦0⟧ / 3)",
+"选择怪兽（⟦0⟧ / 3）"
+],
+"技は もう おぼえて いる。えらんだ モンスターは この ドラフトの あいだ だけ つかえる": [
+"They already know moves. Picked monsters can only be used during this draft",
+"已经学会招式。选中的怪兽只能在这次选秀中使用"
+],
+"ごほうび：モンスターを 1体 えらぶ": [
+"Reward: pick 1 monster",
+"奖励：选择1只怪兽"
+],
+"ワザステッカーを えらぶ（⟦0⟧ / 4）": [
+"Pick a Move Sticker (⟦0⟧ / 4)",
+"选择技贴纸（⟦0⟧ / 4）"
+],
+"えらんだ モンスターが おぼえられる ものから。訓練の がめんで 技の 枠に いれると おぼえる": [
+"Only ones your picks can learn. Put it in a move slot in Training to learn it",
+"只出现选中怪兽能学会的。在训练画面放进招式栏即可学会"
+],
+"⟦0⟧が おぼえられる": [
+"⟦0⟧ can learn",
+"⟦0⟧可以学会"
+],
+"だれも おぼえられない": [
+"No one can learn",
+"谁都学不会"
+],
+"えらべる ステッカーが ない": [
+"No stickers to pick",
+"没有可选的贴纸"
+],
+"ごほうび：ワザステッカーの タイプを えらぶ": [
+"Reward: pick a Move Sticker type",
+"奖励：选择技贴纸的属性"
+],
+"えらんだ タイプの ステッカーが 3まい ランダムで もらえる（おぼえられない ものも でる）": [
+"Get 3 random stickers of that type (some may be unlearnable)",
+"随机获得3张该属性的贴纸（也可能有学不会的）"
+],
+"つぎは": [
+"Next:",
+"下一个"
+],
+"ぜんぶで 21かい": [
+"21 floors in all",
+"共21层"
+],
+"しゅつじょう（3体）": [
+"Team (3)",
+"出战（3只）"
+],
+"タップで いれかえ": [
+"Tap to swap",
+"点击替换"
+],
+"ワザステッカー ⟦0⟧まい": [
+"Move Stickers: ⟦0⟧",
+"技贴纸 ⟦0⟧张"
+],
+"訓練する": [
+"Train",
+"训练"
+],
+"⟦0⟧かいへ": [
+"To ⟦0⟧F",
+"前往第⟦0⟧层"
+],
+"リセット（さいしょから）": [
+"Reset (start over)",
+"重置（从头开始）"
+],
+"⟦0⟧かいめの まえ（ここの 訓練は ドラフト専用）": [
+"Before floor ⟦0⟧ (this training is draft-only)",
+"第⟦0⟧层之前（这里的训练只用于选秀）"
+],
+"タワーへ もどる ›": [
+"Back to Tower ›",
+"返回塔 ›"
+],
+"ドラフトを リセットしますか？\nいまの モンスターと ステッカーは なくなり、さいしょから に なります。": [
+"Reset the draft?\nYour current monsters and stickers will be lost and you will start over.",
+"要重置选秀吗？\n现在的怪兽和贴纸会消失，从头开始。"
+],
+"ワザステッカー ⟦0⟧を もらった！": [
+"Got Move Stickers ⟦0⟧!",
+"获得了技贴纸⟦0⟧！"
+],
+"⟦0⟧の ステッカーは もう ぜんぶ もっている": [
+"You already have every ⟦0⟧ sticker",
+"已经拥有全部⟦0⟧贴纸"
+],
+"ドラフト しゅうりょう": [
+"Draft over",
+"选秀结束"
+],
+"⟦0⟧かいまで クリア": [
+"Cleared up to ⟦0⟧F",
+"通关至第⟦0⟧层"
+],
+"⟦0⟧かい クリア！": [
+"Cleared ⟦0⟧F!",
+"通关第⟦0⟧层！"
+],
+"ごほうびの モンスターと ワザステッカーを えらぼう": [
+"Pick your reward monster and Move Stickers",
+"选择奖励的怪兽和技贴纸吧"
+],
+"⟦0⟧かい！ ⟦1⟧が しょうぶを しかけてきた！": [
+"Floor ⟦0⟧! ⟦1⟧ challenges you!",
+"第⟦0⟧层！⟦1⟧发起了挑战！"
+],
+"えらんだ モンスターと ワザステッカーで 21かいを めざす（7かいごとに ボス）": [
+"Reach 21F with drafted monsters and Move Stickers (Boss every 7F)",
+"用选中的怪兽和技贴纸挑战21层（每7层有首领）"
+],
+"いまの かい": [
+"Current floor",
+"当前层数"
+],
+"ドラフトバトル ⟦0⟧かい": [
+"Draft Battle ⟦0⟧F",
+"选秀对战 第⟦0⟧层"
+],
+"⟦0⟧かい クリア！ 💎+1": [
+"Cleared ⟦0⟧F!　💎+1",
+"通关第⟦0⟧层！　💎+1"
+],
+"いまの モンスターと 技": [
+"Your monsters and moves",
+"现在的怪兽和招式"
+],
+"もっている ステッカー：⟦0⟧": [
+"Stickers you have: ⟦0⟧",
+"拥有的贴纸：⟦0⟧"
+],
+"技の なまえを タップすると せつめいが でる": [
+"Tap a move name to see what it does",
+"点击招式名可查看说明"
+],
+"つぎの ⟦0⟧かいの あいて": [
+"Next: floor ⟦0⟧ opponents",
+"下一层（第⟦0⟧层）的对手"
+],
+"つぎの ⟦0⟧かいの あいて（ボス）": [
+"Next: floor ⟦0⟧ opponents (Boss)",
+"下一层（第⟦0⟧层）的对手（首领）"
+],
+"つぎの ⟦0⟧かいの あいて（タワータイクーン）": [
+"Next: floor ⟦0⟧ opponents (Tower Tycoon)",
+"下一层（第⟦0⟧层）的对手（塔之大亨）"
+],
+"タワーや ドラフトバトルにも ちょうせんしよう": [
+"Try the Tower and Draft Battle too",
+"也来挑战塔和选秀对战吧"
+],
+"レジェンド入り おめでとう！ タワーや ドラフトバトルにも ちょうせんしよう": [
+"You're a Legend! Try the Tower and Draft Battle too",
+"恭喜成为传奇！也来挑战塔和选秀对战吧"
+],
+"⟦0⟧の フィールド": [
+"⟦0⟧ field",
+"⟦0⟧场地"
+],
+"ダブル対戦": [
+"Double Battle",
+"双打对战"
+],
+"2体ずつ でて たたかう": [
+"2 monsters each side",
+"双方各出2只"
+],
+"ダブル対戦は 2体 いじょう ひつようです": [
+"You need at least 2 monsters for a Double Battle",
+"双打对战需要至少2只怪兽"
+],
+"⟦0⟧と ダブル対戦！ 2体ずつ でて たたかう。⟦1⟧フィールドで しあい かいし！": [
+"Double Battle vs ⟦0⟧! 2 each side. Match starts on the ⟦1⟧ field!",
+"与⟦0⟧的双打对战！双方各出2只。在⟦1⟧场地开始比赛！"
+],
+"ダブル対戦では こうたい できない（たおれたら つぎが でる）": [
+"You can't switch in a Double Battle (the next one comes out when one faints)",
+"双打对战中不能替换（倒下后下一只自动出场）"
+],
+"ヘッドの あかし：ワザステッカー「⟦0⟧」を もらった！": [
+"Head's Proof: got the Move Sticker \"⟦0⟧\"!",
+"首领之证：获得了技贴纸「⟦0⟧」！"
+],
+"（ここでしか てに はいらない）": [
+"(only available here)",
+"（只有这里能得到）"
+],
+"これまでに かった ヘッドの あかし：ワザステッカー ⟦0⟧を もらった！": [
+"Proof from the Heads you've beaten: got the Move Stickers ⟦0⟧!",
+"至今击败的首领之证：获得了技贴纸⟦0⟧！"
+],
+"りゅうのキバ": [
+"Dragon Fang",
+"龙之牙"
+],
+"竜のキバでかみつく。20%でひるませる": [
+"Bites with dragon fangs. 20% chance to make the target flinch",
+"用龙牙咬住。20%使对手畏缩"
+],
+"りゅうだま": [
+"Dragon Orb",
+"龙珠"
+],
+"竜の気をこめた弾をとばす。相手を追いかける": [
+"Fires an orb of dragon energy that chases the target",
+"发射蕴含龙气的弹，会追踪对手"
+],
+"りゅうのほうこう": [
+"Dragon Roar",
+"龙之咆哮"
+],
+"まわりにほえて衝撃を広げる。30%で相手の攻撃-1": [
+"Roars to send a shockwave around. 30% chance to lower foe Attack by 1",
+"咆哮向四周扩散冲击。30%使对手攻击-1"
+],
+"うろこのよろい": [
+"Scale Guard",
+"鳞之铠"
+],
+"うろこをかためる。自分の防御+1・属性防御+1": [
+"Hardens its scales. Raises own Defense and Sp. Def by 1",
+"坚固鳞片。自己的防御+1、属性防御+1"
+],
+"ギアカッター": [
+"Gear Cutter",
+"齿轮切割"
+],
+"回る歯車をまっすぐ速くとばす": [
+"Fires a spinning gear straight and fast",
+"笔直快速地射出旋转齿轮"
+],
+"てっこうせん": [
+"Steel Ray",
+"钢铁光线"
+],
+"はがねの光線をまっすぐ撃つ。撃つと自分の防御-1": [
+"Fires a straight steel ray. Lowers own Defense by 1",
+"笔直发射钢铁光线。发射后自己的防御-1"
+],
+"はがねのとっしん": [
+"Steel Rush",
+"钢铁冲撞"
+],
+"はがねの体でまっすぐ突進する": [
+"Charges straight with a steel body",
+"以钢铁之躯笔直冲撞"
+],
+"オーバークロック": [
+"Overclock",
+"超频"
+],
+"体の回転を上げる。自分の素早さ+2": [
+"Spins up its body. Raises own Speed by 2",
+"提高身体转速。自己的速度+2"
+],
+"でんげきほう": [
+"Volt Cannon",
+"电击炮"
+],
+"電気の光線をまっすぐ撃つ。10%でまひにする": [
+"Fires a straight electric ray. 10% chance to paralyze",
+"笔直发射电光线。10%使对手麻痹"
+],
+"プラズマバースト": [
+"Plasma Burst",
+"等离子爆发"
+],
+"まわりに電気をはじけさせる。20%でまひにする": [
+"Bursts electricity all around. 20% chance to paralyze",
+"向四周迸发电流。20%使对手麻痹"
+],
+"でんじあらし": [
+"Static Storm",
+"电磁风暴"
+],
+"前に電気のあらしを吹きつける": [
+"Blasts a storm of electricity forward",
+"向前方吹出电之风暴"
+],
+"じゅうでん": [
+"Charge Up",
+"充电"
+],
+"体に電気をためる。自分の属性攻撃+1・属性防御+1": [
+"Stores electricity. Raises own Sp. Atk and Sp. Def by 1",
+"在体内储存电力。自己的属性攻击+1、属性防御+1"
+],
+"とくせい：": [
+"Ability: ",
+"特性："
+],
+"なんでもや": [
+"Jack of All",
+"万事通"
+],
+"なんでもや！": [
+"Jack of All!",
+"万事通！"
+],
+"自分の タイプと ちがう タイプの 技の 威力が 1.2倍": [
+"Moves of a type it doesn't have deal 1.2x power",
+"与自身属性不同的招式威力变为1.2倍"
+],
+"がんじょう": [
+"Sturdy",
+"结实"
+],
+"がんじょう！": [
+"Sturdy!",
+"结实！"
+],
+"いまの HP いじょうの ダメージを うけても HP1で のこる（1戦に 1かい）": [
+"Survives with 1 HP when hit for at least its current HP (once per battle)",
+"受到大于等于当前HP的伤害时以1HP撑住（每场1次）"
+],
+"ギアチェンジ": [
+"Gear Shift",
+"换挡"
+],
+"ギアチェンジ！": [
+"Gear Shift!",
+"换挡！"
+],
+"技を つかった かいすうが 4かいめごとに、その 技の 威力が 20 あがる": [
+"Every 4th move it uses gains +20 power",
+"每使用第4次招式时，该招式威力+20"
+],
+"むれのちから": [
+"Pack Power",
+"族群之力"
+],
+"むれのちから！": [
+"Pack Power!",
+"族群之力！"
+],
+"たおれていない ひかえの 獣 1体につき 技の 威力が 10% あがる（さいだい 30%）": [
+"+10% move power per Beast still standing on the bench (max 30%)",
+"替补中每有1只未倒下的兽属性，招式威力+10%（最多30%）"
+],
+"おんねん": [
+"Grudge",
+"怨念"
+],
+"おんねん！": [
+"Grudge!",
+"怨念！"
+],
+"たおされると たおした あいての 攻撃と 属攻が 1さがる。チームで さいごの 1体として でると 攻撃と 属攻が 1あがる": [
+"When knocked out, the attacker's Attack and Sp. Atk drop by 1. When sent out as the team's last member, its Attack and Sp. Atk rise by 1",
+"被打倒时，打倒它的对手攻击和特攻-1。作为队伍最后1只出场时，攻击和特攻+1"
+],
+"てかず": [
+"Quick Hands",
+"手数"
+],
+"威力 50いかの 攻撃技の 待ち時間が 20% みじかい": [
+"Attack moves with 50 power or less have 20% shorter cooldowns",
+"威力50以下的攻击招式冷却时间缩短20%"
+],
+"げきりん": [
+"Dragon Rage",
+"逆鳞"
+],
+"げきりん！": [
+"Dragon Rage!",
+"逆鳞！"
+],
+"きゅうしょに あたると 1戦に 1かいだけ 6びょう スーパーアーマーに なり ひるまない。その あいだ 技の 待ち時間が 30% はやく へる": [
+"Once per battle, taking a critical hit grants 6 seconds of super armor (no flinching). Meanwhile, cooldowns recover 30% faster",
+"每场1次，受到会心一击时获得6秒霸体，不会畏缩。期间招式冷却恢复速度加快30%"
+],
+"ねっきょう": [
+"Frenzy",
+"狂热"
+],
+"ねっきょう！": [
+"Frenzy!",
+"狂热！"
+],
+"HPが へるほど 技の 威力が あがる（HP 1/4いかで さいだい +50%）": [
+"The lower its HP, the stronger its moves (up to +50% at 1/4 HP or less)",
+"HP越低招式威力越高（HP在1/4以下时最多+50%）"
+],
+"みずのころも": [
+"Water Veil",
+"水之衣"
+],
+"みずのころも！": [
+"Water Veil!",
+"水之衣！"
+],
+"まひ いがいの 状態異常と こんらんが はやく なおる（時間 はんぶん）": [
+"Status conditions other than paralysis, and confusion, wear off in half the time",
+"麻痹以外的异常状态和混乱恢复时间减半"
+],
+"おいかぜ": [
+"Tailwind",
+"顺风"
+],
+"おいかぜ！": [
+"Tailwind!",
+"顺风！"
+],
+"突進技と 弾の はやさが 20% あがる": [
+"Rush moves and projectiles are 20% faster",
+"突进招式和弹射物速度提升20%"
+],
+"エナジー": [
+"Energy",
+"能量"
+],
+"エナジー！": [
+"Energy!",
+"能量！"
+],
+"エナジーを ひろった": [
+"Picked up energy",
+"捡到了能量"
+],
+"雷技を つかうと エナジーが おちる。ひろうと つぎに つかった 技の 待ち時間が すぐ もどる": [
+"Using Thunder moves drops energy. Picking it up instantly resets the cooldown of the next move used",
+"使用雷属性招式会掉落能量。捡起后，下一个使用的招式冷却立即恢复"
+],
+"はなさかせ": [
+"Bloom",
+"开花"
+],
+"はなさかせ！": [
+"Bloom!",
+"开花！"
+],
+"草技を つかうと お花が さく。お花の ちかくに いると 毎秒 HPが 0.5% かいふく": [
+"Using Grass moves makes a flower bloom. Staying near flowers restores 0.5% HP per second",
+"使用草属性招式会开出花朵。待在花朵附近时每秒恢复0.5%HP"
+],
+"いたずらごころ": [
+"Prankster",
+"恶作剧之心"
+],
+"いたずらごころ！": [
+"Prankster!",
+"恶作剧之心！"
+],
+"補助技（能力アップ・状態異常・しかけ）の ためが はんぶん": [
+"Support moves (stat boosts, status, traps) wind up in half the time",
+"辅助招式（能力提升・异常状态・陷阱）的蓄力时间减半"
+],
+"かまえ": [
+"Stance",
+"架势"
+],
+"かまえ！": [
+"Stance!",
+"架势！"
+],
+"守る技の 待ち時間が 20% みじかい": [
+"Defensive moves have 20% shorter cooldowns",
+"防守类招式冷却时间缩短20%"
+],
+"やけどが なおった": [
+"recovered from its burn",
+"烧伤痊愈了"
+],
+"まひが なおった": [
+"recovered from paralysis",
+"麻痹痊愈了"
+],
+"どくが ぬけた": [
+"recovered from poison",
+"毒素消退了"
+],
+"10秒間、まわりの相手と、自分が置いた技・罠・床・エナジー・お花を引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外でも引き寄せる": [
+"For 10 seconds, keeps pulling in nearby foes and its own placed moves, traps, floors, energy and flowers (it can still move and use moves). A foe once caught is pulled even outside the range",
+"10秒内持续吸引周围的对手，以及自己放置的招式、陷阱、地面、能量和花朵（可以移动也能使用招式）。一旦捕获的对手即使在范围外也会被吸引"
+],
+"⟦0⟧秒間、まわり（ふつうの距離まで）の相手と、自分が置いた技・罠・床・エナジー・お花を自分へ引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
+"For ⟦0⟧ sec, keeps pulling nearby foes (normal range) and its own placed moves, traps, floors, energy and flowers toward itself (it can still move and use moves). A foe once caught is pulled even if it leaves the range",
+"⟦0⟧秒内，持续将周围（普通距离内）的对手，以及自己放置的招式、陷阱、地面、能量和花朵吸向自己（可以移动也能使用招式）。一旦捕获的对手即使离开范围也会被吸引"
+],
+"かならず当たる（相手へ曲がって突っこみ、よけられない）": [
+"Always hits (curves toward the foe and can't be dodged)",
+"必定命中（朝对手转弯冲去，无法躲开）"
+],
+"相手を吹き飛ばし、壁に当てると同じだけの追加ダメージ": [
+"Knocks the foe back; slamming it into a wall deals the same damage again",
+"将对手击飞，撞到墙上时追加同等伤害"
+],
+"かべ -⟦0⟧": [
+"Wall -⟦0⟧",
+"撞墙 -⟦0⟧"
+],
+"前足や手で相手をはたいて吹き飛ばす。壁に当てると同じだけの追加ダメージ": [
+"Slaps the foe with a paw or hand and knocks it back. Slamming it into a wall deals the same damage again",
+"用前爪或手拍打对手并将其击飞。撞到墙上时追加同等伤害"
+],
+"（⟦0⟧秒）": [
+" (⟦0⟧ sec)",
+"（⟦0⟧秒）"
+],
+"相手の最大HPの⟦0⟧%を削る": [
+"Deals ⟦0⟧% of the foe's max HP",
+"削减对手最大HP的⟦0⟧%"
 ]
 }
