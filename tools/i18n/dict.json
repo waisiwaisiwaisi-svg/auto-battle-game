@@ -11902,5 +11902,105 @@
 "きゅうしょに あたると 1戦に 1かいだけ 6びょう スーパーアーマーに なり ひるまない。その あいだ 技の 待ち時間が 30% はやく へる": [
 "Once per battle, taking a critical hit grants 6 seconds of super armor (no flinching). Meanwhile, cooldowns recover 30% faster",
 "每场1次，受到会心一击时获得6秒霸体，不会畏缩。期间招式冷却恢复速度加快30%"
+],
+"ねっきょう": [
+"Frenzy",
+"狂热"
+],
+"ねっきょう！": [
+"Frenzy!",
+"狂热！"
+],
+"HPが へるほど 技の 威力が あがる（HP 1/4いかで さいだい +50%）": [
+"The lower its HP, the stronger its moves (up to +50% at 1/4 HP or less)",
+"HP越低招式威力越高（HP在1/4以下时最多+50%）"
+],
+"みずのころも": [
+"Water Veil",
+"水之衣"
+],
+"みずのころも！": [
+"Water Veil!",
+"水之衣！"
+],
+"まひ いがいの 状態異常と こんらんが はやく なおる（時間 はんぶん）": [
+"Status conditions other than paralysis, and confusion, wear off in half the time",
+"麻痹以外的异常状态和混乱恢复时间减半"
+],
+"おいかぜ": [
+"Tailwind",
+"顺风"
+],
+"おいかぜ！": [
+"Tailwind!",
+"顺风！"
+],
+"突進技と 弾の はやさが 20% あがる": [
+"Rush moves and projectiles are 20% faster",
+"突进招式和弹射物速度提升20%"
+],
+"エナジー": [
+"Energy",
+"能量"
+],
+"エナジー！": [
+"Energy!",
+"能量！"
+],
+"エナジーを ひろった": [
+"Picked up energy",
+"捡到了能量"
+],
+"雷技を つかうと エナジーが おちる。ひろうと つぎに つかった 技の 待ち時間が すぐ もどる": [
+"Using Thunder moves drops energy. Picking it up instantly resets the cooldown of the next move used",
+"使用雷属性招式会掉落能量。捡起后，下一个使用的招式冷却立即恢复"
+],
+"はなさかせ": [
+"Bloom",
+"开花"
+],
+"はなさかせ！": [
+"Bloom!",
+"开花！"
+],
+"草技を つかうと お花が さく。お花の ちかくに いると 毎秒 HPが 0.5% かいふく": [
+"Using Grass moves makes a flower bloom. Staying near flowers restores 0.5% HP per second",
+"使用草属性招式会开出花朵。待在花朵附近时每秒恢复0.5%HP"
+],
+"いたずらごころ": [
+"Prankster",
+"恶作剧之心"
+],
+"いたずらごころ！": [
+"Prankster!",
+"恶作剧之心！"
+],
+"補助技（能力アップ・状態異常・しかけ）の ためが はんぶん": [
+"Support moves (stat boosts, status, traps) wind up in half the time",
+"辅助招式（能力提升・异常状态・陷阱）的蓄力时间减半"
+],
+"かまえ": [
+"Stance",
+"架势"
+],
+"かまえ！": [
+"Stance!",
+"架势！"
+],
+"守る技の 待ち時間が 20% みじかい": [
+"Defensive moves have 20% shorter cooldowns",
+"防守类招式冷却时间缩短20%"
+],
+"やけどが なおった": [
+"recovered from its burn",
+"烧伤痊愈了"
+],
+"まひが なおった": [
+"recovered from paralysis",
+"麻痹痊愈了"
+],
+"どくが ぬけた": [
+"recovered from poison",
+"毒素消退了"
 ]
 }
