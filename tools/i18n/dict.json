@@ -11995,12 +11995,12 @@
 "recovered from poison",
 "毒素消退了"
 ],
-"10秒間、まわりの相手と置かれた技・罠・エナジー・お花を引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外でも引き寄せる": [
-"For 10 seconds, keeps pulling in nearby foes, placed moves, traps, energy and flowers (it can still move and use moves). A foe once caught is pulled even outside the range",
-"10秒内持续吸引周围的对手、放置的招式、陷阱、能量和花朵（可以移动也能使用招式）。一旦捕获的对手即使在范围外也会被吸引"
+"10秒間、まわりの相手と、自分が置いた技・罠・床・エナジー・お花を引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外でも引き寄せる": [
+"For 10 seconds, keeps pulling in nearby foes and its own placed moves, traps, floors, energy and flowers (it can still move and use moves). A foe once caught is pulled even outside the range",
+"10秒内持续吸引周围的对手，以及自己放置的招式、陷阱、地面、能量和花朵（可以移动也能使用招式）。一旦捕获的对手即使在范围外也会被吸引"
 ],
-"⟦0⟧秒間、まわり（ふつうの距離まで）の相手と、置いてある技・罠・エナジー・お花を自分へ引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
-"For ⟦0⟧ sec, keeps pulling nearby foes (normal range), placed moves, traps, energy and flowers toward itself (it can still move and use moves). A foe once caught is pulled even if it leaves the range",
-"⟦0⟧秒内，持续将周围（普通距离内）的对手、放置的招式、陷阱、能量和花朵吸向自己（可以移动也能使用招式）。一旦捕获的对手即使离开范围也会被吸引"
+"⟦0⟧秒間、まわり（ふつうの距離まで）の相手と、自分が置いた技・罠・床・エナジー・お花を自分へ引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
+"For ⟦0⟧ sec, keeps pulling nearby foes (normal range) and its own placed moves, traps, floors, energy and flowers toward itself (it can still move and use moves). A foe once caught is pulled even if it leaves the range",
+"⟦0⟧秒内，持续将周围（普通距离内）的对手，以及自己放置的招式、陷阱、地面、能量和花朵吸向自己（可以移动也能使用招式）。一旦捕获的对手即使离开范围也会被吸引"
 ]
 }
