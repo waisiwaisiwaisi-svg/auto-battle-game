@@ -11890,5 +11890,17 @@
 "威力 50いかの 攻撃技の 待ち時間が 20% みじかい": [
 "Attack moves with 50 power or less have 20% shorter cooldowns",
 "威力50以下的攻击招式冷却时间缩短20%"
+],
+"げきりん": [
+"Dragon Rage",
+"逆鳞"
+],
+"げきりん！": [
+"Dragon Rage!",
+"逆鳞！"
+],
+"きゅうしょに あたると 1戦に 1かいだけ 6びょう スーパーアーマーに なり ひるまない。その あいだ 技の 待ち時間が 30% はやく へる": [
+"Once per battle, taking a critical hit grants 6 seconds of super armor (no flinching). Meanwhile, cooldowns recover 30% faster",
+"每场1次，受到会心一击时获得6秒霸体，不会畏缩。期间招式冷却恢复速度加快30%"
 ]
 }
