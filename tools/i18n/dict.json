@@ -2903,10 +2903,6 @@
 "Links to the foe with a psychic thread, dealing damage for 4 sec. Closer is stronger (up to 30 Power/sec). Breaks if too far",
 "用念力之线连住对手，4秒内持续造成伤害。越近越强（每秒最大威力30）。距离太远会断开"
 ],
-"10秒間その場から動けない代わりに、まわりの相手と置かれた技・罠を引き寄せ続ける（技は使える）。一度とらえた相手は範囲の外でも引き寄せる": [
-"Can't move for 10 sec, but keeps pulling in nearby foes and placed moves/traps (can use moves). Caught foes keep getting pulled even outside the range",
-"10秒内无法移动，但会持续吸引周围的对手和设置的招式、陷阱（可以使用招式）。被抓住的对手即使在范围外也会被吸过来"
-],
 "当たった相手を突進の向きへつき飛ばす。壁・障害物・場の端にぶつけると2.5秒ひるむ": [
 "Knocks the foe in the dash direction. Slamming into a wall, obstacle, or field edge makes them Flinch for 2.5 sec",
 "把对手朝突进方向撞飞。撞到墙、障碍物或场地边缘会畏缩2.5秒"
@@ -8339,10 +8335,6 @@
 "Leaves an afterimage. After 5s, returns to it and regains half the HP lost meanwhile",
 "在原地留下残影。5秒后回到残影处，并恢复期间失去的HP的一半"
 ],
-"⟦0⟧秒間、その場から動けなくなる代わりに、まわり（ふつうの距離まで）の相手と、置いてある技・罠を自分へ引き寄せ続ける（技は使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
-"For ⟦0⟧s, can't move but keeps pulling nearby foes (normal range) and placed moves/traps toward itself (can still use moves). Caught foes keep getting pulled even out of range",
-"⟦0⟧秒内无法移动，但持续把周围（普通距离内）的对手和放置的招式、陷阱拉向自己（可以出招）。一旦抓住的对手即使离开范围也会被拉过来"
-],
 "⟦0⟧回に1回、2.5倍の強い一撃になる": [
 "Every ⟦0⟧th use is a strong ×2.5 hit",
 "每⟦0⟧次有1次变成2.5倍的强力一击"
@@ -12002,5 +11994,13 @@
 "どくが ぬけた": [
 "recovered from poison",
 "毒素消退了"
+],
+"10秒間、まわりの相手と置かれた技・罠・エナジー・お花を引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外でも引き寄せる": [
+"For 10 seconds, keeps pulling in nearby foes, placed moves, traps, energy and flowers (it can still move and use moves). A foe once caught is pulled even outside the range",
+"10秒内持续吸引周围的对手、放置的招式、陷阱、能量和花朵（可以移动也能使用招式）。一旦捕获的对手即使在范围外也会被吸引"
+],
+"⟦0⟧秒間、まわり（ふつうの距離まで）の相手と、置いてある技・罠・エナジー・お花を自分へ引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
+"For ⟦0⟧ sec, keeps pulling nearby foes (normal range), placed moves, traps, energy and flowers toward itself (it can still move and use moves). A foe once caught is pulled even if it leaves the range",
+"⟦0⟧秒内，持续将周围（普通距离内）的对手、放置的招式、陷阱、能量和花朵吸向自己（可以移动也能使用招式）。一旦捕获的对手即使离开范围也会被吸引"
 ]
 }
