@@ -21,7 +21,7 @@ html.iosapp,html.iosapp body{height:calc(100 * var(--vh));min-height:100%}
 body{word-break:keep-all;overflow-wrap:anywhere;line-break:strict;
   font-synthesis:none;   /* ドットフォントに にせの 太字を かけない（にじむ） */
   font-family:"DotGothic16",ui-monospace,"SFMono-Regular",Menlo,Consolas,"Hiragino Kaku Gothic ProN","Noto Sans JP",monospace;
-  display:flex;justify-content:center;overflow:hidden;touch-action:none;
+  display:flex;justify-content:center;overflow:hidden;touch-action:pan-y;   /* iPhone の Safari は おやの touch-action:none で 中の スクロールまで とまる ことが ある（ズームは viewport で とめて いる） */
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
 }
 #app{width:100%;max-width:520px;height:100%;height:calc(100 * var(--vh));position:relative}
@@ -259,7 +259,7 @@ body.artbg{background-size:cover;background-position:center;background-attachmen
 .slot.over{box-shadow:0 0 0 3px var(--good),0 0 18px rgba(79,209,165,.6)!important}
 .slot.dragging{opacity:.3}
 .slot.lift{transform:scale(1.06);box-shadow:0 0 0 3px var(--acc),0 8px 14px rgba(0,0,0,.5)!important;z-index:3}   /* ながおしで もちあげた */
-.boxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:calc(42 * var(--vh));overflow:auto;padding:4px;background:rgba(13,11,20,.5);border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}
+.boxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:calc(42 * var(--vh));overflow:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:4px;background:rgba(13,11,20,.5);border-radius:4px;box-shadow:inset 0 0 0 2px var(--rim2)}
 .boxgrid .slot{min-height:84px;font-size:10.5px}
 .boxgrid .slot canvas{width:44px;height:44px}
 .tsqs{display:flex;gap:3px;justify-content:center;height:10px}.tsq{display:block;width:10px;height:10px;box-shadow:0 0 0 1px #0b0914,inset 0 2px 0 rgba(255,255,255,.3)}   /* ボックスの タイプは いろの しかく */
@@ -1764,7 +1764,7 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
 
   <section class="screen" id="scTeam">
     <div class="sec-title"><span style="font-size:18px;color:var(--ink)">へんせい</span><button class="btn sub" id="btnTeamBack" style="padding:6px 14px;font-size:13px">もどる</button></div>
-    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>（スマホは ながおし）して いれかえ　／　<b>タップ</b>で くわしく みる</p>
+    <p class="dim teamhint">✋ モンスターを <b>ドラッグ</b>（スマホは ながおし）して いれかえ　／　すきまを つかむと スクロール　／　<b>タップ</b>で くわしく みる</p>
     <div class="teamwrap">
       <div class="teamleft">
         <div class="deckbar" id="deckBar"></div>
@@ -5691,10 +5691,15 @@ function openBoost(m) {
   const refOf = (el) => { const d = el && el.closest && el.closest('#scTeam .slot'); return d ? { w: d.dataset.w, i: +d.dataset.i, el: d } : null; };
   const under = (cx, cy) => { const g = drag && drag.ghost; if (g) g.style.display = 'none'; const el = document.elementFromPoint(cx, cy); if (g) g.style.display = ''; return refOf(el); };
   document.addEventListener('pointerdown', (ev) => {
-    if ($('scTeam').hidden) return; const r = refOf(ev.target); if (!r || r.w === 'drop' || !teamMon(r)) return;
+    if ($('scTeam').hidden) return; const r = refOf(ev.target);
+    if ((!r || r.w === 'drop' || !teamMon(r)) && ev.pointerType === 'mouse' && ev.button === 0 && !ev.target.closest('button, select, input, a')) {   // パソコン：モンスターの いない ところを つかんで うごかすと スクロール
+      const bx = $('tmBox'), sc = bx && bx.contains(ev.target) && bx.scrollHeight > bx.clientHeight + 2 ? bx : $('scTeam'); const y0 = ev.clientY, t0 = sc.scrollTop;
+      const mv = (e) => { sc.scrollTop = t0 - (e.clientY - y0); }, up = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up); };
+      document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up); return; }
+    if (!r || r.w === 'drop' || !teamMon(r)) return;
     drag = { r, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, over: null, touch: ev.pointerType === 'touch', armed: ev.pointerType !== 'touch' };
     // ゆび：ながおし（0.28びょう）で もちあげる。すぐ うごかしたら スクロール（いれかえない）
-    if (drag.touch) { const d = drag; d.tm = setTimeout(() => { if (drag !== d) return; d.armed = true; d.r.el.classList.add('lift'); try { navigator.vibrate && navigator.vibrate(15); } catch (e) { } }, 280); }
+    if (drag.touch) { const d = drag; d.tm = setTimeout(() => { if (drag !== d) return; d.armed = true; d.r.el.classList.add('lift'); try { navigator.vibrate && navigator.vibrate(15); } catch (e) { } }, 450); }
   });
   document.addEventListener('touchmove', (ev) => { if (drag && drag.armed && drag.touch) ev.preventDefault(); }, { passive: false });   // もちあげた あとは スクロール させない
   document.addEventListener('pointermove', (ev) => {
