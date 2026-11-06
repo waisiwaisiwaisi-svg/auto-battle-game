@@ -1890,7 +1890,7 @@ const dist = (a, b) => DM.hypot(b.x - a.x, b.y - a.y);
 const choice = (arr) => arr[Math.floor(rnd() * arr.length)];
 const wrapAng = (d) => { while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return d; };
 const QS = new URLSearchParams(location.search);
-const GAME_SPEED = .8;   // バトルの はやさ（1＝もとの はやさ）。すこし ゆっくりに して 見やすく する
+const GAME_SPEED = .65;   // バトルの はやさ（1＝もとの はやさ）。ゆっくりに して 見やすく する（.8 → .65）
 const TIME_SCALE = clamp(+(QS.get('speed') || 1), 0.1, 10) * GAME_SPEED;
 
 /* =====================================================================
