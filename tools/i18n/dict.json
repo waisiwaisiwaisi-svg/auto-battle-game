@@ -12030,5 +12030,13 @@
 "すきな モンスターの きょうかポイントを +5（どの しゅるいにも つかえる）": [
 "Adds +5 Power Points to any monster (works on every species)",
 "为任意怪兽增加5点强化点数（所有种类都能用）"
+],
+"きたえのもと": [
+"Training Seed",
+"锻炼之源"
+],
+"すきな モンスターの 個体値を ぜんぶ +3（さいだい 31）": [
+"Raises all IVs of any monster by +3 (max 31)",
+"任意怪兽的个体值全部+3（最高31）"
 ]
 }
