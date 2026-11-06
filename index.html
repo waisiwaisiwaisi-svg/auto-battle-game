@@ -2949,6 +2949,12 @@ const BODY_CAT = { s: [1, 1.3], m: [1.38, 1.85], l: [1.95, 2.45], x: [3, 3] };  
   const M0 = DM.exp(ids.reduce((t, id) => t + DM.log(met(id)), 0) / n), V0 = DM.exp(ids.reduce((t, id) => t + DM.log(v[id]), 0) / n);   // 平均の 大きさは いまの まま
   const g = DM.exp(ids.reduce((t, id) => t + DM.log(SPECIES[id].sz || 1), 0) / n);
   for (const id of ids) { const r = v[id] / V0 * (SIZE_K[id] || 1); SPR[id].ms *= M0 * r / met(id); SPECIES[id].vsz = g * r; SPECIES[id].bz = 2 * DM.log(v[id]) / DM.log(BODY_RATIO) - 1; }   // bz：-1（いちばん 小さい）〜 +1（最大）
+  // 当たり判定：絵の 下半身（すけて いない ところ）に あわせる。あたまは いれない
+  //   hitR：下半身の 面積と おなじ 面積の まるの 半径（しっぽ・はねが ながくても おおきく なりすぎない）、hitH：下半身の まんなかの 高さ（弾・ビームを みせる 高さ）
+  for (const id of ids) { try { const im = SPR[id].fr.idle0 && SPR[id].fr.idle0.n, ms = SPR[id].ms, q = im && im.getContext ? im.getContext('2d') : null, d = q && q.getImageData(0, 0, im.width, im.height).data; if (!d) continue;
+    let y0 = 1e9, y1 = -1; for (let y = 0; y < im.height; y++) for (let x = 0; x < im.width; x++) if (d[(y * im.width + x) * 4 + 3] > 40) { if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (y1 < 0) continue; const ym = Math.round((y0 + y1) / 2); let A = 0; for (let y = ym; y <= y1; y++) for (let x = 0; x < im.width; x++) if (d[(y * im.width + x) * 4 + 3] > 40) A++;
+    SPECIES[id].hitR = Math.max(8, Math.round(Math.sqrt(A / Math.PI) * ms)); SPECIES[id].hitH = Math.max(8, Math.round(((im.height - 1 - y1) + (y1 - ym + 1) / 2) * ms)); } catch (e) { } }
 })();
 const bodySz = (sp) => sp.vsz || sp.sz || 1;
 // 体格：おもい（おそいが かたく ふきとびにくい・いちげきが おもい）／かるい（はやいが もろい）
@@ -5984,6 +5990,8 @@ const WALL_GAP = 8, WALL_ART = 10, WALL_UP = 30, WALL_COMFY = 52;   // WALL_COMF
 const _wg = 0;   // わざで つくった かべからは あるいて この きょり いじょう はなれる
 const OBST_GAP = 18;   // ふつうに あるく ときは 障害物から この きょり（ゲーム内の ドット）いじょう はなれる。せまい すきまは しかたなく とおる
 // 障害物との 当たりは 足もとだけ（当たり判定が 絵の 足もとに あわせて あるので、体の 円より 小さく）
+const bodyH = (f) => (f && f.mon && SPECIES[f.mon.sid] && SPECIES[f.mon.sid].hitH) || BODY;   // 下半身の まんなかの 高さ（みせかた だけ。当たりの けいさんは 地面で する）
+let PROJ_DY = 0;   // 弾を かく ときの 高さの ずれ
 const footR = (f) => Math.max(10, f.r * .6);
 // 絵の みえている よこはばの 半分（からだが ながい こ ほど ひろい）
 const _bodyHW = {};
@@ -6127,7 +6135,7 @@ function mkFighter(mon, side) {
   return ({
     mon, sp, side, lvl: MON_LV, hp: st.hp, maxHp: st.hp, atk: st.atk, def: st.def, spa: st.spa, sdef: st.spd, speStat: st.spe, eva: st.eva, baseSpd: Math.round(st.spe * .85 - 10),
     moves: equipped(mon).slice(),
-    x: 0, y: 0, r: Math.round(23 * bodySz(sp)), face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
+    x: 0, y: 0, r: sp.hitR || Math.round(23 * bodySz(sp)), face: side ? -1 : 1, state: 'bench', stT: 0, cd: {}, queued: null, cur: null,
     inv: 0, flash: 0, kx: 0, ky: 0, dodgeCd: 0, aiT: 1, plan: null, planFor: 0, strafe: 1, stratT: 0,
     scale: 1, fainted: false, moving: false, walk: 0, ghostT: 0, splashT: 0,
     st: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, eva: 0 }, status: '', statusT: 0, tickT: TICK, toxN: 1, parT: 2.5,
@@ -11403,7 +11411,7 @@ function drawWeather(st) {   // てんき：あめ・はれ・すな・ゆき
 }
 function drawChan(f) {
   const cur = f.cur, m = cur.m, cs = (FX_STYLE[vt(m)] || FX_STYLE.normal).cols, fl = .75 + .25 * DM.sin(B.t * 40);
-  const k = Math.min(1, (cur.ch != null ? cur.ch : cur.t - cur.wind) / .1 + .2), c = DM.cos(cur.ang), s = DM.sin(cur.ang), mo = m.k === 'beam' ? Math.min(f.r * .7, 30) : 0, ox = f.x + c * mo, oy = f.y - (m.k === 'cone' ? 0 : BODY) + s * mo;   // ビームは 口もと（からだの まえ）から   // おうぎは あしもとから（よこくの はんい・あたりはんてい と そろえる）
+  const k = Math.min(1, (cur.ch != null ? cur.ch : cur.t - cur.wind) / .1 + .2), c = DM.cos(cur.ang), s = DM.sin(cur.ang), mo = m.k === 'beam' ? Math.min(f.r * .7, 30) : 0, ox = f.x + c * mo, oy = f.y - (m.k === 'cone' ? 0 : bodyH(f)) + s * mo;   // ビームは 口もと（からだの まえ）から   // おうぎは あしもとから（よこくの はんい・あたりはんてい と そろえる）
   { const gb = gfxOf(m, 'body'), gc = gfxOf(m, 'cone'), fy = c < 0;   // 大技の 専用の 絵（ビーム・扇）
     if (m.k === 'beam' && gb) { const L = Math.max(0, (cur.len != null ? cur.len : m.len) * k - mo), gsc = (GFX[m.fxid] && GFX[m.fxid].sc) || 1, bs = Math.max(1, m.wid * 2.2 * gsc / (32 * PIX_D)), sk = gfxOf(m, 'start'), tk = gfxOf(m, 'tip');
       plStretch(gb, plLoop(gb, B.t), ox, oy, cur.ang, L, m.wid * 2.2 * gsc * fl);
@@ -12125,7 +12133,7 @@ function drawProj(p) {
   const x = Math.round(p.x), y = Math.round(p.y), t = vt(p.m), R = p.r, S_ = FX_STYLE[t] || FX_STYLE.normal;
   glowDot(x, y, R * 2.2, S_.cols[1], .35);
   if (rnd() < .45) B.parts.push({ x: p.x + rand(-2, 2), y: p.y + rand(-2, 2), vx: -p.vx * .15 + rand(-12, 12), vy: -p.vy * .15 + rand(-12, 12), life: .32, max: .32, col: choice(S_.cols), size: 5, g: 0, shape: S_.shape, rot: rnd() * 6, vr: 6, glow: rnd() < .5 });
-  ctx.fillStyle = 'rgba(10,8,18,.25)'; ctx.beginPath(); ctx.ellipse(x, y + BODY + (p.h || 0), R * (p.h ? .7 : 1), R * .4, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = 'rgba(10,8,18,.25)'; ctx.beginPath(); ctx.ellipse(x, y + BODY - PROJ_DY + (p.h || 0), R * (p.h ? .7 : 1), R * .4, 0, 0, 7); ctx.fill();
   if (p.pat === 'lob') { ctx.strokeStyle = p.side === 1 ? 'rgba(255,90,100,.6)' : 'rgba(90,190,255,.6)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(p.tx, p.ty, p.m.blastR || 48, (p.m.blastR || 48) * .78, 0, 0, 7); ctx.stroke(); }   // おちる ばしょ
   const pk = gfxOf(p.m, 'shot') || (p.m.e && p.m.e.seed && PLFX.seed_proj ? 'seed_proj' : PLFX['p_' + t] ? 'p_' + t : 'p_' + (t === 'ground' ? 'rock' : t));
   if (PLFX[pk] && plProj(pk, p)) { if (t === 'fire' && rnd() < .7) B.parts.push({ x: p.x + rand(-3, 3), y: p.y, vx: rand(-15, 15), vy: -30, life: .3, max: .3, col: choice(['#ff8a3d', '#ffd166']), size: 2, g: 0 }); }
@@ -12751,7 +12759,8 @@ function render() {
 
   // とぶ もの・エフェクト・つぶ（ドット絵に して かさねる）
   pixLayer(T, () => {
-    for (const p of B.projs) drawProj(p);
+    for (const p of B.projs) { const t = p.f && opp(p.f), h0 = bodyH(p.f), h1 = t ? bodyH(t) : h0; let u = 0; if (t) { const d = DM.hypot(t.x - p.x, t.y - BODY - p.y); if (!p.d0) p.d0 = Math.max(1, d); u = clamp(1 - d / p.d0, 0, 1); }   // 撃つ 子の 下半身 → 当たる 子の 下半身へ
+      PROJ_DY = p.pat === 'lob' ? 0 : BODY - (h0 + (h1 - h0) * u); p.y += PROJ_DY; try { drawProj(p); } finally { p.y -= PROJ_DY; PROJ_DY = 0; } }
     drawObsTop();
     drawFxList();
     for (const q of B.parts) drawPart(q);
