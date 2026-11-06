@@ -13560,8 +13560,9 @@ function autoTrain(e) {
 function aceTrain(em) { const T = ACE_TR[em.sid]; if (!T) return; const ok = T.filter(([id]) => MOVES[id] && canLearn(em.sid, id)); if (ok.length < 2) return;
   em.moves = ok.map(([id]) => id).slice(0, 4); em.tr = { mode: 'chip', prog: { hv: 1, nat: em.nat, mv: ok.map(([id, go, c]) => ({ id, go, c })) } }; }
 const leagueAce = (type) => { const L = LEAGUE.find(x => (x[3] || null) === (type || null)); if (L && L[4] && SPECIES[L[4]]) return L[4];   /* ビッグフォーごとに きめた エース */ const ids = poolIds().filter(id => !LEAGUE.some(x => x[4] === id));   /* ほかの 人が きめた エースは つかわない（かぶらない） */ return (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids).sort((a, b) => baseTot(b) - baseTot(a))[0]; };
-function leagueTeam(type, n, p) {
+function leagueTeam(type, n, p, sub) {
   const ids = poolIds().filter(id => !LEAGUE.some(x => x[4] === id)), ace = leagueAce(type); let pool = (type ? ids.filter(id => SPECIES[id].type === type || SPECIES[id].type2 === type) : ids.slice()).filter(id => id !== ace).sort((a, b) => baseTot(b) - baseTot(a));
+  if (type && sub) { const ok = (id) => { const o = SPECIES[id].type === type ? SPECIES[id].type2 : SPECIES[id].type; return sub.includes(o); }; const p2 = pool.filter(ok); if (p2.length >= n) pool = p2; }   // 2つめの タイプを しぼる（たいさく しやすく）
   if (pool.length < n) pool = pool.concat(ids.filter(id => !pool.includes(id) && id !== ace).sort((a, b) => baseTot(b) - baseTot(a)));
   const top = pool.slice(0, n + (type ? 2 : 6)), out = [];
   while (out.length < n && top.length) { const c = type ? top : top.filter(id => !out.some(e => SPECIES[e.sid].type === SPECIES[id].type)); const sid = (c.length ? c : top)[0]; top.splice(top.indexOf(sid), 1); out.push(foeMon(sid, p, -1 - out.length)); }   // メンバーは いつも おなじ（弱点を しらべて そなえられる）
@@ -13638,7 +13639,8 @@ function readCover(e) { const ty = [SPECIES[e.sid].type, SPECIES[e.sid].type2].f
   const L = learned(e).filter(id => isDamaging(MOVES[id]) && !AUTO_GUARD[MOVES[id].k] && !e.moves.includes(id) && weak.some(w => effOf(MOVES[id].t, w) > 1)).sort((a, b) => (MOVES[b].power || 0) - (MOVES[a].power || 0));
   if (L.length) { const i = e.moves.findIndex(id => !isDamaging(MOVES[id])); e.moves[i >= 0 && e.moves.length >= 4 ? i : Math.min(3, e.moves.length)] = L[0]; autoTrain(e); } }
 const LEAGUE_READ = [false, true, false, false, false];
-function leagueFoes(k) { const T = leagueTeam(LEAGUE[k][3], LEAGUE_N, jProg(10 + k, 2) + (LEAGUE_PADJ[k] || 0)), P = LEAGUE_PLAN[k], C = LEAGUE_CON[k];
+const LEAGUE_SUB = [null, null, ['fire', 'elec', 'ground'], null, null];   // ガイ：2つめの タイプは 火・雷・土 だけ（水・土で たいさく できる）
+function leagueFoes(k) { const T = leagueTeam(LEAGUE[k][3], LEAGUE_N, jProg(10 + k, 2) + (LEAGUE_PADJ[k] || 0), LEAGUE_SUB[k]), P = LEAGUE_PLAN[k], C = LEAGUE_CON[k];
   T.forEach((e, i) => { if (P) e.plan = Array.isArray(P) ? P[i % P.length] : P;
     if (C && !e.ace && !e.moves.some(id => id === 'duel-arena' || id === 'hako-punch')) { conMoves(e, C, LEAGUE[k][3]); autoTrain(e); }
     if (LEAGUE_READ[k] && !e.ace) readCover(e); });
