@@ -39,7 +39,6 @@ window.PMA_LW = (job) => {
   try {
     await p.goto('file://' + tmp); await p.waitForTimeout(1500);
     const opp = [['g', 5], ['g', 6], ['g', 7], ['g', 8], ['g', 9], ['l', 0], ['l', 1], ['l', 2], ['l', 3], ['l', 4]];
-    const names = await p.evaluate((opp) => opp.map(o => o[0] === 'l' ? window.__game.run(x => x).LEAGUE ? '' : '' : ''), opp);
     const acc = opp.map(() => ({ w: 0, n: 0, left: 0 }));
     for (let t = 0; t < T; t++) { const r = await p.evaluate((job) => window.PMA_LW(job), { seed: 9001 + t * 101, fed: FED, pick: PICK, opp });
       r.forEach((x, i) => { acc[i].w += x.win; acc[i].n++; acc[i].left += x.left / x.n; }); if ((t + 1) % 20 === 0) console.log((t + 1) + '/' + T); }
