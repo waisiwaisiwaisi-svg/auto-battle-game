@@ -6199,7 +6199,8 @@ function abilTick(dt) {
   const L = B.abObj; if (!L || !L.length) return;
   for (const o of L) o.t -= dt;
   for (const f of allActs()) { if (!f || f.hp <= 0 || f.fainted || ['faint', 'return', 'enter', 'bench'].includes(f.state)) continue;
-    if (f.hp < f.maxHp && !(f.v.healBlock > 0) && L.some(o => o.k === 'flw' && o.side === f.side && o.t > 0 && DM.hypot(o.x - f.x, o.y - f.y) < FLW_R)) f.hp = Math.min(f.maxHp, f.hp + f.maxHp * .005 * dt);   // お花の ちかく：毎秒 0.5%
+    if (f.hp < f.maxHp && !(f.v.healBlock > 0) && L.some(o => o.k === 'flw' && o.side === f.side && o.t > 0 && DM.hypot(o.x - f.x, o.y - f.y) < FLW_R)) { const h = Math.min(f.maxHp - f.hp, f.maxHp * .005 * dt); f.hp += h; f.flwA = (f.flwA || 0) + h; }   // お花の ちかく：毎秒 0.5%
+    f.flwT = (f.flwT || 0) + dt; if (f.flwA >= 1 && f.flwT >= 1) { const n = Math.floor(f.flwA); f.flwA -= n; f.flwT = 0; if (!B.headless) popText(f.x, f.y - 90, '+' + n, '#7fe08a'); }   // かいふくした ぶんを（1びょうに 1かいまで）みせる
     if (!f.nrg) { const e = L.find(o => o.k === 'nrg' && o.side === f.side && o.t > 0 && DM.hypot(o.x - f.x, o.y - f.y) < NRG_R + f.r * .5); if (e) { e.t = 0; f.nrg = 1; if (!B.headless) { popText(f.x, f.y - 96, 'エナジーを ひろった', '#ffd84a'); burst(e.x, e.y - 10, '#ffd84a', 10, 90, .35); } } }
   }
   B.abObj = L.filter(o => o.t > 0);
@@ -8912,7 +8913,7 @@ function updateFighter(f, dt) {
     case 'chan': {   // うちつづける：ゆっくり あいてへ むきを あわせながら はなつ
       const cur = f.cur; if (!cur) { f.state = 'free'; break; }
       const m = cur.m; cur.ch += dt;
-      if (oT) { const tr = (m.aim === 'lock' ? .12 : .08) * dt; /* 照射中は ゆっくりしか むきを かえられない（はやいと よけても おいつかれて ほぼ あたる） */ cur.ang += clamp(wrapAng(DM.atan2(o.y - f.y, o.x - f.x) - cur.ang), -tr, tr); }
+      if (oT) { const tr = (m.aim === 'lock' ? .15 : .1) * dt; /* 照射中は ゆっくりしか むきを かえられない（はやいと よけても おいつかれて ほぼ あたる） */ cur.ang += clamp(wrapAng(DM.atan2(o.y - f.y, o.x - f.x) - cur.ang), -tr, tr); }
       if (m.k === 'beam') cur.len = rayLen(f, cur.ang, m.len);
       if (m.chanMove && oT) { const a = DM.atan2(o.y - f.y, o.x - f.x), dd = dist(f, o), pr = dd > 150 ? 1 : dd < 90 ? -1 : 0, sd = f.side ? -1 : 1; f.paceT = .8; moveDir(f, DM.cos(a) * pr - DM.sin(a) * .7 * sd, DM.sin(a) * pr + DM.cos(a) * .7 * sd, dt); }   // ドラゴンブレス：はきながら うごく
       if (cur.ch >= cur.next) { cur.next += CHAN_TICK; chanTick(f, o, oT); if (f.state !== 'chan') break; }
