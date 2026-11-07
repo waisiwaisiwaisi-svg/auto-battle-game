@@ -18,7 +18,7 @@
 //   点・実威力などは 訓練なしが score / real …、訓練ありが scoreT / realT …。gain＝訓練で のびた 点。
 // つかいかた：node tools/movepower/movepower.js [--n 24] [--train both|none|on] [--moves ember,surf] [--out tools/movepower/out]
 //   → out/movepower.json と out/movepower.html（表）
-const { chromium } = require('playwright');
+const { withGame } = require('../lib/harness');
 const fs = require('fs'), path = require('path');
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -71,14 +71,8 @@ const HOOKS = [
 ];
 
 (async () => {
-  let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  const anchor = 'window.PMA_REPLAY = (job) => {'; if (!html.includes(anchor)) throw new Error('PMA_REPLAY が みつからない');
-  html = html.replace(anchor, SIM + anchor);
-  for (const [a, b] of HOOKS) { if (html.split(a).length !== 2) throw new Error('フックの ばしょが みつからない: ' + a); html = html.replace(a, b); }
-  fs.mkdirSync(OUT, { recursive: true }); const tmp = path.join(ROOT, '.movepower_tmp_' + process.pid + '.html'); fs.writeFileSync(tmp, html);
-  const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
-  try {
-    await p.goto('file://' + tmp); await p.waitForTimeout(1500);
+  fs.mkdirSync(OUT, { recursive: true });
+  await withGame({ src: path.join(ROOT, 'index.html'), inject: SIM, hooks: HOOKS, tag: 'movepower' }, async (p, errs) => {
     const info = await p.evaluate(() => { const G = window.__game, M = G.MOVES, X = G.run(o => o);
       return Object.keys(M).map(id => ({ id, n: M[id].n, t: M[id].t, k: M[id].k, cat: M[id].cat || '', power: M[id].power || Math.round((M[id].pow || 0) * 5), desc: X.moveDesc(M[id]) })); });
     const mons = await p.evaluate(() => window.PMA_MONSTATS());
@@ -124,5 +118,5 @@ const HOOKS = [
     const meta = { go: GO, train: TRAIN, n: N, sid: SID, nat: NAT, fields: FIELDS, steps: STEPS, styles: STYLES, mons: mons.length, date: new Date().toISOString(), errors: errs.slice(0, 20) };
     fs.writeFileSync(path.join(OUT, SHARD ? 'movepower_' + SHARD.replace('/', 'of') + '.json' : 'movepower.json'), JSON.stringify({ meta, res }, null, 1));
     console.log('done', res.length, 'moves', errs.length ? 'errors: ' + errs.slice(0, 3).join(' / ') : '');
-  } finally { await b.close(); fs.unlinkSync(tmp); }
+  });
 })();

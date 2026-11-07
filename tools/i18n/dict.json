@@ -11951,10 +11951,6 @@
 "Bloom!",
 "开花！"
 ],
-"草技を つかうと お花が さく。お花の ちかくに いると 毎秒 HPが 0.5% かいふく": [
-"Using Grass moves makes a flower bloom. Staying near flowers restores 0.5% HP per second",
-"使用草属性招式会开出花朵。待在花朵附近时每秒恢复0.5%HP"
-],
 "いたずらごころ": [
 "Prankster",
 "恶作剧之心"
@@ -12022,5 +12018,57 @@
 "相手の最大HPの⟦0⟧%を削る": [
 "Deals ⟦0⟧% of the foe's max HP",
 "削减对手最大HP的⟦0⟧%"
+],
+"草技を つかうと お花が さく。お花の ちかくに いると お花 1つにつき 毎秒 HPが 3% かいふく（かさなる）": [
+"Using Grass moves makes a flower bloom. Each nearby flower restores 3% HP per second (stacks)",
+"使用草属性招式会开出花朵。附近每有1朵花，每秒恢复3%HP（可叠加）"
+],
+"きょうかのもと": [
+"Power Seed",
+"强化之源"
+],
+"すきな モンスターの きょうかポイントを +5（どの しゅるいにも つかえる）": [
+"Adds +5 Power Points to any monster (works on every species)",
+"为任意怪兽增加5点强化点数（所有种类都能用）"
+],
+"きたえのもと": [
+"Training Seed",
+"锻炼之源"
+],
+"すきな モンスターの 個体値を ぜんぶ +3（さいだい 31）": [
+"Raises all IVs of any monster by +3 (max 31)",
+"任意怪兽的个体值全部+3（最高31）"
+],
+"💪 きょうかポイント：⟦0⟧": [
+"💪 Power Points: ⟦0⟧",
+"💪 强化点数：⟦0⟧"
+],
+"きょうかポイントは たたかうと たまる（出場して かつと +1）。おなじ しゅるいの モンスターを 1たい つかうと +⟦0⟧、きょうかのもとで +⟦1⟧（さいだい ⟦2⟧）。ポイントを すきな のうりょくに ふりわけて「確定する」で きまる（1つ ⟦3⟧ まで・1ポイントで +⟦4⟧）。": [
+"Power Points build up as you battle (+1 for each win you take part in). Using one monster of the same species gives +⟦0⟧, a Power Seed gives +⟦1⟧ (max ⟦2⟧). Assign points to any stat and press Confirm (up to ⟦3⟧ each, +⟦4⟧ per point).",
+"强化点数会在战斗中累积（出场并获胜+1）。使用1只同种怪兽+⟦0⟧，强化之源+⟦1⟧（最多⟦2⟧）。把点数分配到喜欢的能力后按「确定」（每项最多⟦3⟧，每点+⟦4⟧）。"
+],
+"⟦0⟧ きょうかのもとを つかう（+⟦1⟧・のこり ⟦2⟧）": [
+"⟦0⟧ Use Power Seed (+⟦1⟧, ⟦2⟧ left)",
+"⟦0⟧ 使用强化之源（+⟦1⟧・剩余 ⟦2⟧）"
+],
+"⟦0⟧ きたえのもと（個体値+⟦1⟧・のこり ⟦2⟧）": [
+"⟦0⟧ Training Seed (IVs +⟦1⟧, ⟦2⟧ left)",
+"⟦0⟧ 锻炼之源（个体值+⟦1⟧・剩余 ⟦2⟧）"
+],
+"💪 きょうかのもと ×⟦0⟧": [
+"💪 Power Seed ×⟦0⟧",
+"💪 强化之源 ×⟦0⟧"
+],
+"🏋 きたえのもと ×⟦0⟧": [
+"🏋 Training Seed ×⟦0⟧",
+"🏋 锻炼之源 ×⟦0⟧"
+],
+"（スマホは ながおし）して いれかえ / すきまを つかむと スクロール / ": [
+" (long-press on phones) to swap / Grab empty space to scroll / ",
+" （手机长按）来交换 / 抓住空白处可滚动 / "
+],
+" 💎+⟦0⟧・ボックス+⟦1⟧・きょうかのもと×⟦2⟧・きたえのもと×⟦3⟧": [
+" 💎+⟦0⟧, Capsule +⟦1⟧, Power Seed ×⟦2⟧, Training Seed ×⟦3⟧",
+" 💎+⟦0⟧・胶囊+⟦1⟧・强化之源×⟦2⟧・锻炼之源×⟦3⟧"
 ]
 }

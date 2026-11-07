@@ -195,7 +195,7 @@ exports.saveClaim = onCall(async (req) => {
   });
 });
 const newOsb = () => ({ b: ((Math.random() * 4294967296) >>> 0).toString(36), n: 0 });
-const ACT_NAMES = new Set(['sync', 'shopBuyDeal', 'shopBuyChest', 'shopBuySpecial', 'openChest', 'payOpen', 'battleStart', 'battleEnd', 'release', 'boost', 'evAdd', 'respec', 'reroll4', 'reroll1', 'xlearn', 'tm', 'towerBegin', 'towerQuit', 'arcadeNew', 'arcadeQuit', 'tutGem']);
+const ACT_NAMES = new Set(['sync', 'shopBuyDeal', 'shopBuyChest', 'shopBuySpecial', 'openChest', 'payOpen', 'battleStart', 'battleEnd', 'release', 'boost', 'evItem', 'ivItem', 'evAdd', 'respec', 'reroll4', 'reroll1', 'xlearn', 'tm', 'towerBegin', 'towerQuit', 'arcadeNew', 'arcadeQuit', 'tutGem']);
 exports.act = onCall({ memory: '2GiB', timeoutSeconds: 60 }, async (req) => {
   const uid = uidOf(req), name = req.data && req.data.name, args = (req.data && req.data.args) || [], loc = req.data && req.data.loc;
   if (!ACT_NAMES.has(name) || !Array.isArray(args) || JSON.stringify(args).length > 200000) throw new HttpsError('invalid-argument', 'act');
