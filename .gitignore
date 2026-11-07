@@ -7,3 +7,5 @@ tools/movepower/out/
 .hitrate_tmp_*.html
 tools/hitrate/out/
 .movepower_tmp_*.html
+tools/balance/out/
+.*_tmp_*.html

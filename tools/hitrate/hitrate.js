@@ -5,7 +5,7 @@
 //   訓練あり（ゲームの じどう訓練）で うごかす。ばしょは ランダムな ステージ
 //   --stat：じょうたいいじょうの 技（まひの だん など）も はかる（あいてに とどいたら めいちゅう）
 // つかいかた：node tools/hitrate/hitrate.js [--n 8] [--moves ice-beam,shadow-pin] [--stat] [--out tools/hitrate/out]
-const { chromium } = require('playwright');
+const { withGame } = require('../lib/harness');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '../..');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
@@ -41,14 +41,8 @@ const HOOKS = [
   ['function hit(att, def, m, ang, opt) {', 'function hit(att, def, m, ang, opt) { if (window.__hit) window.__hit(att, def, m);'],
 ];
 (async () => {
-  let html = fs.readFileSync(SRC, 'utf8');
-  const anchor = 'window.PMA_REPLAY = (job) => {'; if (!html.includes(anchor)) throw new Error('PMA_REPLAY が みつからない');
-  html = html.replace(anchor, SIM + anchor);
-  for (const [a, b] of HOOKS) { if (html.split(a).length !== 2) throw new Error('フックの ばしょが みつからない: ' + a); html = html.replace(a, b); }
-  fs.mkdirSync(OUT, { recursive: true }); const tmp = path.join(ROOT, '.hitrate_tmp_' + process.pid + '.html'); fs.writeFileSync(tmp, html);
-  const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
-  try {
-    await p.goto('file://' + tmp); await p.waitForTimeout(1500);
+  fs.mkdirSync(OUT, { recursive: true });
+  await withGame({ src: SRC, inject: SIM, hooks: HOOKS, tag: 'hitrate' }, async (p, errs) => {
     await p.evaluate((v) => { window.STAT = v; }, STAT);
     const info = await p.evaluate(() => { const M = window.__game.MOVES, X = window.__game.run(o => o);
       return Object.keys(M).filter(id => (M[id].power > 0 || M[id].pow > 0) || (STAT && M[id].cat === 'stat' && ['proj', 'beam', 'cone', 'strike', 'aoe', 'multi', 'swipe', 'dash'].includes(M[id].k))).map(id => ({ id, n: M[id].n, t: M[id].t, k: M[id].k, cat: M[id].cat || '', acc: M[id].acc, aim: M[id].aim || '', power: M[id].power || 0 })); });
@@ -69,5 +63,5 @@ const HOOKS = [
     res.sort((a, c) => (a.rate ?? 999) - (c.rate ?? 999));
     fs.writeFileSync(path.join(OUT, 'hitrate.json'), JSON.stringify({ meta: { n: N, steps: STEPS, speeds: SPEEDS, date: new Date().toISOString(), errors: errs.slice(0, 20) }, res }, null, 1));
     console.log('done', res.length, errs.length ? 'errors: ' + errs.slice(0, 3).join(' / ') : '');
-  } finally { await b.close(); fs.unlinkSync(tmp); }
+  });
 })();

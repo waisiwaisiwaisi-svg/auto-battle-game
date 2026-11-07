@@ -4,7 +4,7 @@
 //   ビッグフォー・キング・クルー6〜10の ヘッドと 1かいずつ たたかわせて 勝率と 95%信頼区間（ウィルソン）を だす。
 //   --pick：ランダムな 18たいから ゲームの「へんせい」（sortPartyFor）で あいてに むいた 6たいを えらぶ（えらばない ときは ランダムの 6たい）
 // つかいかた：node tools/balance/leaguewin.js [--t 200] [--fed 40] [--pick] [--out tools/balance/out]
-const { chromium } = require('playwright');
+const { withGame } = require('../lib/harness');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '../..');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
@@ -32,12 +32,8 @@ window.PMA_LW = (job) => {
 };
 `;
 (async () => {
-  let html = fs.readFileSync(SRC, 'utf8'); const anchor = 'window.PMA_REPLAY = (job) => {'; if (!html.includes(anchor)) throw new Error('PMA_REPLAY が みつからない');
-  html = html.replace(anchor, SIM + anchor);
-  fs.mkdirSync(OUT, { recursive: true }); const tmp = path.join(ROOT, '.movepower_tmp_' + process.pid + '.html'); fs.writeFileSync(tmp, html);
-  const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
-  try {
-    await p.goto('file://' + tmp); await p.waitForTimeout(1500);
+  fs.mkdirSync(OUT, { recursive: true });
+  await withGame({ src: SRC, inject: SIM, tag: 'leaguewin' }, async (p, errs) => {
     const opp = [['g', 5], ['g', 6], ['g', 7], ['g', 8], ['g', 9], ['l', 0], ['l', 1], ['l', 2], ['l', 3], ['l', 4]];
     const acc = opp.map(() => ({ w: 0, n: 0, left: 0 }));
     for (let t = 0; t < T; t++) { const r = await p.evaluate((job) => window.PMA_LW(job), { seed: 9001 + t * 101, fed: FED, pick: PICK, opp });
@@ -47,5 +43,5 @@ window.PMA_LW = (job) => {
     const res = opp.map((o, i) => { const a = acc[i], [lo, hi] = wil(a.w, a.n); return { who: label(o), win: Math.round(a.w / a.n * 1000) / 10, lo: Math.round(lo * 1000) / 10, hi: Math.round(hi * 1000) / 10, n: a.n, leftFoe: Math.round(a.left / a.n * 100) }; });
     fs.writeFileSync(path.join(OUT, `leaguewin_${PICK ? 'pick' : 'rand'}_fed${FED}.json`), JSON.stringify({ meta: { T, FED, PICK, errors: errs.slice(0, 10) }, res }, null, 1));
     for (const r of res) console.log(`${r.who}\t勝率 ${r.win}%（95%: ${r.lo}〜${r.hi}%）\tのこった あいて ${r.leftFoe}%`);
-  } finally { await b.close(); fs.unlinkSync(tmp); }
+  });
 })();

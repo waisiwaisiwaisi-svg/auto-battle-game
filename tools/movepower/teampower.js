@@ -8,7 +8,7 @@
 //   かち：技ありの 勝率 と 技なしの 勝率
 // つかいかた：node tools/movepower/teampower.js [--n 24] [--seed 0（かえると べつの 乱数・べつの 3たい）] [--moves ember,surf] [--shard 1/3] [--out tools/movepower/out]
 //   → out/teampower(_1of3).json
-const { chromium } = require('playwright');
+const { withGame } = require('../lib/harness');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '../..');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
@@ -49,14 +49,8 @@ window.PMA_TEAM_FIGHT = (job) => {   // 1しあい（ゲームの シミュレ�
 const HOOKS = [['function beginMove(f, id) {', 'function beginMove(f, id) { if (window.__use) window.__use(f, id);']];
 
 (async () => {
-  let html = fs.readFileSync(SRC, 'utf8');
-  const anchor = 'window.PMA_REPLAY = (job) => {'; if (!html.includes(anchor)) throw new Error('PMA_REPLAY が みつからない');
-  html = html.replace(anchor, SIM + anchor);
-  for (const [a, b] of HOOKS) { if (html.split(a).length !== 2) throw new Error('フックの ばしょが みつからない: ' + a); html = html.replace(a, b); }
-  fs.mkdirSync(OUT, { recursive: true }); const tmp = path.join(ROOT, '.movepower_tmp_' + process.pid + '.html'); fs.writeFileSync(tmp, html);
-  const b = await chromium.launch(); const p = await b.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
-  try {
-    await p.goto('file://' + tmp); await p.waitForTimeout(1500);
+  fs.mkdirSync(OUT, { recursive: true });
+  await withGame({ src: SRC, inject: SIM, hooks: HOOKS, tag: 'teampower' }, async (p, errs) => {
     const info = await p.evaluate(() => { const M = window.__game.MOVES; return Object.keys(M).map(id => ({ id, n: M[id].n, t: M[id].t, k: M[id].k, cat: M[id].cat || '', power: M[id].power || Math.round((M[id].pow || 0) * 5) })); });
     let ids = ONLY ? ONLY.split(',') : info.filter(m => m.cat !== 'stat' && m.power > 0).map(m => m.id);
     if (SHARD) { const [a, n] = SHARD.split('/').map(Number); ids = ids.filter((_, i) => i % n === a - 1); }
@@ -76,5 +70,5 @@ const HOOKS = [['function beginMove(f, id) {', 'function beginMove(f, id) { if (
     res.sort((a, c) => (c.score ?? -1e9) - (a.score ?? -1e9));
     fs.writeFileSync(path.join(OUT, SHARD ? 'teampower_' + SHARD.replace('/', 'of') + '.json' : 'teampower.json'), JSON.stringify({ meta: { n: N, foes: foes.map(f => f.tag), date: new Date().toISOString(), errors: errs.slice(0, 20) }, res }, null, 1));
     console.log('done', res.length, errs.length ? 'errors: ' + errs.slice(0, 3).join(' / ') : '');
-  } finally { await b.close(); fs.unlinkSync(tmp); }
+  });
 })();
