@@ -382,9 +382,10 @@ html.land #chartWrap{--cs:clamp(19px,calc((var(--appH,100vh) - 170px) / 16),30px
 #mmPill[hidden]{display:none}
 /* バトルの スタンプ：HPの 下に ふきだし・えらぶ パネル */
 #cvWrap .hudtop .plate{position:relative}
-#bEnv{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:70%;pointer-events:none}   /* てんき・フィールド：HPの したの まんなか（カメラで きれない） */
-#bEnv span{font-size:12px;line-height:1;padding:3px 7px;background:rgba(13,11,20,.78);box-shadow:inset 0 0 0 1px #3a3060;white-space:nowrap;font-variant-numeric:tabular-nums}
+#bEnv{flex:0 1 auto;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:2px;pointer-events:none}   /* てんき・フィールド：じぶんと あいての HPの あいだ */
+#bEnv span{font-size:12px;line-height:1;padding:3px 6px;background:rgba(13,11,20,.78);box-shadow:inset 0 0 0 1px #3a3060;white-space:nowrap;font-variant-numeric:tabular-nums}
 #bEnv span b{color:#fff;font-weight:400}
+html #app #cvWrap .hudtop.env .plate{width:min(41%,280px)}   /* てんきが ある ときは HPを すこし せまく して あいだを あける */
 .stp{position:absolute;top:calc(100% + 7px);display:flex;align-items:center;gap:5px;padding:5px;background:#fff8e6;color:#2a2040;border-radius:10px;box-shadow:0 0 0 2px #1a1626,2px 3px 0 rgba(0,0,0,.35);font-size:13px;font-weight:700;white-space:nowrap;z-index:6;pointer-events:none}
 .stp[hidden]{display:none}
 #stpP{left:6px} #stpE{right:6px}
@@ -1811,8 +1812,8 @@ html.isle[data-st=deal] #scShop .shsec:not([data-k=deal]):not([data-k=sp]),html.
       <div id="waitOv" hidden><div class="wcard"><i class="wspin"></i><b id="waitMsg">あいてが つぎの モンスターを えらんでいます</b><small id="waitT"></small></div></div>
       <div class="plates hudtop">
         <div class="plate" id="plP"><div class="top"><b class="nm"></b><span class="types"></span></div><div class="hp"><i></i></div><div class="bot"><span class="hpn"></span><span class="balls"></span></div><div class="cond"></div><div class="stp" id="stpP" hidden></div></div>
-        <div class="plate" id="plE"><div class="top"><span class="types"></span><b class="nm"></b></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div><div class="stp" id="stpE" hidden></div></div>
         <div id="bEnv" hidden></div>
+        <div class="plate" id="plE"><div class="top"><span class="types"></span><b class="nm"></b></div><div class="hp"><i></i></div><div class="bot"><span class="balls"></span><span class="hpn"></span></div><div class="cond"></div><div class="stp" id="stpE" hidden></div></div>
       </div>
       <div id="stampPal" hidden></div>
       <div class="ov" id="pauseOv" hidden><h2>PAUSE</h2><button class="btn" id="btnResume">つづける</button><button class="btn sub" id="btnQuit" style="font-size:13px">しあいを やめる（まけ あつかい）</button></div>
@@ -7876,7 +7877,7 @@ function threatDir(f, o) {
     const cur = o.cur, m = cur.m; let base;
     if (m.k === 'beam' || m.k === 'dash') {
       let s = (f.dodgeCur === cur && f.dodgeS) || Math.sign(-(f.x - o.x) * DM.sin(cur.ang) + (f.y - o.y) * DM.cos(cur.ang)) || 1;   // よける むきは さいしょに きめた ほうの まま
-      { const ok = (k) => spotOk(f, f.x + DM.cos(cur.ang + k * Math.PI / 2) * 40, f.y + DM.sin(cur.ang + k * Math.PI / 2) * 40); if (!ok(s) && ok(-s)) s = -s; }   // かべで ふさがって いたら はんたいへ（1かい きりかえたら その まま）
+      if (f.dodgeFlip !== cur) { const ok = (k) => spotOk(f, f.x + DM.cos(cur.ang + k * Math.PI / 2) * 40, f.y + DM.sin(cur.ang + k * Math.PI / 2) * 40); if (!ok(s) && ok(-s)) { s = -s; f.dodgeFlip = cur; } }   // かべで ふさがって いたら はんたいへ（1つの わざで 1かい だけ）
       f.dodgeS = s; base = cur.ang + s * Math.PI / 2;
     } else if (m.k === 'strike' || m.k === 'vault') base = DM.atan2(f.y - cur.ty, f.x - cur.tx);
     else if (m.k === 'cone' || m.k === 'swipe') { const s = (f.dodgeCur === cur && f.dodgeS) || Math.sign(wrapAng(DM.atan2(f.y - o.y, f.x - o.x) - cur.ang)) || 1; f.dodgeS = s; base = cur.ang + s * 1.6; }
@@ -8426,7 +8427,6 @@ function aiMove(f, o, dt, autoSpecial) {
     const keep = f.dodgeCur === o.cur;
     if (keep) f.dodgeOn = f.dodgeOn ? inZone(o.cur, o, f.x, f.y, f.r + 40) : inZone(o.cur, o, f.x, f.y, f.r + 12);   // 2つの さかいで きりかえ（とまる・うごくを くりかえさない）
     if (keep ? f.dodgeOn : inZone(o.cur, o, f.x, f.y, f.r) && rnd() < 1 + persona(f).dodge) { if (!keep) f.dodgeOn = true; f.dodgeCur = o.cur; const t = threatDir(f, o); f.paceT = 1.5; return moveDir(f, DM.cos(t.base), DM.sin(t.base), dt); }
-    if (keep) { f.paceT = Math.max(f.paceT || 0, .6); return moveDir(f, 0, 0, dt); }   // はなれた：わざが おわるまで ちかよらない
   } else f.dodgeCur = null;
   { const dl = o.clones && o.clones.find(c => c.doll);   // デコイにんぎょう：ここから さきの たちまわりは にんぎょうを あいてと して うごく（よちょうの はんいは 本物で よける）
     if (dl) { const p = Object.create(o); p.x = dl.x; p.y = dl.y; p.real = o; o = p; d = dist(f, o); ang = DM.atan2(o.y - f.y, o.x - f.x); } }
@@ -8687,8 +8687,19 @@ function pickSpot(f, o, w, dt) {
   }
   return (f.spot = best || { x: f.x, y: f.y });
 }
+// あいての こうげきの はんい（よちょう）に (x, y) が はいるか
+function threatAt(f, x, y, pad) { for (const o of allActs()) { if (!o || o.side === f.side || !threatState(o) || !o.cur || !ZONE_KINDS.includes(o.cur.m.k)) continue; if (inZone(o.cur, o, x, y, f.r + pad)) return true; } return false; }
 function moveDir(f, mx, my, dt, nav) {
   if (f.v.confuse > 0) { const a = DM.atan2(my, mx) + DM.sin(B.t * 3 + f.side) * 2.2; const L = DM.hypot(mx, my); mx = DM.cos(a) * L; my = DM.sin(a) * L; }
+  if ((mx || my) && !(f.want && f.queued === f.want.id && rpsOf(MOVES[f.queued]) === 'rock') && !threatAt(f, f.x, f.y, 0)) {   // こうげきの はんいの そとから すすむ ときは、はんいに はいらない ように まわりこむ（はいって よける・でて ちかよる を くりかえさない）
+    const L = DM.hypot(mx, my), a0 = DM.atan2(my, mx), bad = (a) => threatAt(f, f.x + DM.cos(a) * 44, f.y + DM.sin(a) * 44, 20);
+    const keepD = Math.max(0, (f.detD || 0) - dt * 1.5);   // まわりこみの かくどは ゆっくり もどす（まっすぐ ⇔ まわりこみ を いったり きたり しない）
+    let d = null; const pr = f.detS || 1;
+    if (keepD > 0 && !bad(a0 + pr * keepD)) d = keepD;
+    else if (bad(a0) || keepD > 0) { for (let k = .2; k <= 2.41 && d == null; k += .2) for (const sg of [pr, -pr]) if (!bad(a0 + sg * k)) { d = k; f.detS = sg; break; } }   // まわる むきは まえと おなじ ほうを さきに ためす
+    else d = 0;
+    if (d == null) { f.detD = 0; mx = my = 0; } else { f.detD = d; if (d > 0) { const a = a0 + (f.detS || 1) * d; mx = DM.cos(a) * L; my = DM.sin(a) * L; } }
+  }
   if ((mx || my) && (B.st.solid || (B.wallRects && B.wallRects.length)) && !(flies(f) && !(B.wallRects && B.wallRects.length)) && !(f.order && f.order.k === 'hide')) {   // 障害物・わざの かべに OBST_GAP より ちかい ときは そっと はなれる むきへ
     const R = footR(f) + OBST_GAP; let rx = 0, ry = 0;
     for (const o of (flies(f) ? B.wallRects : obstacles(true))) { const cx = clamp(f.x, o.x0, o.x1), cy = clamp(f.y, o.y0, o.y1), dx = f.x - cx, dy = f.y - cy, d = DM.hypot(dx, dy); if (d >= R || d < .01) continue; const w = (1 - d / R) * 1.6; rx += dx / d * w; ry += dy / d * w; }
@@ -11295,15 +11306,15 @@ function updPlate(id, side) {
   const sig = B.sides[side].fs.map(x => x.fainted ? 0 : 1).join('');
   if (plCache[id] !== sig) { plCache[id] = sig; root.querySelector('.balls').innerHTML = B.sides[side].fs.map(x => `<i class="${x.fainted ? 'out' : ''}"></i>`).join(''); }
 }
-const TERRAIN_N = { elec: ['でんかい', '#ffe27a'], grass: ['そうげん', '#7be07b'], psy: ['ねんりきのば', '#ff9ad0'] };
+const TERRAIN_N = { elec: ['でんかい', '#ffe27a', '⚡'], grass: ['そうげん', '#7be07b', '🌿'], psy: ['ねんりきのば', '#ff9ad0', '🔮'] }, WEATHER_IC = { rain: '☔', sun: '☀️', sand: '🌪️', snow: '❄️' };
 function updEnv() {   // てんき・フィールド・じゅうりょく・さかさまフィールドの のこり びょう
   const el = $('bEnv'); if (!el || !B) return; const L = [], W = B.weather && WEATHER[B.weather.k];
-  if (W) L.push([W.n, B.weather.t, TYPES[W.ty] ? TYPES[W.ty].c : '#fff']);
-  if (B.terrain && TERRAIN_N[B.terrain.k]) L.push([TERRAIN_N[B.terrain.k][0], B.terrain.t, TERRAIN_N[B.terrain.k][1]]);
-  if (B.gravity > 0) L.push(['じゅうりょく', B.gravity, '#c8a8ff']);
-  if (B.trickRoom > 0) L.push([(Object.values(MOVES).find(m => m.fld === 'trickroom') || { n: 'さかさまフィールド' }).n, B.trickRoom, '#ff96dc']);
-  const sig = L.map(x => x[0] + Math.ceil(x[1])).join('|'); if (el._s === sig) return; el._s = sig; el.hidden = !L.length;
-  el.innerHTML = L.map(([n, t, c]) => `<span style="color:${c}">${n}${t < 90 ? `<b> ${Math.ceil(t)}</b>` : ''}</span>`).join(''); }
+  if (W) L.push([WEATHER_IC[B.weather.k] || W.n, B.weather.t, TYPES[W.ty] ? TYPES[W.ty].c : '#fff', W.n]);
+  if (B.terrain && TERRAIN_N[B.terrain.k]) L.push([TERRAIN_N[B.terrain.k][2], B.terrain.t, TERRAIN_N[B.terrain.k][1], TERRAIN_N[B.terrain.k][0]]);
+  if (B.gravity > 0) L.push(['⏬', B.gravity, '#c8a8ff', 'じゅうりょく']);
+  if (B.trickRoom > 0) L.push(['🔄', B.trickRoom, '#ff96dc', (Object.values(MOVES).find(m => m.fld === 'trickroom') || { n: 'さかさまフィールド' }).n]);
+  const sig = L.map(x => x[0] + Math.ceil(x[1])).join('|'); if (el._s === sig) return; el._s = sig; el.hidden = !L.length; el.parentNode.classList.toggle('env', !!L.length);
+  el.innerHTML = L.map(([ic, t, c, nm]) => `<span style="color:${c}" title="${nm}">${ic}${t < 90 ? `<b> ${Math.ceil(t)}</b>` : ''}</span>`).join(''); }   // あいだは せまいので しるし＋のこり びょう
 function updHUD() { updEnv();
   if (!B) return;
   { const el = $('bTimer'), on = !TUT && !B.cfg.tutorial && !B.remote && !B.cfg.dummy; if (el) { const sec = Math.ceil(Math.max(0, MATCH_T - (B.fightT || 0))); setText(el, on ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : ''); el.classList.toggle('hurry', on && sec <= 30); } }   // のこり じかん（オンラインの ゲストは ださない）
