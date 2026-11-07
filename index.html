@@ -6646,7 +6646,6 @@ function autoGuard(att, def, m, opt) {
   if (simMine(def)) { const L = B.simLog; L.used[id] = (L.used[id] || 0) + 1; }
   if (B.cfg.dummy) { def.trTag = P ? id : null; def.trLine = li; dummyLog(def, id); }   // 模擬戦：うけた しゅんかんの はつどうも きろく
   if (!B.headless) popText(def.x, def.y - 104, P ? g.n + '！' : `じどう ${g.n}`, '#9ff0ff');
-  say(P ? `${prefix(def)}${def.sp.n}は とっさに ${g.n}！` : `${prefix(def)}${def.sp.n}の ${g.n}が じどうで はつどうした！`);
   if (g.k === 'protect') { def.v.protect = 2.5; def.v.pg = g.psnGuard ? 1 : 0; typeFx(def.x, def.y - bodyH(def), g.psnGuard ? 'poison' : 'ice', 4, 110, .45); }   // ビームなど つづけて あたる わざも しばらく ふせぐ
   else if (g.k === 'counter') def.v.counter = { ctr: g.ctr, mult: g.mult, t: .5, t0: B.t };
   else { def.cur = { id, m: g, t: 0, wind: 0, ang: 0, uid: ++B.uidc, hits: 0 }; def.state = 'stance'; def.stT = .3; }   // だしぬき：うけたら すぐ つっこむ
@@ -6727,7 +6726,7 @@ function beginMove(f, id) {
   if (B.log) B.log.push(id); if (B.logS) B.logS.push([f.side, id]);
   if (!B.headless && m.n) popText(f.x, f.y - 112, m.n, TYPES[m.t] ? TYPES[m.t].c : '#ffffff', true);   // 撃った 技の なまえを あたまの うえに
   if (m.k !== 'melee' || id !== 'tackle') {
-    say(`${prefix(f)}${f.sp.n}の ${m.n}！`);
+    // 技の なまえは あたまの うえ だけ（したの まどに 毎回 だすと 文字が おおすぎる）
     if (B.cfg.dummy) dummyLog(f, id);
     if (m.rapidSpin) { for (const sd of B.sides) { const hz = sd.hz; hz.rocks = hz.spikes = hz.tspikes = 0; const x = sd.fs[sd.act]; if (x) x.v.seed = 0; } B.obs = OB().filter(o => o.k !== 'mine' && o.k !== 'snare'); B.zones = []; say('しかけが すべて はらわれた！'); }   // ふりはらい：撃った ときに りょうほうの 場の しかけ（いわ・まきびし・どくびし・じらい・わな・ゆか）と たねを ぜんぶ はらう
     if (f.trTag === id) { f.trTag = null; if (!B.headless) popText(f.x, f.y - 138, '条件', '#7be0a8'); }   // 訓練の 条件で えらんだ 技
