@@ -4594,7 +4594,7 @@ function shopIcon(o) {
 function shopGive(o) {
   if (o.k === 'orb') S.capsules += o.n;
   else if (o.k === 'gem') S.gems = (S.gems || 0) + o.n;
-  else if (o.k === 'item') { S.items = S.items || {}; S.items[o.id] = (S.items[o.id] || 0) + 1; }
+  else if (o.k === 'item') addItem(o.id);
   else if (o.k === 'tm') { S.tms = S.tms || {}; S.tms[o.id] = (S.tms[o.id] || 0) + 1; }
   else if (o.k === 'mon') { const m = newMon(o.id); if (o.nat && NATURES[o.nat]) m.nat = o.nat; const toBox = S.party.length >= 6; (toBox ? (S.box = S.box || []) : S.party).push(m); return toBox ? 'box' : 'party'; }
 }
@@ -4657,7 +4657,7 @@ async function shopBuySpecial() {
 ACTS.shopBuySpecial = () => {
   const st = shopState(), o = shopSpecial(); if (st.wb) return 'sold';
   if ((S.gems || 0) < o.p) { SND.se('deny'); say0('ジェムが たりません'); return 'gems'; }
-  S.gems -= o.p; st.wb = 1; if (o.orb) S.capsules += o.orb; S.items = S.items || {}; for (let k = 0; k < (o.item || 0); k++) { const id = itemPick(rnd); S.items[id] = (S.items[id] || 0) + 1; }
+  S.gems -= o.p; st.wb = 1; if (o.orb) S.capsules += o.orb; for (let k = 0; k < (o.item || 0); k++) addItem(itemPick(rnd));
   S.chests = S.chests || []; S.chests.push({ kind: o.ch, at: 0 }); save(); clerkPlay('buy'); openChest(S.chests.length - 1); renderShop(); return 'ok';
 };
 ACTS.sync = () => 'ok';
@@ -4783,7 +4783,7 @@ function openChest(i) {
   S.chests.splice(i, 1);
   S.capsules += R.cr; S.tms = S.tms || {};
   for (const id of R.tms) S.tms[id] = (S.tms[id] || 0) + 1;
-  S.items = S.items || {}; for (const k of R.items || []) S.items[k] = (S.items[k] || 0) + 1;
+  for (const k of R.items || []) addItem(k);
   const owned = new Set([...S.party, ...S.box].map(m => m.sid));
   const monCards = R.mons.map(sid => {
     const m = newMon(sid), sp = SPECIES[sid], r = RARITY[monRarity(sid)], isNew = !owned.has(sid); owned.add(sid);
@@ -5114,6 +5114,7 @@ const X_ITEMS = ['pick1', 'xtype', ...Object.keys(X_SCROLL)];   // わざを え
 const itemPick = (r) => { const ks = Object.keys(ITEMS), W = ks.map(k => ITEMS[k].w ?? 1); let x = r() * W.reduce((a, b) => a + b, 0); for (let i = 0; i < ks.length; i++) { x -= W[i]; if (x < 0) return ks[i]; } return ks[ks.length - 1]; };   // 上位版は でにくい
 const itemN = (k) => (S.items && S.items[k]) || 0;
 function useItem(k) { S.items = S.items || {}; S.items[k] = Math.max(0, itemN(k) - 1); }
+function addItem(k, n = 1) { S.items = S.items || {}; S.items[k] = itemN(k) + n; }
 // わざの おぼえなおし
 function rerollPool(m, idx, sameType) {
   const cur = m.moves, old = MOVES[cur[idx]];
@@ -6003,6 +6004,7 @@ const OBST_GAP = 18;   // ふつうに あるく ときは 障害物から こ�
 // 障害物との 当たりは 足もとだけ（当たり判定が 絵の 足もとに あわせて あるので、体の 円より 小さく）
 const bodyH = (f) => (f && f.mon && SPECIES[f.mon.sid] && SPECIES[f.mon.sid].hitH) || BODY;   // 下半身の まんなかの 高さ（みせかた だけ。当たりの けいさんは 地面で する）
 let PROJ_DY = 0;   // 弾を かく ときの 高さの ずれ
+const PROJ_D0 = new WeakMap();   // 弾ごとの さいしょの きょり（みせかた だけ。たたかいの データには かきこまない）
 const footR = (f) => Math.max(10, f.r * .6);
 // 絵の みえている よこはばの 半分（からだが ながい こ ほど ひろい）
 const _bodyHW = {};
@@ -9162,7 +9164,7 @@ async function srvFn() { if (SRV_FN) return SRV_FN; if (!SRV_APP() || !(SRV_FN_O
    おなじ らんすう・じこく で この 端末でも うごかす（がめんも そのまま でる）。けっかが ちがえば サーバーの ほうに する */
 let SRV_SAVE = false;   // サーバーの セーブを つかって いる
 const SAVE_PROT = ['tutGem', 'gems', 'capsules', 'items', 'tms', 'chests', 'chLog', 'shop', 'wins', 'trophies', 'caught', 'tier', 'round', 'journey', 'tower', 'arcade', 'uid', 'onbChest', 'onbOpen', 'tmFree', 'freeLast', 'tkt', 'osb', 'onb'];   // osb：オフラインの らんすうの たね（サーバーが きめる）   // サーバーが きめる ところ
-const MON_PROT = ['uid', 'sid', 'iv', 'nat', 'ev', 'fed', 'lvl', 'tmL', 'xL'];   // モンスターの サーバーが きめる ところ（わざ・訓練・ならびは 端末で かえて よい）
+const MON_PROT = ['uid', 'sid', 'iv', 'nat', 'ev', 'fed', 'fx', 'lvl', 'tmL', 'xL'];   // モンスターの サーバーが きめる ところ（わざ・訓練・ならびは 端末で かえて よい）
 const saveHash = (x) => { const o = {}; for (const k of SAVE_PROT) if (x[k] !== undefined) o[k] = x[k]; o.mons = [...(x.party || []), ...(x.box || [])].map(m => MON_PROT.map(k => m[k] === undefined ? null : m[k])); return seedOf(JSON.stringify(o)).toString(36); };
 const cloneJ = (x) => JSON.parse(JSON.stringify(x));
 let ACT_SEED = 0;
@@ -12777,7 +12779,7 @@ function render() {
 
   // とぶ もの・エフェクト・つぶ（ドット絵に して かさねる）
   pixLayer(T, () => {
-    for (const p of B.projs) { const t = p.f && opp(p.f), h0 = bodyH(p.f), h1 = t ? bodyH(t) : h0; let u = 0; if (t) { const d = DM.hypot(t.x - p.x, t.y - BODY - p.y); if (!p.d0) p.d0 = Math.max(1, d); u = clamp(1 - d / p.d0, 0, 1); }   // 撃つ 子の 下半身 → 当たる 子の 下半身へ
+    for (const p of B.projs) { const t = p.f && opp(p.f), h0 = bodyH(p.f), h1 = t ? bodyH(t) : h0; let u = 0; if (t) { const d = DM.hypot(t.x - p.x, t.y - BODY - p.y); let d0 = PROJ_D0.get(p); if (!d0) { d0 = Math.max(1, d); PROJ_D0.set(p, d0); } u = clamp(1 - d / d0, 0, 1); }   // 撃つ 子の 下半身 → 当たる 子の 下半身へ
       PROJ_DY = p.pat === 'lob' ? 0 : BODY - (h0 + (h1 - h0) * u); p.y += PROJ_DY; try { drawProj(p); } finally { p.y -= PROJ_DY; PROJ_DY = 0; } }
     drawObsTop();
     drawFxList();
@@ -13705,7 +13707,7 @@ function journeyResult(res, lines) {
     return;
   }
   if (c.league != null) {
-    if (res === 'win') { S.wins++; S.gems = (S.gems || 0) + 2; J.league++; { const n = J.league >= LEAGUE.length ? 5 : 2, n2 = J.league >= LEAGUE.length ? 3 : 1; S.items = S.items || {}; S.items.evup = (S.items.evup || 0) + n; S.items.ivup = (S.items.ivup || 0) + n2; lines.push(`${ITEMS.evup.ic} ${ITEMS.evup.n} ×${n}`, `${ITEMS.ivup.ic} ${ITEMS.ivup.n} ×${n2}`); }   // キングバトル：きょうかのもと・きたえのもと
+    if (res === 'win') { S.wins++; S.gems = (S.gems || 0) + 2; J.league++; { const n = J.league >= LEAGUE.length ? 5 : 2, n2 = J.league >= LEAGUE.length ? 3 : 1; addItem('evup', n); addItem('ivup', n2); lines.push(`${ITEMS.evup.ic} ${ITEMS.evup.n} ×${n}`, `${ITEMS.ivup.ic} ${ITEMS.ivup.n} ×${n2}`); }   // キングバトル：きょうかのもと・きたえのもと
       if (J.league >= LEAGUE.length) { J.league = 0; J.champ++; S.trophies++; S.gems += 15; lines.unshift('<b style="color:var(--acc)">👑 キングバトル ゆうしょう！ レジェンド入り！</b>'); lines.push('ヘッドたちが さらに つよく なって まっている…'); }
       else lines.unshift(`${LEAGUE[J.league - 1][1]}に かった！ つぎは ${LEAGUE[J.league][1]}`); }
     else if (res === 'lose') lines.unshift(`まけてしまった… ${LEAGUE[J.league][1]}に もういちど ちょうせんできるよ`, '<span class="dim">へんせいで タイプを あわせたり、きょうかで つよく しよう</span>');   // まけても さいしょに もどさない
@@ -13721,7 +13723,7 @@ function journeyResult(res, lines) {
   if (first) { J.badges.push(G.f); lines.unshift(`<b style="color:var(--acc)">${gymMedal(G.t, 'medal-i')} ${TYPES[G.t].n}タグを てにいれた！</b>`); }
   else lines.unshift(`${G.ln}に また かった！`);
   const ht = HEAD_TM[G.t];
-  { const n = first ? 3 : 1; S.items = S.items || {}; S.items.evup = (S.items.evup || 0) + n; lines.push(`${ITEMS.evup.ic} ${ITEMS.evup.n} ×${n}`); if (first) { S.items.ivup = (S.items.ivup || 0) + 1; lines.push(`${ITEMS.ivup.ic} ${ITEMS.ivup.n} ×1`); } }   // ヘッド：きょうかのもと（はじめては きたえのもとも）
+  { const n = first ? 3 : 1; addItem('evup', n); lines.push(`${ITEMS.evup.ic} ${ITEMS.evup.n} ×${n}`); if (first) { addItem('ivup'); lines.push(`${ITEMS.ivup.ic} ${ITEMS.ivup.n} ×1`); } }   // ヘッド：きょうかのもと（はじめては きたえのもとも）
   if (first && ht && MOVES[ht]) { S.tms = S.tms || {}; S.tms[ht] = (S.tms[ht] || 0) + 1; lines.push(`<b style="color:var(--acc)">ヘッドの あかし：ワザステッカー「${MOVES[ht].n}」を もらった！</b>（ここでしか てに はいらない）`); }   // はじめて かった ときだけ
   else { const tms = TM_POOL().filter(id => MOVES[id].t === G.t && isDamaging(MOVES[id]) && !tmBig(id)); if (tms.length) { const t = tmNew(tms); S.tms = S.tms || {}; S.tms[t] = (S.tms[t] || 0) + 1; lines.push(`ワザステッカー「${MOVES[t].n}」を もらった`); } }
   if (c.gi === J.gym && J.gym < GYMS.length) { J.gym++; J.step = 0; if (J.gym < GYMS.length) lines.push(`つぎは ${TYPES[GYMS[J.gym].t].n}クルー！`); else lines.push('<b>タグが 10こ そろった！ キングバトルへ いこう！</b>'); }
@@ -13796,7 +13798,7 @@ function towerResult(res, lines) {
   const T = tw(), R = T.run; if (!R) return;
   if (res !== 'win') { lines.unshift(`<b style="color:var(--bad)">れんしょう ストップ</b>　${R.streak}れんしょう`); if (R.streak > T.best) { T.best = R.streak; lines.push('<b style="color:var(--acc)">さいこう きろく こうしん！</b>'); } T.run = null; return; }
   S.wins++; R.streak++; const n = R.streak; if (n > T.best) T.best = n; S.gems = (S.gems || 0) + 1; let msg = `${n}れんしょう！　💎+1`;
-  if (n % TW_SET === 0) { T.sets++; S.gems += 10; S.capsules += 3; S.items = S.items || {}; S.items.evup = (S.items.evup || 0) + 2; S.items.ivup = (S.items.ivup || 0) + 1; msg = `<b style="color:var(--acc)">${n}れんしょう たっせい！</b>　💎+11・ボックス+3・${ITEMS.evup.n}×2・${ITEMS.ivup.n}×1`; }
+  if (n % TW_SET === 0) { T.sets++; S.gems += 10; S.capsules += 3; addItem('evup', 2); addItem('ivup'); msg = `<b style="color:var(--acc)">${n}れんしょう たっせい！</b>　💎+11・ボックス+3・${ITEMS.evup.n}×2・${ITEMS.ivup.n}×1`; }
   if (n % TW_TYCOON === 0) { S.gems += 30; S.trophies++; msg = `<b style="color:var(--acc)">👑 タワータイクーンに かった！ ${n}れんしょう</b>　💎+41・トロフィー+1`; }
   if (n > T.best) T.best = n;
   lines.unshift(msg);
