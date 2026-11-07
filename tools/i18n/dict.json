@@ -12039,9 +12039,9 @@
 "Raises all IVs of any monster by +3 (max 31)",
 "任意怪兽的个体值全部+3（最高31）"
 ],
-"💪 きょうかポイント：⟦0⟧": [
-"💪 Power Points: ⟦0⟧",
-"💪 强化点数：⟦0⟧"
+"きょうかポイント：⟦0⟧": [
+"Power Points: ⟦0⟧",
+"强化点数：⟦0⟧"
 ],
 "きょうかポイントは たたかうと たまる（出場して かつと +1）。おなじ しゅるいの モンスターを 1たい つかうと +⟦0⟧、きょうかのもとで +⟦1⟧（さいだい ⟦2⟧）。ポイントを すきな のうりょくに ふりわけて「確定する」で きまる（1つ ⟦3⟧ まで・1ポイントで +⟦4⟧）。": [
 "Power Points build up as you battle (+1 for each win you take part in). Using one monster of the same species gives +⟦0⟧, a Power Seed gives +⟦1⟧ (max ⟦2⟧). Assign points to any stat and press Confirm (up to ⟦3⟧ each, +⟦4⟧ per point).",
@@ -12055,13 +12055,13 @@
 "⟦0⟧ Training Seed (IVs +⟦1⟧, ⟦2⟧ left)",
 "⟦0⟧ 锻炼之源（个体值+⟦1⟧・剩余 ⟦2⟧）"
 ],
-"💪 きょうかのもと ×⟦0⟧": [
-"💪 Power Seed ×⟦0⟧",
-"💪 强化之源 ×⟦0⟧"
+"きょうかのもと ×⟦0⟧": [
+"Power Seed ×⟦0⟧",
+"强化之源 ×⟦0⟧"
 ],
-"🏋 きたえのもと ×⟦0⟧": [
-"🏋 Training Seed ×⟦0⟧",
-"🏋 锻炼之源 ×⟦0⟧"
+"きたえのもと ×⟦0⟧": [
+"Training Seed ×⟦0⟧",
+"锻炼之源 ×⟦0⟧"
 ],
 "（スマホは ながおし）して いれかえ / すきまを つかむと スクロール / ": [
 " (long-press on phones) to swap / Grab empty space to scroll / ",
@@ -12082,5 +12082,25 @@
 "ねんりきのば": [
 "Psychic Field",
 "精神场地"
+],
+"砂": [
+"Sand",
+"沙"
+],
+"電": [
+"Elec",
+"电"
+],
+"念": [
+"Psy",
+"念"
+],
+"逆": [
+"Trick",
+"逆"
+],
+"重力": [
+"Gravity",
+"重力"
 ]
 }
