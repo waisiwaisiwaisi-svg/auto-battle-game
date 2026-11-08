@@ -6439,6 +6439,12 @@ for (const id in MOVES) { const m = MOVES[id]; if (m.switchOut) { m.power = 45; 
   m.wind = Math.round(m.wind * 100) / 100;
   const T = BAL_TUNE[id]; if (T) { if (T[2]) m.wind = T[2]; if (T[0]) m.cd = T[0]; if (T[1]) { const P = P0 <= 50 ? Math.min(T[1], 50) : P0 < 100 ? Math.min(T[1], 95) : T[1]; m.power = P; m.pow = P / 5; } }   // 威力を かえても 使える 回数の だん（50いか・55〜95・100いじょう）は こえない
 }
+// 照射ビーム：ためは さいだい 3びょう、威力は ため時間で きめる（60 ＋ 30×ため。じぶんの 能力ダウン 1だんにつき +10・撃ったあと 動けない +20・射程が みじかい（300いか）+10・状態異常や 相手の 能力ダウンつき −5・すいとり ×0.85。5きざみ）
+for (const id in MOVES) { const m = MOVES[id]; if (m.k !== 'beam' || m.ohko || id === 'garyou' || !((m.power || m.pow) > 0)) continue;
+  m.wind = Math.min(m.wind || 0, 3); const e = m.e || {}; let P = 60 + 30 * m.wind;
+  if (e.self) P += 10 * Object.values(e.self).reduce((a, v) => a + Math.max(0, -v), 0);
+  if (m.recharge) P += 20; if ((m.len || 520) <= 300) P += 10; if (e.st || e.foe) P -= 5; if (e.drain) P *= .85;
+  P = Math.round(P / 5) * 5; m.power = P; m.pow = P / 5; }
 // 個別の 調整
 MOVES['triple-axel'].rad *= 2;   // さんれんスピン：はんい 2ばい
 Object.assign(MOVES['fake-out'], { power: 60, pow: 12, pctDmg: .2, sureHit: 1, flinchT: 3 });   // びっくりてうち：あいての 最大HPの 20%を けずる・かならず あたる（あいてへ まがって つっこむ・よけられない）・ひるみ 3びょう
