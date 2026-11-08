@@ -11,9 +11,9 @@
 "Tip: Tap a bench monster to switch!",
 "提示：点击替补就能替换！"
 ],
-"ヒント：タイプの あいしょうを クルーに あわせよう": [
-"Tip: Pick types that match up well against the Crew!",
-"提示：根据街团选择相克有利的属性吧！"
+"ヒント：タイプの あいしょうを ギルドに あわせよう": [
+"Tip: Pick types that match up well against the Guild!",
+"提示：根据公会选择相克有利的属性吧！"
 ],
 "ヒント：シミュレーションで 訓練の ききめを ためせる": [
 "Tip: Test your Training in a simulation!",
@@ -3347,9 +3347,9 @@
 "[\\\\s・._-]*",
 "[\\\\s・._-]*"
 ],
-"サモナー": [
-"Summoner",
-"召唤师"
+"ギアマスター": [
+"Gear Master",
+"齿轮大师"
 ],
 "オリジナル": [
 "Original",
@@ -3363,17 +3363,17 @@
 "Shop",
 "商店"
 ],
-"クルー": [
-"Crew",
-"街团"
+"ギルド": [
+"Guild",
+"公会"
 ],
 "くんれん": [
 "Training",
 "训练"
 ],
-"ギルド": [
-"Guild",
-"公会"
+"チーム": [
+"Team",
+"队伍"
 ],
 "コレクション": [
 "Collection",
@@ -3399,9 +3399,9 @@
 "Close",
 "关闭"
 ],
-"アーケード": [
-"Arcade",
-"街机"
+"アリーナ": [
+"Arena",
+"竞技场"
 ],
 "マイルーム": [
 "My Room",
@@ -3443,9 +3443,9 @@
 "Start with your first battle!",
 "先从第一场战斗开始！"
 ],
-"つぎは ⟦0⟧クルーの メンバー ⟦1⟧人め！": [
-"Next: ⟦0⟧ Crew, Summoner #⟦1⟧!",
-"下一个：⟦0⟧街团的第⟦1⟧位召唤师！"
+"つぎは ⟦0⟧ギルドの メンバー ⟦1⟧人め！": [
+"Next: ⟦0⟧ Guild, Gear Master #⟦1⟧!",
+"下一个：⟦0⟧公会的第⟦1⟧位齿轮大师！"
 ],
 "つぎの あいては ⟦0⟧！": [
 "Next foe: ⟦0⟧!",
@@ -3851,9 +3851,9 @@
 "Move: ⟦0⟧",
 "招式：⟦0⟧"
 ],
-"コーチから ⟦0⟧を もらった！ （⟦1⟧クルーで たよりに なるよ）": [
-"Got ⟦0⟧ from the coach! (A big help at the ⟦1⟧ Crew)",
-"从教练那里得到了⟦0⟧！（在⟦1⟧街团很可靠哦）"
+"コーチから ⟦0⟧を もらった！ （⟦1⟧ギルドで たよりに なるよ）": [
+"Got ⟦0⟧ from the coach! (A big help at the ⟦1⟧ Guild)",
+"从教练那里得到了⟦0⟧！（在⟦1⟧公会很可靠哦）"
 ],
 "まずは チュートリアルで バトルの きほんを やってみよう！": [
 "First, learn battle basics in the tutorial!",
@@ -4039,9 +4039,9 @@
 "Opens right away",
 "买了马上打开"
 ],
-"ジェムは しあいや クルー・キングバトルの ごほうびで たまります": [
-"Earn Gems from matches and Crew/King Battle rewards",
-"宝石可以通过对战和街团、王者之战的奖励获得"
+"ジェムは しあいや ギルド・キングバトルの ごほうびで たまります": [
+"Earn Gems from matches and Guild/King Battle rewards",
+"宝石可以通过对战和公会、王者之战的奖励获得"
 ],
 "⟦0⟧じかん⟦1⟧ふん": [
 "⟦0⟧h⟦1⟧m",
@@ -4179,9 +4179,9 @@
 "Legend ×⟦0⟧, Tags ⟦1⟧/10",
 "传奇⟦0⟧次、标签 ⟦1⟧/10"
 ],
-"タグ ⟦0⟧/10・つぎは ⟦1⟧クルー": [
-"Tags ⟦0⟧/10, Next: ⟦1⟧ Crew",
-"标签 ⟦0⟧/10、下一个：⟦1⟧街团"
+"タグ ⟦0⟧/10・つぎは ⟦1⟧ギルド": [
+"Tags ⟦0⟧/10, Next: ⟦1⟧ Guild",
+"标签 ⟦0⟧/10、下一个：⟦1⟧公会"
 ],
 "タグが そろった！ キングバトルへ": [
 "All Tags collected! On to the King Battle",
@@ -4595,9 +4595,9 @@
 ", ",
 "、"
 ],
-"⟦0⟧クルー": [
-"⟦0⟧ Crew",
-"⟦0⟧街团"
+"⟦0⟧ギルド": [
+"⟦0⟧ Guild",
+"⟦0⟧公会"
 ],
 "あう こうげきを うけず、でなかった": [
 "Not hit by a matching attack, so it didn't trigger",
@@ -6915,9 +6915,9 @@
 "⟦0⟧ players",
 "⟦0⟧名玩家"
 ],
-"⟦0⟧ギルド": [
-"⟦0⟧ guilds",
-"⟦0⟧个公会"
+"⟦0⟧チーム": [
+"⟦0⟧ teams",
+"⟦0⟧个队伍"
 ],
 "よみこみちゅう…": [
 "Loading…",
@@ -6939,25 +6939,25 @@
 "Start matching",
 "开始匹配"
 ],
-"まだ ギルドが ありません。": [
-"No guilds yet.",
-"还没有公会。"
+"まだ チームが ありません。": [
+"No teams yet.",
+"还没有队伍。"
 ],
 "よみこめませんでした。あとで もういちど ためしてね。": [
 "Couldn't load. Please try again later.",
 "加载失败。请稍后再试。"
 ],
-"ギルドの なまえ・ひとこと で さがす": [
-"Search by guild name, message",
-"按公会名称、留言搜索"
+"チームの なまえ・ひとこと で さがす": [
+"Search by team name, message",
+"按队伍名称、留言搜索"
 ],
-"ギルドに はいると、かつたびに ギルドに ポイントが はいる（オンライン たいせん +3、そのほか +1）。こんしゅうの ポイントで ギルドランキングを きそおう！（のこり ⟦0⟧にち・1ギルド ⟦1⟧にん まで）": [
-"Join a guild and every win earns it points (online battle +3, others +1). Compete in the Guild Ranking with this week's points! (⟦0⟧ days left, up to ⟦1⟧ per guild)",
-"加入公会后，每次胜利都会为公会赢得点数（在线对战 +3，其他 +1）。用本周的点数争夺公会排行榜吧！（剩余⟦0⟧天、每个公会最多⟦1⟧人）"
+"チームに はいると、かつたびに チームに ポイントが はいる（オンライン たいせん +3、そのほか +1）。こんしゅうの ポイントで チームランキングを きそおう！（のこり ⟦0⟧にち・1チーム ⟦1⟧にん まで）": [
+"Join a team and every win earns it points (online battle +3, others +1). Compete in the Team Ranking with this week's points! (⟦0⟧ days left, up to ⟦1⟧ per team)",
+"加入队伍后，每次胜利都会为队伍赢得点数（在线对战 +3，其他 +1）。用本周的点数争夺队伍排行榜吧！（剩余⟦0⟧天、每个队伍最多⟦1⟧人）"
 ],
-"ギルドを さがす": [
-"Find a guild",
-"寻找公会"
+"チームを さがす": [
+"Find a team",
+"寻找队伍"
 ],
 "あき あり": [
 "Has space",
@@ -6975,9 +6975,9 @@
 "Newest",
 "最新"
 ],
-"まだ ギルドが ありません。さいしょの ギルドを つくろう！": [
-"No guilds yet. Make the first one!",
-"还没有公会。来创建第一个公会吧！"
+"まだ チームが ありません。さいしょの チームを つくろう！": [
+"No teams yet. Make the first one!",
+"还没有队伍。来创建第一个队伍吧！"
 ],
 "みつかりませんでした": [
 "Nothing found",
@@ -6991,17 +6991,17 @@
 "Join",
 "加入"
 ],
-"この ギルドは いっぱいです。": [
-"This guild is full.",
-"这个公会已满。"
+"この チームは いっぱいです。": [
+"This team is full.",
+"这个队伍已满。"
 ],
-"ギルドに はいれませんでした（": [
-"Couldn't join the guild (",
-"无法加入公会（"
+"チームに はいれませんでした（": [
+"Couldn't join the team (",
+"无法加入队伍（"
 ],
-"ギルドの なまえ（10もじ まで）": [
-"Guild name (up to 10 letters)",
-"公会名称（最多10个字）"
+"チームの なまえ（10もじ まで）": [
+"Team name (up to 10 letters)",
+"队伍名称（最多10个字）"
 ],
 "じぶんで かく": [
 "Write your own",
@@ -7011,9 +7011,9 @@
 "e.g. Recruiting! (up to 24 letters)",
 "例如：招募中！（最多24个字）"
 ],
-"ギルドを つくる": [
-"Create guild",
-"创建公会"
+"チームを つくる": [
+"Create team",
+"创建队伍"
 ],
 "もんしょう": [
 "Emblem",
@@ -7051,9 +7051,9 @@
 "Members (this week's points)",
 "成员（本周点数）"
 ],
-"ギルドチャット": [
-"Guild Chat",
-"公会聊天"
+"チームチャット": [
+"Team Chat",
+"队伍聊天"
 ],
 "まだ だれも はなして いません": [
 "No one has talked yet",
@@ -7063,9 +7063,9 @@
 "Send",
 "发送"
 ],
-"ギルドランキング": [
-"Guild Ranking",
-"公会排行榜"
+"チームランキング": [
+"Team Ranking",
+"队伍排行榜"
 ],
 "ぜんぶ みる": [
 "See all",
@@ -7095,9 +7095,9 @@
 "Make leader",
 "设为会长"
 ],
-"⟦0⟧ さんに リーダーを たのみますか？ うけて もらえたら、ギルドの なまえ・もんしょう・メンバー・ポイントは そのまま ひきつがれ、あなたは メンバーに なります。": [
-"Ask ⟦0⟧ to be leader? If they accept, the guild's name, emblem, members and points stay the same, and you become a member.",
-"要请⟦0⟧担任会长吗？对方接受后，公会的名称、徽记、成员和点数都会保留，你将成为普通成员。"
+"⟦0⟧ さんに リーダーを たのみますか？ うけて もらえたら、チームの なまえ・もんしょう・メンバー・ポイントは そのまま ひきつがれ、あなたは メンバーに なります。": [
+"Ask ⟦0⟧ to be leader? If they accept, the team's name, emblem, members and points stay the same, and you become a member.",
+"要请⟦0⟧担任会长吗？对方接受后，队伍的名称、徽记、成员和点数都会保留，你将成为普通成员。"
 ],
 "たのめませんでした": [
 "Couldn't ask",
@@ -7135,17 +7135,17 @@
 "Report, Block",
 "举报、屏蔽"
 ],
-"ギルドを かいさん しますか？ メンバーも みんな ぬけた ことに なります。 （のこしたい ときは、さきに メンバーの「リーダーに する」で リーダーを たのもう）": [
-"Disband the guild? All members will be removed too. (To keep it, first use \"Make leader\" on a member to hand it over)",
-"要解散公会吗？所有成员也都会退出。（想保留公会的话，请先用成员的「设为会长」请对方担任会长）"
+"チームを かいさん しますか？ メンバーも みんな ぬけた ことに なります。 （のこしたい ときは、さきに メンバーの「リーダーに する」で リーダーを たのもう）": [
+"Disband the team? All members will be removed too. (To keep it, first use \"Make leader\" on a member to hand it over)",
+"要解散队伍吗？所有成员也都会退出。（想保留队伍的话，请先用成员的「设为会长」请对方担任会长）"
 ],
-"ギルドを かいさん しますか？": [
-"Disband the guild?",
-"要解散公会吗？"
+"チームを かいさん しますか？": [
+"Disband the team?",
+"要解散队伍吗？"
 ],
-"ギルドを ぬけますか？": [
-"Leave the guild?",
-"要退出公会吗？"
+"チームを ぬけますか？": [
+"Leave the team?",
+"要退出队伍吗？"
 ],
 "いやな ことを された ときは ブロックすると、この 人の チャットが みえなく なります。⟦0⟧": [
 "If someone is mean, block them to hide their chat. ⟦0⟧",
@@ -7679,9 +7679,9 @@
 "\" with your Rival, then ",
 "」，之后是"
 ],
-"クルー戦": [
-"Crew battles",
-"街团战"
+"ギルド戦": [
+"Guild battles",
+"公会战"
 ],
 "です。がんばってください！": [
 ". Good luck!",
@@ -9399,9 +9399,9 @@
 "Last 20",
 "最近20条"
 ],
-"トロフィー たいかいで ゆうしょうしたり、アーケードを クリアしたり、キングバトルで かつと もらえる。これまでの きろく です。": [
-"Trophies: earned by winning tournaments, clearing the Arcade, or winning the King Battle. Here's your record so far.",
-"奖杯：在大赛中夺冠、通关街机或在王者之战中获胜即可获得。这是至今的记录。"
+"トロフィー たいかいで ゆうしょうしたり、アリーナを クリアしたり、キングバトルで かつと もらえる。これまでの きろく です。": [
+"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
+"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
 ],
 "ボックス あきちで よわらせた マギアに なげると つかまえられる。バトルに かったり、ブラインドボックスから でる。": [
 "Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
@@ -9583,9 +9583,9 @@
 "Move to other devices, restore if erased",
 "转到其他设备、删除后也能恢复"
 ],
-"サモナーの みため": [
-"Summoner look",
-"召唤师外观"
+"ギアマスターの みため": [
+"Gear Master look",
+"齿轮大师外观"
 ],
 "データを しょきか（はじめから あそぶ）": [
 "Reset data (start over)",
@@ -9595,9 +9595,9 @@
 "Privacy Policy",
 "隐私政策"
 ],
-"ランキング・ギルド・なまえ・データの バックアップ など、サーバーに ある あなたの データを ぜんぶ けしますか？（この スマホの セーブデータは のこります。ふっかつコードは つかえなく なります）": [
-"Erase all your data on the server, like rankings, guild, name, and backups? (Save data on this phone stays. Your restore code will stop working.)",
-"要删除服务器上你的所有数据吗？包括排行榜、公会、名字、数据备份等。（本手机的存档会保留。恢复代码将无法使用。）"
+"ランキング・チーム・なまえ・データの バックアップ など、サーバーに ある あなたの データを ぜんぶ けしますか？（この スマホの セーブデータは のこります。ふっかつコードは つかえなく なります）": [
+"Erase all your data on the server, like rankings, team, name, and backups? (Save data on this phone stays. Your restore code will stop working.)",
+"要删除服务器上你的所有数据吗？包括排行榜、队伍、名字、数据备份等。（本手机的存档会保留。恢复代码将无法使用。）"
 ],
 "けす": [
 "Erase",
@@ -10007,13 +10007,13 @@
 "Dragon's true power (big moves, stat boosts)",
 "龙的真正实力（大招和能力提升）"
 ],
-"⟦0⟧クルーの ⟦1⟧": [
-"⟦1⟧ of the ⟦0⟧ Crew",
-"⟦0⟧街团的⟦1⟧"
+"⟦0⟧ギルドの ⟦1⟧": [
+"⟦1⟧ of the ⟦0⟧ Guild",
+"⟦0⟧公会的⟦1⟧"
 ],
-"⟦0⟧クルー ⟦1⟧": [
-"⟦0⟧ Crew ⟦1⟧",
-"⟦0⟧街团 ⟦1⟧"
+"⟦0⟧ギルド ⟦1⟧": [
+"⟦0⟧ Guild ⟦1⟧",
+"⟦0⟧公会 ⟦1⟧"
 ],
 "⟦0⟧が しょうぶを しかけてきた！": [
 "⟦0⟧ wants to battle!",
@@ -10027,9 +10027,9 @@
 "⟦0⟧: “You made it this far. This is the final battle!”",
 "⟦0⟧「你终于来到这里了。最后的对决！」"
 ],
-"⟦0⟧「あなたもサモナーになったんだ。まずは腕試し！」": [
-"⟦0⟧: “So you're a Summoner too. Let's test your skills!”",
-"⟦0⟧「你也成为召唤师了啊。先来试试身手吧！」"
+"⟦0⟧「あなたもギアマスターになったんだ。まずは腕試し！」": [
+"⟦0⟧: “So you're a Gear Master too. Let's test your skills!”",
+"⟦0⟧「你也成为齿轮大师了啊。先来试试身手吧！」"
 ],
 "⟦0⟧に かった！": [
 "Beat ⟦0⟧!",
@@ -10039,13 +10039,13 @@
 "……Not bad. That was a good battle for your first time.",
 "……挺厉害嘛。作为第一次，打得不错哦。"
 ],
-"わたしもこれから、クルーを巡ってタグを集めるんだ。": [
-"I'm going to tour the Crews and collect Tags too.",
-"我接下来也要去挑战街团、收集标签。"
+"わたしもこれから、ギルドを巡ってタグを集めるんだ。": [
+"I'm going to tour the Guilds and collect Tags too.",
+"我接下来也要去挑战公会、收集标签。"
 ],
-"ねえ、競争しない？ どっちが先にクルータグを10個集められるか！": [
-"Hey, wanna race? Who gets 10 Crew Tags first!",
-"嘿，要不要比一比？看谁先集齐10枚街团标签！"
+"ねえ、競争しない？ どっちが先にギルドタグを10個集められるか！": [
+"Hey, wanna race? Who gets 10 Guild Tags first!",
+"嘿，要不要比一比？看谁先集齐10枚公会标签！"
 ],
 "まけてしまった… もういちど ちょうせんしよう": [
 "You lost… Let's try again",
@@ -10075,13 +10075,13 @@
 "You lost… Try again",
 "输了…再挑战吧"
 ],
-"ヒント：⟦0⟧クルーには ⟦1⟧タイプが つよい。アーケードの「へんせい」ボタンや、きょうか・ワザステッカーで つよく しよう": [
-"Hint: ⟦1⟧ type is strong vs. the ⟦0⟧ Crew. Power up with the Arcade's “Team” button, Training points, and Move stickers",
-"提示：⟦1⟧属性对⟦0⟧街团很有效。用街机的「编队」按钮、强化和技贴纸变强吧"
+"ヒント：⟦0⟧ギルドには ⟦1⟧タイプが つよい。アリーナの「へんせい」ボタンや、きょうか・ワザステッカーで つよく しよう": [
+"Hint: ⟦1⟧ type is strong vs. the ⟦0⟧ Guild. Power up with the Arena's “Team” button, Training points, and Move stickers",
+"提示：⟦1⟧属性对⟦0⟧公会很有效。用竞技场的「编队」按钮、强化和技贴纸变强吧"
 ],
-"サモナーに かった！ ⟦0⟧": [
-"Beat the Summoner! ⟦0⟧",
-"战胜了召唤师！⟦0⟧"
+"ギアマスターに かった！ ⟦0⟧": [
+"Beat the Gear Master! ⟦0⟧",
+"战胜了齿轮大师！⟦0⟧"
 ],
 "⟦0⟧ ⟦1⟧タグを てにいれた！": [
 "⟦0⟧ Got the ⟦1⟧ Tag!",
@@ -10095,9 +10095,9 @@
 "Got Move sticker “⟦0⟧”",
 "获得了技贴纸「⟦0⟧」"
 ],
-"つぎは ⟦0⟧クルー！": [
-"Next: ⟦0⟧ Crew!",
-"下一个是⟦0⟧街团！"
+"つぎは ⟦0⟧ギルド！": [
+"Next: ⟦0⟧ Guild!",
+"下一个是⟦0⟧公会！"
 ],
 "タグが 10こ そろった！ キングバトルへ いこう！": [
 "All 10 Tags! On to the King Battle!",
@@ -10207,9 +10207,9 @@
 "Team vs. ⟦0⟧ (⟦1⟧)",
 "针对⟦0⟧（⟦1⟧）编队"
 ],
-"⟦0⟧クルーに あわせて へんせい": [
-"Team for ⟦0⟧ Crew",
-"针对⟦0⟧街团编队"
+"⟦0⟧ギルドに あわせて へんせい": [
+"Team for ⟦0⟧ Guild",
+"针对⟦0⟧公会编队"
 ],
 "つよい じゅんに へんせい": [
 "Team by strength",
@@ -10275,9 +10275,9 @@
 "Boss ⟦0⟧",
 "首领 ⟦0⟧"
 ],
-"アーケード ステージ ⟦0⟧/⟦1⟧⟦2⟧": [
-"Arcade Stage ⟦0⟧/⟦1⟧⟦2⟧",
-"街机 关卡 ⟦0⟧/⟦1⟧⟦2⟧"
+"アリーナ ステージ ⟦0⟧/⟦1⟧⟦2⟧": [
+"Arena Stage ⟦0⟧/⟦1⟧⟦2⟧",
+"竞技场 关卡 ⟦0⟧/⟦1⟧⟦2⟧"
 ],
 "ボスが あらわれた！": [
 "A Boss appeared!",
@@ -10307,9 +10307,9 @@
 "Stage ⟦0⟧, HP left ⟦1⟧, Time ⟦2⟧",
 "第⟦0⟧关、剩余HP ⟦1⟧、时间 ⟦2⟧"
 ],
-"🏆 アーケード クリア！": [
-"🏆 Arcade clear!",
-"🏆 街机通关！"
+"🏆 アリーナ クリア！": [
+"🏆 Arena clear!",
+"🏆 竞技场通关！"
 ],
 "ボスを たおした！ ひんしの マギアも ふっかつ！": [
 "Boss defeated! Fainted Magia are revived!",
@@ -10359,9 +10359,9 @@
 "Give up",
 "放弃"
 ],
-"アーケードを おわりますか？ ここまでの スコアで きろくします。": [
-"End the Arcade? Your score so far will be recorded.",
-"要结束街机吗？将记录到目前为止的分数。"
+"アリーナを おわりますか？ ここまでの スコアで きろくします。": [
+"End the Arena? Your score so far will be recorded.",
+"要结束竞技场吗？将记录到目前为止的分数。"
 ],
 "いまは ほかの 人の チームを よみこめないので、コンピューターの チームと たたかいます": [
 "Can't load other players' teams now, so you'll battle a computer team",
@@ -10471,13 +10471,13 @@
 "Types have matchups. Pick a Magia you like.",
 "属性之间有相性。选择1只你喜欢的魔机吧。"
 ],
-"ほかの サモナーと たいせん": [
-"Battle other Summoners",
-"与其他召唤师对战"
+"ほかの ギアマスターと たいせん": [
+"Battle other Gear Masters",
+"与其他齿轮大师对战"
 ],
-"クルーを めぐって タグを あつめる": [
-"Visit Crews and collect Tags",
-"巡游街团收集标签"
+"ギルドを めぐって タグを あつめる": [
+"Visit Guilds and collect Tags",
+"巡游公会收集标签"
 ],
 "だれかの チームと たいせん": [
 "Battle someone's team",
@@ -10499,17 +10499,17 @@
 "History",
 "记录"
 ],
-"🛡 ギルド ボーナス：ブラインドボックスが 5% はやく あく": [
-"🛡 Guild bonus: Mystery Boxes open 5% faster",
-"🛡 公会加成：盲盒开启速度加快5%"
+"🛡 チーム ボーナス：ブラインドボックスが 5% はやく あく": [
+"🛡 Team bonus: Mystery Boxes open 5% faster",
+"🛡 队伍加成：盲盒开启速度加快5%"
 ],
 "メイキング": [
 "Making-of",
 "制作花絮"
 ],
-"アーケード：タグ": [
-"Arcade: Tags",
-"街机：标签"
+"アリーナ：タグ": [
+"Arena: Tags",
+"竞技场：标签"
 ],
 "マギアずかん": [
 "Magia Dex",
@@ -10559,9 +10559,9 @@
 "Bench",
 "替补"
 ],
-"— クルー・キングバトル・ライバル戦は ひかえも つづけて でる（6たいで たたかう）": [
-"— in Crew, King Battle, and Rival battles the Bench fights too (6 monsters)",
-"— 街团、王者之战、劲敌战中替补也会接着出战（6只战斗）"
+"— ギルド・キングバトル・ライバル戦は ひかえも つづけて でる（6たいで たたかう）": [
+"— in Guild, King Battle, and Rival battles the Bench fights too (6 monsters)",
+"— 公会、王者之战、劲敌战中替补也会接着出战（6只战斗）"
 ],
 "ホーム": [
 "Home",
@@ -10659,13 +10659,13 @@
 "Opens after your first battle",
 "第一场战斗后开放"
 ],
-"まえの クルーを クリアすると あく": [
-"Clear the previous Crew to open",
-"通过上一个街团后开放"
+"まえの ギルドを クリアすると あく": [
+"Clear the previous Guild to open",
+"通过上一个公会后开放"
 ],
-"サモナー ⟦0⟧人め": [
-"Summoner #⟦0⟧",
-"第⟦0⟧位召唤师"
+"ギアマスター ⟦0⟧人め": [
+"Gear Master #⟦0⟧",
+"第⟦0⟧位齿轮大师"
 ],
 "ヘッドに ちょうせん": [
 "Challenge the Crew Head",
@@ -10695,17 +10695,17 @@
 "Next: Crew Head!",
 "下一个：团长！"
 ],
-"つぎは 2人めの サモナー": [
-"Next: 2nd Summoner",
-"下一个：第2位召唤师"
+"つぎは 2人めの ギアマスター": [
+"Next: 2nd Gear Master",
+"下一个：第2位齿轮大师"
 ],
 "ヘッド": [
 "Crew Head",
 "团长"
 ],
-"サモナー ⟦0⟧": [
-"Summoner ⟦0⟧",
-"召唤师 ⟦0⟧"
+"ギアマスター ⟦0⟧": [
+"Gear Master ⟦0⟧",
+"齿轮大师 ⟦0⟧"
 ],
 "できた！": [
 "Done!",
@@ -10719,9 +10719,9 @@
 "Copy Tatsu",
 "复制 Tatsu"
 ],
-"ギルドの もんしょうを 16×16 ドットで かこう": [
-"Draw your Guild Emblem in 16×16 pixels",
-"用16×16像素画出公会徽记"
+"チームの もんしょうを 16×16 ドットで かこう": [
+"Draw your Team Emblem in 16×16 pixels",
+"用16×16像素画出队伍徽记"
 ],
 "なまえ（8もじ まで）": [
 "Name (up to 8 letters)",
@@ -10931,21 +10931,21 @@
 "Requesting",
 "申请中"
 ],
-"ギルドを かいさん する": [
-"Disband Guild",
-"解散公会"
+"チームを かいさん する": [
+"Disband Team",
+"解散队伍"
 ],
-"ギルドを ぬける": [
-"Leave Guild",
-"退出公会"
+"チームを ぬける": [
+"Leave Team",
+"退出队伍"
 ],
-"じぶんの ギルドに もどる": [
-"Back to my Guild",
-"返回我的公会"
+"じぶんの チームに もどる": [
+"Back to my Team",
+"返回我的队伍"
 ],
-"＋ ギルドを つくる": [
-"+ Create Guild",
-"＋ 创建公会"
+"＋ チームを つくる": [
+"+ Create Team",
+"＋ 创建队伍"
 ],
 "い": [
 "th",
@@ -11039,17 +11039,17 @@
 "Battling",
 "出场"
 ],
-"サモナーの なまえを きめよう！": [
-"Choose your Summoner name!",
-"来决定召唤师的名字吧！"
+"ギアマスターの なまえを きめよう！": [
+"Choose your Gear Master name!",
+"来决定齿轮大师的名字吧！"
 ],
-"オンライン対戦・ランキング・ギルドで みんなに みえるよ（あとで オプションから かえられる）": [
-"Everyone sees it in Online battle, Rankings and Guilds (change it later in Options)",
-"在线对战、排行榜和公会里大家都能看到（之后可在选项中更改）"
+"オンライン対戦・ランキング・チームで みんなに みえるよ（あとで オプションから かえられる）": [
+"Everyone sees it in Online battle, Rankings and Teams (change it later in Options)",
+"在线对战、排行榜和队伍里大家都能看到（之后可在选项中更改）"
 ],
-"サモナーの なまえ": [
-"Summoner name",
-"召唤师名字"
+"ギアマスターの なまえ": [
+"Gear Master name",
+"齿轮大师名字"
 ],
 "⟦0⟧が ほかに いません（おなじ しゅるいを あきち・ブラインドボックスで あつめよう）": [
 "No other ⟦0⟧ (collect the same kind in Vacant lot or Blind Boxes)",
@@ -11451,9 +11451,9 @@
 "All types",
 "所有属性"
 ],
-"クルーの タグを とるごとに エリアが ふえる（いま タグ ⟦0⟧こ）": [
-"Each Crew Tag you earn opens a new area (Tags: ⟦0⟧)",
-"每获得一个街团标签就会开放新区域（现在标签：⟦0⟧个）"
+"ギルドの タグを とるごとに エリアが ふえる（いま タグ ⟦0⟧こ）": [
+"Each Guild Tag you earn opens a new area (Tags: ⟦0⟧)",
+"每获得一个公会标签就会开放新区域（现在标签：⟦0⟧个）"
 ],
 "タグ ⟦0⟧こで ひらく": [
 "Opens at ⟦0⟧ Tags",
