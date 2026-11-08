@@ -3895,45 +3895,45 @@
 "Epic",
 "史诗"
 ],
-"とっしんシール": [
-"Dash Sticker",
-"突进贴纸"
+"とっしんギア": [
+"Dash Gear",
+"突进齿轮"
 ],
 "突進": [
 "Dash",
 "突进"
 ],
-"とびどうぐシール": [
-"Projectile Sticker",
-"飞行道具贴纸"
+"とびどうぐギア": [
+"Projectile Gear",
+"飞行道具齿轮"
 ],
 "飛び道具": [
 "Projectile",
 "飞行道具"
 ],
-"せっきんシール": [
-"Melee Sticker",
-"近战贴纸"
+"せっきんギア": [
+"Melee Gear",
+"近战齿轮"
 ],
 "近接・前方を切る": [
 "Melee, front slash",
 "近战、劈砍前方"
 ],
-"はんいシール": [
-"Area Sticker",
-"范围贴纸"
+"はんいギア": [
+"Area Gear",
+"范围齿轮"
 ],
 "まわり・足元・扇・範囲": [
 "Around, Ground target, Cone, Area",
 "周围、脚下、扇形、范围"
 ],
-"ビームシール": [
-"Beam Sticker",
-"光束贴纸"
+"ビームギア": [
+"Beam Gear",
+"光束齿轮"
 ],
-"へんかシール": [
-"Status Sticker",
-"变化贴纸"
+"へんかギア": [
+"Status Gear",
+"变化齿轮"
 ],
 "変化（攻撃しない）": [
 "Status (no attack)",
@@ -4391,53 +4391,53 @@
 "Release ⟦0⟧⟦1⟧? It won't come back.",
 "要放生⟦0⟧⟦1⟧吗？它不会再回来了。"
 ],
-"ふりわけシール": [
-"Reset Sticker",
-"重置贴纸"
+"ふりわけギア": [
+"Reset Gear",
+"重置齿轮"
 ],
 "きょうかポイントの ふりわけを ぜんぶ もどす（つかった 数は そのまま）": [
 "Resets all Training point assignments (points used stay the same)",
 "把强化点数的分配全部退回（已用的数量不变）"
 ],
-"ランダムシール": [
-"Random Sticker",
-"随机贴纸"
+"ランダムギア": [
+"Random Gear",
+"随机齿轮"
 ],
 "おぼえている わざ 4つを ぜんぶ、ランダムに はりかえる": [
 "Swaps all 4 known moves at random",
 "把已学会的4个招式全部随机替换"
 ],
-"はりかえシール": [
-"Swap Sticker",
-"替换贴纸"
+"はりかえギア": [
+"Swap Gear",
+"替换齿轮"
 ],
 "えらんだ わざ 1つを、その マギアが おぼえる わざの なかから ランダムに はりかえる": [
 "Swaps 1 chosen move for a random one this Magia can learn",
 "把选中的1个招式随机换成这只魔机能学会的招式"
 ],
-"おなじいろシール": [
-"Same-Color Sticker",
-"同色贴纸"
+"おなじいろギア": [
+"Same-Color Gear",
+"同色齿轮"
 ],
 "えらんだ わざを、おなじ タイプの わざ（おぼえられる もの）に ランダムに はりかえる": [
 "Swaps the chosen move for a random learnable move of the same type",
 "把选中的招式随机换成同属性的（能学会的）招式"
 ],
-"えらべるシール": [
-"Pick Sticker",
-"自选贴纸"
+"えらべるギア": [
+"Pick Gear",
+"自选齿轮"
 ],
-"えらんだ わざ 1つを、その マギアが おぼえる わざの なかから 好きな わざに はりかえる（はりかえシールの 上位版）": [
-"Swaps 1 chosen move for any move you like that this Magia can learn (upgraded Swap Sticker)",
-"把选中的1个招式换成这只魔机能学会的任意招式（替换贴纸的升级版）"
+"えらんだ わざ 1つを、その マギアが おぼえる わざの なかから 好きな わざに はりかえる（はりかえギアの 上位版）": [
+"Swaps 1 chosen move for any move you like that this Magia can learn (upgraded Swap Gear)",
+"把选中的1个招式换成这只魔机能学会的任意招式（替换齿轮的升级版）"
 ],
-"とくべつシール": [
-"Special Sticker",
-"特别贴纸"
+"とくべつギア": [
+"Special Gear",
+"特别齿轮"
 ],
-"その マギアの タイプ（属性か 種族）の わざなら、ふだんは おぼえない わざでも 好きに えらんで はれる（おなじいろシールの 上位版）": [
-"Pick any move of this Magia's type (Attribute or Race), even ones it normally can't learn (upgraded Same-Color Sticker)",
-"只要是这只魔机属性（属性或种族）的招式，平时学不会的也能自由选择贴上（同色贴纸的升级版）"
+"その マギアの タイプ（属性か 種族）の わざなら、ふだんは おぼえない わざでも 好きに えらんで はれる（おなじいろギアの 上位版）": [
+"Pick any move of this Magia's type (Attribute or Race), even ones it normally can't learn (upgraded Same-Color Gear)",
+"只要是这只魔机属性（属性或种族）的招式，平时学不会的也能自由选择齿轮上（同色齿轮的升级版）"
 ],
 "⟦0⟧の わざなら、タイプに かかわらず 好きな わざを えらんで はれる": [
 "Pick any ⟦0⟧ move, whatever its type",
@@ -9827,13 +9827,13 @@
 "Training",
 "强化"
 ],
-"：へんせい → きょうか で おなじ しゅるいの マギアを つかうと ポイントが ふえる（1たい +1。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりわけシール）。": [
-": In Team → Training points, use Magia of the same kind to gain points (+1 each, up to 50 per Magia). Spend them on any stat you like (redo with a Reset sticker).",
-"：在编队 → 强化中使用同种魔机即可增加点数（每只+1，每只最多50）。分配到喜欢的能力上吧（用分配贴纸可重新分配）。"
+"：へんせい → きょうか で おなじ しゅるいの マギアを つかうと ポイントが ふえる（1たい +1。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりわけギア）。": [
+": In Team → Training points, use Magia of the same kind to gain points (+1 each, up to 50 per Magia). Spend them on any stat you like (redo with a Reset gear).",
+"：在编队 → 强化中使用同种魔机即可增加点数（每只+1，每只最多50）。分配到喜欢的能力上吧（用分配齿轮可重新分配）。"
 ],
-"：ふりわけシール・ランダムシール・はりかえシール・おなじいろシールなど。上位版の えらべるシール・とくべつシール・わざの かたちの シール（とっしん・とびどうぐ など）は でにくい。ブラインドボックスから でる。へんせい → アイテム で つかう。": [
-": Reset, Random, Swap, Same-Color stickers, and more. Rarer upgrades: Choice, Special, and move-shape stickers (Dash, Projectile, etc.). They come from Mystery Boxes. Use them in Team → Items.",
-"：分配贴纸、随机贴纸、替换贴纸、同色贴纸等。高级版的可选贴纸、特别贴纸、招式形状贴纸（突进、飞行道具等）较难获得。从盲盒中开出。在编队 → 道具中使用。"
+"：ふりわけギア・ランダムギア・はりかえギア・おなじいろギアなど。上位版の えらべるギア・とくべつギア・わざの かたちの ギア（とっしん・とびどうぐ など）は でにくい。ブラインドボックスから でる。へんせい → アイテム で つかう。": [
+": Reset, Random, Swap, Same-Color gears, and more. Rarer upgrades: Choice, Special, and move-shape gears (Dash, Projectile, etc.). They come from Mystery Boxes. Use them in Team → Items.",
+"：分配齿轮、随机齿轮、替换齿轮、同色齿轮等。高级版的可选齿轮、特别齿轮、招式形状齿轮（突进、飞行道具等）较难获得。从盲盒中开出。在编队 → 道具中使用。"
 ],
 "で すきな わざを おぼえさせよう（てもち → ワザステッカー）。": [
 " let you teach any move you like (Party → Move stickers).",
