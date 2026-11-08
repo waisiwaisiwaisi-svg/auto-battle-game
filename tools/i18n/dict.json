@@ -2907,10 +2907,6 @@
 "Puts a mark under the foe and strikes there 2.5 sec later (move away to dodge)",
 "在对手脚下放置标记，2.5秒后攻击该位置（躲开就能避开）"
 ],
-"素早く出せる。相手が溜めている攻撃技を奪い、先に1.5倍で撃つ。溜めていない相手に使うと失敗して1.2秒動けない": [
-"Fast to use. Steals the attack the foe is charging and fires it first at 1.5x. Fails on a foe not charging, and you can't move for 1.2 sec",
-"出招很快。夺走对手正在蓄力的攻击招式，抢先以1.5倍发出。对没在蓄力的对手使用会失败，1.2秒无法移动"
-],
 "20秒間、天候を雨にする。水技1.5倍・火技0.5倍": [
 "Makes the Weather Rain for 20 sec. Water moves 1.5x, Fire moves 0.5x",
 "20秒内天气变为下雨。水招式1.5倍、火招式0.5倍"
@@ -7771,10 +7767,6 @@
 ". Big move",
 "。大招"
 ],
-"素早く出せる": [
-"Quick to use",
-"能快速使出"
-],
 "突進・打撃を受けた瞬間に、受けたダメージを⟦0⟧倍で返す": [
 "When hit by a dash or strike, returns ⟦0⟧× the damage taken",
 "受到突进、打击的瞬间，以⟦0⟧倍返还受到的伤害"
@@ -8266,10 +8258,6 @@
 "味方の虫の種族は上にいると回復": [
 "Heals Bug-race allies standing on it",
 "虫种族的我方站在上面会回复"
-],
-"訓練の条件「攻撃を受けた瞬間」で、受けた瞬間に出せる": [
-"With the Training condition \"When hit\", fires the instant it's hit",
-"使用训练条件「受到攻击的瞬间」时，可在受击瞬间使出"
 ],
 "やけど（状態異常）": [
 "Burn (status)",
@@ -11967,10 +11955,6 @@
 "For 9s, flips the Speed of Magia in battle",
 "9秒内，反转场上魔机的速度"
 ],
-"HPを1/4使って、相手のHPを20%削る": [
-"Uses 1/4 HP to cut the foe's HP by 20%",
-"消耗1/4 HP，削减对手20%的HP"
-],
 "相手を無理やり控えと交代させる": [
 "Forces the foe to switch with its bench",
 "强制对手与替补替换"
@@ -12007,10 +11991,6 @@
 "User faints. Fully heals the next ally's HP and status",
 "自己倒下。下一个出场的同伴HP和异常状态全部恢复"
 ],
-"必ず当たる。6秒後、その間に与えたダメージの40%を追加で与える": [
-"Always hits. Turns into a shadow, dashes behind the foe, and leaves a mark. After 6 sec, deals an extra 40% of the damage dealt meanwhile",
-"必定命中。化为影子冲到对手身后，刻下印记。6秒后追加这段时间造成伤害的40%"
-],
 "8秒間、だれも空を飛べない": [
 "No one can fly for 8 sec. Floating foes fall to the ground and can't use flying moves",
 "8秒内谁都无法飞行。漂浮的对手也会掉到地面，无法使用飞上天的招式"
@@ -12022,10 +12002,6 @@
 "相手の種族を霊にする": [
 "Makes the foe's Race Spirit",
 "把对手的种族变成灵"
-],
-"当てると相手の攻撃+1。5秒ごとに奪うステータスが攻撃→防御→属性攻撃→属性防御→素早さの順に1つずつ増える": [
-"On hit, foe's Attack +1 (a loan). Every 5 sec, one more stat to steal is added: Attack → Defense → Sp. Atk → Sp. Def → Speed. Hit again or KO the foe to take it all for yourself",
-"命中后对手攻击+1（借出）。每5秒按攻击→防御→特攻→特防→速度的顺序增加1项要夺取的能力。再次命中或对手倒下时，夺取积攒的部分归自己所有"
 ],
 "火のしっぽを立ててすばしっこく走り回る": [
 "Raises its fiery tail and darts all around.",
@@ -12879,10 +12855,6 @@
 "Slow but tough and hard to knock back. Hits hard",
 "虽然慢但很结实，不容易被撞飞。一击很重"
 ],
-"別のタブでこのゲームが動いてデータが変わりました": [
-"This game is running in another tab and the data changed.",
-"这个游戏在另一个标签页中运行，数据已经改变。"
-],
 "この画面は読みこみ直します": [
 "This screen will reload.",
 "这个画面将重新载入。"
@@ -12903,10 +12875,6 @@
 "You have no Move Stickers. They come from Blind Boxes",
 "没有技贴纸。可以从盲盒中获得"
 ],
-"マギアは属性1つ＋種族1つ。◎＝有利（2倍）・△＝不利（0.5倍）": [
-"Each Magia has 1 Attribute + 1 Race. Attribute moves are compared only with the foe's Attribute, and Race moves only with the foe's Race. ◎ = Advantage (2×), △ = Disadvantage (0.5×). Normal and Beast are neutral against all.",
-"每只魔机有1个属性＋1个种族。属性招式只和对手的属性比较，种族招式只和对手的种族比较。◎＝有利、△＝不利。无和兽对谁都是普通效果。"
-],
 "「預ける」を並びかえている間は、その中で入れかえできません": [
 "You can't swap inside \"Storage\" while it's sorted. Choose \"Custom order\" to swap.",
 "「寄存」排序时无法在其中调换。改成「自行排列」就能调换。"
@@ -12919,17 +12887,9 @@
 "Resets all Training point assignments",
 "把强化点数的分配全部退回"
 ],
-"選んだ技を、同じタイプの技にランダムにはりかえる": [
-"Swaps the chosen move for a random learnable move of the same type",
-"把选中的招式随机换成同属性的招式"
-],
 "選んだ技1つを、そのマギアが覚える技の中から好きな技にはりかえる": [
 "Swaps 1 chosen move for any move you like that this Magia can learn",
 "把选中的1个招式换成这只魔机能学会的任意招式"
-],
-"そのマギアのタイプの技なら、ふだんは覚えない技でも好きに選んではれる": [
-"Pick any move of this Magia's type, even ones it normally can't learn",
-"只要是这只魔机属性的招式，平时学不会的也能自由选择齿轮上"
 ],
 "前へ前へ": [
 "Always pushes forward. Rarely hides",
@@ -13043,10 +13003,6 @@
 "It battles 5 times and shows you the results.",
 "会战斗5次并显示结果。"
 ],
-"」を見ると、条件が成り立ったかと、何回撃ったかが分かります": [
-"\" shows if each condition was met and how many times moves were used.",
-"」可以看到条件是否满足以及使出了几次。"
-],
 "うまくいかなければ、条件を変えてもう一度試しましょう": [
 "If it doesn't work, change the conditions and try again.",
 "如果不顺利，就改一下条件再试一次吧。"
@@ -13131,10 +13087,6 @@
 "Can't learn ⟦0⟧",
 "学不会⟦0⟧"
 ],
-"ワザステッカーは使いません": [
-"No Move Stickers used. Confirm these settings?",
-"不使用技贴纸。要按这个设置确定吗？"
-],
 "今の設定は上書きされます": [
 "Current settings will be overwritten",
 "当前设置会被覆盖"
@@ -13170,10 +13122,6 @@
 "他の試合を始めたので、オンライン対戦の相手を探すのをやめました": [
 "You started another match, so we stopped looking for an online opponent.",
 "你开始了其他比赛，所以已停止寻找在线对战对手。"
-],
-"ほろびのうたがひびいた！10びょうでほろびる": [
-"Horobi no Uta rang out! Faint in 10s",
-"Horobi no Uta响起了！10秒后倒下"
 ],
 "雨が降りだした！": [
 "It started to rain!",
@@ -13423,10 +13371,6 @@
 "That's the end of the test. Restoring your original data.",
 "测试到此结束。将恢复原来的数据。"
 ],
-"最初の流れを通しで試します": [
-"Test the whole opening flow. Test data isn't saved; your original data comes back at the end.",
-"完整测试开头流程。测试中的数据不会保存，最后会恢复原来的数据。"
-],
 "チュートリアルを終えました": [
 "Tutorial finished. You can replay it anytime from Help.",
 "教程结束了。随时可以从帮助重新开始。"
@@ -13478,10 +13422,6 @@
 "投げ技：つかんで5連打": [
 "Throw: grabs and hits 5 times",
 "投技：抓住后连打5次"
-],
-"当てたら近くの壁の後ろへすばやく隠れる": [
-"On hit, quickly hides behind a nearby wall. If no wall, goes back to start",
-"命中后迅速躲到附近的墙后。没有墙就回到原位"
 ],
 "相手の周りを回って渦を作る": [
 "Circles the foe to make a whirlpool",
@@ -13547,10 +13487,6 @@
 "Shakes the whole field. Breaks all walls and rocks placed by Magia",
 "震动整个场地。摧毁魔机放置的所有墙和岩石"
 ],
-"天候があると、その天候のタイプで威力2倍": [
-"In weather, takes that weather's type with ×2 Power",
-"有天气时，变为该天气的属性，威力2倍"
-],
 "必ず当たる。⟦0⟧秒後、その間に与えたダメージの⟦1⟧%を追加で与える": [
 "Never misses. Dashes behind the foe as a shadow and leaves a mark. After ⟦0⟧s, deals an extra ⟦1⟧% of the damage dealt meanwhile",
 "必定命中。化为影子冲到对手背后，刻下印记。⟦0⟧秒后，追加期间所造成伤害的⟦1⟧%"
@@ -13571,17 +13507,9 @@
 "Turns the foe Water type",
 "把对手变为水属性"
 ],
-"自分の状態異常と混乱、積み重ねを治す": [
-"Cures own status, Confusion and stacks",
-"治愈自己的异常状态、混乱和叠加效果"
-],
 "最大HPの⟦0⟧%のシールドを張る（⟦1⟧秒）": [
 "Puts up a shield of ⟦0⟧% max HP (⟦1⟧s). It takes damage first",
 "张开最大HP⟦0⟧%的护盾。优先承受伤害"
-],
-"飛び道具・ビームを跳ね返す": [
-"Reflects projectiles and beams",
-"反弹飞行道具和光束"
 ],
 "3秒ごとに最大HPの1/32のダメージ": [
 "Damage of 1/32 max HP every 3s. Physical move damage is halved. Fire types are immune.",
@@ -13598,10 +13526,6 @@
 "3秒ごとに最大HPの1/24のダメージ": [
 "Damage of 1/24 max HP every 3s. Machine race is immune.",
 "每3秒受到最大HP 1/24的伤害。机械种族不会中毒。"
-],
-"3秒動けない。亜人の技でもとけるが、その技のダメージは1.5倍": [
-"Can't move for 3s. Thaws at once when hit by a Fire move. Demi moves thaw it too, but deal ×1.5 damage. Fire types are immune.",
-"3秒无法行动。受到火属性招式会立刻解冻。亚人招式也能解冻，但该招式伤害1.5倍。火属性不会冰冻。"
 ],
 "5秒動けない": [
 "Can't move for 5s.",
@@ -13659,29 +13583,9 @@
 "Distance to the foe. Near = under 150, Mid = 150–290, Far = 290+.",
 "与对手的距离。近＝不到150、普通＝150〜290、远＝290以上。"
 ],
-"自分が選んだ状態異常か混乱になっているとき": [
-"When you have the chosen status or Confusion. Use it to cure with Arainagasu. \"Poison\" includes Bad poison.",
-"自己处于所选的异常状态或混乱时。用Arainagasu治愈时使用。「中毒」也包括剧毒。"
-],
-"1回目で力をためて2回目で放つ技に置く": [
-"For moves that charge on the 1st use and fire on the 2nd. \"Charged\" = ready to fire now; \"Not yet\" = about to charge. Set only \"Charged\" to leave charging to auto; set only \"Not yet\" to leave firing to auto. Only for this kind of move.",
-"放在第1次蓄力、第2次释放的招式上。「已蓄力」指蓄力完毕可立即释放，「还没」指接下来要蓄力。只放「已蓄力」则蓄力交给自动，只放「还没」则释放交给自动。不能放在其他招式上。"
-],
-"時間で使える回数がたまる技に置く": [
-"For moves that store uses over time. When stored uses are at least the chosen number. Only for this kind of move.",
-"放在随时间积累使用次数的招式上。积累次数达到所选数量以上时。不能放在其他招式上。"
-],
 "相手の攻撃が当たるその瞬間": [
 "The instant a foe's attack hits. Set it on Guard Shell, Counter, Dashinuki, etc. to fire right when hit. Can combine with other conditions using \"AND\". Without this condition, it won't fire when hit. Only for guard-type moves.",
 "对手的攻击命中的那一瞬间。放在Guard Shell、Counter、Dashinuki等招式上，受击瞬间会当场使出。可以用「且」与其他条件组合。不放这个条件，受击瞬间就不会使出。只能放在防御类招式上。"
-],
-"場のフィールドが選んだもののとき。フィールドは15秒続く": [
-"When the field is the chosen one. Fields last 15s.",
-"场上的场地为所选种类时。场地持续15秒。"
-],
-"場の天候が選んだもののとき。天候は20秒続く": [
-"When the weather is the chosen one. Weather lasts 20s.",
-"场上的天气为所选种类时。天气持续20秒。"
 ],
 "自分のHPが選んだ割合より少ないとき": [
 "When your HP is below the chosen %.",
@@ -13695,14 +13599,6 @@
 "Compares your type with the foe's: Advantage, Even or Disadvantage.",
 "比较自己与对手的属性：有利、势均力敌、不利之一。"
 ],
-"相手の状態異常。「どれか」「なし」または1つを選ぶ": [
-"Foe's status. Pick \"Any\", \"None\" or one. \"Flinch\" = while it's flinching and can't move.",
-"对手的异常状态。选择「任意」「无」或其中1种。「畏缩」指畏缩无法行动期间。"
-],
-"相手が攻撃技を出す直前のためをしているとき": [
-"When the foe is charging up right before an attack move.",
-"对手在使出攻击招式前正在蓄力时。"
-],
 "そのまま当てられる技があるとき": [
 "When you have a move that can hit directly.",
 "有能直接命中的招式时。"
@@ -13711,14 +13607,6 @@
 "When obstacles or move walls block you and no move can hit directly.",
 "被障碍物或招式墙挡住，没有能直接命中的招式时。"
 ],
-"自分の能力の段階が「+2以上」「+5以下」「-1以上」「-3以下」などのとき": [
-"When your stat stage is like \"+2 or more\", \"+5 or less\", \"-1 or more\", \"-3 or less\". Pick \"or more/or less\" and the stage separately. Resets on switch.",
-"自己的能力等级为「+2以上」「+5以下」「-1以上」「-3以下」等时。可分别选择以上/以下和等级。替换后恢复原状。"
-],
-"相手の能力の段階が「+2以上」や「-1以下」、「0以下」などのとき": [
-"When the foe's stat stage is like \"+2 or more\", \"-1 or less\" or \"0 or less\". Pick \"or more/or less\" and the stage separately.",
-"对手的能力等级为「+2以上」、「-1以下」、「0以下」等时。可分别选择以上/以下和等级。"
-],
 "この試合で、選んだ技を選んだ回数以上撃ったとき": [
 "When the chosen move has been used the chosen number of times or more this match.",
 "本场比赛中，所选招式已使用所选次数以上时。"
@@ -13726,10 +13614,6 @@
 "直前に撃った技が選んだ技のとき": [
 "When the last move used is the chosen move.",
 "上一个使出的招式是所选招式时。"
-],
-"選んだ技を撃ったことがあり、その効果がもうないとき": [
-"When you've used the chosen move and its effect is gone.",
-"使出过所选招式，且其效果已消失时。"
 ],
 "場に出てから、この技をまだ撃っていないとき": [
 "After entering, if this move hasn't been used yet. Fires before other conditions.",
@@ -13766,18 +13650,6 @@
 "人形が交代した": [
 "Dummy switched",
 "人偶替换了"
-],
-"トロフィーたいかいで優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる": [
-"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
-"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
-],
-"ボックスあきちで弱らせたマギアに投げるとつかまえられる": [
-"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
-"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
-],
-"ジェム ブラインドボックスを待ち時間なしですぐ開けられる": [
-"Gems: open a Mystery Box right away, no waiting. Get them by winning battles or tournaments.",
-"宝石：无需等待，立即打开盲盒。赢得对战或在大赛中夺冠即可获得。"
 ],
 "他の端末で遊んだデータがあります（⟦0⟧）": [
 "There's data played on another device (⟦0⟧). Which do you want to use: that, or this device's? The one you don't pick will be erased.",
@@ -13831,10 +13703,6 @@
 "Erased. Next time you go online, you'll start fresh.",
 "已删除。下次使用在线功能时将重新开始。"
 ],
-"データを初期化して初めからあそびますか？今のセーブデータは消えて元にもどせません": [
-"Reset data and start over? Your current save will be erased and can't be undone.",
-"要初始化数据并从头开始吗？当前存档将被删除且无法恢复。"
-],
 "消しますか？元にもどせません": [
 "Erase? This can't be undone.",
 "要删除吗？无法恢复。"
@@ -13850,10 +13718,6 @@
 "だけ": [
 ". Online battles are also Training vs. Training.",
 "。在线对战也是双方训练设定之间的较量。"
-],
-"：👊近は👣遠に強く、👣遠は🛹中に、🛹中は👊近に強い。受ける側のぼうぎょ・属性防御が、自分が強い相手からなら1.15倍、苦手な相手からなら0.87倍になる": [
-": 👊Close beats 👣Far, 👣Far beats 🛹Mid, and 🛹Mid beats 👊Close. The defender's Defense and Sp. Def become ×1.15 against a foe it beats, and ×0.87 against a foe it's weak to. You can also change it with “Plan” in Training.",
-"：👊近克👣远，👣远克🛹中，🛹中克👊近。受攻击一方的防御、特防，面对自己克制的对手时为1.15倍，面对克制自己的对手时为0.87倍。也可以在训练的「作战」中更改。"
 ],
 "は、技を": [
 " moves cancel a move when they hit a foe that's ",
@@ -13898,10 +13762,6 @@
 "ですぐ開けられる": [
 " open them right away.",
 "可以立即打开。"
-],
-"はHP・こうげき・ぼうぎょ・属性攻撃・属性防御・素早さ・かいひの7つ。種族値・個体値（0〜31）・性格（↑1.1倍↓0.9倍）・強化で決まる": [
-" are 7: HP, Attack, Defense, Sp. Atk, Sp. Def, Speed, and Evasion. Higher Speed means faster walking; higher Evasion means more dodging without orders. They're set by base stats, IVs (0–31), Nature (↑×1.1 ↓×0.9), and Training points.",
-"共有HP、攻击、防御、特攻、特防、速度、闪避7项。速度越高走得越快，闪避越高越会自动躲避。由种族值、个体值、性格和强化点数决定。"
 ],
 "はこうげき→ぼうぎょ、": [
 " use Attack→Defense, ",
@@ -13995,10 +13855,6 @@
 "Visit 10 arenas, beat the Crew Heads, and collect Tags. Get them all to reach the King Battle.",
 "巡游10座竞技场，战胜团长收集标签。全部集齐即可前往王者之战。"
 ],
-"アリーナをおわりますか？ここまでのスコアで記録します": [
-"End the Arena? Your score so far will be recorded.",
-"要结束竞技场吗？将记录到目前为止的分数。"
-],
 "まだ他の人のチームがありません": [
 "No other players' teams yet. You'll battle a computer team",
 "还没有其他玩家的队伍。将与电脑队伍对战"
@@ -14018,14 +13874,6 @@
 "=2倍": [
 "=×2",
 "=2倍"
-],
-"=0.5倍。技と同じタイプのマギアが使うと1.5倍": [
-"=×0.5. Attribute moves use the Attribute chart; Race moves use the Race chart. A Magia using a move of its own type gets ×1.5. Tap a cell for details.",
-"=0.5倍。属性招式看属性表，种族招式看种族表。魔机使用与自身同类型的招式时为1.5倍。点击格子可查看详情。"
-],
-"して入れかえ／": [
-" monsters to swap / ",
-"以交换／"
 ],
 "試合をやめる": [
 "Quit match",
@@ -14103,17 +13951,9 @@
 "Only ones your picks can learn. Put it in a move slot in Training to learn it",
 "只出现选中魔机能学会的。在训练画面放进招式栏即可学会"
 ],
-"選んだタイプのステッカーが3まいランダムでもらえる": [
-"Get 3 random stickers of that type",
-"随机获得3张该属性的贴纸"
-],
 "⟦0⟧回目の前": [
 "Before floor ⟦0⟧",
 "第⟦0⟧层之前"
-],
-"ドラフトをリセットしますか？\nいまのマギアとステッカーはなくなり、最初からになります": [
-"Reset the draft?\nYour current Magia and stickers will be lost and you will start over.",
-"要重置选秀吗？\n现在的魔机和贴纸会消失，从头开始。"
 ],
 "次の⟦0⟧回のあいて": [
 "Next: floor ⟦0⟧ opponents",
@@ -14135,10 +13975,6 @@
 "Using Thunder moves drops energy. Picking it up instantly resets the cooldown of the next move used",
 "使用雷属性招式会掉落能量。捡起后，下一个使用的招式冷却立即恢复"
 ],
-"補助技のためが半分": [
-"Support moves wind up in half the time",
-"辅助招式的蓄力时间减半"
-],
 "⟦0⟧秒間、まわりの相手と、自分が置いた技・罠・床・エナジー・お花を自分へ引き寄せ続ける": [
 "For ⟦0⟧ sec, keeps pulling nearby foes and its own placed moves, traps, floors, energy and flowers toward itself. A foe once caught is pulled even if it leaves the range",
 "⟦0⟧秒内，持续将周围的对手，以及自己放置的招式、陷阱、地面、能量和花朵吸向自己。一旦捕获的对手即使离开范围也会被吸引"
@@ -14151,17 +13987,9 @@
 "Slaps the foe with a paw or hand and knocks it back. Slamming it into a wall deals the same damage again",
 "用前爪或手拍打对手并将其击飞。撞到墙上时追加同等伤害"
 ],
-"好きなマギアの強化ポイントを+5": [
-"Adds +5 Power Points to any Magia",
-"为任意魔机增加5点强化点数"
-],
 "強化ポイントは戦うとたまる（出場して勝つと+1）。同じ種類のマギアを1体使うと+⟦0⟧、きょうかのもとで+⟦1⟧（最大⟦2⟧）。ポイントを好きな能力にふりわけて「確定する」で決まる（1つ⟦3⟧まで・1ポイントで+⟦4⟧）": [
 "Power Points build up as you battle (+1 for each win you take part in). Using one Magia of the same species gives +⟦0⟧, a Power Seed gives +⟦1⟧ (max ⟦2⟧). Assign points to any stat and press Confirm (up to ⟦3⟧ each, +⟦4⟧ per point).",
 "强化点数会在战斗中累积。使用1只同种魔机+⟦0⟧，强化之源+⟦1⟧。把点数分配到喜欢的能力后按「确定」。"
-],
-"して入れかえ/すきまをつかむとスクロール / ": [
-" to swap / Grab empty space to scroll / ",
-" 来交换 / 抓住空白处可滚动 / "
 ],
 "草技を使うとお花がさく。お花の近くにいるとお花1つにつき毎秒HPが0.5%回復": [
 "Using Grass moves makes a flower bloom. Each nearby flower restores 0.5% HP per second",
@@ -14186,26 +14014,6 @@
 "バトルタワーをやめますか？ ⟦0⟧連勝で記録します": [
 "Quit the Battle Tower? A ⟦0⟧-win streak will be recorded.",
 "要退出对战塔吗？将记录为⟦0⟧连胜。"
-],
-"トロフィー 大会で優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる": [
-"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
-"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
-],
-"ボックス 空き地で弱らせたマギアに投げるとつかまえられる": [
-"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
-"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
-],
-"データを初期化して初めから遊びますか？ 今のセーブデータは消えて元にもどせません": [
-"Reset data and start over? Your current save will be erased and can't be undone.",
-"要初始化数据并从头开始吗？当前存档将被删除且无法恢复。"
-],
-"ドラフトをリセットしますか？ 今のマギアとステッカーはなくなり、最初からになります": [
-"Reset the draft?\nYour current Magia and stickers will be lost and you will start over.",
-"要重置选秀吗？\n现在的魔机和贴纸会消失，从头开始。"
-],
-"アリーナを終わりますか？ ここまでのスコアで記録します": [
-"End the Arena? Your score so far will be recorded.",
-"要结束竞技场吗？将记录到目前为止的分数。"
 ],
 "していれかえ ／ すきまをつかむとスクロール ／": [
 " to swap / Grab empty space to scroll / ",
@@ -14387,17 +14195,9 @@
 "A thunder beast carrying thunder drums. Lightning strikes when it beats them.",
 "背着雷鼓的雷兽。一敲鼓就会落雷。"
 ],
-"当てると相手の攻撃+1。5秒ごとに奪うステータスが攻撃→防御→属性攻撃→属性防御→素早さの順に1つずつ増える。もう一度当てるか相手が倒れると、たまった分を奪って自分のものにする": [
-"On hit, foe's Attack +1. Every 5 sec, one more stat to steal is added: Attack → Defense → Sp. Atk → Sp. Def → Speed. Hit again or KO the foe to take it all for yourself",
-"命中后对手攻击+1。每5秒按攻击→防御→特攻→特防→速度的顺序增加1项要夺取的能力。再次命中或对手倒下时，夺取积攒的部分归自己所有"
-],
 "マギアは属性1つ＋種族1つ。属性の技は相手の属性と、種族の技は相手の種族とだけ比べる。◎＝有利（2倍）・△＝不利（0.5倍）。無と獣はどれともふつう": [
 "Each Magia has 1 Attribute + 1 Race. Attribute moves are compared only with the foe's Attribute, and Race moves only with the foe's Race. ◎ = Advantage, △ = Disadvantage. Normal and Beast are neutral against all.",
 "每只魔机有1个属性＋1个种族。属性招式只和对手的属性比较，种族招式只和对手的种族比较。◎＝有利、△＝不利。无和兽对谁都是普通效果。"
-],
-"「預ける」を並びかえている間は、その中で入れかえできません。「じぶんで並べる」にすると入れかえできます": [
-"You can't swap inside \"Storage\" while it's sorted. Choose \"Custom order\" to swap.",
-"「寄存」排序时无法在其中调换。改成「自行排列」就能调换。"
 ],
 "性格は能力の上下だけ。撃ち方が「その場で」の技はこの作戦の動きで撃ちます": [
 "Nature only changes stats. Moves set to fire \"on the spot\" follow this plan's movement.",
@@ -14435,21 +14235,9 @@
 "Watch only during matches. Fights per Training settings",
 "比赛中只能观看。按训练设置战斗"
 ],
-"このマギアはバトルタワーにちょうせん中です。タワーをやめてからにがしてね": [
-"This Magia is taking on the Battle Tower. Quit the Tower before releasing it.",
-"这只魔机正在挑战对战塔。请先退出塔再放生。"
-],
-"ふりわけたポイントがまだ確定していません。確定しないで閉じますか？": [
-"Your point assignments aren't confirmed yet. Close without confirming?",
-"分配的点数还没有确定。不确定就关闭吗？"
-],
 "⟦0⟧につながりませんでした。通信を確かめてもう一度試してね": [
 "Couldn't connect to ⟦0⟧. Check your connection and try again.",
 "无法连接到⟦0⟧。请检查网络后再试一次。"
-],
-"相手の画面が止まったままです。試合をやめますか？": [
-"The opponent's screen is still frozen. Quit the match?",
-"对手的画面一直卡住。要退出比赛吗？"
 ],
 "読みこめませんでした。後でもう一度試してね": [
 "Couldn't load. Please try again later.",
@@ -14471,25 +14259,9 @@
 ". Auto picks moves at random, so it can't beat strong foes.",
 "模式战斗。自动模式会随便选招式，赢不了强敌。"
 ],
-"作戦の相性は👊近→ 👣遠→ 🛹中→ 👊近。作戦は訓練で選べます": [
-"Plan matchups: 👊Close → 👣Far → 🛹Mid → 👊Close. Choose Plans in Training.",
-"作战相性：👊近 → 👣远 → 🛹中 → 👊近。作战可以在训练中选择。"
-],
-"👊近→ 👣遠→ 🛹中→ 👊近。作戦は訓練で選べます": [
-"👊Close → 👣Far → 🛹Mid → 👊Close. Choose Plans in Training.",
-"👊近 → 👣远 → 🛹中 → 👊近。作战可以在训练中选择。"
-],
 "テストはここまでです。元のデータに戻します": [
 "That's the end of the test. Restoring your original data.",
 "测试到此结束。将恢复原来的数据。"
-],
-"最初の流れを通しで試します。テスト中のデータは保存されず、最後に元のデータに戻ります": [
-"Test the whole opening flow. Test data isn't saved; your original data comes back at the end.",
-"完整测试开头流程。测试中的数据不会保存，最后会恢复原来的数据。"
-],
-"チュートリアルを終えました。ヘルプから、いつでもやり直せます": [
-"Tutorial finished. You can replay it anytime from Help.",
-"教程结束了。随时可以从帮助重新开始。"
 ],
 "空へ飛び上がり、相手の所へ降りて攻撃。降りる所の攻撃範囲は体が大きいほど広い": [
 "Flies into the sky and lands on the foe to attack. Bigger bodies hit a wider area on landing",
@@ -14514,14 +14286,6 @@
 "長いおうぎ形。ためる間に、おうぎの真ん中から範囲が広がる": [
 "Long cone. Spreads out from the center while charging",
 "长扇形。蓄力时从扇形中央向外扩大"
-],
-"当てると相手の攻撃+1。5秒ごとに奪うステータスが攻撃→防御→属性攻撃→属性防御→素早さの順に1つずつ増える。もう一度当てるか相手が倒れると、たまった分を相手から奪って自分のものにする": [
-"On hit, the foe gets Attack +1. Every 5s, one more stat is added: Attack→Defense→Sp. Atk→Sp. Def→Speed. Hit again or KO the foe to steal all the stacked boosts for yourself",
-"命中后对手攻击+1。每5秒按攻击→防御→特攻→特防→速度的顺序多借出1项。再次命中或对手倒下时，把累积的部分从对手身上夺来归自己"
-],
-"フィールド全体をゆらす。マギアが置いた壁・岩をすべて崩す": [
-"Shakes the whole field. Breaks all walls and rocks placed by Magia",
-"震动整个场地。摧毁魔机放置的所有墙和岩石"
 ],
 "3秒ごとに最大HPの1/32のダメージ。物理技のダメージが半分になる。火属性はならない": [
 "Damage of 1/32 max HP every 3s. Physical move damage is halved. Fire types are immune.",
@@ -14555,34 +14319,6 @@
 "Walking speed. Doesn't affect cooldowns or dodge chance. In Reverse Field, slower is faster.",
 "行走的速度。与招式冷却和闪避几率无关。颠倒场地期间越慢越快。"
 ],
-"自分が選んだ状態異常か混乱になっているとき。あらいながすでなおすときに使う。「毒」はもうどくもふくむ": [
-"When you have the chosen status or Confusion. Use it to cure with Arainagasu. \"Poison\" includes Bad poison.",
-"自己处于所选的异常状态或混乱时。用Arainagasu治愈时使用。「中毒」也包括剧毒。"
-],
-"1回目で力をためて2回目で放つ技に置く。「チャージ済み」はため終わってすぐ放てるとき、「まだ」はこれからためるとき。「チャージ済み」だけ置けばためるのはお任せ、「まだ」だけ置けば放つのはお任せ。この技以外には置けない": [
-"For moves that charge on the 1st use and fire on the 2nd. \"Charged\" = ready to fire now; \"Not yet\" = about to charge. Set only \"Charged\" to leave charging to auto; set only \"Not yet\" to leave firing to auto. Only for this kind of move.",
-"放在第1次蓄力、第2次释放的招式上。「已蓄力」指蓄力完毕可立即释放，「还没」指接下来要蓄力。只放「已蓄力」则蓄力交给自动，只放「还没」则释放交给自动。不能放在其他招式上。"
-],
-"時間で使える回数がたまる技に置く。たまった回数が選んだ数以上あるとき。この技以外には置けない": [
-"For moves that store uses over time. When stored uses are at least the chosen number. Only for this kind of move.",
-"放在随时间积累使用次数的招式上。积累次数达到所选数量以上时。不能放在其他招式上。"
-],
-"相手の攻撃が当たるその瞬間。ガードシェル・カウンター・だしぬきなどに置くと、受けた瞬間にその場で出る。ほかの条件と「かつ」で組み合わせられる。この条件を置かなければ、受けた瞬間には出ない。ガード系の技以外には置けない": [
-"The instant a foe's attack hits. Set it on Guard Shell, Counter, Dashinuki, etc. to fire right when hit. Can combine with other conditions using \"AND\". Without this condition, it won't fire when hit. Only for guard-type moves.",
-"对手的攻击命中的那一瞬间。放在Guard Shell、Counter、Dashinuki等招式上，受击瞬间会当场使出。可以用「且」与其他条件组合。不放这个条件，受击瞬间就不会使出。只能放在防御类招式上。"
-],
-"相手の状態異常。「どれか」「なし」または1つを選ぶ。「ひるみ」はひるんで動けない間": [
-"Foe's status. Pick \"Any\", \"None\" or one. \"Flinch\" = while it's flinching and can't move.",
-"对手的异常状态。选择「任意」「无」或其中1种。「畏缩」指畏缩无法行动期间。"
-],
-"自分の能力の段階が「+2以上」「+5以下」「-1以上」「-3以下」などのとき。以上・以下と段階を別々に選べる。交代すると元にもどる": [
-"When your stat stage is like \"+2 or more\", \"+5 or less\", \"-1 or more\", \"-3 or less\". Pick \"or more/or less\" and the stage separately. Resets on switch.",
-"自己的能力等级为「+2以上」「+5以下」「-1以上」「-3以下」等时。可分别选择以上/以下和等级。替换后恢复原状。"
-],
-"相手の能力の段階が「+2以上」や「-1以下」、「0以下」などのとき。以上・以下と段階を別々に選べる": [
-"When the foe's stat stage is like \"+2 or more\", \"-1 or less\" or \"0 or less\". Pick \"or more/or less\" and the stage separately.",
-"对手的能力等级为「+2以上」、「-1以下」、「0以下」等时。可分别选择以上/以下和等级。"
-],
 "場に出てから、この技をまだ撃っていないとき。ほかの条件より先に撃つ": [
 "After entering, if this move hasn't been used yet. Fires before other conditions.",
 "上场后还没使出此招式时。优先于其他条件使出。"
@@ -14595,18 +14331,6 @@
 "⟦0⟧ changes. +1 = ×1.5, +2 = ×2 … up to +6. Lowered: -1 = ×2/3 … down to -6. Resets on switch.",
 "⟦0⟧会改变。+1为1.5倍、+2为2倍…最大+6。降低时-1为2/3倍…最低-6。替换后恢复原状。"
 ],
-"トロフィーたいかいで優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる。これまでの記録です": [
-"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
-"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
-],
-"ボックスあきちで弱らせたマギアに投げるとつかまえられる。バトルに勝ったり、ブラインドボックスから出る": [
-"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
-"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
-],
-"ジェム ブラインドボックスを待ち時間なしですぐ開けられる。バトルに勝ったり、大会で優勝するともらえる": [
-"Gems: open a Mystery Box right away, no waiting. Get them by winning battles or tournaments.",
-"宝石：无需等待，立即打开盲盒。赢得对战或在大赛中夺冠即可获得。"
-],
 "他の端末で遊んだデータがあります（⟦0⟧）。この端末で遊んだ分と、どちらをつかいますか？えらばなかったほうは消えます": [
 "There's data played on another device. Which do you want to use: that, or this device's? The one you don't pick will be erased.",
 "有在其他设备上玩过的数据。要使用它，还是本设备上的数据？没选的那份会被删除。"
@@ -14614,14 +14338,6 @@
 "今はオフラインです。インターネットにつながるところでもう一度試してね": [
 "You're offline. Try again where you can connect to the internet.",
 "目前离线。请在能连接网络的地方再试一次。"
-],
-"今はデータの引きつぎが使えません。時間をおいて試してね": [
-"Data transfer isn't available right now. Please try again later.",
-"现在无法转移数据。请稍后再试。"
-],
-"このコードを他のスマホやPCで1回入れると、そのあとはどちらの端末でも続きから遊べます。データを消してしまったときももどせます": [
-"Enter this code once on another phone or PC, and after that you can keep playing on either device. It also restores your data if you erased it.",
-"在其他手机或电脑上输入一次这个代码，之后两台设备都能接着玩。不小心删除数据时也能恢复。"
 ],
 "なくすともどせません。人には教えないでね": [
 "If you lose it, you can't restore. Don't share it with anyone.",
@@ -14631,21 +14347,9 @@
 "Erased. Next time you go online, you'll start fresh.",
 "已删除。下次使用在线功能时将重新开始。"
 ],
-"で決めたとおりに戦う。訓練で決めていないところはお任せAIが動かす。君ができるのは": [
-". Anything not set in Training is handled by the Auto AI. All you can do is ",
-"中设定的方式战斗。训练中没设定的部分由自动AI控制。你能做的只有"
-],
 "だけ。オンライン対戦もおたがいの訓練どうしで戦う": [
 ". Online battles are also Training vs. Training.",
 "。在线对战也是双方训练设定之间的较量。"
-],
-"：👊近は👣遠に強く、👣遠は🛹中に、🛹中は👊近に強い。受ける側のぼうぎょ・属性防御が、自分が強い相手からなら1.15倍、苦手な相手からなら0.87倍になる。訓練の「作戦」でも変えられる": [
-": 👊Close beats 👣Far, 👣Far beats 🛹Mid, and 🛹Mid beats 👊Close. The defender's Defense and Sp. Def become ×1.15 against a foe it beats, and ×0.87 against a foe it's weak to. You can also change it with “Plan” in Training.",
-"：👊近克👣远，👣远克🛹中，🛹中克👊近。受攻击一方的防御、特防，面对自己克制的对手时为1.15倍，面对克制自己的对手时为0.87倍。也可以在训练的「作战」中更改。"
-],
-"などの構えはとっしんをはね返す。ダメージは変わらない、出すタイミングの読み合い": [
-" and other stances bounce back a Dash. Damage stays the same; it's all about timing.",
-"等架势能弹回突进。伤害不变，关键在于出招时机的博弈。"
 ],
 "がその技の待ち時間になる。強い技ほど長く待つので、どれをいつ出すかがかんじん": [
 " go on that move's cooldown. Stronger moves wait longer, so what you use and when really matters.",
@@ -14667,10 +14371,6 @@
 " to catch it. Nature, stats, and moves are set when you catch it.",
 "即可捕捉。性格、能力值和招式在捕捉时决定。"
 ],
-"は勝つとときどきもらえる。手に入れたときから時間が進み、マギア・ボックス・ワザステッカーが出る": [
-" are sometimes won in battles. Their timer starts when you get them, and they give Magia, Capsules, and Move stickers.",
-"胜利后有时可获得。获得后开始计时，会开出魔机、胶囊、技贴纸。"
-],
 "はHP・こうげき・ぼうぎょ・属性攻撃・属性防御・素早さ・かいひの7つ。素早さが高いほど早く歩き、かいひが高いほど指示なしでよける。種族値・個体値（0〜31）・性格（↑1.1倍↓0.9倍）・強化で決まる": [
 " are 7: HP, Attack, Defense, Sp. Atk, Sp. Def, Speed, and Evasion. Higher Speed means faster walking; higher Evasion means more dodging without orders. They're set by base stats, IVs, Nature, and Training points.",
 "共有HP、攻击、防御、特攻、特防、速度、闪避7项。速度越高走得越快，闪避越高越会自动躲避。由种族值、个体值、性格和强化点数决定。"
@@ -14679,10 +14379,6 @@
 ": In Team → Training points, use Magia of the same kind to gain points. Spend them on any stat you like.",
 "：在编队 → 强化中使用同种魔机即可增加点数。分配到喜欢的能力上吧。"
 ],
-"：ふりわけギア・ランダムギア・はりかえギア・おなじいろギアなど。上位版のえらべるギア・とくべつギア・技の形のギアは出にくい。ブラインドボックスから出る。編成→ アイテムで使う": [
-": Reset, Random, Swap, Same-Color gears, and more. Rarer upgrades: Choice, Special, and move-shape gears. They come from Mystery Boxes. Use them in Team → Items.",
-"：分配齿轮、随机齿轮、替换齿轮、同色齿轮等。高级版的可选齿轮、特别齿轮、招式形状齿轮较难获得。从盲盒中开出。在编队 → 道具中使用。"
-],
 "……やるじゃない。初めてにしては、いい戦いだったよ": [
 "……Not bad. That was a good battle for your first time.",
 "……挺厉害嘛。作为第一次，打得不错哦。"
@@ -14690,10 +14386,6 @@
 "10のとうぎじょうをめぐってヘッドに勝ち、タグを集めよう。全部そろうとキングバトルへ": [
 "Visit 10 arenas, beat the Crew Heads, and collect Tags. Get them all to reach the King Battle.",
 "巡游10座竞技场，战胜团长收集标签。全部集齐即可前往王者之战。"
-],
-"=0.5倍。属性の技は属性の表、種族の技は種族の表を見る。技と同じタイプのマギアが使うと1.5倍。マスをタップするとくわしく出る": [
-"=×0.5. Attribute moves use the Attribute chart; Race moves use the Race chart. A Magia using a move of its own type gets ×1.5. Tap a cell for details.",
-"=0.5倍。属性招式看属性表，种族招式看种族表。魔机使用与自身同类型的招式时为1.5倍。点击格子可查看详情。"
 ],
 "きょうは⟦0⟧ようび。ほかのエリアはそのようびにはいれる": [
 "Today is ⟦0⟧. Other areas open on their own day",
@@ -14707,37 +14399,9 @@
 "For ⟦0⟧ sec, keeps pulling nearby foes and its own placed moves, traps, floors, energy and flowers toward itself. A foe once caught is pulled even if it leaves the range",
 "⟦0⟧秒内，持续将周围的对手，以及自己放置的招式、陷阱、地面、能量和花朵吸向自己。一旦捕获的对手即使离开范围也会被吸引"
 ],
-"このマギアはバトルタワーにちょうせん中です。 タワーをやめてからにがしてね": [
-"This Magia is taking on the Battle Tower. Quit the Tower before releasing it.",
-"这只魔机正在挑战对战塔。请先退出塔再放生。"
-],
-"ふりわけたポイントがまだ確定していません。 確定しないで閉じますか？": [
-"Your point assignments aren't confirmed yet. Close without confirming?",
-"分配的点数还没有确定。不确定就关闭吗？"
-],
-"相手の画面が止まったままです。 試合をやめますか？": [
-"The opponent's screen is still frozen. Quit the match?",
-"对手的画面一直卡住。要退出比赛吗？"
-],
-"最初の流れを通しで試します。 テスト中のデータは保存されず、最後に元のデータに戻ります": [
-"Test the whole opening flow. Test data isn't saved; your original data comes back at the end.",
-"完整测试开头流程。测试中的数据不会保存，最后会恢复原来的数据。"
-],
-"「預ける」を並びかえている間は、その中で入れかえできません。 「自分で並べる」にすると入れかえできます": [
-"You can't swap inside \"Storage\" while it's sorted. Choose \"Custom order\" to swap.",
-"「寄存」排序时无法在其中调换。改成「自行排列」就能调换。"
-],
 "チームを解散しますか？メンバーもみんなぬけたことになります。 ": [
 "Disband the team? All members will be removed too.",
 "要解散队伍吗？所有成员也都会退出。"
-],
-"トロフィー 大会で優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる。これまでの記録です": [
-"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
-"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
-],
-"ボックス 空き地で弱らせたマギアに投げるとつかまえられる。バトルに勝ったり、ブラインドボックスから出る": [
-"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
-"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
 ],
 "他の端末で遊んだデータがあります（⟦0⟧）。 この端末で遊んだ分と、どちらを使いますか？ 選ばなかったほうは消えます": [
 "There's data played on another device. Which do you want to use: that, or this device's? The one you don't pick will be erased.",
