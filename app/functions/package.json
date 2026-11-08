@@ -1,7 +1,7 @@
 {
   "name": "pma-functions",
   "private": true,
-  "description": "ピクセルモンスターアリーナ：サーバーで きめる もの（レート・ギルドポイント・日替わり）",
+  "description": "マジックギアアリーナ：サーバーで きめる もの（レート・ギルドポイント・日替わり）",
   "main": "index.js",
   "engines": {
     "node": "22"

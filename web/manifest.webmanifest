@@ -1,6 +1,6 @@
 {
-  "name": "Pixel Monster Arena",
-  "short_name": "モンスターアリーナ",
+  "name": "Magic Gear Arena",
+  "short_name": "マジックギアアリーナ",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",

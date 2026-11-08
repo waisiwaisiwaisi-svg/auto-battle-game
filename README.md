@@ -1,4 +1,4 @@
-# Pixel Monster Arena（auto-battle-game）
+# Magic Gear Arena（auto-battle-game）
 
 くさむらで モンスターを つかまえて、観客席のある **スタジアム** でリアルタイムバトルをする 2D ゲームです。
 `index.html` 1 ファイル（HTML + JavaScript + Canvas、外部ライブラリなし）で動き、スマホのブラウザ向けに作っています。

@@ -35,7 +35,7 @@ ipcMain.on('pma-cloud-write', (_, j) => {
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1280, height: 760, minWidth: 800, minHeight: 480, backgroundColor: '#141022', title: 'Pixel Monster Arena', autoHideMenuBar: true,
+    width: 1280, height: 760, minWidth: 800, minHeight: 480, backgroundColor: '#141022', title: 'Magic Gear Arena', autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false },
   });
   win.loadURL('app://game/index.html');
