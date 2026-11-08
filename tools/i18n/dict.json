@@ -12246,5 +12246,2261 @@
 "ねんしが切れた": [
 "The link broke",
 "连接断开了"
+],
+"相手の場に岩を浮かべる": [
+"Floats rocks on the foe's side. Damages foes that switch in",
+"在对手场地浮起岩石。对替换上场的对手造成伤害"
+],
+"自分の能力の変化を反対にする": [
+"Reverses your stat changes (drops become boosts)",
+"反转自身的能力变化（下降的变为上升）"
+],
+"9秒間、場に出ているマギアの素早さを反転する": [
+"For 9s, flips the Speed of Magia in battle (slower ones walk faster)",
+"9秒内，反转场上魔机的速度（越慢走得越快）"
+],
+"HPを1/4使って、相手のHPを20%削る": [
+"Uses 1/4 HP to cut the foe's HP by 20% (can't be healed until they switch)",
+"消耗1/4 HP，削减对手20%的HP（替换前无法回复这部分）"
+],
+"相手を無理やり控えと交代させる": [
+"Forces the foe to switch with its bench (wild ones run away)",
+"强制对手与替补替换（野生的会逃跑）"
+],
+"相手の場にまきびしをまく（3回まで重なる）": [
+"Scatters spikes on the foe's side (stacks up to 3). Damages foes that switch in (not flying ones)",
+"在对手场地撒下撒菱（最多叠加3层）。对替换上场的对手造成伤害（对飞行中的对手无效）"
+],
+"分身を2体出す（10秒）": [
+"Makes 2 clones (10s). Foe attacks may target the clones, and sometimes they swap with the real one",
+"制造2个分身（10秒）。对手的攻击有时会打向分身，偶尔会与本体互换"
+],
+"体が透けて、無・獣・亜人の技がすり抜ける": [
+"Body turns see-through: Normal, Beast and Demi moves pass through (ends on switch)",
+"身体变透明，无、兽、亚人的招式会穿过（替换后失效）"
+],
+"味方の飛び道具だけ通りぬける壁を作る。通った弾は3つに分かれる（1つ0.7倍）": [
+"Makes a wall only ally projectiles can pass. Shots that pass split into 3 (0.7× each). Blocks enemy projectiles",
+"制造只有我方飞行道具能穿过的墙。穿过的弹会分成3发（每发0.7倍）。能挡住对手的飞行道具"
+],
+"相手と念力の糸でつながり、4秒間ダメージを与え続ける。近いほど強い（1秒で最大威力30）": [
+"Links to the foe with a psychic thread, dealing damage for 4 sec. Closer is stronger (up to 30 Power/sec). Breaks if too far",
+"用念力之线连住对手，4秒内持续造成伤害。越近越强（每秒最大威力30）。距离太远会断开"
+],
+"10秒間、まわりの相手と、自分が置いた技・罠・床・エナジー・お花を引き寄せ続ける": [
+"For 10 seconds, keeps pulling in nearby foes and its own placed moves, traps, floors, energy and flowers (it can still move and use moves). A foe once caught is pulled even outside the range",
+"10秒内持续吸引周围的对手，以及自己放置的招式、陷阱、地面、能量和花朵（可以移动也能使用招式）。一旦捕获的对手即使在范围外也会被吸引"
+],
+"15秒間、相手は交代できず、おたがいの技のタイプ相性がなくなる": [
+"For 15 sec, the foe can't Switch, and type matchups are gone for both (Super effective, Not very effective, No effect all become 1x)",
+"15秒内，对手无法替换，双方招式的属性相克消失（效果拔群、效果不佳、没有效果全部变为等倍）"
+],
+"自分は倒れる": [
+"User faints. Fully heals the next ally's HP and status",
+"自己倒下。下一个出场的同伴HP和异常状态全部恢复"
+],
+"必ず当たる。6秒後、その間に与えたダメージの40%を追加で与える": [
+"Always hits. Turns into a shadow, dashes behind the foe, and leaves a mark. After 6 sec, deals an extra 40% of the damage dealt meanwhile",
+"必定命中。化为影子冲到对手身后，刻下印记。6秒后追加这段时间造成伤害的40%"
+],
+"8秒間、だれも空を飛べない": [
+"No one can fly for 8 sec. Floating foes fall to the ground and can't use flying moves",
+"8秒内谁都无法飞行。漂浮的对手也会掉到地面，无法使用飞上天的招式"
+],
+"相手の属性を水にする": [
+"Makes the foe's Attribute Water (back after Switch)",
+"把对手的属性变成水（替换后恢复）"
+],
+"相手の種族を霊にする": [
+"Makes the foe's Race Spirit (back after Switch)",
+"把对手的种族变成灵（替换后恢复）"
+],
+"当てると相手の攻撃+1。5秒ごとに奪うステータスが攻撃→防御→属性攻撃→属性防御→素早さの順に1つずつ増える": [
+"On hit, foe's Attack +1 (a loan). Every 5 sec, one more stat to steal is added: Attack → Defense → Sp. Atk → Sp. Def → Speed. Hit again or KO the foe to take it all for yourself",
+"命中后对手攻击+1（借出）。每5秒按攻击→防御→特攻→特防→速度的顺序增加1项要夺取的能力。再次命中或对手倒下时，夺取积攒的部分归自己所有"
+],
+"火のしっぽを立ててすばしっこく走り回る": [
+"Raises its fiery tail and darts all around.",
+"竖起火焰尾巴，灵活地四处奔跑。"
+],
+"燃えるたてがみが生え始めた子ライオン": [
+"A lion cub just starting to grow a fiery mane.",
+"刚开始长出燃烧鬃毛的小狮子。"
+],
+"まんまるの体から炎がふきだす": [
+"Flames burst from its round body.",
+"圆滚滚的身体里喷出火焰。"
+],
+"いたずら好き": [
+"A prankster. Hides in the steam to spook people",
+"爱恶作剧。躲在温泉雾气里吓唬人"
+],
+"背中の模様が炎のように光るテントウムシ": [
+"A ladybug whose back pattern glows like fire.",
+"背上的花纹像火焰一样发光的瓢虫。"
+],
+"溶岩の毛皮をまとった大グマ": [
+"A big bear wearing a coat of lava fur.",
+"披着熔岩毛皮的大熊。"
+],
+"ふだんはのんびり": [
+"Usually laid-back. Its fur glows red when angry",
+"平时悠闲自在。生气时毛皮会发红光"
+],
+"黒い体に燃えるたてがみ": [
+"A black body with a burning mane. Runs across night mountains.",
+"黑色身体配燃烧的鬃毛。在夜晚的山间奔驰。"
+],
+"群れのリーダー": [
+"Pack leader. Will leap into fire to protect friends",
+"族群的首领。为了保护同伴敢冲进火里"
+],
+"翼を広げると空が赤くそまる炎の竜": [
+"A fire dragon that turns the sky red when it spreads its wings.",
+"展开翅膀就会把天空染红的火龙。"
+],
+"胸をはってよちよち歩く": [
+"Waddles with its chest out. Fast when swimming.",
+"挺着胸摇摇摆摆地走。游泳很快。"
+],
+"小さいけれどするどい歯でかみつく": [
+"Small, but bites with sharp teeth.",
+"个子小，却会用尖牙咬人。"
+],
+"食いしんぼう": [
+"A big eater. Bites anything first to check it out",
+"贪吃鬼。什么东西都先咬一口试试"
+],
+"葉っぱの耳をぴくぴく動かす子ネコ": [
+"A kitten that twitches its leaf ears.",
+"会抖动叶子耳朵的小猫。"
+],
+"ひなたぼっこが大好き": [
+"Loves sunbathing. Gathers sunlight with its leaf ears",
+"最爱晒太阳。用叶子耳朵收集阳光"
+],
+"頭の花からあまいかおりを出す": [
+"Gives off a sweet scent from the flower on its head.",
+"头上的花散发出甜甜的香气。"
+],
+"大きな枝角につるがからむ森の番人": [
+"A forest guardian with vines wrapped around its big antlers.",
+"大鹿角上缠着藤蔓的森林守护者。"
+],
+"森の奥にすむ王": [
+"A king deep in the forest who leads vine dragons.",
+"住在森林深处的王，率领藤蔓之龙。"
+],
+"森の王": [
+"King of the forest. Seeing it is said to bring happiness",
+"森林之王。据说见到它的人会变得幸福"
+],
+"イナズマ形のしっぽで電気を放つ": [
+"Shoots electricity from its lightning-shaped tail.",
+"从闪电形的尾巴放出电。"
+],
+"丸い体の輪っかが光って回る": [
+"The ring on its round body glows and spins.",
+"圆滚滚身体上的圆环会发光旋转。"
+],
+"雷雲の中を飛び回る": [
+"Flies around inside thunderclouds.",
+"在雷云中飞来飞去。"
+],
+"夜行性": [
+"Nocturnal. Finds prey by the flash of lightning",
+"夜行性。借闪电的光寻找猎物"
+],
+"黒と金のしま模様": [
+"Black and gold stripes. Pounces at lightning speed.",
+"黑金相间的条纹。以闪电般的速度扑向猎物。"
+],
+"孤高のハンター": [
+"A lone hunter. Strikes under cover of thunder",
+"孤傲的猎手。趁着雷声发动袭击"
+],
+"全身から稲妻を放つ雷の王": [
+"King of thunder that shoots lightning from its whole body.",
+"全身放出闪电的雷之王。"
+],
+"雪の上でころころ転がって遊ぶ": [
+"Rolls around and plays in the snow.",
+"在雪地上滚来滚去地玩耍。"
+],
+"大きな体で雪山を守る": [
+"Guards the snowy mountains with its big body.",
+"用庞大的身体守护雪山。"
+],
+"山の守り神": [
+"Mountain guardian. Said to carry lost climbers down to safety",
+"山的守护神。据说会把遇难者送到山脚"
+],
+"背中の氷のとげを逆立てておこる": [
+"Gets angry and raises the ice spikes on its back.",
+"生气时会竖起背上的冰刺。"
+],
+"大きなまきヅノで岩もくだく白いヤギ": [
+"A white goat whose big curled horns can smash rocks.",
+"用卷曲的大角连岩石都能撞碎的白山羊。"
+],
+"ふわふわの羽で風に乗ってただよう妖精": [
+"A fairy that floats on the wind with fluffy wings.",
+"靠着毛茸茸的翅膀乘风飘荡的妖精。"
+],
+"小さなこぶしで毎日修行する": [
+"Trains every day with its tiny fists.",
+"每天用小拳头刻苦修行。"
+],
+"毎日修行": [
+"Trains every day. Hasn't won a single time yet",
+"每天修行，却还一次都没赢过"
+],
+"大きな角で何でもはねとばす": [
+"Knocks anything away with its big horns.",
+"用大角把什么都撞飞。"
+],
+"ツノのある赤い大ザル": [
+"A big red horned ape that splits the ground with its fists.",
+"长角的红色大猩猩，一拳把地面打裂。"
+],
+"あばれ者": [
+"A wild one. Travels looking for strong opponents",
+"调皮捣蛋鬼。四处旅行寻找强敌"
+],
+"紫のうろこ": [
+"Purple scales. Its bite makes you numb.",
+"紫色鳞片。被它咬到会发麻。"
+],
+"夜に毒の粉をまき散らす": [
+"Scatters poison powder at night.",
+"在夜里撒下毒粉。"
+],
+"苔の背中に毒のいぼ": [
+"Poison warts on its mossy back.",
+"长着苔藓的背上有毒疙瘩。"
+],
+"毒の息をはく紫の竜": [
+"A purple dragon that breathes poison.",
+"会吐毒气的紫色龙。"
+],
+"大きなかさから毒の胞子を降らせる": [
+"Rains poison spores from its big cap.",
+"从大大的菌盖上洒下毒孢子。"
+],
+"まっすぐ突進して地面をえぐる": [
+"Charges straight ahead and gouges the ground.",
+"笔直冲撞，把地面掀开。"
+],
+"砂の中を泳ぐように進む": [
+"Moves through sand like it's swimming.",
+"像游泳一样在沙子里前进。"
+],
+"山のような体": [
+"A body like a mountain. The ground shakes when it stomps.",
+"身体像座山。一踩地面就会摇晃。"
+],
+"まだうまく飛べない小鳥": [
+"A little bird that can't fly well yet.",
+"还飞不好的小鸟。"
+],
+"聞いた声をまねして敵をまどわす": [
+"Copies voices it hears to confuse enemies.",
+"模仿听到的声音来迷惑敌人。"
+],
+"月の夜に群れで飛ぶ": [
+"Flies in flocks on moonlit nights.",
+"在月夜里成群飞翔。"
+],
+"雲の上にすむ白い竜": [
+"A white dragon living above the clouds. Its wingbeats make tornadoes.",
+"住在云上的白龙。振翅就能掀起龙卷风。"
+],
+"まだ小さい竜の子": [
+"A small baby dragon. Can't even breathe fire yet.",
+"还很小的龙宝宝。连火都还喷不出来。"
+],
+"川にすむ竜": [
+"A river dragon that sleeps all coiled up.",
+"住在河里的龙。盘成一团睡觉。"
+],
+"川を守る竜": [
+"Guards the river. Lives only in clean water",
+"守护河流的龙，只住在干净的水里"
+],
+"紫の翼で毒の風を起こす": [
+"Stirs up poison wind with purple wings.",
+"用紫色翅膀掀起毒风。"
+],
+"全身が金属でできたオオカミ": [
+"A wolf made all of metal. Its blue eyes glow.",
+"全身由金属打造的狼。蓝色眼睛闪闪发光。"
+],
+"頭の火が消えるとしょんぼりする": [
+"Gets gloomy when the flame on its head goes out.",
+"头上的火一熄灭就会垂头丧气。"
+],
+"しっぽのたいまつで夜道を照らす": [
+"Lights up night paths with its tail torch.",
+"用尾巴上的火把照亮夜路。"
+],
+"石を積んだかまどの体": [
+"A body like a stone oven. Cooks anything with its belly fire.",
+"石头垒成的灶台身体。用肚子里的火什么都能烤。"
+],
+"青い鬼火のしっぽをゆらす雷のキツネ": [
+"An electric fox swishing a tail of blue will-o'-wisps.",
+"摇晃着蓝色鬼火尾巴的雷之狐。"
+],
+"つぼの中で炎がぐつぐつ燃える": [
+"Flames bubble and boil inside a pot.",
+"壶里的火焰咕嘟咕嘟地燃烧。"
+],
+"背中の炎が消えないように雨をさける": [
+"Avoids rain so the flame on its back won't go out.",
+"为了不让背上的火熄灭而躲着雨。"
+],
+"祭りの夜にふわりと浮かぶ": [
+"Floats gently on festival nights.",
+"在祭典之夜轻飘飘地浮起来。"
+],
+"祭りが大好き": [
+"Loves festivals. Gathers in lively places",
+"最爱祭典。喜欢聚在热闹的地方"
+],
+"ティーポットの頭をもつタコ": [
+"An octopus with a teapot head. Squirts hot tea from its spout.",
+"长着茶壶脑袋的章鱼。从壶嘴喷出热茶。"
+],
+"深い海を探検する鉄の魚": [
+"An iron fish that explores the deep sea.",
+"探索深海的铁鱼。"
+],
+"水から高く飛び上がって遊ぶ": [
+"Plays by leaping high out of the water.",
+"高高跃出水面玩耍。"
+],
+"あわをぷかぷか浮かべて遊ぶ": [
+"Plays by floating bubbles around.",
+"让泡泡飘来飘去地玩。"
+],
+"背中にサンゴの島を乗せた大ガメ": [
+"A big turtle with a coral island on its back.",
+"背上驮着珊瑚岛的大海龟。"
+],
+"頭のふたばで日の光を浴びる": [
+"Soaks up sunlight with the sprout on its head.",
+"用头上的嫩芽晒太阳。"
+],
+"日光浴が大好き": [
+"Loves sunbathing. Happy when you water it",
+"最爱晒太阳。给它浇水就会很高兴"
+],
+"真っ赤な実にするどい歯": [
+"A bright red fruit with sharp teeth.",
+"鲜红的果实长着尖牙。"
+],
+"千年生きた大木": [
+"A great tree 1,000 years old. Shakes the earth with its roots.",
+"活了千年的大树。用树根撼动大地。"
+],
+"長いしっぽの先から電気を飛ばす": [
+"Shoots electricity from the tip of its long tail.",
+"从长尾巴尖端放出电。"
+],
+"電気をためたこぶしでパンチするカンガルー": [
+"A kangaroo that punches with electric fists.",
+"用蓄满电的拳头出拳的袋鼠。"
+],
+"大きな目が電球のように光る": [
+"Its big eyes glow like light bulbs.",
+"大眼睛像灯泡一样发光。"
+],
+"雷のカマで切りさく": [
+"Slices with lightning scythes.",
+"用雷电镰刀切开一切。"
+],
+"黒い毛並みに金の稲妻": [
+"Black fur with golden lightning. Its roar calls down thunder.",
+"黑色毛皮配金色闪电。一吼就会落雷。"
+],
+"氷のたてがみをもつオオカミ": [
+"A wolf with an icy mane.",
+"长着冰之鬃毛的狼。"
+],
+"四角い氷の体": [
+"A square body of ice. Rams with its cold corners.",
+"方方正正的冰块身体。用冰冷的棱角撞击。"
+],
+"ガラスの中に小さな家と雪景色": [
+"A tiny house and snowy scene inside glass. Shake it for a blizzard.",
+"玻璃里有小房子和雪景。一摇就刮起暴风雪。"
+],
+"氷の羽をもつチョウ": [
+"A butterfly with icy wings.",
+"长着冰之翅膀的蝴蝶。"
+],
+"大きなきばで氷を割る": [
+"Breaks ice with its big tusks.",
+"用大獠牙破冰。"
+],
+"のんびり屋": [
+"Easygoing. Breaks ice with its big tusks",
+"慢性子。用大獠牙破冰"
+],
+"覆面をつけた空中殺法の鳥": [
+"A masked bird with high-flying moves.",
+"戴面罩、擅长空中招数的鸟。"
+],
+"片足で立つ拳法の構え": [
+"Stands on one leg in a kung fu pose.",
+"单脚站立的拳法架势。"
+],
+"赤いグローブの力持ちボクサー": [
+"A strong boxer with red gloves.",
+"戴红拳套的大力士拳击手。"
+],
+"紫の糸でえものをしばる": [
+"Ties up prey with purple thread.",
+"用紫色的丝捆住猎物。"
+],
+"紫のけむりが集まって生まれた": [
+"Born from gathered purple smoke.",
+"由紫色烟雾聚集而生。"
+],
+"紫の毒のしっぽを高くかかげる": [
+"Holds its purple poison tail up high.",
+"高高举起紫色的毒尾巴。"
+],
+"くちばしのマスクとシルクハット": [
+"A beak mask and top hat. Handles poison potions.",
+"戴鸟嘴面具和高礼帽，操纵毒药。"
+],
+"レンガを積み上げた体": [
+"A body made of stacked bricks.",
+"由砖块堆成的身体。"
+],
+"土でできた馬": [
+"A horse made of clay. Kicks up dust when it runs.",
+"泥土做成的马。一跑就扬起沙尘。"
+],
+"大昔の土偶": [
+"An ancient clay figure. Its single eye glows.",
+"远古的土偶。独眼会发光。"
+],
+"背中のコハクのとげが光る": [
+"The amber spikes on its back glow.",
+"背上的琥珀尖刺会发光。"
+],
+"たくさんの風船でぷかぷか浮かぶ": [
+"Floats around on lots of balloons.",
+"靠许多气球轻飘飘地浮着。"
+],
+"ふわふわの雲の子": [
+"A fluffy little cloud. When it cries, it rains.",
+"软绵绵的云宝宝。一哭就会下雨。"
+],
+"マンボウの形の飛行船": [
+"A sunfish-shaped airship. Makes wind with its propellers.",
+"翻车鱼形状的飞艇。用螺旋桨扇起风。"
+],
+"葉っぱのすきまから目だけが光る森のおばけ": [
+"A forest ghost whose eyes glow from between the leaves.",
+"只有眼睛从树叶缝隙中发光的森林幽灵。"
+],
+"祭りの竜のように赤いリボンをなびかせる": [
+"Its red ribbons flutter like a festival dragon.",
+"像祭典的舞龙一样飘动红丝带。"
+],
+"ひすい色のうろこと金のたてがみ": [
+"Jade-colored scales and a golden mane.",
+"翡翠色的鳞片和金色的鬃毛。"
+],
+"金貨の山にねそべる欲ばりな竜": [
+"A greedy dragon that lounges on piles of gold coins.",
+"趴在金币堆上的贪心龙。"
+],
+"ボタンの目のつぎはぎ人形": [
+"A patchwork doll with button eyes. It wears spirit fire and casts curses.",
+"纽扣眼睛的拼布娃娃。身披灵火施加诅咒。"
+],
+"捨てられた人形": [
+"A thrown-away doll. It wanders, looking for its owner",
+"被丢弃的娃娃。四处游荡寻找主人"
+],
+"宙に浮かぶ狐のお面": [
+"A floating fox mask. Its bell sounds confuse the mind.",
+"飘在空中的狐狸面具。用铃声迷惑人心。"
+],
+"けむりのしっぽをゆらす黒ネコの霊": [
+"A black cat spirit with a swaying smoke tail.",
+"摇着烟雾尾巴的黑猫幽灵。"
+],
+"からっぽのよろいに青い霊火が宿る": [
+"Blue spirit fire lives in empty armor.",
+"空荡荡的铠甲里寄宿着蓝色灵火。"
+],
+"表紙に大きな目玉": [
+"A big eyeball on its cover. It grabs with page tentacles.",
+"封面上有个大眼珠。用书页触手缠住对手。"
+],
+"大きなカマをもつ死神": [
+"A reaper with a big scythe. It takes spirits away.",
+"拿着大镰刀的死神。会带走灵魂。"
+],
+"たてがみから溶岩がしたたる": [
+"Lava drips from its mane.",
+"鬃毛上滴落着熔岩。"
+],
+"燃える刀をふるう武人": [
+"A warrior who swings a burning sword.",
+"挥舞燃烧之刀的武士。"
+],
+"五つの火の玉を回して浮かぶ": [
+"It floats, spinning five fireballs.",
+"转着五个火球飘浮。"
+],
+"全身の炎で体当たりする": [
+"It tackles with flames all over its body.",
+"用全身的火焰撞击。"
+],
+"胸の炉から溶岩を放つ": [
+"It blasts lava from the furnace in its chest.",
+"从胸口的熔炉喷出熔岩。"
+],
+"三つまたの槍をもつ海の兵": [
+"A sea soldier with a trident.",
+"手持三叉戟的海洋士兵。"
+],
+"波のような体で宙を泳ぐ": [
+"It swims through the air with a wave-like body.",
+"用波浪般的身体在空中游动。"
+],
+"霧の中から現れる古い船": [
+"An old ship that appears from the fog.",
+"从雾中出现的古老船只。"
+],
+"背中に小さな島と森を乗せる": [
+"It carries a small island and forest on its back.",
+"背上驮着小岛和森林。"
+],
+"背中の大木が森になった": [
+"The big tree on its back grew into a forest.",
+"背上的大树长成了森林。"
+],
+"頭に花を咲かせた石の巨人": [
+"A stone giant with flowers on its head.",
+"头上开着花的石头巨人。"
+],
+"金色の枝をもつシカ": [
+"A deer with golden branches.",
+"长着金色枝条的鹿。"
+],
+"花のドレスをまとう森の女神": [
+"A forest goddess in a flower dress.",
+"身穿花朵礼服的森林女神。"
+],
+"一つ目で稲妻を呼ぶ": [
+"Its single eye calls lightning.",
+"用独眼召唤闪电。"
+],
+"稲妻の翼で飛ぶ": [
+"It flies on lightning wings.",
+"用闪电之翼飞翔。"
+],
+"稲妻をふりまく小さな玉": [
+"A small ball that scatters lightning.",
+"撒播闪电的小球。"
+],
+"背中の稲妻で敵をしびれさせる": [
+"The lightning on its back stuns foes.",
+"用背上的闪电麻痹敌人。"
+],
+"雷雲をまとった竜": [
+"A dragon wrapped in thunderclouds.",
+"身披雷云的龙。"
+],
+"頭の輪から電気を飛ばす": [
+"It shoots electricity from the ring on its head.",
+"从头上的圆环放出电。"
+],
+"氷のかたまりの巨人": [
+"A giant made of ice blocks.",
+"冰块组成的巨人。"
+],
+"氷の王冠と羽衣の女王": [
+"A queen with an ice crown and a feather robe.",
+"戴着冰冠、披着羽衣的女王。"
+],
+"背中の輪を武器にする王": [
+"A king who uses the ring on its back as a weapon.",
+"把背上的圆环当武器的国王。"
+],
+"赤い角の鬼の拳士": [
+"An oni fighter with red horns.",
+"长着红角的鬼族拳士。"
+],
+"杖と鎖の鉄のよろい": [
+"Iron armor with a staff and chains.",
+"手持法杖和锁链的铁铠甲。"
+],
+"真っ赤な花で虫をさそう": [
+"It lures bugs with bright red flowers.",
+"用鲜红的花引诱虫子。"
+],
+"ヘドロでできた巨人": [
+"A giant made of sludge.",
+"由污泥组成的巨人。"
+],
+"うずまく砂嵐の体": [
+"A body of swirling sandstorm.",
+"身体是旋转的沙暴。"
+],
+"雲の体のクジラ": [
+"A whale with a cloud body.",
+"云朵身体的鲸鱼。"
+],
+"白い骨だけの竜": [
+"A dragon of nothing but white bones.",
+"只剩白骨的龙。"
+],
+"紫の宝玉をかかえる竜": [
+"A dragon holding a purple orb.",
+"抱着紫色宝珠的龙。"
+],
+"全身水晶のとげの竜": [
+"A dragon covered in crystal spikes.",
+"全身长满水晶尖刺的龙。"
+],
+"金と青のうろこの竜": [
+"A dragon with gold and blue scales.",
+"长着金色和蓝色鳞片的龙。"
+],
+"胸の穴に光を吸いこむ竜": [
+"A dragon that sucks light into the hole in its chest.",
+"用胸口的洞吸入光芒的龙。"
+],
+"金のかんむりをもつ竜の王": [
+"A dragon king with a golden crown.",
+"戴着金冠的龙王。"
+],
+"すきとおった結晶の羽で光を曲げて飛ぶ": [
+"It flies on clear crystal wings that bend light.",
+"用透明的结晶翅膀折射光线飞翔。"
+],
+"花になりすましてえものを待つ": [
+"It poses as a flower and waits for prey.",
+"伪装成花朵等待猎物。"
+],
+"岩のからを丸めて地面をころがる": [
+"It curls up its rock shell and rolls along the ground.",
+"蜷起岩石外壳在地上滚动。"
+],
+"こはく色のからに電気をためて光る": [
+"It stores electricity in its amber shell and glows.",
+"在琥珀色外壳里储存电力发光。"
+],
+"はがねのような角で大木も投げ飛ばす": [
+"Its steel-like horn can toss even big trees.",
+"用钢铁般的角连大树都能抛飞。"
+],
+"針のやりを構えて巣を守る": [
+"It readies its needle spear to guard the nest.",
+"架起针枪守护蜂巢。"
+],
+"羽のドクロ模様で相手をこわがらせる": [
+"The skull pattern on its wings scares foes.",
+"翅膀上的骷髅花纹会吓到对手。"
+],
+"ほのおの羽で火の粉をまき散らす": [
+"Its flame wings scatter sparks.",
+"用火焰翅膀撒播火星。"
+],
+"背中のすずを鳴らして相手をまどわせる": [
+"It rings the bell on its back to confuse foes.",
+"摇响背上的铃铛迷惑对手。"
+],
+"石のたてがみを持つ": [
+"It has a stone mane. It waits for prey in a sand pit.",
+"长着石头鬃毛。在沙坑里等待猎物。"
+],
+"雪の羽でふぶきを呼ぶ夜のガ": [
+"A night moth that calls blizzards with its snowy wings.",
+"用雪之翅膀召唤暴风雪的夜蛾。"
+],
+"九つのしっぽに氷のかざりをつけた白いキツネ": [
+"A white fox with ice ornaments on its nine tails.",
+"九条尾巴上挂着冰饰的白狐。"
+],
+"むらさきの毛並みのキツネ": [
+"A purple-furred fox. It shows illusions in the night forest.",
+"紫色毛皮的狐狸。在夜晚的森林里制造幻象。"
+],
+"黒い顔のヒツジ": [
+"A black-faced sheep. It hides the night's darkness in its fluffy wool.",
+"黑脸的绵羊。在蓬松的羊毛里藏着夜晚的黑暗。"
+],
+"雲のしっぽをくるりと巻いたイタチ": [
+"A weasel with a curled cloud tail. It feels cool to the touch.",
+"卷着云朵尾巴的鼬鼠。摸起来凉丝丝的。"
+],
+"頭に赤いバラをさかせたヘビ": [
+"A snake with a red rose on its head. It squeezes with its thorny body.",
+"头上开着红玫瑰的蛇。用带刺的身体缠紧对手。"
+],
+"全身コケだらけ": [
+"Covered in moss. It pulls up trees with its thick arms.",
+"全身长满苔藓。用粗壮的手臂拔起大树。"
+],
+"ふくらんだ羽毛に静電気をためる": [
+"It stores static in its puffy feathers.",
+"在蓬松的羽毛里储存静电。"
+],
+"ふわふわ好き": [
+"It loves fluffy things. Static turns it into a fuzzball",
+"喜欢毛茸茸的东西。静电让它变成毛球"
+],
+"岩のよろいを着たサイ": [
+"A rhino in rock armor.",
+"身穿岩石铠甲的犀牛。"
+],
+"白銀のうろこ": [
+"Silver-white scales. A dragon king wrapped in blizzards.",
+"银白的鳞片。身披暴风雪的龙王。"
+],
+"竜の王": [
+"The dragon king. It appears with the blizzard",
+"龙之王。伴随暴风雪出现"
+],
+"ゆらゆらゆれる生きた炎": [
+"A living flame that flickers.",
+"摇摇晃晃的活火焰。"
+],
+"頭の明かりでえものをさそう": [
+"It lures prey with the light on its head.",
+"用头上的灯引诱猎物。"
+],
+"年をとった木に顔が生まれた": [
+"A face appeared on an old tree.",
+"古老的树上长出了脸。"
+],
+"大きな口でなんでもぱくり": [
+"It gobbles anything with its big mouth.",
+"用大嘴巴一口吞下任何东西。"
+],
+"岩のとげがびっしり生えたサイ": [
+"A rhino covered in rock spikes.",
+"长满岩石尖刺的犀牛。"
+],
+"るり色のかさをゆらしてただようクラゲ": [
+"A jellyfish drifting with its lapis-blue cap.",
+"摇着琉璃色伞盖漂浮的水母。"
+],
+"霜のドレスをまとう氷の妖精": [
+"An ice fairy in a frost dress.",
+"身穿冰霜礼服的冰之妖精。"
+],
+"木の葉のぼうしをかぶった森の魔女": [
+"A forest witch wearing a leaf hat.",
+"戴着树叶帽子的森林魔女。"
+],
+"氷のフードの奥で赤い目が光る": [
+"Red eyes glow deep in its ice hood.",
+"冰之兜帽深处闪着红色的眼睛。"
+],
+"ふたのすきまから歯をのぞかせる古いひつぎ": [
+"An old coffin showing teeth through a gap in its lid.",
+"从盖子缝隙露出牙齿的古老棺材。"
+],
+"背中から稲妻を放つ黒いクモ": [
+"A black spider that shoots lightning from its back.",
+"从背上放出闪电的黑蜘蛛。"
+],
+"赤い羽をふるわせて火の粉をまくガ": [
+"A moth that shakes its red wings to scatter sparks.",
+"抖动红色翅膀撒播火星的蛾子。"
+],
+"青い炎の頭で鉄をうつかじやのおばけ": [
+"A ghost blacksmith with a blue flame head that hammers iron.",
+"顶着蓝色火焰头打铁的铁匠幽灵。"
+],
+"頭のバーナーから青い炎をふき出す鉄の体の化け物": [
+"An iron-bodied monster that blasts blue flames from the burner on its head.",
+"从头上的喷火器喷出蓝色火焰的铁身怪物。"
+],
+"鉄パイプとマンホールのふたを持った路地裏のおばけ": [
+"A back-alley ghost with an iron pipe and a manhole cover.",
+"拿着铁管和井盖的小巷幽灵。"
+],
+"スピーカーから電気の大音量をひびかせる小さなおに": [
+"A small oni that blasts loud electric sound from speakers.",
+"用音箱放出超大电音的小鬼。"
+],
+"屋上菜園で育ったつるの竜": [
+"A vine dragon raised in a rooftop garden. Planters and veggies grow on its body.",
+"在屋顶菜园长大的藤蔓龙。身上长着花盆和蔬菜。"
+],
+"こわれたテレビに住みついたおばけ": [
+"A ghost living in a broken TV. Static flickers on its screen.",
+"住在坏电视里的幽灵。屏幕上闪着雪花。"
+],
+"自販機の明かりに集まるガ": [
+"A moth drawn to vending machine lights. Its wings have circuit patterns.",
+"聚集在自动售货机灯光下的蛾子。翅膀上有电路花纹。"
+],
+"つばさをマントにしたオウムの聖騎士": [
+"A parrot paladin with wings as a cape. It guards the town with sword and shield.",
+"把翅膀当披风的鹦鹉圣骑士。用剑和盾守护城镇。"
+],
+"とけた溶岩でできた大きなおに": [
+"A big oni made of molten lava. It swings a club.",
+"由熔化的熔岩组成的大鬼。挥舞着狼牙棒。"
+],
+"火のテントウムシの騎士": [
+"A fire ladybug knight. It fights using its red shell as a shield.",
+"火焰瓢虫骑士。用红色外壳当盾牌战斗。"
+],
+"ヘラクレスオオカブトの角がレールガンになった騎士": [
+"A knight whose Hercules beetle horn became a railgun.",
+"赫拉克勒斯长戟大兜虫的角变成了电磁炮的骑士。"
+],
+"電線工事をする雷のおに": [
+"A thunder oni who works on power lines. It uses wires like whips.",
+"做电线施工的雷鬼。把电线当鞭子用。"
+],
+"風鈴の妖精": [
+"A wind chime fairy. It rings a cool sound when the wind blows.",
+"风铃妖精。一刮风就发出清凉的声音。"
+],
+"吹き流しの妖精": [
+"A streamer fairy. It rides the wind to swim through the sky.",
+"风幡妖精。乘着风在空中游动。"
+],
+"黒鉄のよろいをまとった三つ首の番犬": [
+"A three-headed guard dog in black iron armor. It breathes fire.",
+"身穿黑铁铠甲的三头看门犬。会从口中喷火。"
+],
+"わたあめの妖精": [
+"A cotton candy fairy. Its fluffy body smells sweet.",
+"棉花糖妖精。毛茸茸的身体散发着甜甜的香味。"
+],
+"雷太鼓を背負った雷獣": [
+"A thunder beast carrying thunder drums. Lightning strikes when it beats them.",
+"背着雷鼓的雷兽。一敲鼓就会落雷。"
+],
+"炎をまとったこぶしでなぐる": [
+"Punches with a flaming fist. May cause a burn",
+"用缠着火焰的拳头殴打。有时会造成灼伤"
+],
+"小さな電気の弾をとばす": [
+"Shoots a small electric ball. May cause Paralysis",
+"发射小电球。有时会造成麻痹"
+],
+"電気をおびたキバでかみつく": [
+"Bites with electric fangs. May cause Paralysis",
+"用带电的牙咬住对手。有时会造成麻痹"
+],
+"弾丸のような速さでなぐる": [
+"Punches as fast as a bullet. Comes out fast",
+"像子弹一样快速出拳。出招很快"
+],
+"相手に吸いよせられる爆弾をとばす": [
+"Throws a bomb drawn to the foe. Chases well",
+"投出会被对手吸引的炸弹。追踪性强"
+],
+"こぶしをふって真空の波をとばす": [
+"Swings a fist to send a vacuum wave. Comes out fast",
+"挥拳发出真空波。出招很快"
+],
+"星形の光をとばす": [
+"Shoots star-shaped light. Chases well",
+"发射星形的光。追踪性强"
+],
+"フィールド全体をゆらす。当たると素早さ-1": [
+"Shakes the whole field. Hit foes get Speed -1. Breaks all placed walls and rocks. Misses flying foes",
+"摇动整个场地。命中后速度-1。击碎所有设置的墙和岩石。打不中飞行中的对手"
+],
+"長いおうぎ形の息": [
+"A long cone breath. Spreads from the middle while charging; the farther the foe, the longer and wider",
+"长长的扇形吐息。蓄力时从中间展开，对手越远蓄力越久、范围越宽"
+],
+"空へ飛び上がり、相手の所へ降りて攻撃。20%でひるませる": [
+"Flies up, then drops on the foe. 20%: Flinch",
+"飞上天空，落到对手身边攻击。20%使对手畏缩"
+],
+"前方へ大あらし": [
+"A big storm ahead. Causes Confusion",
+"向前方掀起大风暴。使对手混乱"
+],
+"念力の刃で前方を切る": [
+"Cuts ahead with a psychic blade. Lands Critical hits easily",
+"用念力之刃切开前方。容易击中要害"
+],
+"影の爪で前方を切る": [
+"Slashes ahead with shadow claws. Lands Critical hits easily",
+"用影之爪劈砍前方。容易击中要害"
+],
+"毒の十字切り。10%でどく": [
+"A poison cross slash. 10%: Poison. Lands Critical hits easily",
+"剧毒十字斩。10%中毒。容易击中要害"
+],
+"相手のHPが減っているほど強い（最大3倍）": [
+"Stronger the lower the foe's HP (up to 3x). A KO resets the Cooldown",
+"对手HP越少越强。打倒对手后冷却立即恢复"
+],
+"追いかけるお札。当たると3秒間技が出せない": [
+"A chasing charm paper. On hit, the foe can't use moves for 3 sec",
+"追踪的符纸。命中后3秒内无法使用招式"
+],
+"追いかける影の針。当たると1.5秒動けない": [
+"A chasing shadow needle. On hit, the foe can't move for 1.5 sec",
+"追踪的影之针。命中后1.5秒无法移动"
+],
+"相手の足元に印を置き、2.5秒後にその場所を攻撃する": [
+"Puts a mark under the foe and strikes there 2.5 sec later",
+"在对手脚下放置标记，2.5秒后攻击该位置"
+],
+"追いかける弾。天候があるとその天候のタイプになり威力2倍": [
+"A chasing ball. With Weather, it takes that type and 2x Power",
+"追踪的弹。有天气时会变成该天气的属性，威力2倍"
+],
+"当たるたびにもう一度転がり、だんだん強くなる（5回まで）": [
+"Rolls again on each hit, getting stronger (up to 5 times). Stops on a miss",
+"每次命中就再滚一次，越来越强。没打中就停下"
+],
+"おそいが固く、ふき飛びにくい": [
+"Slow but tough and hard to knock back. Hits hard",
+"虽然慢但很结实，不容易被撞飞。一击很重"
+],
+"別のタブでこのゲームが動いてデータが変わりました": [
+"This game is running in another tab and the data changed.",
+"这个游戏在另一个标签页中运行，数据已经改变。"
+],
+"この画面は読みこみ直します": [
+"This screen will reload.",
+"这个画面将重新载入。"
+],
+"変化": [
+"Status",
+"变化"
+],
+"ショップの品物がいれかわりました": [
+"The shop items changed. Please pick again",
+"商店的商品更换了。请再选一次吧"
+],
+"残り⟦0⟧。今すぐ開けるには💎⟦1⟧ ジェムがいります（持っている：⟦2⟧）": [
+"⟦0⟧ left. Opening now needs 💎⟦1⟧ Gems (you have: ⟦2⟧).",
+"剩余 ⟦0⟧。立即打开需要 💎⟦1⟧ 宝石。"
+],
+"ワザステッカーを持っていません": [
+"You have no Move Stickers. They come from Blind Boxes",
+"没有技贴纸。可以从盲盒中获得"
+],
+"マギアは属性1つ＋種族1つ。◎＝有利（2倍）・△＝不利（0.5倍）": [
+"Each Magia has 1 Attribute + 1 Race. Attribute moves are compared only with the foe's Attribute, and Race moves only with the foe's Race. ◎ = Advantage (2×), △ = Disadvantage (0.5×). Normal and Beast are neutral against all.",
+"每只魔机有1个属性＋1个种族。属性招式只和对手的属性比较，种族招式只和对手的种族比较。◎＝有利、△＝不利。无和兽对谁都是普通效果。"
+],
+"「預ける」を並びかえている間は、その中で入れかえできません": [
+"You can't swap inside \"Storage\" while it's sorted. Choose \"Custom order\" to swap.",
+"「寄存」排序时无法在其中调换。改成「自行排列」就能调换。"
+],
+"⟦0⟧⟦1⟧をにがしますか？もうもどってきません": [
+"Release ⟦0⟧⟦1⟧? It won't come back.",
+"要放生⟦0⟧⟦1⟧吗？它不会再回来了。"
+],
+"強化ポイントのふりわけを全部もどす": [
+"Resets all Training point assignments",
+"把强化点数的分配全部退回"
+],
+"選んだ技を、同じタイプの技にランダムにはりかえる": [
+"Swaps the chosen move for a random learnable move of the same type",
+"把选中的招式随机换成同属性的招式"
+],
+"選んだ技1つを、そのマギアが覚える技の中から好きな技にはりかえる": [
+"Swaps 1 chosen move for any move you like that this Magia can learn",
+"把选中的1个招式换成这只魔机能学会的任意招式"
+],
+"そのマギアのタイプの技なら、ふだんは覚えない技でも好きに選んではれる": [
+"Pick any move of this Magia's type, even ones it normally can't learn",
+"只要是这只魔机属性的招式，平时学不会的也能自由选择齿轮上"
+],
+"前へ前へ": [
+"Always pushes forward. Rarely hides",
+"一直向前冲。几乎不躲藏"
+],
+"すぐ陰に隠れる": [
+"Hides in cover fast. Attacks from afar",
+"马上躲到掩体后。从远处瞄准"
+],
+"早撃ちの手数型": [
+"Lots of quick shots. Never uses charge moves",
+"快速连射型。不使用蓄力招式"
+],
+"どっしり型": [
+"Steady type. Waits with walls, healing, and counters",
+"稳守型。用墙、回复和反击来等待"
+],
+"踏ん張り型": [
+"Never gives up. The lower its HP, the faster and fiercer it gets",
+"顽强型。HP越少越快越猛"
+],
+"技を撃たないときは近い距離（〜150）を保つ": [
+"When not attacking, stays close (〜150). Rarely hides",
+"不出招时保持近距离。几乎不躲藏"
+],
+"技を撃たないときは普通の距離（150〜290）を保つ": [
+"When not attacking, keeps a normal distance (150〜290). Waits with walls, healing, and counters",
+"不出招时保持普通距离。用墙、回复和反击来等待"
+],
+"技を撃たないときは遠い距離（290〜）を保つ": [
+"When not attacking, stays far (290〜). Waits in cover when idle",
+"不出招时保持远距离。空闲时在掩体后等待"
+],
+"3すくみ：👊近→ 👣遠→ 🛹中→ 👊近": [
+"3-way: 👊Near → 👣Far → 🛹Mid → 👊Near.",
+"三方相克：👊近 → 👣远 → 🛹中 → 👊近。"
+],
+"弱い相手から受けるときはぼうぎょ1.15倍、苦手な相手からは0.87倍": [
+"When hit by a foe you beat, Defense ×1.15; by a foe that beats you, ×0.87.",
+"受到被自己克制的对手攻击时防御1.15倍，受到克制自己的对手攻击时0.87倍。"
+],
+"性格は能力の上下だけ": [
+"Nature only changes stats. Moves set to fire \"on the spot\" follow this plan's movement.",
+"性格只影响能力升降。出招方式为「原地」的招式会按照这个作战的走位来出招。"
+],
+"⟦0⟧⟦1⟧で⟦2⟧の3体と⟦3⟧回": [
+"⟦0⟧ ⟦1⟧ vs. ⟦2⟧'s 3 monsters, ⟦3⟧ times. Stats shown are for this one",
+"⟦0⟧⟦1⟧ 与⟦2⟧的3只对战⟦3⟧次。记录是这只的数据"
+],
+"変更が保存されていません": [
+"Your changes aren't saved. Save before leaving?",
+"更改尚未保存。要保存后再离开吗？"
+],
+"です": [
+". Here you plan how your Magia moves in battle.",
+"。这里用来安排魔机在战斗中怎么行动。"
+],
+"どれかひとつタップしてみましょう": [
+"Tap any one.",
+"随便点一个试试吧。"
+],
+"作戦には、じゃんけんのような相性があります": [
+"Plans have rock-paper-scissors matchups.",
+"作战之间有像石头剪刀布一样的相克关系。"
+],
+"」に、🛹「どっしり」は👊「がんがん」に強くなります": [
+"\", and 🛹 \"Steady\" beats 👊 \"Rush\".",
+"」，🛹「稳守」克制 👊「猛攻」。"
+],
+"よゆう": [
+"Ahead",
+"从容"
+],
+"」になり、攻撃を受けにくく（防御1.07倍）なります": [
+"\" and take less damage (Defense ×1.07). If weaker, you get \"",
+"」，更不容易受伤。较弱时会变成「"
+],
+"けいかい": [
+"On guard",
+"警戒"
+],
+"」になり、受けやすく（0.93倍）なります": [
+"\" and take more damage (×0.93). Same group gives \"Rivals!\".",
+"」，更容易受伤。同一组之间会变成「是劲敌！」。"
+],
+"左の番号をドラッグすると、順番を入れ替えられます": [
+"Drag the number on the left to change the order.",
+"拖动左边的编号就能调换顺序。"
+],
+"③条件を置いてみましょう": [
+"③ Let's place a condition.",
+"③ 来放一个条件吧。"
+],
+"」を選んでください": [
+"\" from the list.",
+"」。"
+],
+"」に、この技を撃ちます": [
+"\", it uses this move.",
+"」，就会使出这个招式。"
+],
+"置いた条件をタップすると、⟦0⟧にも変えられます": [
+"Tap a placed condition to change it to ⟦0⟧, too.",
+"点击已放置的条件，也能改成⟦0⟧。"
+],
+"」を○番の「その場で撃つ」の枠へ置いてみましょう": [
+"\" → put it in move ○'s \"Fire on the spot\" slot.",
+"」放到○号的「原地出招」格子里试试吧。"
+],
+"5回戦わせて、結果を見せてくれます": [
+"It battles 5 times and shows you the results.",
+"会战斗5次并显示结果。"
+],
+"」を見ると、条件が成り立ったかと、何回撃ったかが分かります": [
+"\" shows if each condition was met and how many times moves were used.",
+"」可以看到条件是否满足以及使出了几次。"
+],
+"うまくいかなければ、条件を変えてもう一度試しましょう": [
+"If it doesn't work, change the conditions and try again.",
+"如果不顺利，就改一下条件再试一次吧。"
+],
+"では人形を相手に、条件が今○か×かを見ながら試せます": [
+" lets you test against a dummy while seeing if each condition is ○ or × right now.",
+" 可以和人偶对战，一边看条件现在是○还是×一边测试。"
+],
+"「じょうきょうをつくる」で、HP・状態・天候・人形の攻撃なども変えられます": [
+"With \"Set up a scene\", you can change HP, status, weather, the dummy's attacks, and more.",
+"用「布置情况」可以改变HP、状态、天气、人偶的攻击等。"
+],
+"します": [
+" it. This Magia's Training gets saved.",
+"。这只魔机的训练就会被保存。"
+],
+"⑧これで試合では、この設定どおりに戦います": [
+"⑧ Now it fights just as set in matches. During battle, all you can do is ",
+"⑧ 这样在比赛中就会按照这个设置战斗。战斗中你能做的只有"
+],
+"だけです": [
+".",
+"。"
+],
+"負けたら、ここに戻って直しましょう": [
+"If you lose, come back here and fix it. That's the end of the Training tutorial!",
+"输了的话，就回到这里修改吧。训练教程到此结束！"
+],
+"＋技をここへ": [
+"＋ Move here",
+"＋ 把招式放这里"
+],
+"「使うとき」の条件が合った技を、1→4の順に撃ちます": [
+"Moves whose \"Use when\" condition is met are used in order 1→4.",
+"满足「使用时」条件的招式，按1→4的顺序使出。"
+],
+"条件をつけた技は、条件が合うときしか撃ちません": [
+"Moves with conditions are only used when the conditions are met.",
+"设了条件的招式，只在条件满足时才会使出。"
+],
+"「使わないとき」の条件が合うと、その技は撃ちません": [
+"If a \"Don't use when\" condition is met, that move isn't used.",
+"满足「不使用时」的条件时，不会使出该招式。"
+],
+"「連続で撃ったら後回し」をつけた技は、続けてその回数撃つと、ほかの技を1回撃つまでいちばん後回しになります": [
+"A move with \"Delay after repeats\" goes to the very back after being used that many times in a row, until another move is used once.",
+"设了「连续使出后延后」的招式，连续使出该次数后，在使出其他招式1次之前会排到最后。"
+],
+"条件は横に並べると「かつ」、下の行に入れると「または」": [
+"Conditions side by side mean \"and\"; on the row below they mean \"or\".",
+"条件横着排是「并且」，放到下一行是「或者」。"
+],
+"条件が合う技がないときは、お任せAIが条件なしの技から選びます": [
+"If no move's conditions match, the auto AI picks from moves without conditions. Dodging is always automatic.",
+"没有满足条件的招式时，自动AI会从没有条件的招式中选择。闪避总是自动的。"
+],
+"置く場所をタップ": [
+"Tap where to place it",
+"点击要放置的位置"
+],
+"左の枠をタップ →一覧から選ぶ": [
+"Tap a slot on the left → pick from the list",
+"点击左边的格子 → 从列表中选择"
+],
+"→技の枠へ": [
+"→ To move slot",
+"→ 放到招式格"
+],
+"この設定どおりに戦う": [
+"Fights as set",
+"按照这个设置战斗"
+],
+"⟦0⟧はこのマギアが覚えられない技です": [
+"This Magia can't learn ⟦0⟧. Swap it for another move before testing",
+"⟦0⟧是这只魔机学不会的招式。请换成别的招式再测试"
+],
+"仮保存しました": [
+"Draft saved",
+"已暂存"
+],
+"⟦0⟧は覚えられません": [
+"Can't learn ⟦0⟧",
+"学不会⟦0⟧"
+],
+"ワザステッカーは使いません": [
+"No Move Stickers used. Confirm these settings?",
+"不使用技贴纸。要按这个设置确定吗？"
+],
+"今の設定は上書きされます": [
+"Current settings will be overwritten",
+"当前设置会被覆盖"
+],
+"試合中は見るだけ": [
+"Watch only during matches. Fights per Training settings",
+"比赛中只能观看。按训练设置战斗"
+],
+"ONにすると試合中は見るだけ": [
+"When ON, you just watch during matches. Set it up in the \"Training\" tab below",
+"开启后比赛中只能观看。在下方的「训练」标签中设置"
+],
+"このマギアはバトルタワーにちょうせん中です": [
+"This Magia is taking on the Battle Tower. Quit the Tower before releasing it.",
+"这只魔机正在挑战对战塔。请先退出塔再放生。"
+],
+"同じ種類のマギアを1体使うときょうかポイント +⟦0⟧（最大⟦1⟧）。ポイントを好きな能力にふりわけて「確定する」で決まる（1つ⟦2⟧まで・1ポイントで+⟦3⟧）": [
+"Use 1 Magia of the same kind for +⟦0⟧ Training points (max ⟦1⟧). Assign points to any stat and tap \"Confirm\" to lock them in (up to ⟦2⟧ each, +⟦3⟧ per point).",
+"使用1只同种魔机可获得强化点数 +⟦0⟧。把点数分配给喜欢的能力，按「确定」就会生效。"
+],
+"⟦0⟧たいを使って⟦1⟧を強化しますか？（+⟦2⟧）使ったマギアはいなくなります": [
+"Use ⟦0⟧ Magia to train ⟦1⟧? (+⟦2⟧) Used Magia will be gone.",
+"要使用⟦0⟧只魔机强化⟦1⟧吗？使用的魔机会消失。"
+],
+"ふりわけたポイントがまだ確定していません": [
+"Your point assignments aren't confirmed yet. Close without confirming?",
+"分配的点数还没有确定。不确定就关闭吗？"
+],
+"技はつかまえたときに決まります": [
+"Moves are set when caught. Swap them with Move Stickers",
+"招式在捕捉时就决定了。可以用技贴纸替换"
+],
+"他の試合を始めたので、オンライン対戦の相手を探すのをやめました": [
+"You started another match, so we stopped looking for an online opponent.",
+"你开始了其他比赛，所以已停止寻找在线对战对手。"
+],
+"ほろびのうたがひびいた！10びょうでほろびる": [
+"Horobi no Uta rang out! Faint in 10s",
+"Horobi no Uta响起了！10秒后倒下"
+],
+"雨が降りだした！": [
+"It started to rain!",
+"开始下雨了！"
+],
+"日差しが強くなった！": [
+"The sun got bright!",
+"阳光变强了！"
+],
+"すなあらしがふき始めた！": [
+"A sandstorm kicked up!",
+"刮起了沙暴！"
+],
+"雪が降りだした！": [
+"It started to snow!",
+"开始下雪了！"
+],
+"でんかいになった！": [
+"Electric Field!",
+"变成了电气场地！"
+],
+"そうげんになった！": [
+"Grassy Field!",
+"变成了青草场地！"
+],
+"ねんりきのばになった！": [
+"Psychic Field!",
+"变成了精神场地！"
+],
+"すぐ陰にかくれる": [
+"Hides fast. Aims from far away",
+"马上躲到暗处。从远处瞄准"
+],
+"ふんばり型": [
+"Never-give-up type. Faster and fiercer as HP drops",
+"坚持型。HP越少越快越猛"
+],
+"びくびく…": [
+"Scared...",
+"战战兢兢…"
+],
+"⟦0⟧につながりませんでした": [
+"Couldn't connect to ⟦0⟧. Check your connection and try again.",
+"无法连接到⟦0⟧。请检查网络后再试一次。"
+],
+"このアプリではまだ⟦0⟧が使えません": [
+"⟦0⟧ isn't available in this app yet.",
+"这个应用暂时还不能使用⟦0⟧。"
+],
+"⟦0⟧はclaude.aiにサインインして、このゲームのページを開いたときだけ使えます": [
+"⟦0⟧ only works when you sign in to claude.ai and open this game's page.",
+"只有登录 claude.ai 并打开本游戏页面时才能使用⟦0⟧。"
+],
+"オフラインで遊んでいます": [
+"Playing offline. It'll be sent to the server once connected",
+"正在离线游玩。连上网络后会发送到服务器"
+],
+"サーバーにつながりません": [
+"Can't reach the server. Please play online",
+"无法连接服务器。请在线玩哦"
+],
+"サーバーにつながりませんでした（⟦0⟧）": [
+"Couldn't reach the server (⟦0⟧). Please try again",
+"无法连接服务器。请再试一次"
+],
+"このデータは他の端末へ移しました": [
+"This data was moved to another device. Play on the device where you used the recovery code",
+"这个数据已转移到其他设备。请在使用恢复码的设备上玩"
+],
+"相手とつながりませんでした": [
+"Couldn't connect to the opponent. Please search again",
+"无法连接对手。请重新寻找"
+],
+"その合言葉の部屋は見つかりませんでした": [
+"No room has that passcode. Please check it",
+"找不到这个暗号的房间。请检查暗号"
+],
+"相手の画面が止まっていたので、相手が試合をやめました": [
+"The opponent's screen froze, so they quit the match",
+"对手的画面卡住了，所以对手退出了比赛"
+],
+"相手がいなくなりました": [
+"The opponent left. Please search again",
+"对手离开了。请重新寻找"
+],
+"この部屋はもう対戦が始まっています": [
+"This room's battle has already started",
+"这个房间的对战已经开始了"
+],
+"ホストが見つかりました": [
+"Host found. Waiting to start…",
+"找到房主了。正在等待开始…"
+],
+"相手の通信が切れました": [
+"The opponent's connection dropped",
+"对手的连接断开了"
+],
+"相手の画面が止まったままです": [
+"The opponent's screen is still frozen. Quit the match?",
+"对手的画面一直卡住。要退出比赛吗？"
+],
+"相手の通信が止まったのでやめました": [
+"Quit because the opponent's connection stopped",
+"对手的连接中断，已退出"
+],
+"まだチームがありません": [
+"No teams yet.",
+"还没有队伍。"
+],
+"読みこめませんでした": [
+"Couldn't load. Please try again later.",
+"加载失败。请稍后再试。"
+],
+"このチームはいっぱいです": [
+"This team is full.",
+"这个队伍已满。"
+],
+"メンバー": [
+"Members",
+"成员"
+],
+"⟦0⟧さんにリーダーをたのみますか？受けてもらえたら、チームの名前・もんしょう・メンバー・ポイントはそのまま引きつがれ、あなたはメンバーになります": [
+"Ask ⟦0⟧ to be leader? If they accept, the team's name, emblem, members and points stay the same, and you become a member.",
+"要请⟦0⟧担任会长吗？对方接受后，队伍的名称、徽记、成员和点数都会保留，你将成为普通成员。"
+],
+"チームを解散しますか？メンバーもみんなぬけたことになります": [
+"Disband the team? All members will be removed too.",
+"要解散队伍吗？所有成员也都会退出。"
+],
+"通報しました": [
+"Reported. We'll check it and take action.",
+"已举报。我们会确认并处理。"
+],
+"通報できませんでした": [
+"Couldn't report. Please try again.",
+"举报失败。请再试一次。"
+],
+"合言葉で友だちと対戦": [
+"Battle friends with a passcode",
+"用暗号和朋友对战"
+],
+"選んだ": [
+"Selected. Long-press to copy",
+"已选中。长按复制"
+],
+"⟦0⟧はおどろいてにげていった": [
+"⟦0⟧ got scared and ran off",
+"⟦0⟧被吓跑了"
+],
+"で教えておきます": [
+".",
+"里教给它们。"
+],
+"マギアは自分で技を選んで撃ちます": [
+"Magia pick and use moves by themselves.",
+"魔机会自己选择并使出招式。"
+],
+"は、技が飛んでくる方向です": [
+" shows where the move will fly.",
+"表示招式飞来的方向。"
+],
+"強い技ほど、溜めが長くなります": [
+"Stronger moves take longer to charge.",
+"越强的招式，蓄力时间越长。"
+],
+"」の高さで決まります": [
+"\". It can't always dodge.",
+"」的高低。并不是每次都能躲开。"
+],
+"してかわすことがあります": [
+" and dodge.",
+"躲开。"
+],
+"で戦っています": [
+". Auto picks moves at random, so it can't beat strong foes.",
+"模式战斗。自动模式会随便选招式，赢不了强敌。"
+],
+"のマギアをタップすると、交代できます": [
+" Magia can be tapped to switch in. That's all you can do in battle!",
+"的魔机，点击就能替换。战斗中你能做的只有这个！"
+],
+"」は、タイプ相性の目安です": [
+"\" is a hint for type matchups.",
+"」是属性相克的参考。"
+],
+"をタップしてみましょう": [
+" — try tapping it!",
+"，点点看吧。"
+],
+"」と表示されました": [
+"\" appeared. That means a good ",
+"」。这表示与对手的"
+],
+"が良いしるしです": [
+" against the foe.",
+"很好。"
+],
+"作戦の相性は👊近→ 👣遠→ 🛹中→ 👊近": [
+"Plan matchups: 👊Close → 👣Far → 🛹Mid → 👊Close. Choose Plans in Training.",
+"作战相性：👊近 → 👣远 → 🛹中 → 👊近。作战可以在训练中选择。"
+],
+"👊近→ 👣遠→ 🛹中→ 👊近": [
+"👊Close → 👣Far → 🛹Mid → 👊Close. Choose Plans in Training.",
+"👊近 → 👣远 → 🛹中 → 👊近。作战可以在训练中选择。"
+],
+"野生のマギアが現れました！空き地では、マギアを捕まえて仲間にできます": [
+"A wild Magia appeared! In the vacant lot, you can catch Magia to join your team.",
+"野生魔机出现了！在空地里可以捕捉魔机，让它成为伙伴。"
+],
+"まずは戦って、少し弱らせましょう": [
+"First, battle it to weaken it a bit.",
+"先战斗，让它虚弱一点吧。"
+],
+"」をタップして、マギアを捕まえましょう": [
+"\" below to catch the Magia.",
+"」来捕捉魔机吧。"
+],
+"へ行って、マギアを捕まえてみましょう": [
+" together and catch Magia. Tap \"",
+"捕捉魔机吧。请点击「"
+],
+"」をタップしてください": [
+"\".",
+"」。"
+],
+"ブラインドボックスからは、マギア・ワザステッカー・ボックスなどが出てきます": [
+"Blind Boxes can give Magia, Move stickers, Capsules and more.",
+"盲盒里会开出魔机、技贴纸、胶囊等。"
+],
+"ブラインドボックスは、時間が経つと開けられるようになります": [
+"Blind Boxes can be opened after some time passes.",
+"盲盒经过一段时间后就能打开。"
+],
+"を使えば、すぐに開けることもできます": [
+" can open them right away, too.",
+"，用它也能马上打开。"
+],
+"です！ブラインドボックスをタップして開けてみましょう": [
+"! Tap the Blind Box to open it.",
+"！点击盲盒打开看看吧。"
+],
+"」へ行ってみましょう": [
+"\". First is your \"",
+"」看看吧。首先是和劲敌的「"
+],
+"テストはここまでです": [
+"That's the end of the test. Restoring your original data.",
+"测试到此结束。将恢复原来的数据。"
+],
+"最初の流れを通しで試します": [
+"Test the whole opening flow. Test data isn't saved; your original data comes back at the end.",
+"完整测试开头流程。测试中的数据不会保存，最后会恢复原来的数据。"
+],
+"チュートリアルを終えました": [
+"Tutorial finished. You can replay it anytime from Help.",
+"教程结束了。随时可以从帮助重新开始。"
+],
+"相手との間に金色の壁を作る（⟦0⟧秒）。味方の飛び道具は通りぬけて3つに分かれる（1つ0.7倍）": [
+"Makes a gold wall between you and the foe (⟦0⟧s). Your projectiles pass through and split into 3 (0.7× each). Blocks foe projectiles",
+"在与对手之间造出金色的墙。己方飞行道具能穿过并分成3个。挡住对手的飞行道具"
+],
+"相手との間に壁を作る（⟦0⟧秒）。技も通さない⟦1⟧。壊せるのは⟦2⟧の技だけ": [
+"Makes a wall between you and the foe (⟦0⟧s). Blocks moves too⟦1⟧. Can't stop moves from the sky or fissures. Only ⟦2⟧ moves can break it",
+"在与对手之间造出墙。招式也无法穿过⟦1⟧。挡不住从天而降的招式和地裂。只有⟦2⟧的招式能打破"
+],
+"空へ飛び上がり、相手の所へ降りて攻撃": [
+"Flies into the sky and lands on the foe to attack. Bigger bodies hit a wider area on landing",
+"飞上天空，落到对手所在处攻击。体型越大，落地的攻击范围越广"
+],
+"地面に潜り、相手の足元から攻撃": [
+"Digs underground and attacks from under the foe. The attack area depends on body size. Holes stay, and Magia no bigger than you can travel hole to hole",
+"钻入地下，从对手脚下攻击。出来时的攻击范围由体型决定。挖的洞会留下，不比自己大的魔机可以从洞钻到洞"
+],
+"相手の足元に⟦0⟧を作る。⟦1⟧": [
+"Makes ⟦0⟧ under the foe. ⟦1⟧",
+"在对手脚下造出⟦0⟧。⟦1⟧"
+],
+"8秒間、自分の周りを木の葉が回って攻撃": [
+"For 8s, leaves spin around you and attack",
+"8秒内，树叶围绕自身旋转攻击"
+],
+"胞子を5個ばらまく": [
+"Scatters 5 spores. They explode when stepped on",
+"撒出5个孢子。踩到就会爆炸"
+],
+"相手の足元に見えない罠を仕掛ける。踏むと2.4秒動けない": [
+"Sets an invisible trap under the foe. Stepping on it stops them for 2.4s",
+"在对手脚下设置看不见的陷阱。踩到后2.4秒无法行动"
+],
+"影に潜り、相手の後ろへワープして攻撃": [
+"Sinks into shadows and warps behind the foe to attack",
+"潜入影子，瞬移到对手身后攻击"
+],
+"前へゆっくり進む波": [
+"A slow wave that moves forward. Allies move faster where it passed",
+"缓缓向前推进的波。波经过后我方能移动得更快"
+],
+"相手の場に毒のトゲをまく": [
+"Scatters poison spikes on the foe's side. Poisons foes that switch in",
+"在对手场地撒下毒刺。让替换上场的对手中毒"
+],
+"投げ技：つかんで5連打": [
+"Throw: grabs and hits 5 times",
+"投技：抓住后连打5次"
+],
+"当てたら近くの壁の後ろへすばやく隠れる": [
+"On hit, quickly hides behind a nearby wall. If no wall, goes back to start",
+"命中后迅速躲到附近的墙后。没有墙就回到原位"
+],
+"相手の周りを回って渦を作る": [
+"Circles the foe to make a whirlpool",
+"绕着对手转圈形成漩涡"
+],
+"⟦0⟧回続けて攻撃": [
+"Attacks ⟦0⟧ times in a row",
+"连续攻击⟦0⟧次"
+],
+"相手を混乱させる": [
+"Confuses the foe",
+"使对手混乱"
+],
+"場に出てから1回だけ使える": [
+"Usable once after entering",
+"上场后只能使用1次"
+],
+"自分の周りぜんぶを攻撃": [
+"Attacks all around. Clears all traps and seeds on both sides",
+"攻击自己周围全部。清除双方场地上的所有机关和种子"
+],
+"しるしの付いた相手には⟦0⟧倍": [
+"×⟦0⟧ vs marked foes",
+"对有印记的对手造成⟦0⟧倍伤害"
+],
+"長いおうぎ形": [
+"Long cone. Spreads out from the center while charging",
+"长扇形。蓄力时从扇形中央向外扩大"
+],
+"⟦0⟧秒以内にもう1回撃てる": [
+"Can fire again within ⟦0⟧s",
+"⟦0⟧秒内可再发射1次"
+],
+"⟦0⟧回続けて撃てる": [
+"Can fire ⟦0⟧ times in a row",
+"可连续发射⟦0⟧次"
+],
+"当たると⟦0⟧秒動けない": [
+"Can't move for ⟦0⟧s on hit",
+"命中后⟦0⟧秒无法移动"
+],
+"当たると⟦0⟧秒技が出せない": [
+"Can't use moves for ⟦0⟧s on hit",
+"命中后⟦0⟧秒无法出招"
+],
+"相手とすぐにつながり、⟦0⟧秒間ダメージを与え続ける。近いほど強い（1秒で最大威力30）": [
+"Links to the foe instantly and deals damage for ⟦0⟧s. Stronger up close (max 30 Power per sec). Breaks if too far",
+"立刻与对手相连，⟦0⟧秒内持续造成伤害。越近越强。离太远会断开"
+],
+"自分と相手に10秒のカウント。0になると倒れる": [
+"Starts a 10s countdown on you and the foe. Faint at 0",
+"给自己和对手10秒倒计时。归0时倒下"
+],
+"相手の足元に予告を置き、⟦0⟧秒後に攻撃": [
+"Marks the ground under the foe and attacks ⟦0⟧s later",
+"在对手脚下放置预警，⟦0⟧秒后攻击"
+],
+"当たると爆弾を付ける。⟦0⟧秒後に爆発（⟦1⟧倍）": [
+"Attaches a bomb. Explodes after ⟦0⟧s (×⟦1⟧). Hit a bombed foe again to blow it now and stun it",
+"命中后安上炸弹。⟦0⟧秒后爆炸。再次命中带炸弹的对手会立刻爆炸并使其昏厥"
+],
+"フィールド全体をゆらす": [
+"Shakes the whole field. Breaks all walls and rocks placed by Magia",
+"震动整个场地。摧毁魔机放置的所有墙和岩石"
+],
+"天候があると、その天候のタイプで威力2倍": [
+"In weather, takes that weather's type with ×2 Power",
+"有天气时，变为该天气的属性，威力2倍"
+],
+"必ず当たる。⟦0⟧秒後、その間に与えたダメージの⟦1⟧%を追加で与える": [
+"Never misses. Dashes behind the foe as a shadow and leaves a mark. After ⟦0⟧s, deals an extra ⟦1⟧% of the damage dealt meanwhile",
+"必定命中。化为影子冲到对手背后，刻下印记。⟦0⟧秒后，追加期间所造成伤害的⟦1⟧%"
+],
+"当たると⟦0⟧秒間、空を飛べなくなる": [
+"Can't fly for ⟦0⟧s on hit",
+"命中后⟦0⟧秒内无法飞行"
+],
+"当たるたびに必ずもう一度転がり、だんだん強くなる（5回まで）": [
+"Always rolls again on hit, getting stronger (up to 5). Stops on a miss",
+"每次命中必定再滚一次，越来越强。落空就停下"
+],
+"足元に光を残し、3秒後にその上にいる味方のHPを50%回復": [
+"Leaves light underfoot; after 3s heals the ally on it by 50% HP",
+"在脚下留下光，3秒后为站在上面的我方回复50%HP"
+],
+"相手を水属性にする": [
+"Turns the foe Water type",
+"把对手变为水属性"
+],
+"自分の状態異常と混乱、積み重ねを治す": [
+"Cures own status, Confusion and stacks",
+"治愈自己的异常状态、混乱和叠加效果"
+],
+"最大HPの⟦0⟧%のシールドを張る（⟦1⟧秒）": [
+"Puts up a shield of ⟦0⟧% max HP (⟦1⟧s). It takes damage first",
+"张开最大HP⟦0⟧%的护盾。优先承受伤害"
+],
+"飛び道具・ビームを跳ね返す": [
+"Reflects projectiles and beams",
+"反弹飞行道具和光束"
+],
+"3秒ごとに最大HPの1/32のダメージ": [
+"Damage of 1/32 max HP every 3s. Physical move damage is halved. Fire types are immune.",
+"每3秒受到最大HP 1/32的伤害。物理招式的伤害减半。火属性不会灼伤。"
+],
+"素早さが半分。2.5秒ごとに25%で0.8秒しびれて動けない": [
+"Speed halved. Every 2.5s, 25% chance to be stuck for 0.8s. Electric types are immune.",
+"速度减半。每2.5秒有25%几率麻痹0.8秒无法行动。雷属性不会麻痹。"
+],
+"3秒ごとにダメージ。最大HPの1/48から始まり、そのたびに増えて1/12まで": [
+"Damage every 3s. Starts at 1/48 max HP and grows each time, up to 1/12. Resets on switch. Machine race is immune.",
+"每3秒受到伤害。从最大HP的1/48开始，每次增加，最多1/12。替换后增幅重置。机械种族不会中毒。"
+],
+"3秒ごとに最大HPの1/24のダメージ": [
+"Damage of 1/24 max HP every 3s. Machine race is immune.",
+"每3秒受到最大HP 1/24的伤害。机械种族不会中毒。"
+],
+"3秒動けない。亜人の技でもとけるが、その技のダメージは1.5倍": [
+"Can't move for 3s. Thaws at once when hit by a Fire move. Demi moves thaw it too, but deal ×1.5 damage. Fire types are immune.",
+"3秒无法行动。受到火属性招式会立刻解冻。亚人招式也能解冻，但该招式伤害1.5倍。火属性不会冰冻。"
+],
+"5秒動けない": [
+"Can't move for 5s.",
+"5秒无法行动。"
+],
+"しばらく動けなくなる（ふつうは0.7秒。ひっぱたきで壁にぶつかると3秒）": [
+"Can't move for a bit (usually 0.7s; 3s if slammed into a wall by Hippataki).",
+"暂时无法行动。"
+],
+"しばらくの間、技を出そうとするとときどき転んだり、勝手によけたりする": [
+"For a while, sometimes trips or dodges on its own when trying to use a move.",
+"一段时间内，想出招时会时不时摔倒或擅自闪避。"
+],
+"ダメージが1.5倍": [
+"Damage ×1.5.",
+"伤害1.5倍。"
+],
+"タイプの相性が良く、ダメージが2倍（2つのタイプどちらにもばつぐんなら4倍）": [
+"Good type matchup: damage ×2 (×4 if super effective on both types).",
+"属性相克有利，伤害2倍。"
+],
+"威力100以上の技。1戦で使える回数に限りがある": [
+"Moves with 100+ Power. Limited uses per battle.",
+"威力100以上的招式。每场可用次数有限。"
+],
+"相手の技を受けた瞬間に自動で出る": [
+"Fires automatically the instant a foe's move hits.",
+"受到对手招式的瞬间自动使出。"
+],
+"体力。0になるとたおれる": [
+"Health. Faints at 0.",
+"体力。归0就会倒下。"
+],
+"物理技のダメージが増える": [
+"Raises physical move damage. Physical = moves that hit with the body.",
+"提高物理招式的伤害。物理招式＝用身体撞击的招式。"
+],
+"物理技から受けるダメージが減る": [
+"Reduces damage from physical moves.",
+"减少受到的物理招式伤害。"
+],
+"属性技のダメージが増える": [
+"Raises special move damage. Special = moves that reach from afar.",
+"提高属性招式的伤害。属性招式＝从远处命中的招式。"
+],
+"属性技から受けるダメージが減る": [
+"Reduces damage from special moves.",
+"减少受到的属性招式伤害。"
+],
+"指示なしで自動でよける確率（平均約15%・最大60%）": [
+"Chance to dodge on its own (avg ~15%, max 60%).",
+"无需指令自动闪避的几率。"
+],
+"相手との距離。近い＝150未満・普通＝150〜290・遠い＝290以上": [
+"Distance to the foe. Near = under 150, Mid = 150–290, Far = 290+.",
+"与对手的距离。近＝不到150、普通＝150〜290、远＝290以上。"
+],
+"自分が選んだ状態異常か混乱になっているとき": [
+"When you have the chosen status or Confusion. Use it to cure with Arainagasu. \"Poison\" includes Bad poison.",
+"自己处于所选的异常状态或混乱时。用Arainagasu治愈时使用。「中毒」也包括剧毒。"
+],
+"1回目で力をためて2回目で放つ技に置く": [
+"For moves that charge on the 1st use and fire on the 2nd. \"Charged\" = ready to fire now; \"Not yet\" = about to charge. Set only \"Charged\" to leave charging to auto; set only \"Not yet\" to leave firing to auto. Only for this kind of move.",
+"放在第1次蓄力、第2次释放的招式上。「已蓄力」指蓄力完毕可立即释放，「还没」指接下来要蓄力。只放「已蓄力」则蓄力交给自动，只放「还没」则释放交给自动。不能放在其他招式上。"
+],
+"時間で使える回数がたまる技に置く": [
+"For moves that store uses over time. When stored uses are at least the chosen number. Only for this kind of move.",
+"放在随时间积累使用次数的招式上。积累次数达到所选数量以上时。不能放在其他招式上。"
+],
+"相手の攻撃が当たるその瞬間": [
+"The instant a foe's attack hits. Set it on Guard Shell, Counter, Dashinuki, etc. to fire right when hit. Can combine with other conditions using \"AND\". Without this condition, it won't fire when hit. Only for guard-type moves.",
+"对手的攻击命中的那一瞬间。放在Guard Shell、Counter、Dashinuki等招式上，受击瞬间会当场使出。可以用「且」与其他条件组合。不放这个条件，受击瞬间就不会使出。只能放在防御类招式上。"
+],
+"場のフィールドが選んだもののとき。フィールドは15秒続く": [
+"When the field is the chosen one. Fields last 15s.",
+"场上的场地为所选种类时。场地持续15秒。"
+],
+"場の天候が選んだもののとき。天候は20秒続く": [
+"When the weather is the chosen one. Weather lasts 20s.",
+"场上的天气为所选种类时。天气持续20秒。"
+],
+"自分のHPが選んだ割合より少ないとき": [
+"When your HP is below the chosen %.",
+"自己的HP低于所选比例时。"
+],
+"相手のHPが選んだ割合より少ないとき": [
+"When the foe's HP is below the chosen %.",
+"对手的HP低于所选比例时。"
+],
+"自分のタイプと相手のタイプを比べて、有利・互角・不利のどれか": [
+"Compares your type with the foe's: Advantage, Even or Disadvantage.",
+"比较自己与对手的属性：有利、势均力敌、不利之一。"
+],
+"相手の状態異常。「どれか」「なし」または1つを選ぶ": [
+"Foe's status. Pick \"Any\", \"None\" or one. \"Flinch\" = while it's flinching and can't move.",
+"对手的异常状态。选择「任意」「无」或其中1种。「畏缩」指畏缩无法行动期间。"
+],
+"相手が攻撃技を出す直前のためをしているとき": [
+"When the foe is charging up right before an attack move.",
+"对手在使出攻击招式前正在蓄力时。"
+],
+"そのまま当てられる技があるとき": [
+"When you have a move that can hit directly.",
+"有能直接命中的招式时。"
+],
+"障害物・技のかべにさえぎられて、そのままでは当てられる技がないとき": [
+"When obstacles or move walls block you and no move can hit directly.",
+"被障碍物或招式墙挡住，没有能直接命中的招式时。"
+],
+"自分の能力の段階が「+2以上」「+5以下」「-1以上」「-3以下」などのとき": [
+"When your stat stage is like \"+2 or more\", \"+5 or less\", \"-1 or more\", \"-3 or less\". Pick \"or more/or less\" and the stage separately. Resets on switch.",
+"自己的能力等级为「+2以上」「+5以下」「-1以上」「-3以下」等时。可分别选择以上/以下和等级。替换后恢复原状。"
+],
+"相手の能力の段階が「+2以上」や「-1以下」、「0以下」などのとき": [
+"When the foe's stat stage is like \"+2 or more\", \"-1 or less\" or \"0 or less\". Pick \"or more/or less\" and the stage separately.",
+"对手的能力等级为「+2以上」、「-1以下」、「0以下」等时。可分别选择以上/以下和等级。"
+],
+"この試合で、選んだ技を選んだ回数以上撃ったとき": [
+"When the chosen move has been used the chosen number of times or more this match.",
+"本场比赛中，所选招式已使用所选次数以上时。"
+],
+"直前に撃った技が選んだ技のとき": [
+"When the last move used is the chosen move.",
+"上一个使出的招式是所选招式时。"
+],
+"選んだ技を撃ったことがあり、その効果がもうないとき": [
+"When you've used the chosen move and its effect is gone.",
+"使出过所选招式，且其效果已消失时。"
+],
+"場に出てから、この技をまだ撃っていないとき": [
+"After entering, if this move hasn't been used yet. Fires before other conditions.",
+"上场后还没使出此招式时。优先于其他条件使出。"
+],
+"相手が交代して出てきてから、この技をまだ撃っていないとき（10秒まで）": [
+"After the foe switches in, if this move hasn't been used yet (up to 10s). Fires before other conditions.",
+"对手替换上场后还没使出此招式时。优先于其他条件使出。"
+],
+"いつもの動きのまま撃つ": [
+"Fires while moving as usual.",
+"保持平常的动作使出。"
+],
+"距離150未満まで近づいてから撃つ（3秒たったら撃つ）": [
+"Fires after getting within 150 (fires anyway after 3s).",
+"靠近到距离不到150后使出。"
+],
+"260以上離れてから撃つ（3秒たったら撃つ）": [
+"Fires after getting 260+ away (fires anyway after 3s).",
+"拉开260以上后使出。"
+],
+"障害物の陰に隠れてから撃つ": [
+"Fires after hiding behind an obstacle.",
+"躲到障碍物后面再使出。"
+],
+"相手の横へ回り込んでから撃つ": [
+"Fires after circling to the foe's side.",
+"绕到对手侧面后使出。"
+],
+"⟦0⟧が変わる。+1で1.5倍・+2で2倍…最大+6（4倍）。下がると-1で2/3倍…最大-6（1/4倍）": [
+"⟦0⟧ changes. +1 = ×1.5, +2 = ×2 … up to +6 (×4). Lowered: -1 = ×2/3 … down to -6 (×1/4). Resets on switch.",
+"⟦0⟧会改变。+1为1.5倍、+2为2倍…最大+6。降低时-1为2/3倍…最低-6。替换后恢复原状。"
+],
+"人形が交代した": [
+"Dummy switched",
+"人偶替换了"
+],
+"トロフィーたいかいで優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる": [
+"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
+"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
+],
+"ボックスあきちで弱らせたマギアに投げるとつかまえられる": [
+"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
+"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
+],
+"ジェム ブラインドボックスを待ち時間なしですぐ開けられる": [
+"Gems: open a Mystery Box right away, no waiting. Get them by winning battles or tournaments.",
+"宝石：无需等待，立即打开盲盒。赢得对战或在大赛中夺冠即可获得。"
+],
+"他の端末で遊んだデータがあります（⟦0⟧）": [
+"There's data played on another device (⟦0⟧). Which do you want to use: that, or this device's? The one you don't pick will be erased.",
+"有在其他设备上玩过的数据。要使用它，还是本设备上的数据？没选的那份会被删除。"
+],
+"他の端末で遊んだデータにそろえます": [
+"Switch to the data from the other device.",
+"改用其他设备上的数据。"
+],
+"今はオフラインです": [
+"You're offline. Try again where you can connect to the internet.",
+"目前离线。请在能连接网络的地方再试一次。"
+],
+"今はデータの引きつぎが使えません": [
+"Data transfer isn't available right now. Please try again later.",
+"现在无法转移数据。请稍后再试。"
+],
+"このコードを他のスマホやPCで1回入れると、そのあとはどちらの端末でも続きから遊べます": [
+"Enter this code once on another phone or PC, and after that you can keep playing on either device. It also restores your data if you erased it.",
+"在其他手机或电脑上输入一次这个代码，之后两台设备都能接着玩。不小心删除数据时也能恢复。"
+],
+"コードはスクショかメモで必ずひかえておいてね": [
+"Be sure to save the code with a screenshot or a note.",
+"请务必截图或记下代码。"
+],
+"なくすともどせません": [
+"If you lose it, you can't restore. Don't share it with anyone.",
+"丢失后就无法恢复。不要告诉别人哦。"
+],
+"復活コード（16文字）を入れてね": [
+"Enter your restore code (16 characters).",
+"请输入恢复代码。"
+],
+"そのコードのデータは見つかりませんでした": [
+"No data found for that code.",
+"找不到该代码的数据。"
+],
+"コードは16文字です（Ｏ・Ｉ・０・１は使っていません）": [
+"Codes are 16 characters.",
+"代码为16位。"
+],
+"データを初期化": [
+"Reset data",
+"初始化数据"
+],
+"ランキング・チーム・名前・データのバックアップなど、サーバーにあるあなたのデータを全部消しますか？": [
+"Erase all your data on the server, like rankings, team, name, and backups?",
+"要删除服务器上你的所有数据吗？包括排行榜、队伍、名字、数据备份等。"
+],
+"消しました": [
+"Erased. Next time you go online, you'll start fresh.",
+"已删除。下次使用在线功能时将重新开始。"
+],
+"データを初期化して初めからあそびますか？今のセーブデータは消えて元にもどせません": [
+"Reset data and start over? Your current save will be erased and can't be undone.",
+"要初始化数据并从头开始吗？当前存档将被删除且无法恢复。"
+],
+"消しますか？元にもどせません": [
+"Erase? This can't be undone.",
+"要删除吗？无法恢复。"
+],
+"何も書かれていません": [
+"Nothing is drawn.",
+"什么都没有画。"
+],
+"で決めたとおりに戦う": [
+". Anything not set in Training is handled by the Auto AI. All you can do is ",
+"中设定的方式战斗。训练中没设定的部分由自动AI控制。你能做的只有"
+],
+"だけ": [
+". Online battles are also Training vs. Training.",
+"。在线对战也是双方训练设定之间的较量。"
+],
+"：👊近は👣遠に強く、👣遠は🛹中に、🛹中は👊近に強い。受ける側のぼうぎょ・属性防御が、自分が強い相手からなら1.15倍、苦手な相手からなら0.87倍になる": [
+": 👊Close beats 👣Far, 👣Far beats 🛹Mid, and 🛹Mid beats 👊Close. The defender's Defense and Sp. Def become ×1.15 against a foe it beats, and ×0.87 against a foe it's weak to. You can also change it with “Plan” in Training.",
+"：👊近克👣远，👣远克🛹中，🛹中克👊近。受攻击一方的防御、特防，面对自己克制的对手时为1.15倍，面对克制自己的对手时为0.87倍。也可以在训练的「作战」中更改。"
+],
+"は、技を": [
+" moves cancel a move when they hit a foe that's ",
+"招式击中"
+],
+"相手に当てるとキャンセルできる": [
+".",
+"的对手，就能打断其招式。"
+],
+"は弾・ビーム・はんいを1回打ち消す": [
+" blocks one projectile, beam, or area attack.",
+"可抵消一次弹、光束或范围攻击。"
+],
+"などの構えはとっしんをはね返す": [
+" and other stances bounce back a Dash. Damage stays the same; it's all about timing.",
+"等架势能弹回突进。伤害不变，关键在于出招时机的博弈。"
+],
+"がその技の待ち時間になる": [
+" go on that move's cooldown. Stronger moves wait longer, so what you use and when really matters.",
+"都会进入该招式的冷却。越强的招式冷却越长，所以何时用哪招很关键。"
+],
+"は相手の技のよちょう": [
+" warn of the foe's moves. Magia try to dodge on their own.",
+"是对手招式的预警。魔机会自己尝试躲开。"
+],
+"はタイプの相性が悪いときに": [
+" is for bad type matchups. Careful: you're open right after coming out.",
+"适合属性相性不好时使用。刚登场时有破绽，要小心。"
+],
+"は技をさえぎる": [
+" block moves. Beams and projectiles stop at rocks and pillars.",
+"会阻挡招式。光束和弹会被岩石、柱子挡住。"
+],
+"を投げるとつかまえられる": [
+" to catch it. Nature, stats, and moves are set when you catch it.",
+"即可捕捉。性格、能力值和招式在捕捉时决定。"
+],
+"は勝つとときどきもらえる": [
+" are sometimes won in battles. Their timer starts when you get them, and they give Magia, Capsules, and Move stickers.",
+"胜利后有时可获得。获得后开始计时，会开出魔机、胶囊、技贴纸。"
+],
+"ですぐ開けられる": [
+" open them right away.",
+"可以立即打开。"
+],
+"はHP・こうげき・ぼうぎょ・属性攻撃・属性防御・素早さ・かいひの7つ。種族値・個体値（0〜31）・性格（↑1.1倍↓0.9倍）・強化で決まる": [
+" are 7: HP, Attack, Defense, Sp. Atk, Sp. Def, Speed, and Evasion. Higher Speed means faster walking; higher Evasion means more dodging without orders. They're set by base stats, IVs (0–31), Nature (↑×1.1 ↓×0.9), and Training points.",
+"共有HP、攻击、防御、特攻、特防、速度、闪避7项。速度越高走得越快，闪避越高越会自动躲避。由种族值、个体值、性格和强化点数决定。"
+],
+"はこうげき→ぼうぎょ、": [
+" use Attack→Defense, ",
+"由攻击→防御，"
+],
+"は属性攻撃→属性防御でダメージが決まる": [
+" use Sp. Atk→Sp. Def to decide damage.",
+"则由特攻→特防决定伤害。"
+],
+"：編成→強化で同じ種類のマギアを使うとポイントが増える（1体+1。1体50まで）": [
+": In Team → Training points, use Magia of the same kind to gain points (+1 each, up to 50 per Magia). Spend them on any stat you like (redo with a Reset gear).",
+"：在编队 → 强化中使用同种魔机即可增加点数。分配到喜欢的能力上吧。"
+],
+"：ふりわけギア・ランダムギア・はりかえギア・おなじいろギアなど": [
+": Reset, Random, Swap, Same-Color gears, and more. Rarer upgrades: Choice, Special, and move-shape gears. They come from Mystery Boxes. Use them in Team → Items.",
+"：分配齿轮、随机齿轮、替换齿轮、同色齿轮等。高级版的可选齿轮、特别齿轮、招式形状齿轮较难获得。从盲盒中开出。在编队 → 道具中使用。"
+],
+"で好きな技を覚えさせよう": [
+" let you teach any move you like.",
+"可以让怪兽学会喜欢的招式。"
+],
+"オンライン対戦をやめますか？": [
+"Quit the online battle?",
+"要退出在线对战吗？"
+],
+"むしの研究成果、見せてあげる": [
+"Let me show you my bug research!",
+"让你看看我研究虫子的成果。"
+],
+"ドラゴンの本気を見せてあげる": [
+"I'll show you a dragon's true power.",
+"让你见识龙的真正实力。"
+],
+"データはもうそろっているの": [
+"My data is already complete.",
+"数据已经齐全了。"
+],
+"反応速度": [
+"Reflexes",
+"反应速度"
+],
+"精度": [
+"Precision",
+"精度"
+],
+"ドラゴンの本気": [
+"Dragon's true power",
+"龙的真正实力"
+],
+"⟦0⟧「ここまで来たんだね": [
+"⟦0⟧: “You made it this far. This is the final battle!”",
+"⟦0⟧「你终于来到这里了。最后的对决！」"
+],
+"⟦0⟧「あなたもギアマスターになったんだ": [
+"⟦0⟧: “So you're a Gear Master too. Let's test your skills!”",
+"⟦0⟧「你也成为齿轮大师了啊。先来试试身手吧！」"
+],
+"……やるじゃない": [
+"……Not bad. That was a good battle for your first time.",
+"……挺厉害嘛。作为第一次，打得不错哦。"
+],
+"わたしもこれから、ギルドを巡ってタグを集めるんだ": [
+"I'm going to tour the Guilds and collect Tags too.",
+"我接下来也要去挑战公会、收集标签。"
+],
+"ヒント：⟦0⟧ギルドには⟦1⟧タイプが強い": [
+"Hint: ⟦1⟧ type is strong vs. the ⟦0⟧ Guild. Power up with the Arena's “Team” button, Training points, and Move stickers",
+"提示：⟦1⟧属性对⟦0⟧公会很有效。用竞技场的「编队」按钮、强化和技贴纸变强吧"
+],
+"バトルタワーをやめますか？⟦0⟧連勝で記録します": [
+"Quit the Battle Tower? A ⟦0⟧-win streak will be recorded.",
+"要退出对战塔吗？将记录为⟦0⟧连胜。"
+],
+"ちょうせん中のメンバーがいないので、記録を終わりにします": [
+"No members in the challenge, so the run will end.",
+"没有挑战中的成员，记录将结束。"
+],
+"タワータイクーン「ここまで登って来たのね": [
+"Tower Tycoon: “You climbed all the way up. I'll go all out!”",
+"塔之大亨「你终于爬到这里了。我要认真了！」"
+],
+"レジェンド入り⟦0⟧かい！ヘッドたちは強くなって待っている": [
+"Legend ×⟦0⟧! The Crew Heads are waiting, stronger.",
+"第⟦0⟧次成为传奇！团长们变得更强，正在等着你。"
+],
+"タグがそろった！キングバトルにいどもう": [
+"All Tags collected! Take on the King Battle.",
+"标签集齐了！挑战王者之战吧。"
+],
+"10のとうぎじょうをめぐってヘッドに勝ち、タグを集めよう": [
+"Visit 10 arenas, beat the Crew Heads, and collect Tags. Get them all to reach the King Battle.",
+"巡游10座竞技场，战胜团长收集标签。全部集齐即可前往王者之战。"
+],
+"アリーナをおわりますか？ここまでのスコアで記録します": [
+"End the Arena? Your score so far will be recorded.",
+"要结束竞技场吗？将记录到目前为止的分数。"
+],
+"まだ他の人のチームがありません": [
+"No other players' teams yet. You'll battle a computer team",
+"还没有其他玩家的队伍。将与电脑队伍对战"
+],
+"残り⟦0⟧秒": [
+"⟦0⟧s left",
+"还剩⟦0⟧秒"
+],
+"タイプには相性があります。好きなマギアを1体選んでください": [
+"Types have matchups. Pick a Magia you like.",
+"属性之间有相性。选择1只你喜欢的魔机吧。"
+],
+"縦＝技のタイプ／横＝受けるマギアのタイプ": [
+"Rows = move type / Columns = defending Magia type.",
+"纵＝招式属性／横＝受击魔机属性。"
+],
+"=2倍": [
+"=×2",
+"=2倍"
+],
+"=0.5倍。技と同じタイプのマギアが使うと1.5倍": [
+"=×0.5. Attribute moves use the Attribute chart; Race moves use the Race chart. A Magia using a move of its own type gets ×1.5. Tap a cell for details.",
+"=0.5倍。属性招式看属性表，种族招式看种族表。魔机使用与自身同类型的招式时为1.5倍。点击格子可查看详情。"
+],
+"して入れかえ／": [
+" monsters to swap / ",
+"以交换／"
+],
+"試合をやめる": [
+"Quit match",
+"退出比赛"
+],
+"今この端末にあるデータは消えて、元にもどせません": [
+"The data on this device will be erased and can't be restored.",
+"此设备上的数据将被删除，无法恢复。"
+],
+"インターネットにつながっている必要があります": [
+"You need to be connected to the internet.",
+"需要连接互联网。"
+],
+"相手もこのゲームのページをclaude.aiで開いている必要があります": [
+"Your opponent also needs this game's page open on claude.ai.",
+"对手也需要在 claude.ai 上打开这个游戏页面。"
+],
+"ルールいはんは通報してください": [
+"Please report anyone breaking the rules.",
+"有违规行为请举报。"
+],
+"対戦": [
+"battle.",
+"对战。"
+],
+"オンライン対戦・ランキング・チームでみんなに見えるよ": [
+"Everyone sees it in Online battle, Rankings and Teams",
+"在线对战、排行榜和队伍里大家都能看到"
+],
+"⟦0⟧がほかにいません": [
+"No other ⟦0⟧",
+"没有其他⟦0⟧"
+],
+"前に確定した設定": [
+"Last locked-in setup",
+"上次确定的设置"
+],
+"仮保存済み": [
+"Draft saved",
+"已暂存"
+],
+"⟦0⟧を受けたしゅんかんに自動で出る": [
+"Auto-used the moment it takes ⟦0⟧",
+"受到⟦0⟧的瞬间自动使用"
+],
+"＋ほかの条件": [
+"+ Another condition",
+"＋ 其他条件"
+],
+"きょうは⟦0⟧ようび": [
+"Today is ⟦0⟧. Other areas open on their own day",
+"今天是⟦0⟧。其他区域在对应的日子开放"
+],
+"※ ★のついた技はワザステッカーで覚えます": [
+"※ Moves marked ★ are learned with Move Stickers",
+"※ 带★的招式用技贴纸学习"
+],
+"このワザステッカーはもう持っています": [
+"You already have this Move Sticker",
+"你已经拥有这张技贴纸"
+],
+"訓練して戦う": [
+"Train, then battle. Wins earn more Magia and stickers",
+"训练后战斗。获胜可获得更多魔机和贴纸"
+],
+"負けたら最初から": [
+"Lose and you start over",
+"输了就从头开始"
+],
+"技はもう覚えている": [
+"They already know moves. Picked Magia can only be used during this draft",
+"已经学会招式。选中的魔机只能在这次选秀中使用"
+],
+"選んだマギアが覚えられるものから": [
+"Only ones your picks can learn. Put it in a move slot in Training to learn it",
+"只出现选中魔机能学会的。在训练画面放进招式栏即可学会"
+],
+"選んだタイプのステッカーが3まいランダムでもらえる": [
+"Get 3 random stickers of that type",
+"随机获得3张该属性的贴纸"
+],
+"⟦0⟧回目の前": [
+"Before floor ⟦0⟧",
+"第⟦0⟧层之前"
+],
+"ドラフトをリセットしますか？\nいまのマギアとステッカーはなくなり、最初からになります": [
+"Reset the draft?\nYour current Magia and stickers will be lost and you will start over.",
+"要重置选秀吗？\n现在的魔机和贴纸会消失，从头开始。"
+],
+"次の⟦0⟧回のあいて": [
+"Next: floor ⟦0⟧ opponents",
+"下一层的对手"
+],
+"ダブル対戦では交代できない": [
+"You can't switch in a Double Battle",
+"双打对战中不能替换"
+],
+"竜の気をこめた弾をとばす": [
+"Fires an orb of dragon energy that chases the target",
+"发射蕴含龙气的弹，会追踪对手"
+],
+"まひ以外の状態異常と混乱が早く治る": [
+"Status conditions other than paralysis, and confusion, wear off in half the time",
+"麻痹以外的异常状态和混乱恢复时间减半"
+],
+"雷技を使うとエナジーが落ちる": [
+"Using Thunder moves drops energy. Picking it up instantly resets the cooldown of the next move used",
+"使用雷属性招式会掉落能量。捡起后，下一个使用的招式冷却立即恢复"
+],
+"補助技のためが半分": [
+"Support moves wind up in half the time",
+"辅助招式的蓄力时间减半"
+],
+"⟦0⟧秒間、まわりの相手と、自分が置いた技・罠・床・エナジー・お花を自分へ引き寄せ続ける": [
+"For ⟦0⟧ sec, keeps pulling nearby foes and its own placed moves, traps, floors, energy and flowers toward itself. A foe once caught is pulled even if it leaves the range",
+"⟦0⟧秒内，持续将周围的对手，以及自己放置的招式、陷阱、地面、能量和花朵吸向自己。一旦捕获的对手即使离开范围也会被吸引"
+],
+"かならず当たる": [
+"Always hits",
+"必定命中"
+],
+"前足や手で相手をはたいて吹き飛ばす": [
+"Slaps the foe with a paw or hand and knocks it back. Slamming it into a wall deals the same damage again",
+"用前爪或手拍打对手并将其击飞。撞到墙上时追加同等伤害"
+],
+"好きなマギアの強化ポイントを+5": [
+"Adds +5 Power Points to any Magia",
+"为任意魔机增加5点强化点数"
+],
+"強化ポイントは戦うとたまる（出場して勝つと+1）。同じ種類のマギアを1体使うと+⟦0⟧、きょうかのもとで+⟦1⟧（最大⟦2⟧）。ポイントを好きな能力にふりわけて「確定する」で決まる（1つ⟦3⟧まで・1ポイントで+⟦4⟧）": [
+"Power Points build up as you battle (+1 for each win you take part in). Using one Magia of the same species gives +⟦0⟧, a Power Seed gives +⟦1⟧ (max ⟦2⟧). Assign points to any stat and press Confirm (up to ⟦3⟧ each, +⟦4⟧ per point).",
+"强化点数会在战斗中累积。使用1只同种魔机+⟦0⟧，强化之源+⟦1⟧。把点数分配到喜欢的能力后按「确定」。"
+],
+"して入れかえ/すきまをつかむとスクロール / ": [
+" to swap / Grab empty space to scroll / ",
+" 来交换 / 抓住空白处可滚动 / "
+],
+"草技を使うとお花がさく。お花の近くにいるとお花1つにつき毎秒HPが0.5%回復": [
+"Using Grass moves makes a flower bloom. Each nearby flower restores 0.5% HP per second",
+"使用草属性招式会开出花朵。附近每有1朵花，每秒恢复0.5%HP"
+],
+"残り⟦0⟧。 今すぐ開けるには💎⟦1⟧ ジェムがいります（持っている：⟦2⟧）": [
+"⟦0⟧ left. Opening now needs 💎⟦1⟧ Gems (you have: ⟦2⟧).",
+"剩余 ⟦0⟧。立即打开需要 💎⟦1⟧ 宝石。"
+],
+"⟦0⟧⟦1⟧をにがしますか？ もうもどってきません": [
+"Release ⟦0⟧⟦1⟧? It won't come back.",
+"要放生⟦0⟧⟦1⟧吗？它不会再回来了。"
+],
+"⟦0⟧たいを使って⟦1⟧を強化しますか？（+⟦2⟧） 使ったマギアはいなくなります": [
+"Use ⟦0⟧ Magia to train ⟦1⟧? (+⟦2⟧) Used Magia will be gone.",
+"要使用⟦0⟧只魔机强化⟦1⟧吗？使用的魔机会消失。"
+],
+"⟦0⟧さんにリーダーをたのみますか？ 受けてもらえたら、チームの名前・もんしょう・メンバー・ポイントはそのまま引きつがれ、あなたはメンバーになります": [
+"Ask ⟦0⟧ to be leader? If they accept, the team's name, emblem, members and points stay the same, and you become a member.",
+"要请⟦0⟧担任会长吗？对方接受后，队伍的名称、徽记、成员和点数都会保留，你将成为普通成员。"
+],
+"バトルタワーをやめますか？ ⟦0⟧連勝で記録します": [
+"Quit the Battle Tower? A ⟦0⟧-win streak will be recorded.",
+"要退出对战塔吗？将记录为⟦0⟧连胜。"
+],
+"トロフィー 大会で優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる": [
+"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
+"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
+],
+"ボックス 空き地で弱らせたマギアに投げるとつかまえられる": [
+"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
+"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
+],
+"データを初期化して初めから遊びますか？ 今のセーブデータは消えて元にもどせません": [
+"Reset data and start over? Your current save will be erased and can't be undone.",
+"要初始化数据并从头开始吗？当前存档将被删除且无法恢复。"
+],
+"ドラフトをリセットしますか？ 今のマギアとステッカーはなくなり、最初からになります": [
+"Reset the draft?\nYour current Magia and stickers will be lost and you will start over.",
+"要重置选秀吗？\n现在的魔机和贴纸会消失，从头开始。"
+],
+"アリーナを終わりますか？ ここまでのスコアで記録します": [
+"End the Arena? Your score so far will be recorded.",
+"要结束竞技场吗？将记录到目前为止的分数。"
+],
+"していれかえ ／ すきまをつかむとスクロール ／": [
+" to swap / Grab empty space to scroll / ",
+" 来交换 / 抓住空白处可滚动 / "
 ]
 }
