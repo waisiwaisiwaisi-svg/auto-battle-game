@@ -116,6 +116,11 @@ for p in sorted(FX.glob('K/K_*_*f.png')):
 for p in sorted(FX.glob('L/L_*_*f.png')):
     nm = re.sub(r'^L_|_\d+f\.png$', '', p.name); n = nf(p)
     out['l_' + nm] = sheet(p, n, 100 if nm.endswith('_trail') else 70, **({'ax': 0} if nm.endswith('_trail') else {}))
+# ---- Hグループ（ガードシェルの 描きなおし：全身を つつむ から〈ふつう・よこなが〉、だいかえんの 差しかえ）：キーは h_ ＋ なまえ ----
+for p in sorted(FX.glob('H/H_*_*f.png')):
+    nm = re.sub(r'^H_|_\d+f\.png$', '', p.name); n = nf(p)
+    out['h_' + nm] = sheet(p, n, 100 if nm.endswith(('_hold', '_shot')) else 75)
+out['g_fire_blast_shot'] = out['h_fire_blast_shot']; out['g_fire_blast_hit'] = out['h_fire_blast_hit']   # だいかえん：「大」の 字と 星の ばくはつを やめて 火の玉と まるい ばくはつに
 # ---- 優先度C（5回目の 納品）----
 add('n_conf', 'C_conf', 120); add('n_scared', 'E_scared', 140); add('n_anger', 'E_anger', 140); add('n_encore', 'E_encore', 140)
 def no_soil(p):   # やどりぎ：めばえの 下の 土を けす（くきの 下はしは ふちどりで とじる）
