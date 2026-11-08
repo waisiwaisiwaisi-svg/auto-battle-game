@@ -2975,9 +2975,9 @@
 "Kusahara no Ba",
 "Kusahara no Ba"
 ],
-"15秒間、場を草原にする。草技1.3倍・地面にいるモンスターは毎秒1%回復": [
-"Turns the field into grassland for 15 sec. Grass moves 1.3x; grounded monsters heal 1% per sec",
-"15秒内场地变成草原。草招式1.3倍，地面上的怪兽每秒恢复1%"
+"15秒間、場を草原にする。草技1.3倍・地面にいるマギアは毎秒1%回復": [
+"Turns the field into grassland for 15 sec. Grass moves 1.3x; grounded Magia heal 1% per sec",
+"15秒内场地变成草原。草招式1.3倍，地面上的魔机每秒恢复1%"
 ],
 "15秒間、場を念力で満たす。妖精技1.3倍・地面にいる相手に突進が効かない": [
 "Fills the field with psychic power for 15 sec. Fairy moves 1.3x; Dashes don't work on grounded foes",
@@ -3427,9 +3427,9 @@
 "Stickers",
 "贴纸"
 ],
-"モンスター": [
-"Monsters",
-"怪兽"
+"マギア": [
+"Magia",
+"魔机"
 ],
 "レジェンド入り おめでとう！ タワーにも のぼろう": [
 "You're a Legend! Now climb the Tower too",
@@ -3495,9 +3495,9 @@
 "SMTWTFS",
 "日一二三四五六"
 ],
-"エリアを えらぶと やせいの モンスターが でてくる": [
-"Pick an area to meet wild monsters",
-"选择区域就会出现野生怪兽"
+"エリアを えらぶと やせいの マギアが でてくる": [
+"Pick an area to meet wild Magia",
+"选择区域就会出现野生魔机"
 ],
 "ボックス": [
 "Capsule",
@@ -4139,9 +4139,9 @@
 "Tap to open",
 "点击打开"
 ],
-"モンスターを つかまえる アイテム": [
-"An item for catching monsters",
-"用来捕捉怪兽的道具"
+"マギアを つかまえる アイテム": [
+"An item for catching Magia",
+"用来捕捉魔机的道具"
 ],
 "つぎへ": [
 "Next",
@@ -4231,9 +4231,9 @@
 "Move",
 "招"
 ],
-"モンスターは 属性1つ＋種族1つ。属性の 技は あいての 属性と、種族の 技は あいての 種族と だけ くらべる。◎＝有利（2ばい）・△＝不利（0.5ばい）。無と 獣は どれとも ふつう。": [
-"Each monster has 1 Attribute + 1 Race. Attribute moves are compared only with the foe's Attribute, and Race moves only with the foe's Race. ◎ = Advantage (2×), △ = Disadvantage (0.5×). Normal and Beast are neutral against all.",
-"每只怪兽有1个属性＋1个种族。属性招式只和对手的属性比较，种族招式只和对手的种族比较。◎＝有利（2倍）、△＝不利（0.5倍）。无和兽对谁都是普通效果。"
+"マギアは 属性1つ＋種族1つ。属性の 技は あいての 属性と、種族の 技は あいての 種族と だけ くらべる。◎＝有利（2ばい）・△＝不利（0.5ばい）。無と 獣は どれとも ふつう。": [
+"Each Magia has 1 Attribute + 1 Race. Attribute moves are compared only with the foe's Attribute, and Race moves only with the foe's Race. ◎ = Advantage (2×), △ = Disadvantage (0.5×). Normal and Beast are neutral against all.",
+"每只魔机有1个属性＋1个种族。属性招式只和对手的属性比较，种族招式只和对手的种族比较。◎＝有利（2倍）、△＝不利（0.5倍）。无和兽对谁都是普通效果。"
 ],
 "すくみ図：やじるしの 先の タイプに つよい（2ばい）。むかいあう 2つは ふつう": [
 "Matchup chart: strong (2×) against the type the arrow points to. Two facing each other are neutral",
@@ -4243,9 +4243,9 @@
 " moves →",
 "的招式 →"
 ],
-"の モンスター：": [
-" monsters:",
-"的怪兽："
+"の マギア：": [
+" Magia:",
+"的魔机："
 ],
 "ごうけい ⟦0⟧⟦1⟧": [
 "Total ⟦0⟧⟦1⟧",
@@ -4319,9 +4319,9 @@
 "Saved to Deck ⟦0⟧",
 "已保存到阵容⟦0⟧"
 ],
-"この デッキの モンスターは もう いない": [
-"This deck's monsters are all gone",
-"这个阵容的怪兽已经不在了"
+"この デッキの マギアは もう いない": [
+"This deck's Magia are all gone",
+"这个阵容的魔机已经不在了"
 ],
 "デッキ⟦0⟧を よびだした（いない こ ⟦1⟧たいは ぬかした）": [
 "Loaded Deck ⟦0⟧ (skipped ⟦1⟧ missing)",
@@ -4411,9 +4411,9 @@
 "Swap Sticker",
 "替换贴纸"
 ],
-"えらんだ わざ 1つを、その モンスターが おぼえる わざの なかから ランダムに はりかえる": [
-"Swaps 1 chosen move for a random one this monster can learn",
-"把选中的1个招式随机换成这只怪兽能学会的招式"
+"えらんだ わざ 1つを、その マギアが おぼえる わざの なかから ランダムに はりかえる": [
+"Swaps 1 chosen move for a random one this Magia can learn",
+"把选中的1个招式随机换成这只魔机能学会的招式"
 ],
 "おなじいろシール": [
 "Same-Color Sticker",
@@ -4427,25 +4427,25 @@
 "Pick Sticker",
 "自选贴纸"
 ],
-"えらんだ わざ 1つを、その モンスターが おぼえる わざの なかから 好きな わざに はりかえる（はりかえシールの 上位版）": [
-"Swaps 1 chosen move for any move you like that this monster can learn (upgraded Swap Sticker)",
-"把选中的1个招式换成这只怪兽能学会的任意招式（替换贴纸的升级版）"
+"えらんだ わざ 1つを、その マギアが おぼえる わざの なかから 好きな わざに はりかえる（はりかえシールの 上位版）": [
+"Swaps 1 chosen move for any move you like that this Magia can learn (upgraded Swap Sticker)",
+"把选中的1个招式换成这只魔机能学会的任意招式（替换贴纸的升级版）"
 ],
 "とくべつシール": [
 "Special Sticker",
 "特别贴纸"
 ],
-"その モンスターの タイプ（属性か 種族）の わざなら、ふだんは おぼえない わざでも 好きに えらんで はれる（おなじいろシールの 上位版）": [
-"Pick any move of this monster's type (Attribute or Race), even ones it normally can't learn (upgraded Same-Color Sticker)",
-"只要是这只怪兽属性（属性或种族）的招式，平时学不会的也能自由选择贴上（同色贴纸的升级版）"
+"その マギアの タイプ（属性か 種族）の わざなら、ふだんは おぼえない わざでも 好きに えらんで はれる（おなじいろシールの 上位版）": [
+"Pick any move of this Magia's type (Attribute or Race), even ones it normally can't learn (upgraded Same-Color Sticker)",
+"只要是这只魔机属性（属性或种族）的招式，平时学不会的也能自由选择贴上（同色贴纸的升级版）"
 ],
 "⟦0⟧の わざなら、タイプに かかわらず 好きな わざを えらんで はれる": [
 "Pick any ⟦0⟧ move, whatever its type",
 "只要是⟦0⟧的招式，不论属性都能自由选择贴上"
 ],
-"その モンスターが おぼえられる ⟦0⟧の わざから、好きな わざを えらんで はれる": [
-"Pick any ⟦0⟧ move this monster can learn",
-"可以从这只怪兽能学会的⟦0⟧招式中自由选择贴上"
+"その マギアが おぼえられる ⟦0⟧の わざから、好きな わざを えらんで はれる": [
+"Pick any ⟦0⟧ move this Magia can learn",
+"可以从这只魔机能学会的⟦0⟧招式中自由选择贴上"
 ],
 "勇敢": [
 "Brave",
@@ -4671,9 +4671,9 @@
 "This is ",
 "这里是"
 ],
-"です。バトルでモンスターがどう動くかを組み立てる場所です。": [
-". Here you plan how your monster moves in battle.",
-"。这里用来安排怪兽在战斗中怎么行动。"
+"です。バトルでマギアがどう動くかを組み立てる場所です。": [
+". Here you plan how your Magia moves in battle.",
+"。这里用来安排魔机在战斗中怎么行动。"
 ],
 "一緒にひとつ作ってみましょう！": [
 "Let's make one together!",
@@ -4687,9 +4687,9 @@
 ". It sets the usual movement.",
 "。用来决定平时的走位。"
 ],
-"どれかひとつタップしてみましょう（★がこのモンスターのおすすめです）。": [
-"Tap any one (★ is this monster's recommended).",
-"随便点一个试试吧（★是这只怪兽的推荐）。"
+"どれかひとつタップしてみましょう（★がこのマギアのおすすめです）。": [
+"Tap any one (★ is this Magia's recommended).",
+"随便点一个试试吧（★是这只魔机的推荐）。"
 ],
 "作戦には、じゃんけんのような相性があります。": [
 "Plans have rock-paper-scissors matchups.",
@@ -4863,9 +4863,9 @@
 "Confirm",
 "确定"
 ],
-"します。このモンスターの訓練が保存されます。": [
-" it. This monster's Training gets saved.",
-"。这只怪兽的训练就会被保存。"
+"します。このマギアの訓練が保存されます。": [
+" it. This Magia's Training gets saved.",
+"。这只魔机的训练就会被保存。"
 ],
 "⑧ これで試合では、この設定どおりに戦います。バトル中にあなたができるのは": [
 "⑧ Now it fights just as set in matches. During battle, all you can do is ",
@@ -5095,9 +5095,9 @@
 "Add move",
 "添加招式"
 ],
-"⟦0⟧ は このモンスターが 覚えられない技です。べつの 技に かえてから ためしてください": [
-"This monster can't learn ⟦0⟧. Swap it for another move before testing",
-"⟦0⟧是这只怪兽学不会的招式。请换成别的招式再测试"
+"⟦0⟧ は このマギアが 覚えられない技です。べつの 技に かえてから ためしてください": [
+"This Magia can't learn ⟦0⟧. Swap it for another move before testing",
+"⟦0⟧是这只魔机学不会的招式。请换成别的招式再测试"
 ],
 "技を 1つ いじょう 設定してください": [
 "Set at least 1 move",
@@ -5123,9 +5123,9 @@
 "You have ⟦0⟧ moves. Max is 4",
 "有⟦0⟧个招式。最多4个"
 ],
-"⟦0⟧ は覚えられません（ワザステッカーがないか、このモンスターは覚えられない技です）": [
-"Can't learn ⟦0⟧ (no Move Sticker, or this monster can't learn it)",
-"学不会⟦0⟧（没有技贴纸，或这只怪兽学不会该招式）"
+"⟦0⟧ は覚えられません（ワザステッカーがないか、このマギアは覚えられない技です）": [
+"Can't learn ⟦0⟧ (no Move Sticker, or this Magia can't learn it)",
+"学不会⟦0⟧（没有技贴纸，或这只魔机学不会该招式）"
 ],
 "ワザステッカーを使います：": [
 "Using Move Stickers:",
@@ -5143,13 +5143,13 @@
 "No Move Stickers used. Confirm these settings?",
 "不使用技贴纸。要按这个设置确定吗？"
 ],
-"設定のあるモンスターがいません": [
-"No monsters have settings",
-"没有已设置的怪兽"
+"設定のあるマギアがいません": [
+"No Magia have settings",
+"没有已设置的魔机"
 ],
-"どのモンスターの設定を呼び出しますか？": [
-"Load settings from which monster?",
-"要调出哪只怪兽的设置？"
+"どのマギアの設定を呼び出しますか？": [
+"Load settings from which Magia?",
+"要调出哪只魔机的设置？"
 ],
 "今の設定は上書きされます（覚えていない技はワザステッカーが必要・覚えられない技は使えません）": [
 "Current settings will be overwritten (unlearned moves need a Move Sticker; unlearnable moves can't be used)",
@@ -5199,17 +5199,17 @@
 "⟦0⟧ learned ⟦1⟧!",
 "⟦0⟧新学会了⟦1⟧！"
 ],
-"この モンスターは バトルタワーに ちょうせん中です。 タワーを やめてから にがしてね。": [
-"This monster is taking on the Battle Tower. Quit the Tower before releasing it.",
-"这只怪兽正在挑战对战塔。请先退出塔再放生。"
+"この マギアは バトルタワーに ちょうせん中です。 タワーを やめてから にがしてね。": [
+"This Magia is taking on the Battle Tower. Quit the Tower before releasing it.",
+"这只魔机正在挑战对战塔。请先退出塔再放生。"
 ],
 "⟦0⟧を きょうか": [
 "Train ⟦0⟧",
 "强化⟦0⟧"
 ],
-"おなじ しゅるいの モンスターを 1たい つかうと きょうかポイント +⟦0⟧（さいだい ⟦1⟧）。ポイントを すきな のうりょくに ふりわけて「確定する」で きまる（1つ ⟦2⟧ まで・1ポイントで +⟦3⟧）。": [
-"Use 1 monster of the same kind for +⟦0⟧ Training points (max ⟦1⟧). Assign points to any stat and tap \"Confirm\" to lock them in (up to ⟦2⟧ each, +⟦3⟧ per point).",
-"使用1只同种怪兽可获得强化点数 +⟦0⟧（最多⟦1⟧）。把点数分配给喜欢的能力，按「确定」就会生效（每项最多⟦2⟧，每1点 +⟦3⟧）。"
+"おなじ しゅるいの マギアを 1たい つかうと きょうかポイント +⟦0⟧（さいだい ⟦1⟧）。ポイントを すきな のうりょくに ふりわけて「確定する」で きまる（1つ ⟦2⟧ まで・1ポイントで +⟦3⟧）。": [
+"Use 1 Magia of the same kind for +⟦0⟧ Training points (max ⟦1⟧). Assign points to any stat and tap \"Confirm\" to lock them in (up to ⟦2⟧ each, +⟦3⟧ per point).",
+"使用1只同种魔机可获得强化点数 +⟦0⟧（最多⟦1⟧）。把点数分配给喜欢的能力，按「确定」就会生效（每项最多⟦2⟧，每1点 +⟦3⟧）。"
 ],
 "あつめた": [
 "Collected",
@@ -5231,9 +5231,9 @@
 "⟦0⟧ Reassign ×⟦1⟧",
 "⟦0⟧ 重新分配 ×⟦1⟧"
 ],
-"つかう モンスター": [
-"Monsters to use",
-"要使用的怪兽"
+"つかう マギア": [
+"Magia to use",
+"要使用的魔机"
 ],
 "えらんだ ⟦0⟧たいを つかう（+⟦1⟧）": [
 "Use ⟦0⟧ selected (+⟦1⟧)",
@@ -5247,9 +5247,9 @@
 "Your party would have 0 monsters",
 "队伍会变成0只"
 ],
-"⟦0⟧たいを つかって ⟦1⟧を きょうかしますか？（+⟦2⟧） つかった モンスターは いなくなります。": [
-"Use ⟦0⟧ monsters to train ⟦1⟧? (+⟦2⟧) Used monsters will be gone.",
-"要使用⟦0⟧只怪兽强化⟦1⟧吗？（+⟦2⟧）使用的怪兽会消失。"
+"⟦0⟧たいを つかって ⟦1⟧を きょうかしますか？（+⟦2⟧） つかった マギアは いなくなります。": [
+"Use ⟦0⟧ Magia to train ⟦1⟧? (+⟦2⟧) Used Magia will be gone.",
+"要使用⟦0⟧只魔机强化⟦1⟧吗？（+⟦2⟧）使用的魔机会消失。"
 ],
 "ふりわけた ポイントが まだ 確定して いません。 確定しないで とじますか？（ふりわけは もとに もどります）": [
 "Your point assignments aren't confirmed yet. Close without confirming? (They'll be undone)",
@@ -6155,9 +6155,9 @@
 "⟦0⟧⟦1⟧ fainted!",
 "⟦0⟧⟦1⟧倒下了！"
 ],
-"あいてが つぎの モンスターを えらんでいます…": [
-"The foe is choosing its next monster...",
-"对手正在选择下一只怪兽…"
+"あいてが つぎの マギアを えらんでいます…": [
+"The foe is choosing its next Magia...",
+"对手正在选择下一只魔机…"
 ],
 "ねばねばで よけられない": [
 "Too sticky to dodge",
@@ -7335,9 +7335,9 @@
 "⟦0⟧ was scared by the howl and ran back…",
 "⟦0⟧被嚎叫吓到，逃回去了…"
 ],
-"ちからつきて しまった… でも モンスターたちは すぐに げんきに なった": [
-"You ran out of strength… but your monsters were soon full of energy again",
-"力气用尽了…不过怪兽们很快就恢复了精神"
+"ちからつきて しまった… でも マギアたちは すぐに げんきに なった": [
+"You ran out of strength… but your Magia were soon full of energy again",
+"力气用尽了…不过魔机们很快就恢复了精神"
 ],
 "⟦0⟧は おどろいて にげていった（とおぼえで やせいは にげる）": [
 "⟦0⟧ got scared and ran off (howls scare wild ones away)",
@@ -7411,9 +7411,9 @@
 "Welcome! In this game's battles, ",
 "欢迎！在这个游戏的战斗中，"
 ],
-"モンスターが自分で考えて戦います": [
-"monsters think and fight on their own",
-"怪兽会自己思考并战斗"
+"マギアが自分で考えて戦います": [
+"Magia think and fight on their own",
+"魔机会自己思考并战斗"
 ],
 "どう戦うかは、前もって": [
 "You teach them how to fight ahead of time in ",
@@ -7423,9 +7423,9 @@
 ".",
 "里教给它们。"
 ],
-"① モンスターの": [
+"① マギアの": [
 "① The ",
-"① 怪兽"
+"① 魔机"
 ],
 "頭の上に出た文字": [
 "text over a monster's head",
@@ -7439,9 +7439,9 @@
 "name of the move it used",
 "招式名称"
 ],
-"モンスターは自分で技を選んで撃ちます。": [
-"Monsters pick and use moves by themselves.",
-"怪兽会自己选择并使出招式。"
+"マギアは自分で技を選んで撃ちます。": [
+"Magia pick and use moves by themselves.",
+"魔机会自己选择并使出招式。"
 ],
 "② 相手が技を": [
 "② The opponent is ",
@@ -7531,9 +7531,9 @@
 "Bench",
 "替补"
 ],
-"のモンスターをタップすると、交代できます。バトル中にあなたができるのは、これだけです！": [
-" monsters can be tapped to switch in. That's all you can do in battle!",
-"的怪兽，点击就能替换。战斗中你能做的只有这个！"
+"のマギアをタップすると、交代できます。バトル中にあなたができるのは、これだけです！": [
+" Magia can be tapped to switch in. That's all you can do in battle!",
+"的魔机，点击就能替换。战斗中你能做的只有这个！"
 ],
 "控えの「": [
 "On the bench, \"",
@@ -7543,9 +7543,9 @@
 "\" is a hint for type matchups.",
 "」是属性相克的参考。"
 ],
-"光っているモンスター": [
-"The glowing monster",
-"发光的怪兽"
+"光っているマギア": [
+"The glowing Magia",
+"发光的魔机"
 ],
 "をタップしてみましょう。": [
 " — try tapping it!",
@@ -7583,9 +7583,9 @@
 "Finally, defeat the opponent to finish!",
 "最后，打倒对手来收尾吧！"
 ],
-"野生のモンスターが現れました！ 空き地では、モンスターを捕まえて仲間にできます。": [
-"A wild monster appeared! In the vacant lot, you can catch monsters to join your team.",
-"野生怪兽出现了！在空地里可以捕捉怪兽，让它成为伙伴。"
+"野生のマギアが現れました！ 空き地では、マギアを捕まえて仲間にできます。": [
+"A wild Magia appeared! In the vacant lot, you can catch Magia to join your team.",
+"野生魔机出现了！在空地里可以捕捉魔机，让它成为伙伴。"
 ],
 "まずは戦って、少し弱らせましょう。": [
 "First, battle it to weaken it a bit.",
@@ -7595,9 +7595,9 @@
 "Now! Tap \"",
 "就是现在！点击下方的「"
 ],
-"」をタップして、モンスターを捕まえましょう。": [
-"\" below to catch the monster.",
-"」来捕捉怪兽吧。"
+"」をタップして、マギアを捕まえましょう。": [
+"\" below to catch the Magia.",
+"」来捕捉魔机吧。"
 ],
 "（弱っているほど捕まえやすくなります）": [
 "(The weaker it is, the easier to catch)",
@@ -7619,17 +7619,17 @@
 "Vacant lot",
 "空地"
 ],
-"へ行って、モンスターを捕まえてみましょう。「": [
-" together and catch monsters. Tap \"",
-"捕捉怪兽吧。请点击「"
+"へ行って、マギアを捕まえてみましょう。「": [
+" together and catch Magia. Tap \"",
+"捕捉魔机吧。请点击「"
 ],
 "」をタップしてください。": [
 "\".",
 "」。"
 ],
-"ブラインドボックスからは、モンスター・ワザステッカー・ボックスなどが出てきます。": [
-"Blind Boxes can give monsters, Move stickers, Capsules and more.",
-"盲盒里会开出怪兽、技贴纸、胶囊等。"
+"ブラインドボックスからは、マギア・ワザステッカー・ボックスなどが出てきます。": [
+"Blind Boxes can give Magia, Move stickers, Capsules and more.",
+"盲盒里会开出魔机、技贴纸、胶囊等。"
 ],
 "ブラインドボックスは、時間が経つと開けられるようになります。": [
 "Blind Boxes can be opened after some time passes.",
@@ -7691,9 +7691,9 @@
 "That's the end of the test. Restoring your original data.",
 "测试到此结束。将恢复原来的数据。"
 ],
-"最初の流れ（バトル → 訓練 → 名前・最初のモンスター → 空き地 → ブラインドボックス）を通しで試します。 テスト中のデータは保存されず、最後に元のデータに戻ります。": [
-"Test the whole opening flow (Battle → Training → Name, first monster → Vacant lot → Blind Box). Test data isn't saved; your original data comes back at the end.",
-"完整测试开头流程（战斗 → 训练 → 名字、第一只怪兽 → 空地 → 盲盒）。测试中的数据不会保存，最后会恢复原来的数据。"
+"最初の流れ（バトル → 訓練 → 名前・最初のマギア → 空き地 → ブラインドボックス）を通しで試します。 テスト中のデータは保存されず、最後に元のデータに戻ります。": [
+"Test the whole opening flow (Battle → Training → Name, first Magia → Vacant lot → Blind Box). Test data isn't saved; your original data comes back at the end.",
+"完整测试开头流程（战斗 → 训练 → 名字、第一只魔机 → 空地 → 盲盒）。测试中的数据不会保存，最后会恢复原来的数据。"
 ],
 "チュートリアル クリア！": [
 "Tutorial cleared!",
@@ -7923,9 +7923,9 @@
 "Flies into the sky and lands on the foe to attack (can't be hit while flying). Bigger bodies hit a wider area on landing",
 "飞上天空，落到对手所在处攻击（飞行中不会受到攻击）。体型越大，落地的攻击范围越广"
 ],
-"地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。出てくる所の攻撃範囲は体の大きさで決まる。掘った穴は残り、自分より大きくないモンスターは穴から穴へくぐれる": [
-"Digs underground and attacks from under the foe (can't be hit while underground). The attack area depends on body size. Holes stay, and monsters no bigger than you can travel hole to hole",
-"钻入地下，从对手脚下攻击（潜地时不会受到攻击）。出来时的攻击范围由体型决定。挖的洞会留下，不比自己大的怪兽可以从洞钻到洞"
+"地面に潜り、相手の足元から攻撃（潜っている間は攻撃を受けない）。出てくる所の攻撃範囲は体の大きさで決まる。掘った穴は残り、自分より大きくないマギアは穴から穴へくぐれる": [
+"Digs underground and attacks from under the foe (can't be hit while underground). The attack area depends on body size. Holes stay, and Magia no bigger than you can travel hole to hole",
+"钻入地下，从对手脚下攻击（潜地时不会受到攻击）。出来时的攻击范围由体型决定。挖的洞会留下，不比自己大的魔机可以从洞钻到洞"
 ],
 "相手の足元に⟦0⟧を作る（消えない）。⟦1⟧": [
 "Makes ⟦0⟧ under the foe (it stays). ⟦1⟧",
@@ -7999,9 +7999,9 @@
 "Makes 2 clones (10s). Foe attacks may target the clones, and sometimes they swap with the real one",
 "制造2个分身（10秒）。对手的攻击有时会打向分身，偶尔会与本体互换"
 ],
-"9秒間、場に出ているモンスターの素早さを反転する（遅いほど速く歩く）": [
-"For 9s, flips the Speed of monsters in battle (slower ones walk faster)",
-"9秒内，反转场上怪兽的速度（越慢走得越快）"
+"9秒間、場に出ているマギアの素早さを反転する（遅いほど速く歩く）": [
+"For 9s, flips the Speed of Magia in battle (slower ones walk faster)",
+"9秒内，反转场上魔机的速度（越慢走得越快）"
 ],
 "しばらく味方の素早さが上がる": [
 "Raises allies' Speed for a while",
@@ -8319,9 +8319,9 @@
 "Sets the weather to ⟦0⟧ for 20s. ⟦1⟧",
 "20秒内把天气变为⟦0⟧。⟦1⟧"
 ],
-"フィールド全体をゆらす（予告なし・飛んでいる相手には当たらない）。モンスターが置いた壁・岩をすべて崩す": [
-"Shakes the whole field (no warning, misses flying foes). Breaks all walls and rocks placed by monsters",
-"震动整个场地（无预警，打不中飞行中的对手）。摧毁怪兽放置的所有墙和岩石"
+"フィールド全体をゆらす（予告なし・飛んでいる相手には当たらない）。マギアが置いた壁・岩をすべて崩す": [
+"Shakes the whole field (no warning, misses flying foes). Breaks all walls and rocks placed by Magia",
+"震动整个场地（无预警，打不中飞行中的对手）。摧毁魔机放置的所有墙和岩石"
 ],
 "天候があると、その天候のタイプ（雨＝水・晴れ＝火・砂＝土・雪＝水）で威力2倍": [
 "In weather, takes that weather's type (Rain=Water, Sun=Fire, Sand=Earth, Snow=Water) with ×2 Power",
@@ -9403,9 +9403,9 @@
 "Trophies: earned by winning tournaments, clearing the Arcade, or winning the King Battle. Here's your record so far.",
 "奖杯：在大赛中夺冠、通关街机或在王者之战中获胜即可获得。这是至今的记录。"
 ],
-"ボックス あきちで よわらせた モンスターに なげると つかまえられる。バトルに かったり、ブラインドボックスから でる。": [
-"Capsule: throw it at a monster weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
-"胶囊：向在空地中削弱的怪兽投掷即可捕捉。赢得对战或从盲盒中获得。"
+"ボックス あきちで よわらせた マギアに なげると つかまえられる。バトルに かったり、ブラインドボックスから でる。": [
+"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
+"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
 ],
 "ジェム ブラインドボックスを まち時間なしで すぐ あけられる。バトルに かったり、たいかいで ゆうしょうすると もらえる。": [
 "Gems: open a Mystery Box right away, no waiting. Get them by winning battles or tournaments.",
@@ -9695,9 +9695,9 @@
 "Battles are watch-only",
 "对战只需观看"
 ],
-"：モンスターは": [
-": Monsters fight just as set in ",
-"：怪兽会按照"
+"：マギアは": [
+": Magia fight just as set in ",
+"：魔机会按照"
 ],
 "で きめた とおりに たたかう（作戦・わざの じゅんばん・条件・撃ち方）。訓練で きめて いない ところは お任せAIが うごかす。きみが できるのは": [
 " (plan, move order, conditions, how to fire). Anything not set in Training is handled by the Auto AI. All you can do is ",
@@ -9763,9 +9763,9 @@
 "Red areas",
 "红色范围"
 ],
-"は あいての わざの よちょう。モンスターは じぶんで かわそうと する。": [
-" warn of the foe's moves. Monsters try to dodge on their own.",
-"是对手招式的预警。怪兽会自己尝试躲开。"
+"は あいての わざの よちょう。マギアは じぶんで かわそうと する。": [
+" warn of the foe's moves. Magia try to dodge on their own.",
+"是对手招式的预警。魔机会自己尝试躲开。"
 ],
 "は タイプの あいしょうが わるい ときに。でてきた 直後は スキが あるので 注意。": [
 " is for bad type matchups. Careful: you're open right after coming out.",
@@ -9775,9 +9775,9 @@
 "Obstacles",
 "障碍物"
 ],
-"は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ モンスターは のぞく）。": [
-" block moves. Beams and projectiles stop at rocks and pillars (except for flying monsters).",
-"会阻挡招式。光束和弹会被岩石、柱子挡住（飞行的怪兽除外）。"
+"は わざを さえぎる。ビームや 弾は 岩や 柱で とまる（空を とぶ マギアは のぞく）。": [
+" block moves. Beams and projectiles stop at rocks and pillars (except for flying Magia).",
+"会阻挡招式。光束和弹会被岩石、柱子挡住（飞行的魔机除外）。"
 ],
 "で よわらせて": [
 ": weaken a monster, then throw a ",
@@ -9787,9 +9787,9 @@
 " to catch it. Nature, stats, and moves are set when you catch it.",
 "即可捕捉。性格、能力值和招式在捕捉时决定。"
 ],
-"は 勝つと ときどき もらえる（ヘッド・キングバトルは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、モンスター・ボックス・ワザステッカーが でる。": [
-" are sometimes won in battles (always from Crew Heads and the King Battle; kind is random). Their timer starts when you get them, and they give monsters, Capsules, and Move stickers.",
-"胜利后有时可获得（团长和王者之战必定获得，种类随机）。获得后开始计时，会开出怪兽、胶囊、技贴纸。"
+"は 勝つと ときどき もらえる（ヘッド・キングバトルは かならず。しゅるいは ランダム）。てに いれた ときから 時間が すすみ、マギア・ボックス・ワザステッカーが でる。": [
+" are sometimes won in battles (always from Crew Heads and the King Battle; kind is random). Their timer starts when you get them, and they give Magia, Capsules, and Move stickers.",
+"胜利后有时可获得（团长和王者之战必定获得，种类随机）。获得后开始计时，会开出魔机、胶囊、技贴纸。"
 ],
 "💎ジェム": [
 "💎Gems",
@@ -9827,9 +9827,9 @@
 "Training",
 "强化"
 ],
-"：へんせい → きょうか で おなじ しゅるいの モンスターを つかうと ポイントが ふえる（1たい +1。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりわけシール）。": [
-": In Team → Training points, use monsters of the same kind to gain points (+1 each, up to 50 per monster). Spend them on any stat you like (redo with a Reset sticker).",
-"：在编队 → 强化中使用同种怪兽即可增加点数（每只+1，每只最多50）。分配到喜欢的能力上吧（用分配贴纸可重新分配）。"
+"：へんせい → きょうか で おなじ しゅるいの マギアを つかうと ポイントが ふえる（1たい +1。1たい 50まで）。すきな のうりょくに ふりわけよう（ふりなおしは ふりわけシール）。": [
+": In Team → Training points, use Magia of the same kind to gain points (+1 each, up to 50 per Magia). Spend them on any stat you like (redo with a Reset sticker).",
+"：在编队 → 强化中使用同种魔机即可增加点数（每只+1，每只最多50）。分配到喜欢的能力上吧（用分配贴纸可重新分配）。"
 ],
 "：ふりわけシール・ランダムシール・はりかえシール・おなじいろシールなど。上位版の えらべるシール・とくべつシール・わざの かたちの シール（とっしん・とびどうぐ など）は でにくい。ブラインドボックスから でる。へんせい → アイテム で つかう。": [
 ": Reset, Random, Swap, Same-Color stickers, and more. Rarer upgrades: Choice, Special, and move-shape stickers (Dash, Projectile, etc.). They come from Mystery Boxes. Use them in Team → Items.",
@@ -10311,13 +10311,13 @@
 "🏆 Arcade clear!",
 "🏆 街机通关！"
 ],
-"ボスを たおした！ ひんしの モンスターも ふっかつ！": [
-"Boss defeated! Fainted monsters are revived!",
-"打倒了首领！倒下的怪兽也复活了！"
+"ボスを たおした！ ひんしの マギアも ふっかつ！": [
+"Boss defeated! Fainted Magia are revived!",
+"打倒了首领！倒下的魔机也复活了！"
 ],
-"モンスターの HPが 40% かいふくした": [
-"Monsters recovered 40% HP",
-"怪兽恢复了40%的HP"
+"マギアの HPが 40% かいふくした": [
+"Magia recovered 40% HP",
+"魔机恢复了40%的HP"
 ],
 "ハイスコア": [
 "High score",
@@ -10391,13 +10391,13 @@
 "⟦0⟧ ⟦1⟧! Match starts on the ⟦2⟧ Field!",
 "⟦0⟧ ⟦1⟧！在⟦2⟧场地开始比赛！"
 ],
-"あいてが つぎの モンスターを えらんでいます": [
-"Foe is picking the next monster",
-"对手正在选择下一只怪兽"
+"あいてが つぎの マギアを えらんでいます": [
+"Foe is picking the next Magia",
+"对手正在选择下一只魔机"
 ],
-"あいてが モンスターを えらんでいます": [
-"Foe is picking a monster",
-"对手正在选择怪兽"
+"あいてが マギアを えらんでいます": [
+"Foe is picking a Magia",
+"对手正在选择魔机"
 ],
 "つうしんを まっています": [
 "Waiting for connection",
@@ -10451,25 +10451,25 @@
 "Stamps",
 "表情贴图"
 ],
-"ピクセル モンスター アリーナ": [
-"Pixel Monster Arena",
-"像素怪兽竞技场"
+"ピクセル マギア アリーナ": [
+"Pixel Magia Arena",
+"像素魔机竞技场"
 ],
 "つかまえて、そだてて、スタジアムで ぶつかりあえ！": [
 "Catch, raise, and clash in the stadium!",
 "捕捉、培育，在竞技场一决高下！"
 ],
-"リアルタイム モンスターバトル": [
-"Real-time monster battles",
-"实时怪兽对战"
+"リアルタイム マギアバトル": [
+"Real-time Magia battles",
+"实时魔机对战"
 ],
 "最初の相棒を選びましょう": [
 "Choose your first partner",
 "选择你的第一个伙伴"
 ],
-"タイプには相性があります。好きなモンスターを1体選んでください。": [
-"Types have matchups. Pick a monster you like.",
-"属性之间有相性。选择1只你喜欢的怪兽吧。"
+"タイプには相性があります。好きなマギアを1体選んでください。": [
+"Types have matchups. Pick a Magia you like.",
+"属性之间有相性。选择1只你喜欢的魔机吧。"
 ],
 "ほかの サモナーと たいせん": [
 "Battle other Summoners",
@@ -10483,9 +10483,9 @@
 "Battle someone's team",
 "与某人的队伍对战"
 ],
-"モンスターを つかまえる": [
-"Catch monsters",
-"捕捉怪兽"
+"マギアを つかまえる": [
+"Catch Magia",
+"捕捉魔机"
 ],
 "あいことばで たいせん": [
 "Battle with a passcode",
@@ -10511,29 +10511,29 @@
 "Arcade: Tags",
 "街机：标签"
 ],
-"モンスターずかん": [
-"Monster Dex",
-"怪兽图鉴"
+"マギアずかん": [
+"Magia Dex",
+"魔机图鉴"
 ],
 "タイプあいしょう表": [
 "Type chart",
 "属性相性表"
 ],
-"たて＝わざの タイプ／よこ＝うける モンスターの タイプ。": [
-"Rows = move type / Columns = defending monster type.",
-"纵＝招式属性／横＝受击怪兽属性。"
+"たて＝わざの タイプ／よこ＝うける マギアの タイプ。": [
+"Rows = move type / Columns = defending Magia type.",
+"纵＝招式属性／横＝受击魔机属性。"
 ],
 "=2ばい（有利）": [
 "=×2 (Advantage)",
 "=2倍（有利）"
 ],
-"=0.5ばい（不利）。属性の 技は 属性の 表、種族の 技は 種族の 表を みる。わざと 同じタイプ（属性か 種族）の モンスターが つかうと 1.5ばい。マスを タップ（カーソル）すると くわしく 出る。": [
-"=×0.5 (Disadvantage). Attribute moves use the Attribute chart; Race moves use the Race chart. A monster using a move of its own type (Attribute or Race) gets ×1.5. Tap a cell (or move the cursor) for details.",
-"=0.5倍（不利）。属性招式看属性表，种族招式看种族表。怪兽使用与自身同类型（属性或种族）的招式时为1.5倍。点击格子（或移动光标）可查看详情。"
+"=0.5ばい（不利）。属性の 技は 属性の 表、種族の 技は 種族の 表を みる。わざと 同じタイプ（属性か 種族）の マギアが つかうと 1.5ばい。マスを タップ（カーソル）すると くわしく 出る。": [
+"=×0.5 (Disadvantage). Attribute moves use the Attribute chart; Race moves use the Race chart. A Magia using a move of its own type (Attribute or Race) gets ×1.5. Tap a cell (or move the cursor) for details.",
+"=0.5倍（不利）。属性招式看属性表，种族招式看种族表。魔机使用与自身同类型（属性或种族）的招式时为1.5倍。点击格子（或移动光标）可查看详情。"
 ],
-"✋ モンスターを": [
+"✋ マギアを": [
 "✋ ",
-"✋ 将怪兽"
+"✋ 将魔机"
 ],
 "ドラッグ": [
 "Drag",
@@ -10827,9 +10827,9 @@
 "Electric moves ×1.3, foes on the ground can't sleep",
 "雷招式1.3倍、地面上的对手不会睡眠"
 ],
-"草技1.3倍・地面にいるモンスターは毎秒1%回復": [
-"Grass moves ×1.3, monsters on the ground heal 1% per sec",
-"草招式1.3倍、地面上的怪兽每秒回复1%"
+"草技1.3倍・地面にいるマギアは毎秒1%回復": [
+"Grass moves ×1.3, Magia on the ground heal 1% per sec",
+"草招式1.3倍、地面上的魔机每秒回复1%"
 ],
 "妖精技1.3倍・地面にいる相手に突進が効かない": [
 "Fairy moves ×1.3, Dash doesn't work on foes on the ground",
@@ -11263,9 +11263,9 @@
 "Buy for 💎 ⟦0⟧",
 "用 💎 ⟦0⟧ 购买"
 ],
-"モンスターを つかまえる ときに つかう": [
-"Used to catch monsters",
-"捕捉怪兽时使用"
+"マギアを つかまえる ときに つかう": [
+"Used to catch Magia",
+"捕捉魔机时使用"
 ],
 "ショップで つかう": [
 "Used in the Shop",
@@ -11495,9 +11495,9 @@
 "You're a Legend! Try the Draft Battle too",
 "恭喜成为传奇！也来挑战选秀对战吧"
 ],
-"えらんだ モンスターと ワザステッカーで 21かいを めざせ！": [
-"Reach the 21st floor with the monsters and Move Stickers you draft!",
-"用选中的怪兽和技贴纸挑战21层！"
+"えらんだ マギアと ワザステッカーで 21かいを めざせ！": [
+"Reach the 21st floor with the Magia and Move Stickers you draft!",
+"用选中的魔机和技贴纸挑战21层！"
 ],
 "3体の なかから 1体を 3かい えらぶ": [
 "Pick 1 of 3 monsters, three times",
@@ -11507,33 +11507,33 @@
 "Pick 4 Move Stickers",
 "选择4张技贴纸"
 ],
-"訓練して たたかう。かつと モンスターと ステッカーが ふえる": [
-"Train, then battle. Wins earn more monsters and stickers",
-"训练后战斗。获胜可获得更多怪兽和贴纸"
+"訓練して たたかう。かつと マギアと ステッカーが ふえる": [
+"Train, then battle. Wins earn more Magia and stickers",
+"训练后战斗。获胜可获得更多魔机和贴纸"
 ],
-"まけたら さいしょから（ここの モンスターは 手もちに はいらない）": [
-"Lose and you start over (these monsters never join your party)",
-"输了就从头开始（这里的怪兽不会加入手持）"
+"まけたら さいしょから（ここの マギアは 手もちに はいらない）": [
+"Lose and you start over (these Magia never join your party)",
+"输了就从头开始（这里的魔机不会加入手持）"
 ],
-"モンスターを えらぶ（⟦0⟧ / 3）": [
-"Pick a monster (⟦0⟧ / 3)",
-"选择怪兽（⟦0⟧ / 3）"
+"マギアを えらぶ（⟦0⟧ / 3）": [
+"Pick a Magia (⟦0⟧ / 3)",
+"选择魔机（⟦0⟧ / 3）"
 ],
-"技は もう おぼえて いる。えらんだ モンスターは この ドラフトの あいだ だけ つかえる": [
-"They already know moves. Picked monsters can only be used during this draft",
-"已经学会招式。选中的怪兽只能在这次选秀中使用"
+"技は もう おぼえて いる。えらんだ マギアは この ドラフトの あいだ だけ つかえる": [
+"They already know moves. Picked Magia can only be used during this draft",
+"已经学会招式。选中的魔机只能在这次选秀中使用"
 ],
-"ごほうび：モンスターを 1体 えらぶ": [
-"Reward: pick 1 monster",
-"奖励：选择1只怪兽"
+"ごほうび：マギアを 1体 えらぶ": [
+"Reward: pick 1 Magia",
+"奖励：选择1只魔机"
 ],
 "ワザステッカーを えらぶ（⟦0⟧ / 4）": [
 "Pick a Move Sticker (⟦0⟧ / 4)",
 "选择技贴纸（⟦0⟧ / 4）"
 ],
-"えらんだ モンスターが おぼえられる ものから。訓練の がめんで 技の 枠に いれると おぼえる": [
+"えらんだ マギアが おぼえられる ものから。訓練の がめんで 技の 枠に いれると おぼえる": [
 "Only ones your picks can learn. Put it in a move slot in Training to learn it",
-"只出现选中怪兽能学会的。在训练画面放进招式栏即可学会"
+"只出现选中魔机能学会的。在训练画面放进招式栏即可学会"
 ],
 "⟦0⟧が おぼえられる": [
 "⟦0⟧ can learn",
@@ -11595,9 +11595,9 @@
 "Back to Tower ›",
 "返回塔 ›"
 ],
-"ドラフトを リセットしますか？\nいまの モンスターと ステッカーは なくなり、さいしょから に なります。": [
-"Reset the draft?\nYour current monsters and stickers will be lost and you will start over.",
-"要重置选秀吗？\n现在的怪兽和贴纸会消失，从头开始。"
+"ドラフトを リセットしますか？\nいまの マギアと ステッカーは なくなり、さいしょから に なります。": [
+"Reset the draft?\nYour current Magia and stickers will be lost and you will start over.",
+"要重置选秀吗？\n现在的魔机和贴纸会消失，从头开始。"
 ],
 "ワザステッカー ⟦0⟧を もらった！": [
 "Got Move Stickers ⟦0⟧!",
@@ -11619,17 +11619,17 @@
 "Cleared ⟦0⟧F!",
 "通关第⟦0⟧层！"
 ],
-"ごほうびの モンスターと ワザステッカーを えらぼう": [
-"Pick your reward monster and Move Stickers",
-"选择奖励的怪兽和技贴纸吧"
+"ごほうびの マギアと ワザステッカーを えらぼう": [
+"Pick your reward Magia and Move Stickers",
+"选择奖励的魔机和技贴纸吧"
 ],
 "⟦0⟧かい！ ⟦1⟧が しょうぶを しかけてきた！": [
 "Floor ⟦0⟧! ⟦1⟧ challenges you!",
 "第⟦0⟧层！⟦1⟧发起了挑战！"
 ],
-"えらんだ モンスターと ワザステッカーで 21かいを めざす（7かいごとに ボス）": [
-"Reach 21F with drafted monsters and Move Stickers (Boss every 7F)",
-"用选中的怪兽和技贴纸挑战21层（每7层有首领）"
+"えらんだ マギアと ワザステッカーで 21かいを めざす（7かいごとに ボス）": [
+"Reach 21F with drafted Magia and Move Stickers (Boss every 7F)",
+"用选中的魔机和技贴纸挑战21层（每7层有首领）"
 ],
 "いまの かい": [
 "Current floor",
@@ -11643,9 +11643,9 @@
 "Cleared ⟦0⟧F!　💎+1",
 "通关第⟦0⟧层！　💎+1"
 ],
-"いまの モンスターと 技": [
-"Your monsters and moves",
-"现在的怪兽和招式"
+"いまの マギアと 技": [
+"Your Magia and moves",
+"现在的魔机和招式"
 ],
 "もっている ステッカー：⟦0⟧": [
 "Stickers you have: ⟦0⟧",
@@ -12023,25 +12023,25 @@
 "Power Seed",
 "强化之源"
 ],
-"すきな モンスターの きょうかポイントを +5（どの しゅるいにも つかえる）": [
-"Adds +5 Power Points to any monster (works on every species)",
-"为任意怪兽增加5点强化点数（所有种类都能用）"
+"すきな マギアの きょうかポイントを +5（どの しゅるいにも つかえる）": [
+"Adds +5 Power Points to any Magia (works on every species)",
+"为任意魔机增加5点强化点数（所有种类都能用）"
 ],
 "きたえのもと": [
 "Training Seed",
 "锻炼之源"
 ],
-"すきな モンスターの 個体値を ぜんぶ +3（さいだい 31）": [
-"Raises all IVs of any monster by +3 (max 31)",
-"任意怪兽的个体值全部+3（最高31）"
+"すきな マギアの 個体値を ぜんぶ +3（さいだい 31）": [
+"Raises all IVs of any Magia by +3 (max 31)",
+"任意魔机的个体值全部+3（最高31）"
 ],
 "きょうかポイント：⟦0⟧": [
 "Power Points: ⟦0⟧",
 "强化点数：⟦0⟧"
 ],
-"きょうかポイントは たたかうと たまる（出場して かつと +1）。おなじ しゅるいの モンスターを 1たい つかうと +⟦0⟧、きょうかのもとで +⟦1⟧（さいだい ⟦2⟧）。ポイントを すきな のうりょくに ふりわけて「確定する」で きまる（1つ ⟦3⟧ まで・1ポイントで +⟦4⟧）。": [
-"Power Points build up as you battle (+1 for each win you take part in). Using one monster of the same species gives +⟦0⟧, a Power Seed gives +⟦1⟧ (max ⟦2⟧). Assign points to any stat and press Confirm (up to ⟦3⟧ each, +⟦4⟧ per point).",
-"强化点数会在战斗中累积（出场并获胜+1）。使用1只同种怪兽+⟦0⟧，强化之源+⟦1⟧（最多⟦2⟧）。把点数分配到喜欢的能力后按「确定」（每项最多⟦3⟧，每点+⟦4⟧）。"
+"きょうかポイントは たたかうと たまる（出場して かつと +1）。おなじ しゅるいの マギアを 1たい つかうと +⟦0⟧、きょうかのもとで +⟦1⟧（さいだい ⟦2⟧）。ポイントを すきな のうりょくに ふりわけて「確定する」で きまる（1つ ⟦3⟧ まで・1ポイントで +⟦4⟧）。": [
+"Power Points build up as you battle (+1 for each win you take part in). Using one Magia of the same species gives +⟦0⟧, a Power Seed gives +⟦1⟧ (max ⟦2⟧). Assign points to any stat and press Confirm (up to ⟦3⟧ each, +⟦4⟧ per point).",
+"强化点数会在战斗中累积（出场并获胜+1）。使用1只同种魔机+⟦0⟧，强化之源+⟦1⟧（最多⟦2⟧）。把点数分配到喜欢的能力后按「确定」（每项最多⟦3⟧，每点+⟦4⟧）。"
 ],
 "⟦0⟧ きょうかのもとを つかう（+⟦1⟧・のこり ⟦2⟧）": [
 "⟦0⟧ Use Power Seed (+⟦1⟧, ⟦2⟧ left)",

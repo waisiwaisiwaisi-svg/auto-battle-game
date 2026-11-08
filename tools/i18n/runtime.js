@@ -1,5 +1,5 @@
 // ====== I18N（tools/i18n/build_i18n.py が 自動生成：ことば＝日本語・English・简体中文）======
-// ひょうじの ときに 日本語を おきかえる（DOMの 文字・title など・キャンバスの 文字）。モンスター名・技名は ローマ字。
+// ひょうじの ときに 日本語を おきかえる（DOMの 文字・title など・キャンバスの 文字）。マギア名・技名は ローマ字。
 const LANG = (() => { try { const v = localStorage.getItem('pma_lang'); return v === 'en' || v === 'zh' ? v : 'ja'; } catch (e) { return 'ja'; } })();
 const I18N_DICT = __I18N_DICT__;
 const ROMA_K = { 'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo', 'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho', 'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho', 'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo', 'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo', 'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo', 'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo', 'ぎゃ': 'gya', 'ぎゅ': 'gyu', 'ぎょ': 'gyo', 'じゃ': 'ja', 'じゅ': 'ju', 'じょ': 'jo', 'びゃ': 'bya', 'びゅ': 'byu', 'びょ': 'byo', 'ぴゃ': 'pya', 'ぴゅ': 'pyu', 'ぴょ': 'pyo', 'てぃ': 'ti', 'でぃ': 'di', 'ふぁ': 'fa', 'ふぃ': 'fi', 'ふぇ': 'fe', 'ふぉ': 'fo', 'うぃ': 'wi', 'うぇ': 'we', 'うぉ': 'wo', 'ゔぁ': 'va', 'ゔぃ': 'vi', 'ゔぇ': 've', 'ゔぉ': 'vo', 'しぇ': 'she', 'じぇ': 'je', 'ちぇ': 'che', 'つぁ': 'tsa', 'とぅ': 'tu', 'どぅ': 'du' };
@@ -30,11 +30,11 @@ const tr = (() => {
   TPL.sort((a, b) => b.fx - a.fx); SUB.sort((a, b) => b[0].length - a[0].length);
   const MISS = new Set(); window.__trMiss = MISS;
   let NS = null; const NSET = () => NS || (NS = new Set(names().map(x => x[0])));
-  let NAMES = null;   // モンスター名・技名 → ローマ字（ながい じゅん）
+  let NAMES = null;   // マギア名・技名 → ローマ字（ながい じゅん）
   const names = () => { if (NAMES) return NAMES; const s = new Set(); try { for (const k in SPECIES) s.add(SPECIES[k].n); for (const k in MOVES) s.add(MOVES[k].n); } catch (e) { return []; } NAMES = [...s].filter(n => n && JPRE.test(n) && !EX.has(n)).sort((a, b) => b.length - a.length).map(n => [n, romaji(n)]); return NAMES; };
   function core(c) {
     let r = EX.get(c); if (r !== undefined) return r;
-    { const m = c.match(/^(あいての |やせいの )?(.+?)の (.+?)([！!]?)$/); if (m && NSET().has(m[2]) && NSET().has(m[3])) { const pre = m[1] ? (m[1][0] === 'あ' ? (LI ? '对手的' : 'Foe ') : (LI ? '野生的' : 'Wild ')) : ''; return pre + (LI ? romaji(m[2]) + '的' + romaji(m[3]) : romaji(m[2]) + "'s " + romaji(m[3])) + m[4]; } }   // 「モンスターの わざ」
+    { const m = c.match(/^(あいての |やせいの )?(.+?)の (.+?)([！!]?)$/); if (m && NSET().has(m[2]) && NSET().has(m[3])) { const pre = m[1] ? (m[1][0] === 'あ' ? (LI ? '对手的' : 'Foe ') : (LI ? '野生的' : 'Wild ')) : ''; return pre + (LI ? romaji(m[2]) + '的' + romaji(m[3]) : romaji(m[2]) + "'s " + romaji(m[3])) + m[4]; } }   // 「マギアの わざ」
     const dot = c.includes('・');
     for (const t of TPL) { if (dot && !t.dot) continue; const m = t.re.exec(c); if (m) return t.out.replace(/⟦(\d+)⟧/g, (_, n) => { const j = t.ord.indexOf(+n); return j >= 0 ? tr1(m[j + 1]) : ''; }); }
     { const m = c.match(/^([^：]{1,8})：(.+)$/); if (m && EX.has(m[1] + '：')) return EX.get(m[1] + '：') + core(m[2].trim()); if (m && EX.has(m[1])) return EX.get(m[1]) + (LI ? '：' : ': ') + core(m[2].trim()); }   // 「みだし：なかみ」
