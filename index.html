@@ -6447,7 +6447,7 @@ for (const id in MOVES) { const m = MOVES[id]; if (m.k !== 'beam' || m.ohko || i
   P = Math.round(P / 5) * 5; m.power = P; m.pow = P / 5; }
 // 個別の 調整
 MOVES['triple-axel'].rad *= 2;   // さんれんスピン：はんい 2ばい
-Object.assign(MOVES['fake-out'], { power: 60, pow: 12, pctDmg: .2, sureHit: 1, flinchT: 3 });   // びっくりてうち：あいての 最大HPの 20%を けずる・かならず あたる（あいてへ まがって つっこむ・よけられない）・ひるみ 3びょう
+Object.assign(MOVES['fake-out'], { power: 40, pow: 8, sureHit: 1, flinchT: 3 });   // びっくりてうち：威力40・かならず あたる（あいてへ まがって つっこむ・よけられない）・ひるみ 3びょう
 Object.assign(MOVES.pound, { wallSlam: 1 });   // はたく：ふきとばして かべに あてたら おなじ だけの ついかダメージ
 const gfxOf = (m, part) => { const g = m && GFX[m.fxid], k = g && g[part]; return k && plOk(k) ? k : null; };
 // 地面から 出る／はじける 専用の 絵（はんい r に あわせる）。かいたら true
