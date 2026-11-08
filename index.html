@@ -11762,7 +11762,8 @@ function drawObsGround() {
   }
 }
 function drawObsTop() {
-  // ビッグウェーブの あたま（しかくい なみ）は かかない：水流だけ みせる
+  if (B.obs) for (const o of B.obs) if (o.k === 'wave' && o.d < o.len && PLFX.wave && PLFX.wave.img.complete && !(o.blk && o.blk.every(Boolean))) {   // なみの あたま（もりあがる なみの 絵）。かべで とまった ときの しかくい なみは かかない
+    const h = waveHead(o), c = DM.cos(o.ang); plDraw('wave', plLoop('wave', B.t), h.x, h.y - 10, o.w * 1.15 / (PLFX.wave.h * PIX_D), o.ang, null, null, c < 0, 0, NFX.wave ? plTint('wave', '#4aa8ff') : null); }
   B.sides.forEach((sd, si) => { const L = sd.leaves; if (!L) return; const me = active(si); if (!targetable(me)) return;   // まわる このは
     if (plOk('n_leaves')) { ctx.globalAlpha = L.t < 1.5 && Math.floor(B.t * 10) % 2 ? .4 : 1; ctx.save(); ctx.translate(me.x, me.y - BODY * .6); ctx.scale(1, .6); plDraw('n_leaves', plLoop('n_leaves', B.t), 0, 0, LEAF_R * 2.3 / (PLFX.n_leaves.w * PIX_D), 0); ctx.restore(); ctx.globalAlpha = 1; return; }   // 納品の このはの わ
     for (let i = 0; i < LEAF_N; i++) { const p = leafPos(me, L, i), a = L.a * 3 + i; glowDot(p.x, p.y, 12, '#7be07b', .35);
