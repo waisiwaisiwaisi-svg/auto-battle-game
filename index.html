@@ -7588,7 +7588,7 @@ function doSwitch(f, idx, pass, forced, byMove) {
   B.sides[f.side].swapCd = SWAP_CD;
 }
 function aura(f, col) { fxPush({ type: 'ring', x: f.x, y: f.y, rad: 34, col, life: .45, max: .45 }); burst(f.x, f.y - bodyH(f), col, 12, 60, .5); }
-function healHp(f, amt) { const a = Math.min(f.maxHp - (f.capHp || 0) - f.hp, Math.round(amt)); if (a <= 0) return; f.hp += a; popText(f.x, f.y - 66, `+${a}`, '#7bd88f'); for (let i = 0; i < 8; i++) B.parts.push({ x: f.x + rand(-16, 16), y: f.y - rand(0, 30), vx: 0, vy: -rand(40, 80), life: .6, max: .6, col: choice(['#ffffff', '#7bd88f']), size: 5, g: 0, shape: 'plus', glow: true }); }
+function healHp(f, amt) { const a = Math.min(f.maxHp - (f.capHp || 0) - f.hp, Math.round(amt)); if (a <= 0) return; f.hp += a; const n = Math.round(a); if (n < 1) return; popText(f.x, f.y - 66, `+${n}`, '#7bd88f'); for (let i = 0; i < 8; i++) B.parts.push({ x: f.x + rand(-16, 16), y: f.y - rand(0, 30), vx: 0, vy: -rand(40, 80), life: .6, max: .6, col: choice(['#ffffff', '#7bd88f']), size: 5, g: 0, shape: 'plus', glow: true }); }   // HPに はすうが ある（お花・わりあいの ダメージ）ときも せいすうで みせる
 function changeStages(f, ch, self) {
   if (!ch) return;
   const parts = [];
