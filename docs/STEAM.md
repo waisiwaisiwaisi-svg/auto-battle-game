@@ -41,7 +41,7 @@ API 名は この とおりに つくる（ゲームは この 名前で おく�
 - デポを 3つ つくる：Windows・macOS・Linux（それぞれ OS を えらぶ）
 - Launch Options：
   - Windows：`PixelMonsterArena.exe`
-  - macOS：`Pixel Monster Arena.app`
+  - macOS：`Magic Gear Arena.app`
   - Linux：`PixelMonsterArena`
 
 ## 5. GitHub から アップロード

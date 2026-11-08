@@ -1,4 +1,4 @@
-# ピクセルモンスターアリーナ　アプリ版リリース手順
+# マジックギアアリーナ　アプリ版リリース手順
 
 ゲーム本体は `index.html` の1ファイルのまま。`app/` が iOS / Android アプリの入れ物（Capacitor）です。
 `app/` でビルドすると、`index.html` を `app/www/` にコピーし、オンライン機能を Firebase につなぐ部品（`app/src/backend.js`）を差しこみます。claude.ai 版はそのまま動きます。

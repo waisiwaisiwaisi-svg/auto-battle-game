@@ -2,7 +2,7 @@
   "name": "pixel-monster-arena-desktop",
   "private": true,
   "version": "1.0.0",
-  "description": "ピクセルモンスターアリーナ（PC版：Steam 用）",
+  "description": "マジックギアアリーナ（PC版：Steam 用）",
   "main": "main.js",
   "scripts": {
     "web": "cd .. && npm run build",
@@ -18,7 +18,7 @@
   },
   "build": {
     "appId": "com.pixelmonsterarena.desktop",
-    "productName": "Pixel Monster Arena",
+    "productName": "Magic Gear Arena",
     "directories": {
       "output": "dist"
     },

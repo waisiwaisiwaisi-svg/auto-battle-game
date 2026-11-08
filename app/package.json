@@ -2,7 +2,7 @@
   "name": "pixel-monster-arena-app",
   "private": true,
   "version": "1.0.0",
-  "description": "ピクセルモンスターアリーナ（iOS / Android アプリ版）",
+  "description": "マジックギアアリーナ（iOS / Android アプリ版）",
   "scripts": {
     "build": "node scripts/build-web.mjs",
     "sync": "npm run build && npx cap sync",

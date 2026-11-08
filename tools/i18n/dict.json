@@ -12102,5 +12102,9 @@
 "草技を つかうと お花が さく。お花の ちかくに いると お花 1つにつき 毎秒 HPが 0.5% かいふく（かさなる）": [
 "Using Grass moves makes a flower bloom. Each nearby flower restores 0.5% HP per second (stacks)",
 "使用草属性招式会开出花朵。附近每有1朵花，每秒恢复0.5%HP（可叠加）"
+],
+"マジック ギア アリーナ": [
+"Magic Gear Arena",
+"魔法齿轮竞技场"
 ]
 }
