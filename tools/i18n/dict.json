@@ -15042,5 +15042,9 @@
 "自分のHPを1/4使う": [
 "Costs 1/4 of own HP",
 "消耗自己1/4的HP"
+],
+"自分のHPを1/4使う。削った分は、相手が交代するまで回復できない": [
+"Costs 1/4 of own HP. The foe can't heal the lost HP until it switches out",
+"消耗自己1/4的HP。被削减的部分在对手替换下场前无法回复"
 ]
 }
