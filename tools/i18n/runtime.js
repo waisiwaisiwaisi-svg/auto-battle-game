@@ -34,7 +34,7 @@ const tr = (() => {
   const names = () => { if (NAMES) return NAMES; const s = new Set(); try { for (const k in SPECIES) s.add(SPECIES[k].n); for (const k in MOVES) s.add(MOVES[k].n); } catch (e) { return []; } NAMES = [...s].filter(n => n && JPRE.test(n) && !EX.has(n)).sort((a, b) => b.length - a.length).map(n => [n, romaji(n)]); return NAMES; };
   function core(c) {
     let r = EX.get(c); if (r !== undefined) return r;
-    { const m = c.match(/^(あいての |やせいの )?(.+?)の (.+?)([！!]?)$/); if (m && NSET().has(m[2]) && NSET().has(m[3])) { const pre = m[1] ? (m[1][0] === 'あ' ? (LI ? '对手的' : 'Foe ') : (LI ? '野生的' : 'Wild ')) : ''; return pre + (LI ? romaji(m[2]) + '的' + romaji(m[3]) : romaji(m[2]) + "'s " + romaji(m[3])) + m[4]; } }   // 「マギアの わざ」
+    { const m = c.match(/^(相手の|野生の)?(.+?)の(.+?)([！!]?)$/); if (m && NSET().has(m[2]) && NSET().has(m[3])) { const pre = m[1] ? (m[1][0] === '相' ? (LI ? '对手的' : 'Foe ') : (LI ? '野生的' : 'Wild ')) : ''; return pre + (LI ? romaji(m[2]) + '的' + romaji(m[3]) : romaji(m[2]) + "'s " + romaji(m[3])) + m[4]; } }   // 「マギアの わざ」
     const dot = c.includes('・');
     for (const t of TPL) { if (dot && !t.dot) continue; const m = t.re.exec(c); if (m) return t.out.replace(/⟦(\d+)⟧/g, (_, n) => { const j = t.ord.indexOf(+n); return j >= 0 ? tr1(m[j + 1]) : ''; }); }
     { const m = c.match(/^([^：]{1,8})：(.+)$/); if (m && EX.has(m[1] + '：')) return EX.get(m[1] + '：') + core(m[2].trim()); if (m && EX.has(m[1])) return EX.get(m[1]) + (LI ? '：' : ': ') + core(m[2].trim()); }   // 「みだし：なかみ」
