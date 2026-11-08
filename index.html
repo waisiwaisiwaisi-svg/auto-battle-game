@@ -10751,7 +10751,7 @@ function moveDesc(m) {
   const TN = (t) => TYPES[t].n;
   // 威力・命中
   if (m.ds) { if (m.cat !== 'stat' && pw > 0) add(`威力${pw}`); if (m.cat !== 'stat' && m.acc && m.acc < 100) add(`命中${m.acc}`); add(m.ds); return descTrim(out); }   // てがきの せつめい
-  if (m.pctDmg) add(`威力HP${Math.round(m.pctDmg * 100)}%`);   // 相手の 最大HPの わりあいで けずる else if (m.cat !== 'stat' && m.k !== 'counter' && !m.ohko) add(`威力${pw}`);
+  if (m.pctDmg) add(`威力HP${Math.round(m.pctDmg * 100)}%`); else if (m.cat !== 'stat' && m.k !== 'counter' && !m.ohko) add(`威力${pw}`);   // HPの わりあいで けずる 技は「威力HP〇%」
   if (m.cat !== 'stat' && m.acc && m.acc < 100) add(`命中${m.acc}`);
   // 動き
   if (m.k === 'counter') add(`突進・打撃を受けた瞬間に、受けたダメージを${m.mult}倍で返す`);
