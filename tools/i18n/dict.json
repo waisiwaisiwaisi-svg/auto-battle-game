@@ -15034,5 +15034,13 @@
 "他の端末で遊んだデータがあります（⟦0⟧）。 この端末で遊んだ分と、どちらを使いますか？ 選ばなかったほうは消えます": [
 "There's data played on another device. Which do you want to use: that, or this device's? The one you don't pick will be erased.",
 "有在其他设备上玩过的数据。要使用它，还是本设备上的数据？没选的那份会被删除。"
+],
+"威力HP20%": [
+"Power: 20% of foe max HP",
+"威力：对手最大HP的20%"
+],
+"自分のHPを1/4使う": [
+"Costs 1/4 of own HP",
+"消耗自己1/4的HP"
 ]
 }
