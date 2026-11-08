@@ -3079,10 +3079,6 @@
 "Cuts the foe's HP down to match yours",
 "把对手的HP减到和自己一样"
 ],
-"当てると相手の攻撃+1（かしつけ）。5秒ごとに奪うステータスが攻撃→防御→属性攻撃→属性防御→素早さの順に1つずつ増える。もう一度当てるか相手が倒れると、たまった分を奪って自分のものにする": [
-"On hit, foe's Attack +1 (a loan). Every 5 sec, one more stat to steal is added: Attack → Defense → Sp. Atk → Sp. Def → Speed. Hit again or KO the foe to take it all for yourself",
-"命中后对手攻击+1（借出）。每5秒按攻击→防御→特攻→特防→速度的顺序增加1项要夺取的能力。再次命中或对手倒下时，夺取积攒的部分归自己所有"
-],
 "星くずの光をまっすぐ放つ。撃つと自分の属性攻撃-1": [
 "Fires stardust light straight ahead. Then own Sp. Atk -1",
 "笔直放出星尘之光。发射后自己的特攻-1"
@@ -4103,10 +4099,6 @@
 "Left",
 "剩余"
 ],
-"残り⟦0⟧。今すぐ開けるには💎⟦1⟧ ジェムがいります（持っている：⟦2⟧）。": [
-"⟦0⟧ left. Opening now needs 💎⟦1⟧ Gems (you have: ⟦2⟧).",
-"剩余 ⟦0⟧。立即打开需要 💎⟦1⟧ 宝石（持有：⟦2⟧）。"
-],
 "残り⟦0⟧。💎⟦1⟧ ジェムで今すぐ開けますか？（持っている：⟦2⟧）": [
 "⟦0⟧ left. Open now for 💎⟦1⟧ Gems? (You have: ⟦2⟧)",
 "剩余 ⟦0⟧。要用 💎⟦1⟧ 宝石立即打开吗？（持有：⟦2⟧）"
@@ -4251,10 +4243,6 @@
 "▼Low",
 "▼低"
 ],
-"「預ける」を並びかえている間は、その中で入れかえできません。「じぶんで並べる」にすると入れかえできます。": [
-"You can't swap inside \"Storage\" while it's sorted. Choose \"Custom order\" to swap.",
-"「寄存」排序时无法在其中调换。改成「自行排列」就能调换。"
-],
 "パーティには1体いないといけません": [
 "Your party needs at least 1 monster",
 "队伍里至少要有1只"
@@ -4374,10 +4362,6 @@
 "アイテム": [
 "Item",
 "道具"
-],
-"⟦0⟧⟦1⟧をにがしますか？もうもどってきません。": [
-"Release ⟦0⟧⟦1⟧? It won't come back.",
-"要放生⟦0⟧⟦1⟧吗？它不会再回来了。"
 ],
 "ふりわけギア": [
 "Reset Gear",
@@ -4599,10 +4583,6 @@
 "Simulation results",
 "模拟结果"
 ],
-"⟦0⟧（先頭）⟦1⟧で⟦2⟧の3体と⟦3⟧回（今の設定。保存前でもOK）。記録はこの子の分": [
-"⟦0⟧ (lead) ⟦1⟧ vs. ⟦2⟧'s 3 monsters, ⟦3⟧ times (current settings, OK before saving). Stats shown are for this one",
-"⟦0⟧（先锋）⟦1⟧ 与⟦2⟧的3只对战⟦3⟧次（当前设置，保存前也可以）。记录是这只的数据"
-],
 "勝ち": [
 "Win",
 "胜利"
@@ -4774,10 +4754,6 @@
 "」に、この技を撃ちます。": [
 "\", it uses this move.",
 "」，就会使出这个招式。"
-],
-"置いた条件をタップすると、⟦0⟧にも変えられます。": [
-"Tap a placed condition to change it to ⟦0⟧, too.",
-"点击已放置的条件，也能改成⟦0⟧。"
 ],
 "④次は": [
 "④ Next is ",
@@ -5103,10 +5079,6 @@
 "You have ⟦0⟧ moves. Max is 4",
 "有⟦0⟧个招式。最多4个"
 ],
-"⟦0⟧は覚えられません（ワザステッカーがないか、このマギアは覚えられない技です）": [
-"Can't learn ⟦0⟧ (no Move Sticker, or this Magia can't learn it)",
-"学不会⟦0⟧（没有技贴纸，或这只魔机学不会该招式）"
-],
 "ワザステッカーを使います：": [
 "Using Move Stickers:",
 "将使用技贴纸："
@@ -5179,17 +5151,9 @@
 "⟦0⟧ learned ⟦1⟧!",
 "⟦0⟧新学会了⟦1⟧！"
 ],
-"このマギアはバトルタワーにちょうせん中です。タワーをやめてからにがしてね。": [
-"This Magia is taking on the Battle Tower. Quit the Tower before releasing it.",
-"这只魔机正在挑战对战塔。请先退出塔再放生。"
-],
 "⟦0⟧を強化": [
 "Train ⟦0⟧",
 "强化⟦0⟧"
-],
-"同じ種類のマギアを1体使うときょうかポイント +⟦0⟧（最大⟦1⟧）。ポイントを好きな能力にふりわけて「確定する」で決まる（1つ⟦2⟧まで・1ポイントで+⟦3⟧）。": [
-"Use 1 Magia of the same kind for +⟦0⟧ Training points (max ⟦1⟧). Assign points to any stat and tap \"Confirm\" to lock them in (up to ⟦2⟧ each, +⟦3⟧ per point).",
-"使用1只同种魔机可获得强化点数 +⟦0⟧（最多⟦1⟧）。把点数分配给喜欢的能力，按「确定」就会生效（每项最多⟦2⟧，每1点 +⟦3⟧）。"
 ],
 "集めた": [
 "Collected",
@@ -5226,14 +5190,6 @@
 "パーティが0体になってしまいます": [
 "Your party would have 0 monsters",
 "队伍会变成0只"
-],
-"⟦0⟧たいを使って⟦1⟧を強化しますか？（+⟦2⟧）使ったマギアはいなくなります。": [
-"Use ⟦0⟧ Magia to train ⟦1⟧? (+⟦2⟧) Used Magia will be gone.",
-"要使用⟦0⟧只魔机强化⟦1⟧吗？（+⟦2⟧）使用的魔机会消失。"
-],
-"ふりわけたポイントがまだ確定していません。確定しないで閉じますか？（ふりわけは元にもどります）": [
-"Your point assignments aren't confirmed yet. Close without confirming? (They'll be undone)",
-"分配的点数还没有确定。不确定就关闭吗？（分配会被还原）"
 ],
 "物理技": [
 "Physical",
@@ -5626,10 +5582,6 @@
 "⟦0⟧がひろがった！": [
 "⟦0⟧ spread out!",
 "⟦0⟧扩散开了！"
-],
-"ほろびのうたがひびいた！10びょうでほろびる（こうたいするととける）": [
-"Horobi no Uta rang out! Faint in 10s (switch to cancel)",
-"Horobi no Uta响起了！10秒后倒下（替换可解除）"
 ],
 "タイプ相性なし！": [
 "No type matchups!",
@@ -6647,18 +6599,6 @@
 "Oh no! It ran away!",
 "不行！它逃走了！"
 ],
-"⟦0⟧につながりませんでした。通信を確かめてもう一度試してね。": [
-"Couldn't connect to ⟦0⟧. Check your connection and try again.",
-"无法连接到⟦0⟧。请检查网络后再试一次。"
-],
-"このアプリではまだ⟦0⟧が使えません。": [
-"⟦0⟧ isn't available in this app yet.",
-"这个应用暂时还不能使用⟦0⟧。"
-],
-"⟦0⟧はclaude.aiにサインインして、このゲームのページを開いたときだけ使えます。": [
-"⟦0⟧ only works when you sign in to claude.ai and open this game's page.",
-"只有登录 claude.ai 并打开本游戏页面时才能使用⟦0⟧。"
-],
 "この対戦はオンラインで遊んでね": [
 "Please play this battle online",
 "这个对战请在线玩哦"
@@ -6790,10 +6730,6 @@
 "通信を待っています…": [
 "Waiting for connection…",
 "正在等待连接…"
-],
-"相手の画面が止まったままです。試合をやめますか？（負けにはなりません）": [
-"The opponent's screen is still frozen. Quit the match? (It won't count as a loss)",
-"对手的画面一直卡住。要退出比赛吗？（不算失败）"
 ],
 "待つ": [
 "Wait",
@@ -7055,10 +6991,6 @@
 "Make leader",
 "设为会长"
 ],
-"⟦0⟧さんにリーダーをたのみますか？受けてもらえたら、チームの名前・もんしょう・メンバー・ポイントはそのまま引きつがれ、あなたはメンバーになります。": [
-"Ask ⟦0⟧ to be leader? If they accept, the team's name, emblem, members and points stay the same, and you become a member.",
-"要请⟦0⟧担任会长吗？对方接受后，队伍的名称、徽记、成员和点数都会保留，你将成为普通成员。"
-],
 "たのめませんでした": [
 "Couldn't ask",
 "请求失败"
@@ -7094,10 +7026,6 @@
 "通報・ブロック": [
 "Report, Block",
 "举报、屏蔽"
-],
-"チームを解散しますか？メンバーもみんなぬけたことになります。（のこしたいときは、先にメンバーの「リーダーにする」でリーダーをたのもう）": [
-"Disband the team? All members will be removed too. (To keep it, first use \"Make leader\" on a member to hand it over)",
-"要解散队伍吗？所有成员也都会退出。（想保留队伍的话，请先用成员的「设为会长」请对方担任会长）"
 ],
 "チームを解散しますか？": [
 "Disband the team?",
@@ -7298,10 +7226,6 @@
 "力つきてしまった…でもマギアたちはすぐに元気になった": [
 "You ran out of strength… but your Magia were soon full of energy again",
 "力气用尽了…不过魔机们很快就恢复了精神"
-],
-"⟦0⟧はおどろいてにげていった（とおぼえで野生はにげる）": [
-"⟦0⟧ got scared and ran off (howls scare wild ones away)",
-"⟦0⟧被吓跑了（嚎叫会让野生怪兽逃走）"
 ],
 "空き地から無事ににげだした": [
 "Got away safely from the vacant lot",
@@ -7647,10 +7571,6 @@
 "That's the end of the test. Restoring your original data.",
 "测试到此结束。将恢复原来的数据。"
 ],
-"最初の流れ（バトル →訓練→名前・最初のマギア →空き地→ ブラインドボックス）を通しで試します。テスト中のデータは保存されず、最後に元のデータに戻ります。": [
-"Test the whole opening flow (Battle → Training → Name, first Magia → Vacant lot → Blind Box). Test data isn't saved; your original data comes back at the end.",
-"完整测试开头流程（战斗 → 训练 → 名字、第一只魔机 → 空地 → 盲盒）。测试中的数据不会保存，最后会恢复原来的数据。"
-],
 "チュートリアル クリア！": [
 "Tutorial cleared!",
 "教程完成！"
@@ -7875,10 +7795,6 @@
 "Digs underground and attacks from under the foe (can't be hit while underground). The attack area depends on body size. Holes stay, and Magia no bigger than you can travel hole to hole",
 "钻入地下，从对手脚下攻击（潜地时不会受到攻击）。出来时的攻击范围由体型决定。挖的洞会留下，不比自己大的魔机可以从洞钻到洞"
 ],
-"相手の足元に⟦0⟧を作る（消えない）。⟦1⟧": [
-"Makes ⟦0⟧ under the foe (it stays). ⟦1⟧",
-"在对手脚下造出⟦0⟧（不会消失）。⟦1⟧"
-],
 "近接・突進など体でぶつかる技を1回防ぎ、攻撃した相手をどくにする": [
 "Blocks one body-contact move like melee or dash, and poisons the attacker",
 "挡住1次近战、突进等身体撞击的招式，并让攻击者中毒"
@@ -7894,10 +7810,6 @@
 "この後倒されたら、相手も一緒に倒れる": [
 "If you're KO'd after this, the foe goes down too",
 "此后如果被打倒，对手也会一起倒下"
-],
-"HPを1/4使って、相手のHPを20%削る（交代するまでその分は回復できない）": [
-"Uses 1/4 HP to cut the foe's HP by 20% (can't be healed until they switch)",
-"消耗1/4 HP，削减对手20%的HP（替换前无法回复这部分）"
 ],
 "能力の変化を引き継いで控えと交代": [
 "Switches with a bench monster, passing on stat changes",
@@ -7958,10 +7870,6 @@
 "相手の場に岩を浮かべる。交代で出てきた相手にダメージ": [
 "Floats rocks on the foe's side. Damages foes that switch in",
 "在对手场地浮起岩石。对替换上场的对手造成伤害"
-],
-"相手の場にまきびしをまく（3回まで重なる）。交代で出てきた相手にダメージ（飛んでいる相手には効かない）": [
-"Scatters spikes on the foe's side (stacks up to 3). Damages foes that switch in (not flying ones)",
-"在对手场地撒下撒菱（最多叠加3层）。对替换上场的对手造成伤害（对飞行中的对手无效）"
 ],
 "相手の場に毒のトゲをまく。交代で出てきた相手をどくにする": [
 "Scatters poison spikes on the foe's side. Poisons foes that switch in",
@@ -8038,10 +7946,6 @@
 "右・左と2回振る": [
 "Swings twice: right, then left",
 "右、左挥2次"
-],
-"⟦0⟧回続けて攻撃（だんだん強くなる）": [
-"Attacks ⟦0⟧ times in a row (gets stronger)",
-"连续攻击⟦0⟧次（越来越强）"
 ],
 "⟦0⟧方向に⟦1⟧回連射": [
 "Fires ⟦1⟧ times in ⟦0⟧ directions",
@@ -8179,10 +8083,6 @@
 "Puts a \"mark\" on the target (⟦0⟧s)",
 "命中后给对手打上「印记」（⟦0⟧秒）"
 ],
-"しるしの付いた相手には⟦0⟧倍（しるしは消える）": [
-"×⟦0⟧ vs marked foes (mark is removed)",
-"对有印记的对手造成⟦0⟧倍伤害（印记消失）"
-],
 "相手のHPが減っているほど強い（最大⟦0⟧倍）": [
 "Stronger the lower the foe's HP (up to ×⟦0⟧)",
 "对手HP越少越强（最多⟦0⟧倍）"
@@ -8215,33 +8115,13 @@
 "Charges longer for farther foes, firing farther and stronger (up to ×1.6)",
 "对手越远蓄力越久，射得越远越强（最多1.6倍）"
 ],
-"⟦0⟧秒以内にもう1回撃てる（使い切るか時間切れで待ち時間）": [
-"Can fire again within ⟦0⟧s (cooldown when used up or time runs out)",
-"⟦0⟧秒内可再发射1次（用完或超时后进入冷却）"
-],
-"⟦0⟧回続けて撃てる（使い切ると待ち時間）": [
-"Can fire ⟦0⟧ times in a row (cooldown when used up)",
-"可连续发射⟦0⟧次（用完后进入冷却）"
-],
 "⟦0⟧積み重なり、⟦1⟧回で⟦2⟧⟦3⟧": [
 "⟦0⟧ stacks; at ⟦1⟧ stacks, ⟦2⟧⟦3⟧",
 "⟦0⟧叠加，叠满⟦1⟧次后⟦2⟧⟦3⟧"
 ],
-"当たると⟦0⟧秒動けない（技は出せる）": [
-"Can't move for ⟦0⟧s on hit (can still use moves)",
-"命中后⟦0⟧秒无法移动（可以出招）"
-],
-"当たると⟦0⟧秒技が出せない（動ける）": [
-"Can't use moves for ⟦0⟧s on hit (can still move)",
-"命中后⟦0⟧秒无法出招（可以移动）"
-],
 "相手とすぐにつながり、⟦0⟧秒間ダメージを与え続ける。近いほど強い（1秒で最大威力30）。離れすぎると切れる": [
 "Links to the foe instantly and deals damage for ⟦0⟧s. Stronger up close (max 30 Power per sec). Breaks if too far",
 "立刻与对手相连，⟦0⟧秒内持续造成伤害。越近越强（每秒最大威力30）。离太远会断开"
-],
-"当てると相手の攻撃+1（かしつけ）。5秒ごとに奪うステータスが攻撃→防御→属性攻撃→属性防御→素早さの順に1つずつ増える。もう一度当てるか相手が倒れると、たまった分を相手から奪って自分のものにする": [
-"On hit, the foe gets Attack +1 (a loan). Every 5s, one more stat is added: Attack→Defense→Sp. Atk→Sp. Def→Speed. Hit again or KO the foe to steal all the stacked boosts for yourself",
-"命中后对手攻击+1（借出）。每5秒按攻击→防御→特攻→特防→速度的顺序多借出1项。再次命中或对手倒下时，把累积的部分从对手身上夺来归自己"
 ],
 "自分と相手に10秒のカウント。0になると倒れる（交代すると消える）": [
 "Starts a 10s countdown on you and the foe. Faint at 0 (switching clears it)",
@@ -8250,10 +8130,6 @@
 "撃つと熱+⟦0⟧。熱50以上で1.3倍。100でオーバーヒート（4秒技が出せない）": [
 "Heat +⟦0⟧ per shot. ×1.3 at 50+ heat. Overheats at 100 (no moves for 4s)",
 "每次发射热量+⟦0⟧。热量50以上时1.3倍。100时过热（4秒无法出招）"
-],
-"相手の足元に予告を置き、⟦0⟧秒後に攻撃（その場からどけばよけられる）": [
-"Marks the ground under the foe and attacks ⟦0⟧s later (move away to dodge)",
-"在对手脚下放置预警，⟦0⟧秒后攻击（离开原地即可躲开）"
 ],
 "当たると爆弾を付ける。⟦0⟧秒後に爆発（⟦1⟧倍）。付いている相手にもう一度当てるとすぐ爆発して気絶": [
 "Attaches a bomb. Explodes after ⟦0⟧s (×⟦1⟧). Hit a bombed foe again to blow it now and stun it",
@@ -8290,10 +8166,6 @@
 "必ず当たる。影になって相手の後ろへ駆け抜け、しるしを刻む。⟦0⟧秒後、その間に与えたダメージの⟦1⟧%を追加で与える": [
 "Never misses. Dashes behind the foe as a shadow and leaves a mark. After ⟦0⟧s, deals an extra ⟦1⟧% of the damage dealt meanwhile",
 "必定命中。化为影子冲到对手背后，刻下印记。⟦0⟧秒后，追加期间所造成伤害的⟦1⟧%"
-],
-"当たると⟦0⟧秒間、空を飛べなくなる（浮いている相手も地面に落ちる）": [
-"Can't fly for ⟦0⟧s on hit (floating foes fall to the ground)",
-"命中后⟦0⟧秒内无法飞行（浮空的对手也会落地）"
 ],
 "当たると他の技の待ち時間が⟦0⟧秒縮む": [
 "On hit, other moves' cooldowns drop by ⟦0⟧s",
@@ -8754,10 +8626,6 @@
 "⟦0⟧の段階": [
 "⟦0⟧ stage",
 "⟦0⟧的等级"
-],
-"⟦0⟧が変わる。+1で1.5倍・+2で2倍…最大+6（4倍）。下がると-1で2/3倍…最大-6（1/4倍）。交代すると元にもどる。": [
-"⟦0⟧ changes. +1 = ×1.5, +2 = ×2 … up to +6 (×4). Lowered: -1 = ×2/3 … down to -6 (×1/4). Resets on switch.",
-"⟦0⟧会改变。+1为1.5倍、+2为2倍…最大+6（4倍）。降低时-1为2/3倍…最低-6（1/4倍）。替换后恢复原状。"
 ],
 "身代わり人形": [
 "Dummy",
@@ -9339,22 +9207,6 @@
 "Last 20",
 "最近20条"
 ],
-"トロフィーたいかいで優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる。これまでの記録です。": [
-"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
-"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
-],
-"ボックスあきちで弱らせたマギアに投げるとつかまえられる。バトルに勝ったり、ブラインドボックスから出る。": [
-"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
-"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
-],
-"ジェム ブラインドボックスを待ち時間なしですぐ開けられる。バトルに勝ったり、大会で優勝するともらえる。": [
-"Gems: open a Mystery Box right away, no waiting. Get them by winning battles or tournaments.",
-"宝石：无需等待，立即打开盲盒。赢得对战或在大赛中夺冠即可获得。"
-],
-"他の端末で遊んだデータがあります（⟦0⟧）。この端末で遊んだ分と、どちらをつかいますか？えらばなかったほうは消えます。": [
-"There's data played on another device (⟦0⟧). Which do you want to use: that, or this device's? The one you don't pick will be erased.",
-"有在其他设备上玩过的数据（⟦0⟧）。要使用它，还是本设备上的数据？没选的那份会被删除。"
-],
 "この端末": [
 "This device",
 "本设备"
@@ -9546,10 +9398,6 @@
 "消しました。次にオンラインを使うと新しく始まります。": [
 "Erased. Next time you go online, you'll start fresh.",
 "已删除。下次使用在线功能时将重新开始。"
-],
-"データを初期化して初めからあそびますか？今のセーブデータは消えて元にもどせません。": [
-"Reset data and start over? Your current save will be erased and can't be undone.",
-"要初始化数据并从头开始吗？当前存档将被删除且无法恢复。"
 ],
 "初期化": [
 "Reset",
@@ -10071,10 +9919,6 @@
 "Next: battle ⟦0⟧",
 "下一场：第⟦0⟧战"
 ],
-"バトルタワーをやめますか？⟦0⟧連勝で記録します。": [
-"Quit the Battle Tower? A ⟦0⟧-win streak will be recorded.",
-"要退出对战塔吗？将记录为⟦0⟧连胜。"
-],
 "ちょうせん中のメンバーがいないので、記録を終わりにします。": [
 "No members in the challenge, so the run will end.",
 "没有挑战中的成员，记录将结束。"
@@ -10154,10 +9998,6 @@
 "編成›": [
 "Team ›",
 "编队 ›"
-],
-"レジェンド入り⟦0⟧かい！ヘッドたちは強くなって待っている。": [
-"Legend ×⟦0⟧! The Crew Heads are waiting, stronger.",
-"第⟦0⟧次成为传奇！团长们变得更强，正在等着你。"
 ],
 "タグがそろった！キングバトルにいどもう。": [
 "All Tags collected! Take on the King Battle.",
@@ -10287,10 +10127,6 @@
 "Give up",
 "放弃"
 ],
-"アリーナをおわりますか？ここまでのスコアで記録します。": [
-"End the Arena? Your score so far will be recorded.",
-"要结束竞技场吗？将记录到目前为止的分数。"
-],
 "今は他の人のチームを読みこめないので、コンピューターのチームと戦います": [
 "Can't load other players' teams now, so you'll battle a computer team",
 "现在无法读取其他玩家的队伍，将与电脑队伍对战"
@@ -10330,10 +10166,6 @@
 "通信を待っています": [
 "Waiting for connection",
 "等待连接中"
-],
-"残り⟦0⟧秒（過ぎたら自動で選ばれます）": [
-"⟦0⟧s left (auto-picks when time's up)",
-"还剩⟦0⟧秒（超时将自动选择）"
 ],
 "読みこみ中": [
 "Loading",
@@ -10466,10 +10298,6 @@
 "ドラッグ": [
 "Drag",
 "拖动"
-],
-"（スマホは長押し）して入れかえ／": [
-" monsters (long-press on phones) to swap / ",
-"（手机长按）以交换／"
 ],
 "でくわしく見る": [
 " to see details",
@@ -10967,10 +10795,6 @@
 "Gear Master name",
 "齿轮大师名字"
 ],
-"⟦0⟧がほかにいません（同じ種類を空き地・ブラインドボックスで集めよう）": [
-"No other ⟦0⟧ (collect the same kind in Vacant lot or Blind Boxes)",
-"没有其他⟦0⟧（在空地或盲盒中收集同种怪兽吧）"
-],
 "パーティ": [
 "Party",
 "队伍"
@@ -11030,10 +10854,6 @@
 "未設定": [
 "Not set",
 "未设置"
-],
-"⟦0⟧を受けたしゅんかんに自動で出る（条件はいらない）": [
-"Auto-used the moment it takes ⟦0⟧ (no condition needed)",
-"受到⟦0⟧的瞬间自动使用（不需要条件）"
 ],
 "弾・ビーム・はんい": [
 "Shots, beams, area",
@@ -11194,10 +11014,6 @@
 "きょうはにちようび！どのエリアにもはいれる": [
 "It's Sunday! You can enter every area",
 "今天是星期日！所有区域都能进入"
-],
-"きょうは⟦0⟧ようび。ほかのエリアはそのようびにはいれる（にちようびはぜんぶ）": [
-"Today is ⟦0⟧. Other areas open on their own day (all on Sunday)",
-"今天是⟦0⟧。其他区域在对应的日子开放（星期日全部开放）"
 ],
 "タグを10個集めると開く": [
 "Opens when you collect 10 Tags",
@@ -11451,10 +11267,6 @@
 "Reward: pick a Move Sticker type",
 "奖励：选择技贴纸的属性"
 ],
-"選んだタイプのステッカーが3まいランダムでもらえる（覚えられないものも出る）": [
-"Get 3 random stickers of that type (some may be unlearnable)",
-"随机获得3张该属性的贴纸（也可能有学不会的）"
-],
 "次は": [
 "Next:",
 "下一个"
@@ -11487,17 +11299,9 @@
 "Reset (start over)",
 "重置（从头开始）"
 ],
-"⟦0⟧回目の前（ここの訓練はドラフト専用）": [
-"Before floor ⟦0⟧ (this training is draft-only)",
-"第⟦0⟧层之前（这里的训练只用于选秀）"
-],
 "タワーへもどる›": [
 "Back to Tower ›",
 "返回塔 ›"
-],
-"ドラフトをリセットしますか？\nいまのマギアとステッカーはなくなり、最初からになります。": [
-"Reset the draft?\nYour current Magia and stickers will be lost and you will start over.",
-"要重置选秀吗？\n现在的魔机和贴纸会消失，从头开始。"
 ],
 "ワザステッカー ⟦0⟧をもらった！": [
 "Got Move Stickers ⟦0⟧!",
@@ -11558,14 +11362,6 @@
 "次の⟦0⟧回の相手": [
 "Next: floor ⟦0⟧ opponents",
 "下一层（第⟦0⟧层）的对手"
-],
-"次の⟦0⟧回のあいて（ボス）": [
-"Next: floor ⟦0⟧ opponents (Boss)",
-"下一层（第⟦0⟧层）的对手（首领）"
-],
-"次の⟦0⟧回のあいて（タワータイクーン）": [
-"Next: floor ⟦0⟧ opponents (Tower Tycoon)",
-"下一层（第⟦0⟧层）的对手（塔之大亨）"
 ],
 "タワーやドラフトバトルにもちょうせんしよう": [
 "Try the Tower and Draft Battle too",
@@ -11891,10 +11687,6 @@
 "For 10 seconds, keeps pulling in nearby foes and its own placed moves, traps, floors, energy and flowers (it can still move and use moves). A foe once caught is pulled even outside the range",
 "10秒内持续吸引周围的对手，以及自己放置的招式、陷阱、地面、能量和花朵（可以移动也能使用招式）。一旦捕获的对手即使在范围外也会被吸引"
 ],
-"⟦0⟧秒間、まわり（ふつうの距離まで）の相手と、自分が置いた技・罠・床・エナジー・お花を自分へ引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
-"For ⟦0⟧ sec, keeps pulling nearby foes (normal range) and its own placed moves, traps, floors, energy and flowers toward itself (it can still move and use moves). A foe once caught is pulled even if it leaves the range",
-"⟦0⟧秒内，持续将周围（普通距离内）的对手，以及自己放置的招式、陷阱、地面、能量和花朵吸向自己（可以移动也能使用招式）。一旦捕获的对手即使离开范围也会被吸引"
-],
 "かならず当たる（相手へ曲がって突っこみ、よけられない）": [
 "Always hits (curves toward the foe and can't be dodged)",
 "必定命中（朝对手转弯冲去，无法躲开）"
@@ -11923,10 +11715,6 @@
 "Power Seed",
 "强化之源"
 ],
-"好きなマギアの強化ポイントを+5（どの種類にも使える）": [
-"Adds +5 Power Points to any Magia (works on every species)",
-"为任意魔机增加5点强化点数（所有种类都能用）"
-],
 "きたえのもと": [
 "Training Seed",
 "锻炼之源"
@@ -11938,10 +11726,6 @@
 "強化ポイント：⟦0⟧": [
 "Power Points: ⟦0⟧",
 "强化点数：⟦0⟧"
-],
-"強化ポイントは戦うとたまる（出場して勝つと+1）。同じ種類のマギアを1体使うと+⟦0⟧、きょうかのもとで+⟦1⟧（最大⟦2⟧）。ポイントを好きな能力にふりわけて「確定する」で決まる（1つ⟦3⟧まで・1ポイントで+⟦4⟧）。": [
-"Power Points build up as you battle (+1 for each win you take part in). Using one Magia of the same species gives +⟦0⟧, a Power Seed gives +⟦1⟧ (max ⟦2⟧). Assign points to any stat and press Confirm (up to ⟦3⟧ each, +⟦4⟧ per point).",
-"强化点数会在战斗中累积（出场并获胜+1）。使用1只同种魔机+⟦0⟧，强化之源+⟦1⟧（最多⟦2⟧）。把点数分配到喜欢的能力后按「确定」（每项最多⟦3⟧，每点+⟦4⟧）。"
 ],
 "⟦0⟧きょうかのもとを使う（+⟦1⟧・残り⟦2⟧）": [
 "⟦0⟧ Use Power Seed (+⟦1⟧, ⟦2⟧ left)",
@@ -11958,10 +11742,6 @@
 "きたえのもと×⟦0⟧": [
 "Training Seed ×⟦0⟧",
 "锻炼之源 ×⟦0⟧"
-],
-"（スマホは長押し）して入れかえ/すきまをつかむとスクロール / ": [
-" (long-press on phones) to swap / Grab empty space to scroll / ",
-" （手机长按）来交换 / 抓住空白处可滚动 / "
 ],
 " 💎+⟦0⟧・ボックス+⟦1⟧・きょうかのもと×⟦2⟧・きたえのもと×⟦3⟧": [
 " 💎+⟦0⟧, Capsule +⟦1⟧, Power Seed ×⟦2⟧, Training Seed ×⟦3⟧",
@@ -12019,10 +11799,6 @@
 "Weekly Special",
 "每周特惠"
 ],
-"残り⟦0⟧。 今すぐ開けるには💎⟦1⟧ ジェムがいります（持っている：⟦2⟧）。": [
-"⟦0⟧ left. Opening now needs 💎⟦1⟧ Gems (you have: ⟦2⟧).",
-"剩余 ⟦0⟧。立即打开需要 💎⟦1⟧ 宝石（持有：⟦2⟧）。"
-],
 "残り⟦0⟧。 💎⟦1⟧ ジェムで今すぐ開けますか？（持っている：⟦2⟧）": [
 "⟦0⟧ left. Open now for 💎⟦1⟧ Gems? (You have: ⟦2⟧)",
 "剩余 ⟦0⟧。要用 💎⟦1⟧ 宝石立即打开吗？（持有：⟦2⟧）"
@@ -12030,10 +11806,6 @@
 "全部のタイプ": [
 "All types",
 "全部属性"
-],
-"⟦0⟧⟦1⟧をにがしますか？ もうもどってきません。": [
-"Release ⟦0⟧⟦1⟧? It won't come back.",
-"要放生⟦0⟧⟦1⟧吗？它不会再回来了。"
 ],
 "変更が保存されていません。 保存してから移動しますか？": [
 "Your changes aren't saved. Save before leaving?",
@@ -12055,10 +11827,6 @@
 "Size: ⟦0⟧ Nature: ⟦1⟧",
 "体型：⟦0⟧ 性格：⟦1⟧"
 ],
-"このマギアはバトルタワーにちょうせん中です。 タワーをやめてからにがしてね。": [
-"This Magia is taking on the Battle Tower. Quit the Tower before releasing it.",
-"这只魔机正在挑战对战塔。请先退出塔再放生。"
-],
 "残りポイント": [
 "Points left",
 "剩余点数"
@@ -12067,26 +11835,6 @@
 "Magia to use",
 "要使用的魔机"
 ],
-"⟦0⟧たいを使って⟦1⟧を強化しますか？（+⟦2⟧） 使ったマギアはいなくなります。": [
-"Use ⟦0⟧ Magia to train ⟦1⟧? (+⟦2⟧) Used Magia will be gone.",
-"要使用⟦0⟧只魔机强化⟦1⟧吗？（+⟦2⟧）使用的魔机会消失。"
-],
-"ふりわけたポイントがまだ確定していません。 確定しないで閉じますか？（ふりわけは元にもどります）": [
-"Your point assignments aren't confirmed yet. Close without confirming? (They'll be undone)",
-"分配的点数还没有确定。不确定就关闭吗？（分配会被还原）"
-],
-"相手の画面が止まったままです。 試合をやめますか？（負けにはなりません）": [
-"The opponent's screen is still frozen. Quit the match? (It won't count as a loss)",
-"对手的画面一直卡住。要退出比赛吗？（不算失败）"
-],
-"⟦0⟧さんにリーダーをたのみますか？ 受けてもらえたら、チームの名前・もんしょう・メンバー・ポイントはそのまま引きつがれ、あなたはメンバーになります。": [
-"Ask ⟦0⟧ to be leader? If they accept, the team's name, emblem, members and points stay the same, and you become a member.",
-"要请⟦0⟧担任会长吗？对方接受后，队伍的名称、徽记、成员和点数都会保留，你将成为普通成员。"
-],
-"最初の流れ（バトル →訓練→名前・最初のマギア →空き地→ ブラインドボックス）を通しで試します。 テスト中のデータは保存されず、最後に元のデータに戻ります。": [
-"Test the whole opening flow (Battle → Training → Name, first Magia → Vacant lot → Blind Box). Test data isn't saved; your original data comes back at the end.",
-"完整测试开头流程（战斗 → 训练 → 名字、第一只魔机 → 空地 → 盲盒）。测试中的数据不会保存，最后会恢复原来的数据。"
-],
 "最後のバックアップ": [
 "Last backup",
 "上次备份"
@@ -12094,10 +11842,6 @@
 "今バックアップ": [
 "Back up now",
 "立即备份"
-],
-"バトルタワーをやめますか？ ⟦0⟧連勝で記録します。": [
-"Quit the Battle Tower? A ⟦0⟧-win streak will be recorded.",
-"要退出对战塔吗？将记录为⟦0⟧连胜。"
 ],
 "連勝ストップ": [
 "Streak ended",
@@ -12123,10 +11867,6 @@
 "All types",
 "所有属性"
 ],
-"「預ける」を並びかえている間は、その中で入れかえできません。 「自分で並べる」にすると入れかえできます。": [
-"You can't swap inside \"Storage\" while it's sorted. Choose \"Custom order\" to swap.",
-"「寄存」排序时无法在其中调换。改成「自行排列」就能调换。"
-],
 "呼び出す": [
 "Summon",
 "召唤"
@@ -12139,49 +11879,17 @@
 "Take along",
 "带上"
 ],
-"チームを解散しますか？メンバーもみんなぬけたことになります。 （残したいときは、先にメンバーの「リーダーにする」でリーダーをたのもう）": [
-"Disband the team? All members will be removed too. (To keep it, first use \"Make leader\" on a member to hand it over)",
-"要解散队伍吗？所有成员也都会退出。（想保留队伍的话，请先用成员的「设为会长」请对方担任会长）"
-],
 "⟦0⟧ みせあい": [
 "⟦0⟧ Team Preview",
 "⟦0⟧ 队伍展示"
-],
-"トロフィー 大会で優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる。これまでの記録です。": [
-"Trophies: earned by winning tournaments, clearing the Arena, or winning the King Battle. Here's your record so far.",
-"奖杯：在大赛中夺冠、通关竞技场或在王者之战中获胜即可获得。这是至今的记录。"
-],
-"ボックス 空き地で弱らせたマギアに投げるとつかまえられる。バトルに勝ったり、ブラインドボックスから出る。": [
-"Capsule: throw it at a Magia weakened in the vacant lot to catch it. Get them by winning battles or from Mystery Boxes.",
-"胶囊：向在空地中削弱的魔机投掷即可捕捉。赢得对战或从盲盒中获得。"
-],
-"他の端末で遊んだデータがあります（⟦0⟧）。 この端末で遊んだ分と、どちらを使いますか？ 選ばなかったほうは消えます。": [
-"There's data played on another device (⟦0⟧). Which do you want to use: that, or this device's? The one you don't pick will be erased.",
-"有在其他设备上玩过的数据（⟦0⟧）。要使用它，还是本设备上的数据？没选的那份会被删除。"
-],
-"データを初期化して初めから遊びますか？ 今のセーブデータは消えて元にもどせません。": [
-"Reset data and start over? Your current save will be erased and can't be undone.",
-"要初始化数据并从头开始吗？当前存档将被删除且无法恢复。"
-],
-"ドラフトをリセットしますか？ 今のマギアとステッカーはなくなり、最初からになります。": [
-"Reset the draft?\nYour current Magia and stickers will be lost and you will start over.",
-"要重置选秀吗？\n现在的魔机和贴纸会消失，从头开始。"
 ],
 "⟦0⟧回まで クリア": [
 "Cleared up to ⟦0⟧F",
 "通关至第⟦0⟧层"
 ],
-"アリーナを終わりますか？ ここまでのスコアで記録します。": [
-"End the Arena? Your score so far will be recorded.",
-"要结束竞技场吗？将记录到目前为止的分数。"
-],
 "みつけた": [
 "Found",
 "已发现"
-],
-"（スマホは長押し）していれかえ ／ すきまをつかむとスクロール ／": [
-" (long-press on phones) to swap / Grab empty space to scroll / ",
-" （手机长按）来交换 / 抓住空白处可滚动 / "
 ],
 "じぶん": [
 "Me",
@@ -12252,20 +11960,20 @@
 "在对手场地浮起岩石。对替换上场的对手造成伤害"
 ],
 "自分の能力の変化を反対にする": [
-"Reverses your stat changes (drops become boosts)",
-"反转自身的能力变化（下降的变为上升）"
+"Reverses your stat changes",
+"反转自身的能力变化"
 ],
 "9秒間、場に出ているマギアの素早さを反転する": [
-"For 9s, flips the Speed of Magia in battle (slower ones walk faster)",
-"9秒内，反转场上魔机的速度（越慢走得越快）"
+"For 9s, flips the Speed of Magia in battle",
+"9秒内，反转场上魔机的速度"
 ],
 "HPを1/4使って、相手のHPを20%削る": [
-"Uses 1/4 HP to cut the foe's HP by 20% (can't be healed until they switch)",
-"消耗1/4 HP，削减对手20%的HP（替换前无法回复这部分）"
+"Uses 1/4 HP to cut the foe's HP by 20%",
+"消耗1/4 HP，削减对手20%的HP"
 ],
 "相手を無理やり控えと交代させる": [
-"Forces the foe to switch with its bench (wild ones run away)",
-"强制对手与替补替换（野生的会逃跑）"
+"Forces the foe to switch with its bench",
+"强制对手与替补替换"
 ],
 "相手の場にまきびしをまく（3回まで重なる）": [
 "Scatters spikes on the foe's side (stacks up to 3). Damages foes that switch in (not flying ones)",
@@ -12276,8 +11984,8 @@
 "制造2个分身（10秒）。对手的攻击有时会打向分身，偶尔会与本体互换"
 ],
 "体が透けて、無・獣・亜人の技がすり抜ける": [
-"Body turns see-through: Normal, Beast and Demi moves pass through (ends on switch)",
-"身体变透明，无、兽、亚人的招式会穿过（替换后失效）"
+"Body turns see-through: Normal, Beast and Demi moves pass through",
+"身体变透明，无、兽、亚人的招式会穿过"
 ],
 "味方の飛び道具だけ通りぬける壁を作る。通った弾は3つに分かれる（1つ0.7倍）": [
 "Makes a wall only ally projectiles can pass. Shots that pass split into 3 (0.7× each). Blocks enemy projectiles",
@@ -12293,7 +12001,7 @@
 ],
 "15秒間、相手は交代できず、おたがいの技のタイプ相性がなくなる": [
 "For 15 sec, the foe can't Switch, and type matchups are gone for both (Super effective, Not very effective, No effect all become 1x)",
-"15秒内，对手无法替换，双方招式的属性相克消失（效果拔群、效果不佳、没有效果全部变为等倍）"
+"15秒内，对手无法替换，双方招式的属性相克消失"
 ],
 "自分は倒れる": [
 "User faints. Fully heals the next ally's HP and status",
@@ -12308,12 +12016,12 @@
 "8秒内谁都无法飞行。漂浮的对手也会掉到地面，无法使用飞上天的招式"
 ],
 "相手の属性を水にする": [
-"Makes the foe's Attribute Water (back after Switch)",
-"把对手的属性变成水（替换后恢复）"
+"Makes the foe's Attribute Water",
+"把对手的属性变成水"
 ],
 "相手の種族を霊にする": [
-"Makes the foe's Race Spirit (back after Switch)",
-"把对手的种族变成灵（替换后恢复）"
+"Makes the foe's Race Spirit",
+"把对手的种族变成灵"
 ],
 "当てると相手の攻撃+1。5秒ごとに奪うステータスが攻撃→防御→属性攻撃→属性防御→素早さの順に1つずつ増える": [
 "On hit, foe's Attack +1 (a loan). Every 5 sec, one more stat to steal is added: Attack → Defense → Sp. Atk → Sp. Def → Speed. Hit again or KO the foe to take it all for yourself",
@@ -15046,5 +14754,13 @@
 "自分のHPを1/4使う。削った分は、相手が交代するまで回復できない": [
 "Costs 1/4 of own HP. The foe can't heal the lost HP until it switches out",
 "消耗自己1/4的HP。被削减的部分在对手替换下场前无法回复"
+],
+"相手の場にまきびしをまく（3回まで重なる）。交代で出てきた相手にダメージ。飛んでいる相手には効かない": [
+"Scatters spikes on the foe's side (stacks up to 3). Damages foes that switch in. Doesn't affect flying foes",
+"在对手场地撒下撒菱（最多叠加3层）。对替换上场的对手造成伤害。对飞行中的对手无效"
+],
+"大技（威力100以上）": [
+"Big move (power 100+)",
+"大招（威力100以上）"
 ]
 }

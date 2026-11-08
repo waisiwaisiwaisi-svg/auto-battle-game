@@ -47,6 +47,7 @@ const tr = (() => {
   }
   function tr1(s) {
     if (!s || typeof s !== 'string' || !JPRE.test(s) || DONE.has(s)) return s;   // DONE：おきかえた あとの 文字（中国語の 漢字を もう いちど おきかえない）
+    { const U = window.__noTr; if (U && U.size && U.has(s.trim())) return s; }   // 人が 書いた なまえ・チャットは そのまま
     const hit = cache.get(s); if (hit !== undefined) return hit;
     const lead = s.match(/^\s*/)[0], tail = s.match(/\s*$/)[0], c = s.trim().replace(/[ \t　]+/g, ' ');
     const r = lead + c.split('\n').map(x => core(x.trim())).join('\n') + tail;
