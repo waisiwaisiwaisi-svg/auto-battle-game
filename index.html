@@ -6242,6 +6242,8 @@ function drawAbilObjs() { const L = B.abObj; if (!L) return;
 const aliveBench = (f) => { const sd = B.sides[f.side]; return sd.fs.filter((x, i) => x !== f && !x.fainted && x.hp > 0 && i !== sd.act && !(B.dbl && i === sd.act2)); };
 const prefix = (f) => f.side === (B.my || 0) ? '' : (B.kind === 'wild' ? 'やせいの ' : 'あいての ');
 const MOVE_SLOW = .55; // 歩く はやさ（1 で もとの はやさ）
+const SPD_CAP = 2;   // うごく はやさは その子の もとの はやさの 2ばい まで（のうりょくアップ・おいかぜ・かけこみ などが かさなっても）
+const ownSpd = (f) => (46 + f.baseSpd * .5) * K * MOVE_SLOW;
 function speedOf(f) {
   let base = f.baseSpd;
   if (B.trickRoom > 0) { const av = avgStats().spe; base = Math.round(av * av / Math.max(10, f.speStat || 70) * .85 - 10); }   // さかさまフィールド：すばやさを 反転（待ち時間と おなじ はかりかた）
@@ -6249,7 +6251,7 @@ function speedOf(f) {
   if (f.status === 'par') s *= .5;
   if (B.sides[f.side].tail > 0) s *= 1.5;
   if (B.obs && onStream(f)) s *= 1.6;   // ビッグウェーブの とおりみち
-  return s;
+  return Math.min(s, ownSpd(f) * SPD_CAP);
 }
 
 // たたかいは シードつきの らんすう で はじめる（おなじ シード・おなじ そうさ なら どの 端末でも おなじ けっか：サーバーで さいげん して たしかめる）
@@ -8709,6 +8711,7 @@ function moveDir(f, mx, my, dt, nav) {
   // 緩急：ダッシュ・ふつう・のんびり を なめらかに きりかえる
   const pt = f.paceT || 1; f.pace = f.pace == null ? pt : f.pace + (pt - f.pace) * Math.min(1, dt * (pt > f.pace ? 7 : 4));
   if (f.pace > 1) { let r = clamp((f.speStat || 70) / avgStats().spe, .5, 1.25); if (B.trickRoom > 0) r = 1 / r; sp *= 1 + (f.pace - 1) * r; } else sp *= f.pace;   // かけこみの はやさ：すばやさが ひくいと のびが すくない
+  sp = Math.min(sp, ownSpd(f) * SPD_CAP);   // うえの きまりの はやさ まで
   if (f.pace > 1.7 && (mx || my)) {   // かけこみ：のこりかげと すなけむり
     if (!f.rushing) { f.rushing = true; SND.se('dash'); fxPush({ type: 'ring', x: f.x, y: f.y, rad: 14, col: '#ffffff', life: .2, max: .2 }); }
     f.ghostT = (f.ghostT || 0) - dt; if (f.ghostT <= 0) { f.ghostT = .07; fxPush({ type: 'ghost', sid: f.mon.sid, x: f.x, y: f.y, face: f.face, life: .16, max: .16 }); }
@@ -13618,6 +13621,9 @@ function gymTeam(type, n, p, rare) {
 // 防御・回避の 技（まもる・しかえし・かべ・デコイ・ぶんしん・すりぬけ・ぼうぎょ／かいひ だけ あげる）
 const DEF_KINDS = ['protect', 'counter', 'stance', 'wall', 'sub', 'clone', 'gshift'];
 const isDefMove = (m) => !!m && (DEF_KINDS.includes(m.k) || (m.k === 'self' && m.e && m.e.self && Object.keys(m.e.self).every(k => ['def', 'spd', 'eva'].includes(k))));
+// 技の 待ち時間は さいだい 5びょう（まもる けいの わざは わざと ながく して あるので そのまま）
+const CD_MAX = 5;
+for (const id in MOVES) { const m = MOVES[id]; if (m.cd > CD_MAX && !isDefMove(m)) m.cd = CD_MAX; }
 const EARLY_GYMS = 3;   // じょばんの クルー：リーダー いがいは 防御・回避の 技を つかわない
 function noDefMoves(em) {
   const keep = em.moves.filter(id => !isDefMove(MOVES[id])); if (keep.length === em.moves.length) return em;
