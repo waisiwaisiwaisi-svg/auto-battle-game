@@ -11356,6 +11356,20 @@ function updHUD() { updEnv();
    描画
    ===================================================================== */
 const dotR = (v) => Math.round(v / PIX_D) * PIX_D;   // ドットの 格子に そろえる（カメラ・エフェクトと おなじ あらさ）
+// モンスターの 絵に うすく すけた あかるい 縁（しろ 35%）と、がめんの 左上からの 光・右下の かげ を つける（絵ごと・むきごとに いちど つくって おく）
+const LIT = new WeakMap();
+function litImg(img, face) {
+  if (!img || !img.width) return img; let e = LIT.get(img); if (!e) { e = {}; LIT.set(img, e); } const k = face < 0 ? 'l' : 'r'; if (e[k]) return e[k];
+  try {
+    const W = img.width, H = img.height, c = document.createElement('canvas'); c.width = W; c.height = H; const q = c.getContext('2d', { willReadFrequently: true }); q.drawImage(img, 0, 0);
+    const d = q.getImageData(0, 0, W, H), a = d.data, src = new Uint8ClampedArray(a), op = (x, y) => x >= 0 && y >= 0 && x < W && y < H && src[(y * W + x) * 4 + 3] > 128;
+    const lx = face < 0 ? 1 : -1;   // ひだりむきは はんてんして かくので、絵の みぎがわを あかるく（がめんでは いつも 左上から 光）
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4;
+      if (op(x, y)) { const hi = !op(x, y - 1) || !op(x + lx, y), lo = !hi && (!op(x, y + 1) || !op(x - lx, y)); if (hi) for (let j = 0; j < 3; j++) a[i + j] = a[i + j] * .7 + 255 * .3; else if (lo) for (let j = 0; j < 3; j++) a[i + j] *= .8; }
+      else if (op(x - 1, y) || op(x + 1, y) || op(x, y - 1) || op(x, y + 1)) { a[i] = a[i + 1] = a[i + 2] = 255; a[i + 3] = 89; } }   // 89 ≒ 35%
+    q.putImageData(d, 0, 0); return (e[k] = c);
+  } catch (er) { return (e[k] = img); }
+}
 function drawSprite(img, x, y, face, scale, alpha, sx, sy) {
   const w = img.width * scale * (sx || 1), h = img.height * scale * (sy || 1);
   if (w < 1 || h < 1) return;
@@ -12505,8 +12519,8 @@ function drawFighter0(f) {
     if (ak && plOk(ak)) plDraw(ak, plLoop(ak, B.t), f.x - DM.cos(dA) * 6, dCy - DM.sin(dA) * 6, (dR * 2 + 20) / (PLFX[ak].w * PIX_D) * 1.1, dA, null, null, dFy); }
   let qx = 0, qy = 0; const qk = f.state === 'wind' && f.cur && f.cur.wind < .26 && f.cur.m.k !== 'self' && isDamaging(f.cur.m) ? clamp(f.cur.t / f.cur.wind, 0, 1) : 0;   // よびどうさ：うしろに ひいて ちぢむ
   if (qk) { const e = DM.sin(qk * Math.PI / 2); qx = -DM.cos(f.cur.ang) * 8 * e; qy = -DM.sin(f.cur.ang) * 3 * e; sy *= 1 - .1 * e; sx *= 1 + .07 * e; }
-  if (bone) drawBoned(img, f, f.x + qx, f.y + 3 + oy + qy + warpU * 10, fface, ms, alpha, sx, sy, fly);
-  else drawSprite(img, f.x + qx, f.y + 3 + oy + qy + warpU * 10, fface, ms, alpha, sx, sy);
+  if (bone) drawBoned(litImg(img, fface), f, f.x + qx, f.y + 3 + oy + qy + warpU * 10, fface, ms, alpha, sx, sy, fly);
+  else drawSprite(litImg(img, fface), f.x + qx, f.y + 3 + oy + qy + warpU * 10, fface, ms, alpha, sx, sy);
   if (qk > .35) { const c = TYPES[f.cur.m.t] ? TYPES[f.cur.m.t].c : '#ffffff', g = (qk - .35) / .65, R = 7 + 12 * g, gx = f.x + qx + DM.cos(f.cur.ang) * img0.width * ms * .36, gy = f.y + oy + qy - img0.height * ms * .5;   // きらっ：うつ まえの あいず
     ctx.save(); ctx.globalAlpha = .9 * DM.sin(g * Math.PI * .5 + .3); ctx.translate(gx, gy); ctx.rotate(B.t * 3); ctx.fillStyle = c; ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? R * .28 : R; ctx.lineTo(DM.cos(a) * r, DM.sin(a) * r); } ctx.fill();
     ctx.fillStyle = '#ffffff'; ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = i % 2 ? R * .14 : R * .55; ctx.lineTo(DM.cos(a) * r, DM.sin(a) * r); } ctx.fill(); ctx.restore(); }
