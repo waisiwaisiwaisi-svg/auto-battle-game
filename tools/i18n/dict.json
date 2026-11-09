@@ -14478,5 +14478,45 @@
 "のこり⟦0⟧": [
 "⟦0⟧ left",
 "剩余⟦0⟧"
+],
+"弱い相手から受けるときは防御1.15倍、苦手な相手からは0.87倍。": [
+"When hit by a foe you beat, Defense ×1.15; by a foe that beats you, ×0.87.",
+"受到被自己克制的对手攻击时防御1.15倍，受到克制自己的对手攻击时0.87倍。"
+],
+"：👊近（ゆうかん・せっかち・ねばりづよい）は👣遠（れいせい・ずるがしこい・むらっけ）に強く、👣遠は🛹中（のんき・おくびょう）に、🛹中は👊近に強い。受ける側の防御・属性防御が、自分が強い相手からなら1.15倍、苦手な相手からなら0.87倍になる。訓練の「作戦」でも変えられる。": [
+": 👊Close (Brave, Hasty, Tenacious) beats 👣Far (Calm, Sly, Moody), 👣Far beats 🛹Mid (Relaxed, Timid), and 🛹Mid beats 👊Close. The defender's Defense and Sp. Def become ×1.15 against a foe it beats, and ×0.87 against a foe it's weak to. You can also change it with “Plan” in Training.",
+"：👊近（勇敢、急躁、坚韧）克👣远（冷静、狡猾、浮躁），👣远克🛹中（悠闲、胆小），🛹中克👊近。受攻击一方的防御、特防，面对自己克制的对手时为1.15倍，面对克制自己的对手时为0.87倍。也可以在训练的「作战」中更改。"
+],
+"はHP・攻撃・防御・属性攻撃・属性防御・素早さ・回避の7つ。素早さが高いほど早く歩き、回避の強化ポイントが多いほど自動でよける。種族値・個体値（0〜31）・性格（↑1.1倍↓0.9倍）・強化で決まる。": [
+" are 7: HP, Attack, Defense, Sp. Atk, Sp. Def, Speed, and Evasion. Higher Speed means faster walking; more Evasion boost points mean more automatic dodging. They're set by base stats, IVs (0–31), Nature (↑×1.1 ↓×0.9), and Training points.",
+"共有HP、攻击、防御、特攻、特防、速度、闪避7项。速度越高走得越快，闪避越高越会自动躲避。由种族值、个体值（0〜31）、性格（↑1.1倍 ↓0.9倍）和强化点数决定。"
+],
+"（近接・突進・前方など体でぶつかる技）は攻撃→防御、": [
+" (Melee, Dash, Front, etc.: moves that hit with the body) use Attack→Defense, ",
+"（近战、突进、前方等用身体撞击的招式）由攻击→防御，"
+],
+"弱い相手から受けるときは防御1.15倍、苦手な相手からは0.87倍": [
+"When hit by a foe you beat, Defense ×1.15; by a foe that beats you, ×0.87.",
+"受到被自己克制的对手攻击时防御1.15倍，受到克制自己的对手攻击时0.87倍。"
+],
+"は攻撃→防御、": [
+" use Attack→Defense, ",
+"由攻击→防御，"
+],
+"はHP・攻撃・防御・属性攻撃・属性防御・素早さ・回避の7つ。素早さが高いほど早く歩き、回避の強化ポイントが多いほど自動でよける。種族値・個体値（0〜31）・性格（↑1.1倍↓0.9倍）・強化で決まる": [
+" are 7: HP, Attack, Defense, Sp. Atk, Sp. Def, Speed, and Evasion. Higher Speed means faster walking; more Evasion boost points mean more automatic dodging. They're set by base stats, IVs, Nature, and Training points.",
+"共有HP、攻击、防御、特攻、特防、速度、闪避7项。速度越高走得越快，闪避越高越会自动躲避。由种族值、个体值、性格和强化点数决定。"
+],
+"歩く速さ。": [
+"Walking speed.",
+"行走速度。"
+],
+"10〜30%": [
+"10-30%",
+"10〜30%"
+],
+"攻撃が当たる瞬間に自動でよける確率。強化ポイント0で10%、25で30%。": [
+"Chance to dodge automatically the moment an attack lands. 10% at 0 boost points, 30% at 25.",
+"攻击命中瞬间自动闪避的概率。强化点数0时10%，25时30%。"
 ]
 }
