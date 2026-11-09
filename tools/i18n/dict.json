@@ -14518,5 +14518,21 @@
 "攻撃が当たる瞬間に自動でよける確率。強化ポイント0で10%、25で30%。": [
 "Chance to dodge automatically the moment an attack lands. 10% at 0 boost points, 30% at 25.",
 "攻击命中瞬间自动闪避的概率。强化点数0时10%，25时30%。"
+],
+"マギアの並びと出場する3体を決める": [
+"Set your Magia order and the 3 that battle",
+"决定魔机的顺序和出场的3只"
+],
+"試合での動き方を教える": [
+"Teach how to move in battle",
+"教导比赛中的行动方式"
+],
+"見た目の変更": [
+"Change look",
+"更换外观"
+],
+"ギアマスターの見た目を選ぶ": [
+"Choose your Gear Master look",
+"选择齿轮大师的外观"
 ]
 }
