@@ -36,6 +36,10 @@ jobs:
           # ホームがめんに ついか した とき アプリの ように ひらく（アイコン・ぜんがめん）・タイトルに いつの はんか を だす
           sed -i "s#<meta name=\"theme-color\" content=\"\#141022\">#<meta name=\"theme-color\" content=\"\#141022\"><link rel=\"manifest\" href=\"manifest.webmanifest\"><link rel=\"icon\" type=\"image/png\" href=\"icon-192.png\"><link rel=\"apple-touch-icon\" href=\"apple-touch-icon.png\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\"><meta name=\"apple-mobile-web-app-title\" content=\"モンスターアリーナ\">#" _site/index.html
           sed -i "s#>ver 1.0<#>ver 1.0（${DATE}・${SHORT}）<#" _site/index.html
+          # あたらしい 版が でたら ひらいて いる ページが きづいて よみこみなおす（index.html の PMA_SITE_VER と くらべる）
+          printf '{"v":"%s"}\n' "$SHORT" > _site/version.json
+          sed -i "s#<script>window.PMA_DIST = true;</script>#<script>window.PMA_DIST = true; window.PMA_SITE_VER = '${SHORT}';</script>#" _site/index.html
+          grep -q "PMA_SITE_VER = '${SHORT}'" _site/index.html
           grep -q 'rel="manifest"' _site/index.html
       - name: gh-pages に おく
         working-directory: _site

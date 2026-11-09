@@ -64,6 +64,7 @@
    - `act`・`saveGet`・`matchVerify` は ゲームの ページを ひらく ので さいしょの 1かいは 数びょう かかる。にぎやかに なったら `minInstances: 1` を おすすめ（すこし お金が かかる）
    - ためす：`npx firebase emulators:start --config firebase.emu.json --only auth,firestore,database,functions --project demo-pma`
    - 配信用の ビルド（`npm run build`）は テスト用の `window.__game` を はずす（のこす ときは `PMA_DEBUG=1`）
+   - **ゲームを かえたら サーバーも くばりなおす**：さいげんは サーバーに おいた ゲーム（`functions/game/index.html`）で うごく ので、ちがう 版だと「ちがう バージョン」で たしかめられない。`SRV_FN_ON = true` に して、リポジトリの Secrets に `FIREBASE_SERVICE_ACCOUNT`（サービスアカウントの JSON）と `FIREBASE_PROJECT_ID` を いれて おくと、本番に あげる たびに `.github/workflows/functions.yml` が じどうで くばりなおす
 
 `firebase-config.js` がない／中身が `YOUR_...` のままだと、アプリはオフライン専用で動きます（1人用の遊びは全部できます）。
 

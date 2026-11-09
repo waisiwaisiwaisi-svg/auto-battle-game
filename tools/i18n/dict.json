@@ -14698,5 +14698,17 @@
 "⟦0⟧秒間、まわり（ふつうの距離まで）の相手と、自分が置いた技・罠・床・はね・お花を自分へ引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
 "For ⟦0⟧ sec, keeps pulling nearby foes (up to normal range) and its own placed moves, traps, floors, feathers and flowers toward itself (can still move and use moves). A foe once caught is pulled even if it leaves the range",
 "⟦0⟧秒内，持续将周围（普通距离内）的对手，以及自己放置的招式、陷阱、地面、羽毛和花朵吸向自己（可以移动和使用招式）。一旦捕获的对手即使离开范围也会被吸引"
+],
+"大技（回数に限りがある技）": [
+"Big move (limited uses)",
+"大招（次数有限的招式）"
+],
+"1戦で使える回数に限りがある強い技（技名の横の残り/最大）。": [
+"A strong move with limited uses per battle (shown as left/max next to the name).",
+"每场战斗使用次数有限的强力招式（招式名旁显示剩余/上限）。"
+],
+"威力40以下の攻撃技の待ち時間が20%短い": [
+"Attack moves with 40 power or less have 20% shorter cooldowns",
+"威力40以下的攻击招式冷却时间缩短20%"
 ]
 }
