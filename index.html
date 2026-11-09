@@ -2890,6 +2890,32 @@ Object.assign(NEW_TEXT, {
   "static-storm": ["でんじあらし", "前に電気のあらしを吹きつける"],
   "charge-up": ["じゅうでん", "体に電気をためる。自分の属性攻撃+1・属性防御+1"],
 });
+// 種族の 技を ふやす（飛行0・妖精4・霊8 だった。よく 使われる 技を 参考に。エフェクトは 発注）
+Object.assign(NEW_MOVES, {
+  "peck2": { "n": "つつき", "t": "flying", "k": "melee", "power": 40, "prio": 1 },
+  "wing-beat2": { "n": "つばさうち", "t": "flying", "k": "swipe", "power": 40, "hits": 2, "rad": 72, "acc": 90 },
+  "acro-dash": { "n": "ひらりアタック", "t": "flying", "k": "dash", "power": 55, "len": 200, "sureHit": 1 },
+  "feather-blade": { "n": "はねのやいば", "t": "flying", "k": "proj", "power": 60, "spd": 380, "r": 9, "crit": 1 },
+  "sky-strike": { "n": "てんくうげき", "t": "flying", "k": "dash", "power": 140, "len": 240, "acc": 90, "crit": 1, "wind": 0.9 },
+  "feather-dance2": { "n": "はねのまい", "t": "flying", "k": "proj", "cat": "stat", "power": 0, "acc": 100, "spd": 220, "r": 12, "homing": 1.2, "cd": 7, "e": { "foe": { "atk": -2 }, "foeCh": 100 } },
+  "big-flap": { "n": "おおはばたき", "t": "flying", "k": "ray", "cat": "stat", "power": 0, "acc": 0, "prio": -6, "sp": "roar", "wind": 0.3, "cd": 7 },
+  "storm-wing": { "n": "あらしのつばさ", "t": "flying", "k": "cone", "power": 100, "acc": 80, "rad": 200, "half": 0.5, "e": { "foe": { "spe": -1 }, "foeCh": 30 } },
+  "heart-break": { "n": "こころくだき", "t": "fairy", "k": "melee", "power": 75, "e": { "foe": { "spa": -1 }, "foeCh": 100 } },
+  "moon-light": { "n": "つきあかり", "t": "fairy", "k": "heal", "cat": "stat", "power": 0, "acc": 0, "wind": 0.4, "cd": 9, "e": { "heal": 50 } },
+  "sweet-voice": { "n": "あまえごえ", "t": "fairy", "k": "proj", "cat": "stat", "power": 0, "acc": 100, "spd": 220, "r": 12, "homing": 1.2, "cd": 7, "e": { "foe": { "atk": -2 }, "foeCh": 100 } },
+  "gentle-song": { "n": "やさしいうた", "t": "fairy", "k": "aoe", "power": 40, "rad": 110, "sure": 1 },
+  "odd-mist": { "n": "ふしぎなきり", "t": "fairy", "k": "cone", "power": 90, "acc": 95, "rad": 190, "half": 0.45, "e": { "foe": { "spa": -1 }, "foeCh": 20 } },
+  "petal-cannon": { "n": "はなびらほう", "t": "fairy", "k": "beam", "power": 130, "acc": 90, "len": 420, "wid": 26, "wind": 0.8, "e": { "self": { "spa": -2 } } },
+  "curse-mark": { "n": "のろいのしるし", "t": "ghost", "k": "proj", "power": 40, "spd": 320, "r": 8, "homing": 1.2, "mark": 6 },
+  "curse-strike": { "n": "たたりうち", "t": "ghost", "k": "strike", "power": 65, "rad": 46, "det": 2 },
+  "grudge-fist": { "n": "うらみのこぶし", "t": "ghost", "k": "melee", "power": 50, "ramp": 0.15 },
+  "pounce2": { "n": "とびかかり", "t": "bug", "k": "dash", "power": 50, "len": 180, "e": { "foe": { "spe": -1 }, "foeCh": 100 } },
+  "bug-thrust": { "n": "むしのひとつき", "t": "bug", "k": "melee", "power": 80, "e": { "foe": { "atk": -1 }, "foeCh": 100 } },
+  "blood-sip": { "n": "ちすすり", "t": "bug", "k": "melee", "power": 80, "e": { "drain": 50 } },
+  "quick-fist": { "n": "はやうちこぶし", "t": "demi", "k": "melee", "power": 40, "prio": 1 },
+  "brute-force": { "n": "ちからまかせ", "t": "demi", "k": "melee", "power": 120, "e": { "self": { "atk": -1, "def": -1 } } },
+  "super-dash": { "n": "ちょうそくダッシュ", "t": "beast", "k": "dash", "power": 80, "len": 220, "prio": 2 },
+});
 const NEW_IDS = Object.keys(NEW_MOVES);
 for (const id of NEW_IDS) {
   const m = Object.assign({ ref: id, acc: 100, prio: 0, aim: 'lock', wind: .35, e: {}, nw: 1 }, NEW_MOVES[id]);
@@ -2945,6 +2971,10 @@ const MOVE_RETYPE = { blizzard: ['wind'], 'ice-shard': ['wind', 'かぜのつぶ
   icicle: ['grass', 'いばらばり'], spikes: ['grass', 'いばらまき', '相手の場にいばらをまく（3回まで重なる）。交代で出てきた相手にダメージ。飛んでいる相手には効かない'], 'rock-tomb': ['grass', 'いばらのおり'], bonemerang: ['grass', 'はっぱブーメラン'],
   'icicle-drop': ['fire', 'ひばなおとし'], avalanche: ['fire', 'ほむらがえし', '足元から炎がふき上がる。直前に攻撃を受けていると威力2倍'], 'rock-blast': ['fire', 'ひのこれんぱつ'], rollout: ['fire', 'ひのわころがし'] };
 for (const id in MOVE_RETYPE) if (MOVES[id]) MOVES[id].t = MOVE_RETYPE[id][0];
+for (const id of ['shadow-ball', 'shadow-sneak', 'shadow-claw', 'shadow-pin', 'shadow-return']) if (MOVES[id]) MOVES[id].t = 'ghost';   // 闇の 影の 技 → 霊
+{ const add = { flying: ['peck2', 'wing-beat2', 'acro-dash', 'feather-blade', 'sky-strike', 'feather-dance2', 'big-flap', 'storm-wing'], fairy: ['heart-break', 'moon-light', 'sweet-voice', 'gentle-song', 'odd-mist', 'petal-cannon'],
+    ghost: ['curse-mark', 'curse-strike', 'grudge-fist'], bug: ['pounce2', 'bug-thrust', 'blood-sip'], demi: ['quick-fist', 'brute-force'], beast: ['super-dash'] };   // あたらしい 種族の 技：その 種族の 子は ステッカーで おぼえられる
+  for (const sid in LEARN_FIX) { const sp = SPECIES[sid]; if (!sp) continue; for (const id of (add[sp.type2] || [])) if (MOVES[id] && !LEARN_FIX[sid].t.includes(id)) LEARN_FIX[sid].t.push(id); } }
 // タイプが かわって 自分の 属性の 技が すくない 子：その 属性の 技を ワザステッカーで おぼえられる ように（6つ まで・よわい〜つよいを ばらけて）
 for (const sid in LEARN_FIX) { const sp = SPECIES[sid], L = LEARN_FIX[sid]; if (!sp || !TYPE_ATTR.includes(sp.type)) continue; const has = new Set([...L.l, ...L.t]);
   const n = [...has].filter(id => MOVES[id] && MOVES[id].t === sp.type).length; if (n >= 4) continue;
