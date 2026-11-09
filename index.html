@@ -10516,7 +10516,9 @@ function bVisual(dt) {
     { const X0 = Math.min(...vis.map(f => f.x - (f.r || 20) - 40)), X1 = Math.max(...vis.map(f => f.x + (f.r || 20) + 40)), Y0 = Math.min(...vis.map(f => f.y - BODY * 2 - (f.r || 20) - 70)), Y1 = Math.max(...vis.map(f => f.y + 24));
       const both = Math.min(aw / (X1 - X0), ah / (Y1 - Y0)); if (tz > both) tz = both;
       const hw = aw / 2 / tz, hh = ah / 2 / tz; tx = clamp(tx, X1 - hw, X0 + hw); ty = clamp(ty, Y1 - hh, Y0 + hh); }
+    B.camLast = { tx, ty, tz };
   }
+  else if (B.camLast && B.mode !== 'intro' && B.mode !== 'end') ({ tx, ty, tz } = B.camLast);   // 交代で かたほうが いない あいだは まえの カメラの まま（きゅうに ひかない）
   if (B.mode === 'intro') { const z0 = Math.max(aw / st.W, ah / st.H), z1 = Math.max(fit, tall ? aw / (fw * LO_W) : Math.min(ah / st.H, aw / (fw * LO_W))), t = B.modeT - (B.vsT || 0); tz = t < .6 ? z0 : z0 + Math.min(1, (t - .6) / 1.6) * (z1 - z0); if (t < 0) { tx = st.W / 2 + DM.sin(B.modeT * 1.1) * 40; ty = st.H * .42; } }
   if (B.mode === 'intro' && vis.length >= 2) {   // はじまりの 演出でも ふたりを がめんに いれる（たて画面で はみでていた）
     const X0 = Math.min(...vis.map(f => f.x - (f.r || 20) - 40)), X1 = Math.max(...vis.map(f => f.x + (f.r || 20) + 40)), Y0 = Math.min(...vis.map(f => f.y - BODY * 2 - (f.r || 20) - 70)), Y1 = Math.max(...vis.map(f => f.y + 24));
@@ -10631,6 +10633,9 @@ function startTutorial() {
   const shot = fit.find(id => MOVES[id].k === 'proj') || pickP(), more = fit.filter(id => id !== shot && ['strike', 'beam', 'melee', 'dash', 'aoe', 'swipe', 'cone', 'multi'].includes(MOVES[id].k)), more2 = more.filter(id => MOVES[id].k !== (more[0] && MOVES[more[0]].k));
   TUT = { i: -1, t: 0, f: {}, auto0: S.auto, em: { shot, strike: more[0] || pickK('strike'), beam: more2[0] || fit.find(id => id !== shot && id !== more[0]) || null } };
   { const fp = ids.find(id => MOVES[id].k === 'proj' && MOVES[id].t === 'fire' && plain(MOVES[id]) && MOVES[id].power > 0 && MOVES[id].power <= 80); if (fp) me.moves = [fp, ...me.moves.filter(x => x !== fp)].slice(0, 4); }   // さいしょに みせる わざは とびどうぐ
+  { const atk = (id) => { const m = MOVES[id]; return m && isDamaging(m) && m.cat !== 'stat' && !m.ohko && !m.boom && !m.recharge && !m.switchOut && !m.forceOut && !m.sucker && !m.fakeout; };   // こうたいして でる ミズチ：こうげき技だけ（へんか技は いれない）
+    const have = buddy.moves.filter(atk), more = ids.filter(id => atk(id) && !have.includes(id) && canLearn(buddy.sid, id) && [SPECIES[buddy.sid].type, SPECIES[buddy.sid].type2].includes(MOVES[id].t) && pwr(MOVES[id]) <= 90);
+    buddy.moves = [...have, ...more].slice(0, 4); }
   S.auto = false;
   startBattle({ kind: 'tutorial', tutorial: true, field: 'grass', p0: [me, buddy], enemies: [en], title: 'チュートリアル', intro: '練習相手が現れた！', trainer: { name: 'コーチ', spr: trArt('boy') }, skill: 0 });
   { const st = B.st;   // まんなかの しょうがいぶつは なし（ひろい ばしょで みせる）
@@ -10663,7 +10668,7 @@ const TUT_STEPS = [
     run: (T) => { if (T.f.dodged && !T.f.at) T.f.at = TUT.t; if (!T.f.at && tutO() && tutO().state === 'free' && TUT.t > 2.5) T.f.at = TUT.t; },
     stop: (T) => T.f.at && TUT.t - T.f.at > .5, done: () => { TUT.dodge = 0; } },
   { tx: '④今は訓練をしていないので、<b>お任せ</b>で戦っています。お任せでは技を適当に選ぶので、強い相手には勝てません。<br><b>訓練</b>で「どの技を・いつ・どう撃つか」を決めると、ぐっと強くなります！<small>（ガード技も「<b>攻撃を受けた瞬間</b>」の条件で使えます）</small>', pause: true },
-  { tx: '⑤ <b>控え</b>のマギアをタップすると、交代できます。バトル中にあなたができるのは、これだけです！<br>出てきた直後は少しの間<b>スキ</b>ができます（頭の上の赤いバーが消えるまで動けず、受けるダメージが1.3倍）。<br>控えの「<b>有利</b>」は、タイプ相性の目安です。<b>光っているマギア</b>をタップしてみましょう。', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 },
+  { tx: '⑤ <b>控え</b>のマギアをタップすると、交代できます。バトル中にあなたができるのは、これだけです！<br>出てきた直後は少しの間<b>スキ</b>ができます（頭の上の赤いバーが消えるまで動けず、受けるダメージが1.3倍）。<br>控えの「<b>有利</b>」は、タイプ相性の目安です。<b>光っているマギア</b>をタップしてみましょう。', hl: () => document.querySelector('#bench .bmon'), freeze: () => true, wait: () => B.sides[0].act !== 0 || (tutF() && tutF().state === 'return') },   // タップして ひっこみ はじめたら すぐ せつめいを けす（のこらない）
   { tx: (T) => TUT.mood ? `⑥出てきたときに「<b>${TUT.mood}</b>」と表示されました。相手との<b>作戦の相性</b>が良いしるしです。<br>作戦の相性は👊近→ 👣遠→ 🛹中→ 👊近（矢印の先に強い）。作戦は訓練で選べます。` : '⑥出てきたときに「<b>よゆう（さくせん◎）</b>」などと表示されるのは、相手との<b>作戦の相性</b>です。<br>👊近→ 👣遠→ 🛹中→ 👊近（矢印の先に強い）。作戦は訓練で選べます。',
     run: (T) => { const f = tutF(); if (!TUT.mood && f && f.state === 'free' && TUT.t > .4) { persona(f); if (f.moodPop) { const M = f.moodPop; f.moodPop = null; popText(f.x, f.y - 86, M.n, M.col, true); TUT.mood = M.n; } }   // でてきた ときの きもち
       if (TUT.mood && !T.f.at) T.f.at = TUT.t; if (!T.f.at && TUT.t > 4) T.f.at = TUT.t; }, stop: (T) => T.f.at && TUT.t - T.f.at > .5 },
@@ -10679,7 +10684,7 @@ function tutShow(step) {
 }
 function tutGo(i) {
   if (!TUT) return; const prev = TS()[TUT.i]; if (prev && prev.done) prev.done(TUT);
-  TUT.i = i; TUT.t = 0; TUT.f = {}; TUT.frozen = false;
+  TUT.i = i; TUT.t = 0; TUT.f = {}; TUT.frozen = false; TUT.hlEl = null; tutHide();   // まえの ステップの ひかり・ゆびさしを のこさない
   const st = TS()[i]; if (!st) return;
   if (st.fin) { $('tutBox').hidden = true; tutHide(); const o = tutO(); if (o) { o.hp = Math.min(o.hp, Math.ceil(o.maxHp * .3)); } for (const x of [tutF(), o]) if (x) { x.aiT = rand(.15, .4); x.dodgeCd = 0; } B.paused = false; return; }   // せつめいの あいだ とめていた ぶん：すぐ うごきだす
   B.paused = !!st.pause; if (st.stop || st.hideTill) { $('tutBox').hidden = true; return; } tutShow(st); if (st.pause) SND.se('ok');
@@ -10690,7 +10695,7 @@ function tutTick(dt) {
   const st = TS()[TUT.i];
   // 指さし：ひからせて いる ボタンの うえ
   const hand = $('tutHand'), el = TUT.hlEl && document.body.contains(TUT.hlEl) ? TUT.hlEl : (st && st.hl && st.hl());
-  if (el && st && !st.fin) { if (!el.classList.contains('tut-hl')) { el.classList.add('tut-hl'); TUT.hlEl = el; } const r = el.getBoundingClientRect(), up = r.top > 90;   // 指さし：ボタンの うえから（うえに よゆうが なければ したから）
+  if (el && st && !st.fin && !TUT.busy && !TUT.f.waited) { if (!el.classList.contains('tut-hl')) { el.classList.add('tut-hl'); TUT.hlEl = el; } const r = el.getBoundingClientRect(), up = r.top > 90;   // 指さし：ボタンの うえから（うえに よゆうが なければ したから）
     hand.hidden = false; hand.textContent = up ? '👇' : '👆'; hand.style.left = (r.left + r.width / 2) + 'px'; hand.style.top = (up ? r.top - 40 : r.bottom + 2) + 'px'; }
   else hand.hidden = true;
   if (B.mode !== 'fight') return;
@@ -10712,7 +10717,7 @@ function tutTick(dt) {
   if (st.stop && st.stop(TUT)) { TUT.f.stopped = 1; B.paused = true; tutShow(st); SND.se('ok'); return; }   // その ばめんで とめて せつめい
   if (st.freeze && !TUT.f.froze && st.freeze(TUT)) { TUT.f.froze = 1; TUT.frozen = true; B.paused = true; tutShow(st); }   // しじを まつ あいだ 時間を とめる
   if (st.wait && st.wait()) {
-    const nx = TS()[TUT.i + 1]; SND.se('caught'); tutHide(); $('tutBox').hidden = true; B.slowT = 0;
+    const nx = TS()[TUT.i + 1]; SND.se('caught'); TUT.hlEl = null; TUT.f.waited = 1; tutHide(); $('tutBox').hidden = true; B.slowT = 0;
     if (st.done) st.done(TUT);
     const d = nx && nx.delay || .6; TUT.busy = true; setTimeout(() => { if (TUT) { TUT.busy = false; tutGo(TUT.i + 1); } }, d * 1000);
   }
@@ -14231,7 +14236,7 @@ function updPad() {
   const wr = $('cvWrap'); if (!wr || !wr.offsetWidth) return false;
   const u = VW / wr.offsetWidth, ht = wr.querySelector('.hudtop'), bp = $('bpanel'), land = document.documentElement.classList.contains('land');
   let t = ht ? (ht.offsetTop + ht.offsetHeight + 4) * u : 0;
-  { const tb = $('tutBox'); if (tb && !tb.hidden) { const r = tb.getBoundingClientRect(), w = wr.getBoundingClientRect(); if (r.height) t = Math.max(t, (r.bottom - w.top + 6) * u); } }   // チュートリアルの ふきだしの したを つかう（マギアと 技名を かくさない。よこ画面も）
+  { const tb = $('tutBox'), tOn = typeof TUT !== 'undefined' && TUT && B && B.cfg && B.cfg.tutorial && !(TS()[TUT.i] && TS()[TUT.i].fin); if (tb && !tb.hidden) { const r = tb.getBoundingClientRect(), w = wr.getBoundingClientRect(); if (r.height) { const v = (r.bottom - w.top + 6) * u; t = Math.max(t, v); if (tOn) TUT.padB = Math.max(TUT.padB || 0, v); } } else if (tOn && TUT.padB) t = Math.max(t, TUT.padB); }   // チュートリアル中は ふきだしが きえても おなじ あきを たもつ（カメラが きゅうに ひかない）   // チュートリアルの ふきだしの したを つかう（マギアと 技名を かくさない。よこ画面も）
   // よこ画面：そうさは 左下（こうどう）と 右下（わざ）に わかれたので、下の ぶんだけ あける
   VPAD = land ? { l: 0, t, r: 0, b: bp ? Math.max(0, bp.offsetHeight - 6) * u : 0 } : { l: 0, t, r: 0, b: bp ? (bp.offsetHeight + 4) * u : 0 };
   return !!(bp && bp.offsetWidth);
