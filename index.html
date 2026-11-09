@@ -9229,6 +9229,7 @@ function cmdCapsule() {
   if (B && TUT && TUT.steps && !TUT.frozen && !TUT.capOk && B.kind === 'wild') { say('まずは戦って、少し弱らせよう！'); SND.se('back'); return; }   // あきちの チュートリアル：あんないが でるまで なげられない
   if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; TUT.capOk = true; B.paused = false; }   // capOk：なげて いい（つぎの ステップで なげる ときにも はじかない）   // チュートリアル：ここを おして と とめて いた
   if (B && B.kind === 'wild' && B.mode === 'intro') { say('試合が始まってから投げてね！', 1); SND.se('back'); return; }   // はじまる まえ：だまって むしを しない
+  if (B && B.kind === 'wild' && B.mode === 'fight' && !B.catchO && B.paused && S.capsules > 0) { B.capWait = B.t + 1.5; return; }   // チュートリアルの せつめいで とまった しゅんかん：うごきだしたら なげる（だまって すてない）
   if (!B || B.kind !== 'wild' || B.mode !== 'fight' || B.catchO || B.paused) return;
   if (S.capsules <= 0) { say('ボックスがもうない！'); return; }
   const e = active(1); if (!targetable(e)) { if (e && !e.fainted && e.hp > 0) B.capWait = B.t + 1.5; return; }   // よろけて いる あいだ など：なげられる ように なったら すぐ なげる（だまって むしを しない）
