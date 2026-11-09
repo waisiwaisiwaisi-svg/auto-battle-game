@@ -6317,6 +6317,7 @@ function startBattle(cfg) {
   if (B) Object.assign(B, { rng, seed, stepN: 0, hq: [], ilog: [], stepAcc: 0 });
 }
 function startBattle0(cfg) {
+  if (!cfg.sim) { SAY_PEND = []; SAY_LOCK = 0; clearTimeout(SAY_TM); sayTimer = 0; const bn = $('banner'); if (bn) bn.textContent = ''; }   // まえの 試合の セリフ（「効果は いまひとつ…」など）を もちこまない
   if (cfg.kind !== 'online' && NET.started && !NET.ended && B && B.kind === 'online') { say0('オンライン対戦中は他の試合はできません'); throw new Error('ONLINE_BUSY'); }   // オンライン対戦中に ほかの しあいは はじめない（のこった まどから など）。よびだし がわが B を いじらない ように とめる
   if (cfg.kind === 'online') { document.querySelectorAll('.askbg').forEach(e => { if (!e.querySelector('.ncode, .nstat')) e.classList.add('onlhide'); }); const tp = $('townPop'); if (tp) tp.hidden = true; }   // マッチした：ほかの まど（フリー対戦の かくにん など）は とじる
   if (cfg.kind !== 'online') mmBgCancel(cfg.sim ? '' : '他の試合を始めたので、オンライン対戦の相手を探すのをやめました。');   // まちながら ほかの しあいは できない
@@ -9142,8 +9143,8 @@ function updateFighter(f, dt) {
 const CATCH_HOT = .45;   // この かくりつ いじょうで ボックスの ボタンを ひからせる
 function catchProb(e) { return clamp(e.sp.catch * (1.6 - 1.3 * e.hp / e.maxHp) * (e.state === 'stun' ? 1.15 : 1) * (e.status === 'slp' || e.status === 'frz' ? 2 : e.status ? 1.5 : 1), .04, .95); }
 function cmdCapsule() {
-  if (B && TUT && TUT.steps && !TUT.frozen && B.kind === 'wild') { say('まずは戦って、少し弱らせよう！'); SND.se('back'); return; }   // あきちの チュートリアル：あんないが でるまで なげられない
-  if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; B.paused = false; }   // チュートリアル：ここを おして と とめて いた
+  if (B && TUT && TUT.steps && !TUT.frozen && !TUT.capOk && B.kind === 'wild') { say('まずは戦って、少し弱らせよう！'); SND.se('back'); return; }   // あきちの チュートリアル：あんないが でるまで なげられない
+  if (B && TUT && TUT.frozen && B.mode === 'fight') { TUT.frozen = false; TUT.capOk = true; B.paused = false; }   // capOk：なげて いい（つぎの ステップで なげる ときにも はじかない）   // チュートリアル：ここを おして と とめて いた
   if (B && B.kind === 'wild' && B.mode === 'intro') { say('試合が始まってから投げてね！', 1); SND.se('back'); return; }   // はじまる まえ：だまって むしを しない
   if (!B || B.kind !== 'wild' || B.mode !== 'fight' || B.catchO || B.paused) return;
   if (S.capsules <= 0) { say('ボックスがもうない！'); return; }
