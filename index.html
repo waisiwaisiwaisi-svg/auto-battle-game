@@ -1583,6 +1583,17 @@ html.isle #isleNav{display:flex;position:absolute;left:0;right:0;bottom:0;z-inde
 #isleTabs button{flex:1;min-width:0;border:0;border-radius:9px;background:transparent;color:#b9b2dc;font-family:inherit;font-size:14px;white-space:nowrap;cursor:pointer}
 #isleTabs button.on{background:var(--win1);color:#ffd166;box-shadow:inset 0 -3px #e9c46a}
 #isleTabs button.lock{opacity:.45;cursor:default;font-size:13px}
+/* フッター・まちの タブ：ホームの アイコンと おなじ 金の わく（えらんでいる ものは あかるい 金） */
+html.town #tabbar{gap:6px!important;padding:6px 8px calc(6px + var(--sab))!important}
+html.town #tabbar button,html.town #tabbar button.home,html.town #tabbar button.home:not(.on),html.town.land #tabbar button.home,#isleBack,#isleTabs button{border:4px solid transparent!important;border-image:var(--fr-win) 2 / 4px / 0 stretch!important;border-radius:0!important;background:linear-gradient(180deg,#30285a,#211a40) padding-box!important;box-shadow:0 3px 0 rgba(0,0,0,.4)!important}
+html.town #tabbar button{min-height:62px!important;padding:4px 0 3px!important;font-size:11.5px}
+html.town #tabbar button .ico,html.town #tabbar button.home .ico{width:34px!important;height:34px!important}
+html.town #tabbar button.on,html.town #tabbar button.home.on,#isleTabs button.on{border-image-source:var(--fr-gold)!important;background:linear-gradient(180deg,#5a4890,#352a66) padding-box!important;color:#ffd166!important}
+html.town #tabbar button::before{inset:0}
+html.isle #isleNav{gap:6px;background:var(--win2)}
+#isleBack{width:56px;font-size:24px}
+#isleTabs{gap:6px}#isleTabs button{font-size:14px;color:#cfc8ef}
+#isleTabs button.lock{background:linear-gradient(180deg,#241e40,#19142e) padding-box!important}
 html.isle.land #isleScene{right:auto;width:36%;height:auto;bottom:0}
 html.isle.land .screen.isl{top:0;left:36%!important;right:0!important;width:auto!important;max-width:none!important;border-top:0;border-left:3px solid var(--rim);border-radius:0;padding-top:calc(10px + var(--sat))!important;box-shadow:-4px 0 14px rgba(0,0,0,.35)}
 html.isle.land #isleNav{left:36%}
@@ -3501,7 +3512,7 @@ function isleScene(k) {
     L.sort((a, b) => a.y - b.y).forEach(o => o.f()); }
   else drawTr();
   if (TP) { }
-  else if (lead && SPR[lead.sid]) try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * roomSz(lead.sid, bh) * z / bh, [mx, my] = B0.at.mon;
+  else if (lead && SPR[lead.sid] && k !== 'shop') try { const im = SPR[lead.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(lead.sid, im), kk = 24 * roomSz(lead.sid, bh) * z / bh, [mx, my] = B0.at.mon;
     shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { }
   $('isleTtl').textContent = ISLE_NAME[k];
   const J = jr(), say = k === 'arena' ? (J.champ ? 'レジェンド入りおめでとう！タワーやドラフトバトルにもちょうせんしよう' : J.badges.length >= GYMS.length ? `次は${LEAGUE[J.league][1]}！` : !J.rival ? 'まずは初めての戦いから！' : (J.step || 0) < 2 ? `次は${TYPES[GYMS[J.gym].t].n}ギルドのメンバー ${(J.step || 0) + 1}人め！` : `次の相手は${GYMS[J.gym].ln}！`)
@@ -3547,7 +3558,7 @@ function renderWild() {
   $('wdBody').innerHTML = `<div class="card wdcard"><b>エリアを選ぶと野生のマギアが出てくる</b><p class="dim">ギルドのタグを取るごとにエリアが増える（今タグ ${tags}こ）</p>
     <div class="wdrow"><span>ボックス</span><b>${S.capsules || 0}こ</b></div></div>
     <div class="wdareas">${WILD_DAYS.map((a, i) => { const [need, n, ts] = a, ok = wildOpen(a);
-      return `<button class="wdarea${ok ? '' : ' off'}${need === 0 ? ' now' : ''}" data-i="${i}"${ok ? '' : ' disabled'}><span class="wdday">${need === 0 ? '★' : ok ? need : '－'}</span><span class="wdan"><b>${n}</b><span class="wdchips">${ts ? ts.map(typeChip).join('') : '<span class="dim">すべてのタイプ</span>'}</span></span>${ok ? '<em>入る›</em>' : `<em>タグ ${need}こで開く</em>`}</button>`; }).join('')}</div>`;
+      return `<button class="wdarea${ok ? '' : ' off'}${need === 0 ? ' now' : ''}" data-i="${i}"${ok ? '' : ' disabled'}><span class="wdan"><b>${n}</b><span class="wdchips">${ts ? ts.map(typeChip).join('') : '<span class="dim">すべてのタイプ</span>'}</span></span>${ok ? '<em>入る›</em>' : `<em>タグ ${need}こで開く</em>`}</button>`; }).join('')}</div>`;
   $('wdBody').querySelectorAll('.wdarea:not(:disabled)').forEach(b => b.onclick = () => { SND.se('ok'); battleGo('wild', +b.dataset.i); });
 }
 $('btnWdBack').onclick = () => $('tabHome').click();
