@@ -7125,20 +7125,20 @@ function fireMove(f) {
     case 'melee':
       wallsInArea(f.x + DM.cos(cur.ang) * (f.r + 16), f.y + DM.sin(cur.ang) * (f.r + 16), 16, m);
       if (m.sure && targetable(o) && !dc && meleeNear(f, o)) {   // はつどうしたら かならず あたる：とどく きょりなら あいての ところへ ふみこむ（とおくから とびつかない）
-        const a = DM.atan2(o.y - f.y, o.x - f.x), px = f.x, py = f.y; stepClear(f, a, Math.min(MELEE_STEP, Math.max(0, dist(f, o) - (f.r + o.r + 4))));
+        const a = DM.atan2(o.y - f.y, o.x - f.x), px = f.x, py = f.y; stepClear(f, a, Math.min(MELEE_STEP, Math.max(0, dist(f, o) - (f.r + o.r + BODY_GAP))));
         fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .2, max: .2 }); hit(f, o, m, a, { sure: 1 }); endAct(f, .25); break; }
       if (m.pat === 'spin') {   // ぐるっと まわって まわり ぜんぶ
         fxPush({ type: 'shock', x: f.x, y: f.y, rad: f.r + 46, col, life: .3, max: .3 }); sheetFx('claw', f.x, f.y - bodyH(f), 1.2, cur.ang); sheetFx('claw', f.x, f.y - bodyH(f), 1.2, cur.ang + Math.PI);
         if (targetable(o) && dist(f, o) <= f.r + o.r + 46) hit(f, o, m, DM.atan2(o.y - f.y, o.x - f.x)); endAct(f, .3); break; }
       if (m.pat === 'combo' && (cur.hits || 0) < 2) {   // すばやく 2かい（1かい ぶんの ダメージを わけて）
         sheetFx('slash', f.x + DM.cos(cur.ang) * (f.r + 14), f.y - bodyH(f) + DM.sin(cur.ang) * (f.r + 14), .8, cur.ang + (cur.hits ? .8 : -.8), TYPES[vt(m)].c);
-        if (!cur.hits && targetable(o) && meleeNear(f, o) && losClear(f, o)) { const gap = Math.min(MELEE_STEP, Math.max(0, dist(f, o) - (f.r + o.r + 6))), px = f.x, py = f.y; cur.ang = DM.atan2(o.y - f.y, o.x - f.x); stepClear(f, cur.ang, gap); if (gap > 4) fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 }); }   // 1かいめ：ふみこむ
+        if (!cur.hits && targetable(o) && meleeNear(f, o) && losClear(f, o)) { const gap = Math.min(MELEE_STEP, Math.max(0, dist(f, o) - (f.r + o.r + BODY_GAP))), px = f.x, py = f.y; cur.ang = DM.atan2(o.y - f.y, o.x - f.x); stepClear(f, cur.ang, gap); if (gap > 4) fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 }); }   // 1かいめ：ふみこむ
         if (targetable(o) && dist(f, o) <= f.r + o.r + 22 + 30 && losClear(f, o)) hit(f, o, m, cur.ang, { mul: .55, tick: !cur.hits });
         cur.hits = (cur.hits || 0) + 1; if (cur.hits < 2) { cur.t = cur.wind - .12; return; } endAct(f, .22); break; }
       if (!m.punch && !isBite(m)) sheetFx('slash', f.x + DM.cos(cur.ang) * (f.r + 14), f.y - bodyH(f) + DM.sin(cur.ang) * (f.r + 14), .9, cur.ang, TYPES[vt(m)].c);
       const near = targetable(o) && meleeNear(f, o) && losClear(f, o);
       if ((m.lunge || near) && o) {   // あいてへ むかって ふみこむ（近い きょりなら とどく まで）
-        const gap = Math.max(0, dist(f, o) - (f.r + o.r + 6)), step = Math.min(MELEE_STEP, near ? gap : Math.min(m.lunge, gap)), px = f.x, py = f.y;
+        const gap = Math.max(0, dist(f, o) - (f.r + o.r + BODY_GAP)), step = Math.min(MELEE_STEP, near ? gap : Math.min(m.lunge, gap)), px = f.x, py = f.y;
         if (near) cur.ang = DM.atan2(o.y - f.y, o.x - f.x);
         stepClear(f, cur.ang, step);
         if (step > 4) fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 });
@@ -8418,7 +8418,9 @@ function aiPick0(f, o) {
 // わざを だすのに ひつような きょり
 const BITE_IDS = new Set(['crunch', 'bug-bite', 'ice-fang']);   // きばで かみつく 技：かみつきの エフェクトを だす
 const isBite = (m) => !!(m && (m.bite || BITE_IDS.has(MOVE_ID.get(m))));
-const MELEE_STEP = 40;   // 近接わざの ふみこみは この きょり まで（とおくから いっきに とびつかない：あるいて ちかづいてから うつ）
+const MELEE_STEP = 40, BODY_GAP = 16;   // BODY_GAP：ふだんは 体と 体の あいだに この くらい すきまを のこす（ちかよっても もみくちゃに ならない。技の とどく きょりは そのまま）
+const gapOk = (f) => ['free', 'act', 'wind', 'chan', 'stun', 'lag', 'dodge', 'enter', 'stance'].includes(f.state);   // すきまを とる じょうたい（とっしん・つかみ などは のぞく）
+const sepGap = (a, b) => gapOk(a) && gapOk(b) ? BODY_GAP : -2;   // 近接わざの ふみこみは この きょり まで（とおくから いっきに とびつかない：あるいて ちかづいてから うつ）
 const meleeNear = (f, o, x, y, r) => DM.hypot((x == null ? o.x : x) - f.x, (y == null ? o.y : y) - f.y) - (f.r + (r == null ? o.r : r) + 6) < MELEE_STEP + 44;   // ふみこんで あたる きょり
 function moveReach(f, o, m) {
   switch (m.k) {
@@ -10427,8 +10429,9 @@ function bStep0(dt) {
     updateFighter(a, dt); if (B.mode === 'fight' || B.mode === 'intro') updateFighter(e, dt);
     if (TUT) tutPin(dt);
     if (targetable(a) && targetable(e)) {
-      const d = dist(a, e), min = a.r + e.r - 2;
+      const d = dist(a, e), min = a.r + e.r - 2, soft = a.r + e.r + sepGap(a, e);
       if (d < min && d > .001) { const p = min - d, nx = (a.x - e.x) / d, ny = (a.y - e.y) / d; a.x += nx * p * .5; a.y += ny * p * .5; e.x -= nx * p * .5; e.y -= ny * p * .5; clampF(a); clampF(e); }
+      else if (d < soft && d > .001) { const p = (soft - d) * Math.min(1, dt * 4), nx = (a.x - e.x) / d, ny = (a.y - e.y) / d; a.x += nx * p * .5; a.y += ny * p * .5; e.x -= nx * p * .5; e.y -= ny * p * .5; clampF(a); clampF(e); }   // すきまの ぶんは やわらかく おしもどす（がたがた しない）
     }
     updatePlaced(dt); updBlasts(dt); updClones(a, dt); updClones(e, dt); updObs(dt); updLeaves(dt);
     }
