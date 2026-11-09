@@ -14706,5 +14706,9 @@
 "1戦で使える回数に限りがある強い技（技名の横の残り/最大）。": [
 "A strong move with limited uses per battle (shown as left/max next to the name).",
 "每场战斗使用次数有限的强力招式（招式名旁显示剩余/上限）。"
+],
+"威力40以下の攻撃技の待ち時間が20%短い": [
+"Attack moves with 40 power or less have 20% shorter cooldowns",
+"威力40以下的攻击招式冷却时间缩短20%"
 ]
 }
