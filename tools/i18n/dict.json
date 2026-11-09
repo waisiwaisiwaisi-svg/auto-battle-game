@@ -14438,5 +14438,33 @@
 "ができます（頭の上の赤いバーが消えるまで動けず、受けるダメージが1.3倍）。": [
 " (until the red bar above its head runs out, it can't move and takes 1.3x damage).",
 "（头上的红条消失前无法行动，受到的伤害变为1.3倍）。"
+],
+"⟦0⟧→⟦1⟧（さくせん◎）": [
+"⟦0⟧→⟦1⟧ (plan ◎)",
+"⟦0⟧→⟦1⟧（作战◎）"
+],
+"⟦0⟧←⟦1⟧（さくせん×）": [
+"⟦0⟧←⟦1⟧ (plan ×)",
+"⟦0⟧←⟦1⟧（作战×）"
+],
+"ようこそ！ここで戦っているのが": [
+"Welcome! The ones fighting here are ",
+"欢迎！在这里战斗的是"
+],
+"マギアは、": [
+"Magia are ",
+"魔机是"
+],
+"魔法のギア": [
+"magic gears",
+"魔法齿轮"
+],
+"の力で命を持ったモノたち。ギアマスターのあなたは、マギアを育ててチームで戦います。": [
+" brought to life. As a Gear Master, you raise Magia and battle as a team.",
+"的力量赋予了生命的存在。身为齿轮大师的你，要培养魔机组队战斗。"
+],
+"このゲームのバトルでは、": [
+"In battles in this game, ",
+"在这个游戏的战斗中，"
 ]
 }
