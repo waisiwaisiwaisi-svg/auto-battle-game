@@ -100,9 +100,9 @@ for p in sorted(FX.glob('G/G_*_*f.png')):
     if nm == 'dragon_head': kw['ax'] = Image.open(p).width // n * .7
     out['g_' + nm] = sheet(p, n, 90 if nm.endswith(('_body', 'thread', 'idle', 'mark')) else 75, **kw)
 # ---- Mグループ（種族の 新技・属性を うつした 技・まほうのおり・こごえるゆか）：キーは m_ ＋ なまえ ----
-M_BOTTOM = {'curse_strike', 'spark_drop', 'flame_return'}   # 下の まんなかが あしもと
+M_BOTTOM = {'curse_strike', 'spark_drop', 'flame_return', 'feather_drop', 'flower', 'flower_bloom'}   # 下の まんなかが あしもと
 M_LEFT = {'big_flap', 'storm_wing', 'odd_mist', 'petal_cannon_start'}   # おうぎ・口もと：ひだりはしが きじゅん
-M_LOOP = ('_shot', '_body', '_start', '_tip', '_sign', 'magic_cage', 'acro_dash', 'sky_strike', 'pounce', 'super_dash', 'fire_wheel', 'thorn_spikes', 'powder_snow_floor')
+M_LOOP = ('_shot', '_body', '_start', '_tip', '_sign', 'magic_cage', 'acro_dash', 'sky_strike', 'pounce', 'super_dash', 'fire_wheel', 'thorn_spikes', 'powder_snow_floor', 'feather_drop', 'flower', 'flower_area')
 for p in sorted(FX.glob('M/M_*_*f.png')):
     nm = re.sub(r'^M_|_\d+f\.png$', '', p.name); n = nf(p)
     kw = {}
