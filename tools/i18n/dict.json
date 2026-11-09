@@ -14542,5 +14542,73 @@
 "乗っている間1秒ごとに2ダメージ": [
 "2 damage every second while standing on it",
 "站在上面时每秒受到2点伤害"
+],
+"木": [
+"Wood",
+"木"
+],
+"光": [
+"Light",
+"光"
+],
+"闇": [
+"Dark",
+"暗"
+],
+"人": [
+"Human",
+"人"
+],
+"飛行": [
+"Flying",
+"飞行"
+],
+"飛": [
+"Fly",
+"飞"
+],
+"マギアは属性1つ＋種族1つ。相性は属性の技だけで決まる（種族の技と無の技はいつも等倍）。◎＝有利（2倍）・△＝不利（0.5倍）。種族は特性を持つ。": [
+"Each Magia has 1 Attribute + 1 Race. Matchups depend only on Attribute moves (Race moves and Normal moves are always neutral). ◎ = Advantage (2×), △ = Disadvantage (0.5×). Races have abilities.",
+"每只魔机有1个属性＋1个种族。相克只由属性招式决定（种族招式和无属性招式总是普通效果）。◎＝有利（2倍）、△＝不利（0.5倍）。种族带有特性。"
+],
+"すくみ図：矢印の先のタイプに強い（2倍）。光と闇はおたがいに強い": [
+"Matchup chart: strong (2×) against the type the arrow points to. Light and Dark are strong against each other",
+"相克图：对箭头指向的属性有利（2倍）。光和暗互相有利"
+],
+"15秒間、場を草原にする。木技1.3倍・地面にいるマギアは毎秒1%回復": [
+"Turns the field into grassland for 15 sec. Wood moves 1.3x; grounded Magia heal 1% per sec",
+"15秒内场地变成草原。木招式1.3倍，地面上的魔机每秒恢复1%"
+],
+"15秒間、場を念力で満たす。光技1.3倍・地面にいる相手に突進が効かない": [
+"Fills the field with psychic power for 15 sec. Light moves 1.3x; Dashes don't work on grounded foes",
+"15秒内场地充满念力。光招式1.3倍，突进对地面上的对手无效"
+],
+"木技1.3倍・地面にいるマギアは毎秒1%回復": [
+"Wood moves ×1.3, Magia on the ground heal 1% per sec",
+"木招式1.3倍、地面上的魔机每秒回复1%"
+],
+"光技1.3倍・地面にいる相手に突進が効かない": [
+"Light moves ×1.3, Dash doesn't work on foes on the ground",
+"光招式1.3倍、突进对地面上的对手无效"
+],
+"そうげんになった！（木↑・少しずつ回復）": [
+"Grassy Field! (Wood↑, slow heal)",
+"变成了青草场地！（木↑・慢慢回复）"
+],
+"ねんりきのばになった！（光↑・とっしんが効かない）": [
+"Psychic Field! (Light↑, dashes blocked)",
+"变成了精神场地！（光↑・突进无效）"
+],
+"体が透けて、無・獣・人の技がすり抜ける（交代すると切れる）": [
+"Body turns see-through: Normal, Beast and Human moves pass through (ends on switch)",
+"身体变透明，无、兽、人的招式会穿过（替换后失效）"
+],
+"3秒動けない。火の技を受けるとすぐとける。人の技でもとけるが、その技のダメージは1.5倍。火属性はならない。": [
+"Can't move for 3s. Thaws at once when hit by a Fire move. Human moves thaw it too, but deal ×1.5 damage. Fire types are immune.",
+"3秒无法行动。受到火属性招式会立刻解冻。人招式也能解冻，但该招式伤害1.5倍。火属性不会冰冻。"
+],
+"3秒動けない。火の技を受けるとすぐとける。人の技でもとけるが、その技のダメージは1.5倍。火属性はならない": [
+"Can't move for 3s. Thaws at once when hit by a Fire move. Human moves thaw it too, but deal ×1.5 damage. Fire types are immune.",
+"3秒无法行动。受到火属性招式会立刻解冻。人招式也能解冻，但该招式伤害1.5倍。火属性不会冰冻。"
 ]
 }
