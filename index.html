@@ -3313,7 +3313,8 @@ function islesBuild() {
       const u = (pt.x - x0) / cv.offsetWidth, v = (pt.y - y0) / cv.offsetHeight; if (u < 0 || u >= 1 || v < 0 || v >= 1) return false;
       try { return cv.getContext('2d').getImageData(Math.floor(u * cv.width), Math.floor(v * cv.height), 1, 1).data[3] > 40; } catch (e) { return b === b0; } };
     const all = [...box.querySelectorAll('.isle')].sort((p, q) => (+q.querySelector('canvas').style.zIndex || 0) - (+p.querySelector('canvas').style.zIndex || 0) || (q.getBoundingClientRect().bottom - p.getBoundingClientRect().bottom));
-    const pick = all.find(hit); if (pick === b0) return; ev.stopPropagation(); ev.preventDefault(); if (pick) { const e2 = new MouseEvent('click', { bubbles: true, clientX: ev.clientX, clientY: ev.clientY }); e2.isleOk = 1; pick.dispatchEvent(e2); } }, true);
+    const pick = all.find(hit); if (!pick || pick === b0) return;   // どの たてものの え にも あたって いない（すきとおった ところ）：おした たてものを そのまま ひらく（なにも おきない ように しない）
+    ev.stopPropagation(); ev.preventDefault(); { const e2 = new MouseEvent('click', { bubbles: true, clientX: ev.clientX, clientY: ev.clientY }); e2.isleOk = 1; pick.dispatchEvent(e2); } }, true);
   box.querySelectorAll('.isle').forEach((b, i) => { b.onclick = () => { SND.se('click'); $('townPop').hidden = true; ISLES[i].act(); }; const cv = b.querySelector('canvas'), k = ISLES[i].k, paint = () => { const a = isleArt(k); cv.width = a.width; cv.height = a.height; cv.getContext('2d').drawImage(a, 0, 0); }; paint(); isleImgThen('OBJ_' + (k === 'room' ? 'house' : k), paint); });
   box.classList.add('plaza'); box.insertAdjacentHTML('beforeend', '<canvas id="plazaChar" width="180" height="132"></canvas>');
 }
