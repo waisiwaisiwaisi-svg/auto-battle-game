@@ -99,6 +99,16 @@ for p in sorted(FX.glob('G/G_*_*f.png')):
     if nm in ('aqua_cannon_start', 'star_ray_start', 'steel_ray_start', 'volt_cannon_start'): kw['ax'] = 0   # 口もとの しぶき：ひだりはしを 口もとに（からだに かさならない）
     if nm == 'dragon_head': kw['ax'] = Image.open(p).width // n * .7
     out['g_' + nm] = sheet(p, n, 90 if nm.endswith(('_body', 'thread', 'idle', 'mark')) else 75, **kw)
+# ---- Mグループ（種族の 新技・属性を うつした 技・まほうのおり・こごえるゆか）：キーは m_ ＋ なまえ ----
+M_BOTTOM = {'curse_strike', 'spark_drop', 'flame_return'}   # 下の まんなかが あしもと
+M_LEFT = {'big_flap', 'storm_wing', 'odd_mist', 'petal_cannon_start'}   # おうぎ・口もと：ひだりはしが きじゅん
+M_LOOP = ('_shot', '_body', '_start', '_tip', '_sign', 'magic_cage', 'acro_dash', 'sky_strike', 'pounce', 'super_dash', 'fire_wheel', 'thorn_spikes', 'powder_snow_floor')
+for p in sorted(FX.glob('M/M_*_*f.png')):
+    nm = re.sub(r'^M_|_\d+f\.png$', '', p.name); n = nf(p)
+    kw = {}
+    if nm in M_BOTTOM: kw['ay'] = Image.open(p).height - 2
+    if nm in M_LEFT or nm.endswith('_body'): kw['ax'] = 0
+    out['m_' + nm] = sheet(p, n, 90 if nm.endswith(M_LOOP) else 75, **kw)
 # ---- Kグループ（技の 専用：仮の 爆発・ドリル・ブーメラン・範囲技）：キーは k_ ＋ なまえ ----
 K_BOTTOM = {'water_pillar', 'icicle_drop', 'avalanche', 'bug_swarm', 'poison_splash', 'spore_mine', 'drill_break'}   # 下の まんなかが あしもと
 K_LEFT = {'flame_breath', 'dragon_breath', 'cold_wind'}   # おうぎ：口もと（ひだりはし）が きじゅん
