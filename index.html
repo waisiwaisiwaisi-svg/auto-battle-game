@@ -6688,7 +6688,8 @@ const SPECIAL_MAX = 5, MID_MAX = 10;
 const SIMPLE_NG = ['switchOut', 'fakeout', 'rapidSpin', 'healBlock', 'ctr', 'sucker', 'hide', 'chain', 'rampage', 'charge2', 'selfConfuse'];
 const movePower = (m) => m.power || Math.round((m.pow || 0) * 5);
 const simpleAtk = (m) => m.cat !== 'stat' && movePower(m) <= 50 && !Object.keys(m.e || {}).length && !SIMPLE_NG.some(k => m[k]);
-function bigMax(m) { if (m.ohko) return USE_MIN; if (m.cat === 'stat') return SPECIAL_MAX; if (simpleAtk(m)) return 0; return movePower(m) >= 100 ? USE_MIN : MID_MAX; }
+const SWAP_MOVE_MAX = 3;   // 交代技（自分が 交代・相手を 入れ替える）は 1戦 3回まで
+function bigMax(m) { if (m.switchOut || m.forceOut || m.sp === 'roar') return SWAP_MOVE_MAX; if (m.ohko) return USE_MIN; if (m.cat === 'stat') return SPECIAL_MAX; if (simpleAtk(m)) return 0; return movePower(m) >= 100 ? USE_MIN : MID_MAX; }
 // すいとる こうげき：なんどでも うてる。かいふく するのは 1戦 DRAIN_MAX 回まで（それいこうは ふつうの こうげき）
 const DRAIN_MAX = 3;
 const drainLeft = (f, id) => ((MOVES[id] && MOVES[id].drainMax) || DRAIN_MAX) - ((f.drains && f.drains[id]) || 0);
@@ -7599,8 +7600,7 @@ function rayEffect(f, o, m) {
       if (!roarFx(f, o, null)) for (let i = 0; i < 4; i++) fxp({ type: 'shock', x: f.x, y: f.y - bodyH(f), rad: 50 + i * 28, col: '#ffffff', life: .3 + i * .12 }); B.shake = Math.max(B.shake, 6);
       if (o && plOk('n_scared')) plFx('n_scared', o.x, o.y - BODY * 2.2, 1.8, .8);   // おびえる しるし
       if (B.kind === 'wild') { B.fled = o.sp.n; endBattle(o.side === 1 ? 'run' : 'lose'); return; }
-      { const idx = benchIdx(o.side, true); if (idx < 0) { return; } if (plOk('sum_swap')) plFx('sum_swap', o.x, o.y - bodyH(o), 1.2, .6); else fxp({ type: 'swap', x: o.x, y: o.y - bodyH(o), col: '#ffffff', life: .7 });
-        if (canPickSwap(o.side)) { const o0 = o; (B.nextFns = B.nextFns || []).push(() => { if (B && active(0) === o0 && o0.hp > 0) chooseSwap(i => doSwitch(o0, i, null, true), 'ふき飛ばされた！だれを出す？', { skip: B.sides[0].act }); }); } else doSwitch(o, idx, null, true); }
+      forceSwitch(f, o);
       break;
   }
 }
@@ -7626,10 +7626,15 @@ function bombBoom(f, Bm, stun) {
   if (stun && f.hp > 0) { f.cur = null; f.state = 'stun'; f.stT = Math.max(f.stT || 0, 1); popText(f.x, f.y - 120, 'きぜつ！', '#ffd84a'); }
 }
 const lostRecent = (f) => { const e = (f.hist || []).find(h => B.t - h.t <= 3.05); return e ? Math.max(0, (e.hp - f.hp) / f.maxHp * 100) : 0; };   // さいきん 3びょうで へった HP（%）
+// 相手を 入れ替える 技（ドラゴンテール・ふきとばし など）：まず ふき飛ばされる 演出（FORCE_T びょう うごけない）→ そのあと 交代（自分の がわは えらぶ まど）
+const FORCE_T = .9;
 function forceSwitch(f, o) {
-  const idx = benchIdx(o.side, true); if (idx < 0) return;
+  if (!o || o.forcing || benchIdx(o.side) < 0) return;
+  o.forcing = 1; o.cur = null; o.queued = null; o.state = 'stun'; o.stT = FORCE_T; B.shake = Math.max(B.shake, 5);
+  if (f) { const a = DM.atan2(o.y - f.y, o.x - f.x); o.kx = DM.cos(a) * 520; o.ky = DM.sin(a) * 520; }   // うしろへ ふき飛ぶ
   if (plOk('sum_swap')) plFx('sum_swap', o.x, o.y - bodyH(o), 1.2, .6); else fxp({ type: 'swap', x: o.x, y: o.y - bodyH(o), col: '#ffffff', life: .7 });
-  if (canPickSwap(o.side)) { const o0 = o; (B.nextFns = B.nextFns || []).push(() => { if (B && active(0) === o0 && o0.hp > 0) chooseSwap(i => doSwitch(o0, i, null, true), 'ふき飛ばされた！だれを出す？', { skip: B.sides[0].act }); }); } else doSwitch(o, idx, null, true);
+  (B.later = B.later || []).push({ t: FORCE_T, fn: () => { o.forcing = 0; if (!B || B.mode === 'end' || o.hp <= 0 || active(o.side) !== o) return; if (plOk('sum_swap')) plFx('sum_swap', o.x, o.y - bodyH(o), 1.2, .6);
+    if (canPickSwap(o.side)) chooseSwap(i => doSwitch(o, i, null, true), 'ふき飛ばされた！だれを出す？', { skip: B.sides[0].act }); else { const j = benchIdx(o.side, true); if (j >= 0) doSwitch(o, j, null, true); } } });
 }
 function benchIdx(side, random) {
   const sd = B.sides[side];
@@ -10305,6 +10310,7 @@ function bStep(dt) {
     }
     else if (b.hq.length) for (const c of b.hq.splice(0)) { b.ilog.push([n, 'h', c]); hostApply(c); }
     if (b.nextFns && b.nextFns.length) for (const fn of b.nextFns.splice(0)) fn();   // まえの ステップで きまった えらぶ まど（いつも おなじ ステップで ひらく）
+    if (b.later && b.later.length && !b.choosing) { for (const x of b.later) x.t -= dt; const due = b.later.filter(x => x.t <= 0); if (due.length) { b.later = b.later.filter(x => x.t > 0); for (const x of due) x.fn(); } }   // すこし あとで やる こと（ふき飛ばされる 演出の あとの 交代 など）
     bStep0(dt);
     if (n % 30 === 0 && B === b) (b.trace = b.trace || []).push(stepHash(b));   // とちゅうの ようす（サーバーの さいげんと くらべて ずれた ところが わかる）
   } finally { SIM_RNG = prev; BCLK = pc; }
@@ -12647,14 +12653,18 @@ $('stampPal').onclick = (e) => { const b = e.target.closest('button'); if (b) { 
 document.addEventListener('pointerdown', (e) => { const p = $('stampPal'); if (!p.hidden && !(e.target.closest && e.target.closest('#stampPal,#bStamp'))) p.hidden = true; }, true);   // ほかを さわったら とじる
 $('bStamp').onclick = (e) => { e.stopPropagation(); $('stampPal').hidden = !$('stampPal').hidden; SND.se('click'); };
 function cmdPose(side) { const t = B.sides[side].trainer; if (t && !(t.shout > .3 && t.pose === 'open')) { t.shout = .6; t.pose = 'point'; } }
+// 絵の 足もとの すきま（すけた 行）：その ぶん 下げて 影の 上に 立たせる
+const PAD_B = new WeakMap();
+function padBottom(img) { if (PAD_B.has(img)) return PAD_B.get(img); let n = 0; try { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); const d = g.getImageData(0, 0, c.width, c.height).data; outer: for (let y = c.height - 1; y >= 0; y--) { for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 20) break outer; n++; } } catch (e) { n = 0; } PAD_B.set(img, n); return n; }
 function drawTrainer(sd) {
   const t = sd.trainer; if (!t) return;
-  const jump = t.shout > 0 ? Math.round(Math.abs(DM.sin(t.shout * 12)) * 5) : 0;
+  const jump = t.shout > 0 && !t.spr.art ? Math.round(Math.abs(DM.sin(t.shout * 12)) * 5) : 0;   // 絵の ギアマスターは とびはねない（うかんで 見える）
   shadow(t.x, t.y, 14);
   const won = B.result === (sd === B.sides[0] ? 'win' : 'lose'), lost = B.result === (sd === B.sides[0] ? 'lose' : 'win');
   const tf = won && t.spr.win ? 'win' : t.shout > 0 ? (t.pose === 'open' ? 'atk2' : 'atk1') : (lost ? 'ko' : 'idle' + (Math.floor(B.t * 4) % 4));
   const bob = t.spr.art && !t.shout && !B.result ? (Math.floor(B.t * 2) % 2) : 0;   // 絵の ギアマスターは 息づかいで 1ドット ゆれる
-  drawSprite(t.spr[tf].n, t.x, t.y - jump + bob, sd === B.sides[0] ? 1 : -1, t.spr.art ? (B.st.solid ? TR_MS * 1.3 : TR_MS) * 48 / (t.spr.h0 || 48) : MS, lost && t.spr.art ? .55 : null);
+  const tim = t.spr[tf].n, tsc = t.spr.art ? (B.st.solid ? TR_MS * 1.3 : TR_MS) * 48 / (t.spr.h0 || 48) : MS, pb = padBottom(t.spr.idle0 ? t.spr.idle0.n : tim) * tsc;   // 足もとは たいきの 絵で そろえる（ポーズで ゆれない）
+  drawSprite(tim, t.x, t.y + pb + 1 - jump + bob, sd === B.sides[0] ? 1 : -1, tsc, lost && t.spr.art ? .55 : null);
   if (t.shout > .2) { ctx.fillStyle = '#ffffff'; ctx.font = '16px "DotGothic16",monospace'; ctx.textAlign = 'center'; ctx.fillText('!', t.x + (sd === B.sides[0] ? 22 : -22), t.y - 56); }
 }
 
