@@ -6756,8 +6756,10 @@ const isDamaging = (m) => m.cat !== 'stat';
 const chgS = (f, id) => { f.chgs = f.chgs || {}; return f.chgs[id] || (f.chgs[id] = { n: 1, t: 0 }); };   // たまる かいすう（ミニほうだい）
 
 /* ---------- わざ ---------- */
+const MOVE_GAP = 1;   // 技を だし おわってから つぎの 技まで さいたん この びょう（あいだも あるく・よけるは できる）
 function beginMove(f, id) {
   const o = opp(f); if (!o || B.mode === 'intro') return;   // ファイト！ まえは うたない
+  if (f.nextMvT > B.t && !f.cfuse) return;   // まえの 技から MOVE_GAP びょう たって いない
   const m = MOVES[id];
   if (m.k === 'dash' && honeyStuck(f)) { popText(f.x, f.y - 66, 'ねばねばでとっしんできない', '#ffd166'); return; }
   if (m.k === 'copycat') {   // オウムがえし：あいてが さいごに つかった 技を つかう
@@ -7126,7 +7128,7 @@ function fireMove(f) {
       wallsInArea(f.x + DM.cos(cur.ang) * (f.r + 16), f.y + DM.sin(cur.ang) * (f.r + 16), 16, m);
       if (m.sure && targetable(o) && !dc && meleeNear(f, o)) {   // はつどうしたら かならず あたる：とどく きょりなら あいての ところへ ふみこむ（とおくから とびつかない）
         const a = DM.atan2(o.y - f.y, o.x - f.x), px = f.x, py = f.y; stepClear(f, a, Math.min(MELEE_STEP, Math.max(0, dist(f, o) - (f.r + o.r + BODY_GAP))));
-        fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .2, max: .2 }); hit(f, o, m, a, { sure: 1 }); endAct(f, .25); break; }
+        fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .2, max: .2 }); hit(f, o, m, a, { sure: 1 }); endAct(f, MELEE_REC); break; }
       if (m.pat === 'spin') {   // ぐるっと まわって まわり ぜんぶ
         fxPush({ type: 'shock', x: f.x, y: f.y, rad: f.r + 46, col, life: .3, max: .3 }); sheetFx('claw', f.x, f.y - bodyH(f), 1.2, cur.ang); sheetFx('claw', f.x, f.y - bodyH(f), 1.2, cur.ang + Math.PI);
         if (targetable(o) && dist(f, o) <= f.r + o.r + 46) hit(f, o, m, DM.atan2(o.y - f.y, o.x - f.x)); endAct(f, .3); break; }
@@ -7134,7 +7136,7 @@ function fireMove(f) {
         sheetFx('slash', f.x + DM.cos(cur.ang) * (f.r + 14), f.y - bodyH(f) + DM.sin(cur.ang) * (f.r + 14), .8, cur.ang + (cur.hits ? .8 : -.8), TYPES[vt(m)].c);
         if (!cur.hits && targetable(o) && meleeNear(f, o) && losClear(f, o)) { const gap = Math.min(MELEE_STEP, Math.max(0, dist(f, o) - (f.r + o.r + BODY_GAP))), px = f.x, py = f.y; cur.ang = DM.atan2(o.y - f.y, o.x - f.x); stepClear(f, cur.ang, gap); if (gap > 4) fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 }); }   // 1かいめ：ふみこむ
         if (targetable(o) && dist(f, o) <= f.r + o.r + 22 + 30 && losClear(f, o)) hit(f, o, m, cur.ang, { mul: .55, tick: !cur.hits });
-        cur.hits = (cur.hits || 0) + 1; if (cur.hits < 2) { cur.t = cur.wind - .12; return; } endAct(f, .22); break; }
+        cur.hits = (cur.hits || 0) + 1; if (cur.hits < 2) { cur.t = cur.wind - .12; return; } endAct(f, MELEE_REC); break; }
       if (!m.punch && !isBite(m)) sheetFx('slash', f.x + DM.cos(cur.ang) * (f.r + 14), f.y - bodyH(f) + DM.sin(cur.ang) * (f.r + 14), .9, cur.ang, TYPES[vt(m)].c);
       const near = targetable(o) && meleeNear(f, o) && losClear(f, o);
       if ((m.lunge || near) && o) {   // あいてへ むかって ふみこむ（近い きょりなら とどく まで）
@@ -7144,7 +7146,7 @@ function fireMove(f) {
         if (step > 4) fxPush({ type: 'ghost', sid: f.mon.sid, x: px, y: py, face: f.face, life: .18, max: .18 });
       }
       if (near && dist(f, o) <= f.r + o.r + 20 + 30) { hit(f, o, m, cur.ang); f.kx -= DM.cos(cur.ang) * 170; f.ky -= DM.sin(cur.ang) * 170; }   // あてたら はねかえって 飛びのく
-      endAct(f, .22); break;
+      endAct(f, MELEE_REC); break;
     case 'swipe':
       wallsInArea(f.x + DM.cos(cur.ang) * (f.r + m.rad * .5), f.y + DM.sin(cur.ang) * (f.r + m.rad * .5), m.rad * .5, m);
       if (m.whip) { fxp({ type: 'whip', x: f.x, y: f.y - bodyH(f), ang: cur.ang, dir: cur.hits % 2 ? -1 : 1, rad: m.rad + f.r, col: TYPES[vt(m)].c, life: .24 }); SND.se('swing'); }
@@ -8419,7 +8421,8 @@ function aiPick0(f, o) {
 // わざを だすのに ひつような きょり
 const BITE_IDS = new Set(['crunch', 'bug-bite', 'ice-fang']);   // きばで かみつく 技：かみつきの エフェクトを だす
 const isBite = (m) => !!(m && (m.bite || BITE_IDS.has(MOVE_ID.get(m))));
-const MELEE_STEP = 40, BODY_GAP = 16;   // BODY_GAP：ふだんは 体と 体の あいだに この くらい すきまを のこす（ちかよっても もみくちゃに ならない。技の とどく きょりは そのまま）
+const MELEE_STEP = 40, BODY_GAP = 16, MELEE_REC = .35;   // MELEE_REC：近接技の あとの こうちょく（ほかの 技と おなじ くらいに）
+// BODY_GAP：ふだんは 体と 体の あいだに この くらい すきまを のこす（ちかよっても もみくちゃに ならない。技の とどく きょりは そのまま）
 const gapOk = (f) => ['free', 'act', 'wind', 'chan', 'stun', 'lag', 'dodge', 'enter', 'stance'].includes(f.state);   // すきまを とる じょうたい（とっしん・つかみ などは のぞく）
 const sepGap = (a, b) => gapOk(a) && gapOk(b) ? BODY_GAP : -2;   // 近接わざの ふみこみは この きょり まで（とおくから いっきに とびつかない：あるいて ちかづいてから うつ）
 const meleeNear = (f, o, x, y, r) => DM.hypot((x == null ? o.x : x) - f.x, (y == null ? o.y : y) - f.y) - (f.r + (r == null ? o.r : r) + 6) < MELEE_STEP + 44;   // ふみこんで あたる きょり
@@ -8912,6 +8915,7 @@ const SD_T = 180;
 
 /* ---------- 1体ぶんの更新 ---------- */
 function updateFighter(f, dt) {
+  if (f.hadCur && !f.cur) f.nextMvT = Math.max(f.nextMvT || 0, B.t + MOVE_GAP); f.hadCur = !!f.cur;   // 技が おわった（とちゅうで とめられた ときも）：つぎの 技まで MOVE_GAP びょう
   { const r = f.v && f.v.dArm > 0 ? (f.v.dArm -= dt, 1.3) : 1; for (const k in f.cd) f.cd[k] = Math.max(0, f.cd[k] - dt * r); }   // げきりん：待ち時間が 30% はやく へる
   if ((f.histT = (f.histT || 0) - dt) <= 0) { f.histT = .1; (f.hist = f.hist || []).push({ t: B.t, x: f.x, y: f.y, hp: f.hp }); while (f.hist.length && B.t - f.hist[0].t > 3.6) f.hist.shift(); }   // まきもどし用：3.6びょうぶんの いち・HP
   if (f.rcEnd) for (const k in f.rcEnd) if (B.t > f.rcEnd[k]) { delete f.rcEnd[k]; const M = MOVES[k]; f.cd[k] = Math.max(f.cd[k] || 0, M.cd * cdScale(f) * CD_SHARED_K - M.recast); (f.cdMax = f.cdMax || {})[k] = f.cd[k]; if (f.ammo) f.ammo[k] = M.stock; }   // さいはつどうの まどが しまった：まちじかん
@@ -10660,7 +10664,7 @@ function startTutorial() {
 const tutF = () => B.sides[0].fs[B.sides[0].act], tutO = () => B.sides[1].fs[B.sides[1].act];
 function tutEnemy(id, hold) {   // あいてに わざを ださせる（hold びょう ためつづける）
   const o = tutO(), f = tutF(); if (!o || !f || !id || o.state !== 'free') return false; o.cur = null;
-  o.cd[id] = 0; beginMove(o, id); if (o.cur) { o.cur.wind = Math.max(o.cur.wind, hold); o.cur.tx = f.x; o.cur.ty = f.y; } return !!o.cur;
+  o.cd[id] = 0; o.nextMvT = 0; beginMove(o, id); if (o.cur) { o.cur.wind = Math.max(o.cur.wind, hold); o.cur.tx = f.x; o.cur.ty = f.y; } return !!o.cur;
 }
 // stop：その ばめんに なった しゅんかんに とめて せつめいを だす（それまでは 文字を ださない）
 const TS = () => (TUT && TUT.steps) || TUT_STEPS;   // いまの チュートリアルの すすめかた（バトル・あきち）
@@ -10669,7 +10673,7 @@ const TUT_STEPS = [
   { tx: 'このゲームのバトルでは、<b>マギアが自分で考えて戦います</b>。<br>どう戦うかは、前もって<b>訓練</b>で教えておきます。', pause: true },
   { tx: '① マギアの<b>頭の上に出た文字</b>が、使った<b>技の名前</b>です。<br>マギアは自分で技を選んで撃ちます。',
     run: (T) => { const f = tutF(); if (!f) return; if (f.cur && !T.f.at) T.f.at = TUT.t;
-      if (!T.f.at && TUT.t > .8 && f.state === 'free') { const ok = (x) => MOVES[x] && isDamaging(MOVES[x]), id = f.moves.find(x => ok(x) && MOVES[x].k === 'proj') || f.moves.find(ok); if (id) { f.cur = null; f.cd[id] = 0; beginMove(f, id); } } },
+      if (!T.f.at && TUT.t > .8 && f.state === 'free') { const ok = (x) => MOVES[x] && isDamaging(MOVES[x]), id = f.moves.find(x => ok(x) && MOVES[x].k === 'proj') || f.moves.find(ok); if (id) { f.cur = null; f.cd[id] = 0; f.nextMvT = 0; beginMove(f, id); } } },
     stop: (T) => T.f.at && TUT.t - T.f.at > .35 },
   { tx: '②相手が技を<b>溜めています</b>！<b>赤い点線</b>は、技が飛んでくる方向です。<br>強い技ほど、溜めが長くなります。',
     run: (T) => { const f = tutF(); if (!T.f.sent && TUT.t > .3 && f && f.state === 'free' && !B.projs.some(q => q.side === 0) && tutEnemy(TUT.em.shot, 1.4)) { T.f.sent = TUT.t; TUT.dodge = 1; } },
@@ -11038,7 +11042,7 @@ function dummyTick(dt) {
   if (S.wx && !(B.weather && B.weather.k === S.wx)) B.weather = { k: S.wx, t: 99 }; if (S.wx && B.weather) B.weather.t = 99;
   if (S.tr && !(B.terrain && B.terrain.k === S.tr)) B.terrain = { k: S.tr, t: 99 }; if (S.tr && B.terrain) B.terrain.t = 99;
   DUM.atkT -= dt;
-  if (S.atk !== 'none' && DUM.atkT <= 0 && d.state === 'free' && !d.cur && canAct(d)) { const id = dollMove(S.atk, d, f); DUM.atkT = 3.5; if (id) { d.cd = {}; beginMove(d, id); if (d.cur) d.cur.doll = 1; } }
+  if (S.atk !== 'none' && DUM.atkT <= 0 && d.state === 'free' && !d.cur && canAct(d)) { const id = dollMove(S.atk, d, f); DUM.atkT = 3.5; if (id) { d.cd = {}; d.nextMvT = 0; beginMove(d, id); if (d.cur) d.cur.doll = 1; } }
   if (d.cur && d.cur.doll && d.state === 'wind' && d.cur.t + dt * 2 >= d.cur.wind) {   // 人形の こうげきは ためおわったら かならず とどく（にげられて「攻撃を受けた瞬間」が ためせない のを ふせぐ）
     const m = d.cur.m; d.cur = null; d.state = 'act'; d.stT = .3; burst(f.x, f.y - bodyH(f), TYPES[vt(m)] ? TYPES[vt(m)].c : '#ffffff', 14, 140, .4); hit(d, f, m, DM.atan2(f.y - d.y, f.x - d.x)); }
 }
