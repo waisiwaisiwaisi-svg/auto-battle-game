@@ -14654,5 +14654,9 @@
 "3秒動けない。火の技を受けるとすぐとける。人型の技でもとけるが、その技のダメージは1.5倍。火属性はならない": [
 "Can't move for 3s. Thaws at once when hit by a Fire move. Human-type moves thaw it too, but deal ×1.5 damage. Fire types are immune.",
 "3秒无法行动。受到火属性招式会立刻解冻。人型招式也能解冻，但该招式伤害1.5倍。火属性不会冰冻。"
+],
+"妖精型の技を使うとお花がさく。お花の近くにいるとお花1つにつき毎秒HPが0.5%回復（重なる）": [
+"Using Fairy-type moves makes a flower bloom. Each nearby flower restores 0.5% HP per second (stacks)",
+"使用妖精型招式会开出花朵。附近每有1朵花，每秒恢复0.5%HP（可叠加）"
 ]
 }
