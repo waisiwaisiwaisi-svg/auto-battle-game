@@ -3396,6 +3396,7 @@ function isleLayout() {
   els.forEach((e, i) => { Object.assign(e.style, { position: 'absolute', width: w + 'px', height: h + 'px', left: (i % 2 ? W - w - pad : pad) + 'px', top: top0 + i * h * step + 'px', zIndex: i + 1, padding: '0' }); });
 }
 window.addEventListener('resize', () => setTimeout(isleLayout, 50));
+window.addEventListener('resize', () => setTimeout(() => { if (ISLE.k) isleScene(ISLE.k); }, 80));   // しまの なかの 絵：わくの 大きさに あわせて ならべ なおす
 function islesStage() {
   islesBuild(); citySky(); requestAnimationFrame(isleLayout); setTimeout(isleLayout, 250); setTimeout(isleLayout, 900); setTimeout(isleLayout, 1600);   // したの ブラインドボックスの 大きさが きまってから もういちど $('townPop').hidden = true;
   if (HUB_ANIM) clearInterval(HUB_ANIM);
@@ -3508,16 +3509,19 @@ function isleScene(k) {
   // アリーナ：編成の マギアを ぜんぶ（6たいまで）。ギアマスターの みぎに 2れつ（おく 3たい・てまえ 3たい）
   const monDim = (m, hh) => { try { const im = SPR[m.sid].fr.idle0.n, [, , bw, bh] = sprBox(m.sid, im), kk = hh * Math.min(1.7, roomSz(m.sid, bh)) / bh; return { w: bw * kk, h: bh * kk }; } catch (e) { return { w: 20, h: 20 }; } };   // え の 大きさ（へやの ざひょう）
   // ならべかた：しゅつじょう 3たいは てまえの れつ、ひかえは おくの れつ。大きさに あわせて よこに つめ、はいりきらない れつは ちぢめる（かさならない）
-  const TP = team.length > 1 ? (() => { const X0 = 90, X1 = 214, GAP = 3, mon = [], sc = [];
+  // 見える はんい：絵は わくに cover で はめる ので、たてに ながい わく（よこ画面）では 左右が きれる。見える はばの なかに ならべて、その ぶんへ ずらす
+  const sw = (() => { const el = $('isleScene'), W = el && el.clientWidth, H = el && el.clientHeight; if (!W || !H) return 220; return Math.min(220, W / Math.max(W / 660, H / 570) / 3); })();
+  const VL = team.length > 1 && sw < 219 ? Math.max(0, Math.min(220 - sw, (220 - sw) * .7)) : 0; cv.style.objectPosition = VL ? `${VL / (220 - sw) * 100}% 62%` : '';
+  const TP = team.length > 1 ? (() => { const X0 = VL ? VL + 6 : 34, X1 = VL ? VL + sw - 6 : 214, GAP = 3, mon = [], sc = [];
     for (const [row, y, hh] of [[team.slice(0, 3), 172, 25], [team.slice(3), 134, 20]]) { if (!row.length) continue; const d = row.map(m => monDim(m, hh)), W = d.reduce((a, x) => a + x.w, 0) + GAP * (row.length - 1), k = Math.min(1, (X1 - X0) / W);
       let x = X0 + Math.max(0, (X1 - X0 - W * k) / 2) * (y < 150 ? 1 : .3); d.forEach(o => { mon.push([x + o.w * k / 2, y]); sc.push(k); x += o.w * k + GAP; }); }
-    return { tr: [76, 140], mon, sc }; })() : null;
+    return { tr: [VL ? VL + 14 : 76, 140], mon, sc }; })() : null;
   const drawMon = (m, mx, my, hh, sc = 1) => { if (!m || !SPR[m.sid]) return; try { const im = SPR[m.sid].fr.idle0.n, [bx, by, bw, bh] = sprBox(m.sid, im), kk = hh * Math.min(1.7, roomSz(m.sid, bh)) * sc * z / bh;   // みための 大きさ（身長くらべ）を そのまま（大きすぎる こは 1.7 まで）
     shadow(mx, my, bw * kk / z * .4 + 2); q.drawImage(im, bx, by, bw, bh, Math.round(mx * z - bw * kk / 2), Math.round(my * z - bh * kk), Math.round(bw * kk), Math.round(bh * kk)); } catch (e) { } };
   const drawTr = () => { try { const tr = trArt(myLook()), ti = tr.idle0.n, h0 = tr.h0 || ti.height, ts = 32 * z / h0, [px, py] = TP ? TP.tr : B0.at.tr;
     shadow(px, py, 8); q.drawImage(ti, Math.round(px * z - ti.width * ts / 2), Math.round(py * z - ti.height * ts), Math.round(ti.width * ts), Math.round(ti.height * ts)); } catch (e) { } };
   if (TP) {   // おくから じゅんに（y の ちいさい ほう）かく。ひかえは すこし ちいさく
-    const L = team.map((m, i) => ({ y: TP.mon[i][1], f: () => drawMon(m, TP.mon[i][0], TP.mon[i][1], i < 3 ? 25 : 20, TP.sc[i]) })).concat([{ y: TP.tr[1], f: drawTr }]);
+    const L = team.map((m, i) => ({ y: TP.mon[i][1], f: () => drawMon(m, TP.mon[i][0], TP.mon[i][1], i < 3 ? 25 : 20, TP.sc[i]) }));   // アリーナ：マギアだけ（ギアマスターは ださない）
     L.sort((a, b) => a.y - b.y).forEach(o => o.f()); }
   else drawTr();
   if (TP) { }
