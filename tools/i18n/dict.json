@@ -14538,5 +14538,33 @@
 "おかえり！チームの準備をしよう": [
 "Welcome back! Get your team ready.",
 "欢迎回来！来准备队伍吧"
+],
+"20秒間、天候を砂あらしにする。いわ・じめん以外は2秒ごとに2%けずられる": [
+"Makes the Weather Sandstorm for 20 sec. All but Rock and Earth lose 2% every 2 sec",
+"20秒内将天气变为沙暴。岩石与地面以外每2秒损失2%"
+],
+"20秒間、天候を雪にする。こおり以外は2秒ごとに2%けずられる": [
+"Makes the Weather Snow for 20 sec. All but Ice lose 2% every 2 sec",
+"20秒内将天气变为下雪。冰以外每2秒损失2%"
+],
+"8秒間、自分のHPを2秒ごとに4%使って、近くの相手を焼き続ける": [
+"For 8 sec, uses 4% of own HP every 2 sec to keep burning nearby foes",
+"8秒内每2秒消耗自身4%的HP，持续灼烧附近的对手"
+],
+"8秒間、自分のHPを2秒ごとに4%使って、近くの相手にダメージを与え続ける": [
+"For 8s, spends 4% HP every 2 sec to keep damaging nearby foes",
+"8秒内每2秒消耗4%的HP，持续伤害附近的对手"
+],
+"土以外は2秒ごとに2%けずられる": [
+"Non-Earth types lose 2% every 2 sec",
+"土以外每2秒损失2%"
+],
+"水以外は2秒ごとに2%けずられる": [
+"Non-Water types lose 2% every 2 sec",
+"水以外每2秒损失2%"
+],
+"乗っている間2秒ごとに4ダメージ": [
+"4 damage every 2 sec while standing on it",
+"站在上面时每2秒受到4点伤害"
 ]
 }
