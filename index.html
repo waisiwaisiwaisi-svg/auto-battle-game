@@ -4538,7 +4538,7 @@ function renderStarter() {
    ===================================================================== */
 const CHEST_T = /fastchest/.test(location.search + location.hash) ? 1 / 12 : 1;   /* 本番の 時間。テストは URL の さいごに #fastchest を つけると 1/12（木5びょう〜でんせつ2ふん30びょう） */
 const CHESTS = {
-  wood:   { n: 'ブラインドボックス',     c: '#b07a40', d: '#6a4420', sec: 60 * CHEST_T, mon: 1, tm: 1, cr: [1, 1], rar: [80, 18, 2] },
+  wood:   { n: 'ブラインドボックス',     c: '#ff9a5a', d: '#a04a20', sec: 60 * CHEST_T, mon: 1, tm: 1, cr: [1, 1], rar: [80, 18, 2] },
   silver: { n: '銀の ブラインドボックス',     c: '#c8d0e0', d: '#6a7488', sec: 180 * CHEST_T, mon: 1, tm: 2, cr: [1, 2], rar: [70, 25, 5] },
   gold:   { n: '金の ブラインドボックス',     c: '#ffd166', d: '#a87a10', sec: 480 * CHEST_T, mon: 2, tm: 3, cr: [2, 3], rar: [55, 35, 10] },
   giant:  { n: 'ジャイアントボックス',     c: '#ff9a5a', d: '#a04a20', sec: 720 * CHEST_T, mon: 4, tm: 4, cr: [4, 6], rar: [60, 30, 10] },
