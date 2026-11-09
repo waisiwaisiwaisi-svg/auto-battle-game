@@ -14237,7 +14237,7 @@ function updPad() {
   const wr = $('cvWrap'); if (!wr || !wr.offsetWidth) return false;
   const u = VW / wr.offsetWidth, ht = wr.querySelector('.hudtop'), bp = $('bpanel'), land = document.documentElement.classList.contains('land');
   let t = ht ? (ht.offsetTop + ht.offsetHeight + 4) * u : 0;
-  { const tb = $('tutBox'), tOn = typeof TUT !== 'undefined' && TUT && B && B.cfg && B.cfg.tutorial && !(TS()[TUT.i] && TS()[TUT.i].fin); if (tb && !tb.hidden) { const r = tb.getBoundingClientRect(), w = wr.getBoundingClientRect(); if (r.height) { const v = (r.bottom - w.top + 6) * u; t = Math.max(t, v); if (tOn) TUT.padB = Math.max(TUT.padB || 0, v); } } else if (tOn && TUT.padB) t = Math.max(t, TUT.padB); }   // チュートリアル中は ふきだしが きえても おなじ あきを たもつ（カメラが きゅうに ひかない）   // チュートリアルの ふきだしの したを つかう（マギアと 技名を かくさない。よこ画面も）
+  { const tb = $('tutBox'); if (tb && !tb.hidden) { const r = tb.getBoundingClientRect(), w = wr.getBoundingClientRect(); if (r.height) t = Math.max(t, (r.bottom - w.top + 6) * u); } }   // チュートリアルの ふきだしの したを つかう（マギアと 技名を かくさない。よこ画面も）   // チュートリアルの ふきだしの したを つかう（マギアと 技名を かくさない。よこ画面も）
   // よこ画面：そうさは 左下（こうどう）と 右下（わざ）に わかれたので、下の ぶんだけ あける
   VPAD = land ? { l: 0, t, r: 0, b: bp ? Math.max(0, bp.offsetHeight - 6) * u : 0 } : { l: 0, t, r: 0, b: bp ? (bp.offsetHeight + 4) * u : 0 };
   return !!(bp && bp.offsetWidth);
