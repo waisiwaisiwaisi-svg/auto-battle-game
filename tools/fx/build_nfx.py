@@ -157,6 +157,7 @@ icons('F_small_3_9', [None, 'note', 'heart', 'key', 'check', 'target', 'rps_rock
 icons('F_digits_14', ['d0', 'd1', 'd2', 'd3', 'd4', 'd5', 'd6', 'd7', 'd8', 'd9', 'plus', 'minus', 'times', 'pct'])
 icons('F_type_attr_7', ['ty_fire', 'ty_water', 'ty_grass', 'ty_wind', 'ty_earth', 'ty_elec', 'ty_none'])   # 新タイプ用：まだ ゲームで つかわない
 icons('F_item_14', ['it_respec', 'it_reroll4', 'it_reroll1', 'it_retype', 'it_pick1', 'it_xtype', 'it_xdash', 'it_xproj', 'it_xmelee', 'it_xarea', 'it_xbeam', 'it_xsup', 'it_evup', 'it_ivup'])   # アイテム（ギアの シール：MAGIC GEAR ARENA 版）   # アイテム（シール）
+icons('F_item_boost_2', ['it_evup', 'it_ivup'])   # きょうかのもと（紫）・きたえのもと（赤）：F_item_14 の 2つを 上書き
 icons('F_type_race_7', ['ty_machine', 'ty_bug', 'ty_spirit', 'ty_dragon', 'ty_fairy', 'ty_demi', 'ty_beast'])
 # バトルの スタンプ（effects/ST/ST_<キー>.png・ことば なしの 絵）→ UIA の st_<キー>。ゲームの STAMPS の キーと そろえる
 for p in sorted(FX.glob('ST/ST_*.png')):
