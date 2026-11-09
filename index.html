@@ -6557,9 +6557,6 @@ for (const id in MOVES) { const m = MOVES[id]; if (m.k !== 'beam' || m.ohko || i
 MOVES['triple-axel'].rad *= 2;   // さんれんスピン：はんい 2ばい
 Object.assign(MOVES['fake-out'], { power: 40, pow: 8, sureHit: 1, flinchT: 3 });   // びっくりてうち：威力40・かならず あたる（あいてへ まがって つっこむ・よけられない）・ひるみ 3びょう
 Object.assign(MOVES.pound, { wallSlam: 1 });   // はたく：ふきとばして かべに あてたら おなじ だけの ついかダメージ
-// 落ちる 技で ためが ながすぎて よけられて いた もの：ためを みじかく（あたる わりあいを ひばしら・ちみゃくのいかり なみに）
-const STRIKE_WIND = { geyser: .6, 'icicle-drop': .6, rockfall: .6, thunder: .6, 'thunder-fall': .6, poltergeist: .6 };
-for (const id in STRIKE_WIND) if (MOVES[id]) MOVES[id].wind = STRIKE_WIND[id];
 const gfxOf = (m, part) => { const g = m && GFX[m.fxid], k = g && g[part]; return k && plOk(k) ? k : null; };
 // 地面から 出る／はじける 専用の 絵（はんい r に あわせる）。かいたら true
 const RING_FX = new Set(['m_gentle_song', 'm_thorn_cage', 'g_ground_shock', 'g_grand_quake', 'g_dragon_roar', 'g_plasma_burst', 'k_sparkle_flash', 'k_venom_wave', 'k_hyper_voice', 'k_dark_pulse', 'k_charm_song', 'k_psy_cross']);   // わの 絵：あしもとを まんなかに、あたる はんいと おなじ 大きさで
@@ -7765,7 +7762,7 @@ function setStatus(f, s, by) {
 
 /* ---------- ダメージ ---------- */
 // わざの 種類ごとの ダメージ補正（当たりやすさの ちがいを ならす：当たりにくい ものは 少し つよく）
-const KIND_DMG = { proj: 1.3, beam: 1.3, swipe: 1.15, strike: .7, melee: .6, cone: 1.1, aoe: .94, multi: .95, dash: 1 };
+const KIND_DMG = {};   // 技の 種類ごとの 倍率は なくした（威力 ＝ 1発の つよさ。当たりやすさの ちがいは 威力そのもので つける）
 // あたりやすさの めやす（たくさん たたかわせて はかった 命中の わりあい）
 const KIND_HIT = { vault: '○', melee: '◎', strike: '○', multi: '○', swipe: '○', aoe: '△', cone: '△', beam: '△', dash: '△', proj: '△' };
 const shownPw = (m) => Math.round((m.power || (m.pow || 0) * 5) * (KIND_DMG[m.k] || 1));   // 見せる 威力：技の 種類の 倍率（KIND_DMG）こみ ＝ 1発の じっさいの つよさ（威力が ひくい 技の ほうが 1発 つよい ことが ないように）
