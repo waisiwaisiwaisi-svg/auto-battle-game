@@ -14658,5 +14658,29 @@
 "妖精型の技を使うとお花がさく。お花の近くにいるとお花1つにつき毎秒HPが0.5%回復（重なる）": [
 "Using Fairy-type moves makes a flower bloom. Each nearby flower restores 0.5% HP per second (stacks)",
 "使用妖精型招式会开出花朵。附近每有1朵花，每秒恢复0.5%HP（可叠加）"
+],
+"はねひろい": [
+"Feather Pickup",
+"拾羽"
+],
+"飛行型の技を使うと羽が落ちる。ひろうと次に使った技の待ち時間がすぐもどる": [
+"Using Flying-type moves drops a feather. Picking it up instantly resets the cooldown of the next move used",
+"使用飞行型招式会掉落羽毛。捡起后，下次使用的招式冷却立刻恢复"
+],
+"はね！": [
+"Feather!",
+"羽毛！"
+],
+"はねをひろった": [
+"Picked up a feather",
+"捡到了羽毛"
+],
+"⟦0⟧秒間、まわりの相手と、自分が置いた技・罠・床・はね・お花を自分へ引き寄せ続ける": [
+"For ⟦0⟧ sec, keeps pulling nearby foes and its own placed moves, traps, floors, feathers and flowers toward itself. A foe once caught is pulled even if it leaves the range",
+"⟦0⟧秒内，持续将周围的对手，以及自己放置的招式、陷阱、地面、羽毛和花朵吸向自己。一旦捕获的对手即使离开范围也会被吸引"
+],
+"⟦0⟧秒間、まわりの相手と、自分が置いた技・罠・床・はね・お花を自分へ引き寄せ続ける。一度とらえた相手は範囲の外へ出ても引き寄せる": [
+"For ⟦0⟧ sec, keeps pulling nearby foes and its own placed moves, traps, floors, feathers and flowers toward itself. A foe once caught is pulled even if it leaves the range",
+"⟦0⟧秒内，持续将周围的对手，以及自己放置的招式、陷阱、地面、羽毛和花朵吸向自己。一旦捕获的对手即使离开范围也会被吸引"
 ]
 }
