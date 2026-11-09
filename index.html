@@ -14436,6 +14436,14 @@ if (LANG !== 'ja') {
   document.documentElement.lang = LANG === 'en' ? 'en' : 'zh-CN';
 }
 const setLang = (v) => { try { localStorage.setItem('pma_lang', v); } catch (e) { } location.reload(); };
+// サイト版：あたらしい 版が でて いたら よみこみなおす（GitHub Pages は 古い ページを しばらく くばる）。PMA_SITE_VER は .github/workflows/pages.yml が つける
+(() => { const cur = window.PMA_SITE_VER; if (!cur || typeof fetch !== 'function') return;
+  const calm = () => { const t = $('scTitle'), h = $('scHub'); return (t && !t.hidden) || (h && !h.hidden && !document.querySelector('.askbg, #tutBox:not([hidden])') && !(B && B.mode && B.mode !== 'end')); };   // タイトルか ホーム（まども バトルも ない）だけ
+  const chk = () => fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || typeof j.v !== 'string' || !/^[0-9a-f]{7,12}$/.test(j.v) || j.v === cur || !calm()) return;
+    const k = 'pma_sitever_try'; try { if (sessionStorage.getItem(k) === j.v) return; sessionStorage.setItem(k, j.v); } catch (e) { }   // おなじ 版へは 1かいだけ（くばる がわが まだ ふるい ときに くりかえさない）
+    location.replace(location.pathname + '?v=' + j.v + location.hash); }).catch(() => { });
+  chk(); document.addEventListener('visibilitychange', () => { if (!document.hidden) chk(); }); })();
 // ====== ここまで I18N ======
 window.__game = {
   tut() { return TUT; }, get town() { return { TOWN, TOWN_B }; },
