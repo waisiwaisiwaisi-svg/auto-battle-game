@@ -14682,5 +14682,21 @@
 "⟦0⟧秒間、まわりの相手と、自分が置いた技・罠・床・はね・お花を自分へ引き寄せ続ける。一度とらえた相手は範囲の外へ出ても引き寄せる": [
 "For ⟦0⟧ sec, keeps pulling nearby foes and its own placed moves, traps, floors, feathers and flowers toward itself. A foe once caught is pulled even if it leaves the range",
 "⟦0⟧秒内，持续将周围的对手，以及自己放置的招式、陷阱、地面、羽毛和花朵吸向自己。一旦捕获的对手即使离开范围也会被吸引"
+],
+"追いかける風のかたまり。当たると8秒間、空を飛べなくなる": [
+"A homing ball of wind. On hit, the foe can't fly for 8 sec",
+"追踪的风团。命中后8秒内无法飞行"
+],
+"相手の場にいばらをまく（3回まで重なる）。交代で出てきた相手にダメージ。飛んでいる相手には効かない": [
+"Scatters thorns on the foe's side (stacks up to 3). Damages foes that switch in. No effect on flying foes",
+"在对手场地撒下荆棘（最多叠加3次）。对替换上场的对手造成伤害。对飞行中的对手无效"
+],
+"足元から炎がふき上がる。直前に攻撃を受けていると威力2倍": [
+"Flames burst up from the foe's feet. Power doubles if the user was just hit",
+"火焰从脚下喷出。如果刚受到攻击，威力翻倍"
+],
+"⟦0⟧秒間、まわり（ふつうの距離まで）の相手と、自分が置いた技・罠・床・はね・お花を自分へ引き寄せ続ける（動けるし技も使える）。一度とらえた相手は範囲の外へ出ても引き寄せる": [
+"For ⟦0⟧ sec, keeps pulling nearby foes (up to normal range) and its own placed moves, traps, floors, feathers and flowers toward itself (can still move and use moves). A foe once caught is pulled even if it leaves the range",
+"⟦0⟧秒内，持续将周围（普通距离内）的对手，以及自己放置的招式、陷阱、地面、羽毛和花朵吸向自己（可以移动和使用招式）。一旦捕获的对手即使离开范围也会被吸引"
 ]
 }
