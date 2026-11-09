@@ -4592,7 +4592,7 @@ function renderStarter() {
 /* =====================================================================
    ブラインドボックス（クラッシュ・ロワイヤル式：勝つと ときどき もらえる／4スロット／1つずつ 時間で あく／ジェムで すぐ あく）
    ===================================================================== */
-const CHEST_T = /fastchest/.test(location.search + location.hash) ? 1 / 12 : 1;   /* 本番の 時間。テストは URL の さいごに #fastchest を つけると 1/12（木5びょう〜でんせつ2ふん30びょう） */
+const CHEST_T = !window.PMA_DIST && /fastchest/.test(location.search + location.hash) ? 1 / 12 : 1;   /* 本番の 時間。テストは URL の さいごに #fastchest を つけると 1/12（木5びょう〜でんせつ2ふん30びょう） */
 const CHESTS = {
   wood:   { n: 'ブラインドボックス',     c: '#ff9a5a', d: '#a04a20', sec: 60 * CHEST_T, mon: 1, tm: 1, cr: [1, 1], rar: [80, 18, 2] },
   silver: { n: '銀の ブラインドボックス',     c: '#c8d0e0', d: '#6a7488', sec: 180 * CHEST_T, mon: 1, tm: 2, cr: [1, 2], rar: [70, 25, 5] },
@@ -4934,7 +4934,8 @@ document.addEventListener('pointerdown', (ev) => { const b = ev.target.closest &
 
 /* ---------- ワザステッカー：もっている わざを 好きな マギアに おぼえさせる ---------- */
 // テスト用：せっていの「ワザステッカー つかいほうだい」で すべての ワザステッカーが へらずに つかえる
-const tmFree = () => !!S.tmFree;
+const DEV_UI = !window.PMA_DIST;   // 配信版（サイト・アプリ：app/scripts/build-web.mjs が PMA_DIST を つける）では テスト・調整の 項目を 出さない
+const tmFree = () => DEV_UI && !!S.tmFree;
 let DFT_ON = false;   // ドラフトバトルの 訓練中：訓練の がめんは ドラフト用の マギア・ステッカーを つかう
 const tmSrc = () => DFT_ON && S.draft && S.draft.run ? S.draft.run.tms : (S.tms || {});
 const tmN = (id) => DFT_ON && S.draft && S.draft.run ? (tmSrc()[id] || 0) : tmFree() ? (MOVES[id] && TM_POOL().includes(id) ? 99 : 0) : ((S.tms || {})[id] || 0);
@@ -13455,9 +13456,9 @@ $('btnOpt').onclick = () => {
     <label class="optrow">BGM <input type="range" min="0" max="1" step="0.05" id="oMusic"></label>
     <label class="optrow">効果音<input type="range" min="0" max="1" step="0.05" id="oSfx"></label>
     <label class="optrow">音を消す<input type="checkbox" id="oMute"></label>
-    <label class="optrow">テスト：ワザステッカー使い放題<input type="checkbox" id="oTmFree"></label>
+    ${DEV_UI ? `    <label class="optrow">テスト：ワザステッカー使い放題<input type="checkbox" id="oTmFree"></label>
     <div class="optrow" style="flex-wrap:wrap;row-gap:6px"><span>テスト：チュートリアル</span><span style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-left:auto"><button class="btn sub" id="oTutB" style="font-size:12px;padding:6px 10px">バトル</button><button class="btn sub" id="oTutT" style="font-size:12px;padding:6px 10px">訓練</button><button class="btn sub" id="oTutA" style="font-size:12px;padding:6px 10px">初めから</button><button class="btn sub" id="oTutR" style="font-size:12px;padding:6px 10px">初めての戦い</button></span></div>
-    <div class="optrow"><span></span><button class="btn sub" id="oSeAdj" style="font-size:12px;padding:6px 12px">効果音を一つずつ調整</button></div>
+    <div class="optrow"><span></span><button class="btn sub" id="oSeAdj" style="font-size:12px;padding:6px 12px">効果音を一つずつ調整</button></div>` : ''}
     
     ${!window.PMA_NAME ? `<div class="optrow">名前<span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">変える</button></span></div>` : ''}
     ${window.PMA_NAME ? `<label class="optrow">名前（オンライン）<span style="display:flex;gap:6px"><input type="text" id="oName" maxlength="12" style="width:9em;font:inherit;font-size:14px;padding:4px 6px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"><button class="btn sub" id="oNameSave" style="padding:4px 10px;font-size:12px">決める</button></span></label>` : ''}
@@ -13474,17 +13475,17 @@ $('btnOpt').onclick = () => {
     bg.querySelector('#oWipe').onclick = async () => { if (!(await ask('ランキング・チーム・名前・データのバックアップなど、サーバーにあるあなたのデータを全部消しますか？（このスマホのセーブデータは残ります。復活コードは使えなくなります）', '消す', 'やめる'))) return; if (BK_T) { clearTimeout(BK_T); BK_T = 0; } await window.PMA_NAME.wipe().catch(() => { }); BKDB = null; if (S) { delete S.bk; S.bkOff = 1; save(); } RANKDB = null; RANKDB_FAIL = 0;   /* bkOff：じぶんで バックアップを ひらく まで あげない（けした すぐ あとに あたらしく つくらない） */ NET.room = null; GUILD.me = null; await ask('消しました。次にオンラインを使うと新しく始まります。', 'OK', null); };
   }
   m.value = SND.opt.music; x.value = SND.opt.sfx; u.checked = SND.opt.mute;
-  { const t = bg.querySelector('#oTmFree'); t.checked = !!S.tmFree; t.onchange = () => { S.tmFree = t.checked; save(); renderHub(); }; }
-  bg.querySelector('#oTutB').onclick = () => { bg.remove(); startTutorial(); };   // テスト：いつでも チュートリアルを たしかめる
-  bg.querySelector('#oTutT').onclick = () => { bg.remove(); trainTutorial(() => renderHub()); };
-  bg.querySelector('#oTutA').onclick = () => { bg.remove(); onbTest(); };
-  bg.querySelector('#oTutR').onclick = () => { bg.remove(); battleGo('rival', 1); };   // テスト：はじめての戦い（初回の 会話つき）
+  if (DEV_UI) { const t = bg.querySelector('#oTmFree'); t.checked = !!S.tmFree; t.onchange = () => { S.tmFree = t.checked; save(); renderHub(); }; }
+  if (DEV_UI) bg.querySelector('#oTutB').onclick = () => { bg.remove(); startTutorial(); };   // テスト：いつでも チュートリアルを たしかめる
+  if (DEV_UI) bg.querySelector('#oTutT').onclick = () => { bg.remove(); trainTutorial(() => renderHub()); };
+  if (DEV_UI) bg.querySelector('#oTutA').onclick = () => { bg.remove(); onbTest(); };
+  if (DEV_UI) bg.querySelector('#oTutR').onclick = () => { bg.remove(); battleGo('rival', 1); };   // テスト：はじめての戦い（初回の 会話つき）
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
   
   const LK = bg.querySelector('#oLooks');
   const drawLooks = () => lookGrid(LK);
   if (S) drawLooks(); else LK.previousElementSibling.hidden = true;
-  bg.querySelector('#oSeAdj').onclick = () => seAdjust();
+  if (DEV_UI) bg.querySelector('#oSeAdj').onclick = () => seAdjust();
   bg.querySelector('#oHelp').onclick = () => { bg.remove(); $('btnHelp').click(); };
   bg.querySelector('#oClose').onclick = () => bg.remove();
   bg.querySelector('#oReset').onclick = async () => { bg.remove(); if (!(await ask('データを初期化して初めから遊びますか？\n今のセーブデータは消えて元にもどせません。', '初期化', 'やめる'))) return; SAVE_GEN++; try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; renderTitle(); };

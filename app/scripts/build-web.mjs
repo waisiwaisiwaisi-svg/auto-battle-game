@@ -42,7 +42,8 @@ if (!process.env.PMA_DEBUG) {
   html = html.replace(/\r?\nwindow\.__game = \{[\s\S]*?\r?\n\};\r?\n/, '\n');   // Windows（CRLF）でも
   if (html.length === n0) throw new Error('window.__game が みつかりません（build-web.mjs を なおして）');
 }
-const inject = '<script src="firebase-config.js"></script><script src="backend.js"></script>';
+// 配信版の しるし：設定の テスト・調整の 項目を 出さない（PMA_DEBUG=1 の ときは 出す）
+const inject = (process.env.PMA_DEBUG ? '' : '<script>window.PMA_DIST = true;</script>') + '<script src="firebase-config.js"></script><script src="backend.js"></script>';
 if (!html.includes('</title>')) throw new Error('index.html に <title> が ありません');
 html = html.replace('</title>', '</title>\n' + inject);
 fs.writeFileSync(path.join(www, 'index.html'), html);
