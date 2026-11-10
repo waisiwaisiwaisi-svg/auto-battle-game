@@ -4062,7 +4062,7 @@ const STG = (() => { if (typeof STAGE === 'undefined') return null; const L = (u
 const imgOk = (im) => im && im.complete && im.naturalWidth > 0;
 // ステージの サムネ（えらぶ がめん）：床＋枠＋旗＋置きもの を ちいさく かさねて つくる
 function stageThumbs() { if (!STG) return; const all_ = [STG.frame, ...Object.values(STG.floors), ...Object.values(STG.banners), ...Object.values(STG.props).flat().map(p => p.img)];
-  if (all_.some(im => !imgOk(im))) { setTimeout(stageThumbs, 300); return; }
+  if (all_.some(im => im && im.complete === false)) { setTimeout(stageThumbs, 300); return; }   // よみこみ中だけ まつ（よみこめなかった 絵が あっても ほかの サムネは つくる）
   for (const k in ARENAS) if (STG.floors[k]) { const c = document.createElement('canvas'); c.width = 362; c.height = 272; const g = c.getContext('2d'); g.scale(362 / ARENAS[k].W, 272 / ARENAS[k].H); stageComposite(k, g, ARENAS[k].W, ARENAS[k].H, true); try { ARENAS[k].img = c.toDataURL('image/jpeg', .82); } catch (e) { ARENAS[k].img = STAGE.floors[k]; }   /* ファイルを じかに ひらいた とき（file://）は 床の 絵で */ } }
 setTimeout(stageThumbs, 0);
 // 床＋枠＋旗（とまった 絵）を 1まいに：ステージの そとの しきつめ・サムネに つかう
