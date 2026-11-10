@@ -14710,5 +14710,153 @@
 "威力40以下の攻撃技の待ち時間が20%短い": [
 "Attack moves with 40 power or less have 20% shorter cooldowns",
 "威力40以下的攻击招式冷却时间缩短20%"
+],
+"相手のHPが減っているほど強い（最大3倍）。倒すとCDがすぐ戻る": [
+"Stronger the lower the foe's HP (up to 3x). A KO resets the CD",
+"对手HP越少越强（最多3倍）。打倒对手后CD立即恢复"
+],
+"速い魔法の弾。当たると他の技のCDが1.5秒縮む": [
+"A fast magic ball. On hit, other moves' CDs shrink by 1.5 sec",
+"快速的魔法弹。命中后其他招式的CD缩短1.5秒"
+],
+"10秒間、2秒ごとに相手を撃つミニほうだいを置く（さわると壊れる・3つまで）。5秒ごとに1回分たまり（最大3回）、CDはない": [
+"Places a mini turret that shoots the foe every 2 sec for 10 sec (breaks on touch, up to 3). Gains 1 charge every 5 sec (max 3), no CD",
+"放置10秒内每2秒射击对手的迷你炮台（触碰会坏、最多3个）。每5秒积攒1次（最多3次），没有CD"
+],
+"⟦0⟧・⟦1⟧・CD⟦2⟧秒": [
+"⟦0⟧, ⟦1⟧, CD ⟦2⟧s",
+"⟦0⟧、⟦1⟧、CD⟦2⟧秒"
+],
+"飛行型の技を使うと羽が落ちる。ひろうと次に使った技のCDがすぐもどる": [
+"Using Flying-type moves drops a feather. Picking it up instantly resets the CD of the next move used",
+"使用飞行型招式会掉落羽毛。捡起后，下次使用的招式CD立刻恢复"
+],
+"急所に当たると1戦に1回だけ6秒スーパーアーマーになりひるまない。その間技のCDが30%早く減る": [
+"Once per battle, taking a critical hit grants 6 seconds of super armor (no flinching). Meanwhile, CDs recover 30% faster",
+"每场1次，受到会心一击时获得6秒霸体，不会畏缩。期间招式CD恢复速度加快30%"
+],
+"守る技のCDが20%短い": [
+"Defensive moves have 20% shorter CDs",
+"防守类招式CD缩短20%"
+],
+"威力40以下の攻撃技のCDが20%短い": [
+"Attack moves with 40 power or less have 20% shorter CDs",
+"威力40以下的攻击招式CD缩短20%"
+],
+"CD-⟦0⟧秒": [
+"CD -⟦0⟧s",
+"CD -⟦0⟧秒"
+],
+"CDリセット！": [
+"CD reset!",
+"CD重置！"
+],
+"倒すとCDがすぐ戻る": [
+"CD resets on KO",
+"打倒对手后CD立刻恢复"
+],
+"当たると他の技のCDが⟦0⟧秒縮む": [
+"On hit, other moves' CDs drop by ⟦0⟧s",
+"命中后其他招式的CD缩短⟦0⟧秒"
+],
+"10秒間、相手を2秒ごとに自動で撃つミニほうだいを置く（相手がさわると壊れる・3つまで）。使える回数は5秒ごとに1回たまり（最大3回）、CDはない": [
+"Places a mini turret that auto-shoots the foe every 2s for 10s (breaks if touched, max 3). Gains 1 use every 5s (max 3), no CD",
+"放置10秒内每2秒自动射击对手的迷你炮台（对手碰到会坏，最多3个）。每5秒积累1次使用次数（最多3次），没有CD"
+],
+"がその技のCDになる。強い技ほど長く待つので、どれをいつ出すかがかんじん。": [
+" go on that move's CD. Stronger moves wait longer, so what you use and when really matters.",
+"都会进入该招式的CD。越强的招式CD越长，所以何时用哪招很关键。"
+],
+"今はCD（あと⟦0⟧秒）": [
+"Cooling down (⟦0⟧s left)",
+"CD中（还剩⟦0⟧秒）"
+],
+"⟦0⟧秒以内にもう1回撃てる（使い切るか時間切れでCD）": [
+"Can fire again within ⟦0⟧ sec (CD starts when used up or time runs out)",
+"⟦0⟧秒内可再发射1次（用完或超时后进入CD）"
+],
+"⟦0⟧回続けて撃てる（使い切るとCD）": [
+"Can fire ⟦0⟧ times in a row (CD after using them all)",
+"可连续发射⟦0⟧次（用完后进入CD）"
+],
+"・CD": [
+", CD",
+"・CD"
+],
+"ヘッド サトリ": [
+"Crew Head Satori",
+"团长 Satori"
+],
+"ヘッド ヨミ": [
+"Crew Head Yomi",
+"团长 Yomi"
+],
+"キングエイト ハヤト": [
+"King Eight Hayato",
+"王者八人 Hayato"
+],
+"キングエイト シオリ": [
+"King Eight Shiori",
+"王者八人 Shiori"
+],
+"キングエイト アカリ": [
+"King Eight Akari",
+"王者八人 Akari"
+],
+"キングエイト ガイ": [
+"King Eight Gai",
+"王者八人 Gai"
+],
+"キングエイト ツバキ": [
+"King Eight Tsubaki",
+"王者八人 Tsubaki"
+],
+"キングエイト カゲミ": [
+"King Eight Kagemi",
+"王者八人 Kagemi"
+],
+"キングエイト ソラ": [
+"King Eight Sora",
+"王者八人 Sora"
+],
+"かげの中から、あなたをえらんだの。": [
+"From within the shadows, I chose you.",
+"我从阴影之中选中了你。"
+],
+"風に乗って、いちばん高いところまで！": [
+"Riding the wind, all the way to the top!",
+"乘着风，飞到最高处！"
+],
+"先読み（予知と能力アップ）": [
+"Foresight (future attacks and stat boosts)",
+"预判（预知与能力提升）"
+],
+"はなれて撃つ（ふつうの弾と状態異常）": [
+"Shoot from afar (plain shots and status)",
+"远距离射击（普通弹与异常状态）"
+],
+"レジェンド入り⟦0⟧回・タグ ⟦1⟧/⟦2⟧": [
+"Legend ×⟦0⟧, Tags ⟦1⟧/⟦2⟧",
+"传奇⟦0⟧次、标签 ⟦1⟧/⟦2⟧"
+],
+"タグが⟦0⟧個そろった！キングバトルへ行こう！": [
+"All ⟦0⟧ Tags! On to the King Battle!",
+"集齐了⟦0⟧枚标签！前往王者之战吧！"
+],
+"タグを⟦0⟧個集めるとちょうせんできる": [
+"Collect ⟦0⟧ Tags to challenge",
+"集齐⟦0⟧枚标签即可挑战"
+],
+"キングエイト 8人に勝ちぬけ！": [
+"Beat all of the King Eight!",
+"连胜王者八人！"
+],
+"タグを": [
+"Collect ",
+"收集"
+],
+"個集めると開く": [
+" Tags to open",
+" 个标签后开放"
 ]
 }

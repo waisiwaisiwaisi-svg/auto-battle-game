@@ -30,7 +30,7 @@ def add(key, name, ms, **kw):
     p = f(name); out[key] = sheet(p, nf(p), ms, **kw)
 
 ART = {'ground': 'earth'}   # 新タイプ：土は 土の 絵（earth）。機械・亜人・妖精・けもの も ふえた
-for t in TYPES + ['machine', 'demi', 'fairy', 'beast']:
+for t in TYPES + ['machine', 'demi', 'fairy', 'beast', 'light', 'dark', 'flying']:
     a = ART.get(t, t)
     add('p_' + t, 'A_shot_' + a, 100)            # とぶ たま（みぎむき）
     add('hit_' + t, 'A_hit_' + a, 70)            # あたった しゅんかん
@@ -169,6 +169,7 @@ icons('F_type_attr_7', ['ty_fire', 'ty_water', 'ty_grass', 'ty_wind', 'ty_earth'
 icons('F_item_14', ['it_respec', 'it_reroll4', 'it_reroll1', 'it_retype', 'it_pick1', 'it_xtype', 'it_xdash', 'it_xproj', 'it_xmelee', 'it_xarea', 'it_xbeam', 'it_xsup', 'it_evup', 'it_ivup'])   # アイテム（ギアの シール：MAGIC GEAR ARENA 版）   # アイテム（シール）
 icons('F_item_boost_2', ['it_evup', 'it_ivup'])   # きょうかのもと（紫）・きたえのもと（赤）：F_item_14 の 2つを 上書き
 icons('F_type_race_7', ['ty_machine', 'ty_bug', 'ty_spirit', 'ty_dragon', 'ty_fairy', 'ty_demi', 'ty_beast'])
+icons('F_type_new_3', ['ty_light', 'ty_dark', 'ty_flying'])   # 光・闇（属性）・飛行型（種族）
 # バトルの スタンプ（effects/ST/ST_<キー>.png・ことば なしの 絵）→ UIA の st_<キー>。ゲームの STAMPS の キーと そろえる
 for p in sorted(FX.glob('ST/ST_*.png')):
     if p.name.endswith('_x4.png'): continue
