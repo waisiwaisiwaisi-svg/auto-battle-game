@@ -4274,10 +4274,11 @@ const SND = (() => {   // おとは Math.random（たたかいの らんすう�
     return prep(S_);
   }
   const hzToMidi = (n) => { const m = /^([A-G]#?)(-?\d)$/.exec(n); return NN.indexOf(m[1]) + (+m[2] + 1) * 12; };
-  const songOf = (name) => { if (!SONGS[name] && /^st_/.test(name)) { const [, k, b] = /^st_(\w+?)(_boss)?$/.exec(name); if (STAGE_MUSIC[k]) SONGS[name] = compose(STAGE_MUSIC[k], !!b); } return SONGS[name] || null; };
+  const bgmK = (k) => AUDIO_BGM[k] || STAGE_MUSIC[k] || !STAGE_X[k] ? k : STAGE_X[k][0];   // きょくの ない ステージ（光・闇・ひこう）は もとに した ステージの きょく
+  const songOf = (name) => { if (!SONGS[name] && /^st_/.test(name)) { const [, k0, b] = /^st_(\w+?)(_boss)?$/.exec(name), k = bgmK(k0); if (STAGE_MUSIC[k]) SONGS[name] = compose(STAGE_MUSIC[k], !!b); } return SONGS[name] || null; };
   function parseDrum(str) { const ev = []; let t = 0; for (const tok of str.trim().split(/\s+/)) { const [n, l] = tok.split(':'); ev.push({ t, d: n }); t += +l || 1; } return { ev, len: t }; }
   // ろくおんした きょく：ステージごと（ボスでも おなじ きょくを ながしつづける）
-  const audioKey = (name) => { const m = /^st_(\w+?)(_boss)?$/.exec(name || ''), k = m ? m[1] : name; return k && AUDIO_BGM[k] && !aBad[k] ? k : null; };   // ステージ（st_○○）と ホーム（hub）・かち（win）   // よみこめなかった きょくは でんしおんで
+  const audioKey = (name) => { const m = /^st_(\w+?)(_boss)?$/.exec(name || ''), k = m ? bgmK(m[1]) : name; return k && AUDIO_BGM[k] && !aBad[k] ? k : null; };   // ステージ（st_○○）と ホーム（hub）・かち（win）   // よみこめなかった きょくは でんしおんで
   async function loadAudio(k) {
     if (aBuf[k]) return aBuf[k];
     const A = AUDIO_BGM[k], resp = await fetch(A.file); if (!resp.ok) throw new Error('bgm ' + resp.status);
@@ -8079,7 +8080,7 @@ function startDodge(f, dirOverride) {
   }
   f.cur = null; if (!f.v.rampage) f.queued = null;
   f.state = 'dodge'; f.stT = .22; f.dvx = DM.cos(dir) * 250 * K; f.dvy = DM.sin(dir) * 250 * K;
-  f.inv = .3; f.dodgeCd = f.side === 0 ? .9 : 1.4; f.ghostT = 0;
+  f.inv = .3; f.dodgeCd = 1; f.ghostT = 0;
 }
 
 /* ---------- AI ---------- */
