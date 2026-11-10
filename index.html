@@ -4053,7 +4053,7 @@ function stageLayout(k, props) {
 function flipImg(im) { const c = document.createElement('canvas'); c.complete = false; c.naturalWidth = 0;
   const go = () => { c.width = im.naturalWidth; c.height = im.naturalHeight; const q = c.getContext('2d'); q.translate(c.width, 0); q.scale(-1, 1); q.drawImage(im, 0, 0); c.complete = true; c.naturalWidth = c.width; c.dispatchEvent(new Event('load')); };
   if (im.complete && im.naturalWidth) go(); else im.addEventListener('load', go, { once: true }); return c; }
-const STG = (() => { if (typeof STAGE === 'undefined') return null; const L = (u) => { const im = new Image(); im.src = u; return im; };
+const STG = (() => { if (typeof STAGE === 'undefined') return null; const L = (u) => { const im = new Image(); let n = 0; im.onerror = () => { if (n++ < 2) setTimeout(() => { im.src = u + (u.includes('?') ? '&' : '?') + 'r=' + n; }, 1500 * n); }; im.src = u; return im; };   // サーバーが いっとき こたえない（503 など）ときは 2かいまで よみなおす
   const o = { frame: L(STAGE.frame), crowd: L(STAGE.crowd.src), floors: {}, banners: {}, props: {} };
   for (const k in STAGE.floors) o.floors[k] = L(STAGE.floors[k]);
   for (const k in STAGE.banners) o.banners[k] = L(STAGE.banners[k]);
