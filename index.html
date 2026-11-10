@@ -13880,7 +13880,7 @@ function startJourney(gi) {
   });
 }
 // ビッグフォーは とくいタイプ。会場は その タイプの ステージ、キングは キングの ステージ
-const LEAGUE_STAGE = ['ice', 'poison', 'fighting', 'grass', 'fighting', 'poison', 'wind', null];   // さいごの キングは キングの ステージ   // ツバキ（亜人）は かくとうの ステージ
+const LEAGUE_STAGE = ['machine', 'bug', 'fairy', 'beast', 'fighting', 'ghost', 'wind', null];   // 種族の ステージ（人型・飛行型は まだ ない：かくとう・かぜで かわり）。さいごの キングは キングの ステージ   // ツバキ（亜人）は かくとうの ステージ
 const leagueStage = (k) => k >= LEAGUE.length - 1 ? 'champion' : LEAGUE_STAGE[k] || (ARENAS[LEAGUE[k][3]] ? LEAGUE[k][3] : FIELDS[k % FIELDS.length]);
 function startLeague() {
   const J = jr(); if (jrB(J) < GYMS.length) return;
