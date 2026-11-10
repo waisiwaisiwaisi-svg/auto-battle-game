@@ -3635,7 +3635,7 @@ function renderRoom() {
 }
 $('btnRmBack').onclick = () => $('tabHome').click();
 // したの メニュー：バトル・メニュー
-$('tabBattle').onclick = () => { const tp = $('townPop'); if (tp.parentNode !== $('app')) $('app').appendChild(tp); tp.style.zIndex = 95; isleMenu('バトル', [['オンライン対戦', 'btnRank'], ['フリー対戦', 'btnCup'], ['ダブル対戦', 'btnDbl'], ['フレンド対戦', 'btnOnline']]); };   // いまの がめんの うえに ひらく（ホームへ もどらない）
+$('tabBattle').onclick = () => { const tp = $('townPop'); if (tp.parentNode !== $('app')) $('app').appendChild(tp); tp.style.zIndex = 95; isleMenu('バトル', [['オンライン対戦', 'btnRank'], ['フリー対戦', 'btnCup'], ...(DEV_UI ? [['ダブル対戦', 'btnDbl']] : []), ['フレンド対戦', 'btnOnline']]); };   // いまの がめんの うえに ひらく（ホームへ もどらない）
 $('tabMenu').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('メニュー', [['ショップ', 'btnShop'], ['訓練', 'btnTrainTab'], ['コレクション（図鑑）', 'btnDex'], ['ランキング', 'hMe'], ['遊び方', 'btnHelp'], ['タイプ相性', 'btnChart'], ['音オン／オフ', 'hubSnd'], ['画面の向き', 'hubRot'], ['設定', 'btnOpt']]), 0); };
 function hubTown(fk, base) {
   const W = 320, H = 212, z = 3, key = fk; if (HUBTOWN[key] && HUBTOWN[key].ok) return HUBTOWN[key];
@@ -13656,7 +13656,7 @@ $('btnHelp').onclick = () => {
 };
 $('btnWild').onclick = startWild;
 $('btnCup').onclick = () => startFree();
-$('btnDbl').onclick = () => { SND.se('ok'); const n = S.party.filter(m => m).length; if (n < 2) { say0('ダブル対戦は2体以上必要です'); return; } battleGo('dbl'); };
+$('btnDbl').onclick = () => { if (!DEV_UI) return; SND.se('ok'); const n = S.party.filter(m => m).length; if (n < 2) { say0('ダブル対戦は2体以上必要です'); return; } battleGo('dbl'); };
 $('btnJourney').onclick = renderJourney;
 $('btnArcade').onclick = renderArcade;
 $('btnAcBack').onclick = () => renderHub();
