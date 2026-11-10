@@ -5700,6 +5700,7 @@ function itemMenu(m) {
     box.querySelectorAll('.it .btn').forEach(b => b.onclick = async () => {
       const k = b.dataset.k;
       if (k === 'respec') { if (!evUsed(m)) { say0('まだポイントをふっていません'); return; } if (!(await ask(`${ITEMS[k].n}を使って、${sp.n}の強化ポイントをふりなおしますか？`))) return; act('respec', m.uid).then(r => { if (r !== 'ok') return; m = monU(m.uid) || m; SND.se('heal'); bg.remove(); openBoost(m); }); return; }
+      if (k === 'ivup' || k === 'evup') { bg.remove(); openBoost(m); return; }   // きたえのもと・きょうかのもと：強化の がめんで つかう（技を えらぶ がめんに しない）
       if (k === 'reroll4') { if (!(await ask(`${ITEMS[k].n}を使って、${sp.n}の技を4つ全部はりかえますか？`))) return; act('reroll4', m.uid).then(r => { if (!r || !r.after) return; m = monU(m.uid) || m; SND.se('up'); say0(`${sp.n}は新しく${r.after.map(id => MOVES[id].n).join('・')}を覚えた！`); draw(); }); return; }
       draw(k);
     });
