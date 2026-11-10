@@ -23,7 +23,7 @@ const tr = (() => {
   const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k in I18N_DICT) {
     const v = I18N_DICT[k][LI]; if (!v) continue;
-    if (k.includes('⟦')) { if (/⟧⟦/.test(k) || (k.replace(/⟦\d+⟧/g, '').trim().length < 3 && !/[\u4e00-\u9fff]/.test(k))) continue;   // ならんだ ⟦⟧（どこで わけるか きまらない）・きまった 文字が すくない ものは つかわない
+    if (k.includes('⟦')) { if (/⟧⟦/.test(k) || (k.replace(/⟦\d+⟧/g, '').trim().length < 3 && !/[\u4e00-\u9fff]/.test(k) && !/^(⟦\d+⟧(たい|こ|かい|まい|%で)|い\/ ⟦\d+⟧)$/.test(k))) continue;   // かずの ことば（3たい・5こ）は みじかくても つかう   // ならんだ ⟦⟧（どこで わけるか きまらない）・きまった 文字が すくない ものは つかわない
       const ps = k.split(/⟦(\d+)⟧/); let re = '^'; const ord = []; ps.forEach((p, i) => { if (i % 2) { re += '(.+?)'; ord.push(+p); } else re += esc(p); }); TPL.push({ re: new RegExp(re + '$', 's'), ord, out: v, dot: k.includes('・'), fx: k.replace(/⟦\d+⟧/g, '').length }); }
     else { EX.set(k, v); if (k.length >= 2) SUB.push([k, v]); }
   }
@@ -32,13 +32,17 @@ const tr = (() => {
   let NS = null; const NSET = () => NS || (NS = new Set(names().map(x => x[0])));
   let NAMES = null;   // マギア名・技名 → ローマ字（ながい じゅん）
   const names = () => { if (NAMES) return NAMES; const s = new Set(); try { for (const k in SPECIES) s.add(SPECIES[k].n); for (const k in MOVES) s.add(MOVES[k].n); } catch (e) { return []; } NAMES = [...s].filter(n => n && JPRE.test(n) && !EX.has(n)).sort((a, b) => b.length - a.length).map(n => [n, romaji(n)]); return NAMES; };
+  function tpl(c) { const dot = c.includes('・'); for (const t of TPL) { if (dot && !t.dot) continue; const m = t.re.exec(c); if (m) return t.out.replace(/⟦(\d+)⟧/g, (_, n) => { const j = t.ord.indexOf(+n); return j >= 0 ? tr1(m[j + 1]) : ''; }); } return null; }
+  const punct = (y) => LI ? y.replace(/。{2,}/g, '。') : y.replace(/([.!?])?。\s*/g, (_, p) => (p || '.') + ' ').replace(/、/g, ', ').replace(/：/g, ': ').replace(/ +$/, '');   // 英語：のこった「。、：」を ふつうの 記号に
   function core(c) {
     let r = EX.get(c); if (r !== undefined) return r;
     { const m = c.match(/^(相手の|野生の)?(.+?)の(.+?)([！!]?)$/); if (m && NSET().has(m[2]) && NSET().has(m[3])) { const pre = m[1] ? (m[1][0] === '相' ? (LI ? '对手的' : 'Foe ') : (LI ? '野生的' : 'Wild ')) : ''; return pre + (LI ? romaji(m[2]) + '的' + romaji(m[3]) : romaji(m[2]) + "'s " + romaji(m[3])) + m[4]; } }   // 「マギアの わざ」
-    const dot = c.includes('・');
-    for (const t of TPL) { if (dot && !t.dot) continue; const m = t.re.exec(c); if (m) return t.out.replace(/⟦(\d+)⟧/g, (_, n) => { const j = t.ord.indexOf(+n); return j >= 0 ? tr1(m[j + 1]) : ''; }); }
+    { const t = tpl(c); if (t != null) return t; }
     { const m = c.match(/^([^：]{1,8})：(.+)$/); if (m && EX.has(m[1] + '：')) return EX.get(m[1] + '：') + core(m[2].trim()); if (m && EX.has(m[1])) return EX.get(m[1]) + (LI ? '：' : ': ') + core(m[2].trim()); }   // 「みだし：なかみ」
-    if (c.includes('・')) return c.split('・').map(x => core(x.trim())).filter(x => x !== '').join(LI ? '、' : ', ');   // 「・」で ならべた ものは ひとつずつ
+    if (c.includes('・')) {   // 「・」で ならべた ものは ひとつずつ。ただし「・」を ふくむ 1つの 文（「右・左と2回振る」など）は つないだ まま 訳す（ながい ほうから）
+      const ps = c.split('・'), out = [];
+      for (let i = 0; i < ps.length;) { let j = ps.length, hit = null; for (; j > i + 1; j--) { const s2 = ps.slice(i, j).join('・').trim(), e = EX.get(s2); hit = e !== undefined ? e : tpl(s2); if (hit != null) break; } if (hit != null) { out.push(hit); i = j; } else { out.push(core(ps[i].trim())); i++; } }
+      return out.filter(x => x !== '').join(LI ? '、' : ', '); }
     if (MISS.size < 3000) MISS.add(c);   // 訳が ない 文（しらべる ため）
     r = c; for (const [n, ro] of names()) if (r.includes(n)) r = r.split(n).join(ro);
     if (!JPRE.test(r)) return r;
@@ -50,7 +54,7 @@ const tr = (() => {
     { const U = window.__noTr, k = s.trim(); if (U && U.size && U.has(k) && !EX.has(k) && !NSET().has(k)) return s; }   // 人が 書いた なまえ・チャットは そのまま（ゲームの ことば・マギア名・技名と おなじ ときは ふつうに 訳す）
     const hit = cache.get(s); if (hit !== undefined) return hit;
     const lead = s.match(/^\s*/)[0], tail = s.match(/\s*$/)[0], c = s.trim().replace(/[ \t　]+/g, ' ');
-    const r = lead + c.split('\n').map(x => core(x.trim())).join('\n') + tail;
+    const r = lead + c.split('\n').map(x => punct(core(x.trim()))).join('\n') + tail;
     if (cache.size > 8000) { cache.clear(); DONE.clear(); } cache.set(s, r); DONE.add(r); return r;
   }
   return tr1;
