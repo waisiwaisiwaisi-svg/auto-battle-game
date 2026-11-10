@@ -4407,13 +4407,13 @@
 "Pick any move of this Magia's type (Attribute or Race), even ones it normally can't learn (upgraded Same-Color Gear)",
 "只要是这只魔机属性（属性或种族）的招式，平时学不会的也能自由选择齿轮上（同色齿轮的升级版）"
 ],
-"⟦0⟧の技なら、タイプにかかわらず好きな技を選んで晴れる": [
-"Pick any ⟦0⟧ move, whatever its type",
-"只要是⟦0⟧的招式，不论属性都能自由选择贴上"
+"⟦0⟧の技なら、タイプにかかわらず好きな技を選んで貼れる": [
+"Pick any ⟦0⟧ move to stick on, regardless of type",
+"只要是⟦0⟧招式，不论属性都可任选贴上"
 ],
-"そのマギアが覚えられる⟦0⟧の技から、好きな技を選んで晴れる": [
-"Pick any ⟦0⟧ move this Magia can learn",
-"可以从这只魔机能学会的⟦0⟧招式中自由选择贴上"
+"そのマギアが覚えられる⟦0⟧の技から、好きな技を選んで貼れる": [
+"Pick any ⟦0⟧ move that Magia can learn and stick it on",
+"从该魔机能学会的⟦0⟧招式中任选一个贴上"
 ],
 "勇敢": [
 "Brave",
@@ -6937,7 +6937,7 @@
 ],
 "い/ ⟦0⟧": [
 " / ⟦0⟧",
-"名 / ⟦0⟧"
+"名/ ⟦0⟧"
 ],
 "メンバー（今週のポイント）": [
 "Members (this week's points)",
@@ -7752,8 +7752,8 @@
 "必定⟦0⟧"
 ],
 "⟦0⟧%で⟦1⟧": [
-"⟦0⟧%: ⟦1⟧",
-"⟦0⟧%几率⟦1⟧"
+"⟦0⟧% chance: ⟦1⟧",
+"⟦0⟧%几率：⟦1⟧"
 ],
 "威力⟦0⟧": [
 "Power ⟦0⟧",
@@ -11068,12 +11068,12 @@
 "自己的"
 ],
 "必ず": [
-"always ",
+"Always: ",
 "必定"
 ],
 "にする": [
-"",
-""
+" ",
+" "
 ],
 "⟦0⟧%で": [
 "⟦0⟧% chance: ",
@@ -11189,7 +11189,7 @@
 ],
 "⟦0⟧かい": [
 "⟦0⟧F",
-"第⟦0⟧层"
+"⟦0⟧层"
 ],
 "⟦0⟧かいクリア ⟦1⟧かい": [
 "⟦0⟧F cleared ×⟦1⟧",
@@ -11240,11 +11240,11 @@
 "只出现选中魔机能学会的。在训练画面放进招式栏即可学会"
 ],
 "⟦0⟧が覚えられる": [
-"⟦0⟧ can learn",
-"⟦0⟧可以学会"
+"Learnable by ⟦0⟧",
+"⟦0⟧可学会"
 ],
 "だれも覚えられない": [
-"No one can learn",
+"No one can learn it",
 "谁都学不会"
 ],
 "選べるステッカーがない": [
@@ -11348,8 +11348,8 @@
 "点击招式名可查看说明"
 ],
 "次の⟦0⟧回の相手": [
-"Next: floor ⟦0⟧ opponents",
-"下一层（第⟦0⟧层）的对手"
+"Next opponents (round ⟦0⟧)",
+"第⟦0⟧回的对手"
 ],
 "タワーやドラフトバトルにもちょうせんしよう": [
 "Try the Tower and Draft Battle too",
@@ -13980,7 +13980,7 @@
 "⟦0⟧秒内，持续将周围的对手，以及自己放置的招式、陷阱、地面、能量和花朵吸向自己。一旦捕获的对手即使离开范围也会被吸引"
 ],
 "かならず当たる": [
-"Always hits",
+"Never misses",
 "必定命中"
 ],
 "前足や手で相手をはたいて吹き飛ばす": [
@@ -14874,5 +14874,657 @@
 "キングエイト 8人とキングに勝ちぬけ！": [
 "Beat all of the King Eight and the King!",
 "连胜王者八人和王者！"
+],
+"⟦0⟧倍（不利）": [
+"×⟦0⟧ (Disadvantage)",
+"⟦0⟧倍（不利）"
+],
+"⟦0⟧倍（有利）": [
+"×⟦0⟧ (Advantage)",
+"⟦0⟧倍（有利）"
+],
+"⟦0⟧倍": [
+"×⟦0⟧",
+"⟦0⟧倍"
+],
+"⟦0⟧回クリア ⟦1⟧かい": [
+"Cleared ⟦0⟧ floors: ⟦1⟧×",
+"通关⟦0⟧层：⟦1⟧次"
+],
+"⟦0⟧%でひるませる": [
+"⟦0⟧% chance to flinch",
+"⟦0⟧%几率使对手畏缩"
+],
+"⟦0⟧秒間撃ち続ける": [
+"Keeps firing for ⟦0⟧s",
+"持续射击⟦0⟧秒"
+],
+"ひるませる（⟦0⟧秒）": [
+"Flinches (⟦0⟧s)",
+"使对手畏缩（⟦0⟧秒）"
+],
+"必ずひるませる（⟦0⟧秒）": [
+"Always flinches (⟦0⟧s)",
+"必定使对手畏缩（⟦0⟧秒）"
+],
+"場に出てから⟦0⟧回だけ使える": [
+"Only ⟦0⟧ use(s) after entering",
+"上场后只能使用⟦0⟧次"
+],
+"相手の足元に見えない罠を仕掛ける。踏むと⟦0⟧秒動けない": [
+"Sets a hidden trap at the foe's feet. Stepping on it freezes them for ⟦0⟧s",
+"在对手脚下设置看不见的陷阱。踩到后⟦0⟧秒无法移动"
+],
+"与えたダメージの⟦0⟧%を回復（回復は⟦1⟧戦⟦2⟧回まで）": [
+"Heals ⟦0⟧% of damage dealt (up to ⟦2⟧× per ⟦1⟧ battle)",
+"回复造成伤害的⟦0⟧%（每⟦1⟧场最多⟦2⟧次）"
+],
+"当てると相手の攻撃+⟦0⟧。もう一度当てると、時間とともに増えた能力を奪う": [
+"On hit, foe Atk +⟦0⟧. Hit again to steal the stats it gained over time",
+"命中后对手攻击+⟦0⟧。再次命中时，夺取其随时间增加的能力"
+],
+"右・左と⟦0⟧回振る": [
+"Swings right and left (⟦0⟧ hits)",
+"左右挥动⟦0⟧次"
+],
+"相手との間に壁を作る（⟦0⟧秒）。空から降る技・地割れは防げない。壊せるのは⟦1⟧の技だけ": [
+"Makes a wall between you and the foe (⟦0⟧s). Doesn't stop moves from above or fissures. Only ⟦1⟧ moves can break it",
+"在自己与对手之间筑起墙壁（⟦0⟧秒）。挡不住从天而降的招式和地裂。只有⟦1⟧属性的招式能打破"
+],
+"相手との間に壁を作る（⟦0⟧秒）。触れると⟦1⟧ダメージ。空から降る技・地割れは防げない。壊せるのは⟦2⟧の技だけ": [
+"Makes a wall between you and the foe (⟦0⟧s). Touching it deals ⟦1⟧ damage. Doesn't stop moves from above or fissures. Only ⟦2⟧ moves can break it",
+"在自己与对手之间筑起墙壁（⟦0⟧秒）。触碰会受到⟦1⟧点伤害。挡不住从天而降的招式和地裂。只有⟦2⟧属性的招式能打破"
+],
+"相手との間に壁を作る（⟦0⟧秒）。空から降る技・地割れは防げない": [
+"Makes a wall between you and the foe (⟦0⟧s). Doesn't stop moves from above or fissures",
+"在自己与对手之间筑起墙壁（⟦0⟧秒）。挡不住从天而降的招式和地裂"
+],
+"相手との間に壁を作る（⟦0⟧秒）。触れると⟦1⟧ダメージ。空から降る技・地割れは防げない": [
+"Makes a wall between you and the foe (⟦0⟧s). Touching it deals ⟦1⟧ damage. Doesn't stop moves from above or fissures",
+"在自己与对手之间筑起墙壁（⟦0⟧秒）。触碰会受到⟦1⟧点伤害。挡不住从天而降的招式和地裂"
+],
+"。触れると⟦0⟧ダメージ": [
+". Touching it deals ⟦0⟧ damage",
+"。触碰会受到⟦0⟧点伤害"
+],
+"飛び道具・ビームを跳ね返す": [
+"Reflects projectiles and beams",
+"反弹飞行道具和光束"
+],
+"体が透けて、⟦0⟧の技がすり抜ける": [
+"Its body turns see-through; ⟦0⟧ moves pass through it",
+"身体变得透明，⟦0⟧的招式会穿透过去"
+],
+"当たると⟦0⟧秒動けない（技は出せる）": [
+"On hit, the foe can't move for ⟦0⟧s (can still use moves)",
+"命中后对手⟦0⟧秒无法移动（仍可出招）"
+],
+"当たると⟦0⟧秒技が出せない（動ける）": [
+"On hit, the foe can't use moves for ⟦0⟧s (can still move)",
+"命中后对手⟦0⟧秒无法出招（仍可移动）"
+],
+"当たると⟦0⟧秒間、空を飛べなくなる（浮いている相手も地面に落ちる）": [
+"On hit, the foe can't fly for ⟦0⟧s (floating foes drop to the ground)",
+"命中后对手⟦0⟧秒内无法飞行（浮空的对手也会落地）"
+],
+"しるしの付いた相手には⟦0⟧倍（しるしは消える）": [
+"×⟦0⟧ against a marked foe (removes the mark)",
+"对带有标记的对手为⟦0⟧倍（标记会消失）"
+],
+"⟦0⟧回続けて攻撃（だんだん強くなる）": [
+"Attacks ⟦0⟧ times in a row (each hit gets stronger)",
+"连续攻击⟦0⟧次（越打越强）"
+],
+"相手の足元に⟦0⟧を作る（消えない）。⟦1⟧": [
+"Creates ⟦0⟧ at the foe's feet (permanent). ⟦1⟧",
+"在对手脚下制造⟦0⟧（不会消失）。⟦1⟧"
+],
+"足元に⟦0⟧を作る（消えない）。⟦1⟧": [
+"Creates ⟦0⟧ underfoot (permanent). ⟦1⟧",
+"在脚下制造⟦0⟧（不会消失）。⟦1⟧"
+],
+"相手の足元に予告を置き、⟦0⟧秒後に攻撃（その場からどけばよけられる）": [
+"Marks the foe's spot and strikes ⟦0⟧s later (move away to dodge)",
+"在对手脚下放置预告，⟦0⟧秒后攻击（离开原地即可躲开）"
+],
+"足元に予告を置き、⟦0⟧秒後に攻撃（その場からどけばよけられる）": [
+"Marks a spot and strikes ⟦0⟧s later (move away to dodge)",
+"在脚下放置预告，⟦0⟧秒后攻击（离开原地即可躲开）"
+],
+"当てるたびに積み重なり、⟦0⟧回で⟦1⟧": [
+"Builds up on each hit; at ⟦0⟧ stacks: ⟦1⟧",
+"每次命中都会累积，累积⟦0⟧次后：⟦1⟧"
+],
+"乗っている間⟦0⟧秒ごとに積み重なり、⟦1⟧回で⟦2⟧": [
+"Builds up every ⟦0⟧s while standing on it; at ⟦1⟧ stacks: ⟦2⟧",
+"站在上面时每⟦0⟧秒累积一次，累积⟦1⟧次后：⟦2⟧"
+],
+"⟦0⟧（たまるほど足が遅くなる）": [
+"⟦0⟧ (slows more as it builds)",
+"⟦0⟧（累积越多越慢）"
+],
+"⟦0⟧が変わる。+1で1.5倍・+2で2倍…最大+6（4倍）。下がると-1で2/3倍…最大-6（1/4倍）。交代すると元にもどる。": [
+"Changes ⟦0⟧. +1 = ×1.5, +2 = ×2 … up to +6 (×4). When lowered: -1 = ×2/3 … down to -6 (×1/4). Resets when switched out.",
+"改变⟦0⟧。+1为1.5倍、+2为2倍…最高+6（4倍）。降低时-1为2/3倍…最低-6（1/4倍）。交换后恢复原状。"
+],
+"・威力⟦0⟧": [
+", Power ⟦0⟧",
+"・威力⟦0⟧"
+],
+"👊近：👣遠に強い・🛹中に弱い": [
+"👊Near: strong vs 👣Far, weak vs 🛹Mid",
+"👊近：克制👣远、被🛹中克制"
+],
+"👣遠：🛹中に強い・👊近に弱い": [
+"👣Far: strong vs 🛹Mid, weak vs 👊Near",
+"👣远：克制🛹中、被👊近克制"
+],
+"🛹中：👊近に強い・👣遠に弱い": [
+"🛹Mid: strong vs 👊Near, weak vs 👣Far",
+"🛹中：克制👊近、被👣远克制"
+],
+"近：遠に強い・中に弱い": [
+"Near: strong vs Far, weak vs Mid",
+"近：克制远、被中克制"
+],
+"遠：中に強い・近に弱い": [
+"Far: strong vs Mid, weak vs Near",
+"远：克制中、被近克制"
+],
+"中：近に強い・遠に弱い": [
+"Mid: strong vs Near, weak vs Far",
+"中：克制近、被远克制"
+],
+"出場⟦0⟧番目 ⟦1⟧": [
+"Slot ⟦0⟧ · ⟦1⟧",
+"出场第⟦0⟧位 ⟦1⟧"
+],
+"ひかえ ⟦0⟧": [
+"Bench · ⟦0⟧",
+"替补 ⟦0⟧"
+],
+"預ける ⟦0⟧": [
+"Storage · ⟦0⟧",
+"寄存 ⟦0⟧"
+],
+"合計⟦0⟧ こたいち⟦1⟧/⟦2⟧ きょうか⟦3⟧/⟦4⟧": [
+"Total ⟦0⟧  IVs ⟦1⟧/⟦2⟧  Power Pts ⟦3⟧/⟦4⟧",
+"合计⟦0⟧ 个体值⟦1⟧/⟦2⟧ 强化⟦3⟧/⟦4⟧"
+],
+"合計⟦0⟧": [
+"Total ⟦0⟧",
+"合计⟦0⟧"
+],
+"きょうか": [
+"Power Pts",
+"强化"
+],
+"好きなマギアの個体値を全部+⟦0⟧（最大⟦1⟧）": [
+"All IVs of a chosen Magia +⟦0⟧ (max ⟦1⟧)",
+"所选魔机的个体值全部+⟦0⟧（最高⟦1⟧）"
+],
+"好きなマギアの強化ポイントを+⟦0⟧（どの種類にも使える）": [
+"+⟦0⟧ Power Points to a chosen Magia (works on any kind)",
+"所选魔机的强化点数+⟦0⟧（任何种类都可使用）"
+],
+"（最大⟦0⟧）": [
+" (max ⟦0⟧)",
+"（最高⟦0⟧）"
+],
+"（どの種類にも使える）": [
+" (works on any kind)",
+"（任何种类都可使用）"
+],
+"強化ポイントは戦うとたまる（出場して勝つと+1）。同じ種類のマギアを1体使うと+⟦0⟧、⟦1⟧で+⟦2⟧（最大⟦3⟧）。ポイントを好きな能力にふりわけて「確定する」で決まる（1つ⟦4⟧まで・1ポイントで+⟦5⟧）。": [
+"Power Points build up from battles (+1 for each win you play in). Using one Magia of the same kind gives +⟦0⟧; ⟦1⟧ gives +⟦2⟧ (max ⟦3⟧). Assign points to any stat and tap \"Confirm\" to lock them in (up to ⟦4⟧ per stat; 1 point = +⟦5⟧).",
+"强化点数通过战斗积累（出场并获胜+1）。使用1只同种魔机+⟦0⟧，⟦1⟧+⟦2⟧（最多⟦3⟧）。将点数分配给喜欢的能力，按「确定」后生效（每项最多⟦4⟧・1点+⟦5⟧）。"
+],
+"確定したポイントはもどせません（ふりわけギアでふりなおし）": [
+"Confirmed points can't be undone (reassign with a Reset Gear)",
+"已确定的点数无法撤回（可用重置齿轮重新分配）"
+],
+"確定したポイントはもどせません（": [
+"Confirmed points can't be undone (",
+"已确定的点数无法撤回（"
+],
+"ふりわけギアでふりなおし）": [
+"reassign with a Reset Gear)",
+"可用重置齿轮重新分配）"
+],
+"人形の能力": [
+"Dummy stats",
+"人偶的能力"
+],
+"置いた条件をタップすると、⟦0⟧にも変えられます。": [
+"Tap a placed condition to change it to ⟦0⟧.",
+"点击已放置的条件，也可以改为⟦0⟧。"
+],
+"⟦0⟧を受けたしゅんかんに自動で出る（条件はいらない）": [
+"Fires automatically the moment it takes ⟦0⟧ (no condition needed)",
+"受到⟦0⟧的瞬间自动发动（不需要条件）"
+],
+"⟦0⟧回目の前（ここの訓練はドラフト専用）": [
+"Before round ⟦0⟧ (this training is for the Draft only)",
+"第⟦0⟧回之前（此处的训练仅限选秀战）"
+],
+"⟦0⟧（先頭）で⟦1⟧の⟦2⟧体と⟦3⟧回（今の設定。保存前でもOK）。記録はこの子の分": [
+"⟦0⟧ (lead) vs. ⟦1⟧'s ⟦2⟧ Magia, ⟦3⟧ times (current settings; works before saving). Results are for this Magia.",
+"以⟦0⟧（首发）对战⟦1⟧的⟦2⟧只魔机⟦3⟧次（当前设定，保存前也可）。记录为此魔机的数据。"
+],
+"⟦0⟧は覚えられません（ワザステッカーがないか、このマギアは覚えられない技です）": [
+"Can't learn ⟦0⟧ (no Move Sticker, or this Magia can't learn it)",
+"无法学会⟦0⟧（没有招式贴纸，或此魔机学不会该招式）"
+],
+"⟦0⟧はおどろいてにげていった（とおぼえで野生はにげる）": [
+"⟦0⟧ got scared and ran away (Howl makes wild Magia flee)",
+"⟦0⟧受到惊吓逃走了（嚎叫会让野生魔机逃跑）"
+],
+"⟦0⟧がほかにいません（同じ種類を空き地・ブラインドボックスで集めよう）": [
+"You have no other ⟦0⟧ (collect more of the same kind in the Vacant lot or Blind Boxes)",
+"没有其他的⟦0⟧（去空地或盲盒收集同种魔机吧）"
+],
+"残り⟦0⟧。": [
+"⟦0⟧ left.",
+"剩余⟦0⟧。"
+],
+"今すぐ開けるには💎⟦0⟧ ジェムがいります（持っている：⟦1⟧）。": [
+"Opening now costs 💎⟦0⟧ gems (you have ⟦1⟧).",
+"立即打开需要💎⟦0⟧颗宝石（持有：⟦1⟧）。"
+],
+"もうもどってきません。": [
+"It won't come back.",
+"它不会再回来了。"
+],
+"使ったマギアはいなくなります。": [
+"The Magia you use will be gone.",
+"使用的魔机会消失。"
+],
+"⟦0⟧たいを使って⟦1⟧を強化しますか？（+⟦2⟧）": [
+"Use ⟦0⟧ Magia to power up ⟦1⟧? (+⟦2⟧)",
+"要使用⟦0⟧只魔机强化⟦1⟧吗？（+⟦2⟧）"
+],
+"⟦0⟧タグを手に入れた！": [
+"Got the ⟦0⟧ Tag!",
+"获得了⟦0⟧标签！"
+],
+"⟦0⟧・⟦1⟧が覚えられる": [
+"Learnable by ⟦0⟧, ⟦1⟧",
+"⟦0⟧、⟦1⟧可学会"
+],
+"⟦0⟧・⟦1⟧・⟦2⟧が覚えられる": [
+"Learnable by ⟦0⟧, ⟦1⟧, ⟦2⟧",
+"⟦0⟧、⟦1⟧、⟦2⟧可学会"
+],
+"⟦0⟧・⟦1⟧・⟦2⟧・⟦3⟧が覚えられる": [
+"Learnable by ⟦0⟧, ⟦1⟧, ⟦2⟧, ⟦3⟧",
+"⟦0⟧、⟦1⟧、⟦2⟧、⟦3⟧可学会"
+],
+"⟦0⟧・⟦1⟧・⟦2⟧・⟦3⟧・⟦4⟧が覚えられる": [
+"Learnable by ⟦0⟧, ⟦1⟧, ⟦2⟧, ⟦3⟧, ⟦4⟧",
+"⟦0⟧、⟦1⟧、⟦2⟧、⟦3⟧、⟦4⟧可学会"
+],
+"⟦0⟧・⟦1⟧・⟦2⟧・⟦3⟧・⟦4⟧・⟦5⟧が覚えられる": [
+"Learnable by ⟦0⟧, ⟦1⟧, ⟦2⟧, ⟦3⟧, ⟦4⟧, ⟦5⟧",
+"⟦0⟧、⟦1⟧、⟦2⟧、⟦3⟧、⟦4⟧、⟦5⟧可学会"
+],
+"選んだタイプのステッカーが⟦0⟧まいランダムでもらえる（覚えられないものも出る）": [
+"Get ⟦0⟧ random stickers of the chosen type (some may be unlearnable)",
+"随机获得⟦0⟧张所选属性的贴纸（也可能出现学不会的）"
+],
+"トロフィー 大会で優勝したり、アリーナをクリアしたり、キングバトルで勝つともらえる。これまでの記録です。": [
+"Trophies: earned by winning tournaments, clearing the Arena, or winning King Battles. Your record so far.",
+"奖杯：在大会夺冠、通关竞技场或赢得王者之战即可获得。这是你至今的记录。"
+],
+"ボックス 空き地で弱らせたマギアに投げるとつかまえられる。バトルに勝ったり、ブラインドボックスから出る。": [
+"Capsules: throw one at a weakened Magia in the Vacant lot to catch it. Earned from battles and Blind Boxes.",
+"胶囊：在空地对虚弱的魔机投掷即可捕获。可通过战斗胜利或盲盒获得。"
+],
+"ジェム ブラインドボックスを待ち時間なしですぐ開けられる。バトルに勝ったり、大会で優勝するともらえる。": [
+"Gems: open Blind Boxes instantly with no wait. Earned by winning battles and tournaments.",
+"宝石：无需等待即可立即打开盲盒。赢得战斗或在大会夺冠即可获得。"
+],
+"レジェンド入り⟦0⟧かい！ヘッドたちは強くなって待っている。": [
+"Legend ×⟦0⟧! The Crew Heads have grown stronger and are waiting.",
+"已成为传奇⟦0⟧次！团长们变得更强，正在等你。"
+],
+"きかいの精度、見せてやる！": [
+"I'll show you machine precision!",
+"让你见识机械的精准！"
+],
+"アリーナを終わりますか？": [
+"End the Arena?",
+"要结束竞技场吗？"
+],
+"ここまでのスコアで記録します。": [
+"Your score so far will be recorded.",
+"将以目前的分数记录。"
+],
+"バトルタワーをやめますか？": [
+"Quit the Battle Tower?",
+"要退出对战塔吗？"
+],
+"⟦0⟧連勝で記録します。": [
+"Recorded as a ⟦0⟧-win streak.",
+"将以⟦0⟧连胜记录。"
+],
+"ワザステッカーを⟦0⟧まい選ぶ": [
+"Pick ⟦0⟧ Move Stickers",
+"选择⟦0⟧张招式贴纸"
+],
+"選んだマギアとワザステッカーで⟦0⟧回を目指す（⟦1⟧回ごとにボス）": [
+"Aim for ⟦0⟧ wins with your picked Magia and Move Stickers (a boss every ⟦1⟧)",
+"用选中的魔机和招式贴纸挑战⟦0⟧回（每⟦1⟧回出现首领）"
+],
+"次の⟦0⟧回の相手（ボス）": [
+"Next opponents (round ⟦0⟧, Boss)",
+"第⟦0⟧回的对手（首领）"
+],
+"次の⟦0⟧回の相手（タワータイクーン）": [
+"Next opponents (round ⟦0⟧, Tower Tycoon)",
+"第⟦0⟧回的对手（塔之大亨）"
+],
+"（ボス）": [
+" (Boss)",
+"（首领）"
+],
+"（タワータイクーン）": [
+" (Tower Tycoon)",
+"（塔之大亨）"
+],
+"ボス": [
+"Boss",
+"首领"
+],
+"👑 ⟦0⟧かいせいは！タワータイクーンにかった！": [
+"👑 Floor ⟦0⟧ conquered! You beat the Tower Tycoon!",
+"👑 制霸第⟦0⟧层！战胜了塔之大亨！"
+],
+"👑 ⟦0⟧かいせいは！タワータイクーン": [
+"👑 Floor ⟦0⟧ conquered! Tower Tycoon",
+"👑 制霸第⟦0⟧层！塔之大亨"
+],
+"⟦0⟧秒（過ぎたら自動で選ばれます）": [
+"⟦0⟧s (auto-picks when time runs out)",
+"⟦0⟧秒（超时将自动选择）"
+],
+"残り⟦0⟧秒（過ぎたら自動で選ばれます）": [
+"⟦0⟧s left (auto-picks when time runs out)",
+"剩余⟦0⟧秒（超时将自动选择）"
+],
+"ひかりの": [
+"Light",
+"光之"
+],
+"やみの": [
+"Dark",
+"暗之"
+],
+"ひこうの": [
+"Flying",
+"飞行之"
+],
+"プレイヤー": [
+"Player",
+"玩家"
+],
+"「預ける」を並びかえている間は、その中で入れかえできません。": [
+"You can't swap inside \"Storage\" while it's sorted.",
+"「寄存」在排序时，无法在其中交换。"
+],
+"「自分で並べる」にすると入れかえできます。": [
+"Choose \"Custom order\" to swap.",
+"选择「自己排列」后即可交换。"
+],
+"ふりわけたポイントがまだ確定していません。": [
+"Your point assignments aren't confirmed yet.",
+"分配的点数还没有确定。"
+],
+"確定しないで閉じますか？（ふりわけは元にもどります）": [
+"Close without confirming? (Assignments will be undone)",
+"不确定就关闭吗？（分配将恢复原状）"
+],
+"このマギアはバトルタワーにちょうせん中です。": [
+"This Magia is taking on the Battle Tower.",
+"这只魔机正在挑战对战塔。"
+],
+"タワーをやめてからにがしてね。": [
+"Quit the Tower before releasing it.",
+"请先退出对战塔再放走它。"
+],
+"チームを解散しますか？メンバーもみんなぬけたことになります。": [
+"Disband the team? All members will be removed too.",
+"要解散队伍吗？所有成员也会退出。"
+],
+"（残したいときは、先にメンバーの「リーダーにする」でリーダーをたのもう）": [
+"(To keep the team, first make a member leader with \"Make leader\")",
+"（想保留队伍的话，请先用成员的「设为队长」委托他人担任队长）"
+],
+"⟦0⟧さんにリーダーをたのみますか？": [
+"Ask ⟦0⟧ to become leader?",
+"要请⟦0⟧担任队长吗？"
+],
+"受けてもらえたら、チームの名前・もんしょう・メンバー・ポイントはそのまま引きつがれ、あなたはメンバーになります。": [
+"If they accept, the team's name, emblem, members and points carry over, and you become a member.",
+"对方接受后，队伍名称、队徽、成员和积分都会保留，你将成为普通成员。"
+],
+"データを初期化して初めから遊びますか？": [
+"Reset your data and start over?",
+"要初始化数据从头开始吗？"
+],
+"今のセーブデータは消えて元にもどせません。": [
+"Your current save will be deleted and can't be restored.",
+"当前存档将被删除，且无法恢复。"
+],
+"ドラフトをリセットしますか？": [
+"Reset the Draft?",
+"要重置选秀战吗？"
+],
+"今のマギアとステッカーはなくなり、最初からになります。": [
+"Your current Magia and stickers will be lost, and you'll start over.",
+"当前的魔机和贴纸将消失，从头开始。"
+],
+"他の端末で遊んだデータがあります（⟦0⟧）。": [
+"There's save data from another device (⟦0⟧).",
+"有在其他设备上游玩的数据（⟦0⟧）。"
+],
+"この端末で遊んだ分と、どちらを使いますか？": [
+"Use that, or the data from this device?",
+"要使用那份，还是本设备上的数据？"
+],
+"選ばなかったほうは消えます。": [
+"The one you don't choose will be deleted.",
+"未选择的一方将被删除。"
+],
+"画面が止まったままです。": [
+"The screen is frozen.",
+"画面停住了。"
+],
+"相手の画面が止まったままです。": [
+"The opponent's screen is frozen.",
+"对手的画面停住了。"
+],
+"試合をやめますか？（負けにはなりません）": [
+"Quit the match? (It won't count as a loss)",
+"要结束比赛吗？（不算输）"
+],
+"⟦0⟧につながりませんでした。": [
+"Couldn't connect to ⟦0⟧.",
+"无法连接到⟦0⟧。"
+],
+"通信を確かめてもう一度試してね。": [
+"Check your connection and try again.",
+"请检查网络后再试一次。"
+],
+"⟦0⟧につながりませんでした。通信を確かめてもう一度試してね。": [
+"Couldn't connect to ⟦0⟧. Check your connection and try again.",
+"无法连接到⟦0⟧。请检查网络后再试一次。"
+],
+"⟦0⟧はclaude.aiにサインインして、このゲームのページを開いたときだけ使えます。": [
+"⟦0⟧ only works when you're signed in to claude.ai and open this game's page.",
+"只有登录claude.ai并打开本游戏页面时才能使用⟦0⟧。"
+],
+"チームはclaude.aiにサインインして、このゲームのページを開いたときだけ使えます。": [
+"Teams only work when you're signed in to claude.ai and open this game's page.",
+"只有登录claude.ai并打开本游戏页面时才能使用队伍。"
+],
+"ランキングはclaude.aiにサインインして、このゲームのページを開いたときだけ使えます。": [
+"Rankings only work when you're signed in to claude.ai and open this game's page.",
+"只有登录claude.ai并打开本游戏页面时才能使用排行榜。"
+],
+"このアプリではまだ⟦0⟧が使えません。": [
+"⟦0⟧ isn't available in this app yet.",
+"此应用暂时无法使用⟦0⟧。"
+],
+"最初の流れ（バトル →訓練→名前・最初のマギア →空き地→ ブラインドボックス）を通しで試します。": [
+"Runs through the opening flow (Battle → Training → Name & first Magia → Vacant lot → Blind Box).",
+"完整试玩开场流程（战斗→训练→名字・首只魔机→空地→盲盒）。"
+],
+"テスト中のデータは保存されず、最後に元のデータに戻ります。": [
+"Test data isn't saved; your original data comes back at the end.",
+"测试中的数据不会保存，结束后恢复原来的数据。"
+],
+"（スマホは長押し）していれかえ ／ すきまをつかむとスクロール ／": [
+" (long-press on phones) to swap / grab empty space to scroll / ",
+"（手机上长按）来交换 ／ 抓住空白处可滚动 ／ "
+],
+"まだ一度も勝ったことがない": [
+"Has never won even once",
+"一次都没赢过"
+],
+"何でもかじる": [
+"Chews on anything",
+"什么都啃"
+],
+"料理をしてもらうと喜ぶ": [
+"Loves it when someone cooks for it",
+"有人给它做饭就会很开心"
+],
+"森の長老": [
+"Elder of the forest",
+"森林的长老"
+],
+"吹雪とともに現れる": [
+"Appears with the blizzard",
+"随暴风雪一同出现"
+],
+"⟦0⟧%で相手の⟦1⟧": [
+"⟦0⟧% chance: Foe's ⟦1⟧",
+"⟦0⟧%几率使对手的⟦1⟧"
+],
+"必ず相手の⟦0⟧": [
+"Always: Foe's ⟦0⟧",
+"必定使对手的⟦0⟧"
+],
+"体が透けて、⟦0⟧・⟦1⟧の技がすり抜ける": [
+"Its body turns see-through; ⟦0⟧ and ⟦1⟧ moves pass through it",
+"身体变得透明，⟦0⟧、⟦1⟧的招式会穿透过去"
+],
+"体が透けて、⟦0⟧・⟦1⟧・⟦2⟧の技がすり抜ける": [
+"Its body turns see-through; ⟦0⟧, ⟦1⟧ and ⟦2⟧ moves pass through it",
+"身体变得透明，⟦0⟧、⟦1⟧、⟦2⟧的招式会穿透过去"
+],
+"体が透けて、⟦0⟧・⟦1⟧・⟦2⟧・⟦3⟧の技がすり抜ける": [
+"Its body turns see-through; ⟦0⟧, ⟦1⟧, ⟦2⟧ and ⟦3⟧ moves pass through it",
+"身体变得透明，⟦0⟧、⟦1⟧、⟦2⟧、⟦3⟧的招式会穿透过去"
+],
+"⟦0⟧%で相手の": [
+"⟦0⟧% chance: Foe's ",
+"⟦0⟧%几率使对手的"
+],
+"必ず相手の": [
+"Always: Foe's ",
+"必定使对手的"
+],
+"ライバル ⟦0⟧": [
+"Rival ⟦0⟧",
+"劲敌 ⟦0⟧"
+],
+"人形のHP": [
+"Dummy HP",
+"人偶的HP"
+],
+"人形の攻撃": [
+"Dummy attacks",
+"人偶的攻击"
+],
+"人形の属性": [
+"Dummy attribute",
+"人偶的属性"
+],
+"人形の種族": [
+"Dummy race",
+"人偶的种族"
+],
+"人形の状態": [
+"Dummy status",
+"人偶的状态"
+],
+"アカネ": [
+"Akane",
+"Akane"
+],
+"アカリ": [
+"Akari",
+"Akari"
+],
+"カゲミ": [
+"Kagemi",
+"Kagemi"
+],
+"ガイ": [
+"Gai",
+"Gai"
+],
+"シオリ": [
+"Shiori",
+"Shiori"
+],
+"ソラ": [
+"Sora",
+"Sora"
+],
+"ツバキ": [
+"Tsubaki",
+"Tsubaki"
+],
+"ハヤト": [
+"Hayato",
+"Hayato"
+],
+"レイ": [
+"Rei",
+"Rei"
+],
+"コハル": [
+"Koharu",
+"Koharu"
+],
+"リク": [
+"Riku",
+"Riku"
+],
+"ショウ": [
+"Sho",
+"Sho"
+],
+"ネネ": [
+"Nene",
+"Nene"
+],
+"ジン": [
+"Jin",
+"Jin"
+],
+"タクミ": [
+"Takumi",
+"Takumi"
+],
+"サトリ": [
+"Satori",
+"Satori"
+],
+"ヨミ": [
+"Yomi",
+"Yomi"
 ]
 }
