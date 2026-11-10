@@ -594,6 +594,7 @@ html.rot #app{position:fixed;left:0;top:0;transform-origin:0 0;transform:rotate(
 #bside{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
 #chooseOv .swaplist button{padding:6px 10px;font-size:14px}
 #chooseOv .swaplist canvas{width:48px;height:48px}
+@media (max-height:520px){#chooseOv{justify-content:flex-start;overflow-y:auto;gap:4px;padding:6px}#chooseOv h2{font-size:16px!important;margin:0}#chooseOv .swaplist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:560px;gap:4px}#chooseOv .swaplist button{padding:3px 8px;font-size:13px}#chooseOv .swaplist canvas{width:36px;height:36px}}   /* よこ画面（ひくい 画面）：2れつに して 見出しと 文が はみ出さない */
 html.land #scBattle:not([hidden]){grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"top top" "cv side" "bbar side"}
 html.land #cvWrap{grid-area:cv;width:min(100%, calc((var(--appH, calc(100 * var(--vh))) - 150px) * 16 / 9))}
 html.land #bbar{grid-area:bbar;align-self:start}
