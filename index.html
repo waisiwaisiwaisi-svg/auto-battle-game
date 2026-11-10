@@ -3288,7 +3288,7 @@ const ISLES = [   // 4つ：1がめんに おさまる
 ];
 function isleMenu(title, items) {
   const p = $('townPop'); p.innerHTML = `<b>${title}</b>` + items.map(([t, id]) => `<button class="btn" data-a="${id}">${t}</button>`).join('') + `<button class="btn sub" data-a="x">閉じる</button>`;
-  p.hidden = false; p.onclick = (e) => { const b = e.target.closest('button'); if (!b) return; p.hidden = true; const id = b.dataset.a; if (id === 'x') return; if (id === 'lookPick') { lookPick(); return; } if (id === 'hubSnd') { const t = $('hubSnd'); if (t) t.click(); return; } const t = $(id); if (t) t.click(); };
+  p.hidden = false; p.onclick = (e) => { const b = e.target.closest('button'); if (!b) return; p.hidden = true; const id = b.dataset.a; if (id === 'x') return; if (id === 'arena') { ISLE.jt = isleJt(); $('btnJourney').click(); return; } if (id === 'lookPick') { lookPick(); return; } if (id === 'hubSnd') { const t = $('hubSnd'); if (t) t.click(); return; } const t = $(id); if (t) t.click(); };
 }
 // まちの メニュー（マイルーム・とうぎじょう など）：そとを タップしたら とじる（したの ものは おさない）
 { let popT = 0; const outside = (e) => { const p = $('townPop'); return p && !p.hidden && !p.contains(e.target); };
@@ -3635,7 +3635,7 @@ function renderRoom() {
 }
 $('btnRmBack').onclick = () => $('tabHome').click();
 // したの メニュー：バトル・メニュー
-$('tabBattle').onclick = () => { const tp = $('townPop'); if (tp.parentNode !== $('app')) $('app').appendChild(tp); tp.style.zIndex = 95; isleMenu('バトル', [['オンライン対戦', 'btnRank'], ['フリー対戦', 'btnCup'], ...(DEV_UI ? [['ダブル対戦', 'btnDbl']] : []), ['フレンド対戦', 'btnOnline']]); };   // いまの がめんの うえに ひらく（ホームへ もどらない）
+$('tabBattle').onclick = () => { const tp = $('townPop'); if (tp.parentNode !== $('app')) $('app').appendChild(tp); tp.style.zIndex = 95; isleMenu('バトル', [['アリーナ', 'arena'], ['オンライン対戦', 'btnRank'], ['フリー対戦', 'btnCup'], ...(DEV_UI ? [['ダブル対戦', 'btnDbl']] : []), ['フレンド対戦', 'btnOnline']]); };   // いまの がめんの うえに ひらく（ホームへ もどらない）
 $('tabMenu').onclick = () => { if ($('scHub').hidden) $('tabHome').click(); setTimeout(() => isleMenu('メニュー', [['ショップ', 'btnShop'], ['訓練', 'btnTrainTab'], ['コレクション（図鑑）', 'btnDex'], ['ランキング', 'hMe'], ['遊び方', 'btnHelp'], ['タイプ相性', 'btnChart'], ['音オン／オフ', 'hubSnd'], ['画面の向き', 'hubRot'], ['設定', 'btnOpt']]), 0); };
 function hubTown(fk, base) {
   const W = 320, H = 212, z = 3, key = fk; if (HUBTOWN[key] && HUBTOWN[key].ok) return HUBTOWN[key];
