@@ -13789,9 +13789,8 @@ function leagueTeam(type, n, p, sub) {
   if (type === 'fairy' && out.length >= 2) {   // アカリ：1ばんめは 出場時に けっとうのば、2ばんめは 出場時に ぶっとびてんし
     const teach = (e, sp) => { e.moves = [sp, ...e.moves.filter(id => id !== sp).slice(0, 3)]; autoTrain(e); const mv = e.tr.prog.mv, i = mv.findIndex(r => r.id === sp), r = mv.splice(i, 1)[0];
       r.c = [[TRC('enter')]]; r.go = sp === 'hako-punch' ? 'near' : 'auto'; mv.unshift(r); for (const x of mv) if (x !== r) x.c = x.c.filter(l => !l.some(c => c.t === 'enter')); e.moves = mv.map(x => x.id); };   // この 技だけ 出場時（ほかの 出場時は はずす）
-    const pickBy = (id, from) => { const k = out.findIndex((e, n) => n >= from && canLearn(e.sid, id)); return k < 0 ? from : k; };
-    let k = pickBy('duel-arena', 0); out.unshift(out.splice(k, 1)[0]); k = pickBy('hako-punch', 1); out.splice(1, 0, out.splice(k, 1)[0]);
-    teach(out[0], 'duel-arena'); teach(out[1], 'hako-punch'); }
+    const pickBy = (id, from) => out.findIndex((e, n) => n >= from && canLearn(e.sid, id));   // おぼえられる 子が いなければ -1（おしえない）
+    let at = 0; for (const sp of ['duel-arena', 'hako-punch']) { const k = pickBy(sp, at); if (k < 0) continue; out.splice(at, 0, out.splice(k, 1)[0]); teach(out[at], sp); at++; } }
   for (const e of out) if (!e.tr) autoTrain(e);   // エース いがいの 3たいにも 訓練
   if (ace) { const em = foeMon(ace, 1, -9), b = base6(ace), main = b.atk >= b.spa ? 'atk' : 'spa', sub = main === 'atk' ? 'spa' : 'atk';
     em.ace = 1; em.iv = { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31, eva: 31 }; em.ev = { [main]: EV_STAT_MAX, spe: EV_MAX - EV_STAT_MAX };
