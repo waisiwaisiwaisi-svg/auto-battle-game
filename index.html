@@ -13509,7 +13509,6 @@ $('btnOpt').onclick = () => {
     ${!window.PMA_NAME ? `<div class="optrow">名前<span style="display:flex;gap:6px;align-items:center"><b id="oPname"></b><button class="btn sub" id="oPnameEd" style="padding:4px 10px;font-size:12px">変える</button></span></div>` : ''}
     ${window.PMA_NAME ? `<label class="optrow">名前（オンライン）<span style="display:flex;gap:6px"><input type="text" id="oName" maxlength="12" style="width:9em;font:inherit;font-size:14px;padding:4px 6px;color:var(--ink);background:#120e1c;border:2px solid #0b0914;box-shadow:inset 0 0 0 2px var(--rim2)"><button class="btn sub" id="oNameSave" style="padding:4px 10px;font-size:12px">決める</button></span></label>` : ''}
     <div class="optrow"><span>データの引きつぎ<br><span class="dim" style="font-size:11px">他の端末へ・消してももどせる</span></span><button class="btn sub" id="oBk" style="font-size:12px;padding:6px 12px">開く</button></div>
-    <div style="margin-top:12px">ギアマスターの見た目</div><div class="looks" id="oLooks"></div>
     <div class="row" style="margin-top:16px;justify-content:space-between"><span style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><button class="dim" id="oReset" style="text-decoration:underline">データを初期化（初めから遊ぶ）</button>${window.PMA_NAME ? '<button class="dim" id="oWipe" style="text-decoration:underline">オンラインのデータを消す</button>' : ''}<a class="dim" href="https://waisiwaisiwaisi-svg.github.io/auto-battle-game/privacy.html" target="_blank" rel="noopener" style="font-size:12px">プライバシーポリシー</a></span><button class="btn" id="oClose">閉じる</button></div>`);
   bg.querySelectorAll('[data-lang]').forEach(b => { b.onclick = () => { if (b.dataset.lang !== LANG) setLang(b.dataset.lang); }; });   // ことば：えらぶと よみこみなおす
   bg.querySelector('#oBk').onclick = () => { bg.remove(); bkWin(); };
@@ -13528,9 +13527,6 @@ $('btnOpt').onclick = () => {
   if (DEV_UI) bg.querySelector('#oTutR').onclick = () => { bg.remove(); battleGo('rival', 1); };   // テスト：はじめての戦い（初回の 会話つき）
   m.oninput = () => SND.set('music', +m.value); x.oninput = () => { SND.set('sfx', +x.value); SND.se('hit'); }; u.onchange = () => { SND.set('mute', u.checked); updSnd(); };
   
-  const LK = bg.querySelector('#oLooks');
-  const drawLooks = () => lookGrid(LK);
-  if (S) drawLooks(); else LK.previousElementSibling.hidden = true;
   if (DEV_UI) bg.querySelector('#oSeAdj').onclick = () => seAdjust();
   bg.querySelector('#oHelp').onclick = () => { bg.remove(); $('btnHelp').click(); };
   bg.querySelector('#oClose').onclick = () => bg.remove();
