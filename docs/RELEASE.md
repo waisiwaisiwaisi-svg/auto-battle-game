@@ -5,6 +5,20 @@
 
 ---
 
+## いまの状態と、のこりの作業（2026/11/11）
+
+- アプリの中身：最終テスト済み（全画面×日英中×スマホ・タブレット・PC、通しプレイ、データの確認）
+- Capacitor 8：Android は targetSdk・compileSdk 36（Google Play の いまの 条件）、最低 Android 7（minSdk 24）。iOS は 15.0 から
+- バージョン：1.0.0（Android の versionCode・iOS のビルド番号は GitHub Actions の実行番号が自動で入る）
+- はじめての ときの ことばは 端末（Steam 版は Steam）の ことばに あわせる。日本語・中国語 いがいは English
+- **のこり（あなたが やること）**
+  1. Firebase の設定を GitHub Secrets の `FIREBASE_CONFIG_JS` に入れる（1章・6章）
+  2. 署名：Android（`ANDROID_KEYSTORE_BASE64` ほか）・iOS（`IOS_P12_BASE64`・`ASC_KEY_P8` ほか）・Steam（`STEAM_APP_ID`・`STEAM_USERNAME`・`STEAM_CONFIG_VDF`）を GitHub Secrets に入れる（6章・STEAM.md）
+  3. プライバシーポリシー（`docs/privacy.html`）の「お問い合わせ」に連絡先を書く（7章）
+  4. 各ストアで アプリを作って、5章の文と `promo/store/` の画像を入れる
+  5. Google Play は クローズドテスト 12人×14日（0章の注意）
+  6. 人型ステージ（キングエイト ツバキ）の絵が とどいたら さしかえる（いまは かくとうの ステージで 代用）
+
 ## 0. 必要なもの
 
 | もの | 費用 | 用途 |
@@ -110,7 +124,7 @@ cd android && ./gradlew bundleRelease
 （versionCode は毎回 1 ずつ上げる）
 
 ### 3-3. Play Console
-1. アプリを作成：名前「ピクセルモンスターアリーナ」、ゲーム、無料。
+1. アプリを作成：名前「マジックギアアリーナ」、ゲーム、無料。
 2. **アプリのコンテンツ**をすべて埋める：
    - プライバシーポリシー：`https://waisiwaisiwaisi-svg.github.io/auto-battle-game/privacy.html`（7章で公開）
    - 広告：なし
@@ -144,24 +158,67 @@ cd android && ./gradlew bundleRelease
 5. TestFlight で動作確認 → 審査に提出。
 
 輸出コンプライアンス（暗号化）の質問は `Info.plist` に「使っていない」と設定済みなので出ません。
+プライバシーマニフェスト（`app/ios/App/App/PrivacyInfo.xcprivacy`）も入れてあります：トラッキングなし、集めるのは ユーザーID（匿名）・その他のユーザーコンテンツ（名前・チャット）・ゲームプレイの内容 で、どれも「App の機能」だけに使う。App Store Connect の「App のプライバシー」も同じ内容で答えてください。
 
 ---
 
-## 5. ストア掲載文の例
+## 5. ストア掲載文（日本語・English・简体中文）
 
-- **名前**：ピクセルモンスターアリーナ
-- **サブタイトル／簡単な説明（80字以内）**：ドット絵モンスターを育てて、リアルタイムで対戦！ランク戦・ギルドで全国のトレーナーと競おう
+スクリーンショットは `promo/store/` にあります（言語_サイズ_場面.png）。
+- `iphone69`：1320×2868（App Store 6.9インチ）・`ipad13`：2752×2064（App Store 13インチ iPad・よこ向き）
+- `android`：1080×2400（Google Play スマホ）・`steam`：1920×1080（Steam）
+- 場面：1battle（キングエイト戦）・2home（ホームの街）・3train（訓練）・4team（編成）・5wild（空き地で捕獲）
+
+### 日本語
+- **名前**：マジックギアアリーナ
+- **サブタイトル（30字以内・iOS）**：育てて、教えて、リアルタイム対戦
+- **簡単な説明（80字以内・Google Play）**：ドット絵のマギアを捕まえて訓練し、リアルタイムで戦わせよう！ギルド・キングエイト・オンライン対戦
 - **説明**：
   ```
-  ドット絵のモンスターたちが、リアルタイムでぶつかりあう！
-  ・173種類のモンスターをくさむらでつかまえて、自分だけのチームに
-  ・技の相性と性格を見きわめる、オートバトル＋指示のハイブリッド対戦
+  ドット絵のマギアたちが、リアルタイムでぶつかりあう！
+  ・191種類のマギアを空き地で捕まえて、自分だけのチームに
+  ・「訓練」で技の順番・条件・撃ち方を教えると、その通りに戦うオートバトル
+  ・8つのギルドを巡ってタグを集め、キングエイトとキングに挑もう
+  ・アリーナでタワー・ドラフトバトル・10連戦に挑戦
   ・オンライン対戦でレートを上げて、ブロンズからマスターを目指そう
-  ・ギルドに入ってみんなでポイントを集め、週間ランキングで競争
-  ・アーケードでジムを巡ってバッジを集め、チャンピオンリーグへ
-  ・トレーナーとモンスターをドット絵で自作できるメイキング機能
+  ・チームに入って仲間と協力、週間ランキングで競争
+  ・オフラインでも1人用モードはすべて遊べます
   ```
-- **キーワード（iOS）**：モンスター,ドット絵,対戦,育成,オートバトル,ランク戦,ギルド,レトロ,RPG
+- **キーワード（iOS・100字以内）**：モンスター,ドット絵,対戦,育成,オートバトル,ランク戦,レトロ,RPG,捕獲,ギルド
+
+### English
+- **Name**: Magic Gear Arena
+- **Subtitle (iOS, 30 chars)**: Catch, train, battle in real time
+- **Short description (Google Play, 80 chars)**: Catch pixel Magia, train their moves, and battle in real time!
+- **Description**:
+  ```
+  Pixel-art Magia clash in real-time battles!
+  - Catch 191 kinds of Magia in the Vacant Lot and build your own team
+  - Use Training to teach move order, conditions and positioning - then watch them fight exactly as taught
+  - Visit 8 Guilds to collect Tags, then challenge the King Eight and the King
+  - Take on the Battle Tower, Draft Battles and 10-battle runs in the Arena
+  - Climb from Bronze to Master in online ranked battles
+  - Join a Team with friends and compete on the weekly ranking
+  - All single-player modes work offline
+  ```
+- **Keywords (iOS)**: monster,pixel,retro,battle,auto battler,trainer,rpg,pvp,strategy,collect
+
+### 简体中文
+- **名称**：魔法齿轮竞技场
+- **副标题（iOS）**：捕捉、训练、实时对战
+- **简短说明（Google Play）**：捕捉像素魔机，训练招式，实时对战！公会・王者八人・在线对战
+- **说明**：
+  ```
+  像素风格的魔机们，在实时战斗中激烈碰撞！
+  ・在空地捕捉191种魔机，组成属于你的队伍
+  ・通过“训练”教会招式顺序、条件和走位，它们会照着你教的方式战斗
+  ・巡游8个公会收集标签，挑战王者八人与王者
+  ・在竞技场挑战塔、轮抽对战与10连战
+  ・在线对战提升积分，从青铜一路冲向大师
+  ・加入队伍与伙伴合作，在每周排行榜上竞争
+  ・单人模式全部可离线游玩
+  ```
+- **关键词（iOS）**：怪兽,像素,复古,对战,自动战斗,养成,RPG,策略,收集
 
 ---
 
@@ -195,7 +252,7 @@ cd android && ./gradlew bundleRelease
 
 ## 8. 審査で気をつけること
 
-- **似ている作品との関係**：モンスターを捕まえる・ジム・バッジ・殿堂入りなど、有名作品に近い用語や仕組みがあります。名前・絵・用語が既存作品と同じにならないよう確認してください（似すぎると著作権・商標で削除や却下の対象になります）。
+- **似ている作品との関係**：モンスターを捕まえて育てる仕組みは有名作品に近いので、用語はギルド・タグ・キングエイト・キングなど独自のものにしています。名前・絵・用語が既存作品と同じにならないよう確認してください（似すぎると著作権・商標で削除や却下の対象になります）。
 - **ユーザー生成コンテンツ**（名前・ギルド名・チャット）：NGワードの伏せ字、通報、ブロック、連絡先の掲載が必要です（アプリ内に実装済み。連絡先は7章）。
 - **最低限の機能**（Apple 4.2）：Web をそのまま包んだだけのアプリは却下されやすいですが、本作はオフラインで遊べるゲームなので問題ありません。
 
