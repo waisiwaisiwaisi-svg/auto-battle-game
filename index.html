@@ -13744,13 +13744,13 @@ function startWild(types) {
    たび：10の ギルドを めぐって タグを あつめ、キングバトルへ
    各ギルド：ギアマスター 2人 → ヘッド。リーダーに かつと タグ・ジェム・タイプの ワザステッカー
    ===================================================================== */
-const GYMS = [   // 2026/11/10：ギルドは 属性 8つ（種族 8つは キングエイト）
-  { f: 'grass', t: 'grass', lead: 'gym_koharu', ln: 'ヘッド コハル', say: '花と緑の力、受け止めてね！' },
+const GYMS = [   // 2026/11/10：ギルドは 属性 8つ（種族 8つは キングエイト）。2026/11/11：ならびは「その じてんで ひらいて いる 空き地で 弱点を つける」じゅん（土→水→火→雷→風→木→光→闇）
+  { f: 'ground', t: 'ground', lead: 'gym_jin', ln: 'ヘッド ジン', say: 'どっしり構えて受けて立つ！' },
   { f: 'water', t: 'water', lead: 'gym_riku', ln: 'ヘッド リク', say: '流れに逆らえるかな？' },
   { f: 'fire', t: 'fire', lead: 'gym_sho', ln: 'ヘッド ショウ', say: 'あつあつの試合をめしあがれ！' },
   { f: 'elec', t: 'elec', lead: 'gamer', ln: 'ヘッド ネネ', say: '反応速度、ついてこられる？' },
-  { f: 'ground', t: 'ground', lead: 'gym_jin', ln: 'ヘッド ジン', say: 'どっしり構えて受けて立つ！' },
   { f: 'wind', t: 'wind', lead: 'gym_takumi', ln: 'ヘッド タクミ', say: '空からすべて見えているぞ！' },
+  { f: 'grass', t: 'grass', lead: 'gym_koharu', ln: 'ヘッド コハル', say: '花と緑の力、受け止めてね！' },
   { f: 'light', st: 'light', t: 'light', lead: 'league_shiori', ln: 'ヘッド サトリ', say: 'データはもうそろっているの。' },
   { f: 'dark', st: 'dark', t: 'dark', lead: 'occult', ln: 'ヘッド ヨミ', say: '暗やみの向こうからずっと見ていたよ…' },
 ];
@@ -13856,12 +13856,12 @@ function noDefMoves(em) {
 // ギルドの コンセプト：作戦（plan）・この ギルドらしい 技（sup＝ほじょ技 1つ・atk＝こうげき技の このみ）。あいては ギルドの タイプの 技を 中心に つかう（弱点を つけば かてる）
 const isDmgK = (x, ks) => ks.includes(x.k);
 const GYM_CON = [
-  { c: 'どく・やどりぎでじわじわ', plan: 'nonki', sup: (x) => !!(x.e && (x.e.seed || ['psn', 'tox'].includes(x.e.st))) || x.k === 'heal', atk: (x) => x.e && x.e.drain ? 1.3 : 1 },   // くさ コハル
+  { c: 'どっしり受けて返す', plan: 'nonki', sup: (x) => ['counter', 'protect'].includes(x.k) || !!(x.e && x.e.self && x.e.self.def > 0), atk: (x) => isDmgK(x, ['melee', 'strike', 'aoe']) ? 1.2 : 1 },   // つち ジン
   { c: '遠くからおし流す', plan: 'reisei', sup: (x) => x.k === 'weather', atk: (x) => isDmgK(x, ['proj', 'beam', 'wave', 'cone']) ? 1.3 : .8 },   // みず リク
   { c: 'あつあつの大技', plan: 'yuukan', sup: (x) => !!(x.e && x.e.st === 'brn'), atk: (x) => (x.power || 0) >= 90 ? 1.3 : 1 },   // ほのお ショウ
   { c: '反応速度（先制・まひ）', plan: 'yuukan', sup: (x) => !!(x.e && x.e.st === 'par'), atk: (x) => (x.prio > 0 ? 1.4 : 1) * (x.e && x.e.st === 'par' ? 1.2 : 1) },   // でんき ネネ
-  { c: 'どっしり受けて返す', plan: 'nonki', sup: (x) => ['counter', 'protect'].includes(x.k) || !!(x.e && x.e.self && x.e.self.def > 0), atk: (x) => isDmgK(x, ['melee', 'strike', 'aoe']) ? 1.2 : 1 },   // つち ジン
   { c: '空からねらいうち', plan: 'reisei', sup: (x) => x.k === 'field' || x.k === 'weather', atk: (x) => isDmgK(x, ['proj', 'beam', 'cone']) ? 1.3 : .85 },   // かぜ タクミ
+  { c: 'どく・やどりぎでじわじわ', plan: 'nonki', sup: (x) => !!(x.e && (x.e.seed || ['psn', 'tox'].includes(x.e.st))) || x.k === 'heal', atk: (x) => x.e && x.e.drain ? 1.3 : 1 },   // くさ コハル
   { c: '先読み（予知と能力アップ）', plan: 'reisei', sup: (x) => ['future', 'terrain', 'field'].includes(x.k) || !!(x.e && x.e.self && Object.values(x.e.self).some(v => v > 0)), atk: (x) => x.k === 'future' ? 1.4 : 1 },   // 光 サトリ
   { c: 'はなれて撃つ（ふつうの弾と状態異常）', plan: 'reisei', sup: (x) => !!(x.e && (x.e.st || x.e.seed)), atk: (x) => x.k === 'proj' && (x.power || 0) < 100 ? 1.6 : .7 },   // 闇 ヨミ
 ];
