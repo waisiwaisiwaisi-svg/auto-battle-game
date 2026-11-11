@@ -67,14 +67,12 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
 .reward.epic .rar{animation:epBadge .9s ease-in-out .5s infinite alternate}
 .reward.epic .big{animation:epText .5s ease-out .55s both}
 .epsp{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fff;box-shadow:0 0 6px #e0b0ff,0 0 12px #b060ff;pointer-events:none;animation:epSpark .9s ease-out var(--d) both}
-.epfl{position:fixed;inset:0;background:radial-gradient(circle,#fff 0,#e6c2ff 30%,rgba(150,70,255,.85) 70%);pointer-events:none;z-index:5;animation:epFlash .7s ease-out both}
 .askbox.epshake{animation:epShake .45s steps(8) both}
 @keyframes epSpin{to{transform:rotate(360deg)}}@keyframes epRayIn{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
 @keyframes epPop{0%{transform:scale(0) rotate(-20deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
 @keyframes epBadge{from{box-shadow:0 0 4px #d08aff;transform:scale(1)}to{box-shadow:0 0 14px #f0c8ff,0 0 24px #b060ff;transform:scale(1.12)}}
 @keyframes epText{from{opacity:0;transform:translateY(8px) scale(.8)}to{opacity:1;transform:none}}
 @keyframes epSpark{0%{transform:translate(0,0) scale(1.4);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
-@keyframes epFlash{0%{opacity:0}15%{opacity:.95}100%{opacity:0}}
 @keyframes epShake{0%,100%{transform:none}20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
 .chimg.pop{animation:chpop .45s ease-out both}
 @keyframes chshake{0%,100%{transform:translate(0,0)}20%{transform:translate(-4px,0) rotate(-4deg)}40%{transform:translate(4px,0) rotate(4deg)}60%{transform:translate(-3px,0) rotate(-3deg)}80%{transform:translate(3px,0) rotate(3deg)}}
@@ -4944,9 +4942,8 @@ function openChest(i) {
   const showK = () => { bg.querySelector('#rwBody').innerHTML = cards[k]; bg.querySelector('#rwCount').textContent = k ? `${k} / ${cards.length - 1}` : ''; bg.querySelector('#rwNext').textContent = k === cards.length - 1 ? '閉じる' : k === 0 ? '開ける！' : '次へ'; };
   let anim = false;
   const hasEpic = R.mons.some(sid => monRarity(sid) === 2);
-  const epicFx = () => {   // エピック：ひかり・きらきら・ゆれ（0.9びょうは つぎへ すすめない）
+  const epicFx = () => {   // エピック：後光・きらきら・ゆれ（0.9びょうは つぎへ すすめない）
     const box = bg.querySelector('.askbox'), w = bg.querySelector('.reward.epic .epwrap'); anim = true;
-    const fl = document.createElement('div'); fl.className = 'epfl'; bg.appendChild(fl); setTimeout(() => fl.remove(), 800);
     box.classList.remove('epshake'); void box.offsetWidth; box.classList.add('epshake');
     if (w) for (let i = 0; i < 18; i++) { const a = i / 18 * 6.283 + rnd() * .3, d = 70 + rnd() * 60, sp = document.createElement('i'); sp.className = 'epsp'; sp.style.setProperty('--x', Math.cos(a) * d + 'px'); sp.style.setProperty('--y', Math.sin(a) * d + 'px'); sp.style.setProperty('--d', (.1 + rnd() * .25).toFixed(2) + 's'); w.appendChild(sp); }
     SND.se('epic'); setTimeout(() => SND.se('up'), 250); try { navigator.vibrate && navigator.vibrate([30, 40, 60]); } catch (e) { }
