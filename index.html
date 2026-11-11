@@ -5825,8 +5825,8 @@ function openBoost(m) {
       document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up); return; }
     if (!r || r.w === 'drop' || !teamMon(r)) return;
     drag = { r, x: ev.clientX, y: ev.clientY, moved: false, ghost: null, over: null, touch: ev.pointerType === 'touch', armed: ev.pointerType !== 'touch' };
-    // ゆび：ながおし（0.28びょう）で もちあげる。すぐ うごかしたら スクロール（いれかえない）
-    if (drag.touch) { const d = drag; d.tm = setTimeout(() => { if (drag !== d) return; d.armed = true; d.r.el.classList.add('lift'); try { navigator.vibrate && navigator.vibrate(15); } catch (e) { } }, 450); }
+    // ゆび：ながおし（0.18びょう）で もちあげる。すぐ うごかしたら スクロール（いれかえない）
+    if (drag.touch) { const d = drag; d.tm = setTimeout(() => { if (drag !== d) return; d.armed = true; d.r.el.classList.add('lift'); try { navigator.vibrate && navigator.vibrate(15); } catch (e) { } }, 180); }
   });
   document.addEventListener('touchmove', (ev) => { if (drag && drag.armed && drag.touch) ev.preventDefault(); }, { passive: false });   // もちあげた あとは スクロール させない
   document.addEventListener('pointermove', (ev) => {
