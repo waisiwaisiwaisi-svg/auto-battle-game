@@ -11,6 +11,7 @@
 <style>
 :root{--vw:1vw;--vh:1dvh;--sat:env(safe-area-inset-top);--sar:env(safe-area-inset-right);--sab:env(safe-area-inset-bottom);--sal:env(safe-area-inset-left)}
 html.rot{--sat:env(safe-area-inset-right);--sar:env(safe-area-inset-bottom);--sab:env(safe-area-inset-left);--sal:env(safe-area-inset-top)}
+body::after{content:'';position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top,0px);background:#141022;z-index:2147483000;pointer-events:none}   /* ノッチ・ダイナミックアイランドの 端末：時計・電池の うらを べたぬりに（うらの 絵が ぼかされて モヤに 見えない ように） */
 :root{
   --bg:#141022; --panel:#241d38; --panel2:#2e2648; --edge:#4a4070; --ink:#f6f0e0; --dim:#a49ac0;
   --acc:#ffd166; --good:#4fd1a5; --mid:#ffd166; --bad:#ff6b5b;
