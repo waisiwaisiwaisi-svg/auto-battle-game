@@ -9072,9 +9072,10 @@ function updateFighter(f, dt) {
       const m = cur.m;
       // 命中100（ロック）の わざだけ 予兆の とちゅうまで あいてを 追う
       if (oT && m.aim === 'lock') {
-        if ((m.k === 'beam' || m.k === 'dash' || m.k === 'cone' || m.k === 'swipe') && cur.t < cur.wind * (m.k === 'swipe' ? .75 : m.charge2 || m.k === 'beam' || m.k === 'dash' ? .9 : .6)) {
-          const want = DM.atan2(o.y - f.y, o.x - f.x);
-          cur.ang += clamp(wrapAng(want - cur.ang), -3 * dt, 3 * dt);
+        const br = m.k === 'cone' && BREATH_TRACK.has(cur.id);
+        if ((m.k === 'beam' || m.k === 'dash' || m.k === 'cone' || m.k === 'swipe') && cur.t < cur.wind * (br ? 1 : m.k === 'swipe' ? .75 : m.charge2 || m.k === 'beam' || m.k === 'dash' ? .9 : .6)) {
+          const want = DM.atan2(o.y - f.y, o.x - f.x), rt = (br ? 6 : 3) * dt;
+          cur.ang += clamp(wrapAng(want - cur.ang), -rt, rt);
         }
         if (m.k === 'strike' && cur.t < cur.wind * .55) { cur.tx += (o.x - cur.tx) * Math.min(1, dt * 8); cur.ty += (o.y - cur.ty) * Math.min(1, dt * 8); }
       }
@@ -9232,6 +9233,8 @@ function updateFighter(f, dt) {
 }
 
 /* ---------- 捕獲 ---------- */
+// ブレス系（フレイムブレス・ドラゴンブレス・ウィンドブレス・りゅうのためいき）：ためて いる あいだ さいごまで あいてを 追い、まわる はやさも 2ばい
+const BREATH_TRACK = new Set(['flamethrower', 'dragon-pulse', 'hurricane', 'dragon-charge']);
 const CATCH_HOT = .45;   // この かくりつ いじょうで ボックスの ボタンを ひからせる
 function catchProb(e) { return clamp(e.sp.catch * (1.6 - 1.3 * e.hp / e.maxHp) * (e.state === 'stun' ? 1.15 : 1) * (e.status === 'slp' || e.status === 'frz' ? 2 : e.status ? 1.5 : 1), .04, .95); }
 function cmdCapsule() {
