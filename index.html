@@ -58,7 +58,25 @@ canvas.pix{image-rendering:pixelated;image-rendering:crisp-edges}
 .chest span{word-break:keep-all;overflow-wrap:anywhere}
 .chbox{height:212px;display:flex;align-items:flex-end;justify-content:center}.chbox .chimg{max-height:208px;width:auto}
 .reward .chimg.shake{animation:chshake .5s steps(6) both}
-.reward .chimg.pop{animation:chpop .45s ease-out both}
+.reward .chimg.epicglow{filter:drop-shadow(0 0 6px #d08aff) drop-shadow(0 0 14px #b060ff);animation:chshake .5s steps(6) both,epGlow .25s ease-in-out infinite alternate}
+@keyframes epGlow{from{filter:drop-shadow(0 0 4px #d08aff) drop-shadow(0 0 10px #b060ff)}to{filter:drop-shadow(0 0 10px #f0c8ff) drop-shadow(0 0 26px #b060ff)}}
+.reward.epic{position:relative}
+.reward.epic .epwrap{position:relative;width:150px;height:118px;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.reward.epic .eprays{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;background:repeating-conic-gradient(rgba(214,150,255,.55) 0 10deg,rgba(214,150,255,0) 10deg 22.5deg);-webkit-mask:radial-gradient(circle,#000 18%,transparent 66%);mask:radial-gradient(circle,#000 18%,transparent 66%);animation:epSpin 6s linear infinite,epRayIn .6s ease-out both;pointer-events:none}
+.reward.epic .epwrap img{position:relative;animation:epPop .75s cubic-bezier(.2,1.6,.4,1) .15s both;filter:drop-shadow(0 0 8px #e0b0ff)}
+.reward.epic .rar{animation:epBadge .9s ease-in-out .5s infinite alternate}
+.reward.epic .big{animation:epText .5s ease-out .55s both}
+.epsp{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;background:#fff;box-shadow:0 0 6px #e0b0ff,0 0 12px #b060ff;pointer-events:none;animation:epSpark .9s ease-out var(--d) both}
+.epfl{position:fixed;inset:0;background:radial-gradient(circle,#fff 0,#e6c2ff 30%,rgba(150,70,255,.85) 70%);pointer-events:none;z-index:5;animation:epFlash .7s ease-out both}
+.askbox.epshake{animation:epShake .45s steps(8) both}
+@keyframes epSpin{to{transform:rotate(360deg)}}@keyframes epRayIn{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+@keyframes epPop{0%{transform:scale(0) rotate(-20deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes epBadge{from{box-shadow:0 0 4px #d08aff;transform:scale(1)}to{box-shadow:0 0 14px #f0c8ff,0 0 24px #b060ff;transform:scale(1.12)}}
+@keyframes epText{from{opacity:0;transform:translateY(8px) scale(.8)}to{opacity:1;transform:none}}
+@keyframes epSpark{0%{transform:translate(0,0) scale(1.4);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
+@keyframes epFlash{0%{opacity:0}15%{opacity:.95}100%{opacity:0}}
+@keyframes epShake{0%,100%{transform:none}20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
+.chimg.pop{animation:chpop .45s ease-out both}
 @keyframes chshake{0%,100%{transform:translate(0,0)}20%{transform:translate(-4px,0) rotate(-4deg)}40%{transform:translate(4px,0) rotate(4deg)}60%{transform:translate(-3px,0) rotate(-3deg)}80%{transform:translate(3px,0) rotate(3deg)}}
 @keyframes chpop{0%{transform:scale(.9);filter:brightness(2.2)}60%{transform:scale(1.12);filter:brightness(1.4)}100%{transform:scale(1);filter:none}}
 .chest b{font-size:11px}
@@ -4911,7 +4929,8 @@ function openChest(i) {
     const m = newMon(sid), sp = SPECIES[sid], r = RARITY[monRarity(sid)], isNew = !owned.has(sid); owned.add(sid);
     const where = S.party.length < 6 ? (S.party.push(m), 'パーティに加わった！') : (S.box.push(m), '「預ける」に送られた');
     const img = spriteCanvas(sid, 96).toDataURL();
-    return `<div class="reward"><div style="display:flex;gap:6px;justify-content:center"><span class="rar" style="background:${r.c}">${r.n}</span>${isNew ? '<span class="rar" style="background:#ffd166">NEW</span>' : ''}</div><img src="${img}" class="pix" style="width:96px;height:96px;display:block;margin:6px auto"><div class="big">${sp.n}</div><div style="display:flex;gap:4px;justify-content:center">${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><div class="dim">${NATURES[m.nat].n}・${ivGrade(m)}<br>技：${m.moves.map(x => MOVES[x].n).join('・')}<br>${where}</div></div>`;
+    const ep = monRarity(sid) === 2, pic = `<img src="${img}" class="pix" style="width:96px;height:96px;display:block;margin:6px auto">`;
+    return `<div class="reward${ep ? ' epic' : ''}"><div style="display:flex;gap:6px;justify-content:center"><span class="rar" style="background:${r.c}">${r.n}</span>${isNew ? '<span class="rar" style="background:#ffd166">NEW</span>' : ''}</div>${ep ? `<div class="epwrap"><div class="eprays"></div>${pic}</div>` : pic}<div class="big">${sp.n}</div><div style="display:flex;gap:4px;justify-content:center">${typeChip(sp.type)}${sp.type2 ? typeChip(sp.type2) : ''}</div><div class="dim">${NATURES[m.nat].n}・${ivGrade(m)}<br>技：${m.moves.map(x => MOVES[x].n).join('・')}<br>${where}</div></div>`;
   });
   S.chLog = [{ t: NOW(), k: c.kind, mons: R.mons.slice(), cr: R.cr, tms: R.tms.slice(), items: (R.items || []).slice() }, ...(S.chLog || [])].slice(0, 20);   // さいきん 20けんの りれき
   save();
@@ -4924,13 +4943,21 @@ function openChest(i) {
   $('app').appendChild(bg);
   const showK = () => { bg.querySelector('#rwBody').innerHTML = cards[k]; bg.querySelector('#rwCount').textContent = k ? `${k} / ${cards.length - 1}` : ''; bg.querySelector('#rwNext').textContent = k === cards.length - 1 ? '閉じる' : k === 0 ? '開ける！' : '次へ'; };
   let anim = false;
-  const go = () => { k++; if (k >= cards.length) { bg.remove(); if (fromShop) renderShop(); else renderHub(); } else { SND.se(k === 1 ? 'card' : /エピック/.test(cards[k]) ? 'epic' : 'card'); showK(); } };
+  const hasEpic = R.mons.some(sid => monRarity(sid) === 2);
+  const epicFx = () => {   // エピック：ひかり・きらきら・ゆれ（0.9びょうは つぎへ すすめない）
+    const box = bg.querySelector('.askbox'), w = bg.querySelector('.reward.epic .epwrap'); anim = true;
+    const fl = document.createElement('div'); fl.className = 'epfl'; bg.appendChild(fl); setTimeout(() => fl.remove(), 800);
+    box.classList.remove('epshake'); void box.offsetWidth; box.classList.add('epshake');
+    if (w) for (let i = 0; i < 18; i++) { const a = i / 18 * 6.283 + rnd() * .3, d = 70 + rnd() * 60, sp = document.createElement('i'); sp.className = 'epsp'; sp.style.setProperty('--x', Math.cos(a) * d + 'px'); sp.style.setProperty('--y', Math.sin(a) * d + 'px'); sp.style.setProperty('--d', (.1 + rnd() * .25).toFixed(2) + 's'); w.appendChild(sp); }
+    SND.se('epic'); setTimeout(() => SND.se('up'), 250); try { navigator.vibrate && navigator.vibrate([30, 40, 60]); } catch (e) { }
+    setTimeout(() => { anim = false; }, 900); };
+  const go = () => { k++; if (k >= cards.length) { bg.remove(); if (fromShop) renderShop(); else renderHub(); } else { const ep = /class="reward epic"/.test(cards[k]); if (!ep) SND.se('card'); showK(); if (ep) epicFx(); } };
   bg.querySelector('#rwNext').onclick = () => {   // さいしょは はこが ゆれて → ひらく
     if (anim) return;
     const im = k === 0 && bg.querySelector('#rwBody .chimg');
     if (!im) return go();
-    anim = true; SND.se('chest'); im.classList.add('shake');
-    setTimeout(() => { const o = CHEST_IMG['o' + c.kind]; if (o) { im.src = o[0]; im.width = o[1] * 4; im.height = o[2] * 4; } im.classList.remove('shake'); im.classList.add('pop'); SND.se('open'); }, 520);
+    anim = true; SND.se('chest'); im.classList.add(hasEpic ? 'epicglow' : 'shake');   // エピックが はいって いる ときは はこが むらさきに ひかる
+    setTimeout(() => { const o = CHEST_IMG['o' + c.kind]; if (o) { im.src = o[0]; im.width = o[1] * 4; im.height = o[2] * 4; } im.classList.remove('shake', 'epicglow'); im.classList.add('pop'); SND.se('open'); }, 520);
     setTimeout(() => { anim = false; go(); }, 1150);
   };
   showK(); bg.querySelector('#rwNext').onclick();   // 1タップで あける：すぐ はこが ひらく
