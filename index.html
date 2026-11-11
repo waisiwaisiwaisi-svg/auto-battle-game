@@ -9134,7 +9134,7 @@ function updateFighter(f, dt) {
     case 'chan': {   // うちつづける：ゆっくり あいてへ むきを あわせながら はなつ
       const cur = f.cur; if (!cur) { f.state = 'free'; break; }
       const m = cur.m; cur.ch += dt;
-      if (oT) { const tr = (m.aim === 'lock' ? .12 : .08) * dt; /* 照射中は ゆっくりしか むきを かえられない（はやいと よけても おいつかれて ほぼ あたる） */ cur.ang += clamp(wrapAng(DM.atan2(o.y - f.y, o.x - f.x) - cur.ang), -tr, tr); }
+      if (oT) { const tr = (m.aim === 'lock' ? .25 : .16) * dt; /* 照射中は ゆっくりしか むきを かえられない（はやいと よけても おいつかれて ほぼ あたる） */ cur.ang += clamp(wrapAng(DM.atan2(o.y - f.y, o.x - f.x) - cur.ang), -tr, tr); }
       if (m.k === 'beam') cur.len = rayLen(f, cur.ang, m.len);
       if (m.chanMove && oT) { const a = DM.atan2(o.y - f.y, o.x - f.x), dd = dist(f, o), pr = dd > 150 ? 1 : dd < 90 ? -1 : 0, sd = f.side ? -1 : 1; f.paceT = .8; moveDir(f, DM.cos(a) * pr - DM.sin(a) * .7 * sd, DM.sin(a) * pr + DM.cos(a) * .7 * sd, dt); }   // ドラゴンブレス：はきながら うごく
       if (cur.ch >= cur.next) { cur.next += CHAN_TICK; chanTick(f, o, oT); if (f.state !== 'chan') break; }
