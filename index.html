@@ -13722,22 +13722,16 @@ $('btnQuit').onclick = () => { $('pauseOv').hidden = true; if (!B) return; if (B
 document.addEventListener('visibilitychange', () => { if (document.hidden && B && B.mode !== 'end' && B.kind !== 'online') { B.paused = true; B.userPause = true; $('pauseOv').hidden = false; } });
 
 // あいての わざ：おぼえている中から ランダムに4つ（こうげきわざを 2つ以上）
-const PICK_CAGE_WALL = .3;   // 檻・壁の 技を さいしょに おぼえて いる かくりつ（ほかの 技が ある とき）
-function pickMoves(m) {
-  const L = learned(m), atk = L.filter(id => MOVES[id].cat !== 'stat'), sup = L.filter(id => MOVES[id].cat === 'stat');
+const PICK_CAGE_WALL = .6;   // えらばれた 檻・壁の 技を のこす かくりつ（ほかの 技と いれかえ）。おぼえられる 子の やく 25% が さいしょから もつ
+function pickMoves(m) {   // おぼえる 技：おぼえられる 技から ランダムに 4つ（こうげき・へんか の わりふりや タイプ一致の しばりは しない）
+  const L = learned(m);
   const nf = { mon: m, hp: 1, maxHp: 1 };   // 性格に あう わざほど えらばれやすい
   const rare = (mv) => mv.k === 'wall' || mv.k === 'cage' || mv.pat === 'cage' ? PICK_CAGE_WALL : 1;   // 檻・壁の 技は さいしょに おぼえにくい
-  const shuffle = (a) => a.map(x => [DM.pow(rnd(), 1 / Math.max(.02, natPref(nf, MOVES[x]) * rare(MOVES[x]))), x]).sort((p, q) => q[0] - p[0]).map(p => p[1]);
-  const sp = SPECIES[m.sid], stab = shuffle(atk.filter(id => MOVES[id].t === sp.type || MOVES[id].t === sp.type2));
-  let order = stab.length ? [stab[0]].concat(shuffle(atk.filter(id => id !== stab[0]))) : shuffle(atk);   // じぶんの タイプの こうげきを かならず 1つ
-  const ind = order.find(id => INDIRECT(MOVES[id]));
-  if (ind && ['reisei', 'nonki'].includes(planOfMon(m))) order = [ind].concat(order.filter(id => id !== ind));   // かくれる 子は かべごしの わざを かならず
-  const supN = Math.min(planOfMon(m) === 'yuukan' ? 1 : 2, sup.length);
-  const res = order.slice(0, Math.max(1, 4 - supN));
-  const out = res.concat(shuffle(sup)).slice(0, 4);
+  const order = L.map(x => [DM.pow(rnd(), 1 / Math.max(.02, natPref(nf, MOVES[x]))), x]).sort((p, q) => q[0] - p[0]).map(p => p[1]);
+  const out = order.slice(0, 4);
   // 檻・壁の 技：えらばれても PICK_CAGE_WALL の かくりつで のこす（ほかは のこりの 技と いれかえ。いれかえる 技が ない ときは そのまま）
-  const spare = order.concat(shuffle(sup)).filter(id => !out.includes(id) && rare(MOVES[id]) === 1);
-  return out.map(id => id !== stab[0] && rare(MOVES[id]) < 1 && rnd() >= PICK_CAGE_WALL && spare.length ? spare.shift() : id);   // じぶんの タイプの こうげき（かならず 1つ）は いれかえない
+  const spare = order.slice(4).filter(id => rare(MOVES[id]) === 1);
+  return out.map(id => rare(MOVES[id]) < 1 && rnd() >= PICK_CAGE_WALL && spare.length ? spare.shift() : id);
 }
 function avgLevel() { const t = S.party.slice(0, 3); return t.reduce((s, m) => s + m.lvl, 0) / t.length; }
 function startWild(types) {
