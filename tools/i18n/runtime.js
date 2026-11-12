@@ -1,6 +1,11 @@
 // ====== I18N（tools/i18n/build_i18n.py が 自動生成：ことば＝日本語・English・简体中文）======
 // ひょうじの ときに 日本語を おきかえる（DOMの 文字・title など・キャンバスの 文字）。マギア名・技名は ローマ字。
-const LANG = (() => { try { const v = localStorage.getItem('pma_lang'); return v === 'en' || v === 'zh' ? v : 'ja'; } catch (e) { return 'ja'; } })();
+// ことば：えらんだ ことが あれば それ。はじめての ときは Steam の ことば → 端末の ことば（日本語・中国語 いがいは English）。まえから あそんでいる ひと（セーブが ある）は 日本語の まま
+const LANG = (() => { try { const v = localStorage.getItem('pma_lang'); if (v === 'en' || v === 'zh' || v === 'ja') return v; if (localStorage.getItem('pixel-monster-arena-v1')) return 'ja';
+  const D = window.PMA_DESKTOP, sl = D && typeof D.steamLang === 'string' ? D.steamLang : '';
+  if (sl) return sl === 'japanese' ? 'ja' : /^(schinese|tchinese)$/.test(sl) ? 'zh' : 'en';
+  const nl = ((navigator.languages && navigator.languages[0]) || navigator.language || 'ja').toLowerCase();
+  return nl.startsWith('ja') ? 'ja' : nl.startsWith('zh') ? 'zh' : 'en'; } catch (e) { return 'ja'; } })();
 const I18N_DICT = __I18N_DICT__;
 const ROMA_K = { 'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo', 'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho', 'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho', 'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo', 'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo', 'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo', 'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo', 'ぎゃ': 'gya', 'ぎゅ': 'gyu', 'ぎょ': 'gyo', 'じゃ': 'ja', 'じゅ': 'ju', 'じょ': 'jo', 'びゃ': 'bya', 'びゅ': 'byu', 'びょ': 'byo', 'ぴゃ': 'pya', 'ぴゅ': 'pyu', 'ぴょ': 'pyo', 'てぃ': 'ti', 'でぃ': 'di', 'ふぁ': 'fa', 'ふぃ': 'fi', 'ふぇ': 'fe', 'ふぉ': 'fo', 'うぃ': 'wi', 'うぇ': 'we', 'うぉ': 'wo', 'ゔぁ': 'va', 'ゔぃ': 'vi', 'ゔぇ': 've', 'ゔぉ': 'vo', 'しぇ': 'she', 'じぇ': 'je', 'ちぇ': 'che', 'つぁ': 'tsa', 'とぅ': 'tu', 'どぅ': 'du' };
 const ROMA_1 = (() => { const o = {}, a = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゃゅょゔ', r = 'a i u e o ka ki ku ke ko sa shi su se so ta chi tsu te to na ni nu ne no ha hi fu he ho ma mi mu me mo ya yu yo ra ri ru re ro wa o n ga gi gu ge go za ji zu ze zo da ji zu de do ba bi bu be bo pa pi pu pe po a i u e o ya yu yo vu'.split(' '); for (let i = 0; i < a.length; i++) o[a[i]] = r[i]; return o; })();

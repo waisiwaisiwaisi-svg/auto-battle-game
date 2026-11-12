@@ -24,5 +24,6 @@ const steam = (() => { try { return ipcRenderer.sendSync('pma-steam'); } catch (
 contextBridge.exposeInMainWorld('PMA_DESKTOP', {
   platform: process.platform,
   steam: !!steam,
+  steamLang: steam && typeof steam.lang === 'string' ? steam.lang : '',   // Steam の ことば（はじめての ときの ことば）
   achv: (id) => { if (typeof id === 'string') ipcRenderer.send('pma-achv', id); },
 });

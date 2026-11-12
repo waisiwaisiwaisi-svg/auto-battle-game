@@ -15542,5 +15542,21 @@
 "「条件外もお任せで撃つ」をつけた技は、条件が合わないときもお任せAIが選べます（合うときは優先して撃ちます）。": [
 "Moves with \"Also use freely otherwise\" can still be picked by the auto AI when their conditions don't match (and are used first when they do).",
 "带有“条件外也自动使用”的招式，在条件不满足时自动AI也可以选择（满足时优先使用）。"
+],
+"→技の枠へ（★＝今覚えている技）": [
+"→ To move slot (★ = known moves)",
+"→ 放到招式格（★＝已学会的招式）"
+],
+"※ ★＝今覚えている技。★のない技は、置いて確定するとワザステッカーで覚えます（ステッカーはなくならない）": [
+"※ ★ = moves it knows now. Moves without ★ are learned with a Move Sticker when you place them and confirm (stickers are never used up)",
+"※ ★＝现在已学会的招式。没有★的招式，放入并确定后会用技贴纸学会（贴纸不会消耗）"
+],
+"かつ": [
+"and",
+"且"
+],
+"与えたダメージの⟦0⟧%を回復": [
+"Heals ⟦0⟧% of damage dealt",
+"回复造成伤害的⟦0⟧%"
 ]
 }
