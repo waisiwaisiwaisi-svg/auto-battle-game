@@ -5783,10 +5783,6 @@
 "Put a curse on ⟦0⟧!",
 "对⟦0⟧施加了诅咒！"
 ],
-"時空がねじれておそいものが速くなった！": [
-"Space-time twisted! Slow ones go first!",
-"时空扭曲了！慢的变快了！"
-],
 "ねじれた時空が元にもどった！": [
 "The twisted space-time returned to normal!",
 "扭曲的时空恢复正常了！"
@@ -7850,10 +7846,6 @@
 "分身を2体出す（10秒）。相手の攻撃が分身に向かうことがあり、時々本物と入れ替わる": [
 "Makes 2 clones (10s). Foe attacks may target the clones, and sometimes they swap with the real one",
 "制造2个分身（10秒）。对手的攻击有时会打向分身，偶尔会与本体互换"
-],
-"9秒間、場に出ているマギアの素早さを反転する（遅いほど速く歩く）": [
-"For 9s, flips the Speed of Magia in battle (slower ones walk faster)",
-"9秒内，反转场上魔机的速度（越慢走得越快）"
 ],
 "しばらく味方の素早さが上がる": [
 "Raises allies' Speed for a while",
@@ -15558,5 +15550,13 @@
 "与えたダメージの⟦0⟧%を回復": [
 "Heals ⟦0⟧% of damage dealt",
 "回复造成伤害的⟦0⟧%"
+],
+"時空がねじれて素早さと回避がさかさまになった！": [
+"Space-time twisted! Speed and Evasion are flipped!",
+"时空扭曲了！速度和闪避颠倒了！"
+],
+"9秒間、場に出ているマギアの素早さと回避を反転する（遅いほど速く歩き、回避が低いほどよけやすい）": [
+"For 9s, flips the Speed and Evasion of Magia in battle (slower ones walk faster, low-Evasion ones dodge more)",
+"9秒内，反转场上魔机的速度和闪避（越慢走得越快，闪避越低越容易躲开）"
 ]
 }
