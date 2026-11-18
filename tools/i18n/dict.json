@@ -15558,5 +15558,13 @@
 "はHP・攻撃・防御・属性攻撃・属性防御・素早さ・回避の7つ。素早さが高いほど早く歩く。回避（自動でよける確率）はどのマギアも10%で、強化ポイントはふれない。種族値・個体値（0〜31）・性格（↑1.1倍↓0.9倍）・強化で決まる": [
 " are 7: HP, Attack, Defense, Sp. Atk, Sp. Def, Speed, and Evasion. Higher Speed means faster walking; Evasion (the chance to auto-dodge) is 10% for every Magia and can't take Training points. They're set by base stats, IVs, Nature, and Training points.",
 "共有HP、攻击、防御、特攻、特防、速度、闪避7项。速度越高走得越快，闪避（自动躲避的概率）所有魔机都是10%，不能分配强化点数。由种族值、个体值、性格和强化点数决定。"
+],
+"5秒動けない。攻撃が当たると目をさます。": [
+"Can't move for 5s. Wakes up when hit by an attack.",
+"5秒无法行动。受到攻击就会醒来。"
+],
+"目をさました！": [
+"Woke up!",
+"醒来了！"
 ]
 }
