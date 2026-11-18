@@ -15566,5 +15566,17 @@
 "目をさました！": [
 "Woke up!",
 "醒来了！"
+],
+"当たるたびに50%でもう一度転がり、だんだん強くなる（5回まで）。外すと止まる": [
+"50% chance to roll again on each hit, getting stronger (up to 5). Stops on a miss",
+"每次命中有50%再滚一次，越来越强（最多5次）。落空就停下"
+],
+"当たるたびに50%でもう一度転がり、だんだん強くなる（5回まで）。外すか✋の技で受けられると止まる": [
+"50% chance to roll again on each hit, getting stronger (up to 5). Stops on a miss or when met by a ✋ move",
+"每次命中有50%再滚一次，越来越强（最多5次）。落空或被✋招式接住就停下"
+],
+"当たるともう一度突進。その後も当たるたびに50%で続く。✋の技で受けられると止まる": [
+"Charges again on hit, then 50% to continue on each hit. Stops when met by a ✋ move",
+"命中后再冲一次，之后每次命中有50%继续。被✋招式接住就停下"
 ]
 }
