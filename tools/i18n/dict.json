@@ -15578,5 +15578,17 @@
 "当たるともう一度突進。その後も当たるたびに50%で続く。✋の技で受けられると止まる": [
 "Charges again on hit, then 50% to continue on each hit. Stops when met by a ✋ move",
 "命中后再冲一次，之后每次命中有50%继续。被✋招式接住就停下"
+],
+"3秒ごとに最大HPの1/32のダメージ。物理技のダメージが半分になる。回復量が半分になる。火属性はならない。": [
+"Damage of 1/32 max HP every 3s. Physical move damage is halved. Healing received is halved. Fire types are immune.",
+"每3秒受到最大HP 1/32的伤害。物理招式的伤害减半。受到的回复量减半。火属性不会灼伤。"
+],
+"3秒ごとにダメージ。最大HPの1/48から始まり、そのたびに増えて1/12まで。交代すると増え方がもどる。回復量が半分になる。機械の種族はならない。": [
+"Damage every 3s. Starts at 1/48 max HP and grows each time, up to 1/12. Resets on switch. Healing received is halved. Machine race is immune.",
+"每3秒受到伤害。从最大HP的1/48开始，每次增加，最多1/12。替换后增幅重置。受到的回复量减半。机械种族不会中毒。"
+],
+"3秒ごとに最大HPの1/24のダメージ。回復量が半分になる。機械の種族はならない。": [
+"Damage of 1/24 max HP every 3s. Healing received is halved. Machine race is immune.",
+"每3秒受到最大HP 1/24的伤害。受到的回复量减半。机械种族不会中毒。"
 ]
 }
